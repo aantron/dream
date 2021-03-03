@@ -1,0 +1,6 @@
+(executable
+ (name main)
+ (libraries
+  dream
+  dream-httpaf
+  lwt.unix))

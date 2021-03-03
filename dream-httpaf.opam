@@ -1,0 +1,11 @@
+opam-version: "2.0"
+
+depends: [
+  "base-unix"
+  "dream"
+  "dune" {>= "2.0.0"}
+  "httpaf"
+  "httpaf-lwt-unix"
+  "lwt"
+  "ocaml"
+]

@@ -1,0 +1,9 @@
+(library
+ (public_name dream-httpaf)
+ (name dream_httpaf)
+ (libraries
+  dream
+  httpaf
+  httpaf-lwt-unix
+  lwt
+  lwt.unix))

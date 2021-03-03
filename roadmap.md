@@ -1,0 +1,73 @@
+## 1.0.0 roadmap:
+
+- Will do a bunch of `1.0.0~alphaX` releases before `1.0.0`, but all the basic things have to be in place during the alphas &mdash; they are just a chance to do breaking chanegs before the real `1.0.0`.
+- Working apps.
+  - 🔲 Servers abstracted; httpaf implementation provided (should be easy).
+  - ✅ Basic router &mdash; doesn't have to be fast.
+    - 🔲 But need the basic composition story, including the path prefix middleware (almost).
+  - ✅ Basic template engine.
+  - 🔲 Minimal dependencies (need to vendor some things and write some glue code).
+- Middleware collection.
+  - ✅ Logger.
+  - 🔲 Debugger (using external ATM).
+  - ✅ URL templates.
+  - ✅ XSS protection helpers.
+  - 🔲 Cookies (using external ATM).
+  - ✅ Sessions.
+  - ✅ CSRF tokens.
+  - ✅ SQL connection pools (needs separate packaging).
+  - ✅ Tag generation helpers.
+  - 🔲 Form, JSON, file uploader parsers (partially external).
+  - ✅ Client+server localization.
+  - 🔲 Static.
+  - 🔲 Websocket design.
+    - Just the helper that responds with a websocket response should also return some kind of connection object that the server can further interact on.
+  - From Opium:
+    - 🔲 `allow_cors`
+    - 🔲 ETag
+  - From Sihl:
+    - 🔲 cron. Not really a middleware. Should probably recommend something.
+    - 🔲 email. Also not middleware. Should also just recommend.
+    - 🔲 flash
+- 🛑 Excellent docs.
+  - How to build a single-binary app.
+  - Recommendations.
+    - Creating empty error responses and decorating them at the top level.
+    - Type annotation habits to help type inference.
+    - "Where to go from here."
+      - How to replace and scale each component.
+      - Templates: use TyXML.
+      - Scaling up database.
+      - Using more of the optional middlewares, like URL templates and localizations.
+      - `ppx_yojson_conv`.
+      - Explain the super loose coupling throughout the framework.
+  - Several example projects.
+  - Lots of links to references.
+    - But all best practices should be summarized into brief recommendations and examples anyway &mdash; the links are for rationale and for users' research purposes, not for skimping on own docs.
+    - OWASP.
+    - CSRF, JWT discussions.
+    - All kinds of best practices guides, etc.
+    - RFCs.
+  - Tooltips on things like packages.
+  - How to plug in Opium middlewares.
+    - Actually, they will become less and less useful over time.
+  - How to switch web servers.
+  - How to create a single-binary web app.
+  - Emphasize no hidden strings leaked anywhere.
+- 🛑 Excellent testing framework for apps to use.
+  - `request -> response` function tester.
+    - This would probably the fastest way, because the HTTP parser (an external component to the project) does not get involved.
+    - Need to be able to set the current time, capture log, etc.
+    - Probably best done using expect tests, so the user will be encouraged to decorate context keys with metadata at this point, if they want to see more.
+      - Then good sanitizers are necessary.
+      - Perhaps the framework should also be useful in `ppx_expect`.
+    - Good combinators for non-expect testing.
+  - End-to-end testing.
+    - Provide generators and/or accept raw HTTP requests in the tester.
+    - Return the actual responses.
+      - Provide useful sanitizers.
+- 🛑 Name.
+- Not included in 1.0.0, but planned eventually:
+  - ❌ Metadata: route listing, etc.
+  - ❌ Migrations.
+  - ❌ Multicore/effects version.

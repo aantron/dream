@@ -1,0 +1,13 @@
+opam-version: "2.0"
+
+depends: [
+  "base-unix"
+  "dune" {>= "2.0.0"}
+  "lwt"
+  "ocaml"
+
+  # "logs" # Should vendor this to avoid OCamlbuild.
+  # "ocaml" {>= "4.10.0"} # Because of List.find_map.
+  # Require OCaml 4.03 or so, for result.
+  # "opium" # Temporary.
+]
