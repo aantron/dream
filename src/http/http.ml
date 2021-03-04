@@ -1,11 +1,16 @@
+open Dream_pure
+
 let address_to_string : Unix.sockaddr -> string = function
   | ADDR_UNIX path -> path
   | ADDR_INET (address, port) ->
     Printf.sprintf "%s:%i" (Unix.string_of_inet_addr address) port
 
-let forward_body (response : Dream.response) (body : [ `write ] Httpaf.Body.t) =
+let forward_body
+    (response : Dream_.response)
+    (body : [ `write ] Httpaf.Body.t) =
+
   let body_stream =
-    Dream.internal_body_stream response [@ocaml.warning "-3"] in
+    Dream_.internal_body_stream response [@ocaml.warning "-3"] in
 
   (* TODO LATER Will also need to monitor buffer accumulation and use
            flush. *)
@@ -32,7 +37,7 @@ let forward_body (response : Dream.response) (body : [ `write ] Httpaf.Body.t) =
    passed to http/af to end up in the error handler. This is a low-level handler
    that ordinarily shouldn't be relied on by the user - this is just our last
    chance to tell the user that something is wrong with their app. *)
-let wrap_handler app (user's_dream_handler : Dream.handler) =
+let wrap_handler app (user's_dream_handler : Dream_.handler) =
 
   let httpaf_request_handler = fun client_address (conn : Httpaf.Reqd.t) ->
 
@@ -60,8 +65,8 @@ let wrap_handler app (user's_dream_handler : Dream.handler) =
           k (Some (Bigarray_compat.Array1.sub buffer off len)))
     in
 
-    let request : Dream.request =
-      Dream.internal_create_request
+    let request : Dream_.request =
+      Dream_.internal_create_request
         ~app ~client ~method_ ~target ~version ~headers ~body_stream
           [@ocaml.warning "-3"]
     in
@@ -84,12 +89,12 @@ let wrap_handler app (user's_dream_handler : Dream.handler) =
         user's_dream_handler request
 
         (* Extract the Dream response's headers. *)
-        >>= fun (response : Dream.response) ->
+        >>= fun (response : Dream_.response) ->
 
         let status =
-          (Dream.status response :> Httpaf.Status.t) in
+          (Dream_.status response :> Httpaf.Status.t) in
         let headers =
-          Httpaf.Headers.of_list (Dream.headers response) in
+          Httpaf.Headers.of_list (Dream_.headers response) in
 
         let httpaf_response =
           Httpaf.Response.create ~headers status in
@@ -113,10 +118,10 @@ let wrap_handler app (user's_dream_handler : Dream.handler) =
 type error_handler =
   Unix.sockaddr ->
   [ `Bad_request | `Bad_gateway | `Internal_server_error | `Exn of exn ] ->
-    Dream.response Lwt.t
+    Dream_.response Lwt.t
 
 let log =
-  Dream.Log.source "dream.httpaf"
+  Log.source "dream.http"
 
 let default_error_handler client_address error =
   begin match error with
@@ -130,10 +135,10 @@ let default_error_handler client_address error =
   | `Exn exn ->
     log.error (fun m -> m "Application leaked %s" (Printexc.to_string exn));
     Printexc.get_backtrace ()
-    |> Dream.Log.iter_backtrace (fun line -> log.error (fun m -> m "%s" line));
+    |> Log.iter_backtrace (fun line -> log.error (fun m -> m "%s" line));
   end;
 
-  Lwt.return @@ Dream.response ~headers:["Content-Length", "0"] ()
+  Lwt.return @@ Dream_.response ~headers:["Content-Length", "0"] ()
 
 
 
@@ -150,7 +155,7 @@ let wrap_error_handler (user's_error_handler : error_handler) =
         >>= fun response ->
 
         let headers =
-          Httpaf.Headers.of_list (Dream.headers response) in
+          Httpaf.Headers.of_list (Dream_.headers response) in
         let body =
           start_response headers in
 
@@ -163,8 +168,7 @@ let wrap_error_handler (user's_error_handler : error_handler) =
           m "Double fault: error handler raised %s" (Printexc.to_string exn));
 
         Printexc.get_backtrace ()
-        |> Dream.Log.iter_backtrace (fun line ->
-          log.error (fun m -> m "%s" line));
+        |> Log.iter_backtrace (fun line -> log.error (fun m -> m "%s" line));
 
         Lwt.return_unit
     end
@@ -180,7 +184,7 @@ let serve =
   fun
     ?(interface = "localhost") ?(port = 8080)
     ?(stop = never)
-    ?(app = Dream.app ())
+    ?(app = Dream_.app ())
     ?(error_handler = default_error_handler)
     user's_dream_handler ->
 
@@ -200,7 +204,8 @@ let serve =
   >>= fun addresses ->
   match addresses with
   | [] ->
-    Printf.ksprintf failwith "Dream_httpaf.serve: no interface with address %s"
+    (* TODO The function might be Dream.run, not Dream.serve. *)
+    Printf.ksprintf failwith "Dream.serve: no interface with address %s"
       interface
   | address::_ ->
   let listen_address = Lwt_unix.(address.ai_addr) in
@@ -224,3 +229,7 @@ let serve =
 let run ?interface ?port ?stop ?app ?error_handler user's_dream_handler =
   Lwt_main.run
     (serve ?interface ?port ?stop ?app ?error_handler user's_dream_handler)
+
+
+
+(* TODO Consider also lazily setting async_exception_hook. *)

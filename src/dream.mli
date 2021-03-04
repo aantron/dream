@@ -69,7 +69,7 @@ val local : 'a local -> _ message -> 'a
 val local_option : 'a local -> _ message -> 'a option
 val set_local : 'a local -> 'b message -> 'a -> 'b message
 
-module Httpaf = Dream_httpaf [@@ocaml.warning "-49"]
+(* module Httpaf = Dream_httpaf [@@ocaml.warning "-49"] *)
 
 module Request_id :
 sig
@@ -117,14 +117,53 @@ type 'a global
 val new_global : initializer_:(unit -> 'a) -> 'a global
 val global : 'a global -> request -> 'a
 
+type error_handler =
+  Unix.sockaddr ->
+  [ `Bad_request | `Bad_gateway | `Internal_server_error | `Exn of exn ] ->
+    response Lwt.t
+
+val serve :
+  ?interface:string ->
+  ?port:int ->
+  ?stop:unit Lwt.t ->
+  ?app:app ->
+  ?error_handler:error_handler ->
+  handler ->
+    unit Lwt.t
+
+val run :
+  ?interface:string ->
+  ?port:int ->
+  ?stop:unit Lwt.t ->
+  ?app:app ->
+  ?error_handler:error_handler ->
+  handler ->
+    unit
+
+(* TODO Change the error type - replace Bad_gateway and Internal_server_error by
+   Bad_response. *)
+
+(* TODO DOC that [stop] only stops the server listening - requests already
+   in the server can continue executing. *)
+(* TODO DOC Can probably also get `Exn upon failure to stream the body. *)
+(* TODO DOC `Bad_gateway and `Internal_server_error occur when the application
+   returns a negative content-length, or no content-length when one is
+   required. *)
+(* TODO DOC Can't even define the response type fully.. or can we? Can just
+   reuse the Dream response, but note that the status will be ignored. *)
+(* TODO DOC Figure out the behavior of various strings one could pass for the
+   interface and DOCUMENT. *)
+(* TODO DOC What happens if the error handler also raises an exception? *)
+(* TODO DOC Placate the user: the error handler is generally not necessary. *)
+
 (**/**)
 
-type bigstring =
-  (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
+(* type bigstring =
+  (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t *)
 
 (* TODO DOC The app is just obtained by calling App.create () and holding one
    reference per one server. *)
-val internal_create_request :
+(* val internal_create_request :
   app:app ->
   client:string ->
   method_:method_ ->
@@ -136,7 +175,7 @@ val internal_create_request :
 [@@ocaml.deprecated "Internal function. The signature may change."]
 
 val internal_body_stream : response -> ((string option -> unit) -> unit)
-[@@ocaml.deprecated "Internal function. The signature may change."]
+[@@ocaml.deprecated "Internal function. The signature may change."] *)
 
 (* TODO DOC Give people a tip: a basic response needs either content-length or
    connection: close. *)

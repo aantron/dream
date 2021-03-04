@@ -1,3 +1,4 @@
+open Dream_pure
 include Dream_
 
 let identity handler request =
@@ -23,4 +24,8 @@ let debug = default_log.debug
 module Request_id = Request_id
 module Log = Log
 
-module Httpaf = Dream_httpaf [@@ocaml.warning "-49"]
+open Dream_http
+
+type error_handler = Http.error_handler
+let serve = Http.serve
+let run = Http.run

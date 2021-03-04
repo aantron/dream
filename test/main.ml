@@ -12,6 +12,6 @@ let app =
     Lwt.return @@ Dream.set_body response "VERY KEWL"
 
 let () =
-  Dream.Httpaf.run app
+  Dream.run app
 
 (* TODO Need Content-Length middleware. *)

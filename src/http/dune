@@ -1,10 +1,10 @@
 (library
- (public_name dream-httpaf)
- (name dream_httpaf)
+ (public_name dream.http)
+ (name dream_http)
  (libraries
   bigarray-compat
   bigstringaf
-  dream
+  dream.pure
   httpaf
   httpaf-lwt-unix
   lwt

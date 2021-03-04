@@ -2,9 +2,7 @@
  (public_name dream)
  (wrapped false)
  (libraries
-  fmt
-  fmt.tty
-  hmap
+  dream.http
+  dream.pure
   logs
-  lwt
-  lwt.unix))
+  lwt))
