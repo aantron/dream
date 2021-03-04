@@ -50,7 +50,8 @@ type 'a message = {
 type request = incoming message
 type response = outgoing message
 
-(* TODO Make the version context-dependent, or take it from the request. *)
+(* TODO Make the version context-dependent, or take it from the request,
+   probably with a middleware. *)
 let response
     ?(version = (1, 1))
     ?(status = `OK)
@@ -127,12 +128,9 @@ let local key message =
 let set_local key message value =
   {message with scope = Hmap.add key value message.scope}
 
-(* TODO Get rid of this module. *)
-(* module App =
-struct *)
 type app = Hmap.t ref
 
-let new_app () =
+let app () =
   ref Hmap.empty
 
 type 'a global = {
@@ -152,7 +150,6 @@ let global {key; initializer_} request =
     let value = initializer_ () in
     request.specific.app := Hmap.add key value !(request.specific.app);
     value
-(* end *)
 
 type ('a, 'b) log =
   ((?request:request ->

@@ -29,6 +29,7 @@
     - 🔲 cron. Not really a middleware. Should probably recommend something.
     - 🔲 email. Also not middleware. Should also just recommend.
     - 🔲 flash
+  - 🔲 HTTP/2.0 support (h2)
 - 🛑 Excellent docs.
   - How to build a single-binary app.
   - Recommendations.

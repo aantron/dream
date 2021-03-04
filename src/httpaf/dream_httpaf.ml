@@ -153,7 +153,7 @@ let serve =
   fun
     ?(interface = "localhost") ?(port = 8080)
     ?(stop = never)
-    ?(app = Dream.new_app ())
+    ?(app = Dream.app ())
     ?(error_handler = default_error_handler)
     user's_dream_handler ->
 

@@ -115,7 +115,7 @@ let reporter () =
          source, leave the column empty. *)
       let source =
         let width = 15 in
-        if Logs.Src.equal src Logs.default then
+        if Logs.Src.name src = Logs.Src.name Logs.default then
           String.make width ' '
         else
           let name = Logs.Src.name src in
@@ -329,6 +329,8 @@ let log_traffic next_handler request =
       Lwt.fail exn)
 
 
+
+(* TODO Dim the prefix. *)
 
 (* TODO DOC Add docs on how to avoid OCamlbuild dep. *)
 (* TODO DOC recommending logs-ppx... or something else? *)

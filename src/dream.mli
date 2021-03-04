@@ -54,23 +54,6 @@ val start : middleware
 val request_id : ?prefix:string -> middleware
 val log : middleware
 
-(* val request_id : ?prefix:string -> middleware *)
-
-(* val assign_request_id : ?prefix:string -> middleware
-val request_id : request -> string *)
-
-(* module Id  *)
-
-(* type headers *)
-(* TODO LATER Helpers for working on header sets separately. Probably in a
-   module Headers. *)
-(* type body *)
-
-(* TODO Introduce contexts that are created for each server (or can be shared?).
-   These will also help with mocking for testing. *)
-
-(* TODO Hide these in a module. *)
-
 type 'a local
 
 val new_local : unit -> 'a local
@@ -82,16 +65,18 @@ module Httpaf = Dream_httpaf [@@ocaml.warning "-49"]
 
 module Request_id :
 sig
-  (* val assign : ?prefix:string -> middleware *)
   val get_option : ?request:request -> unit -> string option
 end
-
-(* TODO Dream-level logging functions. *)
 
 type ('a, 'b) log =
   ((?request:request ->
   ('a, Stdlib.Format.formatter, unit, 'b) Stdlib.format4 -> 'a) -> 'b) ->
     unit
+
+val error : ('a, unit) log
+val warning : ('a, unit) log
+val info : ('a, unit) log
+val debug : ('a, unit) log
 
 module Log :
 sig
@@ -116,20 +101,8 @@ sig
   val iter_backtrace : (string -> unit) -> string -> unit
 end
 
-(* TODO Try to unwrap this module. *)
-(* module App :
-sig
-  type t
-  val create : unit -> t
-
-  (* type 'a value
-
-  val value : (unit -> 'a) -> 'a value
-  val get : 'a value -> request -> 'a *)
-end *)
-
 type app
-val new_app : unit -> app
+val app : unit -> app
 
 type 'a global
 
@@ -147,7 +120,6 @@ val internal_create_request :
   target:string ->
   version:int * int ->
   headers:(string * string) list ->
-  (* app_scope:(Dream_hmap ) ->1 *)
     request
 [@@ocaml.deprecated "Internal function. The signature may change."]
 

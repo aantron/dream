@@ -1,7 +1,5 @@
 include Dream_
 
-(* let assign_request_id = Request_id.assign_request_id *)
-
 let identity handler request =
   handler request
 
@@ -13,6 +11,14 @@ let request_id =
 
 let log =
   Log.log_traffic
+
+let default_log =
+  Log.source (Logs.Src.name Logs.default)
+
+let error = default_log.error
+let warning = default_log.warning
+let info = default_log.info
+let debug = default_log.debug
 
 module Request_id = Request_id
 module Log = Log
