@@ -331,6 +331,17 @@ let log_traffic next_handler request =
 
 
 (* TODO Dim the prefix. *)
+(* TODO DOC Include logging itself in the timing. Or? Isn't that pointless?
+   End-to -end timing should include the HTTP parser as well. The logger
+   provides much more useful information if it helps the user optimize the app.
+   Sp, should probably craete some helpers for the user to do end-to-end timing
+   of the HTTP server and document how to use them. *)
+(* Dream.log is a bit of a misleading name. Maybr Dream.logger? Dream.log maybe
+   should be an alias to Dream.info. *)
+(* TODO The fun m -> m system stucks. Replace it by info... *)
+(* TODO Actually, it's fine. Just need a Dream.log that doesn't have this
+   fun m -> m business. Do a serach/replace for these ms eerywhere and change
+   them to log. *)
 
 (* TODO DOC Add docs on how to avoid OCamlbuild dep. *)
 (* TODO DOC recommending logs-ppx... or something else? *)

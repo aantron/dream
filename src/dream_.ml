@@ -21,11 +21,45 @@ let method_to_string = function
   | `TRACE -> "TRACE"
   | `Other method_ -> method_
 
+module Bigstring = Bigarray.Array1
+
+(* TODO LATER It would be best if the web server would write straight into the
+   framework's buffer, rather than first into its own, with copying to the
+   framework following later. However, in the case of both http/af and h2, it
+   appears that this will require at least a custom integration (at the same
+   level as httpaf-lwt-unix), if it is currently possible at all. Fortunately,
+   this will be an implementation detail of the framework, so we can profile and
+   change it later, as an optimization. *)
+type bigstring =
+  (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigstring.t
+
+let new_bigstring length =
+  Bigstring.create Bigarray.char Bigarray.c_layout length
+
+(* Not every request will need body reading, so don't allocate a buffer for each
+   requesst - only allocate it upon request. *)
+(* TODO LATER For now, Dream is following a simple model. The http server layer
+   DOES NOT allocate a buffer, but stores a reading function in the request.
+   When the body is actually needed by something in the web app, it is read to
+   completion. *)
+(* TODO LATER This exposes the framework to large request attacks. *)
+(* TODO In case of connection: keep-alive or similar, don't we still need to at
+   least skip the body to get the next request/frame? If so, the body reader
+   will interact with the http layer. *)
+
+type request_body_buffer = [
+  | `Not_started
+  | `Reading of bigstring Lwt.t
+  | `Finished of bigstring
+]
+
 type incoming = {
+  app : Hmap.t ref;
   client : string;
   method_ : method_;
   target : string;
-  app : Hmap.t ref;
+  request_body_buffer : request_body_buffer ref;
+  request_body_stream : (bigstring option -> unit) -> unit;
 }
 
 type status = [
@@ -35,9 +69,13 @@ type status = [
 let status_to_int = function
   | `OK -> 200
 
+(* TODO Allow the response body to be either a string or a bigstring stream, as
+   first-class kinds, so as to get zero-copy response output even with string
+   streams. *)
 type outgoing = {
   status : status;
   reason : string option;
+  response_body_stream : (string option -> unit) -> unit;
 }
 
 type 'a message = {
@@ -62,6 +100,7 @@ let response
     specific = {
       status;
       reason;
+      response_body_stream = (fun k -> k None);
     };
     version;
     headers;
@@ -108,6 +147,64 @@ let header name message =
 let header_option name message =
   try Some (header_basic name message)
   with Not_found -> None
+
+(* TODO LATER This is the preliminary reader implementation described in
+   comments above. It should eventually be replaced by a 0-copy reader, but that
+   will likely require a much more low-level web server integration. *)
+let receive_body request =
+  match !(request.specific.request_body_buffer) with
+  | `Finished body -> Lwt.return body
+  | `Reading on_finished -> on_finished
+  | `Not_started ->
+    let on_finished, finished = Lwt.wait () in
+    request.specific.request_body_buffer := `Reading on_finished;
+
+    let rec read body length =
+      request.specific.request_body_stream begin function
+      | None ->
+        let body = Bigstring.sub body 0 length in
+        request.specific.request_body_buffer := `Finished body;
+        Lwt.wakeup_later finished body
+
+      | Some chunk ->
+        let chunk_length = Bigstring.size_in_bytes chunk in
+        let new_length = length + chunk_length in
+        let body =
+          if new_length <= Bigstring.size_in_bytes body then
+            body
+          else
+            let new_body = new_bigstring (new_length * 2) in
+            Bigstring.blit
+              (Bigstring.sub body 0 length) (Bigstring.sub new_body 0 length);
+            new_body
+        in
+        Bigstring.blit chunk (Bigstring.sub body length chunk_length);
+        read body new_length
+      end
+    in
+
+    read (new_bigstring 4096) 0;
+
+    on_finished
+
+let body request =
+  receive_body request
+  |> Lwt.map Lwt_bytes.to_string
+
+let set_body_stream response stream =
+  {response with specific =
+    {response.specific with response_body_stream = stream}}
+
+let set_body response body =
+  let sent = ref false in
+  set_body_stream response begin fun k ->
+    if !sent then
+      k None
+    else begin
+      sent := true;
+      k (Some body)
+    end
+  end
 
 type handler = request -> response Lwt.t
 type middleware = handler -> handler
@@ -157,14 +254,21 @@ type ('a, 'b) log =
     unit
 
 (* TODO Do uri parsing somewhre around here. *)
-let internal_create_request ~app ~client ~method_ ~target ~version ~headers = {
-  specific = {
-    client;
-    method_;
-    target;
-    app;
-  };
-  version;
-  headers;
-  scope = Hmap.empty;
-}
+let internal_create_request
+    ~app ~client ~method_ ~target ~version ~headers ~body_stream =
+  {
+    specific = {
+      app;
+      client;
+      method_;
+      target;
+      request_body_buffer = ref `Not_started;
+      request_body_stream = body_stream;
+    };
+    version;
+    headers;
+    scope = Hmap.empty;
+  }
+
+let internal_body_stream response =
+  response.specific.response_body_stream

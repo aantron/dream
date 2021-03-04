@@ -2,6 +2,8 @@
  (public_name dream-httpaf)
  (name dream_httpaf)
  (libraries
+  bigarray-compat
+  bigstringaf
   dream
   httpaf
   httpaf-lwt-unix

@@ -49,6 +49,13 @@ val header_option : string -> _ message -> string option
 val status : response -> status
 val status_to_int : status -> int
 
+val body : request -> string Lwt.t
+
+(* TODO Need to expose the bigstring type eventually. *)
+(* TODO Reconsider order of arguments. *)
+val set_body_stream : response -> ((string option -> unit) -> unit) -> response
+val set_body : response -> string -> response
+
 val identity : middleware
 val start : middleware
 val request_id : ?prefix:string -> middleware
@@ -56,6 +63,7 @@ val log : middleware
 
 type 'a local
 
+(* TODO Reconsider order of arguments in set_local based on usage. *)
 val new_local : unit -> 'a local
 val local : 'a local -> _ message -> 'a
 val local_option : 'a local -> _ message -> 'a option
@@ -111,6 +119,9 @@ val global : 'a global -> request -> 'a
 
 (**/**)
 
+type bigstring =
+  (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
+
 (* TODO DOC The app is just obtained by calling App.create () and holding one
    reference per one server. *)
 val internal_create_request :
@@ -120,7 +131,11 @@ val internal_create_request :
   target:string ->
   version:int * int ->
   headers:(string * string) list ->
+  body_stream:((bigstring option -> unit) -> unit) ->
     request
+[@@ocaml.deprecated "Internal function. The signature may change."]
+
+val internal_body_stream : response -> ((string option -> unit) -> unit)
 [@@ocaml.deprecated "Internal function. The signature may change."]
 
 (* TODO DOC Give people a tip: a basic response needs either content-length or

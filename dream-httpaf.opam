@@ -2,6 +2,8 @@ opam-version: "2.0"
 
 depends: [
   "base-unix"
+  "bigarray-compat"
+  "bigstringaf"
   "dream"
   "dune" {>= "2.0.0"}
   "httpaf"

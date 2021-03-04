@@ -3,6 +3,23 @@ let address_to_string : Unix.sockaddr -> string = function
   | ADDR_INET (address, port) ->
     Printf.sprintf "%s:%i" (Unix.string_of_inet_addr address) port
 
+let forward_body (response : Dream.response) (body : [ `write ] Httpaf.Body.t) =
+  let body_stream =
+    Dream.internal_body_stream response [@ocaml.warning "-3"] in
+
+  (* TODO LATER Will also need to monitor buffer accumulation and use
+           flush. *)
+  let rec send_body () =
+    body_stream begin function
+    | None -> Httpaf.Body.close_writer body
+    | Some chunk ->
+      Httpaf.Body.write_string body chunk;
+      send_body ()
+    end
+  in
+
+  send_body ()
+
 
 
 (* Wraps the user's Dream handler in the kind of handler expected by http/af.
@@ -34,12 +51,20 @@ let wrap_handler app (user's_dream_handler : Dream.handler) =
     let headers =
       Httpaf.Headers.to_list httpaf_request.headers in
 
-    let request : Dream.request =
-      Dream.internal_create_request
-        ~app ~client ~method_ ~target ~version ~headers [@ocaml.warning "-3"]
+    let body =
+      Httpaf.Reqd.request_body conn in
+    let body_stream k =
+      Httpaf.Body.schedule_read body
+        ~on_eof:(fun () -> k None)
+        ~on_read:(fun buffer ~off ~len ->
+          k (Some (Bigarray_compat.Array1.sub buffer off len)))
     in
 
-    (* TODO Stream request and response bodies. *)
+    let request : Dream.request =
+      Dream.internal_create_request
+        ~app ~client ~method_ ~target ~version ~headers ~body_stream
+          [@ocaml.warning "-3"]
+    in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -68,8 +93,10 @@ let wrap_handler app (user's_dream_handler : Dream.handler) =
 
         let httpaf_response =
           Httpaf.Response.create ~headers status in
+        let body =
+          Httpaf.Reqd.respond_with_streaming conn httpaf_response in
 
-        Httpaf.Reqd.respond_with_string conn httpaf_response "";
+        forward_body response body;
 
         Lwt.return_unit
       end
@@ -124,10 +151,10 @@ let wrap_error_handler (user's_error_handler : error_handler) =
 
         let headers =
           Httpaf.Headers.of_list (Dream.headers response) in
-        let response_body = start_response headers in
-        (* TODO Read the body. *)
+        let body =
+          start_response headers in
 
-        Httpaf.Body.write_string response_body "";
+        forward_body response body;
 
         Lwt.return_unit
       end
