@@ -1,17 +1,15 @@
 let app =
   Dream.start
   @@ Dream.request_id
-  @@ Dream.log
+  @@ Dream.logger
 
-  @@ fun request ->
-    let open Lwt.Infix in
-    Dream.body request
-    >>= fun body ->
-    Dream.info (fun m -> m "body: \'%s\'" body);
-    let response = Dream.response ~headers:["Content-Length", "6"] () in
-    Lwt.return @@ Dream.set_body response "VERY KEWL"
+  @@ fun _request ->
+    Dream.response ~headers:["Content-Length", "6"] ()
+    |> Dream.set_body "VERY KEWL"
+    |> Lwt.return
 
 let () =
   Dream.run app
 
 (* TODO Need Content-Length middleware. *)
+(* TODO Max-length middleware. *)

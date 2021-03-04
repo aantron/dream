@@ -26,7 +26,7 @@ let assign ?(prefix = "") next_handler request =
      best-effort delivery to all code that might want the id. Continue into the
      rest of the app. *)
   let request =
-    Dream_.set_local id request new_id in
+    Dream_.set_local id new_id request in
 
   Lwt.with_value
     lwt_key

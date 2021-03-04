@@ -30,6 +30,8 @@
     - 🔲 email. Also not middleware. Should also just recommend.
     - 🔲 flash
   - 🔲 HTTP/2.0 support (h2)
+    - 🔲 Needs TLS.
+    - 🔲 Built-in dev certificates for localhost, and docs on how to get real ones.
 - 🛑 Excellent docs.
   - How to build a single-binary app.
   - Recommendations.

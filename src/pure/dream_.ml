@@ -36,21 +36,24 @@ type bigstring =
 let new_bigstring length =
   Bigstring.create Bigarray.char Bigarray.c_layout length
 
-(* Not every request will need body reading, so don't allocate a buffer for each
-   requesst - only allocate it upon request. *)
 (* TODO LATER For now, Dream is following a simple model. The http server layer
    DOES NOT allocate a buffer, but stores a reading function in the request.
    When the body is actually needed by something in the web app, it is read to
    completion. *)
 (* TODO LATER This exposes the framework to large request attacks. *)
-(* TODO In case of connection: keep-alive or similar, don't we still need to at
-   least skip the body to get the next request/frame? If so, the body reader
-   will interact with the http layer. *)
 
-type request_body_buffer = [
-  | `Not_started
-  | `Reading of bigstring Lwt.t
-  | `Finished of bigstring
+(* Not every request will need body reading, so don't allocate a buffer for each
+   requesst - only allocate it upon request. *)
+type ground_body = [
+  | `Empty
+  | `String of string
+  | `Bigstring of bigstring
+]
+
+type body = [
+  | ground_body
+  | `Bigstring_stream of (bigstring option -> unit) -> unit
+  | `Reading of ground_body Lwt.t
 ]
 
 type incoming = {
@@ -58,8 +61,7 @@ type incoming = {
   client : string;
   method_ : method_;
   target : string;
-  request_body_buffer : request_body_buffer ref;
-  request_body_stream : (bigstring option -> unit) -> unit;
+  request_version : int * int;
 }
 
 type status = [
@@ -69,41 +71,37 @@ type status = [
 let status_to_int = function
   | `OK -> 200
 
-(* TODO Allow the response body to be either a string or a bigstring stream, as
-   first-class kinds, so as to get zero-copy response output even with string
-   streams. *)
 type outgoing = {
+  response_version : (int * int) option;
   status : status;
   reason : string option;
-  response_body_stream : (string option -> unit) -> unit;
 }
 
 type 'a message = {
   specific : 'a;
-  version : int * int;
   headers : (string * string) list;
+  body : body ref;
   scope : Hmap.t;
 }
 
 type request = incoming message
 type response = outgoing message
 
-(* TODO Make the version context-dependent, or take it from the request,
-   probably with a middleware. *)
-let response
-    ?(version = (1, 1))
-    ?(status = `OK)
-    ?reason
-    ?(headers = [])
-    () =
+
+let response ?version ?(status = `OK) ?reason ?(headers = []) ?body () =
+  let body =
+    match body with
+    | None -> `Empty
+    | Some body -> `String body
+  in
   {
     specific = {
+      response_version = version;
       status;
       reason;
-      response_body_stream = (fun k -> k None);
     };
-    version;
     headers;
+    body = ref body;
     scope = Hmap.empty;
   }
 
@@ -151,19 +149,20 @@ let header_option name message =
 (* TODO LATER This is the preliminary reader implementation described in
    comments above. It should eventually be replaced by a 0-copy reader, but that
    will likely require a much more low-level web server integration. *)
-let receive_body request =
-  match !(request.specific.request_body_buffer) with
-  | `Finished body -> Lwt.return body
+let force_body message : ground_body Lwt.t =
+  match !(message.body) with
+  | #ground_body as body -> Lwt.return body
   | `Reading on_finished -> on_finished
-  | `Not_started ->
+
+  | `Bigstring_stream stream ->
     let on_finished, finished = Lwt.wait () in
-    request.specific.request_body_buffer := `Reading on_finished;
+    message.body := `Reading on_finished;
 
     let rec read body length =
-      request.specific.request_body_stream begin function
+      stream begin function
       | None ->
-        let body = Bigstring.sub body 0 length in
-        request.specific.request_body_buffer := `Finished body;
+        let body = `Bigstring (Bigstring.sub body 0 length) in
+        message.body := body;
         Lwt.wakeup_later finished body
 
       | Some chunk ->
@@ -188,23 +187,51 @@ let receive_body request =
     on_finished
 
 let body request =
-  receive_body request
-  |> Lwt.map Lwt_bytes.to_string
+  force_body request
+  |> Lwt.map begin function
+    | `Empty -> ""
+    | `String body -> body
+    | `Bigstring body -> Lwt_bytes.to_string body
+  end
 
-let set_body_stream response stream =
-  {response with specific =
-    {response.specific with response_body_stream = stream}}
-
-let set_body response body =
+(* TODO LATER There need to be buffering and unbuffering version of this. The
+   HTTP server needs a version that does not buffer. The app, by default,
+   should get buffering. *)
+let ground_body_stream body =
   let sent = ref false in
-  set_body_stream response begin fun k ->
+
+  fun k ->
     if !sent then
       k None
     else begin
       sent := true;
-      k (Some body)
+      match body with
+      | `Empty -> k None
+      | `String body -> k (Some (Lwt_bytes.of_string body))
+      | `Bigstring body -> k (Some body)
     end
-  end
+
+let body_stream request =
+  match !(request.body) with
+  | #ground_body as body -> ground_body_stream body
+  | `Bigstring_stream stream -> stream
+  | `Reading on_finished ->
+    fun k ->
+      Lwt.on_success on_finished (fun body -> ground_body_stream body k)
+
+(* Create a fresh ref. The reason this field has a ref is because it might get
+   replaced when a body is forced read. That's not what's happening here - we
+   are setting a new body. Indeed, there might be a concurrent read going on.
+   That read should not override the new body. So let it mutate the old
+   request's ref; we generate a new request with a new body ref. *)
+let set_body body response =
+  {response with body = ref (`String body)}
+
+let version_override response =
+  response.specific.response_version
+
+let reason_override response =
+  response.specific.reason
 
 type handler = request -> response Lwt.t
 type middleware = handler -> handler
@@ -222,7 +249,7 @@ let local key message =
   | Some value -> value
   | None -> raise Not_found
 
-let set_local key message value =
+let set_local key value message =
   {message with scope = Hmap.add key value message.scope}
 
 type app = Hmap.t ref
@@ -253,22 +280,16 @@ type ('a, 'b) log =
    ('a, Stdlib.Format.formatter, unit, 'b) Stdlib.format4 -> 'a) -> 'b) ->
     unit
 
-(* TODO Do uri parsing somewhre around here. *)
-let internal_create_request
-    ~app ~client ~method_ ~target ~version ~headers ~body_stream =
+let request ~app ~client ~method_ ~target ~version ~headers ~body =
   {
     specific = {
       app;
       client;
       method_;
       target;
-      request_body_buffer = ref `Not_started;
-      request_body_stream = body_stream;
+      request_version = version;
     };
-    version;
     headers;
+    body = ref (`Bigstring_stream body);
     scope = Hmap.empty;
   }
-
-let internal_body_stream response =
-  response.specific.response_body_stream

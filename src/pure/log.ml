@@ -124,6 +124,14 @@ let reporter () =
           else
             (String.make (width - String.length name) ' ') ^ name
       in
+      let source_prefix, source =
+        try
+          let dot_index = String.rindex source '.' + 1 in
+          String.sub source 0 dot_index,
+          String.sub source dot_index (String.length source - dot_index)
+        with Not_found ->
+          "", source
+      in
 
       (* Check if a request id is available in the tags passed from the front
          end. If not, try to get it from the promise-chain-local storage. If
@@ -161,9 +169,9 @@ let reporter () =
 
       (* The formatting proper. *)
       Format.kfprintf write formatter
-        ("%a %s %a%a @[" ^^ format_and_arguments ^^ "@]@.")
+        ("%a %a%s %a%a @[" ^^ format_and_arguments ^^ "@]@.")
         Fmt.(styled `Faint string) time
-        source
+        Fmt.(styled `White string) source_prefix source
         Fmt.(styled level_style string) level
         Fmt.(styled request_style (styled `Italic string)) request_id
   in
@@ -235,7 +243,7 @@ let source name =
   let forward ~(destination_log : _ Logs.log) user's_k =
     Lazy.force initializer_;
 
-    destination_log (fun m ->
+    destination_log (fun log ->
       user's_k (fun ?request format_and_arguments ->
         let tags =
           match request with
@@ -246,7 +254,7 @@ let source name =
             | Some request_id ->
               Logs.Tag.add logs_lib_tag request_id Logs.Tag.empty
         in
-        m ~tags format_and_arguments))
+        log ~tags format_and_arguments))
   in
 
   (* Create the actual Logs source, and then wrap all the interesting
@@ -259,6 +267,16 @@ let source name =
     info =    (fun k -> forward ~destination_log:Log.info  k);
     debug =   (fun k -> forward ~destination_log:Log.debug k);
   }
+
+
+
+let convenience_log format_and_arguments =
+  Fmt.kstr
+    (fun message -> Logs.app (fun log -> log "%s" message))
+    format_and_arguments
+  (* Logs.app (fun log -> log format_and_arguments) *)
+  (* let report = Logs.((reporter ()).report) in
+  report Logs.default Logs.App ~over:ignore ignore format_and_arguments *)
 
 
 
@@ -276,7 +294,7 @@ let iter_backtrace f backtrace =
 let log = source "dream.log"
 
 (* The requst logging middleware. *)
-let log_traffic next_handler request =
+let logger next_handler request =
 
   (* Turn on backtrace recording. *)
   if !set_printexc then begin
@@ -290,8 +308,8 @@ let log_traffic next_handler request =
     |> String.concat " "
   in
 
-  log.info (fun m ->
-    m ~request "%s %s %s %s"
+  log.info (fun log ->
+    log ~request "%s %s %s %s"
       (Dream_.method_to_string (Dream_.method_ request))
       (Dream_.target request)
       (Dream_.client request)
@@ -313,7 +331,7 @@ let log_traffic next_handler request =
         | None -> ""
       in
 
-      log.info (fun m -> m ~request "%i%s in %.0f μs"
+      log.info (fun log -> log ~request "%i%s in %.0f μs"
         (Dream_.status_to_int (Dream_.status response))
         location
         (elapsed *. 1e6));
@@ -322,29 +340,22 @@ let log_traffic next_handler request =
 
     (fun exn ->
       (* In case of exception, log the exception and the backtrace. *)
-      log.error (fun m -> m ~request "Aborted by %s" (Printexc.to_string exn));
+      log.error (fun log ->
+        log ~request "Aborted by %s" (Printexc.to_string exn));
       Printexc.get_backtrace ()
-      |> iter_backtrace (fun line -> log.error (fun m -> m ~request "%s" line));
+      |> iter_backtrace (fun line -> log.error (fun log ->
+        log ~request "%s" line));
 
       Lwt.fail exn)
 
 
 
-(* TODO Dim the prefix. *)
 (* TODO DOC Include logging itself in the timing. Or? Isn't that pointless?
    End-to -end timing should include the HTTP parser as well. The logger
    provides much more useful information if it helps the user optimize the app.
    Sp, should probably craete some helpers for the user to do end-to-end timing
    of the HTTP server and document how to use them. *)
-(* Dream.log is a bit of a misleading name. Maybr Dream.logger? Dream.log maybe
-   should be an alias to Dream.info. *)
-(* TODO The fun m -> m system stucks. Replace it by info... *)
-(* TODO Actually, it's fine. Just need a Dream.log that doesn't have this
-   fun m -> m business. Do a serach/replace for these ms eerywhere and change
-   them to log. *)
-
 (* TODO DOC Add docs on how to avoid OCamlbuild dep. *)
-(* TODO DOC recommending logs-ppx... or something else? *)
 (* TODO DOC why it's good to use the initializer early. *)
 
 (* TODO LATER implement fire. *)

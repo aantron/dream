@@ -10,7 +10,7 @@ let forward_body
     (body : [ `write ] Httpaf.Body.t) =
 
   let body_stream =
-    Dream_.internal_body_stream response [@ocaml.warning "-3"] in
+    Dream_.body_stream response in
 
   (* TODO LATER Will also need to monitor buffer accumulation and use
            flush. *)
@@ -18,7 +18,7 @@ let forward_body
     body_stream begin function
     | None -> Httpaf.Body.close_writer body
     | Some chunk ->
-      Httpaf.Body.write_string body chunk;
+      Httpaf.Body.write_bigstring body chunk;
       send_body ()
     end
   in
@@ -58,7 +58,7 @@ let wrap_handler app (user's_dream_handler : Dream_.handler) =
 
     let body =
       Httpaf.Reqd.request_body conn in
-    let body_stream k =
+    let body k =
       Httpaf.Body.schedule_read body
         ~on_eof:(fun () -> k None)
         ~on_read:(fun buffer ~off ~len ->
@@ -66,10 +66,7 @@ let wrap_handler app (user's_dream_handler : Dream_.handler) =
     in
 
     let request : Dream_.request =
-      Dream_.internal_create_request
-        ~app ~client ~method_ ~target ~version ~headers ~body_stream
-          [@ocaml.warning "-3"]
-    in
+      Dream_.request ~app ~client ~method_ ~target ~version ~headers ~body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -91,13 +88,20 @@ let wrap_handler app (user's_dream_handler : Dream_.handler) =
         (* Extract the Dream response's headers. *)
         >>= fun (response : Dream_.response) ->
 
+        let version =
+          match Dream_.version_override response with
+          | None -> None
+          | Some (major, minor) -> Some Httpaf.Version.{major; minor}
+        in
         let status =
           (Dream_.status response :> Httpaf.Status.t) in
+        let reason =
+          Dream_.reason_override response in
         let headers =
           Httpaf.Headers.of_list (Dream_.headers response) in
 
         let httpaf_response =
-          Httpaf.Response.create ~headers status in
+          Httpaf.Response.create ?version ?reason ~headers status in
         let body =
           Httpaf.Reqd.respond_with_streaming conn httpaf_response in
 
@@ -115,27 +119,37 @@ let wrap_handler app (user's_dream_handler : Dream_.handler) =
 
 
 
-type error_handler =
-  Unix.sockaddr ->
-  [ `Bad_request | `Bad_gateway | `Internal_server_error | `Exn of exn ] ->
-    Dream_.response Lwt.t
+type error = [
+  | `Bad_request of string
+  | `Internal_server_error of string
+  | `Exn of exn
+]
+
+type error_handler = Unix.sockaddr -> error -> Dream_.response Lwt.t
 
 let log =
   Log.source "dream.http"
 
+let format_detail detail =
+  if detail = "" then
+    ""
+  else
+    ": " ^ detail
+
 let default_error_handler client_address error =
   begin match error with
-  | `Bad_request ->
-    log.warning (fun m ->
-      m "Bad request from %s" (address_to_string client_address))
+  | `Bad_request detail ->
+    log.warning (fun log ->
+      log "Bad request from %s%s"
+        (address_to_string client_address) (format_detail detail))
 
-  | `Bad_gateway | `Internal_server_error ->
-    log.error (fun m -> m "Content-Length missing when required, or negative")
+  | `Internal_server_error detail ->
+    log.error (fun log -> log "Bad response from app%s" (format_detail detail))
 
   | `Exn exn ->
-    log.error (fun m -> m "Application leaked %s" (Printexc.to_string exn));
+    log.error (fun log -> log "App leaked %s" (Printexc.to_string exn));
     Printexc.get_backtrace ()
-    |> Log.iter_backtrace (fun line -> log.error (fun m -> m "%s" line));
+    |> Log.iter_backtrace (fun line -> log.error (fun log -> log "%s" line));
   end;
 
   Lwt.return @@ Dream_.response ~headers:["Content-Length", "0"] ()
@@ -151,6 +165,15 @@ let wrap_error_handler (user's_error_handler : error_handler) =
       Lwt.catch begin fun () ->
         let open Lwt.Infix in
 
+        let error =
+          match error with
+          | `Exn exn -> `Exn exn
+          | `Bad_request -> `Bad_request ""
+          | `Bad_gateway
+          | `Internal_server_error ->
+            `Internal_server_error "Content-Length missing or negative"
+        in
+
         user's_error_handler client_address error
         >>= fun response ->
 
@@ -164,11 +187,12 @@ let wrap_error_handler (user's_error_handler : error_handler) =
         Lwt.return_unit
       end
       @@ fun exn ->
-        log.error (fun m ->
-          m "Double fault: error handler raised %s" (Printexc.to_string exn));
+        log.error (fun log ->
+          log "Double fault: error handler raised %s" (Printexc.to_string exn));
 
         Printexc.get_backtrace ()
-        |> Log.iter_backtrace (fun line -> log.error (fun m -> m "%s" line));
+        |> Log.iter_backtrace (fun line ->
+          log.error (fun log -> log "%s" line));
 
         Lwt.return_unit
     end
@@ -178,7 +202,7 @@ let wrap_error_handler (user's_error_handler : error_handler) =
 
 
 
-let serve =
+let serve_with_caller_name caller =
   let never = fst (Lwt.wait ()) in
 
   fun
@@ -204,9 +228,8 @@ let serve =
   >>= fun addresses ->
   match addresses with
   | [] ->
-    (* TODO The function might be Dream.run, not Dream.serve. *)
-    Printf.ksprintf failwith "Dream.serve: no interface with address %s"
-      interface
+    Printf.ksprintf failwith "Dream.%s: no interface with address %s"
+      caller interface
   | address::_ ->
   let listen_address = Lwt_unix.(address.ai_addr) in
 
@@ -224,11 +247,15 @@ let serve =
   >>= fun () ->
   Lwt.return_unit
 
+let serve =
+  serve_with_caller_name "serve"
+
 
 
 let run ?interface ?port ?stop ?app ?error_handler user's_dream_handler =
   Lwt_main.run
-    (serve ?interface ?port ?stop ?app ?error_handler user's_dream_handler)
+    (serve_with_caller_name "run"
+      ?interface ?port ?stop ?app ?error_handler user's_dream_handler)
 
 
 

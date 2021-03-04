@@ -10,11 +10,14 @@ let start handler request =
 let request_id =
   Request_id.assign
 
-let log =
-  Log.log_traffic
+let logger =
+  Log.logger
 
 let default_log =
   Log.source (Logs.Src.name Logs.default)
+
+let log =
+  Log.convenience_log
 
 let error = default_log.error
 let warning = default_log.warning
@@ -26,6 +29,7 @@ module Log = Log
 
 open Dream_http
 
+type error = Http.error
 type error_handler = Http.error_handler
 let serve = Http.serve
 let run = Http.run

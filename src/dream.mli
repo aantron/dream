@@ -34,6 +34,7 @@ val response :
   ?status:status ->
   ?reason:string ->
   ?headers:(string * string) list ->
+  ?body:string ->
   unit ->
     response
 
@@ -50,35 +51,34 @@ val status : response -> status
 val status_to_int : status -> int
 
 val body : request -> string Lwt.t
+(* val body_stream : request -> ((string option -> unit) -> unit) *)
+val set_body : string -> response -> response
 
-(* TODO Need to expose the bigstring type eventually. *)
-(* TODO Reconsider order of arguments. *)
-val set_body_stream : response -> ((string option -> unit) -> unit) -> response
-val set_body : response -> string -> response
+val reason_override : response -> string option
+val version_override : response -> (int * int) option
 
 val identity : middleware
 val start : middleware
 val request_id : ?prefix:string -> middleware
-val log : middleware
+val logger : middleware
 
 type 'a local
 
-(* TODO Reconsider order of arguments in set_local based on usage. *)
 val new_local : unit -> 'a local
 val local : 'a local -> _ message -> 'a
 val local_option : 'a local -> _ message -> 'a option
-val set_local : 'a local -> 'b message -> 'a -> 'b message
-
-(* module Httpaf = Dream_httpaf [@@ocaml.warning "-49"] *)
+val set_local : 'a local -> 'a -> 'b message -> 'b message
 
 module Request_id :
 sig
   val get_option : ?request:request -> unit -> string option
 end
 
+val log : ('a, Format.formatter, unit, unit) format4 -> 'a
+
 type ('a, 'b) log =
   ((?request:request ->
-  ('a, Stdlib.Format.formatter, unit, 'b) Stdlib.format4 -> 'a) -> 'b) ->
+  ('a, Format.formatter, unit, 'b) format4 -> 'a) -> 'b) ->
     unit
 
 val error : ('a, unit) log
@@ -117,10 +117,13 @@ type 'a global
 val new_global : initializer_:(unit -> 'a) -> 'a global
 val global : 'a global -> request -> 'a
 
-type error_handler =
-  Unix.sockaddr ->
-  [ `Bad_request | `Bad_gateway | `Internal_server_error | `Exn of exn ] ->
-    response Lwt.t
+type error = [
+  | `Bad_request of string
+  | `Internal_server_error of string
+  | `Exn of exn
+]
+
+type error_handler = Unix.sockaddr -> error -> response Lwt.t
 
 val serve :
   ?interface:string ->
@@ -139,9 +142,6 @@ val run :
   ?error_handler:error_handler ->
   handler ->
     unit
-
-(* TODO Change the error type - replace Bad_gateway and Internal_server_error by
-   Bad_response. *)
 
 (* TODO DOC that [stop] only stops the server listening - requests already
    in the server can continue executing. *)
