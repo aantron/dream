@@ -33,6 +33,7 @@ val serve :
   ?interface:string ->
   ?port:int ->
   ?stop:unit Lwt.t ->
+  ?app:Dream.app ->
   ?error_handler:error_handler ->
   Dream.handler ->
     unit Lwt.t
@@ -41,6 +42,7 @@ val run :
   ?interface:string ->
   ?port:int ->
   ?stop:unit Lwt.t ->
+  ?app:Dream.app ->
   ?error_handler:error_handler ->
   Dream.handler ->
     unit

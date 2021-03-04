@@ -1,5 +1,9 @@
-(* TODO Request contexts. *)
-(* TODO Application contexts. *)
+let address_to_string : Unix.sockaddr -> string = function
+  | ADDR_UNIX path -> path
+  | ADDR_INET (address, port) ->
+    Printf.sprintf "%s:%i" (Unix.string_of_inet_addr address) port
+
+
 
 (* Wraps the user's Dream handler in the kind of handler expected by http/af.
    The scheme is simple: wait for http/af "Reqd.t"s (partially parsed
@@ -11,11 +15,7 @@
    passed to http/af to end up in the error handler. This is a low-level handler
    that ordinarily shouldn't be relied on by the user - this is just our last
    chance to tell the user that something is wrong with their app. *)
-let wrap_handler (user's_dream_handler : Dream.handler) =
-
-  (* One Dream application context for all the requests. *)
-  let app =
-    Dream.new_app () in
+let wrap_handler app (user's_dream_handler : Dream.handler) =
 
   let httpaf_request_handler = fun client_address (conn : Httpaf.Reqd.t) ->
 
@@ -24,12 +24,7 @@ let wrap_handler (user's_dream_handler : Dream.handler) =
       Httpaf.Reqd.request conn in
 
     let client =
-      match (client_address : Unix.sockaddr) with
-      | ADDR_UNIX path -> path
-      | ADDR_INET (address, port) ->
-        Printf.sprintf "%s:%i" (Unix.string_of_inet_addr address) port
-    in
-
+      address_to_string client_address in
     let method_ =
       httpaf_request.meth in
     let target =
@@ -57,7 +52,6 @@ let wrap_handler (user's_dream_handler : Dream.handler) =
        exceptions, and the error callback that gets leaked exceptions is also
        customizable. *)
     Lwt.async begin fun () ->
-
       Lwt.catch begin fun () ->
         let open Lwt.Infix in
 
@@ -82,16 +76,10 @@ let wrap_handler (user's_dream_handler : Dream.handler) =
       @@ fun exn ->
         Httpaf.Reqd.report_exn conn exn;
         Lwt.return_unit
-
     end
-
   in
 
   httpaf_request_handler
-
-
-(* TODO Just log framework exceptions somewhere. Probably here, so we can also
-   log bad requests. *)
 
 
 
@@ -100,28 +88,58 @@ type error_handler =
   [ `Bad_request | `Bad_gateway | `Internal_server_error | `Exn of exn ] ->
     Dream.response Lwt.t
 
-(* TODO Log errors. *)
-let default_error_handler _client_address _error =
-  (* TODO But do set the Content-length to 0. *)
-  Lwt.return @@ Dream.response ()
+let log =
+  Dream.Log.source "dream.httpaf"
+
+let default_error_handler client_address error =
+  begin match error with
+  | `Bad_request ->
+    log.warning (fun m ->
+      m "Bad request from %s" (address_to_string client_address))
+
+  | `Bad_gateway | `Internal_server_error ->
+    log.error (fun m -> m "Content-Length missing when required, or negative")
+
+  | `Exn exn ->
+    log.error (fun m -> m "Application leaked %s" (Printexc.to_string exn));
+    Printexc.get_backtrace ()
+    |> Dream.Log.iter_backtrace (fun line -> log.error (fun m -> m "%s" line));
+  end;
+
+  Lwt.return @@ Dream.response ~headers:["Content-Length", "0"] ()
 
 
 
 let wrap_error_handler (user's_error_handler : error_handler) =
-  let open Lwt.Infix in
 
   let httpaf_error_handler = fun client_address ?request error start_response ->
     ignore request;
-    (* TODO In case of exception or rejection in the error handler, don't do
-       anything. *)
 
     Lwt.async begin fun () ->
-      user's_error_handler client_address error
-      >>= fun _response ->
-      (* TODO Take the headers and body from the actual response. *)
-      let response_body = start_response Httpaf.Headers.empty in
-      Httpaf.Body.write_string response_body "";
-      Lwt.return_unit
+      Lwt.catch begin fun () ->
+        let open Lwt.Infix in
+
+        user's_error_handler client_address error
+        >>= fun response ->
+
+        let headers =
+          Httpaf.Headers.of_list (Dream.headers response) in
+        let response_body = start_response headers in
+        (* TODO Read the body. *)
+
+        Httpaf.Body.write_string response_body "";
+
+        Lwt.return_unit
+      end
+      @@ fun exn ->
+        log.error (fun m ->
+          m "Double fault: error handler raised %s" (Printexc.to_string exn));
+
+        Printexc.get_backtrace ()
+        |> Dream.Log.iter_backtrace (fun line ->
+          log.error (fun m -> m "%s" line));
+
+        Lwt.return_unit
     end
   in
 
@@ -133,14 +151,16 @@ let serve =
   let never = fst (Lwt.wait ()) in
 
   fun
-    ?(interface = "localhost") ?(port = 8080) ?(stop = never)
+    ?(interface = "localhost") ?(port = 8080)
+    ?(stop = never)
+    ?(app = Dream.new_app ())
     ?(error_handler = default_error_handler)
     user's_dream_handler ->
 
   (* Create the wrapped Httpaf handler from the user's Dream handler. *)
   let httpaf_connection_handler =
     Httpaf_lwt_unix.Server.create_connection_handler
-      ~request_handler:(wrap_handler user's_dream_handler)
+      ~request_handler:(wrap_handler app user's_dream_handler)
       ~error_handler:(wrap_error_handler error_handler)
   in
 
@@ -153,7 +173,6 @@ let serve =
   >>= fun addresses ->
   match addresses with
   | [] ->
-    (* TODO Also log here once there is a working logger. *)
     Printf.ksprintf failwith "Dream_httpaf.serve: no interface with address %s"
       interface
   | address::_ ->
@@ -175,6 +194,6 @@ let serve =
 
 
 
-let run ?interface ?port ?stop ?error_handler user's_dream_handler =
+let run ?interface ?port ?stop ?app ?error_handler user's_dream_handler =
   Lwt_main.run
-    (serve ?interface ?port ?stop ?error_handler user's_dream_handler)
+    (serve ?interface ?port ?stop ?app ?error_handler user's_dream_handler)

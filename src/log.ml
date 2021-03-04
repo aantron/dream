@@ -262,6 +262,15 @@ let source name =
 
 
 
+(* A helper used in several places. *)
+let iter_backtrace f backtrace =
+  backtrace
+  |> String.split_on_char '\n'
+  |> List.filter (fun line -> line <> "")
+  |> List.iter f
+
+
+
 (* Use the above function to create a log source for Log's own middleware, the
    same way any other middleware would. *)
 let log = source "dream.log"
@@ -314,11 +323,8 @@ let log_traffic next_handler request =
     (fun exn ->
       (* In case of exception, log the exception and the backtrace. *)
       log.error (fun m -> m ~request "Aborted by %s" (Printexc.to_string exn));
-
       Printexc.get_backtrace ()
-      |> String.split_on_char '\n'
-      |> List.filter (fun s -> s <> "")
-      |> List.iter (fun s -> log.error (fun m -> m ~request "%s" s));
+      |> iter_backtrace (fun line -> log.error (fun m -> m ~request "%s" line));
 
       Lwt.fail exn)
 

@@ -95,24 +95,6 @@ type ('a, 'b) log =
 
 module Log :
 sig
-  (* val log : middleware *)
-
-  (* type ('a, 'b) log =
-    ((?request:request ->
-    ('a, Stdlib.Format.formatter, unit, 'b) Stdlib.format4 -> 'a) -> 'b) ->
-      unit *)
-
-  (* TODO Provide Lwt-friendly logs. *)
-  (* TODO Try to turn this into a record, because first-class modules are a
-     major downer. *)
-  (* module type LOG =
-  sig
-    val error : ('a, unit) log
-    val warn : ('a, unit) log
-    val info : ('a, unit) log
-    val debug : ('a, unit) log
-  end *)
-
   type source = {
     error : 'a. ('a, unit) log;
     warning : 'a. ('a, unit) log;
@@ -120,16 +102,7 @@ sig
     debug : 'a. ('a, unit) log;
   }
 
-  (* val foo : unit -> foo *)
-
-  (* val create : string -> (module LOG) *)
   val source : string -> source
-
-  (* TODO Hide this from the API and just provide some function to set the
-     logger; also call it by default; also clear it. *)
-  (* val reporter : unit -> Logs.reporter *)
-
-  (* val request_id : Opium.Request.t -> int *)
 
   type level = [
     | `Error
@@ -139,6 +112,8 @@ sig
   ]
 
   val initialize : ?backtraces:bool -> ?level:level -> enable:bool -> unit
+
+  val iter_backtrace : (string -> unit) -> string -> unit
 end
 
 (* TODO Try to unwrap this module. *)
