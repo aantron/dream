@@ -1,4 +1,10 @@
 (library
  (public_name dream)
+ (wrapped false)
  (libraries
-  lwt))
+  fmt
+  fmt.tty
+  hmap
+  logs
+  lwt
+  lwt.unix))

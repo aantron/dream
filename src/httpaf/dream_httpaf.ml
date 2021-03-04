@@ -13,6 +13,10 @@
    chance to tell the user that something is wrong with their app. *)
 let wrap_handler (user's_dream_handler : Dream.handler) =
 
+  (* One Dream application context for all the requests. *)
+  let app =
+    Dream.new_app () in
+
   let httpaf_request_handler = fun client_address (conn : Httpaf.Reqd.t) ->
 
     (* Covert the http/af request to a Dream request. *)
@@ -36,8 +40,9 @@ let wrap_handler (user's_dream_handler : Dream.handler) =
       Httpaf.Headers.to_list httpaf_request.headers in
 
     let request : Dream.request =
-      Dream.internal_create_request ~client ~method_ ~target ~version ~headers
-      [@ocaml.warning "-3"] in
+      Dream.internal_create_request
+        ~app ~client ~method_ ~target ~version ~headers [@ocaml.warning "-3"]
+    in
 
     (* TODO Stream request and response bodies. *)
 
@@ -67,7 +72,9 @@ let wrap_handler (user's_dream_handler : Dream.handler) =
         let headers =
           Httpaf.Headers.of_list (Dream.headers response) in
 
-        let httpaf_response = Httpaf.Response.create ~headers status in
+        let httpaf_response =
+          Httpaf.Response.create ~headers status in
+
         Httpaf.Reqd.respond_with_string conn httpaf_response "";
 
         Lwt.return_unit
@@ -165,3 +172,9 @@ let serve =
   Lwt_io.shutdown_server server
   >>= fun () ->
   Lwt.return_unit
+
+
+
+let run ?interface ?port ?stop ?error_handler user's_dream_handler =
+  Lwt_main.run
+    (serve ?interface ?port ?stop ?error_handler user's_dream_handler)

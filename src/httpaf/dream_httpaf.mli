@@ -37,4 +37,12 @@ val serve :
   Dream.handler ->
     unit Lwt.t
 
+val run :
+  ?interface:string ->
+  ?port:int ->
+  ?stop:unit Lwt.t ->
+  ?error_handler:error_handler ->
+  Dream.handler ->
+    unit
+
 (* TODO Once the logger is implemented, need customize_default_error_handler. *)

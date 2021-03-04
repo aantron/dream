@@ -1,68 +1,20 @@
-type method_ = [
-   | `GET
-   | `POST
-   | `PUT
-   | `DELETE
-   | `HEAD
-   | `CONNECT
-   | `OPTIONS
-   | `TRACE
-   | `Other of string
-]
+include Dream_
 
-type incoming = {
-  client : string;
-  method_ : method_;
-  target : string;
-}
+(* let assign_request_id = Request_id.assign_request_id *)
 
-type status = [
-  | `OK
-]
+let identity handler request =
+  handler request
 
-type outgoing = {
-  status : status;
-  reason : string option;
-}
+let start handler request =
+  handler request
 
-type 'a message = {
-  specific : 'a;
-  version : int * int;
-  headers : (string * string) list;
-}
+let request_id =
+  Request_id.assign
 
-type request = incoming message
-type response = outgoing message
+let log =
+  Log.log_traffic
 
-(* TODO Make the version context-dependent, or take it from the request. *)
-let response ?(version = (1, 1)) ?(status = `OK) ?reason () = {
-  specific = {
-    status;
-    reason;
-  };
-  version;
-  headers = [];
-}
+module Request_id = Request_id
+module Log = Log
 
-let status response =
-  response.specific.status
-
-let headers message =
-  message.headers
-
-type handler = request -> response Lwt.t
-type middleware = handler -> handler
-
-[@@@ocaml.warning "-49"]
-
-module Httpaf = Dream_httpaf
-
-let internal_create_request ~client ~method_ ~target ~version ~headers = {
-  specific = {
-    client;
-    method_;
-    target;
-  };
-  version;
-  headers;
-}
+module Httpaf = Dream_httpaf [@@ocaml.warning "-49"]

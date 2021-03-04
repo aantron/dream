@@ -3,4 +3,5 @@
  (libraries
   dream
   dream-httpaf
+  lwt
   lwt.unix))
