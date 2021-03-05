@@ -46,7 +46,6 @@ let dump request =
 
   headers ^ "\n\n" ^ locals ^ "\n\n" ^ globals
 
-(* TODO set_content_length helper in main api. *)
 (* TODO LATER Expose the error handlers for users to forward to in debug
    mode. *)
 let default_on_error ~debug request response =

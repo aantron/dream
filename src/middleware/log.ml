@@ -265,7 +265,9 @@ let source name =
 
 let convenience_log format_and_arguments =
   Fmt.kstr
-    (fun message -> Logs.app (fun log -> log "%s" message))
+    (fun message ->
+      Lazy.force initializer_;
+      Logs.app (fun log -> log "%s" message))
     format_and_arguments
   (* Logs.app (fun log -> log format_and_arguments) *)
   (* let report = Logs.((reporter ()).report) in

@@ -101,7 +101,6 @@ type method_ = [
 
 val method_to_string : method_ -> string
 
-(* TODO Consider always using a string to skip the ~body argument. *)
 val response :
   ?version:int * int ->
   ?status:status ->
@@ -246,6 +245,9 @@ val run :
   ?stop:unit Lwt.t ->
   ?app:app ->
   ?error_handler:error_handler ->
+  ?greeting:bool ->
+  ?stop_on_input:bool ->
+  ?graceful_stop:bool ->
   handler ->
     unit
 

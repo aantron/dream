@@ -15,3 +15,5 @@ let () =
   Dream.run (fun _request ->
     Dream.respond "Good morning, world!")
 ``` *)
+
+(* TODO LATER Alias Lwt.return, >|=, and >>=. *)

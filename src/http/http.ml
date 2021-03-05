@@ -53,7 +53,7 @@ let to_httpaf_status = function
    passed to http/af to end up in the error handler. This is a low-level handler
    that ordinarily shouldn't be relied on by the user - this is just our last
    chance to tell the user that something is wrong with their app. *)
-let wrap_handler app (user's_Dreamhandler : Dream.handler) =
+let wrap_handler app (user's_dream_handler : Dream.handler) =
 
   let httpaf_request_handler = fun client_address (conn : Httpaf.Reqd.t) ->
     Dream.Log.set_up_exception_hook ();
@@ -100,7 +100,7 @@ let wrap_handler app (user's_Dreamhandler : Dream.handler) =
         let open Lwt.Infix in
 
         (* Do the big call. *)
-        user's_Dreamhandler request
+        user's_dream_handler request
 
         (* Extract the Dream response's headers. *)
         >>= fun (response : Dream.response) ->
@@ -220,20 +220,24 @@ let wrap_error_handler (user's_error_handler : error_handler) =
 
 
 
-let serve_with_caller_name caller =
-  let never = fst (Lwt.wait ()) in
+let default_interface = "localhost"
+let default_port = 8080
+let never = fst (Lwt.wait ())
 
-  fun
-    ?(interface = "localhost") ?(port = 8080)
+
+
+let serve_with_caller_name
+    caller
+    ?(interface = default_interface) ?(port = default_port)
     ?(stop = never)
     ?(app = Dream.app ())
     ?(error_handler = default_error_handler)
-    user's_Dreamhandler ->
+    user's_dream_handler =
 
   (* Create the wrapped Httpaf handler from the user's Dream handler. *)
   let httpaf_connection_handler =
     Httpaf_lwt_unix.Server.create_connection_handler
-      ~request_handler:(wrap_handler app user's_Dreamhandler)
+      ~request_handler:(wrap_handler app user's_dream_handler)
       ~error_handler:(wrap_error_handler error_handler)
   in
 
@@ -270,7 +274,55 @@ let serve =
 
 
 
-let run ?interface ?port ?stop ?app ?error_handler user's_Dreamhandler =
-  Lwt_main.run
-    (serve_with_caller_name "run"
-      ?interface ?port ?stop ?app ?error_handler user's_Dreamhandler)
+(* TODO LATER Correct protocol scheme once there is HTTPS support. *)
+let run
+    ?(interface = default_interface) ?(port = default_port)
+    ?(stop = never)
+    ?app
+    ?error_handler
+    ?(greeting = true)
+    ?(stop_on_input = true)
+    ?(graceful_stop = true)
+    user's_dream_handler =
+
+  let log = Dream.Log.convenience_log in
+
+  if greeting then begin
+    let hostname =
+      match interface with
+      | "localhost" | "127.0.0.1" | "0.0.0.0" -> "localhost"
+      | interface -> interface
+    in
+
+    log "Running on http://%s:%i" hostname port;
+    if stop_on_input then
+      log "Press ENTER to stop"
+  end;
+
+  let stop =
+    if stop_on_input then
+      Lwt.choose [stop; Lwt.map ignore Lwt_io.(read_char stdin)]
+    else
+      stop
+  in
+
+  Lwt_main.run begin
+    let open Lwt.Infix in
+
+    serve_with_caller_name "run"
+      ~interface ~port ~stop ?app ?error_handler user's_dream_handler
+    >>= fun () ->
+
+    if not graceful_stop then
+      Lwt.return_unit
+    else begin
+      log "Stopping; allowing 1 second for requests to finish";
+      Lwt_unix.sleep 1.
+    end
+  end
+
+
+(* TODO LATER Project homepage to greeting message. *)
+(* TODO LATER Terminal options docs, etc., log viewers, for line wrapping. *)
+(* TODO DOC Gradual replacement of run by serve. *)
+(* TODO LATER Don't print the port if it is the default for the scheme. *)
