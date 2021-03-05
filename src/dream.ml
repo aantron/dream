@@ -19,6 +19,9 @@ let default_log =
 let content_length =
   Content_length.assign
 
+let synchronous next_handler request =
+  Lwt.return (next_handler request)
+
 let log =
   Log.convenience_log
 

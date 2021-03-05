@@ -147,6 +147,7 @@ val start : middleware
 val request_id : ?prefix:string -> middleware
 val logger : middleware
 val content_length : ?buffer_streams:bool -> middleware
+val synchronous : (request -> response) -> handler
 
 type 'a local
 
