@@ -123,6 +123,8 @@ val headers : _ message -> (string * string) list
 val headers_named : string -> _ message -> string list
 val header : string -> _ message -> string
 val header_option : string -> _ message -> string option
+val has_header : string -> _ message -> bool
+val add_header : string -> string -> 'a message -> 'a message
 
 val status : response -> status
 val status_to_int : status -> int
@@ -135,7 +137,6 @@ val is_client_error : status -> bool
 val is_server_error : status -> bool
 
 val body : request -> string Lwt.t
-(* val body_stream : request -> ((string option -> unit) -> unit) *)
 val set_body : string -> response -> response
 
 val reason_override : response -> string option
@@ -145,6 +146,7 @@ val identity : middleware
 val start : middleware
 val request_id : ?prefix:string -> middleware
 val logger : middleware
+val content_length : ?buffer_streams:bool -> middleware
 
 type 'a local
 

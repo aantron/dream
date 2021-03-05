@@ -44,16 +44,16 @@ let new_bigstring length =
 
 (* Not every request will need body reading, so don't allocate a buffer for each
    requesst - only allocate it upon request. *)
-type ground_body = [
+type buffered_body = [
   | `Empty
   | `String of string
   | `Bigstring of bigstring
 ]
 
 type body = [
-  | ground_body
+  | buffered_body
   | `Bigstring_stream of (bigstring option -> unit) -> unit
-  | `Reading of ground_body Lwt.t
+  | `Reading of buffered_body Lwt.t
 ]
 
 type incoming = {
@@ -143,12 +143,20 @@ let header_option name message =
   try Some (header_basic name message)
   with Not_found -> None
 
+let has_header name message =
+  try ignore (header_basic name message); true
+  with Not_found -> false
+
+let add_header name value message =
+  {message with headers = (name, value)::message.headers}
+
 (* TODO LATER This is the preliminary reader implementation described in
    comments above. It should eventually be replaced by a 0-copy reader, but that
    will likely require a much more low-level web server integration. *)
-let force_body message : ground_body Lwt.t =
+(* TODO Emit `Empty. *)
+let buffer_body message : buffered_body Lwt.t =
   match !(message.body) with
-  | #ground_body as body -> Lwt.return body
+  | #buffered_body as body -> Lwt.return body
   | `Reading on_finished -> on_finished
 
   | `Bigstring_stream stream ->
@@ -184,7 +192,7 @@ let force_body message : ground_body Lwt.t =
     on_finished
 
 let body request =
-  force_body request
+  buffer_body request
   |> Lwt.map begin function
     | `Empty -> ""
     | `String body -> body
@@ -194,7 +202,7 @@ let body request =
 (* TODO LATER There need to be buffering and unbuffering version of this. The
    HTTP server needs a version that does not buffer. The app, by default,
    should get buffering. *)
-let ground_body_stream body =
+let buffered_body_stream body =
   let sent = ref false in
 
   fun k ->
@@ -210,11 +218,11 @@ let ground_body_stream body =
 
 let body_stream request =
   match !(request.body) with
-  | #ground_body as body -> ground_body_stream body
+  | #buffered_body as body -> buffered_body_stream body
   | `Bigstring_stream stream -> stream
   | `Reading on_finished ->
     fun k ->
-      Lwt.on_success on_finished (fun body -> ground_body_stream body k)
+      Lwt.on_success on_finished (fun body -> buffered_body_stream body k)
 
 (* Create a fresh ref. The reason this field has a ref is because it might get
    replaced when a body is forced read. That's not what's happening here - we

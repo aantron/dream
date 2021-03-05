@@ -16,6 +16,9 @@ let logger =
 let default_log =
   Log.source (Logs.Src.name Logs.default)
 
+let content_length =
+  Content_length.assign
+
 let log =
   Log.convenience_log
 
