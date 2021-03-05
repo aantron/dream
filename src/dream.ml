@@ -1,4 +1,4 @@
-include Dream_pure.Dream_
+include Dream_pure.Inmost
 
 let identity handler request =
   handler request

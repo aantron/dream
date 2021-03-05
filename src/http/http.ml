@@ -1,5 +1,8 @@
-module Dream = Dream_pure.Dream_
-module Log = Dream_middleware.Log
+module Dream =
+struct
+  include Dream_pure.Inmost
+  module Log = Dream_middleware.Log
+end
 
 
 
@@ -53,7 +56,7 @@ let to_httpaf_status = function
 let wrap_handler app (user's_Dreamhandler : Dream.handler) =
 
   let httpaf_request_handler = fun client_address (conn : Httpaf.Reqd.t) ->
-    Log.set_up_exception_hook ();
+    Dream.Log.set_up_exception_hook ();
 
     (* Covert the http/af request to a Dream request. *)
     let httpaf_request : Httpaf.Request.t =
@@ -142,7 +145,7 @@ type error = [
 type error_handler = Unix.sockaddr -> error -> Dream.response Lwt.t
 
 let log =
-  Log.source "dream.http"
+  Dream.Log.source "dream.http"
 
 let format_detail detail =
   if detail = "" then
@@ -163,7 +166,8 @@ let default_error_handler client_address error =
   | `Exn exn ->
     log.error (fun log -> log "App raised: %s" (Printexc.to_string exn));
     Printexc.get_backtrace ()
-    |> Log.iter_backtrace (fun line -> log.error (fun log -> log "%s" line));
+    |> Dream.Log.iter_backtrace (fun line ->
+      log.error (fun log -> log "%s" line));
   end;
 
   Lwt.return @@ Dream.response ~headers:["Content-Length", "0"] ()
@@ -205,7 +209,7 @@ let wrap_error_handler (user's_error_handler : error_handler) =
           log "Error handler raised: %s" (Printexc.to_string exn));
 
         Printexc.get_backtrace ()
-        |> Log.iter_backtrace (fun line ->
+        |> Dream.Log.iter_backtrace (fun line ->
           log.error (fun log -> log "%s" line));
 
         Lwt.return_unit

@@ -20,7 +20,11 @@
    This is sufficient for attaching a request id to most log messages, in
    practice. *)
 
-module Dream = Dream_pure.Dream_
+module Dream =
+struct
+  include Dream_pure.Inmost
+  module Request_id = Request_id
+end
 
 
 
@@ -151,7 +155,7 @@ let reporter () =
         match request_id_from_tags with
         | Some _ -> request_id_from_tags
         | None ->
-          Request_id.get_option ()
+          Dream.Request_id.get_option ()
       in
 
       let request_id, request_style =
@@ -238,7 +242,7 @@ let source name =
           match request with
           | None -> Logs.Tag.empty
           | Some request ->
-            match Request_id.get_option ~request () with
+            match Dream.Request_id.get_option ~request () with
             | None -> Logs.Tag.empty
             | Some request_id ->
               Logs.Tag.add logs_lib_tag request_id Logs.Tag.empty

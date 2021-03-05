@@ -1,4 +1,4 @@
-module Dream = Dream_pure.Dream_
+module Dream = Dream_pure.Inmost
 
 
 
