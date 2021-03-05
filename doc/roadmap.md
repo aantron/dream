@@ -2,24 +2,26 @@
 
 - Will do a bunch of `1.0.0~alphaX` releases before `1.0.0`, but all the basic things have to be in place during the alphas &mdash; they are just a chance to do breaking chanegs before the real `1.0.0`.
 - Working apps.
-  - 🔲 Servers abstracted; httpaf implementation provided (should be easy).
+  - ✅ Servers abstracted; httpaf implementation provided (should be easy).
+    - 🔲 Also need built-in H2, websocket.
   - ✅ Basic router &mdash; doesn't have to be fast.
     - 🔲 But need the basic composition story, including the path prefix middleware (almost).
-  - ✅ Basic template engine.
-  - 🔲 Minimal dependencies (need to vendor some things and write some glue code).
+  - 🔲 Basic template engine.
+  - ✅ Minimal dependencies (need to vendor some things and write some glue code).
 - Middleware collection.
   - ✅ Logger.
-  - 🔲 Debugger (using external ATM).
-  - ✅ URL templates.
-  - ✅ XSS protection helpers.
-  - 🔲 Cookies (using external ATM).
-  - ✅ Sessions.
-  - ✅ CSRF tokens.
-  - ✅ SQL connection pools (needs separate packaging).
-  - ✅ Tag generation helpers.
+  - ✅ Debugger.
+  - 🔲 URL templates.
+  - 🔲 XSS protection helpers.
+  - 🔲 Cookies.
+  - 🔲 Sessions.
+  - 🔲 CSRF tokens.
+  - 🔲 SQL connection pools (needs separate packaging).
+  - 🔲 Tag generation helpers.
   - 🔲 Form, JSON, file uploader parsers (partially external).
-  - ✅ Client+server localization.
+  - 🔲 Client+server localization.
   - 🔲 Static.
+  - 🔲 Length limits.
   - 🔲 Websocket design.
     - Just the helper that responds with a websocket response should also return some kind of connection object that the server can further interact on.
   - From Opium:

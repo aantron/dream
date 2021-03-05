@@ -1,7 +1,0 @@
-(library
- (name fw)
- (public_name fw)
- (libraries
-  logs
-  lwt
-  opium))
