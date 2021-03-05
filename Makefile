@@ -13,6 +13,6 @@ test :
 todo :
 	@git grep -n TODO | grep -v fw | grep -v DOC | grep -v LATER | grep -v SELF # SELF
 
-.PHONY : all-todo
-all-todo :
+.PHONY : todo-all
+todo-all :
 	@git grep -n TODO | grep -v SELF # SELF

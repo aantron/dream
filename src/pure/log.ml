@@ -351,9 +351,11 @@ let logger next_handler request =
       (* Log the elapsed time. If the response is a redirection, log the
          target. *)
       let location =
-        match Dream_.header_option "Location" response with
-        | Some location -> location
-        | None -> ""
+        if Dream_.is_redirect (Dream_.status response) then
+          match Dream_.header_option "Location" response with
+          | Some location -> location
+          | None -> ""
+        else ""
       in
 
       log.info (fun log -> log ~request "%i%s in %.0f μs"

@@ -233,7 +233,7 @@ let body_stream request =
    are setting a new body. Indeed, there might be a concurrent read going on.
    That read should not override the new body. So let it mutate the old
    request's ref; we generate a new request with a new body ref. *)
-let set_body body response =
+let with_body body response =
   {response with body = ref (`String body)}
 
 let version_override response =
@@ -258,7 +258,7 @@ let local key message =
   | Some value -> value
   | None -> raise Not_found
 
-let set_local key value message =
+let with_local key value message =
   {message with scope = Hmap.add key value message.scope}
 
 type app = Hmap.t ref

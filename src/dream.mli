@@ -137,7 +137,7 @@ val is_client_error : status -> bool
 val is_server_error : status -> bool
 
 val body : request -> string Lwt.t
-val set_body : string -> response -> response
+val with_body : string -> response -> response
 
 val reason_override : response -> string option
 val version_override : response -> (int * int) option
@@ -154,7 +154,7 @@ type 'a local
 val new_local : unit -> 'a local
 val local : 'a local -> _ message -> 'a
 val local_option : 'a local -> _ message -> 'a option
-val set_local : 'a local -> 'a -> 'b message -> 'b message
+val with_local : 'a local -> 'a -> 'b message -> 'b message
 
 module Request_id :
 sig
