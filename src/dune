@@ -3,6 +3,8 @@
  (wrapped false)
  (libraries
   dream.http
+  dream.middleware
   dream.pure
   logs
-  lwt))
+  lwt
+ ))

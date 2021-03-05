@@ -1,0 +1,11 @@
+(library
+ (public_name dream.middleware)
+ (name dream_middleware)
+ (libraries
+  dream.pure
+  fmt
+  fmt.tty
+  logs
+  lwt
+  lwt.unix
+ ))

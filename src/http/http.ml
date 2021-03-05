@@ -1,4 +1,7 @@
-open Dream_pure
+module Dream = Dream_pure.Dream_
+module Log = Dream_middleware.Log
+
+
 
 let address_to_string : Unix.sockaddr -> string = function
   | ADDR_UNIX path -> path
@@ -6,11 +9,11 @@ let address_to_string : Unix.sockaddr -> string = function
     Printf.sprintf "%s:%i" (Unix.string_of_inet_addr address) port
 
 let forward_body
-    (response : Dream_.response)
+    (response : Dream.response)
     (body : [ `write ] Httpaf.Body.t) =
 
   let body_stream =
-    Dream_.body_stream response in
+    Dream.body_stream response in
 
   (* TODO LATER Will also need to monitor buffer accumulation and use
            flush. *)
@@ -47,7 +50,7 @@ let to_httpaf_status = function
    passed to http/af to end up in the error handler. This is a low-level handler
    that ordinarily shouldn't be relied on by the user - this is just our last
    chance to tell the user that something is wrong with their app. *)
-let wrap_handler app (user's_dream_handler : Dream_.handler) =
+let wrap_handler app (user's_Dreamhandler : Dream.handler) =
 
   let httpaf_request_handler = fun client_address (conn : Httpaf.Reqd.t) ->
     Log.set_up_exception_hook ();
@@ -76,8 +79,8 @@ let wrap_handler app (user's_dream_handler : Dream_.handler) =
           k (Some (Bigarray_compat.Array1.sub buffer off len)))
     in
 
-    let request : Dream_.request =
-      Dream_.request ~app ~client ~method_ ~target ~version ~headers ~body in
+    let request : Dream.request =
+      Dream.request ~app ~client ~method_ ~target ~version ~headers ~body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -94,22 +97,22 @@ let wrap_handler app (user's_dream_handler : Dream_.handler) =
         let open Lwt.Infix in
 
         (* Do the big call. *)
-        user's_dream_handler request
+        user's_Dreamhandler request
 
         (* Extract the Dream response's headers. *)
-        >>= fun (response : Dream_.response) ->
+        >>= fun (response : Dream.response) ->
 
         let version =
-          match Dream_.version_override response with
+          match Dream.version_override response with
           | None -> None
           | Some (major, minor) -> Some Httpaf.Version.{major; minor}
         in
         let status =
-          to_httpaf_status (Dream_.status response) in
+          to_httpaf_status (Dream.status response) in
         let reason =
-          Dream_.reason_override response in
+          Dream.reason_override response in
         let headers =
-          Httpaf.Headers.of_list (Dream_.headers response) in
+          Httpaf.Headers.of_list (Dream.headers response) in
 
         let httpaf_response =
           Httpaf.Response.create ?version ?reason ~headers status in
@@ -136,7 +139,7 @@ type error = [
   | `Exn of exn
 ]
 
-type error_handler = Unix.sockaddr -> error -> Dream_.response Lwt.t
+type error_handler = Unix.sockaddr -> error -> Dream.response Lwt.t
 
 let log =
   Log.source "dream.http"
@@ -163,7 +166,7 @@ let default_error_handler client_address error =
     |> Log.iter_backtrace (fun line -> log.error (fun log -> log "%s" line));
   end;
 
-  Lwt.return @@ Dream_.response ~headers:["Content-Length", "0"] ()
+  Lwt.return @@ Dream.response ~headers:["Content-Length", "0"] ()
 
 
 
@@ -189,7 +192,7 @@ let wrap_error_handler (user's_error_handler : error_handler) =
         >>= fun response ->
 
         let headers =
-          Httpaf.Headers.of_list (Dream_.headers response) in
+          Httpaf.Headers.of_list (Dream.headers response) in
         let body =
           start_response headers in
 
@@ -219,14 +222,14 @@ let serve_with_caller_name caller =
   fun
     ?(interface = "localhost") ?(port = 8080)
     ?(stop = never)
-    ?(app = Dream_.app ())
+    ?(app = Dream.app ())
     ?(error_handler = default_error_handler)
-    user's_dream_handler ->
+    user's_Dreamhandler ->
 
   (* Create the wrapped Httpaf handler from the user's Dream handler. *)
   let httpaf_connection_handler =
     Httpaf_lwt_unix.Server.create_connection_handler
-      ~request_handler:(wrap_handler app user's_dream_handler)
+      ~request_handler:(wrap_handler app user's_Dreamhandler)
       ~error_handler:(wrap_error_handler error_handler)
   in
 
@@ -263,7 +266,7 @@ let serve =
 
 
 
-let run ?interface ?port ?stop ?app ?error_handler user's_dream_handler =
+let run ?interface ?port ?stop ?app ?error_handler user's_Dreamhandler =
   Lwt_main.run
     (serve_with_caller_name "run"
-      ?interface ?port ?stop ?app ?error_handler user's_dream_handler)
+      ?interface ?port ?stop ?app ?error_handler user's_Dreamhandler)

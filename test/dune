@@ -2,4 +2,5 @@
  (name main)
  (libraries
   dream
-  lwt))
+  lwt
+ ))

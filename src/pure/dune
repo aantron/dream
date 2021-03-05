@@ -2,9 +2,7 @@
  (public_name dream.pure)
  (name dream_pure)
  (libraries
-  fmt
-  fmt.tty
   hmap
-  logs
   lwt
-  lwt.unix))
+  lwt.unix
+ ))

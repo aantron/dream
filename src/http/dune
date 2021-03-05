@@ -4,8 +4,10 @@
  (libraries
   bigarray-compat
   bigstringaf
+  dream.middleware
   dream.pure
   httpaf
   httpaf-lwt-unix
   lwt
-  lwt.unix))
+  lwt.unix
+ ))

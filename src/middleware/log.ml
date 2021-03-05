@@ -20,6 +20,10 @@
    This is sufficient for attaching a request id to most log messages, in
    practice. *)
 
+module Dream = Dream_pure.Dream_
+
+
+
 let logs_lib_tag : string Logs.Tag.def =
   Logs.Tag.def
     "dream.request_id"
@@ -212,10 +216,10 @@ type level = [
 
 (* The "front end." *)
 type source = {
-  error : 'a. ('a, unit) Dream_.log;
-  warning : 'a. ('a, unit) Dream_.log;
-  info : 'a. ('a, unit) Dream_.log;
-  debug : 'a. ('a, unit) Dream_.log;
+  error : 'a. ('a, unit) Dream.log;
+  warning : 'a. ('a, unit) Dream.log;
+  info : 'a. ('a, unit) Dream.log;
+  debug : 'a. ('a, unit) Dream.log;
 }
 
 let source name =
@@ -329,15 +333,15 @@ let logger next_handler request =
 
   (* Identify the request in the log. *)
   let user_agent =
-    Dream_.headers_named "User-Agent" request
+    Dream.headers_named "User-Agent" request
     |> String.concat " "
   in
 
   log.info (fun log ->
     log ~request "%s %s %s %s"
-      (Dream_.method_to_string (Dream_.method_ request))
-      (Dream_.target request)
-      (Dream_.client request)
+      (Dream.method_to_string (Dream.method_ request))
+      (Dream.target request)
+      (Dream.client request)
       user_agent);
 
   (* Start timing handling of the request, and call into the rest of the app. *)
@@ -351,15 +355,15 @@ let logger next_handler request =
       (* Log the elapsed time. If the response is a redirection, log the
          target. *)
       let location =
-        if Dream_.is_redirect (Dream_.status response) then
-          match Dream_.header_option "Location" response with
+        if Dream.is_redirect (Dream.status response) then
+          match Dream.header_option "Location" response with
           | Some location -> location
           | None -> ""
         else ""
       in
 
       log.info (fun log -> log ~request "%i%s in %.0f μs"
-        (Dream_.status_to_int (Dream_.status response))
+        (Dream.status_to_int (Dream.status response))
         location
         (elapsed *. 1e6));
 
