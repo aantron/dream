@@ -12,6 +12,9 @@ let request_id =
 let logger =
   Dream_middleware.Log.logger
 
+let catch =
+  Dream_middleware.Catch.catch
+
 let content_length =
   Dream_middleware.Content_length.assign
 
@@ -32,9 +35,7 @@ let debug = default_log.debug
 module Request_id = Dream_middleware.Request_id
 module Log = Dream_middleware.Log
 
-open Dream_http
-
-type error = Http.error
-type error_handler = Http.error_handler
-let serve = Http.serve
-let run = Http.run
+type error = Dream_http.Http.error
+type error_handler = Dream_http.Http.error_handler
+let serve = Dream_http.Http.serve
+let run = Dream_http.Http.run

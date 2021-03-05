@@ -11,6 +11,7 @@ type handler = request -> response Lwt.t
 type middleware = handler -> handler
 
 (* TODO DOC Tell the user which of these are actually important. *)
+(* TODO Can probably just unscope this. *)
 module Status :
 sig
   type informational = [
@@ -125,6 +126,8 @@ val header : string -> _ message -> string
 val header_option : string -> _ message -> string option
 val has_header : string -> _ message -> bool
 val add_header : string -> string -> 'a message -> 'a message
+val strip_header : string -> 'a message -> 'a message
+val replace_header : string -> string -> 'a message -> 'a message
 
 val status : response -> status
 val status_to_int : status -> int
@@ -137,21 +140,28 @@ val is_client_error : status -> bool
 val is_server_error : status -> bool
 
 val body : request -> string Lwt.t
+val has_body : _ message -> bool
 val with_body : string -> response -> response
 
 val reason_override : response -> string option
 val version_override : response -> (int * int) option
+val reason : response -> string
 
 val identity : middleware
 val start : middleware
 val request_id : ?prefix:string -> middleware
 val logger : middleware
+val catch :
+  ?on_error:(debug:bool -> request -> response -> response Lwt.t) ->
+  ?on_exn:(debug:bool -> request -> exn -> response Lwt.t) ->
+  ?debug:bool ->
+    middleware
 val content_length : ?buffer_streams:bool -> middleware
 val synchronous : (request -> response) -> handler
 
 type 'a local
 
-val new_local : unit -> 'a local
+val new_local : ?debug:('a -> string * string) -> unit -> 'a local
 val local : 'a local -> _ message -> 'a
 val local_option : 'a local -> _ message -> 'a option
 val with_local : 'a local -> 'a -> 'b message -> 'b message
@@ -206,7 +216,7 @@ val app : unit -> app
 
 type 'a global
 
-val new_global : initializer_:(unit -> 'a) -> 'a global
+val new_global : ?debug:('a -> string * string) -> (unit -> 'a) -> 'a global
 val global : 'a global -> request -> 'a
 
 type error = [

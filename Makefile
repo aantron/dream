@@ -2,6 +2,10 @@
 build :
 	@dune build --no-print-directory
 
+.PHONY : watch
+watch :
+	@dune build --no-print-directory -w
+
 .PHONY : test
 test :
 	@tput rmam

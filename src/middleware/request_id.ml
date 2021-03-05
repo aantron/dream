@@ -2,12 +2,18 @@ module Dream = Dream_pure.Inmost
 
 
 
+let name =
+  "dream.request_id"
+
 let last_id =
-  Dream.new_global ~initializer_:(fun () ->
-    ref 0)
+  Dream.new_global
+    ~debug:(fun id -> "dream.request_id.last_id", string_of_int !id)
+    (fun () -> ref 0)
 
 let id =
-  Dream.new_local ()
+  Dream.new_local
+    ~debug:(fun id -> name, id)
+    ()
 
 let lwt_key =
   Lwt.new_key ()

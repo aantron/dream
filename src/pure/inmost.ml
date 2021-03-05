@@ -21,6 +21,14 @@ let method_to_string = function
   | `TRACE -> "TRACE"
   | `Other method_ -> method_
 
+module Metadata =
+struct
+  type 'a t = ('a -> string * string) option
+end
+
+module Local = Hmap.Make (Metadata)
+module Global = Hmap.Make (Metadata)
+
 module Bigstring = Bigarray.Array1
 
 (* TODO LATER It would be best if the web server would write straight into the
@@ -57,7 +65,7 @@ type body = [
 ]
 
 type incoming = {
-  app : Hmap.t ref;
+  app : Global.t ref;
   client : string;
   method_ : method_;
   target : string;
@@ -78,12 +86,12 @@ type 'a message = {
   specific : 'a;
   headers : (string * string) list;
   body : body ref;
-  scope : Hmap.t;
+  scope : Local.t;
+  final : 'a message ref;
 }
 
 type request = incoming message
 type response = outgoing message
-
 
 let response ?version ?(status = `OK) ?reason ?(headers = []) ?body () =
   let body =
@@ -91,7 +99,7 @@ let response ?version ?(status = `OK) ?reason ?(headers = []) ?body () =
     | None -> `Empty
     | Some body -> `String body
   in
-  {
+  let rec response = {
     specific = {
       response_version = version;
       status;
@@ -99,8 +107,14 @@ let response ?version ?(status = `OK) ?reason ?(headers = []) ?body () =
     };
     headers;
     body = ref body;
-    scope = Hmap.empty;
-  }
+    scope = Local.empty;
+    final = ref response;
+  } in
+  response
+
+let update message =
+  message.final := message;
+  message
 
 let client request =
   request.specific.client
@@ -148,7 +162,26 @@ let has_header name message =
   with Not_found -> false
 
 let add_header name value message =
-  {message with headers = (name, value)::message.headers}
+  update {message with headers = (name, value)::message.headers}
+
+let strip_header name message =
+  let name = String.lowercase_ascii name in
+  update {message with headers =
+    message.headers
+    |> List.filter (fun (name', _) -> String.lowercase_ascii name' <> name)}
+
+let replace_header name value message =
+  message
+  |> strip_header name
+  |> add_header name value
+
+let has_body message =
+  match !(message.body) with
+  | `Empty -> false
+  | `String "" -> false
+  | `String _ -> true
+  | `Bigstring body -> Bigstring.size_in_bytes body > 0
+  | _ -> true
 
 (* TODO LATER This is the preliminary reader implementation described in
    comments above. It should eventually be replaced by a 0-copy reader, but that
@@ -234,7 +267,7 @@ let body_stream request =
    That read should not override the new body. So let it mutate the old
    request's ref; we generate a new request with a new body ref. *)
 let with_body body response =
-  {response with body = ref (`String body)}
+  update {response with body = ref (`String body)}
 
 let version_override response =
   response.specific.response_version
@@ -242,16 +275,21 @@ let version_override response =
 let reason_override response =
   response.specific.reason
 
+let reason response =
+  match reason_override response with
+  | Some reason -> reason
+  | None -> status_to_string response.specific.status
+
 type handler = request -> response Lwt.t
 type middleware = handler -> handler
 
-type 'a local = 'a Hmap.key
+type 'a local = 'a Local.key
 
-let new_local () =
-  Hmap.Key.create ()
+let new_local ?debug () =
+  Local.Key.create debug
 
 let local_option key message =
-  Hmap.find key message.scope
+  Local.find key message.scope
 
 let local key message =
   match local_option key message with
@@ -259,29 +297,29 @@ let local key message =
   | None -> raise Not_found
 
 let with_local key value message =
-  {message with scope = Hmap.add key value message.scope}
+  update {message with scope = Local.add key value message.scope}
 
-type app = Hmap.t ref
+type app = Global.t ref
 
 let app () =
-  ref Hmap.empty
+  ref Global.empty
 
 type 'a global = {
-  key : 'a Hmap.key;
+  key : 'a Global.key;
   initializer_ : unit -> 'a;
 }
 
-let new_global ~initializer_ = {
-  key = Hmap.Key.create ();
+let new_global ?debug initializer_ = {
+  key = Global.Key.create debug;
   initializer_;
 }
 
 let global {key; initializer_} request =
-  match Hmap.find key !(request.specific.app) with
+  match Global.find key !(request.specific.app) with
   | Some value -> value
   | None ->
     let value = initializer_ () in
-    request.specific.app := Hmap.add key value !(request.specific.app);
+    request.specific.app := Global.add key value !(request.specific.app);
     value
 
 type ('a, 'b) log =
@@ -289,15 +327,18 @@ type ('a, 'b) log =
    ('a, Stdlib.Format.formatter, unit, 'b) Stdlib.format4 -> 'a) -> 'b) ->
     unit
 
-let request ~app ~client ~method_ ~target ~version ~headers ~body = {
-  specific = {
-    app;
-    client;
-    method_;
-    target;
-    request_version = version;
-  };
-  headers;
-  body = ref (`Bigstring_stream body);
-  scope = Hmap.empty;
-}
+let request ~app ~client ~method_ ~target ~version ~headers ~body =
+  let rec request = {
+    specific = {
+      app;
+      client;
+      method_;
+      target;
+      request_version = version;
+    };
+    headers;
+    body = ref (`Bigstring_stream body);
+    scope = Local.empty;
+    final = ref request;
+  } in
+  request
