@@ -1,108 +1,105 @@
-module Status =
-struct
-  type informational = [
-    | `Continue
-    | `Switching_protocols
-  ]
+type informational = [
+  | `Continue
+  | `Switching_protocols
+]
 
-  type success = [
-    | `OK
-    | `Created
-    | `Accepted
-    | `Non_authoritative_information
-    | `No_content
-    | `Reset_content
-    | `Partial_content
-  ]
+type success = [
+  | `OK
+  | `Created
+  | `Accepted
+  | `Non_authoritative_information
+  | `No_content
+  | `Reset_content
+  | `Partial_content
+]
 
-  type redirect = [
-    | `Multiple_choices
-    | `Moved_permanently
-    | `Found
-    | `See_other
-    | `Not_modified
-    | `Use_proxy
-    | `Temporary_redirect
-    | `Permanent_redirect
-  ]
+type redirect = [
+  | `Multiple_choices
+  | `Moved_permanently
+  | `Found
+  | `See_other
+  | `Not_modified
+  | `Use_proxy
+  | `Temporary_redirect
+  | `Permanent_redirect
+]
 
-  type client_error = [
-    | `Bad_request
-    | `Unauthorized
-    | `Payment_required
-    | `Forbidden
-    | `Not_found
-    | `Method_not_allowed
-    | `Not_acceptable
-    | `Proxy_authentication_required
-    | `Request_timeout
-    | `Conflict
-    | `Gone
-    | `Length_required
-    | `Precondition_failed
-    | `Payload_too_large
-    | `Uri_too_long
-    | `Unsupported_media_type
-    | `Range_not_satisfiable
-    | `Expectation_failed
-    | `Misdirected_request
-    | `Too_early
-    | `Upgrade_required
-    | `Precondition_required
-    | `Too_many_requests
-    | `Request_header_fields_too_large
-    | `Unavailable_for_legal_reasons
-  ]
+type client_error = [
+  | `Bad_request
+  | `Unauthorized
+  | `Payment_required
+  | `Forbidden
+  | `Not_found
+  | `Method_not_allowed
+  | `Not_acceptable
+  | `Proxy_authentication_required
+  | `Request_timeout
+  | `Conflict
+  | `Gone
+  | `Length_required
+  | `Precondition_failed
+  | `Payload_too_large
+  | `Uri_too_long
+  | `Unsupported_media_type
+  | `Range_not_satisfiable
+  | `Expectation_failed
+  | `Misdirected_request
+  | `Too_early
+  | `Upgrade_required
+  | `Precondition_required
+  | `Too_many_requests
+  | `Request_header_fields_too_large
+  | `Unavailable_for_legal_reasons
+]
 
-  type server_error = [
-    | `Internal_server_error
-    | `Not_implemented
-    | `Bad_gateway
-    | `Service_unavailable
-    | `Gateway_timeout
-    | `Http_version_not_supported
-  ]
+type server_error = [
+  | `Internal_server_error
+  | `Not_implemented
+  | `Bad_gateway
+  | `Service_unavailable
+  | `Gateway_timeout
+  | `Http_version_not_supported
+]
 
-  type standard = [
-    | informational
-    | success
-    | redirect
-    | client_error
-    | server_error
-  ]
+type standard_status = [
+  | informational
+  | success
+  | redirect
+  | client_error
+  | server_error
+]
 
-  type t = [
-    | standard
-    | `Code of int
-  ]
-end
+type status = [
+  | standard_status
+  | `Code of int
+]
 
 let is_informational = function
-  | #Status.informational -> true
+  | #informational -> true
   | `Code code when code >= 100 && code <= 199 -> true
   | _ -> false
 
 let is_success = function
-  | #Status.success -> true
+  | #success -> true
   | `Code code when code >= 200 && code <= 299 -> true
   | _ -> false
 
 let is_redirect = function
-  | #Status.redirect -> true
+  | #redirect -> true
   | `Code code when code >= 300 && code <= 399 -> true
   | _ -> false
 
 let is_client_error = function
-  | #Status.client_error -> true
+  | #client_error -> true
   | `Code code when code >= 400 && code <= 499 -> true
   | _ -> false
 
 let is_server_error = function
-  | #Status.server_error -> true
+  | #server_error -> true
   | `Code code when code >= 500 && code <= 599 -> true
   | _ -> false
 
-let status_to_int : Status.t -> int = function
+let status_to_int : status -> int = function
   | `Code code -> code
   | `Continue -> 100
   | `Switching_protocols -> 101
@@ -153,7 +150,7 @@ let status_to_int : Status.t -> int = function
   | `Gateway_timeout -> 504
   | `Http_version_not_supported -> 505
 
-let int_to_status : int -> Status.t = function
+let int_to_status : int -> status = function
   | 100 -> `Continue
   | 101 -> `Switching_protocols
   | 200 -> `OK

@@ -74,8 +74,6 @@ type incoming = {
 
 include Status
 
-type status = Status.t
-
 type outgoing = {
   response_version : (int * int) option;
   status : status;
@@ -92,25 +90,6 @@ type 'a message = {
 
 type request = incoming message
 type response = outgoing message
-
-let response ?version ?(status = `OK) ?reason ?(headers = []) ?body () =
-  let body =
-    match body with
-    | None -> `Empty
-    | Some body -> `String body
-  in
-  let rec response = {
-    specific = {
-      response_version = version;
-      status;
-      reason;
-    };
-    headers;
-    body = ref body;
-    scope = Local.empty;
-    final = ref response;
-  } in
-  response
 
 let update message =
   message.final := message;
@@ -266,8 +245,13 @@ let body_stream request =
    are setting a new body. Indeed, there might be a concurrent read going on.
    That read should not override the new body. So let it mutate the old
    request's ref; we generate a new request with a new body ref. *)
-let with_body body response =
-  update {response with body = ref (`String body)}
+let with_body ?(set_content_length = true) body response =
+  let response = update {response with body = ref (`String body)} in
+  if set_content_length then
+    replace_header
+      "Content-Length" (string_of_int (String.length body)) response
+  else
+    response
 
 let version_override response =
   response.specific.response_version
@@ -342,3 +326,36 @@ let request ~app ~client ~method_ ~target ~version ~headers ~body =
     final = ref request;
   } in
   request
+
+let response
+    ?version
+    ?(status = `OK)
+    ?reason
+    ?(headers = [])
+    ?(set_content_length = true)
+    body =
+
+  let rec response = {
+    specific = {
+      response_version = version;
+      status;
+      reason;
+    };
+    headers;
+    body = ref `Empty;
+    scope = Local.empty;
+    final = ref response;
+  } in
+
+  with_body ~set_content_length body response
+
+let respond
+    ?version
+    ?(status = `OK)
+    ?reason
+    ?(headers = [])
+    ?(set_content_length = true)
+    body =
+
+  response ?version ~status ?reason ~headers ~set_content_length body
+  |> Lwt.return

@@ -66,14 +66,9 @@ let default_on_error ~debug request response =
         reason
     in
 
-    response
-    |> Dream.with_body reason
-    |> Dream.replace_header "Content-Length"
-      (string_of_int (String.length reason))
-    |> Lwt.return
+    Lwt.return (Dream.with_body reason response)
   end
 
-(* TODO with_status. *)
 let default_on_exn ~debug request exn =
 
   let exn = Printexc.to_string exn in
@@ -90,10 +85,7 @@ let default_on_exn ~debug request exn =
       exn ^ "\n" ^ backtrace ^ "\n\n" ^ dump request
   in
 
-  Dream.response ~status:`Internal_server_error ()
-  |> Dream.with_body reason
-  |> Dream.add_header "Content-Length" (string_of_int (String.length reason))
-  |> Lwt.return
+  Dream.respond ~status:`Internal_server_error reason
 
 
 

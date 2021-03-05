@@ -170,7 +170,7 @@ let default_error_handler client_address error =
       log.error (fun log -> log "%s" line));
   end;
 
-  Lwt.return @@ Dream.response ~headers:["Content-Length", "0"] ()
+  Dream.respond ""
 
 
 

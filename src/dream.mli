@@ -11,87 +11,81 @@ type handler = request -> response Lwt.t
 type middleware = handler -> handler
 
 (* TODO DOC Tell the user which of these are actually important. *)
-(* TODO Can probably just unscope this. *)
-module Status :
-sig
-  type informational = [
-    | `Continue
-    | `Switching_protocols
-  ]
+type informational = [
+  | `Continue
+  | `Switching_protocols
+]
 
-  type success = [
-    | `OK
-    | `Created
-    | `Accepted
-    | `Non_authoritative_information
-    | `No_content
-    | `Reset_content
-    | `Partial_content
-  ]
+type success = [
+  | `OK
+  | `Created
+  | `Accepted
+  | `Non_authoritative_information
+  | `No_content
+  | `Reset_content
+  | `Partial_content
+]
 
-  type redirect = [
-    | `Multiple_choices
-    | `Moved_permanently
-    | `Found
-    | `See_other
-    | `Not_modified
-    | `Use_proxy
-    | `Temporary_redirect
-    | `Permanent_redirect
-  ]
+type redirect = [
+  | `Multiple_choices
+  | `Moved_permanently
+  | `Found
+  | `See_other
+  | `Not_modified
+  | `Use_proxy
+  | `Temporary_redirect
+  | `Permanent_redirect
+]
 
-  type client_error = [
-    | `Bad_request
-    | `Unauthorized
-    | `Payment_required
-    | `Forbidden
-    | `Not_found
-    | `Method_not_allowed
-    | `Not_acceptable
-    | `Proxy_authentication_required
-    | `Request_timeout
-    | `Conflict
-    | `Gone
-    | `Length_required
-    | `Precondition_failed
-    | `Payload_too_large
-    | `Uri_too_long
-    | `Unsupported_media_type
-    | `Range_not_satisfiable
-    | `Expectation_failed
-    | `Misdirected_request
-    | `Too_early
-    | `Upgrade_required
-    | `Precondition_required
-    | `Too_many_requests
-    | `Request_header_fields_too_large
-    | `Unavailable_for_legal_reasons
-  ]
+type client_error = [
+  | `Bad_request
+  | `Unauthorized
+  | `Payment_required
+  | `Forbidden
+  | `Not_found
+  | `Method_not_allowed
+  | `Not_acceptable
+  | `Proxy_authentication_required
+  | `Request_timeout
+  | `Conflict
+  | `Gone
+  | `Length_required
+  | `Precondition_failed
+  | `Payload_too_large
+  | `Uri_too_long
+  | `Unsupported_media_type
+  | `Range_not_satisfiable
+  | `Expectation_failed
+  | `Misdirected_request
+  | `Too_early
+  | `Upgrade_required
+  | `Precondition_required
+  | `Too_many_requests
+  | `Request_header_fields_too_large
+  | `Unavailable_for_legal_reasons
+]
 
-  type server_error = [
-    | `Internal_server_error
-    | `Not_implemented
-    | `Bad_gateway
-    | `Service_unavailable
-    | `Gateway_timeout
-    | `Http_version_not_supported
-  ]
+type server_error = [
+  | `Internal_server_error
+  | `Not_implemented
+  | `Bad_gateway
+  | `Service_unavailable
+  | `Gateway_timeout
+  | `Http_version_not_supported
+]
 
-  type standard = [
-    | informational
-    | success
-    | redirect
-    | client_error
-    | server_error
-  ]
+type standard_status = [
+  | informational
+  | success
+  | redirect
+  | client_error
+  | server_error
+]
 
-  type t = [
-    | standard
-    | `Code of int
-  ]
-end
-
-type status = Status.t
+type status = [
+  | standard_status
+  | `Code of int
+]
 
 type method_ = [
   | `GET
@@ -107,14 +101,24 @@ type method_ = [
 
 val method_to_string : method_ -> string
 
+(* TODO Consider always using a string to skip the ~body argument. *)
 val response :
   ?version:int * int ->
   ?status:status ->
   ?reason:string ->
   ?headers:(string * string) list ->
-  ?body:string ->
-  unit ->
+  ?set_content_length:bool ->
+  string ->
     response
+
+val respond :
+  ?version:int * int ->
+  ?status:status ->
+  ?reason:string ->
+  ?headers:(string * string) list ->
+  ?set_content_length:bool ->
+  string ->
+    response Lwt.t
 
 val client : request -> string
 val method_ : request -> method_
@@ -141,7 +145,7 @@ val is_server_error : status -> bool
 
 val body : request -> string Lwt.t
 val has_body : _ message -> bool
-val with_body : string -> response -> response
+val with_body : ?set_content_length:bool -> string -> response -> response
 
 val reason_override : response -> string option
 val version_override : response -> (int * int) option
@@ -257,27 +261,5 @@ val run :
    interface and DOCUMENT. *)
 (* TODO DOC What happens if the error handler also raises an exception? *)
 (* TODO DOC Placate the user: the error handler is generally not necessary. *)
-
-(**/**)
-
-(* type bigstring =
-  (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t *)
-
-(* TODO DOC The app is just obtained by calling App.create () and holding one
-   reference per one server. *)
-(* val internal_create_request :
-  app:app ->
-  client:string ->
-  method_:method_ ->
-  target:string ->
-  version:int * int ->
-  headers:(string * string) list ->
-  body_stream:((bigstring option -> unit) -> unit) ->
-    request
-[@@ocaml.deprecated "Internal function. The signature may change."]
-
-val internal_body_stream : response -> ((string option -> unit) -> unit)
-[@@ocaml.deprecated "Internal function. The signature may change."] *)
-
 (* TODO DOC Give people a tip: a basic response needs either content-length or
    connection: close. *)
