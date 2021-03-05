@@ -190,6 +190,9 @@ let level =
 let set_printexc =
   ref true
 
+let set_async_exception_hook =
+  ref true
+
 let initializer_ = lazy begin
   if !enable then begin
     Fmt_tty.setup_std_outputs ();
@@ -204,24 +207,6 @@ type level = [
   | `Info
   | `Debug
 ]
-
-let initialize ?(backtraces = true) ?level:(level_ = `Info) ~enable:enable_ =
-  if backtraces then
-    Printexc.record_backtrace true;
-  set_printexc := false;
-
-  let level_ =
-    match level_ with
-    | `Error -> Logs.Error
-    | `Warning -> Logs.Warning
-    | `Info -> Logs.Info
-    | `Debug -> Logs.Debug
-  in
-
-  enable := enable_;
-  level := level_;
-
-  Lazy.force initializer_
 
 
 
@@ -293,6 +278,46 @@ let iter_backtrace f backtrace =
    same way any other middleware would. *)
 let log = source "dream.log"
 
+
+
+let set_up_exception_hook () =
+  if !set_async_exception_hook then begin
+    set_async_exception_hook := false;
+    Lwt.async_exception_hook := fun exn ->
+      log.error (fun log -> log "Async exception: %s" (Printexc.to_string exn));
+      Printexc.get_backtrace ()
+      |> iter_backtrace (fun line -> log.error (fun log -> log "%s" line))
+  end
+
+let initialize
+    ?(backtraces = true)
+    ?(async_exception_hook = true)
+    ?level:(level_ = `Info)
+    ~enable:enable_ =
+
+  if backtraces then
+    Printexc.record_backtrace true;
+  set_printexc := false;
+
+  if async_exception_hook then
+    set_up_exception_hook ();
+  set_async_exception_hook := false;
+
+  let level_ =
+    match level_ with
+    | `Error -> Logs.Error
+    | `Warning -> Logs.Warning
+    | `Info -> Logs.Info
+    | `Debug -> Logs.Debug
+  in
+
+  enable := enable_;
+  level := level_;
+
+  Lazy.force initializer_
+
+
+
 (* The requst logging middleware. *)
 let logger next_handler request =
 
@@ -341,7 +366,7 @@ let logger next_handler request =
     (fun exn ->
       (* In case of exception, log the exception and the backtrace. *)
       log.error (fun log ->
-        log ~request "Aborted by %s" (Printexc.to_string exn));
+        log ~request "Aborted by: %s" (Printexc.to_string exn));
       Printexc.get_backtrace ()
       |> iter_backtrace (fun line -> log.error (fun log ->
         log ~request "%s" line));

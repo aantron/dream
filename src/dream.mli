@@ -191,7 +191,12 @@ sig
     | `Debug
   ]
 
-  val initialize : ?backtraces:bool -> ?level:level -> enable:bool -> unit
+  val initialize :
+    ?backtraces:bool ->
+    ?async_exception_hook:bool ->
+    ?level:level ->
+    enable:bool ->
+      unit
 
   val iter_backtrace : (string -> unit) -> string -> unit
 end

@@ -153,7 +153,6 @@ let add_header name value message =
 (* TODO LATER This is the preliminary reader implementation described in
    comments above. It should eventually be replaced by a 0-copy reader, but that
    will likely require a much more low-level web server integration. *)
-(* TODO Emit `Empty. *)
 let buffer_body message : buffered_body Lwt.t =
   match !(message.body) with
   | #buffered_body as body -> Lwt.return body
@@ -166,7 +165,12 @@ let buffer_body message : buffered_body Lwt.t =
     let rec read body length =
       stream begin function
       | None ->
-        let body = `Bigstring (Bigstring.sub body 0 length) in
+        let body =
+          if Bigstring.size_in_bytes body = 0 then
+            `Empty
+          else
+          `Bigstring (Bigstring.sub body 0 length)
+        in
         message.body := body;
         Lwt.wakeup_later finished body
 
@@ -285,16 +289,15 @@ type ('a, 'b) log =
    ('a, Stdlib.Format.formatter, unit, 'b) Stdlib.format4 -> 'a) -> 'b) ->
     unit
 
-let request ~app ~client ~method_ ~target ~version ~headers ~body =
-  {
-    specific = {
-      app;
-      client;
-      method_;
-      target;
-      request_version = version;
-    };
-    headers;
-    body = ref (`Bigstring_stream body);
-    scope = Hmap.empty;
-  }
+let request ~app ~client ~method_ ~target ~version ~headers ~body = {
+  specific = {
+    app;
+    client;
+    method_;
+    target;
+    request_version = version;
+  };
+  headers;
+  body = ref (`Bigstring_stream body);
+  scope = Hmap.empty;
+}

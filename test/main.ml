@@ -6,8 +6,9 @@ let () =
   @@ Dream.synchronous
 
   @@ fun _request ->
+    Lwt.async (fun () -> assert false);
     Dream.response ()
     |> Dream.set_body "VERY KEWL"
 
-(* TODO Max-length middleware. *)
-(* TODO Predefine responses for common content-types. *)
+(* TODO LATER Max-length middleware. *)
+(* TODO LATER Predefine responses for common content-types. *)

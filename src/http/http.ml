@@ -50,6 +50,7 @@ let to_httpaf_status = function
 let wrap_handler app (user's_dream_handler : Dream_.handler) =
 
   let httpaf_request_handler = fun client_address (conn : Httpaf.Reqd.t) ->
+    Log.set_up_exception_hook ();
 
     (* Covert the http/af request to a Dream request. *)
     let httpaf_request : Httpaf.Request.t =
@@ -157,7 +158,7 @@ let default_error_handler client_address error =
     log.error (fun log -> log "Bad response from app%s" (format_detail detail))
 
   | `Exn exn ->
-    log.error (fun log -> log "App leaked %s" (Printexc.to_string exn));
+    log.error (fun log -> log "App raised: %s" (Printexc.to_string exn));
     Printexc.get_backtrace ()
     |> Log.iter_backtrace (fun line -> log.error (fun log -> log "%s" line));
   end;
@@ -198,7 +199,7 @@ let wrap_error_handler (user's_error_handler : error_handler) =
       end
       @@ fun exn ->
         log.error (fun log ->
-          log "Double fault: error handler raised %s" (Printexc.to_string exn));
+          log "Error handler raised: %s" (Printexc.to_string exn));
 
         Printexc.get_backtrace ()
         |> Log.iter_backtrace (fun line ->
@@ -266,7 +267,3 @@ let run ?interface ?port ?stop ?app ?error_handler user's_dream_handler =
   Lwt_main.run
     (serve_with_caller_name "run"
       ?interface ?port ?stop ?app ?error_handler user's_dream_handler)
-
-
-
-(* TODO Consider also lazily setting async_exception_hook. *)
