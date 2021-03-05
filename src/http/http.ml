@@ -25,6 +25,16 @@ let forward_body
 
   send_body ()
 
+let to_httpaf_status = function
+  | #Httpaf.Status.t as status -> status
+  | `Permanent_redirect -> `Code 308
+  | `Misdirected_request -> `Code 421
+  | `Too_early -> `Code 425
+  | `Precondition_required -> `Code 428
+  | `Too_many_requests -> `Code 429
+  | `Request_header_fields_too_large -> `Code 431
+  | `Unavailable_for_legal_reasons -> `Code 451
+
 
 
 (* Wraps the user's Dream handler in the kind of handler expected by http/af.
@@ -94,7 +104,7 @@ let wrap_handler app (user's_dream_handler : Dream_.handler) =
           | Some (major, minor) -> Some Httpaf.Version.{major; minor}
         in
         let status =
-          (Dream_.status response :> Httpaf.Status.t) in
+          to_httpaf_status (Dream_.status response) in
         let reason =
           Dream_.reason_override response in
         let headers =

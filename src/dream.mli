@@ -10,10 +10,87 @@ type response = outgoing message
 type handler = request -> response Lwt.t
 type middleware = handler -> handler
 
-(* TODO Hide all these in a module and group them by category. *)
-type status = [
-  | `OK
-]
+(* TODO DOC Tell the user which of these are actually important. *)
+module Status :
+sig
+  type informational = [
+    | `Continue
+    | `Switching_protocols
+  ]
+
+  type success = [
+    | `OK
+    | `Created
+    | `Accepted
+    | `Non_authoritative_information
+    | `No_content
+    | `Reset_content
+    | `Partial_content
+  ]
+
+  type redirect = [
+    | `Multiple_choices
+    | `Moved_permanently
+    | `Found
+    | `See_other
+    | `Not_modified
+    | `Use_proxy
+    | `Temporary_redirect
+    | `Permanent_redirect
+  ]
+
+  type client_error = [
+    | `Bad_request
+    | `Unauthorized
+    | `Payment_required
+    | `Forbidden
+    | `Not_found
+    | `Method_not_allowed
+    | `Not_acceptable
+    | `Proxy_authentication_required
+    | `Request_timeout
+    | `Conflict
+    | `Gone
+    | `Length_required
+    | `Precondition_failed
+    | `Payload_too_large
+    | `Uri_too_long
+    | `Unsupported_media_type
+    | `Range_not_satisfiable
+    | `Expectation_failed
+    | `Misdirected_request
+    | `Too_early
+    | `Upgrade_required
+    | `Precondition_required
+    | `Too_many_requests
+    | `Request_header_fields_too_large
+    | `Unavailable_for_legal_reasons
+  ]
+
+  type server_error = [
+    | `Internal_server_error
+    | `Not_implemented
+    | `Bad_gateway
+    | `Service_unavailable
+    | `Gateway_timeout
+    | `Http_version_not_supported
+  ]
+
+  type standard = [
+    | informational
+    | success
+    | redirect
+    | client_error
+    | server_error
+  ]
+
+  type t = [
+    | standard
+    | `Code of int
+  ]
+end
+
+type status = Status.t
 
 type method_ = [
   | `GET
@@ -49,6 +126,13 @@ val header_option : string -> _ message -> string option
 
 val status : response -> status
 val status_to_int : status -> int
+val status_to_reason : status -> string option
+val status_to_string : status -> string
+val is_informational : status -> bool
+val is_success : status -> bool
+val is_redirect : status -> bool
+val is_client_error : status -> bool
+val is_server_error : status -> bool
 
 val body : request -> string Lwt.t
 (* val body_stream : request -> ((string option -> unit) -> unit) *)

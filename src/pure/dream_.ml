@@ -64,12 +64,9 @@ type incoming = {
   request_version : int * int;
 }
 
-type status = [
-  | `OK
-]
+include Status
 
-let status_to_int = function
-  | `OK -> 200
+type status = Status.t
 
 type outgoing = {
   response_version : (int * int) option;
