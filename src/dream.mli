@@ -162,6 +162,16 @@ val catch :
 val content_length : ?buffer_streams:bool -> middleware
 val synchronous : (request -> response) -> handler
 
+(* TODO LATER Conditional middleware, e.g. if post... *)
+
+type route
+
+val router : ?on_match:middleware -> route list -> middleware
+val path_parameter : int -> request -> string
+val get : string -> handler -> route
+val post : string -> handler -> route
+(* TODO LATER Define helpers for other methods. *)
+
 type 'a local
 
 val new_local : ?debug:('a -> string * string) -> unit -> 'a local

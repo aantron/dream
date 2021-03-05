@@ -15,7 +15,7 @@ test :
 
 .PHONY : todo
 todo :
-	@git grep -n TODO | grep -v fw | grep -v DOC | grep -v LATER | grep -v SELF # SELF
+	@git grep -n TODO | grep -v fw | grep -v DOC | grep -v LATER | grep -v SELF || true # SELF
 
 .PHONY : todo-all
 todo-all :

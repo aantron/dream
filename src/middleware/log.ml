@@ -226,6 +226,7 @@ type source = {
   debug : 'a. ('a, unit) Dream.log;
 }
 
+(* TODO LATER source is somehow not a very intuitive name. *)
 let source name =
   (* This creates a wrapper, as described above. The wrapper forwards to a
      logger of the Logs library, but instead of passing the formatter m to the

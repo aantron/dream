@@ -13,4 +13,6 @@ depends: [
   "lwt"
   "logs"
   "ocaml" {>= "4.04.0"}
+
+  "re" # TODO LATER
 ]
