@@ -8,8 +8,17 @@ let () =
     Dream.get "/def" (fun _ -> Dream.respond "uvw");
     Dream.get "/echo/([^/?]+)" (fun request -> Dream.respond (Dream.path_parameter 1 request));
   ]
-  @@ fun _request ->
-    Dream.respond ~status:`Not_found "Good morning, world!"
+  @@ fun request ->
+    let body =
+      match Dream.cookie_option "id" request with
+      | None -> "no cookie"
+      | Some value -> value
+    in
+
+    Dream.response body
+    |> Dream.add_set_cookie "id" "1234"
+    |> Lwt.return
+    (* Dream.respond ~status:`Not_found "Good morning, world!" *)
 
 (* TODO LATER Max-length middleware. *)
 (* TODO LATER Predefine responses for common content-types. *)

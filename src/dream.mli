@@ -123,6 +123,17 @@ val client : request -> string
 val method_ : request -> method_
 val target : request -> string
 
+(* TODO The non-option versions of all of these are only really worthwhile if
+   there is some special exception that they automatically throw that can be
+   converted to Bad_request. So e.g. if the web app *always* expects certain
+   headers, cookies, query parameters, URL parameters (but those have different
+   semantics...). What other key-value things are there? Cookies can easily be
+   missing on any new client. So how useful is this? Headers can be missing...
+   a good app should be robust to that. What's the point of adding outright
+   dangerous APIs? So then we would switch from header/header_option to
+   header/header_exn and likewise for cookie/cookie_exn. Probably the same for
+   query/query_exn. The ordinary path should be the short one, so yes to short
+   names being assigned to the optional-returning functions. *)
 val headers : _ message -> (string * string) list
 val headers_named : string -> _ message -> string list
 val header : string -> _ message -> string
@@ -132,8 +143,19 @@ val add_header : string -> string -> 'a message -> 'a message
 val strip_header : string -> 'a message -> 'a message
 val replace_header : string -> string -> 'a message -> 'a message
 
+(* TODO Should probably hide "cookies" and "headers" from the main API; how
+   useful are these? *)
+val cookies : request -> (string * string) list
+val cookie : string -> request -> string
+val cookie_option : string -> request -> string option
+(* TODO All the optionals for Set-Cookie. *)
+(* TODO set_cookie vs. with_cookie... OTOH this is a nice way to distinguish
+   the header fields. *)
+val add_set_cookie : string -> string -> response -> response
+
 val status : response -> status
 val status_to_int : status -> int
+(* TODO Get rid of the optional here by accepting only standard status codes? *)
 val status_to_reason : status -> string option
 val status_to_string : status -> string
 val is_informational : status -> bool

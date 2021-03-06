@@ -1,5 +1,10 @@
 include Dream_pure.Inmost
 
+let cookies = Dream_middleware.Cookie.cookies
+let cookie = Dream_middleware.Cookie.cookie
+let cookie_option = Dream_middleware.Cookie.cookie_option
+let add_set_cookie = Dream_middleware.Cookie.add_set_cookie
+
 let identity handler request =
   handler request
 
