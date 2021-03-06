@@ -62,3 +62,9 @@ let get_option ?request () =
   | Some _ -> request_id
   | None ->
     Lwt.get lwt_key
+
+
+
+(* TODO LATER Maybe it's better to build the request id straight into the
+   runtime? There's no real cost to it... is there? And when wouldn't the user
+   want a request id? *)

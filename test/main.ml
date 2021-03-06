@@ -22,3 +22,7 @@ let () =
 
 (* TODO LATER Alias Lwt.return, >|=, and >>=. *)
 (* TODO LATER Version the router. *)
+
+(* TODO LATER All the ways to compose middlewares: above handlers, at each
+   handler, under routers, using some pre-composition (e.g. some kind of apply
+   to list of handlers function). *)

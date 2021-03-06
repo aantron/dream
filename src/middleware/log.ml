@@ -397,3 +397,5 @@ let logger next_handler request =
 (* TODO DOC why it's good to use the initializer early. *)
 
 (* TODO LATER implement fire. *)
+(* TODO LATER In case of streamed bodies, it is useful for the logger to be told
+   by the HTTP layer when streaming was actually completed. *)

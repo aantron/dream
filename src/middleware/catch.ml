@@ -115,3 +115,5 @@ let catch
 (* TODO DOC Encourage people to return empty error responses as a default
    scheme, and catch them all at the top. *)
 (* TODO LATER Beautiful default formatters. *)
+(* TODO The request in fully original state is also useful, because the UTF-8
+   path rewriter can make the original targets obscure. *)

@@ -6,7 +6,12 @@
     - 🔲 Also need built-in H2, websocket.
   - ✅ Basic router &mdash; doesn't have to be fast.
     - 🔲 But need the basic composition story, including the path prefix middleware (almost).
-  - 🔲 Basic template engine.
+    - 🔲 Really should improve the router a bit before release. OTOH it might be fast enough already. However, named URL parameters are an absolute requirement.
+  - ✅ Basic template engine.
+    - 🔲 Further improvements:
+      - 🔲 Easy configuration.
+      - 🔲 Template streaming.
+      - 🔲 Escaping helpers.
   - ✅ Minimal dependencies (need to vendor some things and write some glue code).
 - Middleware collection.
   - ✅ Logger.
@@ -34,6 +39,7 @@
   - 🔲 HTTP/2.0 support (h2)
     - 🔲 Needs TLS.
     - 🔲 Built-in dev certificates for localhost, and docs on how to get real ones.
+  - 🛑 GraphQL support.
 - 🛑 Excellent docs.
   - How to build a single-binary app.
   - Recommendations.
