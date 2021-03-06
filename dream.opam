@@ -12,6 +12,7 @@ depends: [
   "httpaf"
   "httpaf-lwt-unix"
   "hmap"
+  "jwto"
   "lwt"
   "logs"
   "mirage-crypto-rng"

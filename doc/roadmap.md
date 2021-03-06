@@ -18,9 +18,13 @@
   - ✅ Debugger.
   - 🔲 URL templates.
   - 🔲 XSS protection helpers.
-  - 🔲 Cookies.
-  - 🔲 Sessions.
-  - 🔲 CSRF tokens.
+  - ✅ Cookies.
+    - 🔲 Needs fast parser, caching, etc.
+  - ✅ Sessions.
+    - 🔲 Needs configurable back-ends, etc. Currently fixed to in-memory sessions.
+  - ✅ CSRF tokens.
+    - 🔲 Needs deps looked at.
+    - 🔲 Needs work in general: code cleanup, more scopes, real secret.
   - 🔲 SQL connection pools (needs separate packaging).
   - 🔲 Tag generation helpers.
   - 🔲 Form, JSON, file uploader parsers (partially external).

@@ -7,6 +7,7 @@
   dream.pure
   fmt
   fmt.tty
+  jwto
   logs
   lwt
   lwt.unix
