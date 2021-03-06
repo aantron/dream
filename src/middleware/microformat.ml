@@ -8,3 +8,17 @@ let base64url text =
 (* TODO LATER Decoder also. *)
 (* TODO LATER Once there are enough microformats, make sure to give everything
    consistent naming to minimize cognitive load. Like X and from_X. *)
+
+(* TODO Move cookie decoding to here. *)
+
+(* TODO Name? *)
+(* TODO Not efficient or fully correct (I think). *)
+(* TODO Urldecode each thing. *)
+(* TODO Name is a bit confusing. *)
+let from_form_urlencoded text =
+  text
+  |> String.split_on_char '&'
+  |> List.map (String.split_on_char '=')
+  |> List.fold_left (fun pairs -> function
+    | [name; value] -> (Uri.pct_decode name, Uri.pct_decode value)::pairs
+    | _ -> pairs) []

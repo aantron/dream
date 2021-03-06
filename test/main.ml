@@ -12,11 +12,20 @@ let () =
     Dream.get "/def" (fun _ -> Dream.respond "uvw");
     Dream.get "/echo/([^/?]+)" (fun request -> Dream.respond (Dream.path_parameter 1 request));
   ]
+  @@ Dream.form
+  @@ Dream.csrf
   @@ fun request ->
     let body =
       match Dream.cookie_option "id" request with
       | None -> "no cookie"
       | Some value -> value
+    in
+
+    let body =
+      Dream.form_get request
+      |> List.map (fun (name, value) -> Printf.sprintf "%s: %s" name value)
+      |> String.concat "\n"
+      |> (^) body
     in
 
     Dream.response body

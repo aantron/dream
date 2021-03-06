@@ -201,6 +201,19 @@ val sessions : middleware
 val session : request -> session
 (* TODO LATER Expose the session switcher and invalidator. *)
 
+val csrf : middleware
+val form : middleware
+(* TODO Naming, naming. *)
+val form_get : request -> (string * string) list
+(* TODO There is no strong reason why Form should be a middleware; it can just
+   be a caching getter like Cookie. CSRF will load it on demand depending on
+   content-type. Will probably need a Content-Type filter middleware, however,
+   because that needs to go before CSRF. Maybe there should be a function form
+   of CSRF? Is there really any reason at all why CSRF should be a middleware
+   itself? Can just provide some middleware that allows running checks, and
+   provide the checks. I guess the main reason why any of these things are
+   middlewares is that CSRF can respond on its own. *)
+
 type 'a local
 
 val new_local : ?debug:('a -> string * string) -> unit -> 'a local

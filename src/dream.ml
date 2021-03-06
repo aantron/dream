@@ -63,6 +63,15 @@ let sessions =
 let session =
   Dream_middleware.Session.get
 
+let csrf =
+  Dream_middleware.Csrf.verify
+
+let form =
+  Dream_middleware.Form.urlencoded
+
+let form_get =
+  Dream_middleware.Form.get
+
 type error = Dream_http.Http.error
 type error_handler = Dream_http.Http.error_handler
 let serve = Dream_http.Http.serve

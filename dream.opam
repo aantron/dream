@@ -17,6 +17,7 @@ depends: [
   "logs"
   "mirage-crypto-rng"
   "ocaml" {>= "4.04.0"}
+  "uri"
 
   "re" # TODO LATER
 ]
