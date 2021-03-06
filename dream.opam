@@ -2,8 +2,10 @@ opam-version: "2.0"
 
 depends: [
   "base-unix"
+  "base64"
   "bigarray-compat"
   "bigstringaf"
+  "cstruct"
   "dream"
   "dune" {>= "2.0.0"}
   "fmt"
@@ -12,6 +14,7 @@ depends: [
   "hmap"
   "lwt"
   "logs"
+  "mirage-crypto-rng"
   "ocaml" {>= "4.04.0"}
 
   "re" # TODO LATER

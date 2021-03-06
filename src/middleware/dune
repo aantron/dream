@@ -2,12 +2,16 @@
  (public_name dream.middleware)
  (name dream_middleware)
  (libraries
+  base64
+  cstruct
   dream.pure
   fmt
   fmt.tty
   logs
   lwt
   lwt.unix
+  mirage-crypto-rng
+  mirage-crypto-rng.lwt
 
   re ; TODO LATER
  ))

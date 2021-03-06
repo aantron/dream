@@ -72,3 +72,7 @@ let cookie_option name request =
 (* TODO LATER Default encoding. *)
 let add_set_cookie name value response =
   Dream.add_header "Set-Cookie" (Printf.sprintf "%s=%s" name value) response
+
+(* TODO LATER Good defaults for path; taking the path from a request; middleware
+   for site-wide cookies during prototyping. Needs prefix middleware in place
+   first. *)

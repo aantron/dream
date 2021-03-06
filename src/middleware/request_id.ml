@@ -68,3 +68,6 @@ let get_option ?request () =
 (* TODO LATER Maybe it's better to build the request id straight into the
    runtime? There's no real cost to it... is there? And when wouldn't the user
    want a request id? *)
+(* TODO LATER List arguments for built-in middlewares: 0 or so cost, highly
+   beneficial, in some cases (prefix) actually necessary for correct operation
+   of a website. *)

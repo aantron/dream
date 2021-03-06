@@ -304,7 +304,8 @@ let initialize
     ?(backtraces = true)
     ?(async_exception_hook = true)
     ?level:(level_ = `Info)
-    ~enable:enable_ =
+    ?enable:(enable_ = true)
+    () =
 
   if backtraces then
     Printexc.record_backtrace true;

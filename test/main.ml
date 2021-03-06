@@ -1,8 +1,12 @@
 let () =
+  Dream.Log.initialize ~level:`Debug ()
+
+let () =
   Dream.run
   @@ Dream.request_id
   @@ Dream.logger
   @@ Dream.catch ~debug:true
+  @@ Dream.sessions
   @@ Dream.router [
     Dream.get "/abc" (fun _ -> Dream.respond "xyz");
     Dream.get "/def" (fun _ -> Dream.respond "uvw");

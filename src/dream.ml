@@ -54,7 +54,22 @@ let get =
 let post =
   Dream_middleware.Router.post
 
+type session =
+  Dream_middleware.Session.t
+
+let sessions =
+  Dream_middleware.Session.check
+
+let session =
+  Dream_middleware.Session.get
+
 type error = Dream_http.Http.error
 type error_handler = Dream_http.Http.error_handler
 let serve = Dream_http.Http.serve
 let run = Dream_http.Http.run
+
+let random =
+  Dream_middleware.Random.random
+
+let base64url =
+  Dream_middleware.Microformat.base64url

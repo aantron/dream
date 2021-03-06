@@ -194,9 +194,25 @@ val get : string -> handler -> route
 val post : string -> handler -> route
 (* TODO LATER Define helpers for other methods. *)
 
+type session
+
+(* TODO LATER Seriously review these signatures and names. *)
+val sessions : middleware
+val session : request -> session
+(* TODO LATER Expose the session switcher and invalidator. *)
+
 type 'a local
 
 val new_local : ?debug:('a -> string * string) -> unit -> 'a local
+(* TODO But this is annoying for locals and globals - those are generally always
+   present by the time they are required.....................................
+   It would absolutely suck to have to handle None for things that will not
+   fail in a correctly-composed application, i.e. the presence of locals and
+   globals is under the user's control, rather than due to the request. So it's
+   probably better to leave local and global as returning bare values by
+   default... OTOH, who ever directly reads locals and globals? It is only done
+   in middleware. Maybe it is better to require middleware authors to handle
+   missing locals/globals for robustness' sake. *)
 val local : 'a local -> _ message -> 'a
 val local_option : 'a local -> _ message -> 'a option
 val with_local : 'a local -> 'a -> 'b message -> 'b message
@@ -240,7 +256,8 @@ sig
     ?backtraces:bool ->
     ?async_exception_hook:bool ->
     ?level:level ->
-    enable:bool ->
+    ?enable:bool ->
+    unit ->
       unit
 
   val iter_backtrace : (string -> unit) -> string -> unit
@@ -282,6 +299,10 @@ val run :
   ?graceful_stop:bool ->
   handler ->
     unit
+
+val random : int -> string
+
+val base64url : string -> string
 
 (* TODO DOC that [stop] only stops the server listening - requests already
    in the server can continue executing. *)
