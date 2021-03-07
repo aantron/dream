@@ -1,5 +1,5 @@
 (executable
- (name main)
+ (name starter)
  (libraries
   dream
   lwt

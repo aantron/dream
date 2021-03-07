@@ -11,7 +11,7 @@ build :
 .PHONY : watch
 watch :
 	fswatch -o site soupault.conf templates | xargs -L 1 -I FOO \
-	  make --no-print-directory build
+	  opam exec -- dune exec --no-print-directory -- soupault
 
 .PHONY : clean
 clean :

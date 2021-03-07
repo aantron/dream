@@ -5,4 +5,5 @@
   hmap
   lwt
   lwt.unix
- ))
+ )
+ (instrumentation (backend bisect_ppx)))

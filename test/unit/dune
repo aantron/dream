@@ -1,0 +1,10 @@
+(executable
+ (name unit)
+ (libraries
+  alcotest
+  dream
+ ))
+
+(rule
+ (alias runtest)
+ (action (run %{exe:unit.exe})))

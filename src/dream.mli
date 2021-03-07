@@ -87,6 +87,7 @@ type status = [
   | `Code of int
 ]
 
+(* TOOD Rename `Other to `Method. *)
 type method_ = [
   | `GET
   | `POST
@@ -155,6 +156,7 @@ val add_set_cookie : string -> string -> response -> response
 
 val status : response -> status
 val status_to_int : status -> int
+val int_to_status : int -> status
 (* TODO Get rid of the optional here by accepting only standard status codes? *)
 val status_to_reason : status -> string option
 val status_to_string : status -> string

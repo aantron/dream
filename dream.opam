@@ -7,7 +7,7 @@ depends: [
   "bigstringaf"
   "cstruct"
   "dream"
-  "dune" {>= "2.0.0"}
+  "dune" {>= "2.7.0"}
   "fmt"
   "httpaf"
   "httpaf-lwt-unix"
@@ -18,6 +18,9 @@ depends: [
   "mirage-crypto-rng"
   "ocaml" {>= "4.04.0"}
   "uri"
+
+  "alcotest" {with-test}
+  "bisect_ppx" {dev >= "2.5.0"}
 
   "re" # TODO LATER
 ]

@@ -100,7 +100,7 @@ let is_server_error = function
   | _ -> false
 
 let status_to_int : status -> int = function
-  | `Code code -> code
+  | `Code code -> code (* TODO Sort last for consistency. *)
   | `Continue -> 100
   | `Switching_protocols -> 101
   | `OK -> 200

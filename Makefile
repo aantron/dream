@@ -1,3 +1,10 @@
+.PHONY : starter
+starter :
+	@tput rmam
+	@stty -echo
+	@dune exec --no-print-directory -- test/starter/starter.exe
+	@tput smam
+
 .PHONY : build
 build :
 	@dune build --no-print-directory
@@ -6,12 +13,28 @@ build :
 watch :
 	@dune build --no-print-directory -w
 
+# TODO LATER After https://github.com/aantron/bisect_ppx/issues/369, get rid of
+# --root argument.
 .PHONY : test
 test :
-	@tput rmam
-	@stty -echo
-	@dune exec --no-print-directory -- test/main.exe
-	@tput smam
+	@opam exec -- \
+	  dune test --no-print-directory \
+	  --instrument-with bisect_ppx --root . --force
+	@opam exec -- dune exec --no-print-directory -- bisect-ppx-report html
+	@opam exec -- dune exec --no-print-directory -- bisect-ppx-report summary
+	@echo See _coverage/index.html
+
+.PHONY : test-watch
+test-watch :
+	@dune test --no-print-directory -w --root .
+
+.PHONY : promote
+promote :
+	dune promote --root .
+
+.PHONY : clean-coverage
+clean-coverage :
+	rm -rf
 
 .PHONY : todo
 todo :
