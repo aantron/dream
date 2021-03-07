@@ -22,3 +22,5 @@ let from_form_urlencoded text =
   |> List.fold_left (fun pairs -> function
     | [name; value] -> (Uri.pct_decode name, Uri.pct_decode value)::pairs
     | _ -> pairs) []
+
+(* TODO Rename this module. *)

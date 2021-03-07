@@ -1,0 +1,8 @@
+opam-version: "2.0"
+
+depends: [
+  "mdx"
+  "odoc"
+  "omd"
+  "soupault"
+]

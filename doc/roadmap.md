@@ -19,7 +19,7 @@
   - 🔲 URL templates.
   - 🔲 XSS protection helpers.
   - ✅ Cookies.
-    - 🔲 Needs fast parser, caching, etc.
+    - 🔲 Needs fast parser, caching, etc.2
   - ✅ Sessions.
     - 🔲 Needs configurable back-ends, etc. Currently fixed to in-memory sessions.
   - ✅ CSRF tokens.
@@ -81,8 +81,7 @@
     - Provide generators and/or accept raw HTTP requests in the tester.
     - Return the actual responses.
       - Provide useful sanitizers.
-- 🛑 Name.
+- 🛑 Metadata: route listing, etc.
+- 🛑 Migrations.
 - Not included in 1.0.0, but planned eventually:
-  - ❌ Metadata: route listing, etc.
-  - ❌ Migrations.
   - ❌ Multicore/effects version.

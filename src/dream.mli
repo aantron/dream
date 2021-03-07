@@ -331,3 +331,5 @@ val base64url : string -> string
 (* TODO DOC Placate the user: the error handler is generally not necessary. *)
 (* TODO DOC Give people a tip: a basic response needs either content-length or
    connection: close. *)
+
+(* TODO Add exception Dream.Response/Dream.Respond. *)
