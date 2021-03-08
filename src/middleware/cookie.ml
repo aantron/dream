@@ -58,7 +58,7 @@ let parse_cookie s =
    variable for opting out? *)
 let cookies request =
   request
-  |> Dream.headers_named "Cookie"
+  |> Dream.headers "Cookie"
   |> List.map parse_cookie
   |> List.flatten
 

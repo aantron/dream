@@ -40,8 +40,8 @@ let tests = "request", [
     let first = Dream.request "" in
     let last  = Dream.with_client "1.2.3.4:23456" first in
 
-    Alcotest.(check bool) "last" true (Dream.last first == last);
-    Alcotest.(check bool) "last" true (Dream.last last  == last);
+    Alcotest.(check bool) "last"  true (Dream.last first == last);
+    Alcotest.(check bool) "last"  true (Dream.last last  == last);
 
     Alcotest.(check bool) "first" true (Dream.first first == first);
     Alcotest.(check bool) "first" true (Dream.first last  == first);
@@ -87,8 +87,8 @@ let tests = "request", [
     let first = Dream.request "" in
     let last  = Dream.with_method_ `TRACE first in
 
-    Alcotest.(check bool) "last" true (Dream.last first == last);
-    Alcotest.(check bool) "last" true (Dream.last last  == last);
+    Alcotest.(check bool) "last"  true (Dream.last first == last);
+    Alcotest.(check bool) "last"  true (Dream.last last  == last);
 
     Alcotest.(check bool) "first" true (Dream.first first == first);
     Alcotest.(check bool) "first" true (Dream.first last  == first);
@@ -131,8 +131,8 @@ let tests = "request", [
     let first = Dream.request "" in
     let last  = Dream.with_target "/foo" first in
 
-    Alcotest.(check bool) "last" true (Dream.last first == last);
-    Alcotest.(check bool) "last" true (Dream.last last  == last);
+    Alcotest.(check bool) "last"  true (Dream.last first == last);
+    Alcotest.(check bool) "last"  true (Dream.last last  == last);
 
     Alcotest.(check bool) "first" true (Dream.first first == first);
     Alcotest.(check bool) "first" true (Dream.first last  == first);
@@ -175,8 +175,8 @@ let tests = "request", [
     let first = Dream.request "" in
     let last  = Dream.with_version (0, 9) first in
 
-    Alcotest.(check bool) "last" true (Dream.last first == last);
-    Alcotest.(check bool) "last" true (Dream.last last  == last);
+    Alcotest.(check bool) "last"  true (Dream.last first == last);
+    Alcotest.(check bool) "last"  true (Dream.last last  == last);
 
     Alcotest.(check bool) "first" true (Dream.first first == first);
     Alcotest.(check bool) "first" true (Dream.first last  == first);

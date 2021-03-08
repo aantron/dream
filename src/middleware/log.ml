@@ -341,7 +341,7 @@ let logger next_handler request =
 
   (* Identify the request in the log. *)
   let user_agent =
-    Dream.headers_named "User-Agent" request
+    Dream.headers "User-Agent" request
     |> String.concat " "
   in
 
@@ -364,7 +364,7 @@ let logger next_handler request =
          target. *)
       let location =
         if Dream.is_redirect (Dream.status response) then
-          match Dream.header_option "Location" response with
+          match Dream.header "Location" response with
           | Some location -> location
           | None -> ""
         else ""

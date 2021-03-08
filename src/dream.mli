@@ -9,6 +9,8 @@ type response = outgoing message
 type handler = request -> response Lwt.t
 type middleware = handler -> handler
 
+type app
+
 
 
 type method_ = [
@@ -116,8 +118,6 @@ val is_server_error : status -> bool
 
 
 
-type app
-
 val request :
   ?client:string ->
   ?method_:method_ ->
@@ -145,6 +145,8 @@ val respond :
   string ->
     response Lwt.t
 
+
+
 val client : request -> string
 val method_ : request -> method_
 val target : request -> string
@@ -158,28 +160,18 @@ val with_version : int * int -> request -> request
 
 (* TODO Expose path. *)
 
-(* TODO The non-option versions of all of these are only really worthwhile if
-   there is some special exception that they automatically throw that can be
-   converted to Bad_request. So e.g. if the web app *always* expects certain
-   headers, cookies, query parameters, URL parameters (but those have different
-   semantics...). What other key-value things are there? Cookies can easily be
-   missing on any new client. So how useful is this? Headers can be missing...
-   a good app should be robust to that. What's the point of adding outright
-   dangerous APIs? So then we would switch from header/header_option to
-   header/header_exn and likewise for cookie/cookie_exn. Probably the same for
-   query/query_exn. The ordinary path should be the short one, so yes to short
-   names being assigned to the optional-returning functions. *)
-val headers : _ message -> (string * string) list
-val headers_named : string -> _ message -> string list
-val header : string -> _ message -> string
-val header_option : string -> _ message -> string option
+val header : string -> _ message -> string option
+val headers : string -> _ message -> string list
 val has_header : string -> _ message -> bool
-val add_header : string -> string -> 'a message -> 'a message
-val strip_header : string -> 'a message -> 'a message
-val replace_header : string -> string -> 'a message -> 'a message
+val all_headers : _ message -> (string * string) list
 
-(* TODO Should probably hide "cookies" and "headers" from the main API; how
-   useful are these? *)
+val add_header : string -> string -> 'a message -> 'a message
+val drop_header : string -> 'a message -> 'a message
+val with_header : string -> string -> 'a message -> 'a message
+
+(* TODO Consider adding Dream.or_exn, Dream.bad_response_exns, and some
+   state. Show how to apply a middleware right at a handler. *)
+
 val cookies : request -> (string * string) list
 val cookie : string -> request -> string
 val cookie_option : string -> request -> string option
@@ -346,6 +338,11 @@ val base64url : string -> string
 val first : 'a message -> 'a message
 val last : 'a message -> 'a message
 
+val sort_headers : (string * string) list -> (string * string) list
+(* TODO DOC This sorts headers based on the header name, but not the value,
+   because the order of values may be important.
+   https://stackoverflow.com/questions/750330/does-the-order-of-headers-in-an-http-response-ever-matter *)
+
 (* TODO DOC that [stop] only stops the server listening - requests already
    in the server can continue executing. *)
 (* TODO DOC Can probably also get `Exn upon failure to stream the body. *)
@@ -362,3 +359,6 @@ val last : 'a message -> 'a message
    connection: close. *)
 
 (* TODO Add exception Dream.Response/Dream.Respond. *)
+
+(* TODO DOC attempt some graphic that shows what getters retrieve what from the
+   response. *)

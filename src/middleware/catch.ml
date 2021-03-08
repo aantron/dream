@@ -19,7 +19,7 @@ let dump request =
   let final_request = Dream.last request in
 
   let headers =
-    Dream.headers final_request
+    Dream.all_headers final_request
     |> List.map (fun (name, value) -> name ^ ": " ^ value)
     |> String.concat "\n"
   in

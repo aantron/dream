@@ -119,7 +119,7 @@ let wrap_handler app (user's_dream_handler : Dream.handler) =
         let reason =
           Dream.reason_override response in
         let headers =
-          Httpaf.Headers.of_list (Dream.headers response) in
+          Httpaf.Headers.of_list (Dream.all_headers response) in
 
         let httpaf_response =
           Httpaf.Response.create ?version ?reason ~headers status in
@@ -200,7 +200,7 @@ let wrap_error_handler (user's_error_handler : error_handler) =
         >>= fun response ->
 
         let headers =
-          Httpaf.Headers.of_list (Dream.headers response) in
+          Httpaf.Headers.of_list (Dream.all_headers response) in
         let body =
           start_response headers in
 

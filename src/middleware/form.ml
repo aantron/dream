@@ -20,7 +20,7 @@ let key =
 let urlencoded handler request =
   let open Lwt.Infix in
 
-  match Dream.header_option "Content-Type" request with
+  match Dream.header "Content-Type" request with
   | Some "application/x-www-form-urlencoded" ->
     Dream.body request >>= fun body ->
     let form = sort (Dream.from_form_urlencoded body) in

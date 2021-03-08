@@ -133,10 +133,10 @@ let with_version version request =
 let status response =
   response.specific.status
 
-let headers message =
+let all_headers message =
   message.headers
 
-let headers_named name message =
+let headers name message =
   let name = String.lowercase_ascii name in
 
   message.headers
@@ -155,10 +155,6 @@ let header_basic name message =
   |> snd
 
 let header name message =
-  try header_basic name message
-  with Not_found -> Printf.ksprintf failwith "Header %s not found" name
-
-let header_option name message =
   try Some (header_basic name message)
   with Not_found -> None
 
@@ -167,17 +163,18 @@ let has_header name message =
   with Not_found -> false
 
 let add_header name value message =
-  update {message with headers = (name, value)::message.headers}
+  update {message with headers = message.headers @ [(name, value)]}
 
-let strip_header name message =
+(* TODO Can optimize this if the header is not found? *)
+let drop_header name message =
   let name = String.lowercase_ascii name in
   update {message with headers =
     message.headers
     |> List.filter (fun (name', _) -> String.lowercase_ascii name' <> name)}
 
-let replace_header name value message =
+let with_header name value message =
   message
-  |> strip_header name
+  |> drop_header name
   |> add_header name value
 
 let has_body message =
@@ -274,8 +271,7 @@ let body_stream request =
 let with_body ?(set_content_length = true) body response =
   let response = update {response with body = ref (`String body)} in
   if set_content_length then
-    replace_header
-      "Content-Length" (string_of_int (String.length body)) response
+    with_header "Content-Length" (string_of_int (String.length body)) response
   else
     response
 
@@ -417,3 +413,11 @@ let respond
 
   response ?version ~status ?reason ~headers ~set_content_length body
   |> Lwt.return
+
+let sort_headers headers =
+  List.stable_sort (fun (name, _) (name', _) -> compare name name') headers
+
+(* TODO Constrain this module by an inner signature to make optimization
+   safe. *)
+(* TODO Factor out body code into module Body, maybe also Stream. *)
+(* TODO Declare a stream type and replace all "k" by more or feed. *)
