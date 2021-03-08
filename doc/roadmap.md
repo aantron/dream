@@ -30,6 +30,7 @@
   - 🔲 Form, JSON, file uploader parsers (partially external).
   - 🔲 Client+server localization.
   - 🔲 Static.
+    - 🔲 Also provide a package that wraps the static middleware so that we can have an OCaml webserver for local development.
   - 🔲 Length limits.
   - 🔲 Websocket design.
     - Just the helper that responds with a websocket response should also return some kind of connection object that the server can further interact on.

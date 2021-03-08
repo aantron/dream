@@ -1,0 +1,3 @@
+(executable
+ (name hello)
+ (libraries dream))
