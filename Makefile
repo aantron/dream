@@ -17,6 +17,7 @@ watch :
 # --root argument.
 .PHONY : test
 test :
+	@find . -name '*.coverage' | xargs rm -f
 	@opam exec -- \
 	  dune test --no-print-directory \
 	  --instrument-with bisect_ppx --root . --force
@@ -31,6 +32,7 @@ test-watch :
 .PHONY : promote
 promote :
 	dune promote --root .
+	@make test
 
 .PHONY : clean-coverage
 clean-coverage :

@@ -277,4 +277,4 @@ let status_to_string status =
   match status_to_reason status, status with
   | Some reason, _ -> reason
   | None, `Code code -> string_of_int code
-  | _ -> "Unknown" (* Should be impossible. *)
+  | _ -> "Unknown" [@coverage off] (* Should be impossible. *)
