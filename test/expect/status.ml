@@ -249,4 +249,4 @@ let show_status_code code =
   show_status (Dream.int_to_status code)
 
 let%expect_test _ =
-  informational |> List.map Dream.status_to_int |> List.iter show_status_code;
+  informational |> List.map Dream.status_to_int |> List.iter show_status_code
