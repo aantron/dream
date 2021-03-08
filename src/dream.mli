@@ -178,6 +178,9 @@ val cookie_option : string -> request -> string option
 (* TODO All the optionals for Set-Cookie. *)
 (* TODO set_cookie vs. with_cookie... OTOH this is a nice way to distinguish
    the header fields. *)
+(* TODO Or just provide one helper for formatting Set-Cookie and let the user
+   use the header calls to actually add the header...? How often do we need to
+   set a cookie? *)
 val add_set_cookie : string -> string -> response -> response
 
 val status : response -> status
@@ -207,6 +210,7 @@ val synchronous : (request -> response) -> handler
 type route
 
 val router : ?on_match:middleware -> route list -> middleware
+(* TODO Rename path_parameter to something. Pathlet? *)
 val path_parameter : int -> request -> string
 val get : string -> handler -> route
 val post : string -> handler -> route
