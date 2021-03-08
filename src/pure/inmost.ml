@@ -7,7 +7,7 @@ type method_ = [
   | `CONNECT
   | `OPTIONS
   | `TRACE
-  | `Other of string
+  | `Method of string
 ]
 
 let method_to_string = function
@@ -19,15 +19,9 @@ let method_to_string = function
   | `CONNECT -> "CONNECT"
   | `OPTIONS -> "OPTIONS"
   | `TRACE -> "TRACE"
-  | `Other method_ -> method_
+  | `Method method_ -> method_
 
-module Metadata =
-struct
-  type 'a t = ('a -> string * string) option
-end
-
-module Local = Hmap.Make (Metadata)
-module Global = Hmap.Make (Metadata)
+include Status
 
 module Bigstring = Bigarray.Array1
 
@@ -40,9 +34,6 @@ module Bigstring = Bigarray.Array1
    change it later, as an optimization. *)
 type bigstring =
   (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigstring.t
-
-let new_bigstring length =
-  Bigstring.create Bigarray.char Bigarray.c_layout length
 
 (* TODO LATER For now, Dream is following a simple model. The http server layer
    DOES NOT allocate a buffer, but stores a reading function in the request.
@@ -64,21 +55,13 @@ type body = [
   | `Reading of buffered_body Lwt.t
 ]
 
-type incoming = {
-  app : Global.t ref;
-  client : string;
-  method_ : method_;
-  target : string;
-  request_version : int * int;
-}
+module Metadata =
+struct
+  type 'a t = ('a -> string * string) option
+end
 
-include Status
-
-type outgoing = {
-  response_version : (int * int) option;
-  status : status;
-  reason : string option;
-}
+module Local = Hmap.Make (Metadata)
+module Global = Hmap.Make (Metadata)
 
 type 'a message = {
   specific : 'a;
@@ -88,8 +71,28 @@ type 'a message = {
   final : 'a message ref;
 }
 
+type incoming = {
+  app : Global.t ref;
+  client : string;
+  method_ : method_;
+  target : string;
+  request_version : int * int;
+}
+
+type outgoing = {
+  response_version : (int * int) option;
+  status : status;
+  reason : string option;
+}
+
 type request = incoming message
 type response = outgoing message
+
+type handler = request -> response Lwt.t
+type middleware = handler -> handler
+
+let new_bigstring length =
+  Bigstring.create Bigarray.char Bigarray.c_layout length
 
 let update message =
   message.final := message;
@@ -263,9 +266,6 @@ let reason response =
   match reason_override response with
   | Some reason -> reason
   | None -> status_to_string response.specific.status
-
-type handler = request -> response Lwt.t
-type middleware = handler -> handler
 
 type 'a local = 'a Local.key
 

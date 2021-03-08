@@ -32,7 +32,7 @@ test-watch :
 .PHONY : promote
 promote :
 	dune promote --root .
-	@make test
+	@make --no-print-directory test
 
 .PHONY : clean-coverage
 clean-coverage :

@@ -1,14 +1,28 @@
-(**/**)
+type _ message
+
 type incoming
 type outgoing
-(**/**)
 
-type _ message
 type request = incoming message
 type response = outgoing message
 
 type handler = request -> response Lwt.t
 type middleware = handler -> handler
+
+(* TOOD Rename `Other to `Method. *)
+type method_ = [
+  | `GET
+  | `POST
+  | `PUT
+  | `DELETE
+  | `HEAD
+  | `CONNECT
+  | `OPTIONS
+  | `TRACE
+  | `Method of string
+]
+
+val method_to_string : method_ -> string
 
 (* TODO DOC Tell the user which of these are actually important. *)
 type informational = [
@@ -87,20 +101,17 @@ type status = [
   | `Code of int
 ]
 
-(* TOOD Rename `Other to `Method. *)
-type method_ = [
-  | `GET
-  | `POST
-  | `PUT
-  | `DELETE
-  | `HEAD
-  | `CONNECT
-  | `OPTIONS
-  | `TRACE
-  | `Other of string
-]
+val status_to_int : status -> int
+val int_to_status : int -> status
+val status_to_reason : status -> string option
+val status_to_string : status -> string
+val is_informational : status -> bool
+val is_success : status -> bool
+val is_redirect : status -> bool
+val is_client_error : status -> bool
+val is_server_error : status -> bool
 
-val method_to_string : method_ -> string
+(* TODO LATER Expose val request here for use in testing. *)
 
 val response :
   ?version:int * int ->
@@ -123,6 +134,8 @@ val respond :
 val client : request -> string
 val method_ : request -> method_
 val target : request -> string
+
+(* TODO Expose path. *)
 
 (* TODO The non-option versions of all of these are only really worthwhile if
    there is some special exception that they automatically throw that can be
@@ -155,16 +168,6 @@ val cookie_option : string -> request -> string option
 val add_set_cookie : string -> string -> response -> response
 
 val status : response -> status
-val status_to_int : status -> int
-val int_to_status : int -> status
-(* TODO Get rid of the optional here by accepting only standard status codes? *)
-val status_to_reason : status -> string option
-val status_to_string : status -> string
-val is_informational : status -> bool
-val is_success : status -> bool
-val is_redirect : status -> bool
-val is_client_error : status -> bool
-val is_server_error : status -> bool
 
 val body : request -> string Lwt.t
 val has_body : _ message -> bool

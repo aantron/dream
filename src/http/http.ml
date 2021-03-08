@@ -11,6 +11,20 @@ let address_to_string : Unix.sockaddr -> string = function
   | ADDR_INET (address, port) ->
     Printf.sprintf "%s:%i" (Unix.string_of_inet_addr address) port
 
+let to_dream_method = function
+  | #Dream.method_ as method_ -> method_
+  | `Other method_ -> `Method method_
+
+let to_httpaf_status = function
+  | #Httpaf.Status.t as status -> status
+  | `Permanent_redirect -> `Code 308
+  | `Misdirected_request -> `Code 421
+  | `Too_early -> `Code 425
+  | `Precondition_required -> `Code 428
+  | `Too_many_requests -> `Code 429
+  | `Request_header_fields_too_large -> `Code 431
+  | `Unavailable_for_legal_reasons -> `Code 451
+
 let forward_body
     (response : Dream.response)
     (body : [ `write ] Httpaf.Body.t) =
@@ -30,16 +44,6 @@ let forward_body
   in
 
   send_body ()
-
-let to_httpaf_status = function
-  | #Httpaf.Status.t as status -> status
-  | `Permanent_redirect -> `Code 308
-  | `Misdirected_request -> `Code 421
-  | `Too_early -> `Code 425
-  | `Precondition_required -> `Code 428
-  | `Too_many_requests -> `Code 429
-  | `Request_header_fields_too_large -> `Code 431
-  | `Unavailable_for_legal_reasons -> `Code 451
 
 
 
@@ -65,7 +69,7 @@ let wrap_handler app (user's_dream_handler : Dream.handler) =
     let client =
       address_to_string client_address in
     let method_ =
-      httpaf_request.meth in
+      to_dream_method httpaf_request.meth in
     let target =
       httpaf_request.target in
     let version =
@@ -326,3 +330,41 @@ let run
 (* TODO LATER Terminal options docs, etc., log viewers, for line wrapping. *)
 (* TODO DOC Gradual replacement of run by serve. *)
 (* TODO LATER Don't print the port if it is the default for the scheme. *)
+
+(* TODO LATER Router API sketch:
+
+@@ Dream.route [
+  Dream.get "/foo" handler;
+  Drema.post "/bar" handler2;
+  Dream.(middleware [form; csrf]) [
+    Dream.post "/baz" handler3;
+    Dream.post "/omg" handler4;
+  ]
+]
+
+so
+
+type route
+val route : route list -> middleware
+val get : string -> handler -> route
+val post ...
+val middleware : middleware list -> route list -> route
+val routes : route list -> route   as an abbreviation for middleware?
+
+Might be nice if middleware could just take a single middleware, but there is no
+function composition operator in OCaml.
+
+Dream.middleware [Dream.form; Dream.csrf] [
+  Dream.post "/a" ...;
+  Dream.post "/b" ...;
+]
+
+Dream.middleware (Dream.form @@@ Dream.csrf) [
+  Dream.post "/a" ...;
+  Dream.post "/b" ...;
+]
+
+The list is still better - it is easier to type, and introduces no new concepts.
+
+Prefix middleware is a must, and it needs to interact with the router.
+ *)

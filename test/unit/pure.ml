@@ -18,7 +18,7 @@ let tests = "pure", [
     check "CONNECT" `CONNECT;
     check "OPTIONS" `OPTIONS;
     check "TRACE"   `TRACE;
-    check "FOO"    (`Other "FOO");
+    check "FOO"    (`Method "FOO");
 
   end;
 
