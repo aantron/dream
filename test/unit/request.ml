@@ -47,4 +47,140 @@ let tests = "request", [
     Alcotest.(check bool) "first" true (Dream.first last  == first);
 
   end;
+
+
+  "method_" -: begin fun () ->
+
+    Dream.request ~method_:`POST ""
+    |> Dream.method_
+    |> Dream.method_to_string
+    |> Alcotest.(check string) "method_" "POST"
+
+  end;
+
+
+  "with_method_" -: begin fun () ->
+
+    Dream.request ""
+    |> Dream.with_method_ `PUT
+    |> Dream.method_
+    |> Dream.method_to_string
+    |> Alcotest.(check string) "method_" "PUT";
+
+  end;
+
+
+  "with_method_ immutable" -: begin fun () ->
+
+    let first = Dream.request ~method_:`DELETE "" in
+    let last  = Dream.with_method_ `HEAD first in
+
+    Alcotest.(check bool) "different" true (last != first);
+    Alcotest.(check string) "method_" "DELETE"
+      (Dream.method_to_string (Dream.method_ first))
+
+  end;
+
+
+  "with_method_ update" -: begin fun () ->
+
+    let first = Dream.request "" in
+    let last  = Dream.with_method_ `TRACE first in
+
+    Alcotest.(check bool) "last" true (Dream.last first == last);
+    Alcotest.(check bool) "last" true (Dream.last last  == last);
+
+    Alcotest.(check bool) "first" true (Dream.first first == first);
+    Alcotest.(check bool) "first" true (Dream.first last  == first);
+
+  end;
+
+
+  "target" -: begin fun () ->
+
+    Dream.request ~target:"/foo" ""
+    |> Dream.target
+    |> Alcotest.(check string) "target" "/foo"
+
+  end;
+
+
+  "with_target" -: begin fun () ->
+
+    Dream.request ""
+    |> Dream.with_target "/bar"
+    |> Dream.target
+    |> Alcotest.(check string) "target" "/bar";
+
+  end;
+
+
+  "with_target immutable" -: begin fun () ->
+
+    let first = Dream.request ~target:"/bar" "" in
+    let last  = Dream.with_target "/foo" first in
+
+    Alcotest.(check bool) "different" true (last != first);
+    Alcotest.(check string) "target" "/bar" (Dream.target first)
+
+  end;
+
+
+  "with_target update" -: begin fun () ->
+
+    let first = Dream.request "" in
+    let last  = Dream.with_target "/foo" first in
+
+    Alcotest.(check bool) "last" true (Dream.last first == last);
+    Alcotest.(check bool) "last" true (Dream.last last  == last);
+
+    Alcotest.(check bool) "first" true (Dream.first first == first);
+    Alcotest.(check bool) "first" true (Dream.first last  == first);
+
+  end;
+
+
+  "version" -: begin fun () ->
+
+    Dream.request ~version:(0, 5) ""
+    |> Dream.version
+    |> Alcotest.(check (pair int int)) "version" (0, 5)
+
+  end;
+
+
+  "with_version" -: begin fun () ->
+
+    Dream.request ""
+    |> Dream.with_version (0, 6)
+    |> Dream.version
+    |> Alcotest.(check (pair int int)) "version" (0, 6);
+
+  end;
+
+
+  "with_version immutable" -: begin fun () ->
+
+    let first = Dream.request ~version:(0, 7) "" in
+    let last  = Dream.with_version (0, 8) first in
+
+    Alcotest.(check bool) "different" true (last != first);
+    Alcotest.(check (pair int int)) "version" (0, 7) (Dream.version first)
+
+  end;
+
+
+  "with_version update" -: begin fun () ->
+
+    let first = Dream.request "" in
+    let last  = Dream.with_version (0, 9) first in
+
+    Alcotest.(check bool) "last" true (Dream.last first == last);
+    Alcotest.(check bool) "last" true (Dream.last last  == last);
+
+    Alcotest.(check bool) "first" true (Dream.first first == first);
+    Alcotest.(check bool) "first" true (Dream.first last  == first);
+
+  end;
+
 ]
