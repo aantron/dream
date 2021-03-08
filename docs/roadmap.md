@@ -86,3 +86,5 @@
 - 🛑 Migrations.
 - Not included in 1.0.0, but planned eventually:
   - ❌ Multicore/effects version.
+
+<!-- doc probably has to become docs for GitHub. -->
