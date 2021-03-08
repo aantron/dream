@@ -1,0 +1,7 @@
+(library
+ (public_name dream.middleware.built_in)
+ (name dream_middleware_built_in)
+ (libraries
+  dream.pure
+  lwt
+ ))

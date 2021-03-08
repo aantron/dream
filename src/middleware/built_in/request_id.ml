@@ -20,6 +20,12 @@ let lwt_key =
 
 
 
+(* TODO Now that the request id is built in, there is no good way for the user
+   to pass in a prefix... except perhaps through the app. However, this is
+   probably worth it, because adding request_id to every single middleware
+   stack is extremely annoying, given that you always want it and it's so cheap
+   that there is no reason not to use it. It's probably very rare that someone
+   needs a prefix. *)
 let assign ?(prefix = "") next_handler request =
 
   (* Get the last id for this request's app, increment it, and prepend the

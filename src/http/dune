@@ -5,6 +5,7 @@
   bigarray-compat
   bigstringaf
   dream.middleware
+  dream.middleware.built_in
   dream.pure
   httpaf
   httpaf-lwt-unix

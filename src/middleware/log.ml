@@ -23,7 +23,7 @@
 module Dream =
 struct
   include Dream_pure.Inmost
-  module Request_id = Request_id
+  module Request_id = Dream_middleware_built_in.Request_id
 end
 
 

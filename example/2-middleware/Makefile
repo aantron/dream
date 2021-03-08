@@ -1,3 +1,6 @@
 .PHONY : run
 run :
-	dune exec -- ./middleware.exe
+	@tput rmam || true
+	@stty -echo || true
+	@dune exec --no-print-directory -- ./middleware.exe
+	@tput smam || true

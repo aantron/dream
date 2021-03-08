@@ -104,7 +104,8 @@ let wrap_handler app (user's_dream_handler : Dream.handler) =
         let open Lwt.Infix in
 
         (* Do the big call. *)
-        user's_dream_handler request
+        Dream_middleware_built_in.Built_in.middleware
+          user's_dream_handler request
 
         (* Extract the Dream response's headers. *)
         >>= fun (response : Dream.response) ->

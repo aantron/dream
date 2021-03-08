@@ -3,7 +3,6 @@ let () =
 
 let () =
   Dream.run
-  @@ Dream.request_id
   @@ Dream.logger
   @@ Dream.catch ~debug:true
   @@ Dream.sessions

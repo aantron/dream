@@ -4,6 +4,7 @@
  (libraries
   base64
   cstruct
+  dream.middleware.built_in
   dream.pure
   fmt
   fmt.tty

@@ -12,7 +12,7 @@ let start handler request =
   handler request
 
 let request_id =
-  Dream_middleware.Request_id.assign
+  Dream_middleware_built_in.Request_id.assign
 
 let logger =
   Dream_middleware.Log.logger
@@ -37,7 +37,7 @@ let warning = default_log.warning
 let info = default_log.info
 let debug = default_log.debug
 
-module Request_id = Dream_middleware.Request_id
+module Request_id = Dream_middleware_built_in.Request_id
 module Log = Dream_middleware.Log
 
 type route = Dream_middleware.Router.route

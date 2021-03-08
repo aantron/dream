@@ -1,3 +1,6 @@
 .PHONY : run
 run :
-	dune exec -- ./hello.exe
+	@tput rmam || true
+	@stty -echo || true
+	@dune exec --no-print-directory -- ./hello.exe
+	@tput smam || true
