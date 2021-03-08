@@ -34,7 +34,13 @@ promote :
 
 .PHONY : clean-coverage
 clean-coverage :
-	rm -rf
+	rm -rf _coverage
+
+.PHONY : clean
+clean : clean-coverage
+	dune clean
+	dune clean --root .
+	make --no-print-directory -C doc/web clean
 
 .PHONY : todo
 todo :

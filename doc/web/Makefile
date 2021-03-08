@@ -16,6 +16,8 @@ watch :
 .PHONY : clean
 clean :
 	rm -rf build
+	rm -f site/api.html
+	rm -rf odoc
 
 .PHONY : deps
 deps :
