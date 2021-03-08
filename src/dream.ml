@@ -42,7 +42,8 @@ module Log = Dream_middleware.Log
 
 type route = Dream_middleware.Router.route
 
-let path_parameter =
+(* TODO Rename the underlying value. *)
+let crumb =
   Dream_middleware.Router.path_parameter
 
 let router =
@@ -53,6 +54,9 @@ let get =
 
 let post =
   Dream_middleware.Router.post
+
+let apply =
+  Dream_middleware.Router.apply
 
 type session =
   Dream_middleware.Session.t

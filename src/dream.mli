@@ -205,16 +205,46 @@ val catch :
 val content_length : ?buffer_streams:bool -> middleware
 val synchronous : (request -> response) -> handler
 
-(* TODO LATER Conditional middleware, e.g. if post... *)
-
 type route
 
-val router : ?on_match:middleware -> route list -> middleware
-(* TODO Rename path_parameter to something. Pathlet? *)
-val path_parameter : int -> request -> string
+(* TODO Get rid of on_match *)
+val router : route list -> middleware
 val get : string -> handler -> route
 val post : string -> handler -> route
+val apply : middleware list -> route list -> route
 (* TODO LATER Define helpers for other methods. *)
+(* val middleware : middleware list -> route list -> route *)
+(* TODO It's also possible to do *)
+(*
+val middleware : middleware list -> route -> route
+val routes : route list -> route
+
+but does that just increase verbosity?
+
+Dream.router @@ Dream.routes [
+  Dream.middleware [...] @@ Dream.routes [
+    ...
+  ];
+  Dream.middleware [..] @@ Dream.routes [
+    sfg
+  ]
+]
+
+as compared with
+
+Dream.router [
+  Dream.apply [ ] [
+  ]
+  Dream.apply [ ] [
+  ]
+]
+*)
+(* TODO FINALLY the prefix middleware and prefixer in the router. *)
+val crumb : string -> request -> string
+(* TOdO string crumbs. *)
+
+(* TODO For a form, you almost always match against a fixed set of fields. But
+   for query parameters, there might be mixtures. *)
 
 type session
 

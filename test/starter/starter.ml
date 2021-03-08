@@ -9,7 +9,7 @@ let () =
   @@ Dream.router [
     Dream.get "/abc" (fun _ -> Dream.respond "xyz");
     Dream.get "/def" (fun _ -> Dream.respond "uvw");
-    Dream.get "/echo/([^/?]+)" (fun request -> Dream.respond (Dream.path_parameter 1 request));
+    Dream.get "/echo/:s" (fun request -> Dream.respond (Dream.crumb "s" request));
   ]
   @@ Dream.form
   @@ Dream.csrf
@@ -40,6 +40,8 @@ let () =
   Dream.run (fun _request ->
     Dream.respond "Good morning, world!")
 ``` *)
+
+(* TODO Retire this file in favor of examples. *)
 
 (* TODO LATER Alias Lwt.return, >|=, and >>=. *)
 (* TODO LATER Version the router. *)
