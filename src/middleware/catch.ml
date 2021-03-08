@@ -14,8 +14,9 @@ let log =
 (* TODO LATER Add ~template argument to main catch handler. *)
 (* TODO LATER Expose all helpers, so that the user can re-compose them. *)
 (* TODO DOC The dump needs escaping if included in HTML. *)
+(* TODO Rename final_request to last, etc. *)
 let dump request =
-  let final_request = !(request.Dream.final) in
+  let final_request = Dream.last request in
 
   let headers =
     Dream.headers final_request

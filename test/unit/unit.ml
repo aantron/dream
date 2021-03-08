@@ -1,4 +1,4 @@
 let () =
   Alcotest.run "Dream" [
-    Pure.tests;
+    Request.tests;
   ]

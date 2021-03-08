@@ -68,7 +68,8 @@ type 'a message = {
   headers : (string * string) list;
   body : body ref;
   scope : Local.t;
-  final : 'a message ref;
+  first : 'a message ref;
+  last : 'a message ref;
 }
 
 type incoming = {
@@ -94,8 +95,14 @@ type middleware = handler -> handler
 let new_bigstring length =
   Bigstring.create Bigarray.char Bigarray.c_layout length
 
+let first message =
+  !(message.first)
+
+let last message =
+  !(message.last)
+
 let update message =
-  message.final := message;
+  message.last := message;
   message
 
 let client request =
@@ -106,6 +113,22 @@ let method_ request =
 
 let target request =
   request.specific.target
+
+let version request =
+  request.specific.request_version
+
+let with_client client request =
+  update {request with specific = {request.specific with client}}
+
+let with_method_ method_ request =
+  update {request with specific = {request.specific with method_}}
+
+let with_target target request =
+  update {request with specific = {request.specific with target}}
+
+let with_version version request =
+  update {request with
+    specific = {request.specific with request_version = version}}
 
 let status response =
   response.specific.status
@@ -311,7 +334,8 @@ type ('a, 'b) log =
    ('a, Stdlib.Format.formatter, unit, 'b) Stdlib.format4 -> 'a) -> 'b) ->
     unit
 
-let request ~app ~client ~method_ ~target ~version ~headers ~body =
+let request_from_http ~app ~client ~method_ ~target ~version ~headers ~body =
+
   let rec request = {
     specific = {
       app;
@@ -323,9 +347,42 @@ let request ~app ~client ~method_ ~target ~version ~headers ~body =
     headers;
     body = ref (`Bigstring_stream body);
     scope = Local.empty;
-    final = ref request;
+    first = ref request;
+    last = ref request;
   } in
+
   request
+
+(* TODO Unify these string-to-stream functions. *)
+let string_to_stream string =
+  let sent = ref false in
+
+  fun k ->
+    if !sent then
+      k None
+    else begin
+      sent := true;
+      k (Some (Lwt_bytes.of_string string))
+    end
+
+let request
+    ?(client = "127.0.0.1:12345")
+    ?(method_ = `GET)
+    ?(target = "/")
+    ?(version = 1, 1)
+    ?(headers = [])
+    body =
+
+  request_from_http
+    ~app:(app ())
+    ~client
+    ~method_
+    ~target
+    ~version
+    ~headers
+    ~body:(string_to_stream body)
+
+
 
 let response
     ?version
@@ -344,7 +401,8 @@ let response
     headers;
     body = ref `Empty;
     scope = Local.empty;
-    final = ref response;
+    first = ref response;
+    last = ref response;
   } in
 
   with_body ~set_content_length body response

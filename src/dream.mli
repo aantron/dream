@@ -9,7 +9,8 @@ type response = outgoing message
 type handler = request -> response Lwt.t
 type middleware = handler -> handler
 
-(* TOOD Rename `Other to `Method. *)
+
+
 type method_ = [
   | `GET
   | `POST
@@ -24,7 +25,8 @@ type method_ = [
 
 val method_to_string : method_ -> string
 
-(* TODO DOC Tell the user which of these are actually important. *)
+
+
 type informational = [
   | `Continue
   | `Switching_protocols
@@ -101,17 +103,29 @@ type status = [
   | `Code of int
 ]
 
+val status_to_string : status -> string
+val status_to_reason : status -> string option
 val status_to_int : status -> int
 val int_to_status : int -> status
-val status_to_reason : status -> string option
-val status_to_string : status -> string
+
 val is_informational : status -> bool
 val is_success : status -> bool
 val is_redirect : status -> bool
 val is_client_error : status -> bool
 val is_server_error : status -> bool
 
-(* TODO LATER Expose val request here for use in testing. *)
+
+
+type app
+
+val request :
+  ?client:string ->
+  ?method_:method_ ->
+  ?target:string ->
+  ?version:int * int ->
+  ?headers:(string * string) list ->
+  string ->
+    request
 
 val response :
   ?version:int * int ->
@@ -134,6 +148,13 @@ val respond :
 val client : request -> string
 val method_ : request -> method_
 val target : request -> string
+val version : request -> int * int
+
+val with_client : string -> request -> request
+val with_method_ : method_ -> request -> request
+val with_target : string -> request -> request
+val with_version : int * int -> request -> request
+(* TODO Generalize version to work with responses. *)
 
 (* TODO Expose path. *)
 
@@ -281,7 +302,7 @@ sig
   val iter_backtrace : (string -> unit) -> string -> unit
 end
 
-type app
+(* TODO Rename to new_app. *)
 val app : unit -> app
 
 type 'a global
@@ -321,6 +342,9 @@ val run :
 val random : int -> string
 
 val base64url : string -> string
+
+val first : 'a message -> 'a message
+val last : 'a message -> 'a message
 
 (* TODO DOC that [stop] only stops the server listening - requests already
    in the server can continue executing. *)

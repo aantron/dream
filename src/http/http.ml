@@ -83,11 +83,11 @@ let wrap_handler app (user's_dream_handler : Dream.handler) =
       Httpaf.Body.schedule_read body
         ~on_eof:(fun () -> k None)
         ~on_read:(fun buffer ~off ~len ->
-          k (Some (Bigarray_compat.Array1.sub buffer off len)))
-    in
+          k (Some (Bigarray_compat.Array1.sub buffer off len))) in
 
     let request : Dream.request =
-      Dream.request ~app ~client ~method_ ~target ~version ~headers ~body in
+      Dream.request_from_http
+        ~app ~client ~method_ ~target ~version ~headers ~body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
