@@ -202,6 +202,8 @@ val catch :
   ?on_exn:(debug:bool -> request -> exn -> response Lwt.t) ->
   ?debug:bool ->
     middleware
+(* TODO Some of these helpers actually return handlers. *)
+(* TODO Actually add the ?template argument. *)
 val content_length : ?buffer_streams:bool -> middleware
 val synchronous : (request -> response) -> handler
 

@@ -18,10 +18,11 @@ let () =
       (fun request ->
         request
         |> Dream.crumb "word"
-        |> Dream.respond)
+        |> Dream.respond);
   ]
   @@ fun _ ->
     Dream.respond ~status:`Not_found ""
+
 ```
 
 As you can see, if the router sees a path component that begins with `:`, it

@@ -11,7 +11,8 @@ let () =
       (fun request ->
         request
         |> Dream.crumb "word"
-        |> Dream.respond)
+        |> Dream.respond);
+
   ]
   @@ fun _ ->
     Dream.respond ~status:`Not_found ""
