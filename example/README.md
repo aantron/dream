@@ -33,3 +33,6 @@ typing `make`.
 - [**`l-metadata`**]()
 - [**`m-migration`**]()
 - [**`n-testing`**]()
+
+<!-- TODO Note that each example is fully self-contained... But also show an
+     example that uses crunch to be truly 1-file even with static content. -->

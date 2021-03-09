@@ -1,0 +1,16 @@
+let show_count count =
+  <html>
+    <body>
+      <h1>You are visitor number number <%= string_of_int count %>!</h1>
+    </body>
+  </html>
+
+let counter =
+  ref 0
+
+let () =
+  Dream.run
+  @@ Dream.logger
+  @@ (fun _ ->
+    counter := !counter + 1;
+    Dream.respond (show_count !counter))

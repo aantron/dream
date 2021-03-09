@@ -1,6 +1,6 @@
 module Command_line :
 sig
-  val parse : unit -> string
+  val parse : unit -> (string * string) list
 end =
 struct
   let usage = {|Usage:
@@ -8,27 +8,50 @@ struct
   eml FILE
 |}
 
-  let input_file =
-    ref None
+  let input_files =
+    ref []
 
-  let options = []
+  let workspace_path =
+    ref ""
+
+  let options = Arg.align [
+    "--workspace",
+    Arg.Set_string workspace_path,
+    "PATH Relative path to the Dune workspace for better locations"
+  ]
 
   let set_file file =
-    match !input_file with
-    | None -> input_file := Some file
-    | Some _ ->
-      Arg.usage options usage;
-      exit 2
+    input_files := file::!input_files
 
   let parse () =
     Arg.parse options set_file usage;
 
-    match !input_file with
-    | None ->
+    if !input_files = [] then begin
       Arg.usage options usage;
       exit 2
-    | Some input_file ->
-      input_file
+    end;
+    let input_files = !input_files in
+
+    let rec build_prefix location prefix path =
+      match Filename.basename path with
+      | component when component = Filename.parent_dir_name ->
+        let directory = Filename.basename location in
+        build_prefix
+          (Filename.dirname location)
+          (Filename.concat directory prefix)
+          (Filename.dirname path)
+      | "" | "." ->
+        prefix
+      | s ->
+        prerr_endline s;
+        Printf.ksprintf failwith
+          "The workspace path may contain only %s components"
+          Filename.parent_dir_name
+    in
+    let prefix = build_prefix (Sys.getcwd ()) "" !workspace_path in
+
+    input_files
+    |> List.map (fun file -> file, Filename.concat prefix file)
 end
 
 
@@ -41,6 +64,7 @@ module Location :
 sig
   val current : unit -> int * int
   val adjust : int -> unit
+  val reset : unit -> unit
   val stream : (unit -> char option) -> char Stream.t
 end =
 struct
@@ -55,6 +79,10 @@ struct
 
   let adjust by =
     column := !column + by
+
+  let reset () =
+    line := 0;
+    column := 0
 
   let stream underlying =
     let ended = ref false in
@@ -542,29 +570,22 @@ end
 
 module Generate :
 sig
-  val generate : string -> (string -> unit) -> token list -> unit
+  val generate : string -> (string -> unit) -> template list -> unit
 end =
 struct
-  let generate source_file print tokens =
+  let generate_template_body location print tokens =
     tokens |> List.iter begin function
-      | `Code_block {line; what; _} ->
-        Printf.ksprintf print "#%i \"%s\"\n" (line + 1) source_file;
-        print what
-
-      | `Newline ->
-        assert false
-
       | `Text text ->
-        Printf.ksprintf print "(print_string %S; flush stdout);\n" text
+        Printf.ksprintf print "(Buffer.add_string ___eml_buffer %S);\n" text
 
       (* TODO If there are options, print something else. At least parens. *)
       | `Embedded {line; column; what = "", code} ->
-        Printf.ksprintf print "#%i \"%s\"\n" (line + 1) source_file;
+        Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
         Printf.ksprintf print "%s%s\n" (String.make column ' ') code
 
       | `Embedded {line; column; what = "=", code} ->
-        print "(print_string (\n";
-        Printf.ksprintf print "#%i \"%s\"\n" (line + 1) source_file;
+        print "(Buffer.add_string ___eml_buffer (\n";
+        Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
         Printf.ksprintf print "%s%s\n" (String.make column ' ') code;
         print "));\n"
 
@@ -572,12 +593,26 @@ struct
       | `Embedded {what = _, _; _} ->
         failwith "Unsupported option"
     end
+
+  let generate location print templates =
+    templates |> List.iter begin function
+      | `Code_block {line; what; _} ->
+        Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
+        print what
+
+      | `Template lines ->
+        (* By this point, the template should be only one "line," with all the
+           newlines built into the strings. We still flatten it, just in
+           case. *)
+        print "let ___eml_buffer = Buffer.create 4096 in";
+        generate_template_body location print (List.flatten lines);
+        print "(Buffer.contents ___eml_buffer)\n"
+    end
 end
 
 
 
-let () =
-  let input_file = Command_line.parse () in
+let process_file (input_file, location) =
 
   let output_file =
     let rec remove_extensions filename =
@@ -598,6 +633,8 @@ let () =
     with End_of_file -> None)
   in
 
+  Location.reset ();
+
   input_stream
   |> Tokenizer.scan
   |> Transform.delimit
@@ -605,5 +642,10 @@ let () =
   |> Transform.empty_lines
   |> Transform.coalesce
   |> Transform.trim
-  |> Transform.flatten
-  |> Generate.generate input_file (output_string output_channel)
+  |> Generate.generate location (output_string output_channel)
+
+
+
+let () =
+  Command_line.parse ()
+  |> List.iter process_file

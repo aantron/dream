@@ -1,0 +1,8 @@
+(executable
+ (name template)
+ (libraries dream))
+
+(rule
+ (targets template.ml)
+ (deps template.eml.html)
+ (action (run eml %{deps} --workspace %{workspace_root})))
