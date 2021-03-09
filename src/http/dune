@@ -4,6 +4,7 @@
  (libraries
   bigarray-compat
   bigstringaf
+  digestif
   dream.middleware
   dream.middleware.built_in
   dream.pure
@@ -12,4 +13,5 @@
   httpaf-lwt-unix
   lwt
   lwt.unix
+  websocketaf
  ))

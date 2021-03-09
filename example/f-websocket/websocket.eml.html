@@ -1,0 +1,35 @@
+let home =
+  <html>
+  <body>
+  <script>
+
+  var socket = new WebSocket("ws://localhost:8080/websocket");
+
+  socket.onopen = function () {
+    socket.send("Hello?");
+  };
+
+  socket.onmessage = function (e) {
+    alert(e.data);
+  }
+
+  </script>
+  </body>
+  </html>
+
+let () =
+  Dream.run
+  @@ Dream.logger
+  @@ Dream.router [
+
+    Dream.get "/"
+      (fun _ ->
+        Dream.respond home);
+
+    Dream.get "/websocket"
+      (fun _ ->
+        Dream.websocket (fun _ -> Lwt.return "Goodbye!"));
+
+  ]
+  @@ fun _ ->
+    Dream.respond ~status:`Not_found ""

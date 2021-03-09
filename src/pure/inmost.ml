@@ -84,6 +84,7 @@ type outgoing = {
   response_version : (int * int) option;
   status : status;
   reason : string option;
+  websocket : (string -> string Lwt.t) option;
 }
 
 type request = incoming message
@@ -286,6 +287,10 @@ let reason response =
   | Some reason -> reason
   | None -> status_to_string response.specific.status
 
+(* TODO Rename. *)
+let is_websocket response =
+  response.specific.websocket
+
 type 'a local = 'a Local.key
 
 let new_local ?debug () =
@@ -393,6 +398,7 @@ let response
       response_version = version;
       status;
       reason;
+      websocket = None;
     };
     headers;
     body = ref `Empty;
@@ -413,6 +419,13 @@ let respond
 
   response ?version ~status ?reason ~headers ~set_content_length body
   |> Lwt.return
+
+let websocket handler =
+  let response = response "" in
+  let response =
+    {response with specific = {response.specific with websocket = Some handler}}
+  in
+  Lwt.return response
 
 let sort_headers headers =
   List.stable_sort (fun (name, _) (name', _) -> compare name name') headers

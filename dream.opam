@@ -30,7 +30,9 @@ depends: [
   # Dependencies of vendored packages.
   "angstrom" {>= "0.14.0"}
   "bigstringaf" {>= "0.4.0"}
+  "digestif" {>= "0.7"}  # websocket/af, sha1.
   "faraday" {>= "0.6.1"}
   "faraday-lwt-unix"
-  "result"
+  "ocaml" {>= "4.06.0"}  # Gluten.
+  "result"  # http/af, websocket/af.
 ]

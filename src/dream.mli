@@ -268,6 +268,10 @@ val form_get : request -> (string * string) list
    provide the checks. I guess the main reason why any of these things are
    middlewares is that CSRF can respond on its own. *)
 
+(* TODO This signature really needs to be reworked, but it's good enough for a
+   proof of concept, and changes should be easy later. *)
+val websocket : (string -> string Lwt.t) -> response Lwt.t
+
 type 'a local
 
 val new_local : ?debug:('a -> string * string) -> unit -> 'a local

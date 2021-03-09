@@ -6,6 +6,16 @@ end
 
 
 
+type error = [
+  | `Bad_request of string
+  | `Internal_server_error of string
+  | `Exn of exn
+]
+
+type error_handler = Unix.sockaddr -> error -> Dream.response Lwt.t
+
+
+
 let address_to_string : Unix.sockaddr -> string = function
   | ADDR_UNIX path -> path
   | ADDR_INET (address, port) ->
@@ -45,6 +55,64 @@ let forward_body
 
   send_body ()
 
+(* TODO Contact upstream: this is from websocketaf/lwt/websocketaf_lwt.ml, but
+   it is not exposed. *)
+let sha1 s =
+  s
+  |> Digestif.SHA1.digest_string
+  |> Digestif.SHA1.to_raw_string
+
+
+
+(* TODO DOC https://tools.ietf.org/html/rfc6455 *)
+(* https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers *)
+(* TODO Offer a "raw" mode that allows the client to stream frames without the
+   intermediate buffer in which message reassembly occurs. *)
+(* TODO It appears that backpressure is impossible in the underlying
+   implementation... *)
+let websocket_handler user's_websocket_handler socket =
+
+  (* The current message being assembled, if we get a contin *)
+  (* TODO - for now just receiving fragments. *)
+  (* let message = ref [] in *)
+
+  (* This function is called on each frame received. In this high-level handler.
+     we automatically respond to all control opcodes. *)
+  let frame ~opcode ~is_fin:_ buffer ~off ~len =
+    match opcode with
+    | `Connection_close ->
+      Websocketaf.Wsd.close socket
+    | `Ping ->
+      Websocketaf.Wsd.send_pong socket
+    | `Pong ->
+      ()
+    | `Other _ ->
+      ()
+
+    | `Text
+    | `Binary
+    | `Continuation ->
+      let open Lwt.Infix in
+      (Lwt_bytes.proxy buffer off len
+      |> Lwt_bytes.to_string
+      |> user's_websocket_handler
+      >>= fun response ->
+      Websocketaf.Wsd.send_bytes
+        socket
+        ~kind:`Text
+        (Bytes.unsafe_of_string response)
+        ~off:0
+        ~len:(String.length response);
+      Lwt.return_unit)
+      |> ignore
+      (* TODO Need to send errors to the error handler, so these two handlers
+         will have to be defined together. *)
+  in
+
+  let eof () =
+    Websocketaf.Wsd.close socket in
+
+  Websocketaf.Server_connection.{frame; eof}
 
 
 (* Wraps the user's Dream handler in the kind of handler expected by http/af.
@@ -57,12 +125,16 @@ let forward_body
    passed to http/af to end up in the error handler. This is a low-level handler
    that ordinarily shouldn't be relied on by the user - this is just our last
    chance to tell the user that something is wrong with their app. *)
-let wrap_handler app (user's_dream_handler : Dream.handler) =
+(* TODO Rename conn like in the body branch. *)
+let wrap_handler
+    app
+    (user's_error_handler : error_handler)
+    (user's_dream_handler : Dream.handler) =
 
   let httpaf_request_handler = fun client_address (conn : _ Gluten.Reqd.t) ->
     Dream.Log.set_up_exception_hook ();
 
-    let conn = conn.reqd in
+    let conn, upgrade = conn.reqd, conn.upgrade in
 
     (* Covert the http/af request to a Dream request. *)
     let httpaf_request : Httpaf.Request.t =
@@ -112,28 +184,85 @@ let wrap_handler app (user's_dream_handler : Dream.handler) =
         (* Extract the Dream response's headers. *)
         >>= fun (response : Dream.response) ->
 
-        let version =
-          match Dream.version_override response with
-          | None -> None
-          | Some (major, minor) -> Some Httpaf.Version.{major; minor}
+        (* This is the default function that translates the Dream response to an
+           http/af response and sends it. We pre-define the function, however,
+           because it is called from two places:
+
+           1. Upon a normal response, the function is called unconditionally.
+           2. Upon failure to establish a WebSocket, the function is called to
+              transmit the resulting error response. *)
+        let forward_response response =
+          let headers =
+            Httpaf.Headers.of_list (Dream.all_headers response) in
+
+          let version =
+            match Dream.version_override response with
+            | None -> None
+            | Some (major, minor) -> Some Httpaf.Version.{major; minor}
+          in
+          let status =
+            to_httpaf_status (Dream.status response) in
+          let reason =
+            Dream.reason_override response in
+
+          let httpaf_response =
+            Httpaf.Response.create ?version ?reason ~headers status in
+          let body =
+            Httpaf.Reqd.respond_with_streaming conn httpaf_response in
+
+          forward_body response body;
+
+          Lwt.return_unit
         in
-        let status =
-          to_httpaf_status (Dream.status response) in
-        let reason =
-          Dream.reason_override response in
-        let headers =
-          Httpaf.Headers.of_list (Dream.all_headers response) in
 
-        let httpaf_response =
-          Httpaf.Response.create ?version ?reason ~headers status in
-        let body =
-          Httpaf.Reqd.respond_with_streaming conn httpaf_response in
+        match Dream.is_websocket response with
+        | None ->
 
-        forward_body response body;
+          forward_response response
 
-        Lwt.return_unit
+        | Some user's_websocket_handler ->
+
+          (* TODO Which errors actually go here? For now, use the user's error
+             handler. Presumably, these are fatal-or-so protocol-level errors
+             that we won't recover from, so it should be fine to simply close
+             the WebSocket. *)
+          (* TODO Actually, the only error constructor is `Exn, so presumably
+             these are server-side errors for the most part. *)
+          (* TODO Note that we are deliberately ignoring the promise returned
+             by the error handler, because we will not send a response, and we
+             don't want a rejection to go into async_exception_hook when we are
+             already handling an error. We already made the best effort. *)
+          let websocket_error_handler socket error =
+            Websocketaf.Wsd.close socket;
+            ignore (user's_error_handler client_address (error :> error))
+          in
+
+          let proceed () =
+            Websocketaf.Server_connection.create_websocket
+              ~error_handler:websocket_error_handler
+              (websocket_handler user's_websocket_handler)
+            |> Gluten.make (module Websocketaf.Server_connection)
+            |> upgrade
+          in
+
+          let headers =
+            Httpaf.Headers.of_list (Dream.all_headers response) in
+
+          (* TODO Need to forward to the error handler and/or log here... *)
+          Websocketaf.Handshake.respond_with_upgrade ~headers ~sha1 conn proceed
+          |> function
+          | Ok () -> Lwt.return_unit
+          | Error string ->
+            user's_error_handler
+              client_address
+              (`Bad_request ("WebSocket: " ^ string))
+
+            >>= forward_response
+
       end
       @@ fun exn ->
+        (* TODO There was something in the fork changelogs about not requiring
+           report exn. Is it relevant to this? *)
         Httpaf.Reqd.report_exn conn exn;
         Lwt.return_unit
     end
@@ -142,14 +271,6 @@ let wrap_handler app (user's_dream_handler : Dream.handler) =
   httpaf_request_handler
 
 
-
-type error = [
-  | `Bad_request of string
-  | `Internal_server_error of string
-  | `Exn of exn
-]
-
-type error_handler = Unix.sockaddr -> error -> Dream.response Lwt.t
 
 let log =
   Dream.Log.source "dream.http"
@@ -244,7 +365,7 @@ let serve_with_caller_name
   (* Create the wrapped Httpaf handler from the user's Dream handler. *)
   let httpaf_connection_handler =
     Httpaf_lwt_unix.Server.create_connection_handler
-      ~request_handler:(wrap_handler app user's_dream_handler)
+      ~request_handler:(wrap_handler app error_handler user's_dream_handler)
       ~error_handler:(wrap_error_handler error_handler)
   in
 
@@ -329,6 +450,7 @@ let run
   end
 
 
+(* TODO LATER Can Dune's watcher kill the server? Just need SIGINT issued. *)
 (* TODO LATER Project homepage to greeting message. *)
 (* TODO LATER Terminal options docs, etc., log viewers, for line wrapping. *)
 (* TODO DOC Gradual replacement of run by serve. *)

@@ -1,0 +1,8 @@
+(executable
+ (name websocket)
+ (libraries dream))
+
+(rule
+ (targets websocket.ml)
+ (deps websocket.eml.html)
+ (action (run eml %{deps} --workspace %{workspace_root})))
