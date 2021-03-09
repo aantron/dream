@@ -42,7 +42,7 @@ clean-coverage :
 clean : clean-coverage
 	dune clean
 	dune clean --root .
-	make --no-print-directory -C doc/web clean
+	make --no-print-directory -C docs/web clean
 
 .PHONY : todo
 todo :

@@ -44,7 +44,7 @@ conditionally and with different log levels.
 
 Where to go from here?
 
-- [**`4-router`**](../4-catch) shows how to assign different handlers to
+- [**`4-router`**](../4-router) shows how to assign different handlers to
   different paths.
 
 <!-- TODO Go to SQL example. -->
