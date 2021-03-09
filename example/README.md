@@ -14,24 +14,22 @@ typing `make`.
   different paths.
 - [**`5-catch`**](5-catch) &nbsp;&mdash;&nbsp; centralize your error page and
   run the debugger.
-- [**`6-sql`**](6-sql) &nbsp;&mdash;&nbsp; finally CRUD!
-- [**`7-template`**](7-template) &nbsp;&mdash;&nbsp; render responses from
-  templates.
-
-<!-- TODO XSS and CSRF examples should come before SQL. -->
-<!-- TODO Setting cookies -->
-<!-- TODO Accessing query parameters -->
-<!-- TODO Static -->
-<!-- TODO Streaming -->
-<!-- TODO Locals -->
-<!-- TODO Testing -->
-<!-- TODO Login -->
-<!-- TODO AJAX -->
-<!-- TODO Websocket -->
-<!-- TODO SSL -->
-<!-- TODO HTTP/2 -->
-<!-- TODO Internationalization -->
-<!-- TODO Flash -->
-<!-- TODO GraphQL -->
-<!-- TODO Metadata -->
-<!-- TODO Migrations -->
+- [**`6-template`**](6-template) &nbsp;&mdash;&nbsp; render responses from
+  templates and guard against XSS.
+- [**`7-form`**](7-form) &nbsp;&mdash;&nbsp; reading forms and CSRF prevention.
+- [**`8-sql`**](8-sql) &nbsp;&mdash;&nbsp; finally CRUD!
+- [**`9-cookie`**](9-cookie)
+- [**`a-query`**](10-query)
+- [**`b-static`**](11-static)
+- [**`c-streaming`**](12-streaming)
+- [**`d-locals`**]()
+- [**`e-ajax`**]()
+- [**`f-websocket`**]()
+- [**`g-ssl`**]()
+- [**`h-login`**]()
+- [**`i-i18n`**]()
+- [**`j-graphql`**]()
+- [**`k-http2`**]()
+- [**`l-metadata`**]()
+- [**`m-migration`**]()
+- [**`n-testing`**]()
