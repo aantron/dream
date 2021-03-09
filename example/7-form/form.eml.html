@@ -1,0 +1,33 @@
+let show_form ~message =
+  <html>
+    <body>
+      <% begin match message with
+         | None -> ()
+         | Some message -> %>
+      <p>You entered: <b><p><%= message %></b></p>
+      <% end; %>
+
+      <form method="POST" action="/">
+        <input name="message" autofocus>
+      </form>
+    </body>
+  </html>
+
+let () =
+  Dream.run
+  @@ Dream.logger
+  @@ Dream.sessions
+  @@ Dream.router [
+
+    Dream.get  "/"
+      (fun _ ->
+        Dream.respond (show_form ~message:None));
+
+    Dream.post "/"
+      (Dream.csrf @@
+      (fun _ ->
+        Dream.respond (show_form ~message:(Some "foo"))));
+
+  ]
+  @@ fun _ ->
+    Dream.respond ~status:`Not_found ""

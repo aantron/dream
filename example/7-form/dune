@@ -1,0 +1,8 @@
+(executable
+ (name form)
+ (libraries dream))
+
+(rule
+ (targets form.ml)
+ (deps form.eml.html)
+ (action (run eml %{deps} --workspace %{workspace_root})))
