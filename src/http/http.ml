@@ -59,8 +59,10 @@ let forward_body
    chance to tell the user that something is wrong with their app. *)
 let wrap_handler app (user's_dream_handler : Dream.handler) =
 
-  let httpaf_request_handler = fun client_address (conn : Httpaf.Reqd.t) ->
+  let httpaf_request_handler = fun client_address (conn : _ Gluten.Reqd.t) ->
     Dream.Log.set_up_exception_hook ();
+
+    let conn = conn.reqd in
 
     (* Covert the http/af request to a Dream request. *)
     let httpaf_request : Httpaf.Request.t =

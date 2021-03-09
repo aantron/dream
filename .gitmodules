@@ -1,0 +1,6 @@
+[submodule "src/vendor/httpaf"]
+	path = src/vendor/httpaf
+	url = https://github.com/anmonteiro/httpaf.git
+[submodule "src/vendor/gluten"]
+	path = src/vendor/gluten
+	url = http://github.com/anmonteiro/gluten.git
