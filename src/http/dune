@@ -5,6 +5,7 @@
   bigarray-compat
   bigstringaf
   digestif
+  dream.localhost
   dream.middleware
   dream.middleware.built_in
   dream.pure

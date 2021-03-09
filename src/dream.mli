@@ -351,6 +351,11 @@ type error = [
 type error_handler = Unix.sockaddr -> error -> response Lwt.t
 
 val serve :
+  ?https:[ `No | `OpenSSL | `OcamlTLS ] ->
+  ?certificate_file:string ->
+  ?key_file:string ->
+  ?certificate_string:string ->
+  ?key_string:string ->
   ?interface:string ->
   ?port:int ->
   ?stop:unit Lwt.t ->
@@ -360,6 +365,11 @@ val serve :
     unit Lwt.t
 
 val run :
+  ?https:[ `No | `OpenSSL | `OcamlTLS ] ->
+  ?certificate_file:string ->
+  ?key_file:string ->
+  ?certificate_string:string ->
+  ?key_string:string ->
   ?interface:string ->
   ?port:int ->
   ?stop:unit Lwt.t ->

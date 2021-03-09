@@ -6,6 +6,7 @@ end
 
 
 
+(* TODO Convert this into a pair of severity, string - or - exn. *)
 type error = [
   | `Bad_request of string
   | `Internal_server_error of string
@@ -354,19 +355,48 @@ let never = fst (Lwt.wait ())
 
 
 
-let serve_with_caller_name
+let serve_with_details
     caller
-    ?(interface = default_interface) ?(port = default_port)
-    ?(stop = never)
-    ?(app = Dream.app ())
-    ?(error_handler = default_error_handler)
+    make_httpaf_handler
+    ~interface ~port
+    ~stop
+    ~app
+    ~error_handler
     user's_dream_handler =
+
+  (* TODO DOC *)
+  (* https://letsencrypt.org/docs/certificates-for-localhost/ *)
 
   (* Create the wrapped Httpaf handler from the user's Dream handler. *)
   let httpaf_connection_handler =
-    Httpaf_lwt_unix.Server.create_connection_handler
+    make_httpaf_handler
+      ?config:None
       ~request_handler:(wrap_handler app error_handler user's_dream_handler)
       ~error_handler:(wrap_error_handler error_handler)
+  in
+
+  (* Some parts of the various HTTP servers that are under heavy development
+     ( *cough* Gluten SSL/TLS at the moment) leak exceptions out of the
+     top-level handler instead of passing them to the error handler that we
+     specified above with ~error_handler. So, to work around that, we pass the
+     errors manually. Since we don't even have request or response objects at
+     this point, we simply ignore the Dream.response that the error handler
+     generates. We call it for any logging that it may do, and to swallow the
+     error. Otherwise, it will go to !Lwt.async_exception_hook. *)
+  (* TODO SSL alerts follow this pathway into the log at ERROR level, which is
+     questionable - I understand that means clients can cause ERROR level log
+     messages to be written into the log at will. To work around this, the
+     exception should be formatted and passed as `Bad_request, or there should
+     be pattern matching on the exception (but that might introduce dependency
+     coupling), or the upstream should be patched to distinguish the errors in
+     some useful way. *)
+  let httpaf_connection_handler client_address socket =
+    Lwt.catch
+      (fun () ->
+        httpaf_connection_handler client_address socket)
+      (fun exn ->
+        ignore (error_handler client_address (`Exn exn));
+        Lwt.return_unit)
   in
 
 
@@ -397,17 +427,173 @@ let serve_with_caller_name
   >>= fun () ->
   Lwt.return_unit
 
-let serve =
-  serve_with_caller_name "serve"
+type https = [
+  | `No
+  | `OpenSSL
+  | `OCamlTLS
+]
 
+(*
+TODO Sketches
 
+serve ~https:(`OpenSSL (`File a, `File b)) ~interface:"localhost"
+serve ~https:`OpenSSL ~certificate:(`File a) ~key:(`File b)
+serve ~https:`OpenSSL ~certificate:a ~key:b
+serve ~https:`OpenSSL ~in_memory_certificate:a ~in_memory_certificate:b
+
+What are the valid combinations of options?
+
+Just ~https: ...: use the built-in certificate from memory.
+https + cert file AND key file
+https + cert string AND key string
+
+*)
+
+(* TODO Need to test with ocaml-ssl again. *)
+let serve_with_https
+    caller
+    ~https
+    ?certificate_file ?key_file
+    ?certificate_string ?key_string
+    ~interface ~port
+    ~stop
+    ~app
+    ~error_handler
+    user's_dream_handler =
+
+  match https with
+  | `No ->
+    serve_with_details
+      caller
+      Httpaf_lwt_unix.Server.create_connection_handler
+      ~interface ~port
+      ~stop
+      ~app
+      ~error_handler
+      user's_dream_handler
+
+  | `OpenSSL | `OcamlTLS as ssl_library ->
+    (* TODO Writing temporary files is extremely questionable for anything
+       except the fake localhost certificate. This needs loud warnings. IIRC the
+       SSL binding already supports in-memory certificates. Does TLS? In any
+       case, this would need upstream work. *)
+    let certificate_and_key =
+      match certificate_file, key_file, certificate_string, key_string with
+      | None, None, None, None ->
+        (* Use the built-in development certificate. However, if the interface
+           is not a loopback interface, write a warning. *)
+        if interface <> "localhost" && interface <> "127.0.0.1" then begin
+          log.warning (fun log ->
+            log "Using a development SSL certificate on a public interface");
+        end;
+
+        `Memory (Dream_localhost.certificate, Dream_localhost.key, `Silent)
+
+      | Some certificate_file, Some key_file, None, None ->
+        `File (certificate_file, key_file)
+
+      | None, None, Some certificate_string, Some key_string ->
+        (* This is likely a non-development in-memory certificate, and it seems
+           reasonable to warn that we are going to write it to a temporary file,
+           with security implications. *)
+        log.warning (fun log ->
+          log "In-memory certificates will be written to temporary files");
+
+        (* Show where the certificate is written so that the user can get rid of
+           it, if necessary. In particular, the key file should be removed using
+           srm. This whole scheme is just completely insecure, because the
+           server itself does not use an equivalent of srm to get rid of the
+           temporary file. Updstream support is really necessary here. *)
+        `Memory (certificate_string, key_string, `Verbose)
+
+      | _ ->
+        raise (Invalid_argument
+          "Must specify exactly one pair of certificate and key")
+    in
+
+    let create_handler =
+      match ssl_library with
+      | `OpenSSL ->
+        Httpaf_lwt_unix.Server.SSL.create_connection_handler_with_default
+      | `OcamlTLS ->
+        Httpaf_lwt_unix.Server.TLS.create_connection_handler_with_default
+    in
+
+    match certificate_and_key with
+    | `File (certificate_file, key_file) ->
+      serve_with_details
+        caller
+        (create_handler ~certfile:certificate_file ~keyfile:key_file)
+        ~interface ~port
+        ~stop
+        ~app
+        ~error_handler
+        user's_dream_handler
+
+    | `Memory (certificate_string, key_string, verbose_or_silent) ->
+      Lwt_io.with_temp_file begin fun (certificate_file, certificate_stream) ->
+      Lwt_io.with_temp_file begin fun (key_file, key_stream) ->
+
+      let open Lwt.Infix in
+
+      if verbose_or_silent <> `Silent then begin
+        log.warning (fun log ->
+          log "Writing certificate to %s" certificate_file);
+        log.warning (fun log ->
+          log "Writing key to %s" key_file);
+      end;
+
+      Lwt_io.write certificate_stream certificate_string
+      >>= fun () ->
+      Lwt_io.write key_stream key_string
+      >>= fun () ->
+      Lwt_io.close certificate_stream
+      >>= fun () ->
+      Lwt_io.close key_stream
+      >>= fun () ->
+
+      serve_with_details
+        caller
+        (create_handler ~certfile:certificate_file ~keyfile:key_file)
+        ~interface ~port
+        ~stop
+        ~app
+        ~error_handler
+        user's_dream_handler
+
+      end
+      end
+
+let serve
+    ?(https = `No)
+    ?certificate_file ?key_file
+    ?certificate_string ?key_string
+    ?(interface = default_interface) ?(port = default_port)
+    ?(stop = never)
+    ?(app = Dream.app ())
+    ?(error_handler = default_error_handler)
+    user's_dream_handler =
+
+  serve_with_https
+    "serve"
+    ~https
+    ?certificate_file ?key_file
+    ?certificate_string ?key_string
+    ~interface ~port
+    ~stop
+    ~app
+    ~error_handler
+    user's_dream_handler
 
 (* TODO LATER Correct protocol scheme once there is HTTPS support. *)
 let run
+    ?(https = `No)
+    ?certificate_file ?key_file
+    ?certificate_string ?key_string
     ?(interface = default_interface) ?(port = default_port)
     ?(stop = never)
-    ?app
-    ?error_handler
+    ?(app = Dream.app ())
+    ?(error_handler = default_error_handler)
     ?(greeting = true)
     ?(stop_on_input = true)
     ?(graceful_stop = true)
@@ -416,13 +602,20 @@ let run
   let log = Dream.Log.convenience_log in
 
   if greeting then begin
+    let scheme =
+      if `https = `No then
+        "http"
+      else
+        "https"
+    in
+
     let hostname =
       match interface with
       | "localhost" | "127.0.0.1" | "0.0.0.0" -> "localhost"
       | interface -> interface
     in
 
-    log "Running on http://%s:%i" hostname port;
+    log "Running on %s://%s:%i" scheme hostname port;
     if stop_on_input then
       log "Press ENTER to stop"
   end;
@@ -437,8 +630,16 @@ let run
   Lwt_main.run begin
     let open Lwt.Infix in
 
-    serve_with_caller_name "run"
-      ~interface ~port ~stop ?app ?error_handler user's_dream_handler
+    serve_with_https
+      "run"
+      ~https
+      ?certificate_file ?key_file
+      ?certificate_string ?key_string
+      ~interface ~port
+      ~stop
+      ~app
+      ~error_handler
+      user's_dream_handler
     >>= fun () ->
 
     if not graceful_stop then
