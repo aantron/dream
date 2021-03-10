@@ -6,7 +6,7 @@ end
 
 
 
-(* TODO https://http2-explained.haxx.se/en
+(* TODO DOC https://http2-explained.haxx.se/en
 https://http2-explained.haxx.se/en/part6
 - Stream priorities.
 - Header compression options.
@@ -60,8 +60,7 @@ let forward_body
   let body_stream =
     Dream.body_stream response in
 
-  (* TODO LATER Will also need to monitor buffer accumulation and use
-           flush. *)
+  (* TODO LATER Will also need to monitor buffer accumulation and use flush. *)
   let rec send_body () =
     body_stream begin function
     | None -> Httpaf.Body.close_writer body
@@ -81,8 +80,7 @@ let forward_body_h2
   let body_stream =
     Dream.body_stream response in
 
-  (* TODO LATER Will also need to monitor buffer accumulation and use
-           flush. *)
+  (* TODO LATER Will also need to monitor buffer accumulation and use flush. *)
   let rec send_body () =
     body_stream begin function
     | None -> H2.Body.close_writer body
@@ -261,19 +259,15 @@ let wrap_handler
 
         | Some user's_websocket_handler ->
 
-          (* TODO Which errors actually go here? For now, use the user's error
-             handler. Presumably, these are fatal-or-so protocol-level errors
-             that we won't recover from, so it should be fine to simply close
-             the WebSocket. *)
-          (* TODO Actually, the only error constructor is `Exn, so presumably
-             these are server-side errors for the most part. *)
-          (* TODO Note that we are deliberately ignoring the promise returned
-             by the error handler, because we will not send a response, and we
-             don't want a rejection to go into async_exception_hook when we are
-             already handling an error. We already made the best effort. *)
+          (* The only constructor of error is `Exn, so presumably these are
+             server-side errors. Not sure if any I/O errors are possible
+             here. *)
           let websocket_error_handler socket error =
             Websocketaf.Wsd.close socket;
             ignore (user's_error_handler client_address (error :> error))
+            (* We deliberately ignore the promise returned by the error handler,
+               because any further error is a double fault. We also don't want
+               any error to leak into !Lwt.async_exception_hook. *)
           in
 
           let proceed () =
@@ -287,7 +281,6 @@ let wrap_handler
           let headers =
             Httpaf.Headers.of_list (Dream.all_headers response) in
 
-          (* TODO Need to forward to the error handler and/or log here... *)
           Websocketaf.Handshake.respond_with_upgrade ~headers ~sha1 conn proceed
           |> function
           | Ok () -> Lwt.return_unit
@@ -311,7 +304,7 @@ let wrap_handler
 
 
 
-(* TODO Factor out what ss in common between the http/af and h2 handlers. *)
+(* TODO Factor out what is in common between the http/af and h2 handlers. *)
 let wrap_handler_h2
     app
     (_user's_error_handler : error_handler)
@@ -320,9 +313,7 @@ let wrap_handler_h2
   let httpaf_request_handler = fun client_address (conn : H2.Reqd.t) ->
     Dream.Log.set_up_exception_hook ();
 
-    (* let conn, upgrade = conn.reqd, conn.upgrade in *)
-
-    (* Covert the http/af request to a Dream request. *)
+    (* Covert the h2 request to a Dream request. *)
     let httpaf_request : H2.Request.t =
       H2.Reqd.request conn in
 
@@ -334,7 +325,6 @@ let wrap_handler_h2
       httpaf_request.target in
     let version =
       (2, 0) in
-      (* (httpaf_request.version.major, httpaf_request.version.minor) in *)
     let headers =
       H2.Headers.to_list httpaf_request.headers in
 
@@ -371,29 +361,14 @@ let wrap_handler_h2
         (* Extract the Dream response's headers. *)
         >>= fun (response : Dream.response) ->
 
-        (* This is the default function that translates the Dream response to an
-           http/af response and sends it. We pre-define the function, however,
-           because it is called from two places:
-
-           1. Upon a normal response, the function is called unconditionally.
-           2. Upon failure to establish a WebSocket, the function is called to
-              transmit the resulting error response. *)
         let forward_response response =
           (* TODO Automatic setting of Content-Length is a bad idea, actually,
              for HTTP/2. Need to be careful about headers. *)
           (* let headers =
             H2.Headers.of_list (Dream.all_headers response) in *)
 
-          (* let version =
-            match Dream.version_override response with
-            | None -> None
-            | Some (major, minor) -> Some Httpaf.Version.{major; minor}
-          in *)
           let status =
             to_httpaf_status (Dream.status response) in
-          (* let reason =
-            Dream.reason_override response in *)
-
           let httpaf_response =
             H2.Response.create status in
           let body =
@@ -401,68 +376,24 @@ let wrap_handler_h2
 
           forward_body_h2 response body;
 
-          (* TODO Just debugging... *)
-          (* H2.Reqd.respond_with_string conn httpaf_response ""; *)
-
           Lwt.return_unit
         in
 
         match Dream.is_websocket response with
         | None ->
-
           forward_response response
 
-        (* TODO H2 appears not to support WebSocket upgrade at present.
+        (* TODO DOC H2 appears not to support WebSocket upgrade at present.
            RFC 8441. *)
-        (* TODO Will browsers simply fall back to HTTP/1.1 WebSockets when we
-           fail to upgrade? *)
-        (* TODO Do we need a CONNECT method? Do users need to be informed of
+        (* TODO DOC Do we need a CONNECT method? Do users need to be informed of
            this? *)
         | Some _user's_websocket_handler ->
-
           Lwt.return_unit
-
-          (* TODO Which errors actually go here? For now, use the user's error
-             handler. Presumably, these are fatal-or-so protocol-level errors
-             that we won't recover from, so it should be fine to simply close
-             the WebSocket. *)
-          (* TODO Actually, the only error constructor is `Exn, so presumably
-             these are server-side errors for the most part. *)
-          (* TODO Note that we are deliberately ignoring the promise returned
-             by the error handler, because we will not send a response, and we
-             don't want a rejection to go into async_exception_hook when we are
-             already handling an error. We already made the best effort. *)
-          (* let websocket_error_handler socket error =
-            Websocketaf.Wsd.close socket;
-            ignore (user's_error_handler client_address (error :> error))
-          in
-
-          let proceed () =
-            Websocketaf.Server_connection.create_websocket
-              ~error_handler:websocket_error_handler
-              (websocket_handler user's_websocket_handler)
-            |> Gluten.make (module Websocketaf.Server_connection)
-            |> upgrade
-          in
-
-          let headers =
-            Httpaf.Headers.of_list (Dream.all_headers response) in
-
-          (* TODO Need to forward to the error handler and/or log here... *)
-          Websocketaf.Handshake.respond_with_upgrade ~headers ~sha1 conn proceed
-          |> function
-          | Ok () -> Lwt.return_unit
-          | Error string ->
-            user's_error_handler
-              client_address
-              (`Bad_request ("WebSocket: " ^ string))
-
-            >>= forward_response *)
 
       end
       @@ fun exn ->
-        (* TODO There was something in the fork changelogs about not requiring
-           report exn. Is it relevant to this? *)
+        (* TODO LATER There was something in the fork changelogs about not
+           requiring report_exn. Is it relevant to this? *)
         H2.Reqd.report_exn conn exn;
         Lwt.return_unit
     end
@@ -546,7 +477,7 @@ let wrap_error_handler (user's_error_handler : error_handler) =
 
   httpaf_error_handler
 
-(* TODO Factor out common code. *)
+(* TODO LATER Factor out common code. *)
 let wrap_error_handler_h2 (user's_error_handler : error_handler) =
 
   let httpaf_error_handler = fun client_address ?request error start_response ->
@@ -600,8 +531,6 @@ type tls_library = {
     app:Dream.app ->
     handler:Dream.handler ->
     error_handler:error_handler ->
-    (* request_handler:(Unix.sockaddr -> Httpaf.Reqd.t Gluten.reqd -> unit) ->
-    error_handler:(Unix.sockaddr -> Httpaf.Server_connection.error_handler) -> *)
       Unix.sockaddr ->
       Lwt_unix.file_descr ->
         unit Lwt.t;
@@ -652,7 +581,7 @@ let openssl = {
       let open Lwt.Infix in
       perform_tls_handshake client_address unix_socket
       >>= fun tls_endpoint ->
-      (* TODO This part with getting the negotiated protocol belongs in
+      (* TODO LATER This part with getting the negotiated protocol belongs in
          Gluten. *)
       match Lwt_ssl.ssl_socket tls_endpoint with
       | None ->
@@ -680,7 +609,7 @@ let openssl = {
   end;
 }
 
-(* TODO Add ALPN + HTTP/2.0 with ocaml-tls, too. *)
+(* TODO LATER Add ALPN + HTTP/2.0 with ocaml-tls, too. *)
 let ocaml_tls = {
   create_handler = fun
       ~certificate_file ~key_file
@@ -709,7 +638,7 @@ let serve_with_details
   (* TODO DOC *)
   (* https://letsencrypt.org/docs/certificates-for-localhost/ *)
 
-  (* Create the wrapped Httpaf handler from the user's Dream handler. *)
+  (* Create the wrapped httpaf or h2 handler from the user's Dream handler. *)
   let httpaf_connection_handler =
     tls_library.create_handler
       ~certificate_file
@@ -770,6 +699,8 @@ let serve_with_details
   Lwt_io.shutdown_server server
   >>= fun () ->
   Lwt.return_unit
+
+
 
 let serve_with_https
     caller_function_for_error_messages
@@ -913,7 +844,6 @@ let serve
     ~error_handler
     user's_dream_handler
 
-(* TODO LATER Correct protocol scheme once there is HTTPS support. *)
 let run
     ?(https = `No)
     ?certificate_file ?key_file
@@ -983,42 +913,3 @@ let run
 (* TODO LATER Project homepage to greeting message. *)
 (* TODO LATER Terminal options docs, etc., log viewers, for line wrapping. *)
 (* TODO DOC Gradual replacement of run by serve. *)
-(* TODO LATER Don't print the port if it is the default for the scheme. *)
-
-(* TODO LATER Router API sketch:
-
-@@ Dream.route [
-  Dream.get "/foo" handler;
-  Drema.post "/bar" handler2;
-  Dream.(middleware [form; csrf]) [
-    Dream.post "/baz" handler3;
-    Dream.post "/omg" handler4;
-  ]
-]
-
-so
-
-type route
-val route : route list -> middleware
-val get : string -> handler -> route
-val post ...
-val middleware : middleware list -> route list -> route
-val routes : route list -> route   as an abbreviation for middleware?
-
-Might be nice if middleware could just take a single middleware, but there is no
-function composition operator in OCaml.
-
-Dream.middleware [Dream.form; Dream.csrf] [
-  Dream.post "/a" ...;
-  Dream.post "/b" ...;
-]
-
-Dream.middleware (Dream.form @@@ Dream.csrf) [
-  Dream.post "/a" ...;
-  Dream.post "/b" ...;
-]
-
-The list is still better - it is easier to type, and introduces no new concepts.
-
-Prefix middleware is a must, and it needs to interact with the router.
- *)
