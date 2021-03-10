@@ -12,6 +12,9 @@
 
 (* TODO LATER Invalidation. *)
 
+(* TODO Does HTTP/2, for example, allow connection-based session validation, as
+   an optimization? Is that secure? *)
+
 (* https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html *)
 
 module Dream =

@@ -7,3 +7,6 @@
 [submodule "src/vendor/websocketaf"]
 	path = src/vendor/websocketaf
 	url = https://github.com/anmonteiro/websocketaf.git
+[submodule "src/vendor/h2"]
+	path = src/vendor/h2
+	url = https://github.com/anmonteiro/ocaml-h2.git

@@ -6,6 +6,23 @@ end
 
 
 
+(* TODO https://http2-explained.haxx.se/en
+https://http2-explained.haxx.se/en/part6
+- Stream priorities.
+- Header compression options.
+- Stream reset.
+- Push.
+- Flow control.
+
+- https://github.com/httpwg/http2-spec/wiki/Implementations
+- BREACH safety?
+- https://github.com/anmonteiro/ocaml-quic
+ *)
+
+(* TODO In serious need of refactoring because of all the different handlers. *)
+
+
+
 (* TODO Convert this into a pair of severity, string - or - exn. *)
 type error = [
   | `Bad_request of string
@@ -50,6 +67,27 @@ let forward_body
     | None -> Httpaf.Body.close_writer body
     | Some chunk ->
       Httpaf.Body.write_bigstring body chunk;
+      send_body ()
+    end
+  in
+
+  send_body ()
+
+(* TODO Factor out commonalities. *)
+let forward_body_h2
+    (response : Dream.response)
+    (body : [ `write ] H2.Body.t) =
+
+  let body_stream =
+    Dream.body_stream response in
+
+  (* TODO LATER Will also need to monitor buffer accumulation and use
+           flush. *)
+  let rec send_body () =
+    body_stream begin function
+    | None -> H2.Body.close_writer body
+    | Some chunk ->
+      H2.Body.write_bigstring body chunk;
       send_body ()
     end
   in
@@ -273,6 +311,167 @@ let wrap_handler
 
 
 
+(* TODO Factor out what ss in common between the http/af and h2 handlers. *)
+let wrap_handler_h2
+    app
+    (_user's_error_handler : error_handler)
+    (user's_dream_handler : Dream.handler) =
+
+  let httpaf_request_handler = fun client_address (conn : H2.Reqd.t) ->
+    Dream.Log.set_up_exception_hook ();
+
+    (* let conn, upgrade = conn.reqd, conn.upgrade in *)
+
+    (* Covert the http/af request to a Dream request. *)
+    let httpaf_request : H2.Request.t =
+      H2.Reqd.request conn in
+
+    let client =
+      address_to_string client_address in
+    let method_ =
+      to_dream_method httpaf_request.meth in
+    let target =
+      httpaf_request.target in
+    let version =
+      (2, 0) in
+      (* (httpaf_request.version.major, httpaf_request.version.minor) in *)
+    let headers =
+      H2.Headers.to_list httpaf_request.headers in
+
+    let body =
+      H2.Reqd.request_body conn in
+    let body k =
+      H2.Body.schedule_read body
+        ~on_eof:(fun () -> k None)
+        ~on_read:(fun buffer ~off ~len ->
+          k (Some (Bigarray_compat.Array1.sub buffer off len))) in
+
+    let request : Dream.request =
+      Dream.request_from_http
+        ~app ~client ~method_ ~target ~version ~headers ~body in
+
+    (* Call the user's handler. If it raises an exception or returns a promise
+       that rejects with an exception, pass the exception up to Httpaf. This
+       will cause it to call its (low-level) error handler with variand `Exn _.
+       A well-behaved Dream app should catch all of its own exceptions and
+       rejections in one of its top-level middlewares.
+
+       We don't try to log exceptions here because the behavior is not
+       customizable here. The handler itself is customizable (to catch all)
+       exceptions, and the error callback that gets leaked exceptions is also
+       customizable. *)
+    Lwt.async begin fun () ->
+      Lwt.catch begin fun () ->
+        let open Lwt.Infix in
+
+        (* Do the big call. *)
+        Dream_middleware_built_in.Built_in.middleware
+          user's_dream_handler request
+
+        (* Extract the Dream response's headers. *)
+        >>= fun (response : Dream.response) ->
+
+        (* This is the default function that translates the Dream response to an
+           http/af response and sends it. We pre-define the function, however,
+           because it is called from two places:
+
+           1. Upon a normal response, the function is called unconditionally.
+           2. Upon failure to establish a WebSocket, the function is called to
+              transmit the resulting error response. *)
+        let forward_response response =
+          (* TODO Automatic setting of Content-Length is a bad idea, actually,
+             for HTTP/2. Need to be careful about headers. *)
+          (* let headers =
+            H2.Headers.of_list (Dream.all_headers response) in *)
+
+          (* let version =
+            match Dream.version_override response with
+            | None -> None
+            | Some (major, minor) -> Some Httpaf.Version.{major; minor}
+          in *)
+          let status =
+            to_httpaf_status (Dream.status response) in
+          (* let reason =
+            Dream.reason_override response in *)
+
+          let httpaf_response =
+            H2.Response.create status in
+          let body =
+            H2.Reqd.respond_with_streaming conn httpaf_response in
+
+          forward_body_h2 response body;
+
+          (* TODO Just debugging... *)
+          (* H2.Reqd.respond_with_string conn httpaf_response ""; *)
+
+          Lwt.return_unit
+        in
+
+        match Dream.is_websocket response with
+        | None ->
+
+          forward_response response
+
+        (* TODO H2 appears not to support WebSocket upgrade at present.
+           RFC 8441. *)
+        (* TODO Will browsers simply fall back to HTTP/1.1 WebSockets when we
+           fail to upgrade? *)
+        (* TODO Do we need a CONNECT method? Do users need to be informed of
+           this? *)
+        | Some _user's_websocket_handler ->
+
+          Lwt.return_unit
+
+          (* TODO Which errors actually go here? For now, use the user's error
+             handler. Presumably, these are fatal-or-so protocol-level errors
+             that we won't recover from, so it should be fine to simply close
+             the WebSocket. *)
+          (* TODO Actually, the only error constructor is `Exn, so presumably
+             these are server-side errors for the most part. *)
+          (* TODO Note that we are deliberately ignoring the promise returned
+             by the error handler, because we will not send a response, and we
+             don't want a rejection to go into async_exception_hook when we are
+             already handling an error. We already made the best effort. *)
+          (* let websocket_error_handler socket error =
+            Websocketaf.Wsd.close socket;
+            ignore (user's_error_handler client_address (error :> error))
+          in
+
+          let proceed () =
+            Websocketaf.Server_connection.create_websocket
+              ~error_handler:websocket_error_handler
+              (websocket_handler user's_websocket_handler)
+            |> Gluten.make (module Websocketaf.Server_connection)
+            |> upgrade
+          in
+
+          let headers =
+            Httpaf.Headers.of_list (Dream.all_headers response) in
+
+          (* TODO Need to forward to the error handler and/or log here... *)
+          Websocketaf.Handshake.respond_with_upgrade ~headers ~sha1 conn proceed
+          |> function
+          | Ok () -> Lwt.return_unit
+          | Error string ->
+            user's_error_handler
+              client_address
+              (`Bad_request ("WebSocket: " ^ string))
+
+            >>= forward_response *)
+
+      end
+      @@ fun exn ->
+        (* TODO There was something in the fork changelogs about not requiring
+           report exn. Is it relevant to this? *)
+        H2.Reqd.report_exn conn exn;
+        Lwt.return_unit
+    end
+  in
+
+  httpaf_request_handler
+
+
+
 let log =
   Dream.Log.source "dream.http"
 
@@ -347,17 +546,150 @@ let wrap_error_handler (user's_error_handler : error_handler) =
 
   httpaf_error_handler
 
+(* TODO Factor out common code. *)
+let wrap_error_handler_h2 (user's_error_handler : error_handler) =
+
+  let httpaf_error_handler = fun client_address ?request error start_response ->
+    ignore request;
+
+    Lwt.async begin fun () ->
+      Lwt.catch begin fun () ->
+        let open Lwt.Infix in
+
+        let error =
+          match error with
+          | `Exn exn -> `Exn exn
+          | `Bad_request -> `Bad_request ""
+          | `Bad_gateway
+          | `Internal_server_error ->
+            `Internal_server_error "Content-Length missing or negative"
+        in
+
+        user's_error_handler client_address error
+        >>= fun response ->
+
+        let headers =
+          H2.Headers.of_list (Dream.all_headers response) in
+        let body =
+          start_response headers in
+
+        forward_body_h2 response body;
+
+        Lwt.return_unit
+      end
+      @@ fun exn ->
+        log.error (fun log ->
+          log "Error handler raised: %s" (Printexc.to_string exn));
+
+        Printexc.get_backtrace ()
+        |> Dream.Log.iter_backtrace (fun line ->
+          log.error (fun log -> log "%s" line));
+
+        Lwt.return_unit
+    end
+  in
+
+  httpaf_error_handler
 
 
-let default_interface = "localhost"
-let default_port = 8080
-let never = fst (Lwt.wait ())
+
+type tls_library = {
+  create_handler :
+    certificate_file:string ->
+    key_file:string ->
+    app:Dream.app ->
+    handler:Dream.handler ->
+    error_handler:error_handler ->
+    (* request_handler:(Unix.sockaddr -> Httpaf.Reqd.t Gluten.reqd -> unit) ->
+    error_handler:(Unix.sockaddr -> Httpaf.Server_connection.error_handler) -> *)
+      Unix.sockaddr ->
+      Lwt_unix.file_descr ->
+        unit Lwt.t;
+}
+
+let no_tls = {
+  create_handler = begin fun
+      ~certificate_file:_ ~key_file:_
+      ~app
+      ~handler
+      ~error_handler ->
+    Httpaf_lwt_unix.Server.create_connection_handler
+      ?config:None
+      ~request_handler:(wrap_handler app error_handler handler)
+      ~error_handler:(wrap_error_handler error_handler)
+  end;
+}
+
+let openssl = {
+  create_handler = begin fun
+      ~certificate_file ~key_file
+      ~app
+      ~handler
+      ~error_handler ->
+
+    let httpaf_handler =
+      Httpaf_lwt_unix.Server.SSL.create_connection_handler
+        ?config:None
+      ~request_handler:(wrap_handler app error_handler handler)
+      ~error_handler:(wrap_error_handler error_handler)
+    in
+
+    let h2_handler =
+      H2_lwt_unix.Server.SSL.create_connection_handler
+        ?config:None
+      ~request_handler:(wrap_handler_h2 app error_handler handler)
+      ~error_handler:(wrap_error_handler_h2 error_handler)
+    in
+
+    let perform_tls_handshake =
+      Gluten_lwt_unix.Server.SSL.create_default
+        ~alpn_protocols:["h2"; "http/1.1"]
+        ~certfile:certificate_file
+        ~keyfile:key_file
+    in
+
+    fun client_address unix_socket ->
+      let open Lwt.Infix in
+      perform_tls_handshake client_address unix_socket
+      >>= fun tls_endpoint ->
+      (* TODO This part with getting the negotiated protocol belongs in
+         Gluten. *)
+      match Lwt_ssl.ssl_socket tls_endpoint with
+      | None ->
+        assert false
+      | Some tls_socket ->
+        match Ssl.get_negotiated_alpn_protocol tls_socket with
+        | None ->
+          Lwt.return_unit
+        | Some "http/1.1" ->
+          httpaf_handler client_address tls_endpoint
+        | Some "h2" ->
+          h2_handler client_address tls_endpoint
+        | Some _ ->
+          assert false
+  end;
+}
+
+(* TODO Add ALPN + HTTP/2.0 with ocaml-tls, too. *)
+let ocaml_tls = {
+  create_handler = fun
+      ~certificate_file ~key_file
+      ~app
+      ~handler
+      ~error_handler ->
+    Httpaf_lwt_unix.Server.TLS.create_connection_handler_with_default
+      ~certfile:certificate_file ~keyfile:key_file
+      ?config:None
+      ~request_handler:(wrap_handler app error_handler handler)
+      ~error_handler:(wrap_error_handler error_handler)
+}
 
 
 
 let serve_with_details
-    caller
-    make_httpaf_handler
+    caller_function_for_error_messages
+    tls_library
+    ~certificate_file ~key_file
     ~interface ~port
     ~stop
     ~app
@@ -369,10 +701,12 @@ let serve_with_details
 
   (* Create the wrapped Httpaf handler from the user's Dream handler. *)
   let httpaf_connection_handler =
-    make_httpaf_handler
-      ?config:None
-      ~request_handler:(wrap_handler app error_handler user's_dream_handler)
-      ~error_handler:(wrap_error_handler error_handler)
+    tls_library.create_handler
+      ~certificate_file
+      ~key_file
+      ~app
+      ~handler:user's_dream_handler
+      ~error_handler
   in
 
   (* Some parts of the various HTTP servers that are under heavy development
@@ -409,7 +743,7 @@ let serve_with_details
   match addresses with
   | [] ->
     Printf.ksprintf failwith "Dream.%s: no interface with address %s"
-      caller interface
+      caller_function_for_error_messages interface
   | address::_ ->
   let listen_address = Lwt_unix.(address.ai_addr) in
 
@@ -427,31 +761,8 @@ let serve_with_details
   >>= fun () ->
   Lwt.return_unit
 
-type https = [
-  | `No
-  | `OpenSSL
-  | `OCamlTLS
-]
-
-(*
-TODO Sketches
-
-serve ~https:(`OpenSSL (`File a, `File b)) ~interface:"localhost"
-serve ~https:`OpenSSL ~certificate:(`File a) ~key:(`File b)
-serve ~https:`OpenSSL ~certificate:a ~key:b
-serve ~https:`OpenSSL ~in_memory_certificate:a ~in_memory_certificate:b
-
-What are the valid combinations of options?
-
-Just ~https: ...: use the built-in certificate from memory.
-https + cert file AND key file
-https + cert string AND key string
-
-*)
-
-(* TODO Need to test with ocaml-ssl again. *)
 let serve_with_https
-    caller
+    caller_function_for_error_messages
     ~https
     ?certificate_file ?key_file
     ?certificate_string ?key_string
@@ -464,15 +775,16 @@ let serve_with_https
   match https with
   | `No ->
     serve_with_details
-      caller
-      Httpaf_lwt_unix.Server.create_connection_handler
+      caller_function_for_error_messages
+      no_tls
+      ~certificate_file:"" ~key_file:""
       ~interface ~port
       ~stop
       ~app
       ~error_handler
       user's_dream_handler
 
-  | `OpenSSL | `OcamlTLS as ssl_library ->
+  | `OpenSSL | `OCaml_TLS as tls_library ->
     (* TODO Writing temporary files is extremely questionable for anything
        except the fake localhost certificate. This needs loud warnings. IIRC the
        SSL binding already supports in-memory certificates. Does TLS? In any
@@ -511,19 +823,18 @@ let serve_with_https
           "Must specify exactly one pair of certificate and key")
     in
 
-    let create_handler =
-      match ssl_library with
-      | `OpenSSL ->
-        Httpaf_lwt_unix.Server.SSL.create_connection_handler_with_default
-      | `OcamlTLS ->
-        Httpaf_lwt_unix.Server.TLS.create_connection_handler_with_default
+    let tls_library =
+      match tls_library with
+      | `OpenSSL -> openssl
+      | `OCaml_TLS -> ocaml_tls
     in
 
     match certificate_and_key with
     | `File (certificate_file, key_file) ->
       serve_with_details
-        caller
-        (create_handler ~certfile:certificate_file ~keyfile:key_file)
+        caller_function_for_error_messages
+        tls_library
+        ~certificate_file ~key_file
         ~interface ~port
         ~stop
         ~app
@@ -553,8 +864,9 @@ let serve_with_https
       >>= fun () ->
 
       serve_with_details
-        caller
-        (create_handler ~certfile:certificate_file ~keyfile:key_file)
+        caller_function_for_error_messages
+        tls_library
+        ~certificate_file ~key_file
         ~interface ~port
         ~stop
         ~app
@@ -563,6 +875,12 @@ let serve_with_https
 
       end
       end
+
+
+
+let default_interface = "localhost"
+let default_port = 8080
+let never = fst (Lwt.wait ())
 
 let serve
     ?(https = `No)

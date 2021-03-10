@@ -86,5 +86,7 @@
 - 🛑 Migrations.
 - Not included in 1.0.0, but planned eventually:
   - ❌ Multicore/effects version.
+  - ❌ QUIC.
+  - ❌ h2c support.
 
 <!-- doc probably has to become docs for GitHub. -->
