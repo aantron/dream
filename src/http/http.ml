@@ -660,7 +660,17 @@ let openssl = {
       | Some tls_socket ->
         match Ssl.get_negotiated_alpn_protocol tls_socket with
         | None ->
-          Lwt.return_unit
+          (* Not 100% confirmed, but it appears that at least Chromium does not
+             send an ALPN protocol list when attempting to establish a secure
+             WebSocket connection (presumably, it assumes HTTP/1.1; RFC 8441 is
+             not implemented). This is partially good, because h2 does not seem
+             to implement RFC 8441, either. So, to support wss:// in the
+             presence of ALPN, handle ALPN failure by just continuing with
+             HTTP/1.1. Once there is HTTP/2 WebSocket support, the web
+             application will need to respond to the CONNECT method. *)
+          (* TODO DOC User guidance on responding to both GET and CONNECT in
+             WebSocket handlers. *)
+          httpaf_handler client_address tls_endpoint
         | Some "http/1.1" ->
           httpaf_handler client_address tls_endpoint
         | Some "h2" ->

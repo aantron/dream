@@ -4,6 +4,7 @@
 - Working apps.
   - ✅ Servers abstracted; httpaf implementation provided (should be easy).
     - 🔲 Also need built-in H2, websocket.
+    - 🔲 Server-sent events.
   - ✅ Basic router &mdash; doesn't have to be fast.
     - 🔲 But need the basic composition story, including the path prefix middleware (almost).
     - 🔲 Really should improve the router a bit before release. OTOH it might be fast enough already. However, named URL parameters are an absolute requirement.
