@@ -1,3 +1,10 @@
+(* This file is part of Dream, released under the MIT license. See
+   LICENSE.md for details, or visit https://github.com/aantron/dream.
+
+   Copyright 2021 Anton Bachin *)
+
+
+
 (* https://ulrikstrid.github.io/ocaml-cookie/cookie/Cookie/index.html
    https://ulrikstrid.github.io/ocaml-cookie/session-cookie-lwt/Session_cookie_lwt/Make/index.html
    https://github.com/inhabitedtype/ocaml-session#readme *)

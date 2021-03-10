@@ -1,3 +1,10 @@
+(* This file is part of Dream, released under the MIT license. See
+   LICENSE.md for details, or visit https://github.com/aantron/dream.
+
+   Copyright 2021 Anton Bachin *)
+
+
+
 (* http://www.lastbarrier.com/public-claims-and-how-to-validate-a-jwt/ *)
 (* https://jwt.io/ *)
 
