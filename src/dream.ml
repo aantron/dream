@@ -44,7 +44,7 @@ type route = Dream_middleware.Router.route
 
 (* TODO Rename the underlying value. *)
 let crumb =
-  Dream_middleware.Router.path_parameter
+  Dream_middleware.Router.crumb
 
 let router =
   Dream_middleware.Router.router

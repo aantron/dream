@@ -1,8 +1,4 @@
-module Dream =
-struct
-  include Dream_pure.Inmost
-  module Log = Log
-end
+module Dream = Dream_pure.Inmost
 
 
 
@@ -107,14 +103,14 @@ let name =
   "dream.router"
 
 let log =
-  Dream.Log.source name
+  Log.source name
 
 (* TODO LATER Pretty-print for the debugger. *)
-let path_parameters : (string * string) list Dream.local =
+let crumbs : (string * string) list Dream.local =
   Dream.new_local ()
 
-let path_parameter index request =
-  try List.assoc index (Dream.local path_parameters request)
+let crumb index request =
+  try List.assoc index (Dream.local crumbs request)
   with _ ->
     let message = Printf.sprintf "Invalid path parameter index %s" index in
     log.error (fun log -> log "%s" message);
@@ -161,6 +157,6 @@ let router routes =
         match matches request route with
         | None -> try_routes routes
         | Some (groups, handler) ->
-          handler (Dream.with_local path_parameters groups request)
+          handler (Dream.with_local crumbs groups request)
     in
     try_routes routes
