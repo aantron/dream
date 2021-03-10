@@ -3,7 +3,7 @@
 	url = https://github.com/anmonteiro/httpaf.git
 [submodule "src/vendor/gluten"]
 	path = src/vendor/gluten
-	url = https://github.com/anmonteiro/gluten.git
+	url = https://github.com/aantron/gluten.git
 [submodule "src/vendor/websocketaf"]
 	path = src/vendor/websocketaf
 	url = https://github.com/anmonteiro/websocketaf.git
