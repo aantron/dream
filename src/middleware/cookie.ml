@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Dream = Dream__pure.Inmost
 
 (* TODO Not quite a middleware. *)
 (* TODO DOC We allow multiple headers sent by the client, to support HTTP/2. *)

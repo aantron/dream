@@ -7,7 +7,7 @@
 
 module Dream =
 struct
-  include Dream_pure.Inmost
+  include Dream__pure.Inmost
   module Log = Log
 end
 

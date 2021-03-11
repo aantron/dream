@@ -7,8 +7,8 @@
 
 module Dream =
 struct
-  include Dream_pure.Inmost
-  module Log = Dream_middleware.Log
+  include Dream__pure.Inmost
+  module Log = Dream__middleware.Log
 end
 
 
@@ -645,13 +645,13 @@ let serve_with_details
   (* https://letsencrypt.org/docs/certificates-for-localhost/ *)
 
   let user's_dream_handler =
-    Dream_middleware_built_in.Built_in.middleware user's_dream_handler in
+    Dream__middleware__built_in.Built_in.middleware user's_dream_handler in
   let user's_dream_handler = fun request ->
     let prefix =
       prefix
-      |> Dream_pure.Formats.parse_target
+      |> Dream__pure.Formats.parse_target
       |> fst
-      |> Dream_pure.Formats.trim_empty_trailing_component
+      |> Dream__pure.Formats.trim_empty_trailing_component
     in
 
     request
@@ -764,7 +764,7 @@ let serve_with_maybe_https
             log "Using a development SSL certificate on a public interface");
         end;
 
-        `Memory (Dream_localhost.certificate, Dream_localhost.key, `Silent)
+        `Memory (Dream__localhost.certificate, Dream__localhost.key, `Silent)
 
       | Some certificate_file, Some key_file, None, None ->
         `File (certificate_file, key_file)

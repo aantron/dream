@@ -7,9 +7,9 @@
 
 module Dream =
 struct
-  include Dream_pure.Inmost
+  include Dream__pure.Inmost
   module Log = Log
-  let from_form_urlencoded = Dream_pure.Formats.from_form_urlencoded
+  let from_form_urlencoded = Dream__pure.Formats.from_form_urlencoded
 end
 
 let log =

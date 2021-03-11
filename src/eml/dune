@@ -1,2 +1,3 @@
 (executable
- (public_name eml))
+ (public_name dream_eml)
+ (name eml))

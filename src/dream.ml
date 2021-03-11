@@ -5,88 +5,88 @@
 
 
 
-include Dream_pure.Inmost
+include Dream__pure.Inmost
 
-let cookies = Dream_middleware.Cookie.cookies
-let cookie = Dream_middleware.Cookie.cookie
-let cookie_option = Dream_middleware.Cookie.cookie_option
-let add_set_cookie = Dream_middleware.Cookie.add_set_cookie
+let cookies = Dream__middleware.Cookie.cookies
+let cookie = Dream__middleware.Cookie.cookie
+let cookie_option = Dream__middleware.Cookie.cookie_option
+let add_set_cookie = Dream__middleware.Cookie.add_set_cookie
 
 let request_id =
-  Dream_middleware_built_in.Request_id.assign
+  Dream__middleware__built_in.Request_id.assign
 
 let logger =
-  Dream_middleware.Log.logger
+  Dream__middleware.Log.logger
 
 let catch =
-  Dream_middleware.Catch.catch
+  Dream__middleware.Catch.catch
 
 let content_length =
-  Dream_middleware.Content_length.assign
+  Dream__middleware.Content_length.assign
 
 let synchronous next_handler request =
   Lwt.return (next_handler request)
 
 let log =
-  Dream_middleware.Log.convenience_log
+  Dream__middleware.Log.convenience_log
 
 let default_log =
-  Dream_middleware.Log.source (Logs.Src.name Logs.default)
+  Dream__middleware.Log.source (Logs.Src.name Logs.default)
 
 let error = default_log.error
 let warning = default_log.warning
 let info = default_log.info
 let debug = default_log.debug
 
-module Request_id = Dream_middleware_built_in.Request_id
-module Log = Dream_middleware.Log
+module Request_id = Dream__middleware__built_in.Request_id
+module Log = Dream__middleware.Log
 
-include Dream_middleware.Router
+include Dream__middleware.Router
 
 type session =
-  Dream_middleware.Session.t
+  Dream__middleware.Session.t
 
 let sessions =
-  Dream_middleware.Session.check
+  Dream__middleware.Session.check
 
 let session =
-  Dream_middleware.Session.get
+  Dream__middleware.Session.get
 
 let csrf =
-  Dream_middleware.Csrf.verify
+  Dream__middleware.Csrf.verify
 
 let form =
-  Dream_middleware.Form.urlencoded
+  Dream__middleware.Form.urlencoded
 
 let form_get =
-  Dream_middleware.Form.get
+  Dream__middleware.Form.get
 
-type error = Dream_http.Http.error
-type error_handler = Dream_http.Http.error_handler
-let serve = Dream_http.Http.serve
-let run = Dream_http.Http.run
+type error = Dream__http.Http.error
+type error_handler = Dream__http.Http.error_handler
+let serve = Dream__http.Http.serve
+let run = Dream__http.Http.run
 
 let random =
-  Dream_middleware.Random.random
+  Dream__middleware.Random.random
 
 let base64url =
-  Dream_pure.Formats.base64url
+  Dream__pure.Formats.base64url
 
 let test ?(prefix = "") handler request =
   let prefix =
     prefix
-    |> Dream_pure.Formats.parse_target
+    |> Dream__pure.Formats.parse_target
     |> fst
-    |> Dream_pure.Formats.trim_empty_trailing_component
+    |> Dream__pure.Formats.trim_empty_trailing_component
   in
 
   request
   |> with_next_prefix prefix
-  |> Dream_middleware_built_in.Built_in.middleware handler
+  |> Dream__middleware__built_in.Built_in.middleware handler
   |> Lwt_main.run
 
 let test_parse_target =
-  Dream_pure.Formats.parse_target
+  Dream__pure.Formats.parse_target
 
 let test_internal_prefix =
   internal_prefix

@@ -1,6 +1,6 @@
 (library
  (public_name dream.middleware)
- (name dream_middleware)
+ (name dream__middleware)
  (libraries
   cstruct
   dream.middleware.built_in

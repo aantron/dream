@@ -10,11 +10,11 @@
 
 module Dream =
 struct
-  include Dream_pure.Inmost
+  include Dream__pure.Inmost
   module Log = Log
   module Session = Session
   (* let add_set_cookie = Cookie.add_set_cookie *)
-  let base64url = Dream_pure.Formats.base64url
+  let base64url = Dream__pure.Formats.base64url
   let random = Random.random
 end
 

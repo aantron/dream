@@ -7,10 +7,10 @@
 
 let show_tokens route =
   try
-    Dream_middleware.Router.parse route
+    Dream__middleware.Router.parse route
     |> List.map (function
-      | Dream_middleware.Router.Literal s -> Printf.sprintf "%S" s
-      | Dream_middleware.Router.Variable s -> Printf.sprintf ":%S" s)
+      | Dream__middleware.Router.Literal s -> Printf.sprintf "%S" s
+      | Dream__middleware.Router.Variable s -> Printf.sprintf ":%S" s)
     |> String.concat "; "
     |> Printf.printf "[%s]\n"
   with Failure message ->

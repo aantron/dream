@@ -1,6 +1,6 @@
 (library
  (public_name dream.http)
- (name dream_http)
+ (name dream__http)
  (libraries
   bigarray-compat
   bigstringaf

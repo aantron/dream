@@ -1,9 +1,9 @@
 (library
  (public_name dream.localhost)
- (name dream_localhost))
+ (name dream__localhost))
 
 (rule
- (target dream_localhost.ml)
+ (target dream__localhost.ml)
  (deps
   (:certificate localhost.crt)
   (:key localhost.key))
