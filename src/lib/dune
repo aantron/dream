@@ -1,0 +1,8 @@
+(library
+ (public_name dream.lib)
+ (name dream_lib)
+ (libraries
+  base64
+  uri
+ )
+ (instrumentation (backend bisect_ppx)))

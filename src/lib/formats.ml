@@ -5,8 +5,6 @@
 
 
 
-(* Web microformats and encoding. *)
-
 (* TODO DOC Recommend direct use of Base64 library for more options. *)
 let base64url text =
   Base64.encode_string ~alphabet:Base64.uri_safe_alphabet text
@@ -29,5 +27,3 @@ let from_form_urlencoded text =
   |> List.fold_left (fun pairs -> function
     | [name; value] -> (Uri.pct_decode name, Uri.pct_decode value)::pairs
     | _ -> pairs) []
-
-(* TODO Rename this module. *)

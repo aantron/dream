@@ -70,4 +70,4 @@ let random =
   Dream_middleware.Random.random
 
 let base64url =
-  Dream_middleware.Microformat.base64url
+  Dream_lib.Formats.base64url

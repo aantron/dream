@@ -9,7 +9,7 @@ module Dream =
 struct
   include Dream_pure.Inmost
   module Log = Log
-  let from_form_urlencoded = Microformat.from_form_urlencoded
+  let from_form_urlencoded = Dream_lib.Formats.from_form_urlencoded
 end
 
 let log =

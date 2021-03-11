@@ -2,8 +2,8 @@
  (public_name dream.middleware)
  (name dream_middleware)
  (libraries
-  base64
   cstruct
+  dream.lib
   dream.middleware.built_in
   dream.pure
   fmt
@@ -15,6 +15,5 @@
   mirage-crypto-rng
   mirage-crypto-rng.lwt
   re
-  uri
  )
  (instrumentation (backend bisect_ppx)))

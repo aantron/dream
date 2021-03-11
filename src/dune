@@ -3,6 +3,7 @@
  (wrapped false)
  (libraries
   dream.http
+  dream.lib
   dream.middleware
   dream.middleware.built_in
   dream.pure
