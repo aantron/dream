@@ -73,7 +73,16 @@ let base64url =
   Dream_pure.Formats.base64url
 
 let test ?(prefix = "") handler request =
-  Dream_middleware_built_in.Built_in.middleware prefix handler request
+  let prefix =
+    prefix
+    |> Dream_pure.Formats.parse_target
+    |> fst
+    |> Dream_pure.Formats.trim_empty_trailing_component
+  in
+
+  request
+  |> with_next_prefix prefix
+  |> Dream_middleware_built_in.Built_in.middleware handler
   |> Lwt_main.run
 
 let test_parse_target =

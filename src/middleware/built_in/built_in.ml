@@ -15,10 +15,5 @@
    The HTTP server integration and test helpers automatically apply built-in
    middleware on top of the handler passed in by the user. *)
 
-let middleware prefix =
-  let site_root_prefix_check = Prefix.site_root_prefix_check prefix in
-
-  fun handler ->
-    Request_id.assign ~prefix:""
-    @@ site_root_prefix_check
-    @@ handler
+let middleware =
+   Request_id.assign

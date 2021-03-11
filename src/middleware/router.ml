@@ -158,14 +158,41 @@ let router routes =
             | None -> find_route bindings prefix path routes
     in
 
-    (* The initial bindings and prefix should be taken from the request context
-       - whenever there is indirect nested router support. *)
-    let route =
-      find_route
-        []
-        (Dream.internal_prefix request)
-        (Dream.internal_path request) routes
+    (* The next_prefix mechanism is intended for composable indirect routing in
+       the future (i.e. another router hidden in a handler, rather than more
+       routes included with Dream.scope). It is currently only used to pass the
+       site prefix down to the one and only supported top-level router, in order
+       to avoid having to make a decision about how to fail (502?) above the
+       application code if the target does not match the site prefix.
+
+       This code will need to be rearranged somewhat to adapt it for indierct
+       composable routers, mainly to build the prefixes incrementally off each
+       other. *)
+    let rec match_site_prefix prefix path =
+
+      match prefix, path with
+      | prefix_crumb::prefix, path_crumb::path ->
+        if path_crumb = prefix_crumb then
+          match_site_prefix prefix path
+        else
+          None
+
+      | [], path ->
+        Some path
+      | _ ->
+        None
     in
-    match route with
+
+    let next_prefix = Dream.next_prefix request
+    and path = Dream.internal_path request
+    in
+
+    match match_site_prefix next_prefix path with
     | None -> next_handler request
-    | Some (handler, request) -> handler request
+    | Some path ->
+      (* The initial bindings and prefix should be taken from the request
+         context when there is indirect nested router support. *)
+      let route = find_route [] next_prefix path routes in
+      match route with
+      | None -> next_handler request
+      | Some (handler, request) -> handler request

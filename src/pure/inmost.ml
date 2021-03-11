@@ -85,6 +85,7 @@ type incoming = {
   method_ : method_;
   target : string;
   prefix : string list;
+  next_prefix : string list;
   path : string list;
   request_version : int * int;
 }
@@ -127,6 +128,9 @@ let target request =
 let internal_prefix request =
   request.specific.prefix
 
+let next_prefix request =
+  request.specific.next_prefix
+
 let internal_path request =
   request.specific.path
 
@@ -153,6 +157,9 @@ let with_method_ method_ request =
 
 let with_prefix prefix request =
   update {request with specific = {request.specific with prefix}}
+
+let with_next_prefix next_prefix request =
+  update {request with specific = {request.specific with next_prefix}}
 
 let with_path path request =
   update {request with specific = {request.specific with path}}
@@ -381,6 +388,7 @@ let request_from_http
       method_;
       target;
       prefix = [];
+      next_prefix = [];
       path = fst (Formats.parse_target target);
       request_version = version;
     };

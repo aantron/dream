@@ -9,5 +9,4 @@ let () =
   Alcotest.run "Dream" [
     Request.tests;
     Headers.tests;
-    Router.tests;
   ]

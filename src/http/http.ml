@@ -645,7 +645,19 @@ let serve_with_details
   (* https://letsencrypt.org/docs/certificates-for-localhost/ *)
 
   let user's_dream_handler =
-    Dream_middleware_built_in.Built_in.middleware prefix user's_dream_handler in
+    Dream_middleware_built_in.Built_in.middleware user's_dream_handler in
+  let user's_dream_handler = fun request ->
+    let prefix =
+      prefix
+      |> Dream_pure.Formats.parse_target
+      |> fst
+      |> Dream_pure.Formats.trim_empty_trailing_component
+    in
+
+    request
+    |> Dream.with_next_prefix prefix
+    |> user's_dream_handler
+  in
 
   (* Create the wrapped httpaf or h2 handler from the user's Dream handler. *)
   let httpaf_connection_handler =
