@@ -9,39 +9,36 @@ module Dream = Dream_pure.Inmost
 
 
 
-(* TODO Need a parser somewhere. Gramamr is like... Paths begin with... a
-separator, either / or /:. if /, the next component is a literal. If /:, it is
-a crumb. Components are not allowed to be empty, except the last component if it
-is not a crumb. Crumbs can never be empty.
- *)
 type token =
   | Literal of string
   | Variable of string
 
-let rec validate = function
-  | [] -> false
-  | (Variable "")::_ -> false
-  | [_] -> true
-  | (Literal "")::_ -> false
-  | _::more -> validate more
+let rec validate route = function
+  | (Variable "")::_ ->
+    Printf.ksprintf failwith "Empty path parameter name in '%s'" route
 
-(* TODO Permit lack of leading /. *)
-(* TODO Permit double /. *)
+  | _::tokens -> validate route tokens
+  | [] -> ()
+
 let parse string =
 
   let rec parse_separator tokens index =
     match string.[index] with
     | '/' ->
-      let constructor, index =
-        match string.[index + 1] with
-        | ':' ->
-          (fun s -> Variable s), index + 2
-        | _ | exception Invalid_argument _ ->
-          (fun s -> Literal s), index + 1
-      in
-      parse_component tokens constructor index index
+      parse_component_start tokens (index + 1)
+    | _ ->
+      parse_component_start tokens index
+    | exception Invalid_argument _ ->
+      List.rev tokens
+
+  and parse_component_start tokens index =
+    match string.[index] with
+    | '/' ->
+      parse_component_start tokens (index + 1)
+    | ':' ->
+      parse_component tokens (fun s -> Variable s) (index + 1) (index + 1)
     | _ | exception Invalid_argument _ ->
-      failwith "Expected '/'" (* TODO Location. *)
+      parse_component tokens (fun s -> Literal s) index index
 
   and parse_component tokens constructor start_index index =
     match string.[index] with
@@ -59,10 +56,8 @@ let parse string =
   in
 
   let tokens = parse_separator [] 0 in
-  if not @@ validate tokens then
-    failwith "Invalid route" (* TODO Better description. *)
-  else
-    tokens
+  validate string tokens;
+  tokens
 
 let rec strip_empty_trailing_token = function
   | [] -> []
@@ -155,13 +150,22 @@ let router routes =
             else
               find_route bindings prefix path routes
           | Subsite new_routes ->
-            match find_route new_bindings (prefix @ new_prefix) new_path new_routes with
+            let subroute =
+              find_route new_bindings (prefix @ new_prefix) new_path new_routes
+            in
+            match subroute with
             | Some _ as result -> result
             | None -> find_route bindings prefix path routes
     in
 
-    (* TODO The initial bindings and prefix should be taken from the request
-       context. *)
-    match find_route [] (Dream.internal_prefix request) (Dream.internal_path request) routes with
+    (* The initial bindings and prefix should be taken from the request context
+       - whenever there is indirect nested router support. *)
+    let route =
+      find_route
+        []
+        (Dream.internal_prefix request)
+        (Dream.internal_path request) routes
+    in
+    match route with
     | None -> next_handler request
     | Some (handler, request) -> handler request

@@ -12,7 +12,7 @@ let show_tokens route =
       | Dream_middleware.Router.Literal s -> Printf.sprintf "%S" s
       | Dream_middleware.Router.Variable s -> Printf.sprintf ":%S" s)
     |> String.concat "; "
-    |> print_endline
+    |> Printf.printf "[%s]\n"
   with Failure message ->
     print_endline message
 
@@ -33,21 +33,21 @@ let%expect_test _ =
   show_tokens "/abc/:/";
   show_tokens "/abc/de:f/";
   [%expect {|
-    Expected '/'
-    Expected '/'
-    ""
-    "abc"
-    "abc"; ""
-    "abc"; "def"; ""
-    Invalid route
-    Invalid route
-    Invalid route
-    "abc"; :"def"; ""
-    "abc"; :"def"
-    Invalid route
-    Invalid route
-    Invalid route
-    "abc"; "de:f"; "" |}]
+    []
+    ["abc"]
+    [""]
+    ["abc"]
+    ["abc"; ""]
+    ["abc"; "def"; ""]
+    ["abc"; "def"; ""]
+    ["abc"; "def"; ""]
+    ["abc"; "def"; ""]
+    ["abc"; :"def"; ""]
+    ["abc"; :"def"]
+    Empty path parameter name in '/:'
+    Empty path parameter name in '/abc/:'
+    Empty path parameter name in '/abc/:/'
+    ["abc"; "de:f"; ""] |}]
 
 
 
@@ -345,6 +345,32 @@ let%expect_test _ =
     bar
     Response: 200 OK
     /abc /def |}]
+
+let%expect_test _ =
+  let pipeline_1 = Dream.pipeline [
+    (fun next_handler request -> print_endline "foo"; next_handler request);
+    (fun next_handler request -> print_endline "bar"; next_handler request);
+  ] in
+
+  let pipeline_2 = Dream.pipeline [
+    (fun next_handler request -> print_endline "baz"; next_handler request);
+    (fun next_handler request -> print_endline "lel"; next_handler request);
+  ] in
+
+  show "/abc/def" @@ Dream.router [
+    Dream.scope "/abc" [pipeline_1] [
+      Dream.scope "/def" [pipeline_2] [
+        Dream.get "" (fun _ -> Dream.respond "wat");
+      ];
+    ];
+  ];
+  [%expect {|
+    foo
+    bar
+    baz
+    lel
+    Response: 200 OK
+    wat |}]
 
 (* TODO Indirect nesting works. *)
 (* TODO Try sequence of routers. *)
