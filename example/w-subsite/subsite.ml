@@ -7,7 +7,7 @@ let () =
       (fun request ->
         Printf.ksprintf Dream.respond "Prefix: %s" (Dream.target request));
 
-    Dream.under "/blah" [
+    Dream.scope "/blah" [] [
       Dream.get "/echo/:word"
         (fun request ->
           request

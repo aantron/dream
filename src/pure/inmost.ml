@@ -472,6 +472,13 @@ let identity handler request =
 let start handler request =
   handler request
 
+let rec pipeline middlewares =
+  let middlewares = List.rev middlewares in
+  fun handler ->
+    match middlewares with
+    | [] -> handler
+    | middleware::more -> pipeline more (middleware handler)
+
 let sort_headers headers =
   List.stable_sort (fun (name, _) (name', _) -> compare name name') headers
 

@@ -205,6 +205,7 @@ val reason : response -> string
 
 val identity : middleware
 val start : middleware
+val pipeline : middleware list -> middleware
 val request_id : ?prefix:string -> middleware
 val logger : middleware
 val catch :
@@ -222,8 +223,9 @@ type route
 val get : string -> handler -> route
 val post : string -> handler -> route
 
-val apply : middleware list -> route list -> route
-val under : string -> route list -> route
+(* val apply : middleware list -> route list -> route
+val under : string -> route list -> route *)
+val scope : string -> middleware list -> route list -> route
 
 val router : route list -> middleware
 (* TODO LATER Define helpers for other methods. *)

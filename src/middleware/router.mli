@@ -14,8 +14,7 @@ val get : string -> Dream.handler -> route
 val post : string -> Dream.handler -> route
 
 (* Route groups. *)
-val apply : Dream.middleware list -> route list -> route
-val under : string -> route list -> route
+val scope : string -> Dream.middleware list -> route list -> route
 
 (* The middleware and the path parameter retriever. With respect to path
    parameters ("crumbs"), the middleware is the setter, and the retriever is,

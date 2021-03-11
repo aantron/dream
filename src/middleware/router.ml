@@ -25,7 +25,7 @@ let rec validate = function
   | (Literal "")::_ -> false
   | _::more -> validate more
 
-(* TODO Permit leading /. *)
+(* TODO Permit lack of leading /. *)
 (* TODO Permit double /. *)
 let parse string =
 
@@ -64,6 +64,11 @@ let parse string =
   else
     tokens
 
+let rec strip_empty_trailing_token = function
+  | [] -> []
+  | [Literal ""] -> []
+  | token::tokens -> token::(strip_empty_trailing_token tokens)
+
 
 
 type node =
@@ -93,11 +98,11 @@ let rec apply middlewares routes =
     in
     pattern, node)
 
-(* TODO Need to handle the prefix extension and path chopping. *)
-(* TODO Need to handle variables in the prefix. *)
-(* TODO Strip trailing /. *)
 let under prefix routes =
-  [parse prefix, Subsite (List.flatten routes)]
+  [strip_empty_trailing_token (parse prefix), Subsite (List.flatten routes)]
+
+let scope prefix middlewares routes =
+  under prefix [apply middlewares routes]
 
 
 

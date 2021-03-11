@@ -233,11 +233,14 @@ let%expect_test _ =
 (* Router applies middlewares. *)
 
 let%expect_test _ =
+
+  let pipeline = Dream.pipeline [
+    (fun next_handler request -> print_endline "foo"; next_handler request);
+    (fun next_handler request -> print_endline "bar"; next_handler request);
+  ] in
+
   show "/abc" @@ Dream.router [
-    Dream.apply [
-      (fun next_handler request -> print_endline "foo"; next_handler request);
-      (fun next_handler request -> print_endline "bar"; next_handler request);
-    ] [
+    Dream.scope "/" [pipeline] [
       Dream.get "/abc" (fun _ -> Dream.respond "baz");
     ];
   ];
@@ -249,7 +252,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/" @@ Dream.router [
-    Dream.apply [
+    Dream.scope "/" [
       (fun next_handler request -> print_endline "foo"; next_handler request);
       (fun next_handler request -> print_endline "bar"; next_handler request);
     ] [
@@ -273,7 +276,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
-    Dream.under "/abc" [
+    Dream.scope "/abc" [] [
       Dream.get "/def" (fun request ->
         Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
     ];
@@ -284,7 +287,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/def/abc" @@ Dream.router [
-    Dream.under "/abc" [
+    Dream.scope "/abc" [] [
       Dream.get "/def" (fun request ->
         Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
     ];
@@ -294,7 +297,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/abc/ghi" @@ Dream.router [
-    Dream.under "/abc" [
+    Dream.scope "/abc" [] [
       Dream.get "/def" (fun request ->
         Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
     ];
@@ -307,7 +310,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
-    Dream.under "/:x" [
+    Dream.scope "/:x" [] [
       Dream.get "/def" (fun request ->
         Dream.respond (Dream.crumb "x" request));
     ];
@@ -318,7 +321,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
-    Dream.under "/:x" [
+    Dream.scope "/:x" [] [
       Dream.get "/:x" (fun request ->
         Dream.respond (Dream.crumb "x" request));
     ];
@@ -329,14 +332,12 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
-    Dream.apply [
+    Dream.scope "/abc" [
       (fun next_handler request -> print_endline "foo"; next_handler request);
       (fun next_handler request -> print_endline "bar"; next_handler request);
     ] [
-      Dream.under "/abc" [
-        Dream.get "/def" (fun request ->
-          Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
-      ];
+      Dream.get "/def" (fun request ->
+        Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
     ];
   ];
   [%expect {|
