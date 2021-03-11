@@ -112,7 +112,7 @@ let tests = "request", [
   end;
 
 
-  "with_target" -: begin fun () ->
+  (* "with_target" -: begin fun () ->
 
     Dream.request ""
     |> Dream.with_target "/bar"
@@ -144,10 +144,10 @@ let tests = "request", [
     Alcotest.(check bool) "first" true (Dream.first first == first);
     Alcotest.(check bool) "first" true (Dream.first last  == first);
 
-  end;
+  end; *)
 
 
-  "prefix" -: begin fun () ->
+  (* "prefix" -: begin fun () ->
 
     Dream.request ~prefix:"/foo" ""
     |> Dream.prefix
@@ -188,26 +188,7 @@ let tests = "request", [
     Alcotest.(check bool) "first" true (Dream.first first == first);
     Alcotest.(check bool) "first" true (Dream.first last  == first);
 
-  end;
-
-
-  "site_prefix" -: begin fun () ->
-
-    Dream.request ~prefix:"/foo" ""
-    |> Dream.site_prefix
-    |> Alcotest.(check string) "site_prefix" "/foo"
-
-  end;
-
-
-  "site_prefix immutable" -: begin fun () ->
-
-    Dream.request ~prefix:"/foo" ""
-    |> Dream.with_prefix "/bar"
-    |> Dream.site_prefix
-    |> Alcotest.(check string) "site_prefix" "/foo"
-
-  end;
+  end; *)
 
 
   "version" -: begin fun () ->

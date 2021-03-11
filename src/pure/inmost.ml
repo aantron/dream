@@ -83,8 +83,9 @@ type incoming = {
   app : Global.t ref;
   client : string;
   method_ : method_;
-  prefix : string;
   target : string;
+  prefix : string list;
+  path : string list;
   request_version : int * int;
 }
 
@@ -123,11 +124,20 @@ let method_ request =
 let target request =
   request.specific.target
 
-let prefix request =
+let internal_prefix request =
   request.specific.prefix
 
-let site_prefix request =
-  request.first.specific.prefix
+let internal_path request =
+  request.specific.path
+
+let prefix request =
+  Formats.make_path request.specific.prefix
+
+let path request =
+  Formats.make_path request.specific.path
+
+(* let path request =
+  request.specific.path *)
 
 let version request =
   request.specific.request_version
@@ -138,11 +148,14 @@ let with_client client request =
 let with_method_ method_ request =
   update {request with specific = {request.specific with method_}}
 
+(* let with_target target request =
+  update {request with specific = {request.specific with target}} *)
+
 let with_prefix prefix request =
   update {request with specific = {request.specific with prefix}}
 
-let with_target target request =
-  update {request with specific = {request.specific with target}}
+let with_path path request =
+  update {request with specific = {request.specific with path}}
 
 let with_version version request =
   update {request with
@@ -356,7 +369,6 @@ let request_from_http
     ~app
     ~client
     ~method_
-    ~prefix
     ~target
     ~version
     ~headers
@@ -367,8 +379,9 @@ let request_from_http
       app;
       client;
       method_;
-      prefix;
       target;
+      prefix = [];
+      path = fst (Formats.parse_target target);
       request_version = version;
     };
     headers;
@@ -395,7 +408,6 @@ let string_to_stream string =
 let request
     ?(client = "127.0.0.1:12345")
     ?(method_ = `GET)
-    ?(prefix = "")
     ?(target = "/")
     ?(version = 1, 1)
     ?(headers = [])
@@ -405,7 +417,6 @@ let request
     ~app:(app ())
     ~client
     ~method_
-    ~prefix
     ~target
     ~version
     ~headers

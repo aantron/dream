@@ -4,4 +4,5 @@
  (libraries
   dream.pure
   lwt
- ))
+ )
+ (instrumentation (backend bisect_ppx)))

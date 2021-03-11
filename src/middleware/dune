@@ -3,7 +3,6 @@
  (name dream_middleware)
  (libraries
   cstruct
-  dream.lib
   dream.middleware.built_in
   dream.pure
   fmt
@@ -14,6 +13,5 @@
   lwt.unix
   mirage-crypto-rng
   mirage-crypto-rng.lwt
-  re
  )
  (instrumentation (backend bisect_ppx)))

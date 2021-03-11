@@ -5,19 +5,19 @@
 
 
 
-let show_method method_ =
+let show method_ =
   print_endline (Dream.method_to_string method_)
 
 let%expect_test _ =
-  show_method `GET;
-  show_method `POST;
-  show_method `PUT;
-  show_method `DELETE;
-  show_method `HEAD;
-  show_method `CONNECT;
-  show_method `OPTIONS;
-  show_method `TRACE;
-  show_method (`Method "FOO");
+  show `GET;
+  show `POST;
+  show `PUT;
+  show `DELETE;
+  show `HEAD;
+  show `CONNECT;
+  show `OPTIONS;
+  show `TRACE;
+  show (`Method "FOO");
   [%expect {|
     GET
     POST

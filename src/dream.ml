@@ -70,4 +70,20 @@ let random =
   Dream_middleware.Random.random
 
 let base64url =
-  Dream_lib.Formats.base64url
+  Dream_pure.Formats.base64url
+
+let test ?(prefix = "") handler request =
+  Dream_middleware_built_in.Built_in.middleware prefix handler request
+  |> Lwt_main.run
+
+let test_parse_target =
+  Dream_pure.Formats.parse_target
+
+let test_internal_prefix =
+  internal_prefix
+
+let test_internal_path =
+  internal_path
+
+(* let test_parse_route =
+  Dream_middleware.Router.parse *)

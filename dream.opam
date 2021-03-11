@@ -14,7 +14,6 @@ depends: [
   "logs" {>= "0.5.0"}
   "mirage-crypto-rng" {>= "0.8.0"}  # Signature of initialize.
   "ocaml" {>= "4.04.0"}  # String.split_on_char.
-  "re"
   "uri"
 
   # Testing, development.

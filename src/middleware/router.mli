@@ -22,3 +22,11 @@ val under : string -> route list -> route
    of course, the getter. *)
 val router : route list -> Dream.middleware
 val crumb : string -> Dream.request -> string
+
+(**/**)
+
+type token =
+  | Literal of string
+  | Variable of string
+
+val parse : string -> token list

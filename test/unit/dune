@@ -3,6 +3,8 @@
  (libraries
   alcotest
   dream
+  lwt
+  lwt.unix
  ))
 
 (rule

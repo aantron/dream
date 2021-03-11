@@ -2,8 +2,10 @@
  (public_name dream.pure)
  (name dream_pure)
  (libraries
+  base64
   hmap
   lwt
   lwt.unix
+  uri
  )
  (instrumentation (backend bisect_ppx)))

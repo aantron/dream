@@ -29,7 +29,7 @@ struct
   include Dream_pure.Inmost
   module Log = Log
   let add_set_cookie = Cookie.add_set_cookie
-  let base64url = Dream_lib.Formats.base64url
+  let base64url = Dream_pure.Formats.base64url
   let cookie_option = Cookie.cookie_option
   let random = Random.random
 end

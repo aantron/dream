@@ -12,10 +12,17 @@ module Dream = Dream_pure.Inmost
 (* TODO This thing can respond with 502 - definitely at least document it. It
    may be better for it to even be passed to ~error_handler. *)
 let site_root_prefix_check prefix =
-  if prefix = "" then
+  let prefix =
+    Dream_pure.Formats.parse_target prefix
+    |> fst
+    |> Dream_pure.Formats.trim_empty_trailing_component
+  in
+
+  match prefix with
+  | [] ->
     Dream.identity
 
-  else
+  | prefix ->
     fun next_handler request ->
       (* We currently use an internal representation in which the "first"
          request already contains the site prefix. This is probably
@@ -24,37 +31,27 @@ let site_root_prefix_check prefix =
          prefix, we chop the prefix and continue. If not, we fail with 502 Bad
          Gateway. *)
 
-      let prefix = Dream.prefix request
-      and target = Dream.target request
+      let rec scan prefix path =
+
+        match prefix, path with
+        | prefix_crumb::prefix, path_crumb::path ->
+          if path_crumb = prefix_crumb then
+            scan prefix path
+          else
+            None
+
+        | [], path ->
+          Some path
+        | _ ->
+          None
       in
 
-      let is_ok, request =
-        if String.length target <= String.length prefix then
-          false, request
-
-        else
-          let rec scan index =
-            if index = String.length prefix then
-              if target.[index] = '/' then
-                true,
-                Dream.with_target
-                  (String.sub target index (String.length target - index))
-                  request
-              else
-                false,
-                request
-
-            else
-              if target.[index] = prefix.[index] then
-                scan (index + 1)
-              else
-                false,
-                request
-          in
-          scan 0
-      in
-
-      if is_ok then
-        next_handler request
-      else
+      match scan prefix (Dream.internal_path request) with
+      | None ->
         Dream.respond ~status:`Bad_gateway ""
+
+      | Some path ->
+        request
+        |> Dream.with_prefix prefix
+        |> Dream.with_path path
+        |> next_handler

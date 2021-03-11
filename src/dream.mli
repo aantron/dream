@@ -128,7 +128,6 @@ val is_server_error : status -> bool
 val request :
   ?client:string ->
   ?method_:method_ ->
-  ?prefix:string ->
   ?target:string ->
   ?version:int * int ->
   ?headers:(string * string) list ->
@@ -159,13 +158,12 @@ val client : request -> string
 val method_ : request -> method_
 val target : request -> string
 val prefix : request -> string
-val site_prefix : request -> string
+val path : request -> string
 val version : request -> int * int
 
 val with_client : string -> request -> request
 val with_method_ : method_ -> request -> request
-val with_target : string -> request -> request
-val with_prefix : string -> request -> request
+(* val with_target : string -> request -> request *)
 val with_version : int * int -> request -> request
 (* TODO Generalize version to work with responses. *)
 (* TODO How should with_target interact with the prefix? *)
@@ -197,7 +195,7 @@ val add_set_cookie : string -> string -> response -> response
 
 val status : response -> status
 
-val body : request -> string Lwt.t
+val body : _ message -> string Lwt.t
 val has_body : _ message -> bool
 val with_body : ?set_content_length:bool -> string -> response -> response
 
@@ -378,6 +376,8 @@ val base64url : string -> string
 val first : 'a message -> 'a message
 val last : 'a message -> 'a message
 
+val test : ?prefix:string -> handler -> (request -> response)
+
 val sort_headers : (string * string) list -> (string * string) list
 (* TODO DOC This sorts headers based on the header name, but not the value,
    because the order of values may be important.
@@ -402,3 +402,15 @@ val sort_headers : (string * string) list -> (string * string) list
 
 (* TODO DOC attempt some graphic that shows what getters retrieve what from the
    response. *)
+
+(**/**)
+
+(* TODO These are probably unnecessary. *)
+val test_parse_target : string -> string list * string
+  [@@ocaml.deprecated "Exposed only for testing"]
+
+val test_internal_prefix : request -> string list
+  [@@ocaml.deprecated "Exposed only for testing"]
+
+val test_internal_path : request -> string list
+  [@@ocaml.deprecated "Exposed only for testing"]
