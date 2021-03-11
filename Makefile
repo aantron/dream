@@ -1,17 +1,12 @@
-.PHONY : starter
-starter :
-	@tput rmam
-	@stty -echo
-	@dune exec --no-print-directory -- test/starter/starter.exe
-	@tput smam
+PACKAGES := dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,h2,h2-lwt,h2-lwt-unix
 
 .PHONY : build
 build :
-	@dune build --no-print-directory
+	@dune build --no-print-directory -p $(PACKAGES)
 
 .PHONY : watch
 watch :
-	@dune build --no-print-directory -w
+	@dune build --no-print-directory -p $(PACKAGES) -w
 
 # TODO LATER After https://github.com/aantron/bisect_ppx/issues/369, get rid of
 # --root argument.

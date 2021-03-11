@@ -1,6 +1,0 @@
-(executable
- (name starter)
- (libraries
-  dream
-  lwt
- ))
