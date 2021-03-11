@@ -75,7 +75,7 @@ type 'a message = {
   headers : (string * string) list;
   body : body ref;
   scope : Local.t;
-  first : 'a message ref;
+  first : 'a message;
   last : 'a message ref;
 }
 
@@ -83,6 +83,7 @@ type incoming = {
   app : Global.t ref;
   client : string;
   method_ : method_;
+  prefix : string;
   target : string;
   request_version : int * int;
 }
@@ -104,7 +105,7 @@ let new_bigstring length =
   Bigstring.create Bigarray.char Bigarray.c_layout length
 
 let first message =
-  !(message.first)
+  message.first
 
 let last message =
   !(message.last)
@@ -122,6 +123,12 @@ let method_ request =
 let target request =
   request.specific.target
 
+let prefix request =
+  request.specific.prefix
+
+let site_prefix request =
+  request.first.specific.prefix
+
 let version request =
   request.specific.request_version
 
@@ -130,6 +137,9 @@ let with_client client request =
 
 let with_method_ method_ request =
   update {request with specific = {request.specific with method_}}
+
+let with_prefix prefix request =
+  update {request with specific = {request.specific with prefix}}
 
 let with_target target request =
   update {request with specific = {request.specific with target}}
@@ -342,20 +352,29 @@ type ('a, 'b) log =
    ('a, Stdlib.Format.formatter, unit, 'b) Stdlib.format4 -> 'a) -> 'b) ->
     unit
 
-let request_from_http ~app ~client ~method_ ~target ~version ~headers ~body =
+let request_from_http
+    ~app
+    ~client
+    ~method_
+    ~prefix
+    ~target
+    ~version
+    ~headers
+    ~body =
 
   let rec request = {
     specific = {
       app;
       client;
       method_;
+      prefix;
       target;
       request_version = version;
     };
     headers;
     body = ref (`Bigstring_stream body);
     scope = Local.empty;
-    first = ref request;
+    first = request; (* TODO LATER What OCaml version is required for this? *)
     last = ref request;
   } in
 
@@ -376,6 +395,7 @@ let string_to_stream string =
 let request
     ?(client = "127.0.0.1:12345")
     ?(method_ = `GET)
+    ?(prefix = "")
     ?(target = "/")
     ?(version = 1, 1)
     ?(headers = [])
@@ -385,6 +405,7 @@ let request
     ~app:(app ())
     ~client
     ~method_
+    ~prefix
     ~target
     ~version
     ~headers
@@ -410,7 +431,7 @@ let response
     headers;
     body = ref `Empty;
     scope = Local.empty;
-    first = ref response;
+    first = response;
     last = ref response;
   } in
 
@@ -433,6 +454,12 @@ let websocket handler =
     {response with specific = {response.specific with websocket = Some handler}}
   in
   Lwt.return response
+
+let identity handler request =
+  handler request
+
+let start handler request =
+  handler request
 
 let sort_headers headers =
   List.stable_sort (fun (name, _) (name', _) -> compare name name') headers

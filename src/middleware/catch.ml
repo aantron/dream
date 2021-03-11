@@ -16,6 +16,8 @@ let log =
 
 
 
+(* TODO This shouldn't be a middleware - it should be the error_handler, so that
+   ALL errors are processed in one place. *)
 (* TODO LATER Once there are many getters in the main API, finish this out. The
    main question right now is printing the headers and the final context. *)
 (* TODO LATER Add ~template argument to main catch handler. *)

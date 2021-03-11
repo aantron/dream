@@ -19,15 +19,15 @@ watch :
 test :
 	@find . -name '*.coverage' | xargs rm -f
 	@opam exec -- \
-	  dune test --no-print-directory \
-	  --instrument-with bisect_ppx --root . --force
+	  dune build --no-print-directory \
+	  --instrument-with bisect_ppx --root . --force @test/runtest
 	@opam exec -- dune exec --no-print-directory -- bisect-ppx-report html
 	@opam exec -- dune exec --no-print-directory -- bisect-ppx-report summary
 	@echo See _coverage/index.html
 
 .PHONY : test-watch
 test-watch :
-	@dune test --no-print-directory -w --root .
+	@dune build --no-print-directory -w --root . @test/runtest
 
 .PHONY : promote
 promote :

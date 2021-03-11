@@ -5,9 +5,9 @@
 
 
 
-let () =
-  Alcotest.run "Dream" [
-    Request.tests;
-    Headers.tests;
-    Router.tests;
-  ]
+let (-:) name f = Alcotest.test_case name `Quick f
+
+
+
+let tests = "router", [
+]

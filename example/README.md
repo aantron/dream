@@ -36,3 +36,5 @@ typing `make`.
 
 <!-- TODO Note that each example is fully self-contained... But also show an
      example that uses crunch to be truly 1-file even with static content. -->
+<!-- TODO Show self-contained example with ppx_blob. -->
+<!-- TODO HTTP2 example is unnecessary - HTTP2 is transparent. -->

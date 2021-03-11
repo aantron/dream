@@ -128,6 +128,7 @@ val is_server_error : status -> bool
 val request :
   ?client:string ->
   ?method_:method_ ->
+  ?prefix:string ->
   ?target:string ->
   ?version:int * int ->
   ?headers:(string * string) list ->
@@ -157,13 +158,17 @@ val respond :
 val client : request -> string
 val method_ : request -> method_
 val target : request -> string
+val prefix : request -> string
+val site_prefix : request -> string
 val version : request -> int * int
 
 val with_client : string -> request -> request
 val with_method_ : method_ -> request -> request
 val with_target : string -> request -> request
+val with_prefix : string -> request -> request
 val with_version : int * int -> request -> request
 (* TODO Generalize version to work with responses. *)
+(* TODO How should with_target interact with the prefix? *)
 
 (* TODO Expose path. *)
 
@@ -216,41 +221,16 @@ val synchronous : (request -> response) -> handler
 
 type route
 
-(* TODO Get rid of on_match *)
-val router : route list -> middleware
 val get : string -> handler -> route
 val post : string -> handler -> route
+
 val apply : middleware list -> route list -> route
+val under : string -> route list -> route
+
+val router : route list -> middleware
 (* TODO LATER Define helpers for other methods. *)
-(* val middleware : middleware list -> route list -> route *)
-(* TODO It's also possible to do *)
-(*
-val middleware : middleware list -> route -> route
-val routes : route list -> route
-
-but does that just increase verbosity?
-
-Dream.router @@ Dream.routes [
-  Dream.middleware [...] @@ Dream.routes [
-    ...
-  ];
-  Dream.middleware [..] @@ Dream.routes [
-    sfg
-  ]
-]
-
-as compared with
-
-Dream.router [
-  Dream.apply [ ] [
-  ]
-  Dream.apply [ ] [
-  ]
-]
-*)
 (* TODO FINALLY the prefix middleware and prefixer in the router. *)
 val crumb : string -> request -> string
-(* TOdO string crumbs. *)
 
 (* TODO For a form, you almost always match against a fixed set of fields. But
    for query parameters, there might be mixtures. *)
@@ -357,6 +337,7 @@ type error = [
 
 type error_handler = Unix.sockaddr -> error -> response Lwt.t
 
+(* TODO Reorder arguments. *)
 val serve :
   ?https:[ `No | `OpenSSL | `OCaml_TLS ] ->
   ?certificate_file:string ->
@@ -366,6 +347,7 @@ val serve :
   ?interface:string ->
   ?port:int ->
   ?stop:unit Lwt.t ->
+  ?prefix:string ->
   ?app:app ->
   ?error_handler:error_handler ->
   handler ->
@@ -380,6 +362,7 @@ val run :
   ?interface:string ->
   ?port:int ->
   ?stop:unit Lwt.t ->
+  ?prefix:string ->
   ?app:app ->
   ?error_handler:error_handler ->
   ?greeting:bool ->

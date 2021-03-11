@@ -14,7 +14,7 @@
   lwt.unix
   mirage-crypto-rng
   mirage-crypto-rng.lwt
+  re
   uri
-
-  re ; TODO LATER
- ))
+ )
+ (instrumentation (backend bisect_ppx)))

@@ -147,6 +147,69 @@ let tests = "request", [
   end;
 
 
+  "prefix" -: begin fun () ->
+
+    Dream.request ~prefix:"/foo" ""
+    |> Dream.prefix
+    |> Alcotest.(check string) "prefix" "/foo"
+
+  end;
+
+
+  "with_prefix" -: begin fun () ->
+
+    Dream.request ""
+    |> Dream.with_prefix "/bar"
+    |> Dream.prefix
+    |> Alcotest.(check string) "prefix" "/bar";
+
+  end;
+
+
+  "with_prefix immutable" -: begin fun () ->
+
+    let first = Dream.request ~prefix:"/bar" "" in
+    let last  = Dream.with_prefix "/foo" first in
+
+    Alcotest.(check bool) "different" true (last != first);
+    Alcotest.(check string) "prefix" "/bar" (Dream.prefix first)
+
+  end;
+
+
+  "with_prefix update" -: begin fun () ->
+
+    let first = Dream.request "" in
+    let last  = Dream.with_prefix "/foo" first in
+
+    Alcotest.(check bool) "last"  true (Dream.last first == last);
+    Alcotest.(check bool) "last"  true (Dream.last last  == last);
+
+    Alcotest.(check bool) "first" true (Dream.first first == first);
+    Alcotest.(check bool) "first" true (Dream.first last  == first);
+
+  end;
+
+
+  "site_prefix" -: begin fun () ->
+
+    Dream.request ~prefix:"/foo" ""
+    |> Dream.site_prefix
+    |> Alcotest.(check string) "site_prefix" "/foo"
+
+  end;
+
+
+  "site_prefix immutable" -: begin fun () ->
+
+    Dream.request ~prefix:"/foo" ""
+    |> Dream.with_prefix "/bar"
+    |> Dream.site_prefix
+    |> Alcotest.(check string) "site_prefix" "/foo"
+
+  end;
+
+
   "version" -: begin fun () ->
 
     Dream.request ~version:(0, 5) ""

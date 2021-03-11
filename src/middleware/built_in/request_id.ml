@@ -5,6 +5,10 @@
 
 
 
+(* TODO The other major built-in middleware, prefix, is actually just going to
+   be built-in code. So it's probably best to look into building in request_id,
+   and getting rid of the concept of built-in middleware. *)
+
 module Dream = Dream_pure.Inmost
 
 

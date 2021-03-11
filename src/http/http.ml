@@ -171,6 +171,7 @@ let websocket_handler user's_websocket_handler socket =
    chance to tell the user that something is wrong with their app. *)
 (* TODO Rename conn like in the body branch. *)
 let wrap_handler
+    prefix
     app
     (user's_error_handler : error_handler)
     (user's_dream_handler : Dream.handler) =
@@ -205,7 +206,7 @@ let wrap_handler
 
     let request : Dream.request =
       Dream.request_from_http
-        ~app ~client ~method_ ~target ~version ~headers ~body in
+        ~app ~client ~method_ ~prefix ~target ~version ~headers ~body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -222,8 +223,7 @@ let wrap_handler
         let open Lwt.Infix in
 
         (* Do the big call. *)
-        Dream_middleware_built_in.Built_in.middleware
-          user's_dream_handler request
+        user's_dream_handler request
 
         (* Extract the Dream response's headers. *)
         >>= fun (response : Dream.response) ->
@@ -313,6 +313,7 @@ let wrap_handler
 
 (* TODO Factor out what is in common between the http/af and h2 handlers. *)
 let wrap_handler_h2
+    prefix
     app
     (_user's_error_handler : error_handler)
     (user's_dream_handler : Dream.handler) =
@@ -345,7 +346,7 @@ let wrap_handler_h2
 
     let request : Dream.request =
       Dream.request_from_http
-        ~app ~client ~method_ ~target ~version ~headers ~body in
+        ~app ~client ~method_ ~prefix ~target ~version ~headers ~body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -362,8 +363,7 @@ let wrap_handler_h2
         let open Lwt.Infix in
 
         (* Do the big call. *)
-        Dream_middleware_built_in.Built_in.middleware
-          user's_dream_handler request
+        user's_dream_handler request
 
         (* Extract the Dream response's headers. *)
         >>= fun (response : Dream.response) ->
@@ -535,6 +535,7 @@ type tls_library = {
   create_handler :
     certificate_file:string ->
     key_file:string ->
+    prefix:string ->
     app:Dream.app ->
     handler:Dream.handler ->
     error_handler:error_handler ->
@@ -546,12 +547,13 @@ type tls_library = {
 let no_tls = {
   create_handler = begin fun
       ~certificate_file:_ ~key_file:_
+      ~prefix
       ~app
       ~handler
       ~error_handler ->
     Httpaf_lwt_unix.Server.create_connection_handler
       ?config:None
-      ~request_handler:(wrap_handler app error_handler handler)
+      ~request_handler:(wrap_handler prefix app error_handler handler)
       ~error_handler:(wrap_error_handler error_handler)
   end;
 }
@@ -559,6 +561,7 @@ let no_tls = {
 let openssl = {
   create_handler = begin fun
       ~certificate_file ~key_file
+      ~prefix
       ~app
       ~handler
       ~error_handler ->
@@ -566,14 +569,14 @@ let openssl = {
     let httpaf_handler =
       Httpaf_lwt_unix.Server.SSL.create_connection_handler
         ?config:None
-      ~request_handler:(wrap_handler app error_handler handler)
+      ~request_handler:(wrap_handler prefix app error_handler handler)
       ~error_handler:(wrap_error_handler error_handler)
     in
 
     let h2_handler =
       H2_lwt_unix.Server.SSL.create_connection_handler
         ?config:None
-      ~request_handler:(wrap_handler_h2 app error_handler handler)
+      ~request_handler:(wrap_handler_h2 prefix app error_handler handler)
       ~error_handler:(wrap_error_handler_h2 error_handler)
     in
 
@@ -620,13 +623,14 @@ let openssl = {
 let ocaml_tls = {
   create_handler = fun
       ~certificate_file ~key_file
+      ~prefix
       ~app
       ~handler
       ~error_handler ->
     Httpaf_lwt_unix.Server.TLS.create_connection_handler_with_default
       ~certfile:certificate_file ~keyfile:key_file
       ?config:None
-      ~request_handler:(wrap_handler app error_handler handler)
+      ~request_handler:(wrap_handler prefix app error_handler handler)
       ~error_handler:(wrap_error_handler error_handler)
 }
 
@@ -638,6 +642,7 @@ let serve_with_details
     ~certificate_file ~key_file
     ~interface ~port
     ~stop
+    ~prefix
     ~app
     ~error_handler
     user's_dream_handler =
@@ -645,11 +650,15 @@ let serve_with_details
   (* TODO DOC *)
   (* https://letsencrypt.org/docs/certificates-for-localhost/ *)
 
+  let user's_dream_handler =
+    Dream_middleware_built_in.Built_in.middleware prefix user's_dream_handler in
+
   (* Create the wrapped httpaf or h2 handler from the user's Dream handler. *)
   let httpaf_connection_handler =
     tls_library.create_handler
       ~certificate_file
       ~key_file
+      ~prefix
       ~app
       ~handler:user's_dream_handler
       ~error_handler
@@ -709,13 +718,15 @@ let serve_with_details
 
 
 
-let serve_with_https
+(* TODO Validate the prefix here. *)
+let serve_with_maybe_https
     caller_function_for_error_messages
     ~https
     ?certificate_file ?key_file
     ?certificate_string ?key_string
     ~interface ~port
     ~stop
+    ~prefix
     ~app
     ~error_handler
     user's_dream_handler =
@@ -728,6 +739,7 @@ let serve_with_https
       ~certificate_file:"" ~key_file:""
       ~interface ~port
       ~stop
+      ~prefix
       ~app
       ~error_handler
       user's_dream_handler
@@ -785,6 +797,7 @@ let serve_with_https
         ~certificate_file ~key_file
         ~interface ~port
         ~stop
+        ~prefix
         ~app
         ~error_handler
         user's_dream_handler
@@ -817,6 +830,7 @@ let serve_with_https
         ~certificate_file ~key_file
         ~interface ~port
         ~stop
+        ~prefix
         ~app
         ~error_handler
         user's_dream_handler
@@ -836,17 +850,19 @@ let serve
     ?certificate_string ?key_string
     ?(interface = default_interface) ?(port = default_port)
     ?(stop = never)
+    ?(prefix = "")
     ?(app = Dream.app ())
     ?(error_handler = default_error_handler)
     user's_dream_handler =
 
-  serve_with_https
+  serve_with_maybe_https
     "serve"
     ~https
     ?certificate_file ?key_file
     ?certificate_string ?key_string
     ~interface ~port
     ~stop
+    ~prefix
     ~app
     ~error_handler
     user's_dream_handler
@@ -857,6 +873,7 @@ let run
     ?certificate_string ?key_string
     ?(interface = default_interface) ?(port = default_port)
     ?(stop = never)
+    ?(prefix = "")
     ?(app = Dream.app ())
     ?(error_handler = default_error_handler)
     ?(greeting = true)
@@ -895,13 +912,14 @@ let run
   Lwt_main.run begin
     let open Lwt.Infix in
 
-    serve_with_https
+    serve_with_maybe_https
       "run"
       ~https
       ?certificate_file ?key_file
       ?certificate_string ?key_string
       ~interface ~port
       ~stop
+      ~prefix
       ~app
       ~error_handler
       user's_dream_handler

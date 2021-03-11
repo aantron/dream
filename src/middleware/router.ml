@@ -30,6 +30,14 @@ let apply middlewares routes =
   |> List.map (fun (method_, pattern, handler) ->
     method_, pattern, compose handler middlewares)
 
+(* TODO Need to handle the prefix extension and path chopping. *)
+(* TODO Need to handle variables in the prefix. *)
+let under prefix routes =
+  routes
+  |> List.flatten
+  |> List.map (fun (method_, pattern, handler) ->
+    method_, prefix ^ pattern, handler)
+
 
 
 (* TODO Test with query strings; it should fail. *)

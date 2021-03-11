@@ -1,0 +1,3 @@
+(executable
+ (name subsite)
+ (libraries dream))

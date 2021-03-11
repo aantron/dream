@@ -12,12 +12,6 @@ let cookie = Dream_middleware.Cookie.cookie
 let cookie_option = Dream_middleware.Cookie.cookie_option
 let add_set_cookie = Dream_middleware.Cookie.add_set_cookie
 
-let identity handler request =
-  handler request
-
-let start handler request =
-  handler request
-
 let request_id =
   Dream_middleware_built_in.Request_id.assign
 
@@ -47,23 +41,7 @@ let debug = default_log.debug
 module Request_id = Dream_middleware_built_in.Request_id
 module Log = Dream_middleware.Log
 
-type route = Dream_middleware.Router.route
-
-(* TODO Rename the underlying value. *)
-let crumb =
-  Dream_middleware.Router.crumb
-
-let router =
-  Dream_middleware.Router.router
-
-let get =
-  Dream_middleware.Router.get
-
-let post =
-  Dream_middleware.Router.post
-
-let apply =
-  Dream_middleware.Router.apply
+include Dream_middleware.Router
 
 type session =
   Dream_middleware.Session.t
