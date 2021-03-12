@@ -2,6 +2,8 @@ Insert the `Dream.catch` middleware to have it handle all errors and exceptions
 in one place:
 
 <!-- TODO Link to database example. -->
+<!-- TODO Update in light of exception handler changes -->
+<!-- TODO Show or mention customization? -->
 
 ```ocaml
 let () =

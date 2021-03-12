@@ -70,6 +70,22 @@ end
 module Local = Hmap.Make (Metadata)
 module Global = Hmap.Make (Metadata)
 
+type app = {
+  app_scope : Global.t ref;
+  mutable debug : bool;
+}
+
+let debug app =
+  app.debug
+
+let set_debug value app =
+  app.debug <- value
+
+let app () = {
+  app_scope = ref Global.empty;
+  debug = false;
+}
+
 type 'a message = {
   specific : 'a;
   headers : (string * string) list;
@@ -80,7 +96,7 @@ type 'a message = {
 }
 
 type incoming = {
-  app : Global.t ref;
+  app : app;
   client : string;
   method_ : method_;
   target : string;
@@ -344,11 +360,6 @@ let local key message =
 let with_local key value message =
   update {message with scope = Local.add key value message.scope}
 
-type app = Global.t ref
-
-let app () =
-  ref Global.empty
-
 type 'a global = {
   key : 'a Global.key;
   initializer_ : unit -> 'a;
@@ -360,11 +371,12 @@ let new_global ?debug initializer_ = {
 }
 
 let global {key; initializer_} request =
-  match Global.find key !(request.specific.app) with
+  match Global.find key !(request.specific.app.app_scope) with
   | Some value -> value
   | None ->
     let value = initializer_ () in
-    request.specific.app := Global.add key value !(request.specific.app);
+    request.specific.app.app_scope :=
+      Global.add key value !(request.specific.app.app_scope);
     value
 
 type ('a, 'b) log =

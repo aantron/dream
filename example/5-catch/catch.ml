@@ -1,7 +1,6 @@
 let () =
-  Dream.run
+  Dream.run ~debug:true
   @@ Dream.logger
-  @@ Dream.catch ~debug:true
   @@ Dream.router [
 
     Dream.get "/"
@@ -10,7 +9,7 @@ let () =
 
     Dream.get "/bad"
       (fun _ ->
-        Dream.respond ~status:`Not_found "");
+        Dream.respond ~status:`Forbidden "");
 
     Dream.get "/fail"
       (fun _ ->

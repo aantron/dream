@@ -208,11 +208,6 @@ val start : middleware
 val pipeline : middleware list -> middleware
 val request_id : ?prefix:string -> middleware
 val logger : middleware
-val catch :
-  ?on_error:(debug:bool -> request -> response -> response Lwt.t) ->
-  ?on_exn:(debug:bool -> request -> exn -> response Lwt.t) ->
-  ?debug:bool ->
-    middleware
 (* TODO Some of these helpers actually return handlers. *)
 (* TODO Actually add the ?template argument. *)
 val content_length : ?buffer_streams:bool -> middleware
@@ -329,13 +324,34 @@ type 'a global
 val new_global : ?debug:('a -> string * string) -> (unit -> 'a) -> 'a global
 val global : 'a global -> request -> 'a
 
-type error = [
-  | `Bad_request of string
-  | `Internal_server_error of string
-  | `Exn of exn
-]
+type error = {
+  condition : [
+    | `Response
+    | `String of string
+    | `Exn of exn
+  ];
+  layer : [
+    | `TLS
+    | `HTTP
+    | `HTTP2
+    | `WebSocket
+    | `App
+  ];
+  caused_by : [
+    | `Server
+    | `Client
+  ];
+  request : request option;
+  response : response option;
+  client : string option;
+  severity : Log.level;
+  debug : bool;
+  will_send_response : bool;
+}
 
-type error_handler = Unix.sockaddr -> error -> response Lwt.t
+type error_handler = error -> response option Lwt.t
+
+(* TODO Default error handler customization. *)
 
 (* TODO Reorder arguments. *)
 val serve :
@@ -349,6 +365,7 @@ val serve :
   ?stop:unit Lwt.t ->
   ?prefix:string ->
   ?app:app ->
+  ?debug:bool ->
   ?error_handler:error_handler ->
   handler ->
     unit Lwt.t
@@ -364,6 +381,7 @@ val run :
   ?stop:unit Lwt.t ->
   ?prefix:string ->
   ?app:app ->
+  ?debug:bool ->
   ?error_handler:error_handler ->
   ?greeting:bool ->
   ?stop_on_input:bool ->

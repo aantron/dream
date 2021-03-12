@@ -18,9 +18,6 @@ let request_id =
 let logger =
   Dream__middleware.Log.logger
 
-let catch =
-  Dream__middleware.Catch.catch
-
 let content_length =
   Dream__middleware.Content_length.assign
 
@@ -61,10 +58,8 @@ let form =
 let form_get =
   Dream__middleware.Form.get
 
-type error = Dream__http.Http.error
-type error_handler = Dream__http.Http.error_handler
-let serve = Dream__http.Http.serve
-let run = Dream__http.Http.run
+include Dream__http.Error
+include Dream__http.Http
 
 let random =
   Dream__middleware.Random.random

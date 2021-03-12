@@ -386,11 +386,8 @@ let logger next_handler request =
 
     (fun exn ->
       (* In case of exception, log the exception and the backtrace. *)
-      log.error (fun log ->
+      log.warning (fun log ->
         log ~request "Aborted by: %s" (Printexc.to_string exn));
-      Printexc.get_backtrace ()
-      |> iter_backtrace (fun line -> log.error (fun log ->
-        log ~request "%s" line));
 
       Lwt.fail exn)
 
