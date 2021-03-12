@@ -2,8 +2,10 @@
  (public_name dream_eml)
  (name main)
  (modules main)
- (libraries eml))
+ (libraries eml)
+ (instrumentation (backend bisect_ppx)))
 
 (library
  (name eml)
- (modules eml))
+ (modules eml)
+ (instrumentation (backend bisect_ppx)))

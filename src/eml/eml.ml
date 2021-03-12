@@ -223,10 +223,16 @@ struct
      Matches options until the first space, then scans for %>. *)
   let scan_embedded : char Stream.t -> token =
 
+    (* TODO Actually, it's better to recover. *)
+    let end_of_input () =
+      Printf.ksprintf failwith "Line %i: end of input in embedded code"
+        (fst (Location.current ()) + 1)
+    in
+
     let rec scan_options stream =
       match Stream.peek stream with
       | None ->
-        failwith "End of input in embedded code block"
+        end_of_input ()
       | Some ' ' ->
         Stream.junk stream;
         finish token_buffer
@@ -239,7 +245,7 @@ struct
     let rec scan_code stream =
       match Stream.peek stream with
       | None ->
-        failwith "End of input in embedded code block"
+        end_of_input ()
       | Some '%' ->
         begin match Stream.npeek 2 stream with
         | [_; '>'] ->
