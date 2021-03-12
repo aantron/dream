@@ -5,64 +5,6 @@
 
 
 
-module Command_line :
-sig
-  val parse : unit -> (string * string) list
-end =
-struct
-  let usage = {|Usage:
-
-  eml FILE
-|}
-
-  let input_files =
-    ref []
-
-  let workspace_path =
-    ref ""
-
-  let options = Arg.align [
-    "--workspace",
-    Arg.Set_string workspace_path,
-    "PATH Relative path to the Dune workspace for better locations"
-  ]
-
-  let set_file file =
-    input_files := file::!input_files
-
-  let parse () =
-    Arg.parse options set_file usage;
-
-    if !input_files = [] then begin
-      Arg.usage options usage;
-      exit 2
-    end;
-    let input_files = !input_files in
-
-    let rec build_prefix location prefix path =
-      match Filename.basename path with
-      | component when component = Filename.parent_dir_name ->
-        let directory = Filename.basename location in
-        build_prefix
-          (Filename.dirname location)
-          (Filename.concat directory prefix)
-          (Filename.dirname path)
-      | "" | "." ->
-        prefix
-      | s ->
-        prerr_endline s;
-        Printf.ksprintf failwith
-          "The workspace path may contain only %s components"
-          Filename.parent_dir_name
-    in
-    let prefix = build_prefix (Sys.getcwd ()) "" !workspace_path in
-
-    input_files
-    |> List.map (fun file -> file, Filename.concat prefix file)
-end
-
-
-
 (* Location handling is done by updating a reference with the location of the
    last character read. This is pretty fragile, and depends on the tokenizer
    never looking so far forward as to invalidate the locations that it cares
@@ -173,7 +115,7 @@ end
 
 (* TODO Add start and end information to the end of file exception. *)
 (* The tokenizer responds to some ASCII characters, and passes everything else
-   through unchanged. So, it is UTF-8 safe. *)
+   through unchanged. So, it is UTF-8-safe. *)
 module Tokenizer :
 sig
   val scan : char Stream.t -> token list
@@ -650,9 +592,3 @@ let process_file (input_file, location) =
   |> Transform.coalesce
   |> Transform.trim
   |> Generate.generate location (output_string output_channel)
-
-
-
-let () =
-  Command_line.parse ()
-  |> List.iter process_file
