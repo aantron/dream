@@ -611,20 +611,18 @@ struct
       | `Text text ->
         Printf.ksprintf print "(Buffer.add_string ___eml_buffer %S);\n" text
 
-      (* TODO If there are options, print something else. At least parens. *)
       | `Embedded {line; column; what = "", code} ->
         Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
         Printf.ksprintf print "%s%s\n" (String.make column ' ') code
 
-      | `Embedded {line; column; what = "=", code} ->
-        print "(Buffer.add_string ___eml_buffer (\n";
+      (* TODO SUppress escaping on ! *)
+      (* TODO Need escaping: %s, %S, %c, %C, %a, %t. *)
+      | `Embedded {line; column; what = format, code} ->
+        Printf.ksprintf print "(Printf.bprintf ___eml_buffer %S
+          (\n" ("%" ^ format);
         Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
         Printf.ksprintf print "%s%s\n" (String.make column ' ') code;
         print "));\n"
-
-      (* TODO Print location. *)
-      | `Embedded {what = _, _; _} ->
-        failwith "Unsupported option"
     end
 
   let generate location print templates =
