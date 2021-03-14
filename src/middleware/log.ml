@@ -226,15 +226,19 @@ type level = [
 
 
 (* The "front end." *)
-type source = {
-  error : 'a. ('a, unit) Dream.log;
-  warning : 'a. ('a, unit) Dream.log;
-  info : 'a. ('a, unit) Dream.log;
-  debug : 'a. ('a, unit) Dream.log;
+type ('a, 'b) log_writer =
+  ((?request:Dream.request ->
+   ('a, Stdlib.Format.formatter, unit, 'b) Stdlib.format4 -> 'a) -> 'b) ->
+    unit
+
+type log = {
+  error : 'a. ('a, unit) log_writer;
+  warning : 'a. ('a, unit) log_writer;
+  info : 'a. ('a, unit) log_writer;
+  debug : 'a. ('a, unit) log_writer;
 }
 
-(* TODO LATER source is somehow not a very intuitive name. *)
-let source name =
+let new_log name =
   (* This creates a wrapper, as described above. The wrapper forwards to a
      logger of the Logs library, but instead of passing the formatter m to the
      user's callback, it passes a formatter m', which is like m, but lacks a
@@ -294,7 +298,8 @@ let iter_backtrace f backtrace =
 
 (* Use the above function to create a log source for Log's own middleware, the
    same way any other middleware would. *)
-let log = source "dream.log"
+let log =
+  new_log "dream.log"
 
 
 
@@ -340,6 +345,8 @@ let initialize
 (* The requst logging middleware. *)
 let logger next_handler request =
 
+  let start = Unix.gettimeofday () in
+
   (* Turn on backtrace recording. *)
   if !set_printexc then begin
     Printexc.record_backtrace true;
@@ -359,14 +366,11 @@ let logger next_handler request =
       (Dream.client request)
       user_agent);
 
-  (* Start timing handling of the request, and call into the rest of the app. *)
-  let start = Unix.gettimeofday () in
+  (* Call the rest of the app. *)
   Lwt.try_bind
     (fun () ->
       next_handler request)
     (fun response ->
-      let elapsed = Unix.gettimeofday () -. start in
-
       (* Log the elapsed time. If the response is a redirection, log the
          target. *)
       let location =
@@ -376,6 +380,8 @@ let logger next_handler request =
           | None -> ""
         else ""
       in
+
+      let elapsed = Unix.gettimeofday () -. start in
 
       log.info (fun log -> log ~request "%i%s in %.0f μs"
         (Dream.status_to_int (Dream.status response))

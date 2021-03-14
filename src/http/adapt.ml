@@ -35,7 +35,6 @@ let forward_body
 
   send_body ()
 
-(* TODO Factor out commonalities. *)
 let forward_body_h2
     (response : Dream.response)
     (body : [ `write ] H2.Body.t) =

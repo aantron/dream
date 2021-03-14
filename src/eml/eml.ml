@@ -121,7 +121,6 @@ struct
       Printf.sprintf "(%i, %i) Embedded (%s) %s" (line + 1) column options code
 end
 
-(* TODO Add start and end information to the end of file exception. *)
 (* The tokenizer responds to some ASCII characters, and passes everything else
    through unchanged. So, it is UTF-8-safe. *)
 module Tokenizer :
@@ -239,16 +238,10 @@ struct
      Matches options until the first space, then scans for %>. *)
   let scan_embedded : char Stream.t -> token =
 
-    (* TODO Actually, it's better to recover. *)
-    let end_of_input () =
-      Printf.ksprintf failwith "Line %i: end of input in embedded code"
-        (fst (Location.current ()) + 1)
-    in
-
     let rec scan_options stream =
       match Stream.peek stream with
       | None ->
-        end_of_input ()
+        finish token_buffer
       | Some ' ' ->
         Stream.junk stream;
         finish token_buffer
@@ -261,7 +254,7 @@ struct
     let rec scan_code stream =
       match Stream.peek stream with
       | None ->
-        end_of_input ()
+        finish token_buffer
       | Some '%' ->
         begin match Stream.npeek 2 stream with
         | [_; '>'] ->

@@ -13,6 +13,9 @@ module Dream = Dream__pure.Inmost
    templates and/or do logging. *)
 
 val default : Error.error_handler
+val customize :
+  (debug_info:string option -> Dream.response -> Dream.response Lwt.t) ->
+    Error.error_handler
 
 
 
@@ -43,9 +46,17 @@ val tls :
     (Unix.sockaddr -> exn -> unit)
 
 val websocket :
-  Dream.app ->
   Error.error_handler ->
-  Unix.sockaddr ->
   Dream.request ->
   Dream.response ->
     (Websocketaf.Wsd.t -> [ `Exn of exn ] -> unit)
+
+val websocket_handshake :
+  Error.error_handler ->
+    (Dream.request -> Dream.response -> string -> Dream.response Lwt.t)
+
+
+
+
+(* Logger also used by elsewhere in the HTTP integration. *)
+val log : Dream__middleware.Log.log

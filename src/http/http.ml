@@ -207,8 +207,7 @@ let wrap_handler
         | Some user's_websocket_handler ->
 
           let error_handler =
-            Error_handler.websocket
-              app user's_error_handler client_address request response in
+            Error_handler.websocket user's_error_handler request response in
 
           let proceed () =
             Websocketaf.Server_connection.create_websocket
@@ -223,13 +222,9 @@ let wrap_handler
           Websocketaf.Handshake.respond_with_upgrade ~headers ~sha1 conn proceed
           |> function
           | Ok () -> Lwt.return_unit
-          | Error _string ->
-            assert false
-            (* TODO Need error handling here, too! *)
-            (* user's_error_handler
-              client_address
-              (`Bad_request ("WebSocket: " ^ string)) *)
-
+          | Error error_string ->
+            Error_handler.websocket_handshake
+              user's_error_handler request response error_string
             >>= forward_response
 
       end
@@ -304,13 +299,17 @@ let wrap_handler_h2
         let forward_response response =
           (* TODO Automatic setting of Content-Length is a bad idea, actually,
              for HTTP/2. Need to be careful about headers. *)
-          (* let headers =
-            H2.Headers.of_list (Dream.all_headers response) in *)
+          let headers =
+            Dream.all_headers response
+            |> List.filter (fun (name, _) ->
+              String.lowercase_ascii name <> "content-length")
+            |> H2.Headers.of_list
+          in
 
           let status =
             to_httpaf_status (Dream.status response) in
           let httpaf_response =
-            H2.Response.create status in
+            H2.Response.create ~headers status in
           let body =
             H2.Reqd.respond_with_streaming conn httpaf_response in
 
@@ -343,9 +342,8 @@ let wrap_handler_h2
 
 
 
-(* TODO Replace by the logs from error.ml. *)
 let log =
-  Dream__middleware.Log.source "dream.http"
+  Error_handler.log
 
 
 
@@ -453,12 +451,14 @@ let ocaml_tls = {
 let serve_with_details
     caller_function_for_error_messages
     tls_library
-    ~certificate_file ~key_file
-    ~interface ~port
+    ~interface
+    ~port
     ~stop
+    ~error_handler
     ~prefix
     ~app
-    ~error_handler
+    ~certificate_file
+    ~key_file
     user's_dream_handler =
 
   (* TODO DOC *)
@@ -552,30 +552,36 @@ let serve_with_details
 (* TODO Validate the prefix here. *)
 let serve_with_maybe_https
     caller_function_for_error_messages
+    ~interface
+    ~port
+    ~stop
+    ?debug
+    ~error_handler
+    ~prefix
+    ~app
     ~https
     ?certificate_file ?key_file
     ?certificate_string ?key_string
-    ~interface ~port
-    ~stop
-    ~prefix
-    ~app
-    ~debug
-    ~error_handler
     user's_dream_handler =
 
-  Dream.set_debug debug app;
+  begin match debug with
+  | Some debug -> Dream.set_debug debug app;
+  | None -> ()
+  end;
 
   match https with
   | `No ->
     serve_with_details
       caller_function_for_error_messages
       no_tls
-      ~certificate_file:"" ~key_file:""
-      ~interface ~port
+      ~interface
+      ~port
       ~stop
+      ~error_handler
       ~prefix
       ~app
-      ~error_handler
+      ~certificate_file:""
+      ~key_file:""
       user's_dream_handler
 
   | `OpenSSL | `OCaml_TLS as tls_library ->
@@ -628,12 +634,14 @@ let serve_with_maybe_https
       serve_with_details
         caller_function_for_error_messages
         tls_library
-        ~certificate_file ~key_file
-        ~interface ~port
+        ~interface
+        ~port
         ~stop
+        ~error_handler
         ~prefix
         ~app
-        ~error_handler
+        ~certificate_file
+        ~key_file
         user's_dream_handler
 
     | `Memory (certificate_string, key_string, verbose_or_silent) ->
@@ -661,12 +669,14 @@ let serve_with_maybe_https
       serve_with_details
         caller_function_for_error_messages
         tls_library
-        ~certificate_file ~key_file
-        ~interface ~port
+        ~interface
+        ~port
         ~stop
+        ~error_handler
         ~prefix
         ~app
-        ~error_handler
+        ~certificate_file
+        ~key_file
         user's_dream_handler
 
       end
@@ -679,40 +689,49 @@ let default_port = 8080
 let never = fst (Lwt.wait ())
 
 let serve
-    ?(https = `No)
-    ?certificate_file ?key_file
-    ?certificate_string ?key_string
-    ?(interface = default_interface) ?(port = default_port)
+    ?(interface = default_interface)
+    ?(port = default_port)
     ?(stop = never)
-    ?(prefix = "")
-    ?(app = Dream.app ())
-    ?(debug = false)
+    ?debug
     ?(error_handler = Error_handler.default)
+    ?(prefix = "")
+    ?(app = Dream.new_app ())
+    ?(https = `No)
+    ?certificate_file
+    ?key_file
+    ?certificate_string
+    ?key_string
     user's_dream_handler =
 
   serve_with_maybe_https
     "serve"
-    ~https
-    ?certificate_file ?key_file
-    ?certificate_string ?key_string
-    ~interface ~port
+    ~interface
+    ~port
     ~stop
+    ?debug
+    ~error_handler
     ~prefix
     ~app
-    ~debug
-    ~error_handler
+    ~https
+    ?certificate_file
+    ?key_file
+    ?certificate_string
+    ?key_string
     user's_dream_handler
 
 let run
-    ?(https = `No)
-    ?certificate_file ?key_file
-    ?certificate_string ?key_string
-    ?(interface = default_interface) ?(port = default_port)
+    ?(interface = default_interface)
+    ?(port = default_port)
     ?(stop = never)
-    ?(prefix = "")
-    ?(app = Dream.app ())
-    ?(debug = false)
+    ?debug
     ?(error_handler = Error_handler.default)
+    ?(prefix = "")
+    ?(app = Dream.new_app ())
+    ?(https = `No)
+    ?certificate_file
+    ?key_file
+    ?certificate_string
+    ?key_string
     ?(greeting = true)
     ?(stop_on_input = true)
     ?(graceful_stop = true)
@@ -722,7 +741,7 @@ let run
 
   if greeting then begin
     let scheme =
-      if `https = `No then
+      if https = `No then
         "http"
       else
         "https"
@@ -751,15 +770,16 @@ let run
 
     serve_with_maybe_https
       "run"
+      ~interface
+      ~port
+      ~stop
+      ?debug
+      ~error_handler
+      ~prefix
+      ~app
       ~https
       ?certificate_file ?key_file
       ?certificate_string ?key_string
-      ~interface ~port
-      ~stop
-      ~prefix
-      ~app
-      ~debug
-      ~error_handler
       user's_dream_handler
     >>= fun () ->
 

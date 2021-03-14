@@ -166,7 +166,13 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "let foo =\n  <%";
-  [%expect {| Line 2: end of input in embedded code |}]
+  [%expect {xxx|
+    (1, 0) Code_block
+    let foo =
+
+    Text {|  |}
+    (2, 4) Embedded ()
+    Text {||} |xxx}]
 
 let%expect_test _ =
   show "let foo =\n  <%\na %>";
@@ -181,14 +187,20 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "let foo =\n  <% \n a";
-  [%expect {| Line 3: end of input in embedded code |}]
+  [%expect {xxx|
+    (1, 0) Code_block
+    let foo =
+
+    Text {|  |}
+    (2, 5) Embedded ()
+     a
+    Text {||} |xxx}]
 
 let%expect_test _ =
   show "let foo =\n  <html>\n\na";
   [%expect {xxx|
     (1, 0) Code_block
-
-     alet foo =
+    let foo =
 
     Text {|  <html>|}
     Newline

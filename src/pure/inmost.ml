@@ -62,16 +62,14 @@ type body = [
   | `Reading of buffered_body Lwt.t
 ]
 
-module Metadata =
+module Scope_variable_metadata =
 struct
   type 'a t = ('a -> string * string) option
 end
-
-module Local = Hmap.Make (Metadata)
-module Global = Hmap.Make (Metadata)
+module Scope = Hmap.Make (Scope_variable_metadata)
 
 type app = {
-  app_scope : Global.t ref;
+  globals : Scope.t ref;
   mutable debug : bool;
 }
 
@@ -81,8 +79,8 @@ let debug app =
 let set_debug value app =
   app.debug <- value
 
-let app () = {
-  app_scope = ref Global.empty;
+let new_app () = {
+  globals = ref Scope.empty;
   debug = false;
 }
 
@@ -90,7 +88,7 @@ type 'a message = {
   specific : 'a;
   headers : (string * string) list;
   body : body ref;
-  scope : Local.t;
+  locals : Scope.t;
   first : 'a message;
   last : 'a message ref;
 }
@@ -156,9 +154,6 @@ let prefix request =
 let path request =
   Formats.make_path request.specific.path
 
-(* let path request =
-  request.specific.path *)
-
 let version request =
   request.specific.request_version
 
@@ -167,9 +162,6 @@ let with_client client request =
 
 let with_method_ method_ request =
   update {request with specific = {request.specific with method_}}
-
-(* let with_target target request =
-  update {request with specific = {request.specific with target}} *)
 
 let with_prefix prefix request =
   update {request with specific = {request.specific with prefix}}
@@ -344,45 +336,54 @@ let reason response =
 let is_websocket response =
   response.specific.websocket
 
-type 'a local = 'a Local.key
+let fold_scope f initial scope =
+  Scope.fold (fun (B (key, value)) accumulator ->
+    match Scope.Key.info key with
+    | None -> accumulator
+    | Some converter ->
+      let key_name, value_string = converter value in
+      f key_name value_string accumulator)
+    scope
+    initial
+
+type 'a local = 'a Scope.key
 
 let new_local ?debug () =
-  Local.Key.create debug
-
-let local_option key message =
-  Local.find key message.scope
+  Scope.Key.create debug
 
 let local key message =
-  match local_option key message with
-  | Some value -> value
-  | None -> raise Not_found
+  Scope.find key message.locals
 
 let with_local key value message =
-  update {message with scope = Local.add key value message.scope}
+  update {message with locals = Scope.add key value message.locals}
+
+let fold_locals f initial message =
+  fold_scope f initial message.locals
 
 type 'a global = {
-  key : 'a Global.key;
+  key : 'a Scope.key;
   initializer_ : unit -> 'a;
 }
 
 let new_global ?debug initializer_ = {
-  key = Global.Key.create debug;
+  key = Scope.Key.create debug;
   initializer_;
 }
 
 let global {key; initializer_} request =
-  match Global.find key !(request.specific.app.app_scope) with
+  match Scope.find key !(request.specific.app.globals) with
   | Some value -> value
   | None ->
     let value = initializer_ () in
-    request.specific.app.app_scope :=
-      Global.add key value !(request.specific.app.app_scope);
+    request.specific.app.globals :=
+      Scope.add key value !(request.specific.app.globals);
     value
 
-type ('a, 'b) log =
-  ((?request:request ->
-   ('a, Stdlib.Format.formatter, unit, 'b) Stdlib.format4 -> 'a) -> 'b) ->
-    unit
+let fold_globals f initial request =
+  fold_scope f initial !(request.specific.app.globals)
+
+let app request =
+  request.specific.app
 
 let request_from_http
     ~app
@@ -406,7 +407,7 @@ let request_from_http
     };
     headers;
     body = ref (`Bigstring_stream body);
-    scope = Local.empty;
+    locals = Scope.empty;
     first = request; (* TODO LATER What OCaml version is required for this? *)
     last = ref request;
   } in
@@ -434,7 +435,7 @@ let request
     body =
 
   request_from_http
-    ~app:(app ())
+    ~app:(new_app ())
     ~client
     ~method_
     ~target
@@ -461,7 +462,7 @@ let response
     };
     headers;
     body = ref `Empty;
-    scope = Local.empty;
+    locals = Scope.empty;
     first = response;
     last = ref response;
   } in
@@ -502,7 +503,5 @@ let rec pipeline middlewares =
 let sort_headers headers =
   List.stable_sort (fun (name, _) (name', _) -> compare name name') headers
 
-(* TODO Constrain this module by an inner signature to make optimization
-   safe. *)
 (* TODO Factor out body code into module Body, maybe also Stream. *)
 (* TODO Declare a stream type and replace all "k" by more or feed. *)

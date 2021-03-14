@@ -41,7 +41,8 @@ let cookie = "session"
 
 (* TODO LATER Rearrange, this is just a calque of the earlier webapp session
    middleware. *)
-let log = Dream.Log.source name
+let log =
+  Dream.Log.new_log name
 
 type stored = {
   person : string option;
@@ -90,7 +91,7 @@ let key =
 (* TODO Rename. *)
 (* TODO A neat error message if the session is missing when expected. *)
 let get request =
-  Dream.local key request
+  Dream.local key request |> Option.get
 
 let switch ?person response =
   let open Lwt.Infix in
@@ -130,7 +131,7 @@ let check handler request =
   >>= fun response ->
 
   let outgoing_key =
-    match Dream.local_option key response, fresh with
+    match Dream.local key response, fresh with
     | Some session, _ -> Some (session_key session)
     | None, true -> Some (session_key session)
     | None, false -> None

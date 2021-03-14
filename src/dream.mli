@@ -163,12 +163,7 @@ val version : request -> int * int
 
 val with_client : string -> request -> request
 val with_method_ : method_ -> request -> request
-(* val with_target : string -> request -> request *)
 val with_version : int * int -> request -> request
-(* TODO Generalize version to work with responses. *)
-(* TODO How should with_target interact with the prefix? *)
-
-(* TODO Expose path. *)
 
 val header : string -> _ message -> string option
 val headers : string -> _ message -> string list
@@ -179,15 +174,13 @@ val add_header : string -> string -> 'a message -> 'a message
 val drop_header : string -> 'a message -> 'a message
 val with_header : string -> string -> 'a message -> 'a message
 
-(* TODO Consider adding Dream.or_exn, Dream.bad_response_exns, and some
+(* TODO LATER Consider adding Dream.or_exn, Dream.bad_response_exns, and some
    state. Show how to apply a middleware right at a handler. *)
 
 val cookies : request -> (string * string) list
 val cookie : string -> request -> string
 val cookie_option : string -> request -> string option
 (* TODO All the optionals for Set-Cookie. *)
-(* TODO set_cookie vs. with_cookie... OTOH this is a nice way to distinguish
-   the header fields. *)
 (* TODO Or just provide one helper for formatting Set-Cookie and let the user
    use the header calls to actually add the header...? How often do we need to
    set a cookie? *)
@@ -208,8 +201,6 @@ val start : middleware
 val pipeline : middleware list -> middleware
 val request_id : ?prefix:string -> middleware
 val logger : middleware
-(* TODO Some of these helpers actually return handlers. *)
-(* TODO Actually add the ?template argument. *)
 val content_length : ?buffer_streams:bool -> middleware
 val synchronous : (request -> response) -> handler
 
@@ -217,14 +208,11 @@ type route
 
 val get : string -> handler -> route
 val post : string -> handler -> route
+(* TODO LATER Define helpers for other methods. *)
 
-(* val apply : middleware list -> route list -> route
-val under : string -> route list -> route *)
 val scope : string -> middleware list -> route list -> route
 
 val router : route list -> middleware
-(* TODO LATER Define helpers for other methods. *)
-(* TODO FINALLY the prefix middleware and prefixer in the router. *)
 val crumb : string -> request -> string
 
 (* TODO For a form, you almost always match against a fixed set of fields. But
@@ -257,17 +245,7 @@ val websocket : (string -> string Lwt.t) -> response Lwt.t
 type 'a local
 
 val new_local : ?debug:('a -> string * string) -> unit -> 'a local
-(* TODO But this is annoying for locals and globals - those are generally always
-   present by the time they are required.....................................
-   It would absolutely suck to have to handle None for things that will not
-   fail in a correctly-composed application, i.e. the presence of locals and
-   globals is under the user's control, rather than due to the request. So it's
-   probably better to leave local and global as returning bare values by
-   default... OTOH, who ever directly reads locals and globals? It is only done
-   in middleware. Maybe it is better to require middleware authors to handle
-   missing locals/globals for robustness' sake. *)
-val local : 'a local -> _ message -> 'a
-val local_option : 'a local -> _ message -> 'a option
+val local : 'a local -> _ message -> 'a option
 val with_local : 'a local -> 'a -> 'b message -> 'b message
 
 module Request_id :
@@ -277,33 +255,32 @@ end
 
 val log : ('a, Format.formatter, unit, unit) format4 -> 'a
 
-type ('a, 'b) log =
+type ('a, 'b) log_writer =
   ((?request:request ->
   ('a, Format.formatter, unit, 'b) format4 -> 'a) -> 'b) ->
     unit
 
-val error : ('a, unit) log
-val warning : ('a, unit) log
-val info : ('a, unit) log
-val debug : ('a, unit) log
+val error : ('a, unit) log_writer
+val warning : ('a, unit) log_writer
+val info : ('a, unit) log_writer
+val debug : ('a, unit) log_writer
 
 module Log :
 sig
-  type source = {
-    error : 'a. ('a, unit) log;
-    warning : 'a. ('a, unit) log;
-    info : 'a. ('a, unit) log;
-    debug : 'a. ('a, unit) log;
-  }
-
-  val source : string -> source
-
   type level = [
     | `Error
     | `Warning
     | `Info
     | `Debug
   ]
+
+  (* TODO Well, the type name conflicts... *)
+  type log = {
+    error : 'a. ('a, unit) log_writer;
+    warning : 'a. ('a, unit) log_writer;
+    info : 'a. ('a, unit) log_writer;
+    debug : 'a. ('a, unit) log_writer;
+  }
 
   val initialize :
     ?backtraces:bool ->
@@ -313,11 +290,12 @@ sig
     unit ->
       unit
 
-  val iter_backtrace : (string -> unit) -> string -> unit
+  (* val iter_backtrace : (string -> unit) -> string -> unit *)
 end
 
-(* TODO Rename to new_app. *)
-val app : unit -> app
+val new_log : string -> Log.log
+
+val new_app : unit -> app
 
 type 'a global
 
@@ -351,38 +329,38 @@ type error = {
 
 type error_handler = error -> response option Lwt.t
 
-(* TODO Default error handler customization. *)
+val error_handler_with_template :
+  (debug_info:string option -> response -> response Lwt.t) -> error_handler
 
-(* TODO Reorder arguments. *)
 val serve :
+  ?interface:string ->
+  ?port:int ->
+  ?stop:unit Lwt.t ->
+  ?debug:bool ->
+  ?error_handler:error_handler ->
+  ?prefix:string ->
+  ?app:app ->
   ?https:[ `No | `OpenSSL | `OCaml_TLS ] ->
   ?certificate_file:string ->
   ?key_file:string ->
   ?certificate_string:string ->
   ?key_string:string ->
-  ?interface:string ->
-  ?port:int ->
-  ?stop:unit Lwt.t ->
-  ?prefix:string ->
-  ?app:app ->
-  ?debug:bool ->
-  ?error_handler:error_handler ->
   handler ->
     unit Lwt.t
 
 val run :
+  ?interface:string ->
+  ?port:int ->
+  ?stop:unit Lwt.t ->
+  ?debug:bool ->
+  ?error_handler:error_handler ->
+  ?prefix:string ->
+  ?app:app ->
   ?https:[ `No | `OpenSSL | `OCaml_TLS ] ->
   ?certificate_file:string ->
   ?key_file:string ->
   ?certificate_string:string ->
   ?key_string:string ->
-  ?interface:string ->
-  ?port:int ->
-  ?stop:unit Lwt.t ->
-  ?prefix:string ->
-  ?app:app ->
-  ?debug:bool ->
-  ?error_handler:error_handler ->
   ?greeting:bool ->
   ?stop_on_input:bool ->
   ?graceful_stop:bool ->
@@ -418,19 +396,7 @@ val sort_headers : (string * string) list -> (string * string) list
 (* TODO DOC Give people a tip: a basic response needs either content-length or
    connection: close. *)
 
-(* TODO Add exception Dream.Response/Dream.Respond. *)
+(* TODO LATER Add exception Dream.Response/Dream.Respond. *)
 
 (* TODO DOC attempt some graphic that shows what getters retrieve what from the
    response. *)
-
-(**/**)
-
-(* TODO These are probably unnecessary. *)
-val test_parse_target : string -> string list * string
-  [@@ocaml.deprecated "Exposed only for testing"]
-
-val test_internal_prefix : request -> string list
-  [@@ocaml.deprecated "Exposed only for testing"]
-
-val test_internal_path : request -> string list
-  [@@ocaml.deprecated "Exposed only for testing"]

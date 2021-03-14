@@ -105,10 +105,20 @@ let scope prefix middlewares routes =
 let crumbs : (string * string) list Dream.local =
   Dream.new_local ()
 
-let crumb index request =
-  try List.assoc index (Dream.local crumbs request)
-  with _ -> Printf.ksprintf failwith "Invalid path parameter '%s'" index
-  (* TODO Should this be logged? *)
+let log =
+  Log.new_log "dream.router"
+
+let missing_crumb name =
+  let message = Printf.sprintf "Missing path parameter (Dream.crumb) %S" name in
+  log.error (fun log -> log "%s" message);
+  failwith message
+
+let crumb name request =
+  match Dream.local crumbs request with
+  | None -> missing_crumb name
+  | Some crumbs ->
+    try List.assoc name crumbs
+    with _ -> missing_crumb name
 
 let router routes =
   let routes = List.flatten routes in

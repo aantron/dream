@@ -5,6 +5,11 @@
 
 
 
+let () =
+  ignore Initialize.require
+
+
+
 let show_tokens route =
   try
     Dream__middleware.Router.parse route
@@ -228,7 +233,7 @@ let%expect_test _ =
       Dream.respond (Dream.crumb "x" request));
   ];
   [%expect {|
-    Invalid path parameter 'x' |}]
+    Missing path parameter (Dream.crumb) "x" |}]
 
 (* Router applies middlewares. *)
 

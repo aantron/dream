@@ -13,7 +13,7 @@ struct
 end
 
 let log =
-  Dream.Log.source "dream.form"
+  Dream.Log.new_log "dream.form"
 
 let sort form =
   List.stable_sort (fun (key, _) (key', _) -> String.compare key key') form
@@ -41,7 +41,7 @@ let urlencoded handler request =
 
 (* TODO Use the optional. *)
 let get request =
-  Dream.local key request
+  Dream.local key request |> Option.get
   (* try
     Opium.Context.find_exn key req.env
   with exn ->

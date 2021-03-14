@@ -17,7 +17,7 @@ depends: [
   "uri"
 
   # Testing, development.
-  "alcotest" {with-test}  # TODO Needs constraint.
+  "alcotest" {with-test}  # TODO LATER Needs constraint.
   "bisect_ppx" {dev & >= "2.5.0"}  # --instrument-with.
 
   # Currently vendored.

@@ -24,11 +24,11 @@ let content_length =
 let synchronous next_handler request =
   Lwt.return (next_handler request)
 
-let log =
-  Dream__middleware.Log.convenience_log
+type ('a, 'b) log_writer =
+  ('a, 'b) Dream__middleware.Log.log_writer
 
 let default_log =
-  Dream__middleware.Log.source (Logs.Src.name Logs.default)
+  Dream__middleware.Log.new_log (Logs.Src.name Logs.default)
 
 let error = default_log.error
 let warning = default_log.warning
@@ -37,6 +37,9 @@ let debug = default_log.debug
 
 module Request_id = Dream__middleware__built_in.Request_id
 module Log = Dream__middleware.Log
+
+let new_log =
+  Log.new_log
 
 include Dream__middleware.Router
 
@@ -61,6 +64,9 @@ let form_get =
 include Dream__http.Error
 include Dream__http.Http
 
+let error_handler_with_template =
+  Dream__http.Error_handler.customize
+
 let random =
   Dream__middleware.Random.random
 
@@ -80,14 +86,5 @@ let test ?(prefix = "") handler request =
   |> Dream__middleware__built_in.Built_in.middleware handler
   |> Lwt_main.run
 
-let test_parse_target =
-  Dream__pure.Formats.parse_target
-
-let test_internal_prefix =
-  internal_prefix
-
-let test_internal_path =
-  internal_path
-
-(* let test_parse_route =
-  Dream_middleware.Router.parse *)
+let log =
+  Dream__middleware.Log.convenience_log

@@ -15,10 +15,8 @@ module Dream = Dream__pure.Inmost
    an app. *)
 
 let log =
-  Dream__middleware.Log.source "dream.http"
+  Dream__middleware.Log.new_log "dream.http"
 
-(* TODO Probably need a logging function that takes a severity as an
-   argument. *)
 let select_log = function
   | `Error -> log.error
   | `Warning -> log.warning
@@ -97,15 +95,26 @@ let dump (error : Error.error) =
       major minor;
 
     Dream.all_headers last
-    |> List.iter (fun (name, value) -> p "\n%s: %s" name value)
+    |> List.iter (fun (name, value) -> p "\n%s: %s" name value);
 
-    (* TODO Show locals and globals. *)
+    let show_variables kind =
+      kind (fun name value first ->
+        if first then
+          p "\n";
+        p "\n%s: %s" name value;
+        false)
+        true
+        request
+      |> ignore
+    in
+    show_variables Dream.fold_locals;
+    show_variables Dream.fold_globals
   end;
 
   Buffer.contents buffer
 
-(* TODO Some library is registering S-exp-based printers for expressions, which
-   are calling functions that use exceptions during parsing, which are
+(* TODO LATER Some library is registering S-exp-based printers for expressions,
+   which are calling functions that use exceptions during parsing, which are
    clobbering the backtrace. *)
 let customize template (error : Error.error) =
 
@@ -175,13 +184,13 @@ let customize template (error : Error.error) =
        site of the error handler already has error handlers for catching double
        faults. *)
     response
-    |> template debug_info
+    |> template ~debug_info
     |> Lwt.map (fun response -> Some response)
 
 
 
-(* TODO Make a nice default template. *)
-let default_template debug_info response =
+(* TODO LATER Make a nice default template. *)
+let default_template ~debug_info response =
   let response =
     match debug_info with
     | None -> response
@@ -309,30 +318,33 @@ let httpaf
     fun client_address ?request error start_response ->
 
   ignore (request : Httpaf.Request.t option);
-  (* TODO Should factor out the request translation function and use it to
+  (* TODO LATER Should factor out the request translation function and use it to
      partially recover the request info. *)
 
-  (* TODO Clean up. *)
-  let condition, severity =
+  let condition, severity, caused_by =
     match error with
-    | `Exn exn -> `Exn exn, `Error
-    | `Bad_request
-    | `Bad_gateway -> `String "Bad request", `Warning
-    | `Internal_server_error ->
-      `String "Content-Length missing or negative", `Error
-  in
+    | `Exn exn ->
+      `Exn exn,
+      `Error,
+      `Server
 
-  let caused_by =
-    match error with
-    | `Bad_request -> `Client
-    | _ -> `Server
+    | `Bad_request
+    | `Bad_gateway ->
+      `String "Bad request",
+      `Warning,
+      `Client
+
+    | `Internal_server_error ->
+      `String "Content-Length missing or negative",
+      `Error,
+      `Server
   in
 
   let error = Error.{
     condition;
     layer = `HTTP;
     caused_by;
-    request = None; (* TODO *)
+    request = None;
     response = None;
     client = Some (Adapt.address_to_string client_address);
     severity;
@@ -371,26 +383,30 @@ let h2
 
   ignore request; (* TODO Recover something from the request. *)
 
-  let condition, severity =
+  let condition, severity, caused_by =
     match error with
-    | `Exn exn -> `Exn exn, `Error
-    | `Bad_request -> `String "Bad request", `Warning
-    | `Internal_server_error ->
-      `String "Content-Length missing or negative", `Error
-      (* TODO When does H2 raise `Internal_server_error? *)
-  in
+    | `Exn exn ->
+      `Exn exn,
+      `Error,
+      `Server
 
-  let caused_by =
-    match error with
-    | `Bad_request -> `Client
-    | _ -> `Server
+    | `Bad_request ->
+      `String "Bad request",
+      `Warning,
+      `Client
+
+    | `Internal_server_error ->
+      `String "Content-Length missing or negative",
+      `Error,
+      `Server
+      (* TODO LATER When does H2 raise `Internal_server_error? *)
   in
 
   let error = Error.{
     condition;
     layer = `HTTP2;
     caused_by;
-    request = None; (* TODO *)
+    request = None;
     response = None;
     client = Some (Adapt.address_to_string client_address);
     severity;
@@ -451,7 +467,7 @@ let tls
 
 
 let websocket
-    app user's_error_handler client_address request response =
+    user's_error_handler request response =
     fun socket error ->
 
   (* Note: in this function, request and response are from the original request
@@ -469,9 +485,9 @@ let websocket
     caused_by = `Server;
     request = Some request;
     response = Some response;
-    client = Some (Adapt.address_to_string client_address);
+    client = Some (Dream.client request);
     severity = `Warning;   (* Not sure what these errors are, yet. *)
-    debug = Dream.debug app;
+    debug = Dream.debug (Dream.app request);
     will_send_response = false;
   } in
 
@@ -479,3 +495,23 @@ let websocket
     double_faults
       (fun () -> Lwt.map ignore (user's_error_handler error))
       Lwt.return)
+
+
+
+let websocket_handshake
+    user's_error_handler =
+    fun request response error_string ->
+
+  let error = Error.{
+    condition = `String error_string;
+    layer = `WebSocket;
+    caused_by = `Client;
+    request = Some request;
+    response = Some response;
+    client = Some (Dream.client request);
+    severity = `Warning;
+    debug = Dream.debug (Dream.app request);
+    will_send_response = true;
+  } in
+
+  respond_with_option (fun () -> user's_error_handler error)

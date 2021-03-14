@@ -4,6 +4,7 @@
   base
   dream
   dream.middleware
+  dream.pure
   eml
   lwt.unix
   ppx_expect.common

@@ -6,7 +6,7 @@
 
 
 let show path =
-  let components, query = Dream.test_parse_target path [@ocaml.warning "-3"] in
+  let components, query = Dream__pure.Formats.parse_target path in
 
   components
   |> List.map (Printf.sprintf "\"%s\"")

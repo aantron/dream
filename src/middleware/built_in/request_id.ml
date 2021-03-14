@@ -70,7 +70,7 @@ let get_option ?request () =
     match request with
     | None -> None
     | Some request ->
-      Dream.local_option id request
+      Dream.local id request
   in
 
   (* If no id was found from the maybe-request, look in the promise-chain-local
