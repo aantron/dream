@@ -53,10 +53,11 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "let foo =\n < bar";
-  [%expect {|
+  [%expect {xxx|
     (1, 0) Code_block
     let foo =
-     < bar |}]
+
+    Text {| < bar|} |xxx}]
 
 let%expect_test _ =
   show "let foo =\n  < bar";
@@ -267,3 +268,50 @@ let%expect_test _ =
     Newline
     (4, 1) Embedded ()  bar
     Text {||} |xxx}]
+
+let%expect_test _ =
+  show "let foo\n  <html>\n \n% bar";
+  [%expect {xxx|
+    (1, 0) Code_block
+    let foo
+
+    Text {|  <html>|}
+    Newline
+    Text {| |}
+    Newline
+    (4, 1) Embedded ()  bar
+    Text {||} |xxx}]
+
+let%expect_test _ =
+  show "let foo\n %% a = b\n bar";
+  [%expect {xxx|
+    (1, 0) Code_block
+    let foo
+
+    Options  a = b
+    Text {| bar|} |xxx}]
+
+let%expect_test _ =
+  show "let foo\n %% a = b\n bar\n %%\n baz";
+  [%expect {xxx|
+    (1, 0) Code_block
+    let foo
+
+    Options  a = b
+    Text {| bar|}
+    Newline
+    (5, 0) Code_block
+     baz |xxx}]
+
+let%expect_test _ =
+  show "let foo\n %% a = b\n %%";
+  [%expect {|
+    (1, 0) Code_block
+    let foo
+
+    Options  a = b
+    (3, 3) Code_block |}]
+
+let%expect_test _ =
+  show "let foo\n %% a = b\n %% c\n";
+  [%expect {| Line 2: text following closing '%%' |}]

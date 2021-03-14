@@ -72,6 +72,11 @@ type code_block_token = [
   | `Code_block of string with_location
 ]
 
+type options_token = [
+  (* Passes template-wide options to the template code generator phase. *)
+  | `Options of string
+]
+
 type newline_token = [
   (* A newline character within template text. The tokenizer notes these for
      future passes that un-indent the template and remove lines containing only
@@ -93,6 +98,7 @@ type template_token = [
 
 type token = [
   | code_block_token
+  | options_token
   | newline_token
   | template_token
 ]
@@ -105,6 +111,8 @@ struct
   let show = function
     | `Code_block {line; column; what = code} ->
       Printf.sprintf "(%i, %i) Code_block\n%s" (line + 1) column code
+    | `Options options ->
+      Printf.sprintf "Options %s" options
     | `Text payload ->
       Printf.sprintf "Text {|%s|}" payload
     | `Newline ->
@@ -135,6 +143,16 @@ struct
     Buffer.clear buffer;
     result
 
+  let rec scan_whitespace stream columns =
+    match Stream.peek stream with
+    | Some ' ' ->
+      Buffer.add_char lookahead_buffer ' ';
+      Stream.junk stream;
+      scan_whitespace stream (columns + 1)
+    | _ ->
+      finish lookahead_buffer
+
+
   (* Consumes all characters line-by-line, until a line begins with at least two
      spaces followed by <. At the end of this scan, the stream is at the first
      significant character on the line that ended the code block, or at the end
@@ -143,24 +161,18 @@ struct
   let scan_code_block : char Stream.t -> token * string =
 
     let is_template_line stream : bool * string =
-      let rec scan_whitespace columns =
-        match Stream.peek stream with
-        | Some ' ' ->
-          Stream.junk stream;
-          Buffer.add_char lookahead_buffer ' ';
-          scan_whitespace (columns + 1)
-        | Some '<' ->
-          columns >= 2
-        | _ ->
-          false
-      in
-
       match Stream.peek stream with
       | Some '%' ->
         true, ""
       | _ ->
-        let result = scan_whitespace 0 in
-        result, finish lookahead_buffer
+        let leading_whitespace = scan_whitespace stream 0 in
+        match Stream.npeek 2 stream with
+        | '<'::_ ->
+          String.length leading_whitespace >= 1, leading_whitespace
+        | ['%'; '%'] ->
+          true, leading_whitespace
+        | _ ->
+          false, leading_whitespace
     in
 
     let rec scan_lines stream =
@@ -307,6 +319,27 @@ struct
         what = "", scan_code stream;
       }
 
+  (* Called at '%%' when a template terminator is encountered. *)
+  let scan_terminator_options : char Stream.t -> string =
+
+    let rec scan stream =
+      match Stream.peek stream with
+      | None ->
+        finish token_buffer
+      | Some '\n' ->
+        Stream.junk stream;
+        finish token_buffer
+      | Some c ->
+        Buffer.add_char token_buffer c;
+        Stream.junk stream;
+        scan stream
+    in
+
+    fun stream ->
+      Stream.junk stream;
+      Stream.junk stream;
+      scan stream
+
 
 
   (* Tokenizer state machine. *)
@@ -317,16 +350,29 @@ struct
     (* A code block can only be terminated by template text or end of input. *)
     match Stream.peek stream with
     | None -> tokens
-    | Some '%' when leftover_whitespace = "" -> at_text_line tokens stream
-    | Some _ -> at_text tokens leftover_whitespace stream
+    | Some _ -> at_text_line tokens true leftover_whitespace stream
 
-  and at_text_line tokens stream =
+  and at_text_line tokens first leading_whitespace stream =
     match Stream.peek stream with
-    | Some '%' ->
+    | Some '%' when leading_whitespace = "" ->
       let tokens = (scan_embedded_line stream)::tokens in
-      at_text_line tokens stream
+      at_text_line tokens false "" stream
     | _ ->
-      at_text tokens "" stream
+      let more_whitespace = scan_whitespace stream 0 in
+      match Stream.npeek 2 stream with
+      | ['%'; '%'] ->
+        let line, _ = Location.current () in
+        let options = scan_terminator_options stream in
+        if first then
+          at_text_line ((`Options options)::tokens) false "" stream
+        else
+          if String.trim options <> "" then
+            Printf.ksprintf failwith
+              "Line %i: text following closing '%%%%'" line
+          else
+            at_code_block tokens stream
+      | _ ->
+        at_text tokens (leading_whitespace ^ more_whitespace) stream
 
   and at_text tokens leading_whitespace stream =
     let token = scan_text leading_whitespace stream in
@@ -342,9 +388,9 @@ struct
       let tokens = `Newline::tokens in
       begin match Stream.peek stream with
       | None -> tokens
-      | Some ' ' -> at_text tokens "" stream
+      | Some ' ' -> at_text_line tokens false "" stream
       | Some '\n' -> at_text tokens "" stream
-      | Some '%' -> at_text_line tokens stream
+      | Some '%' -> at_text_line tokens false "" stream
       | Some _ -> Location.adjust (-1); at_code_block tokens stream
       end;
     (* If the text scanner stopped at <, it is actually <% and this is an
@@ -367,7 +413,7 @@ end
 
 type template = [
   | code_block_token
-  | `Template of template_token list list
+  | `Template of string * template_token list list
 ]
 
 module Transform :
@@ -376,7 +422,6 @@ sig
      following a code block, and ends at the last chunk before the next code
      block or end of input. *)
   val delimit : token list -> template list
-  val flatten : template list -> token list
 
   (* Within each template, finds the maximum amount of leading whitespace on
      all the lines, and removes that much whitespace from each line. *)
@@ -401,8 +446,10 @@ struct
        always be the next token, but be careful in case a future pass allows
        consecutive Code_blocks. *)
     let rec top_level (accumulator : template list) = function
+      | (`Options options)::tokens ->
+        template_level options accumulator [] [] tokens
       | (#template_token | `Newline)::_ as tokens ->
-        template_level accumulator [] [] tokens
+        template_level "" accumulator [] [] tokens
       | (`Code_block _ as token)::tokens ->
         top_level (token::accumulator) tokens
       | [] ->
@@ -411,14 +458,14 @@ struct
     (* This function runs when in a template. It scans for Code_block or end of
        input; upon finding either, it appends End, and returns to the
        insert_begin state. *)
-    and template_level accumulator template line = function
-      | (`Code_block _)::_ | [] as tokens ->
+    and template_level options accumulator template line = function
+      | (`Code_block _ | `Options _)::_ | [] as tokens ->
         let template = (List.rev line)::template in
-        top_level ((`Template (List.rev template))::accumulator) tokens
+        top_level ((`Template (options, List.rev template))::accumulator) tokens
       | `Newline::tokens ->
-        template_level accumulator ((List.rev line)::template) [] tokens
+        template_level options accumulator ((List.rev line)::template) [] tokens
       | (#template_token as token)::tokens ->
-        template_level accumulator template (token::line) tokens
+        template_level options accumulator template (token::line) tokens
 
     in
 
@@ -426,19 +473,10 @@ struct
 
 
 
-  let flatten templates =
-    templates
-    |> List.map (function
-      | `Template template -> (List.flatten template :> token list)
-      | `Code_block _ as token -> [token])
-    |> List.flatten
-
-
-
   let map_templates f templates =
     templates
     |> List.map (function
-      | `Template template -> `Template (f template)
+      | `Template (options, template) -> `Template (options, f template)
       | `Code_block _ as token -> token)
 
 
@@ -595,7 +633,7 @@ struct
         Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
         print what
 
-      | `Template lines ->
+      | `Template (_options, lines) ->
         (* By this point, the template should be only one "line," with all the
            newlines built into the strings. We still flatten it, just in
            case. *)
