@@ -195,3 +195,75 @@ let%expect_test _ =
     Newline
     (4, 0) Code_block
     a |xxx}]
+
+let%expect_test _ =
+  show "let foo =\n% abc";
+  [%expect {xxx|
+    (1, 0) Code_block
+    let foo =
+
+    (2, 1) Embedded ()  abc
+    Text {||} |xxx}]
+
+let%expect_test _ =
+  show "let foo =\n% abc\n";
+  [%expect {xxx|
+    (1, 0) Code_block
+    let foo =
+
+    (2, 1) Embedded ()  abc
+
+    Text {||} |xxx}]
+
+let%expect_test _ =
+  show "let foo =\n% abc\n% def";
+  [%expect {xxx|
+    (1, 0) Code_block
+    let foo =
+
+    (2, 1) Embedded ()  abc
+
+    (3, 1) Embedded ()  def
+    Text {||} |xxx}]
+
+let%expect_test _ =
+  show "let foo =\n  <html>\n% abc\n  </html>";
+  [%expect {xxx|
+    (1, 0) Code_block
+    let foo =
+
+    Text {|  <html>|}
+    Newline
+    (3, 1) Embedded ()  abc
+
+    Text {|  </html>|} |xxx}]
+
+let%expect_test _ =
+  show "let foo=\n % bar";
+  [%expect {|
+    (1, 0) Code_block
+    let foo=
+     % bar |}]
+
+let%expect_test _ =
+  show "let foo=\n  <html>\n % bar";
+  [%expect {xxx|
+    (1, 0) Code_block
+    let foo=
+
+    Text {|  <html>|}
+    Newline
+    Text {| % bar|} |xxx}]
+
+let%expect_test _ =
+  show "let foo\n  <html>\n\n% bar";
+  [%expect {xxx|
+    (1, 0) Code_block
+    let foo
+
+    Text {|  <html>|}
+    Newline
+    Text {||}
+    Newline
+    (4, 1) Embedded ()  bar
+    Text {||} |xxx}]

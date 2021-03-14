@@ -155,8 +155,12 @@ struct
           false
       in
 
-      let result = scan_whitespace 0 in
-      result, finish lookahead_buffer
+      match Stream.peek stream with
+      | Some '%' ->
+        true, ""
+      | _ ->
+        let result = scan_whitespace 0 in
+        result, finish lookahead_buffer
     in
 
     let rec scan_lines stream =
@@ -277,6 +281,32 @@ struct
         what = options, scan_code stream;
       }
 
+  (* Called at the beginning of line when the first character is '%'. *)
+  let scan_embedded_line : char Stream.t -> token =
+
+    let rec scan_code stream =
+      match Stream.peek stream with
+      | None ->
+        finish token_buffer
+      | Some '\n' ->
+        Buffer.add_char token_buffer '\n';
+        Stream.junk stream;
+        finish token_buffer
+      | Some c ->
+        Buffer.add_char token_buffer c;
+        Stream.junk stream;
+        scan_code stream
+    in
+
+    fun stream ->
+      Stream.junk stream;
+      let line, column = Location.current () in
+      `Embedded {
+        line;
+        column;
+        what = "", scan_code stream;
+      }
+
 
 
   (* Tokenizer state machine. *)
@@ -287,7 +317,16 @@ struct
     (* A code block can only be terminated by template text or end of input. *)
     match Stream.peek stream with
     | None -> tokens
+    | Some '%' when leftover_whitespace = "" -> at_text_line tokens stream
     | Some _ -> at_text tokens leftover_whitespace stream
+
+  and at_text_line tokens stream =
+    match Stream.peek stream with
+    | Some '%' ->
+      let tokens = (scan_embedded_line stream)::tokens in
+      at_text_line tokens stream
+    | _ ->
+      at_text tokens "" stream
 
   and at_text tokens leading_whitespace stream =
     let token = scan_text leading_whitespace stream in
@@ -305,6 +344,7 @@ struct
       | None -> tokens
       | Some ' ' -> at_text tokens "" stream
       | Some '\n' -> at_text tokens "" stream
+      | Some '%' -> at_text_line tokens stream
       | Some _ -> Location.adjust (-1); at_code_block tokens stream
       end;
     (* If the text scanner stopped at <, it is actually <% and this is an
@@ -559,7 +599,7 @@ struct
         (* By this point, the template should be only one "line," with all the
            newlines built into the strings. We still flatten it, just in
            case. *)
-        print "let ___eml_buffer = Buffer.create 4096 in";
+        print "let ___eml_buffer = Buffer.create 4096 in\n";
         generate_template_body location print (List.flatten lines);
         print "(Buffer.contents ___eml_buffer)\n"
     end

@@ -5,4 +5,4 @@
 (rule
  (targets template.ml)
  (deps template.eml.html)
- (action (run eml %{deps} --workspace %{workspace_root})))
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))
