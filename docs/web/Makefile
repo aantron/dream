@@ -1,9 +1,12 @@
 ROOT := ../..
 ODOC := odoc/default/_doc/_html
+PACKAGES := dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,h2,h2-lwt,h2-lwt-unix
 
 .PHONY : build
 build :
-	dune build @doc --root $(ROOT) --no-print-directory --build-dir `pwd`/odoc
+	dune build @doc --root $(ROOT) --only-packages $(PACKAGES) \
+	  --no-print-directory --build-dir `pwd`/odoc
+	rm -f site/api.html
 	cp $(ODOC)/dream/Dream/index.html site/api.html
 	@echo soupault
 	@opam exec -- dune exec --no-print-directory -- soupault

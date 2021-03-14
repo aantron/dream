@@ -5,18 +5,85 @@
 
 
 
-type _ message
-
-type incoming
-type outgoing
+(** Dream has two basic {e data} types: [request] and [response]. They are both
+    abstract. *)
 
 type request = incoming message
-type response = outgoing message
+(** HTTP requests, such as [GET /something HTTP/1.1]. *)
 
-type handler = request -> response Lwt.t
-type middleware = handler -> handler
+and response = outgoing message
+(** HTTP responses, such as [200 OK]. *)
 
-type app
+(** Dream describes {e processing} of requests with three types. *)
+
+and handler = request -> response promise
+(** Handlers are functions you directly define yourself. For example, this
+    handler always returns a response with the same friendly message:
+
+    {[
+      let greet_handler =
+        fun _request -> Dream.respond "Good morning, world!"
+    ]} *)
+
+and middleware = handler -> handler
+(** Middlewares are functions that take a handler, and run some code before or
+    after — producing a “bigger” handler. This is the main form of {e sequential
+    composition} in Dream. As with handlers, you can write your own at any time.
+    However, a common middleware that comes with Dream is {!Dream.logger}, which
+    logs all requests:
+
+    {[
+      let web_app =
+        Dream.logger greet_handler
+    ]} *)
+
+and route
+(** Routes tell {!Dream.router} which handler to select for each request. This
+    is the main form of {e alternative composition} in Dream. Routes are created
+    by helpers such as {!Dream.get} and {!Dream.scope}:
+
+    {[
+      Dream.scope "/admin" [] [
+        Dream.get "/" My_admin.home;
+      ]
+    ]} *)
+
+(** Finally, Dream has a bit of convenience machinery. *)
+
+and _ message
+(** [_ message], read as “any message,” allows some arguments to be either
+    requests or responses:
+
+    {[
+      Dream.has_body : _ message -> bool
+    ]}
+
+    This is because both requests and responses are defined in terms of
+    [_ message].
+
+    Most functions still take specifically only requests or responses. For
+    example, only requests have a target (like [/something]), so:
+
+    {[
+      Dream.target : request -> string
+    ]}
+
+    Dream only ever creates [request]s and [response]s, i.e. only
+    [incoming message]s and [outgoing message]s. The type parameter is never
+    used with any types other than these two. In fact, [incoming] and [outgoing]
+    are never mentioned again in the docs — this section is only to help with
+    interpreting arguments of type [_ message], “any message.” *)
+
+and incoming
+(** Type parameter used with [message] for requests. Has no meaning other than
+    it is different from {!outgoing}. *)
+
+and outgoing
+(** Type parameter used with [message] for responses. Has no meaning other than
+    it is different from {!incoming}. *)
+
+and 'a promise = 'a Lwt.t
+(** Dream uses Lwt promises and Lwt asynchronous I/O. *)
 
 
 
@@ -204,8 +271,6 @@ val logger : middleware
 val content_length : ?buffer_streams:bool -> middleware
 val synchronous : (request -> response) -> handler
 
-type route
-
 val get : string -> handler -> route
 val post : string -> handler -> route
 (* TODO LATER Define helpers for other methods. *)
@@ -294,6 +359,8 @@ sig
 end
 
 val new_log : string -> Log.log
+
+type app
 
 val new_app : unit -> app
 

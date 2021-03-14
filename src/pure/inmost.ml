@@ -114,6 +114,8 @@ type outgoing = {
 type request = incoming message
 type response = outgoing message
 
+type 'a promise = 'a Lwt.t
+
 type handler = request -> response Lwt.t
 type middleware = handler -> handler
 
