@@ -1,8 +1,13 @@
 opam-version: "2.0"
 
 depends: [
+  "lambdasoup"
   "mdx"
   "odoc"
   "omd"
   "soupault"
+]
+
+pin-depends: [
+  ["odoc.2.0.0~master" "git+https://github.com/ocaml/odoc.git#50fcb86ae66bb7d223b0d5e90488c7a911d22541"]
 ]

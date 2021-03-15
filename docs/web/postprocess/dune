@@ -1,0 +1,3 @@
+(executable
+ (name postprocess)
+ (libraries lambdasoup))

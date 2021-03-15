@@ -16,10 +16,6 @@ depends: [
   "ocaml" {>= "4.04.0"}  # String.split_on_char.
   "uri"
 
-  # Testing, development.
-  "alcotest" {with-test}  # TODO LATER Needs constraint.
-  "bisect_ppx" {dev & >= "2.5.0"}  # --instrument-with.
-
   # Currently vendored.
   # "gluten"
   # "gluten-lwt-unix"
@@ -34,6 +30,10 @@ depends: [
   "faraday-lwt-unix"
   "ocaml" {>= "4.06.0"}  # Gluten.
   "result"  # http/af, websocket/af.
+
+  # Testing, development.
+  "alcotest" {with-test}  # TODO LATER Needs constraint.
+  "bisect_ppx" {dev & >= "2.5.0"}  # --instrument-with.
 ]
 
 # Depopts of Gluten.

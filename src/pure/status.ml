@@ -78,36 +78,35 @@ type standard_status = [
 
 type status = [
   | standard_status
-  | `Code of int
+  | `Status of int
 ]
 
 let is_informational = function
   | #informational -> true
-  | `Code code when code >= 100 && code <= 199 -> true
+  | `Status code when code >= 100 && code <= 199 -> true
   | _ -> false
 
 let is_success = function
   | #success -> true
-  | `Code code when code >= 200 && code <= 299 -> true
+  | `Status code when code >= 200 && code <= 299 -> true
   | _ -> false
 
 let is_redirect = function
   | #redirect -> true
-  | `Code code when code >= 300 && code <= 399 -> true
+  | `Status code when code >= 300 && code <= 399 -> true
   | _ -> false
 
 let is_client_error = function
   | #client_error -> true
-  | `Code code when code >= 400 && code <= 499 -> true
+  | `Status code when code >= 400 && code <= 499 -> true
   | _ -> false
 
 let is_server_error = function
   | #server_error -> true
-  | `Code code when code >= 500 && code <= 599 -> true
+  | `Status code when code >= 500 && code <= 599 -> true
   | _ -> false
 
 let status_to_int : status -> int = function
-  | `Code code -> code (* TODO Sort last for consistency. *)
   | `Continue -> 100
   | `Switching_protocols -> 101
   | `OK -> 200
@@ -156,6 +155,7 @@ let status_to_int : status -> int = function
   | `Service_unavailable -> 503
   | `Gateway_timeout -> 504
   | `Http_version_not_supported -> 505
+  | `Status code -> code
 
 let int_to_status : int -> status = function
   | 100 -> `Continue
@@ -206,12 +206,12 @@ let int_to_status : int -> status = function
   | 503 -> `Service_unavailable
   | 504 -> `Gateway_timeout
   | 505 -> `Http_version_not_supported
-  | code -> `Code code
+  | code -> `Status code
 
 let status_to_reason status =
   let status =
     match status with
-    | `Code code -> int_to_status code
+    | `Status code -> int_to_status code
     | _ -> status
   in
   match status with
@@ -263,25 +263,25 @@ let status_to_reason status =
   | `Service_unavailable -> Some "Service Unavailable"
   | `Gateway_timeout -> Some "Gateway Timeout"
   | `Http_version_not_supported -> Some "HTTP Version Not Supported"
-  | `Code 102 -> Some "Processing"
-  | `Code 103 -> Some "Early Hints"
-  | `Code 207 -> Some "Multi-Status"
-  | `Code 208 -> Some "Already Reported"
-  | `Code 228 -> Some "IM Used"
-  | `Code 306 -> Some "Switch Proxy"
-  | `Code 418 -> Some "I'm a teapot"
-  | `Code 422 -> Some "Unprocessable Entity"
-  | `Code 423 -> Some "Locked"
-  | `Code 424 -> Some "Failed Dependency"
-  | `Code 506 -> Some "Variant Also Negotiates"
-  | `Code 507 -> Some "Insufficient Storage"
-  | `Code 508 -> Some "Loop Detected"
-  | `Code 510 -> Some "Not Extended"
-  | `Code 511 -> Some "Network Authentication Required"
-  | `Code _ -> None
+  | `Status 102 -> Some "Processing"
+  | `Status 103 -> Some "Early Hints"
+  | `Status 207 -> Some "Multi-Status"
+  | `Status 208 -> Some "Already Reported"
+  | `Status 228 -> Some "IM Used"
+  | `Status 306 -> Some "Switch Proxy"
+  | `Status 418 -> Some "I'm a teapot"
+  | `Status 422 -> Some "Unprocessable Entity"
+  | `Status 423 -> Some "Locked"
+  | `Status 424 -> Some "Failed Dependency"
+  | `Status 506 -> Some "Variant Also Negotiates"
+  | `Status 507 -> Some "Insufficient Storage"
+  | `Status 508 -> Some "Loop Detected"
+  | `Status 510 -> Some "Not Extended"
+  | `Status 511 -> Some "Network Authentication Required"
+  | `Status _ -> None
 
 let status_to_string status =
   match status_to_reason status, status with
   | Some reason, _ -> reason
-  | None, `Code code -> string_of_int code
+  | None, `Status code -> string_of_int code
   | _ -> "Unknown" [@coverage off] (* Should be impossible. *)

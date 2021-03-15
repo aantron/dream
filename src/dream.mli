@@ -5,8 +5,88 @@
 
 
 
-(** Dream has two basic {e data} types: [request] and [response]. They are both
-    abstract. *)
+(** {1 Overview}
+
+    Dream is built on just five types:
+
+    {[
+      type request
+      type response
+
+      type handler = request -> response promise
+      type middleware = handler -> handler
+      type route
+    ]}
+
+    [request] and [response] are the data types of Dream. Requests contain all
+    the interesting fields your application will want to read, and the
+    application will handle requests by creating and returning responses.
+
+    The other three types are for building up such request-handling functions.
+
+    [handler]s are asynchronous functions from requests to responses. They are
+    just bare functions &mdash; you can define a handler immediately:
+
+    {[
+      let greet _ =
+        Dream.respond "Hello, world!"
+    ]}
+
+    Whenever you have a handler, you can pass it to {!Dream.run} to turn it into
+    a working HTTP server:
+
+    {[
+      let () =
+        Dream.run (fun _ ->
+          Dream.respond "Hello, world!")
+    ]}
+
+    This server responds to all requests with status [200 OK] and body
+    [Hello, world!].
+
+    [middleware]s are functions that take a handler, and run some code before or
+    after the handler runs. The result is a “bigger” handler. Middlewares are
+    also just bare functions, so you can also create them immediately:
+
+    {[
+      let log_requests inner_handler =
+        fun request ->
+          Dream.log "Got a request!";
+          inner_handler request
+    ]}
+
+    This middleware prints a message on every request, before passing the
+    request to the rest of the app. You can use it with {!Dream.run}:
+
+    {[
+      let () =
+        Dream.run
+        @@ log_requests
+        @@ greet
+    ]}
+
+    The [@@] is just the ordinary function-calling operator from OCaml's
+    standard library. The above code is the same as
+
+    {[
+      let () =
+        Dream.run (log_requests greet)
+    ]}
+
+    However, as we chain more and more middlewares, there will be more and more
+    nested parentheses. [@@] is just a neat way to avoid that.
+
+    `route`s are used with {!Dream.router} to select which handler each request
+    should go to. They are created with helpers like {!Dream.get} and
+    {!Dream.scope}:
+
+    If you prefer a vaguely “algebraic” take on Dream:
+
+    - Literal [handler]s are atoms.
+    - [middleware] is for sequential composition (AND-like).
+    - [route] is for alternative composition (OR-like). *)
+
+(** {1 Main types} *)
 
 type request = incoming message
 (** HTTP requests, such as [GET /something HTTP/1.1]. *)
@@ -14,41 +94,22 @@ type request = incoming message
 and response = outgoing message
 (** HTTP responses, such as [200 OK]. *)
 
-(** Dream describes {e processing} of requests with three types. *)
-
 and handler = request -> response promise
-(** Handlers are functions you directly define yourself. For example, this
-    handler always returns a response with the same friendly message:
-
-    {[
-      let greet_handler =
-        fun _request -> Dream.respond "Good morning, world!"
-    ]} *)
+(** Handlers are asynchronous functions from requests to responses. *)
 
 and middleware = handler -> handler
 (** Middlewares are functions that take a handler, and run some code before or
     after — producing a “bigger” handler. This is the main form of {e sequential
-    composition} in Dream. As with handlers, you can write your own at any time.
-    However, a common middleware that comes with Dream is {!Dream.logger}, which
-    logs all requests:
-
-    {[
-      let web_app =
-        Dream.logger greet_handler
-    ]} *)
+    composition} in Dream. *)
 
 and route
 (** Routes tell {!Dream.router} which handler to select for each request. This
     is the main form of {e alternative composition} in Dream. Routes are created
-    by helpers such as {!Dream.get} and {!Dream.scope}:
+    by helpers such as {!Dream.get} and {!Dream.scope}. *)
 
-    {[
-      Dream.scope "/admin" [] [
-        Dream.get "/" My_admin.home;
-      ]
-    ]} *)
 
-(** Finally, Dream has a bit of convenience machinery. *)
+
+(** {1 Helper types} *)
 
 and _ message
 (** [_ message], read as “any message,” allows some arguments to be either
@@ -87,6 +148,10 @@ and 'a promise = 'a Lwt.t
 
 
 
+(**/**)
+(* TODO Move these to their own page, and provide an abbreviated version on the
+   main API page. *)
+
 type method_ = [
   | `GET
   | `POST
@@ -98,6 +163,8 @@ type method_ = [
   | `TRACE
   | `Method of string
 ]
+(** HTTP methods. See {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC
+    7231 §4.2}. *)
 
 val method_to_string : method_ -> string
 
@@ -176,7 +243,7 @@ type standard_status = [
 
 type status = [
   | standard_status
-  | `Code of int
+  | `Status of int
 ]
 
 val status_to_string : status -> string
@@ -190,16 +257,11 @@ val is_redirect : status -> bool
 val is_client_error : status -> bool
 val is_server_error : status -> bool
 
+(**/**)
 
 
-val request :
-  ?client:string ->
-  ?method_:method_ ->
-  ?target:string ->
-  ?version:int * int ->
-  ?headers:(string * string) list ->
-  string ->
-    request
+
+(** {1 Requests & responses} *)
 
 val response :
   ?version:int * int ->
@@ -218,8 +280,6 @@ val respond :
   ?set_content_length:bool ->
   string ->
     response Lwt.t
-
-
 
 val client : request -> string
 val method_ : request -> method_
@@ -263,6 +323,8 @@ val reason_override : response -> string option
 val version_override : response -> (int * int) option
 val reason : response -> string
 
+(** {1 Middleware} *)
+
 val identity : middleware
 val start : middleware
 val pipeline : middleware list -> middleware
@@ -270,6 +332,8 @@ val request_id : ?prefix:string -> middleware
 val logger : middleware
 val content_length : ?buffer_streams:bool -> middleware
 val synchronous : (request -> response) -> handler
+
+(** {1 Routing} *)
 
 val get : string -> handler -> route
 val post : string -> handler -> route
@@ -303,9 +367,13 @@ val form_get : request -> (string * string) list
    provide the checks. I guess the main reason why any of these things are
    middlewares is that CSRF can respond on its own. *)
 
+(** {1 Streaming & WebSockets} *)
+
 (* TODO This signature really needs to be reworked, but it's good enough for a
    proof of concept, and changes should be easy later. *)
 val websocket : (string -> string Lwt.t) -> response Lwt.t
+
+(** {1 Request variables} *)
 
 type 'a local
 
@@ -317,6 +385,8 @@ module Request_id :
 sig
   val get_option : ?request:request -> unit -> string option
 end
+
+(** {1 Logging} *)
 
 val log : ('a, Format.formatter, unit, unit) format4 -> 'a
 
@@ -369,6 +439,8 @@ type 'a global
 val new_global : ?debug:('a -> string * string) -> (unit -> 'a) -> 'a global
 val global : 'a global -> request -> 'a
 
+(** {1 Error page} *)
+
 type error = {
   condition : [
     | `Response
@@ -398,6 +470,8 @@ type error_handler = error -> response option Lwt.t
 
 val error_handler_with_template :
   (debug_info:string option -> response -> response Lwt.t) -> error_handler
+
+(** {1 Running apps} *)
 
 val serve :
   ?interface:string ->
@@ -434,9 +508,22 @@ val run :
   handler ->
     unit
 
+(** {1 Web formats} *)
+
 val random : int -> string
 
 val base64url : string -> string
+
+(** {1 Testing} *)
+
+val request :
+  ?client:string ->
+  ?method_:method_ ->
+  ?target:string ->
+  ?version:int * int ->
+  ?headers:(string * string) list ->
+  string ->
+    request
 
 val first : 'a message -> 'a message
 val last : 'a message -> 'a message

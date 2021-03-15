@@ -1,4 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cantarell&family=Fahkwang:wght@200;400&family=Numans&family=Sen&family=Spartan:wght@100&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Open+Sans:wght@300;400;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap');
+/* TODO Get rid of these imports; use data URLs. */
+/* TODO Scroll bar theming. */
+/* TODO Pilcrows on hover. */
+
 body {
-  background-color: #222;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
+  margin: 0;
+  background-color: #30404d;
   color: white;
+  font-size: 16px;
+  line-height: 24px;
+  padding-bottom: 72px;
+}
+
+p, pre {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+h2 {
+  margin-top: 72px;
+  margin-bottom: 24px;
+  font-weight: 400;
+  color: #eee;
+}
+
+nav.odoc-toc {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+}
+
+.spec-doc > :first-child {
+  margin-top: 0;
+}
+
+body.home header {
+  background-color: #2a383f;
+  color: #eee;
+  margin: 0;
+  padding-top: 3em;
+  padding-bottom: 3em;
+}
+
+a, a:visited, a:active {
+  color: #b8ceff;
+  text-decoration: none;
+}
+
+code {
+  /* font-family: Fira Code, monospace; */
+  /* font-weight: 200; */
+  font-size: 15px;
+  /* background-color: rgba(16,22,26,.3); */
+  font-family: monospace;
+}
+
+/* body {
+  max-width: 50rem;
+} */
+
+body.home h1 {
+  text-align: center;
+  /* font-family: Fahkwang; */
+  /* font-family: Spartan; */
+  font-family: Lato;
+  font-size: 800%;
+  margin: 0;
+  font-weight: 100;
+  text-transform: uppercase;
+}
+
+body.home header pre {
+  margin-left: auto;
+  margin-right: auto;
+  width: 22em;
+}
+
+body.home .odoc-content {
+  max-width: 50em;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 3em;
+}
+
+.spec-doc {
+  padding-left: 2em;
+}
+
+.hljs-module-access, .hljs-keyword, .keyword {
+  color: #F49D62;
+}
+
+.hljs-identifier, .hljs-literal, .hljs-type {
+  color: #92BFBF;
+}
+
+.hljs-string {
+  color: #BDDCDC;
+}
+
+.odoc-content > pre, .spec-doc > pre {
+  background-color: rgba(0, 0, 0, 0.075);
+  padding: 12px;
+}
+
+.odoc-content > p code, .spec-doc > p code, a > code {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 1px 5px;
 }

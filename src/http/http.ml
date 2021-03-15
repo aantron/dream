@@ -39,6 +39,7 @@ let to_httpaf_status = function
   | `Too_many_requests -> `Code 429
   | `Request_header_fields_too_large -> `Code 431
   | `Unavailable_for_legal_reasons -> `Code 451
+  | `Status code -> `Code code
 
 (* TODO Contact upstream: this is from websocketaf/lwt/websocketaf_lwt.ml, but
    it is not exposed. *)

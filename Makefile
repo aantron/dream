@@ -13,11 +13,10 @@ watch :
 .PHONY : test
 test :
 	@find . -name '*.coverage' | xargs rm -f
-	@opam exec -- \
-	  dune build --no-print-directory \
+	@dune build --no-print-directory \
 	  --instrument-with bisect_ppx --root . --force @test/runtest
-	@opam exec -- dune exec --no-print-directory -- bisect-ppx-report html
-	@opam exec -- dune exec --no-print-directory -- bisect-ppx-report summary
+	@dune exec --no-print-directory -- bisect-ppx-report html
+	@dune exec --no-print-directory -- bisect-ppx-report summary
 	@echo See _coverage/index.html
 
 .PHONY : test-watch
@@ -28,6 +27,15 @@ test-watch :
 promote :
 	dune promote --root .
 	@make --no-print-directory test
+
+.PHONY : docs
+docs :
+	make -C docs/web --no-print-directory
+
+.PHONY : docs-watch
+docs-watch :
+	fswatch -o src/dream.mli docs/web/site/style.css | xargs -L 1 -I FOO \
+	  make docs
 
 .PHONY : clean-coverage
 clean-coverage :

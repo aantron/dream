@@ -3,7 +3,7 @@
 - Will do a bunch of `1.0.0~alphaX` releases before `1.0.0`, but all the basic things have to be in place during the alphas &mdash; they are just a chance to do breaking chanegs before the real `1.0.0`.
 - Working apps.
   - ✅ Servers abstracted; httpaf implementation provided (should be easy).
-    - 🔲 Also need built-in H2, websocket.
+    - ✅ Also need built-in H2, websocket.
     - 🔲 Server-sent events.
   - ✅ Basic router &mdash; doesn't have to be fast.
     - 🔲 But need the basic composition story, including the path prefix middleware (almost).
