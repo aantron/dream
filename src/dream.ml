@@ -11,17 +11,14 @@ let all_cookies = Dream__middleware.Cookie.all_cookies
 let cookie = Dream__middleware.Cookie.cookie
 let add_set_cookie = Dream__middleware.Cookie.add_set_cookie
 
-let request_id =
-  Dream__middleware__built_in.Request_id.assign
-
 let logger =
   Dream__middleware.Log.logger
 
-let content_length =
-  Dream__middleware.Content_length.assign
+(* let content_length =
+  Dream__middleware.Content_length.assign *)
 
-let synchronous next_handler request =
-  Lwt.return (next_handler request)
+(* let synchronous next_handler request =
+  Lwt.return (next_handler request) *)
 
 type ('a, 'b) log_writer =
   ('a, 'b) Dream__middleware.Log.log_writer
@@ -34,7 +31,6 @@ let warning = default_log.warning
 let info = default_log.info
 let debug = default_log.debug
 
-module Request_id = Dream__middleware__built_in.Request_id
 module Log = Dream__middleware.Log
 
 let new_log =

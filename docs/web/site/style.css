@@ -136,3 +136,12 @@ pre code {
 ol {
   padding-left: 18px;
 }
+
+.spec > pre {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.spec {
+  margin-top: 24px;
+}

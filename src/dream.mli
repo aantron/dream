@@ -5,6 +5,7 @@
 
 
 
+(* TODO Get the overview listed in the TOC. *)
 (** {1 Overview}
 
     Dream is built on just five types. The first two, [request] and [response],
@@ -17,7 +18,7 @@
       type response
     ]}
 
-    These next three types are for building up request-handling functions:
+    The next three types are for building up request-handling functions:
 
     {[
       type handler = request -> response promise
@@ -303,6 +304,9 @@ val all_cookies : request -> (string * string) list
 (** Retrieves all cookies, i.e. all [name=value] in all [Cookie:] headers. As
     with {!Dream.cookie}, no decoding is applied to the values. *)
 
+(* TODO Add https getter. *)
+(* TODO Add request_id. *)
+
 
 
 (** {1:common_fields Common fields} *)
@@ -350,6 +354,8 @@ val with_body : ?set_content_length:bool -> string -> 'a message -> 'a message
 
 (** {1 Responses} *)
 
+(* TODO Isn't the version meaningless? Document what these options are used for,
+   because they are not used for much. *)
 val response :
   ?version:int * int ->
   ?status:status ->
@@ -358,6 +364,11 @@ val response :
   ?set_content_length:bool ->
   string ->
     response
+(** Creates a new response with the given string as body. Use [""] to return an
+    empty response, or if you'd like to assign a stream as the response body
+    later. The optional arguments set the corresponding fields in the new
+    response. Note that the header and body {{!common_fields} updaters} that
+    work with [_ message] also work with responses. *)
 
 val respond :
   ?version:int * int ->
@@ -367,57 +378,80 @@ val respond :
   ?set_content_length:bool ->
   string ->
     response Lwt.t
+(** Same as {!Dream.response}, but immediately uses the new response to resolve
+    a new promise, and returns that promise. This helper is especially
+    convenient for quickly returning empty error responses, which will be filled
+    out later by the top-level error handler. *)
 
 (* TODO LATER Consider adding Dream.or_exn, Dream.bad_response_exns, and some
    state. Show how to apply a middleware right at a handler. *)
-
 
 (* TODO All the optionals for Set-Cookie. *)
 (* TODO Or just provide one helper for formatting Set-Cookie and let the user
    use the header calls to actually add the header...? How often do we need to
    set a cookie? *)
 val add_set_cookie : string -> string -> response -> response
+(** Adds a [Set-Cookie:] header to the given response for setting the cookie
+    with the given name to the given value. Does not remove any [Set-Cookie:]
+    header that is already present — to do that, use {!Dream.drop_header}. This
+    function does not encode the cookie name nor its value. If the values you
+    are passing in can have [=], [;], or newlines, ... *)
 (* TODO Hints about encodings. *)
 
 val status : response -> status
+(** Response status, for example [`OK]. *)
 
 val reason_override : response -> string option
+(** If the response was created with [~reason:r], evaluates to [Some r]. *)
+
 val version_override : response -> (int * int) option
+(** If the response was created with [~version:v], evaluates to [Some v]. *)
+
 val reason : response -> string
+(** Response reason string, for example ["OK"]. If the response was created with
+    [~reason], that string is returned. Otherwise, it is based on the response
+    status. *)
+
+
 
 (** {1 Middleware} *)
 
 val identity : middleware
-val start : middleware
+(** Dpes nothing but call its next handler. This is useful on rare occasions
+    when you are forced to provide a middleware, but don't want it to do
+    anything. *)
+
 val pipeline : middleware list -> middleware
-val request_id : ?prefix:string -> middleware
+(** Combines a sequence of middlewares into one, such that these two lines are
+    equivalent:
+
+    {[
+      Dream.pipeline [mw_1; mw_2; ...; mw_n] @@ handler
+      mw_1 @@ mw_2 @@ ... @@ mw_n @@ handler
+    ]} *)
+
 val logger : middleware
-val content_length : ?buffer_streams:bool -> middleware
-val synchronous : (request -> response) -> handler
+(** Logs incoming requests, times them, and prints timing information when the
+    next handler has returned a response. Time spent logging is included in the
+    timings. *)
 
-(** {1 Routing} *)
+(* val content_length : ?buffer_streams:bool -> middleware *)
+(* val synchronous : (request -> response) -> handler *)
 
-val get : string -> handler -> route
-val post : string -> handler -> route
-(* TODO LATER Define helpers for other methods. *)
+(* TODO LATER Seriously review these signatures and names. *)
+val sessions : middleware
+(* TODO LATER Expose the session switcher and invalidator. *)
 
-val scope : string -> middleware list -> route list -> route
-
-val router : route list -> middleware
-val crumb : string -> request -> string
+val csrf : middleware
+val form : middleware
 
 (* TODO For a form, you almost always match against a fixed set of fields. But
    for query parameters, there might be mixtures. *)
 
 type session
 
-(* TODO LATER Seriously review these signatures and names. *)
-val sessions : middleware
 val session : request -> session
-(* TODO LATER Expose the session switcher and invalidator. *)
 
-val csrf : middleware
-val form : middleware
 (* TODO Naming, naming. *)
 val form_get : request -> (string * string) list
 (* TODO There is no strong reason why Form should be a middleware; it can just
@@ -429,7 +463,78 @@ val form_get : request -> (string * string) list
    provide the checks. I guess the main reason why any of these things are
    middlewares is that CSRF can respond on its own. *)
 
+
+
+(** {1 Routing} *)
+
+val router : route list -> middleware
+(** Creates a router from a list of routes. The new router is a middleware which
+    calls its next handler if none of its routes match the request. The router
+    interprets path components prefixed with [:] as parameters, which can be
+    retrieved with {!Dream.crumb}:
+
+    {[
+      let () =
+        Dream.run
+        @@ Dream.router [
+          Dream.get "/echo/:word" @@ fun request ->
+            Dream.respond (Dream.crumb "word" request);
+        ]
+        @@ fun _ -> Dream.response ~status:`Not_found ""
+    ]} *)
+(* TODO Make sure this code compiles. *)
+
+val crumb : string -> request -> string
+(** Retrieves the given path parameter (“crumb”). This function assumes that it
+    is called from a handler that is under a route that has such a path
+    parameter. In case  the path parameter is missing, the function treats this
+    as a logic error, and raises an exception. *)
+
+val scope : string -> middleware list -> route list -> route
+(** Groups routes under a common path prefix and set of scoped middlewares. In
+    detail, [Dream.scope path middlewares routes] extends the path of each route
+    in [routes] by prefixing each with [path]. If one of [routes] is matched by
+    the router while handling a request, the request is passed through
+    [middlewares] before being given to the route's handler.
+
+    If you only want to apply middlewares, but not prefix the paths, use [""]
+    for the prefix. If you only want to prefix paths, use [[]] for the
+    middleware list. *)
+
+val get : string -> handler -> route
+(** [Dream.get path handler] is a route that will cause [handler] to be called
+    if a request has method [`GET] and path [path]. For example:
+
+    {[
+      Dream.get "/home" home_template
+    ]} *)
+
+val post : string -> handler -> route
+(** Like {!Dream.get}, but the request's method must be [`POST]. *)
+
+val put : string -> handler -> route
+(** Like {!Dream.get}, but the request's method must be [`PUT]. *)
+
+val delete : string -> handler -> route
+(** Like {!Dream.get}, but the request's method must be [`DELETE]. *)
+
+val head : string -> handler -> route
+(** Like {!Dream.get}, but the request's method must be [`HEAD]. *)
+
+val connect : string -> handler -> route
+(** Like {!Dream.get}, but the request's method must be [`CONNECT]. *)
+
+val options : string -> handler -> route
+(** Like {!Dream.get}, but the request's method must be [`OPTIONS]. *)
+
+val trace : string -> handler -> route
+(** Like {!Dream.get}, but the request's method must be [`TRACE]. *)
+
+
+
 (** {1 Streaming} *)
+
+
 
 (** {1 WebSockets} *)
 
@@ -437,7 +542,9 @@ val form_get : request -> (string * string) list
    proof of concept, and changes should be easy later. *)
 val websocket : (string -> string Lwt.t) -> response Lwt.t
 
-(** {1 Message variables} *)
+
+
+(** {1 Variables} *)
 
 type 'a local
 
@@ -445,10 +552,7 @@ val new_local : ?debug:('a -> string * string) -> unit -> 'a local
 val local : 'a local -> _ message -> 'a option
 val with_local : 'a local -> 'a -> 'b message -> 'b message
 
-module Request_id :
-sig
-  val get_option : ?request:request -> unit -> string option
-end
+
 
 (** {1 Logging} *)
 
@@ -464,6 +568,9 @@ val warning : ('a, unit) log_writer
 val info : ('a, unit) log_writer
 val debug : ('a, unit) log_writer
 
+(* TODO Flatten. *)
+(* TODO Reorder; sort above variables. Errors should also go above variables,
+   but probably below logging. *)
 module Log :
 sig
   type level = [
@@ -572,13 +679,22 @@ val run :
   handler ->
     unit
 
+
+
 (** {1:web_formats Web formats} *)
 
 val base64url : string -> string
 
+
+
 (** {1 Entropy} *)
 
 val random : int -> string
+(** Returns the given number of random bytes. This function uses a
+    {{:https://github.com/mirage/mirage-crypto} cryptographically secure random
+    number generator}. *)
+
+
 
 (** {1 Testing & debugging} *)
 

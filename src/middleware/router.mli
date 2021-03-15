@@ -12,6 +12,12 @@ type route
 (* Leaf routes. *)
 val get : string -> Dream.handler -> route
 val post : string -> Dream.handler -> route
+val put : string -> Dream.handler -> route
+val delete : string -> Dream.handler -> route
+val head : string -> Dream.handler -> route
+val connect : string -> Dream.handler -> route
+val options : string -> Dream.handler -> route
+val trace : string -> Dream.handler -> route
 
 (* Route groups. *)
 val scope : string -> Dream.middleware list -> route list -> route

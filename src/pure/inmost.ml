@@ -492,9 +492,6 @@ let websocket handler =
 let identity handler request =
   handler request
 
-let start handler request =
-  handler request
-
 let rec pipeline middlewares =
   let middlewares = List.rev middlewares in
   fun handler ->

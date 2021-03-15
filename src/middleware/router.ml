@@ -78,6 +78,24 @@ let get pattern handler =
 let post pattern handler =
   [parse pattern, Leaf (`POST, handler)]
 
+let put pattern handler =
+  [parse pattern, Leaf (`PUT, handler)]
+
+let delete pattern handler =
+  [parse pattern, Leaf (`DELETE, handler)]
+
+let head pattern handler =
+  [parse pattern, Leaf (`HEAD, handler)]
+
+let connect pattern handler =
+  [parse pattern, Leaf (`CONNECT, handler)]
+
+let options pattern handler =
+  [parse pattern, Leaf (`OPTIONS, handler)]
+
+let trace pattern handler =
+  [parse pattern, Leaf (`TRACE, handler)]
+
 let rec apply middlewares routes =
   let rec compose handler = function
     | [] -> handler
