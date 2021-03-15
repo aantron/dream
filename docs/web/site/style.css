@@ -18,12 +18,16 @@ body {
 }
 
 p, pre {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+p + p {
   margin-top: 24px;
-  margin-bottom: 24px;
 }
 
 h2 {
-  margin-top: 72px;
+  margin-top: 96px;
   margin-bottom: 24px;
   font-weight: 400;
   color: #eee;
@@ -51,6 +55,10 @@ body.home header {
 a, a:visited, a:active {
   color: #b8ceff;
   text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 code {
@@ -105,12 +113,26 @@ body.home .odoc-content {
   color: #BDDCDC;
 }
 
-.odoc-content > pre, .spec-doc > pre {
+#pp-preamble pre, .spec-doc > pre {
   background-color: rgba(0, 0, 0, 0.075);
   padding: 12px;
 }
 
-.odoc-content > p code, .spec-doc > p code, a > code {
+#pp-preamble code, .spec-doc > p code, a > code {
   background-color: rgba(0, 0, 0, 0.2);
   padding: 1px 5px;
+}
+
+#pp-preamble > ol > li {
+  margin-top: 60px;
+  margin-bottom: 72px;
+}
+
+pre code {
+  background: none !important;
+  padding: 0 !important;
+}
+
+ol {
+  padding-left: 18px;
 }

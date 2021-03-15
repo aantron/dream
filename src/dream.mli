@@ -7,33 +7,30 @@
 
 (** {1 Overview}
 
-    Dream is built on just five types:
+    Dream is built on just five types. The first two, [request] and [response],
+    are the data types of Dream. Requests contain all the interesting fields
+    your application will want to read, and the application will handle requests
+    by creating and returning responses:
 
     {[
       type request
       type response
+    ]}
 
+    These next three types are for building up request-handling functions:
+
+    {[
       type handler = request -> response promise
       type middleware = handler -> handler
       type route
     ]}
 
-    [request] and [response] are the data types of Dream. Requests contain all
-    the interesting fields your application will want to read, and the
-    application will handle requests by creating and returning responses.
-
-    The other three types are for building up such request-handling functions.
-
-    [handler]s are asynchronous functions from requests to responses. They are
-    just bare functions &mdash; you can define a handler immediately:
-
-    {[
-      let greet _ =
-        Dream.respond "Hello, world!"
-    ]}
-
-    Whenever you have a handler, you can pass it to {!Dream.run} to turn it into
-    a working HTTP server:
+    {ol
+    {li
+    Handlers are asynchronous functions from requests to responses. They are
+    just bare functions — you can define a handler wherever you need it. Once
+    you have a handler, you can pass it to {!Dream.run} to turn it into a
+    working HTTP server:
 
     {[
       let () =
@@ -41,10 +38,13 @@
           Dream.respond "Hello, world!")
     ]}
 
-    This server responds to all requests with status [200 OK] and body
-    [Hello, world!].
+    This is a complete Dream program that responds to all requests on
+    {{:http://localhost:8080}} with status [200 OK] and body [Hello, world!].
+    The rest of Dream is about defining ever more useful handlers.
+    }
 
-    [middleware]s are functions that take a handler, and run some code before or
+    {li
+    Middlewares are functions that take a handler, and run some code before or
     after the handler runs. The result is a “bigger” handler. Middlewares are
     also just bare functions, so you can also create them immediately:
 
@@ -61,30 +61,33 @@
     {[
       let () =
         Dream.run
-        @@ log_requests
-        @@ greet
+          (log_requests (fun _ ->
+            Dream.respond "Hello, world!"))
     ]}
+    }
 
-    The [@@] is just the ordinary function-calling operator from OCaml's
-    standard library. The above code is the same as
-
-    {[
-      let () =
-        Dream.run (log_requests greet)
-    ]}
-
-    However, as we chain more and more middlewares, there will be more and more
-    nested parentheses. [@@] is just a neat way to avoid that.
-
-    `route`s are used with {!Dream.router} to select which handler each request
+    {li
+    Routes are used with {!Dream.router} to select which handler each request
     should go to. They are created with helpers like {!Dream.get} and
     {!Dream.scope}:
 
+    {[
+      Dream.router [
+        Dream.get "/" home_handler;
+
+        Dream.scope "/admin" [] [
+          Dream.get "/" admin_handler;
+          Dream.get "/logout" admin_logout_handler;
+        ];
+      ]
+    ]}
+    }}
+
     If you prefer a vaguely “algebraic” take on Dream:
 
-    - Literal [handler]s are atoms.
-    - [middleware] is for sequential composition (AND-like).
-    - [route] is for alternative composition (OR-like). *)
+    - Literal handlers are atoms.
+    - Middleware is for sequential composition (AND-like).
+    - Routes are for alternative composition (OR-like). *)
 
 (** {1 Main types} *)
 
@@ -112,43 +115,34 @@ and route
 (** {1 Helper types} *)
 
 and _ message
-(** [_ message], read as “any message,” allows some arguments to be either
-    requests or responses:
+(** [_ message], read as “any message,” allows {{!common_fields} some functions}
+    to take either requests or responses as arguments, because both are defined
+    in terms of [_ message]. For example:
 
     {[
       Dream.has_body : _ message -> bool
     ]}
 
-    This is because both requests and responses are defined in terms of
-    [_ message].
-
-    Most functions still take specifically only requests or responses. For
-    example, only requests have a target (like [/something]), so:
-
-    {[
-      Dream.target : request -> string
-    ]}
-
-    Dream only ever creates [request]s and [response]s, i.e. only
-    [incoming message]s and [outgoing message]s. The type parameter is never
-    used with any types other than these two. In fact, [incoming] and [outgoing]
-    are never mentioned again in the docs — this section is only to help with
-    interpreting arguments of type [_ message], “any message.” *)
+    Dream only ever creates requests and responses, i.e. only [incoming message]
+    and [outgoing message]. You don't have to worry about anything else, such as
+    [int message]. [incoming] and [outgoing] are never mentioned again in the
+    docs — this section is only to help with interpreting arguments of type
+    [_ message], “any message.” *)
 
 and incoming
-(** Type parameter used with [message] for requests. Has no meaning other than
-    it is different from {!outgoing}. *)
+(** Type parameter for [message] for requests. Has no meaning other than it is
+    different from {!outgoing}. *)
 
 and outgoing
-(** Type parameter used with [message] for responses. Has no meaning other than
-    it is different from {!incoming}. *)
+(** Type parameter for [message] for responses. Has no meaning other than it is
+    different from {!incoming}. *)
 
 and 'a promise = 'a Lwt.t
-(** Dream uses Lwt promises and Lwt asynchronous I/O. *)
+(** Dream uses {{:https://github.com/ocsigen/lwt} Lwt} for promises and
+    asynchronous I/O. *)
 
 
 
-(**/**)
 (* TODO Move these to their own page, and provide an abbreviated version on the
    main API page. *)
 
@@ -257,11 +251,104 @@ val is_redirect : status -> bool
 val is_client_error : status -> bool
 val is_server_error : status -> bool
 
+
+
+(** {1:request_fields Request fields} *)
+
+val client : request -> string
+(** Client sending the request, for example [127.0.0.1:56001]. *)
+
+val method_ : request -> method_
+(** Request method, for example [`GET]. See
+    {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2}. *)
+
+val target : request -> string
+(** Request target, for example [/something]. This is the full path as sent by
+    the client or proxy. The site root prefix is included. *)
+
+(**/**)
+(* These are used for router state at the moment, and I am not sure if there is
+   a public use case for them. I may remove them from the API, and have the
+   test cases access their internal definitions directly. *)
+val prefix : request -> string
+val path : request -> string
 (**/**)
 
+val version : request -> int * int
+(** Protocol version, such as [(1, 1)] for HTTP/1.1 and [(2, 0)] for HTTP/2. *)
+
+val with_client : string -> request -> request
+(** Creates a new request from the given one, with the client string
+    replaced. *)
+
+val with_method_ : method_ -> request -> request
+(** Creates a new request from the given one, with the method replaced. *)
+
+val with_version : int * int -> request -> request
+(** Creates a new request from the given one, with the protocol version
+    replaced. *)
+
+val cookie : string -> request -> string option
+(** Cookies are sent by the client in [Cookie:] headers as [name=value] pairs.
+    This function parses those headers, looking for the given [name]. No
+    decoding is applied to any found [value] — it is returned raw, as sent by
+    the client. Cookies are almost always encoded so as to at least escape [=],
+    [;], and newline characters, which are significant to the cookie and HTTP
+    parsers. If you applied such an encoding when setting the cookie, you have
+    to reverse it after calling [Dream.cookie]. See {!Dream.add_set_cookie} for
+    recommendations about encodings to use and {!web_formats} for encoders and
+    decoders. *)
+
+val all_cookies : request -> (string * string) list
+(** Retrieves all cookies, i.e. all [name=value] in all [Cookie:] headers. As
+    with {!Dream.cookie}, no decoding is applied to the values. *)
 
 
-(** {1 Requests & responses} *)
+
+(** {1:common_fields Common fields} *)
+
+val header : string -> _ message -> string option
+(** Retrieves the first header with the given name, if present. *)
+
+val headers : string -> _ message -> string list
+(** Retrieves all headers with the given name. *)
+
+val has_header : string -> _ message -> bool
+(** Evaluates to [true] if and only if a header with the given name is
+    present. *)
+
+val all_headers : _ message -> (string * string) list
+(** Retrieves all headers. *)
+
+val add_header : string -> string -> 'a message -> 'a message
+(** Creates a new message (request or response) by adding a header with the
+    given name and value. Note that, for several header name, HTTP permits
+    mutliple headers with the same name. This function therefore does not remove
+    any existing headers with the same name. *)
+
+val drop_header : string -> 'a message -> 'a message
+(** Creates a new message by removing all headers with the given name. *)
+
+val with_header : string -> string -> 'a message -> 'a message
+(** Equivalent to first calling {!Dream.drop_header} and then
+    {!Dream.add_header}. Creates a new message by replacing all headers with the
+    given name by one header with that name and the given value. *)
+
+val body : _ message -> string Lwt.t
+(** Retrieves the body of the given message (request or response), streaming it
+    to completion first, if necessary. *)
+
+val has_body : _ message -> bool
+(** Evalutes to [true] if the given message either has a body that has been
+    streamed and has positive length, or a body that has not been streamed yet.
+    This function does not stream the body — it could return [true], and later
+    streaming could reveal that the body has length zero. *)
+
+(* TODO Decide what to do about Content-Lengths, and then document it. *)
+val with_body : ?set_content_length:bool -> string -> 'a message -> 'a message
+(** Creates a new message by replacing the body with the given string. *)
+
+(** {1 Responses} *)
 
 val response :
   ?version:int * int ->
@@ -281,43 +368,18 @@ val respond :
   string ->
     response Lwt.t
 
-val client : request -> string
-val method_ : request -> method_
-val target : request -> string
-val prefix : request -> string
-val path : request -> string
-val version : request -> int * int
-
-val with_client : string -> request -> request
-val with_method_ : method_ -> request -> request
-val with_version : int * int -> request -> request
-
-val header : string -> _ message -> string option
-val headers : string -> _ message -> string list
-val has_header : string -> _ message -> bool
-val all_headers : _ message -> (string * string) list
-
-val add_header : string -> string -> 'a message -> 'a message
-val drop_header : string -> 'a message -> 'a message
-val with_header : string -> string -> 'a message -> 'a message
-
 (* TODO LATER Consider adding Dream.or_exn, Dream.bad_response_exns, and some
    state. Show how to apply a middleware right at a handler. *)
 
-val cookies : request -> (string * string) list
-val cookie : string -> request -> string
-val cookie_option : string -> request -> string option
+
 (* TODO All the optionals for Set-Cookie. *)
 (* TODO Or just provide one helper for formatting Set-Cookie and let the user
    use the header calls to actually add the header...? How often do we need to
    set a cookie? *)
 val add_set_cookie : string -> string -> response -> response
+(* TODO Hints about encodings. *)
 
 val status : response -> status
-
-val body : _ message -> string Lwt.t
-val has_body : _ message -> bool
-val with_body : ?set_content_length:bool -> string -> response -> response
 
 val reason_override : response -> string option
 val version_override : response -> (int * int) option
@@ -367,13 +429,15 @@ val form_get : request -> (string * string) list
    provide the checks. I guess the main reason why any of these things are
    middlewares is that CSRF can respond on its own. *)
 
-(** {1 Streaming & WebSockets} *)
+(** {1 Streaming} *)
+
+(** {1 WebSockets} *)
 
 (* TODO This signature really needs to be reworked, but it's good enough for a
    proof of concept, and changes should be easy later. *)
 val websocket : (string -> string Lwt.t) -> response Lwt.t
 
-(** {1 Request variables} *)
+(** {1 Message variables} *)
 
 type 'a local
 
@@ -471,7 +535,7 @@ type error_handler = error -> response option Lwt.t
 val error_handler_with_template :
   (debug_info:string option -> response -> response Lwt.t) -> error_handler
 
-(** {1 Running apps} *)
+(** {1 HTTP} *)
 
 val serve :
   ?interface:string ->
@@ -508,13 +572,15 @@ val run :
   handler ->
     unit
 
-(** {1 Web formats} *)
-
-val random : int -> string
+(** {1:web_formats Web formats} *)
 
 val base64url : string -> string
 
-(** {1 Testing} *)
+(** {1 Entropy} *)
+
+val random : int -> string
+
+(** {1 Testing & debugging} *)
 
 val request :
   ?client:string ->
@@ -524,16 +590,35 @@ val request :
   ?headers:(string * string) list ->
   string ->
     request
+(** [Dream.request body] creates a fresh request with the given body for
+    testing. The optional arguments set the corresponding {{!request_fields}
+    request fields}. *)
 
 val first : 'a message -> 'a message
+(** [Dream.first message] evaluates to the original request or response that
+    [message] is immutably derived from. This is useful for getting the original
+    state of requests especially, when they were first created inside the HTTP
+    server ({!Dream.run}). *)
+
 val last : 'a message -> 'a message
+(** [Dream.last message] evaluates to the latest request or response that was
+    derived from [message]. This is most useful for obtaining the state of
+    requests at the time an exception was raised, without having to instrument
+    the latest version of the request before the exception. *)
 
 val test : ?prefix:string -> handler -> (request -> response)
+(** [Dream.test handler] runs a handler the same way the HTTP server
+    ({!Dream.run}) would — assigning it a request id and noting the site root
+    prefix, which is used by routers. [Dream.test] calls [Lwt_main.run]
+    internally to await the response, which is why the response returned from
+    the test is not wrapped in a promise. If you don't need these facilities,
+    you can test [handler] by calling it directly with a request. *)
 
 val sort_headers : (string * string) list -> (string * string) list
-(* TODO DOC This sorts headers based on the header name, but not the value,
-   because the order of values may be important.
-   https://stackoverflow.com/questions/750330/does-the-order-of-headers-in-an-http-response-ever-matter *)
+(** Sorts headers by name. Headers with the same name are not sorted by value or
+    otherwise reordered, because order is significant for some headers. See
+    {{:https://tools.ietf.org/html/rfc7230#section-3.2.2} RFC 7230 §3.2.2} on
+    header order. This function can help sanitize output before comparison. *)
 
 (* TODO DOC that [stop] only stops the server listening - requests already
    in the server can continue executing. *)
@@ -554,3 +639,5 @@ val sort_headers : (string * string) list -> (string * string) list
 
 (* TODO DOC attempt some graphic that shows what getters retrieve what from the
    response. *)
+
+(* TODO Add clone. *)

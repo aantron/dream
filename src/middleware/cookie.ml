@@ -63,17 +63,19 @@ let parse_cookie s =
 (* TODO DOC Using only raw cookies. *)
 (* TODO However, is it best to URL-encode cookies by default, and provide a
    variable for opting out? *)
-let cookies request =
+let all_cookies request =
   request
   |> Dream.headers "Cookie"
   |> List.map parse_cookie
   |> List.flatten
 
-let cookie name request =
-  snd (cookies request |> List.find (fun (name', _) -> name' = name))
+(* TODO Don't use this exception-raising function, to avoid clobbering user
+   backtraces more. *)
+let cookie_exn name request =
+  snd (all_cookies request |> List.find (fun (name', _) -> name' = name))
 
-let cookie_option name request =
-  try Some (cookie name request)
+let cookie name request =
+  try Some (cookie_exn name request)
   with Not_found -> None
 
 (* TODO LATER Default encoding. *)

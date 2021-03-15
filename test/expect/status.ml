@@ -259,7 +259,7 @@ let%expect_test _ =
 (* Numeric codes. *)
 
 let show_status_code code =
-  let status = `Code code in
+  let status = `Status code in
   Printf.printf "%3i %-5b %-5b %-5b %-5b %-5b\n    %s\n    %s\n"
     (Dream.status_to_int status)
     (Dream.is_informational status)

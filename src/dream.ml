@@ -7,9 +7,8 @@
 
 include Dream__pure.Inmost
 
-let cookies = Dream__middleware.Cookie.cookies
+let all_cookies = Dream__middleware.Cookie.all_cookies
 let cookie = Dream__middleware.Cookie.cookie
-let cookie_option = Dream__middleware.Cookie.cookie_option
 let add_set_cookie = Dream__middleware.Cookie.add_set_cookie
 
 let request_id =

@@ -30,7 +30,7 @@ struct
   module Log = Log
   let add_set_cookie = Cookie.add_set_cookie
   let base64url = Dream__pure.Formats.base64url
-  let cookie_option = Cookie.cookie_option
+  let cookie = Cookie.cookie
   let random = Random.random
 end
 
@@ -107,7 +107,7 @@ let switch ?person response =
 let check handler request =
   let open Lwt.Infix in
 
-  begin match Dream.cookie_option cookie request with
+  begin match Dream.cookie cookie request with
   | None ->
     log.debug (fun m -> m ~request "Session missing");
     create () >>= fun session ->

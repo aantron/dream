@@ -12,10 +12,12 @@ let () =
   $ "nav.odoc-toc"
   |> Soup.prepend_child content;
 
+  let preamble = Soup.create_element ~id:"pp-preamble" "div" in
+
   soup
   $$ "header.odoc-preamble > h1 ~ *"
-  |> to_list
-  |> List.rev
-  |> List.iter (Soup.prepend_child content);
+  |> iter (Soup.append_child preamble);
+
+  Soup.prepend_child content preamble;
 
   Soup.(to_string content |> write_file destination)
