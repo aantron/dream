@@ -33,7 +33,7 @@ docs :
 	make -C docs/web --no-print-directory
 
 WATCH := \
-	docs/web/site/style.css \
+	docs/web/site/docs.css \
 	docs/web/site/*.md \
 	src/dream.mli \
 	docs/web/postprocess
