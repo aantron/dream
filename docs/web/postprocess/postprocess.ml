@@ -361,6 +361,23 @@ let serve_replacement = {|
     unit
 </pre>|}
 
+let request_expected = {|<div class="spec value" id="val-request">
+ <a href="#val-request" class="anchor"></a><code><span><span class="keyword">val</span> request : <span>?client:string <span class="arrow">-&gt;</span></span> <span>?method_:<a href="#type-method_">method_</a> <span class="arrow">-&gt;</span></span> <span>?target:string <span class="arrow">-&gt;</span></span> <span>?version:<span>(int * int)</span>
+<span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-request">request</a></span></code>
+</div>
+|}
+
+let request_replacement = {|
+<pre><span class="keyword">val</span> request :
+  ?client:string ->
+  ?method_:<a href="#type-method_">method_</a> ->
+  ?target:string ->
+  ?version:int * int ->
+  ?headers:(string * string) list ->
+  string ->
+    <a href="#type-request">request</a>
+</pre>|}
+
 let pretty_print_signatures soup =
   let method_ = soup $ "#type-method_" in
   if_expected
@@ -460,7 +477,15 @@ let pretty_print_signatures soup =
       Soup.replace
         (serve $ "> code")
         (Soup.parse serve_replacement);
-      Soup.add_class "multiline" serve)
+      Soup.add_class "multiline" serve);
+
+  let request = soup $ "#val-request" in
+  if_expected
+    request_expected
+    (fun () -> pretty_print request)
+    (fun () ->
+      Soup.replace (request $ "> code") (Soup.parse request_replacement);
+      Soup.add_class "multiline" request)
 
 let remove_methods_and_statuses soup =
   let selectors = [

@@ -839,10 +839,10 @@ val error_template :
     request; it internally reads that variable. *)
 
 type 'a local
-(** Per-message variables. *)
+(** Per-message variable. *)
 
 type 'a global
-(** Per-server variables. *)
+(** Per-server variable. *)
 
 val new_local : ?debug:('a -> string * string) -> unit -> 'a local
 (** Declares a fresh variable of type ['a] in all messages. In each message, the
@@ -1025,7 +1025,7 @@ val random : int -> string
 
 
 
-(** {1 Testing & debugging} *)
+(** {1 Testing} *)
 
 val request :
   ?client:string ->
@@ -1039,6 +1039,14 @@ val request :
     testing. The optional arguments set the corresponding {{!request_fields}
     request fields}. *)
 
+val test : ?prefix:string -> handler -> (request -> response)
+(** [Dream.test handler] runs a handler the same way the HTTP server
+    ({!Dream.run}) would — assigning it a request id and noting the site root
+    prefix, which is used by routers. [Dream.test] calls [Lwt_main.run]
+    internally to await the response, which is why the response returned from
+    the test is not wrapped in a promise. If you don't need these facilities,
+    you can test [handler] by calling it directly with a request. *)
+
 val first : 'a message -> 'a message
 (** [Dream.first message] evaluates to the original request or response that
     [message] is immutably derived from. This is useful for getting the original
@@ -1050,14 +1058,6 @@ val last : 'a message -> 'a message
     derived from [message]. This is most useful for obtaining the state of
     requests at the time an exception was raised, without having to instrument
     the latest version of the request before the exception. *)
-
-val test : ?prefix:string -> handler -> (request -> response)
-(** [Dream.test handler] runs a handler the same way the HTTP server
-    ({!Dream.run}) would — assigning it a request id and noting the site root
-    prefix, which is used by routers. [Dream.test] calls [Lwt_main.run]
-    internally to await the response, which is why the response returned from
-    the test is not wrapped in a promise. If you don't need these facilities,
-    you can test [handler] by calling it directly with a request. *)
 
 val sort_headers : (string * string) list -> (string * string) list
 (** Sorts headers by name. Headers with the same name are not sorted by value or
