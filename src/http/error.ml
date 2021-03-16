@@ -33,7 +33,7 @@ type error = {
   request : Dream.request option;
   response : Dream.response option;
   client : string option;
-  severity : Dream.Log.level;
+  severity : Dream.Log.log_level;
   debug : bool;
   will_send_response : bool;
 }

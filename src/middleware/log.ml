@@ -216,7 +216,7 @@ let initializer_ = lazy begin
   end
 end
 
-type level = [
+type log_level = [
   | `Error
   | `Warning
   | `Info
@@ -226,19 +226,19 @@ type level = [
 
 
 (* The "front end." *)
-type ('a, 'b) log_writer =
+type ('a, 'b) conditional_log =
   ((?request:Dream.request ->
    ('a, Stdlib.Format.formatter, unit, 'b) Stdlib.format4 -> 'a) -> 'b) ->
     unit
 
-type log = {
-  error : 'a. ('a, unit) log_writer;
-  warning : 'a. ('a, unit) log_writer;
-  info : 'a. ('a, unit) log_writer;
-  debug : 'a. ('a, unit) log_writer;
+type sub_log = {
+  error : 'a. ('a, unit) conditional_log;
+  warning : 'a. ('a, unit) conditional_log;
+  info : 'a. ('a, unit) conditional_log;
+  debug : 'a. ('a, unit) conditional_log;
 }
 
-let new_log name =
+let sub_log name =
   (* This creates a wrapper, as described above. The wrapper forwards to a
      logger of the Logs library, but instead of passing the formatter m to the
      user's callback, it passes a formatter m', which is like m, but lacks a
@@ -299,7 +299,7 @@ let iter_backtrace f backtrace =
 (* Use the above function to create a log source for Log's own middleware, the
    same way any other middleware would. *)
 let log =
-  new_log "dream.log"
+  sub_log "dream.log"
 
 
 
@@ -312,7 +312,7 @@ let set_up_exception_hook () =
       |> iter_backtrace (fun line -> log.error (fun log -> log "%s" line))
   end
 
-let initialize
+let initialize_log
     ?(backtraces = true)
     ?(async_exception_hook = true)
     ?level:(level_ = `Info)

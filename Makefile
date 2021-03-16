@@ -32,10 +32,15 @@ promote :
 docs :
 	make -C docs/web --no-print-directory
 
+WATCH := \
+	docs/web/site/style.css \
+	docs/web/site/*.md \
+	src/dream.mli \
+	docs/web/postprocess
+
 .PHONY : docs-watch
 docs-watch :
-	fswatch -o src/dream.mli docs/web/site/style.css | xargs -L 1 -I FOO \
-	  make docs
+	fswatch -o $(WATCH) | xargs -L 1 -I FOO make docs --no-print-directory
 
 .PHONY : clean-coverage
 clean-coverage :

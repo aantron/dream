@@ -13,7 +13,7 @@ struct
 end
 
 let log =
-  Dream.Log.new_log "dream.form"
+  Dream.Log.sub_log "dream.form"
 
 let sort form =
   List.stable_sort (fun (key, _) (key', _) -> String.compare key key') form

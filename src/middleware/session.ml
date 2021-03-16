@@ -42,7 +42,7 @@ let cookie = "session"
 (* TODO LATER Rearrange, this is just a calque of the earlier webapp session
    middleware. *)
 let log =
-  Dream.Log.new_log name
+  Dream.Log.sub_log name
 
 type stored = {
   person : string option;

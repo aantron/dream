@@ -61,7 +61,7 @@ a:hover {
   text-decoration: underline;
 }
 
-code {
+pre, code {
   /* font-family: Fira Code, monospace; */
   /* font-weight: 200; */
   font-size: 15px;
@@ -144,4 +144,35 @@ ol {
 
 .spec {
   margin-top: 24px;
+}
+
+.anchor {
+  visibility: hidden;
+  position: absolute;
+  margin-left: -15px;
+  margin-top: 1px;
+  padding-right: 7px;
+  text-decoration: none !important;
+}
+
+h2 > .anchor {
+  margin-top: -1px;
+}
+
+.multiline > .anchor {
+  margin-top: -1px;
+}
+
+:hover > .anchor {
+  visibility: visible;
+}
+
+.anchor:before {
+  content: "#";
+  font-size: 15px;
+}
+
+/* TODO Some reasonable color. */
+:target {
+  background-color: rgba(255, 255, 255, 0.1);
 }

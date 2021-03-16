@@ -6,9 +6,9 @@ PACKAGES := dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lw
 build :
 	dune build @doc --root $(ROOT) --only-packages $(PACKAGES) \
 	  --no-print-directory --build-dir `pwd`/odoc
-	rm -f site/api.html
+	rm -f site/index.html
 	dune exec -- \
-	  postprocess/postprocess.exe $(ODOC)/dream/Dream/index.html site/api.html
+	  postprocess/postprocess.exe $(ODOC)/dream/Dream/index.html site/index.html
 	@echo soupault
 	@dune exec --no-print-directory -- soupault
 

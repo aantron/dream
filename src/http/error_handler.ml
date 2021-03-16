@@ -15,7 +15,7 @@ module Dream = Dream__pure.Inmost
    an app. *)
 
 let log =
-  Dream__middleware.Log.new_log "dream.http"
+  Dream__middleware.Log.sub_log "dream.http"
 
 let select_log = function
   | `Error -> log.error

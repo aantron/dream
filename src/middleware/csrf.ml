@@ -26,7 +26,7 @@ end
    an opam release. *)
 
 let log =
-  Dream.Log.new_log "dream.csrf"
+  Dream.Log.sub_log "dream.csrf"
 
 (* TODO Generate/use real secrets. *)
 let secret = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

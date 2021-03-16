@@ -40,7 +40,7 @@
     ]}
 
     This is a complete Dream program that responds to all requests on
-    {{:http://localhost:8080}} with status [200 OK] and body [Hello, world!].
+    {{:http://localhost:8080} http://localhost:8080 ↪} with status [200 OK] and body [Hello, world!].
     The rest of Dream is about defining ever more useful handlers.
     }
 
@@ -139,7 +139,7 @@ and outgoing
     different from {!incoming}. *)
 
 and 'a promise = 'a Lwt.t
-(** Dream uses {{:https://github.com/ocsigen/lwt} Lwt} for promises and
+(** Dream uses {{:https://github.com/ocsigen/lwt} Lwt ↪} for promises and
     asynchronous I/O. *)
 
 
@@ -158,8 +158,8 @@ type method_ = [
   | `TRACE
   | `Method of string
 ]
-(** HTTP methods. See {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC
-    7231 §4.2}. *)
+(** HTTP request methods. See
+    {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2 ↪}. *)
 
 val method_to_string : method_ -> string
 
@@ -240,6 +240,8 @@ type status = [
   | standard_status
   | `Status of int
 ]
+(** HTTP response statuses. See
+    {{:https://tools.ietf.org/html/rfc7231#section-6} RFC 7231 §6 ↪}. *)
 
 val status_to_string : status -> string
 val status_to_reason : status -> string option
@@ -261,7 +263,7 @@ val client : request -> string
 
 val method_ : request -> method_
 (** Request method, for example [`GET]. See
-    {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2}. *)
+    {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2 ↪}. *)
 
 val target : request -> string
 (** Request target, for example [/something]. This is the full path as sent by
@@ -378,8 +380,8 @@ val respond :
   ?set_content_length:bool ->
   string ->
     response Lwt.t
-(** Same as {!Dream.response}, but immediately uses the new response to resolve
-    a new promise, and returns that promise. This helper is especially
+(** Same as {!Dream.val-response}, but immediately uses the new response to
+    resolve a new promise, and returns that promise. This helper is especially
     convenient for quickly returning empty error responses, which will be filled
     out later by the top-level error handler. *)
 
@@ -417,7 +419,7 @@ val reason : response -> string
 (** {1 Middleware} *)
 
 val identity : middleware
-(** Dpes nothing but call its next handler. This is useful on rare occasions
+(** Does nothing but call its next handler. This is useful on rare occasions
     when you are forced to provide a middleware, but don't want it to do
     anything. *)
 
@@ -485,10 +487,9 @@ val router : route list -> middleware
 (* TODO Make sure this code compiles. *)
 
 val crumb : string -> request -> string
-(** Retrieves the given path parameter (“crumb”). This function assumes that it
-    is called from a handler that is under a route that has such a path
-    parameter. In case  the path parameter is missing, the function treats this
-    as a logic error, and raises an exception. *)
+(** Retrieves the given path parameter (“crumb”). If the path parameter is
+    missing, [Dream.crumb] treats this as a logic error, and raises an
+    exception. *)
 
 val scope : string -> middleware list -> route list -> route
 (** Groups routes under a common path prefix and set of scoped middlewares. In
@@ -544,74 +545,149 @@ val websocket : (string -> string Lwt.t) -> response Lwt.t
 
 
 
-(** {1 Variables} *)
-
-type 'a local
-
-val new_local : ?debug:('a -> string * string) -> unit -> 'a local
-val local : 'a local -> _ message -> 'a option
-val with_local : 'a local -> 'a -> 'b message -> 'b message
-
-
-
 (** {1 Logging} *)
 
 val log : ('a, Format.formatter, unit, unit) format4 -> 'a
+(** [Dream.log format arguments] formats [arguments] and writes them to the log.
+    Disregard the obfuscated type: the first argument, [format], is a format
+    string as described in the standard library modules
+    {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Printf.html#VALfprintf}
+    [Printf↪]} and
+    {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html#VALfprintf}
+    [Format↪]}, and the rest of the arguments are determined by the format
+    string. For example:
 
-type ('a, 'b) log_writer =
+    {[
+      Dream.log "Counter is now: %i" counter;
+      Dream.log "Client: %s" (Dream.client request);
+    ]} *)
+
+type ('a, 'b) conditional_log =
   ((?request:request ->
-  ('a, Format.formatter, unit, 'b) format4 -> 'a) -> 'b) ->
+   ('a, Format.formatter, unit, 'b) format4 -> 'a) -> 'b) ->
     unit
+(** See {!Dream.val-error} for usage. This type has to be defined, but its
+    definition is largely illegible. *)
 
-val error : ('a, unit) log_writer
-val warning : ('a, unit) log_writer
-val info : ('a, unit) log_writer
-val debug : ('a, unit) log_writer
+val error : ('a, unit) conditional_log
+(** Formats a message and writes it to the log at level [`Error]. The inner
+    formatting function is called only if the {{!initialize_log} current log
+    level} is [`Error] or higher. This scheme is based on the
+    {{:https://erratique.ch/software/logs/doc/Logs/index.html} Logs ↪}
+    library.
 
-(* TODO Flatten. *)
-(* TODO Reorder; sort above variables. Errors should also go above variables,
-   but probably below logging. *)
-module Log :
-sig
-  type level = [
-    | `Error
-    | `Warning
-    | `Info
-    | `Debug
-  ]
+    {[
+      Dream.error ~request (fun log -> log "My message, details: %s" details);
+    ]}
 
-  (* TODO Well, the type name conflicts... *)
-  type log = {
-    error : 'a. ('a, unit) log_writer;
-    warning : 'a. ('a, unit) log_writer;
-    info : 'a. ('a, unit) log_writer;
-    debug : 'a. ('a, unit) log_writer;
-  }
+    Pass the optional argument [~request] to [Dream.error] to help it associate
+    the message with a specific request. If not passed, the logging back end
+    will try to guess the request. This usually works, but may be inaccurate in
+    some cases. *)
 
-  val initialize :
-    ?backtraces:bool ->
-    ?async_exception_hook:bool ->
-    ?level:level ->
-    ?enable:bool ->
-    unit ->
-      unit
+val warning : ('a, unit) conditional_log
+(** Like {!Dream.val-error}, but the level and threshold are [`Warning]. *)
 
-  (* val iter_backtrace : (string -> unit) -> string -> unit *)
-end
+val info : ('a, unit) conditional_log
+(** Like {!Dream.val-error}, but the level and threshold are [`Info]. *)
 
-val new_log : string -> Log.log
+val debug : ('a, unit) conditional_log
+(** Like {!Dream.val-error}, but the level and threshold are [`Debug]. *)
 
-type app
+type sub_log = {
+  error : 'a. ('a, unit) conditional_log;
+  warning : 'a. ('a, unit) conditional_log;
+  info : 'a. ('a, unit) conditional_log;
+  debug : 'a. ('a, unit) conditional_log;
+}
+(** Sub-logs. See {!Dream.val-sub_log}. *)
 
-val new_app : unit -> app
+(* TODO How to change levels of individual logs. *)
+val sub_log : string -> sub_log
+(** Creates a new sub-log with the given name. For example,
 
-type 'a global
+    {[
+      let log = Dream.sub_log "myapp.ajax"
+    ]}
 
-val new_global : ?debug:('a -> string * string) -> (unit -> 'a) -> 'a global
-val global : 'a global -> request -> 'a
+    Creates a logger that can be used like {!Dream.val-error} and the other
+    default loggers, but prefixes ["myapp.ajax"] to each log message:
 
-(** {1 Error page} *)
+    {[
+      log.error ~request (fun log -> log "Validation failed")
+    ]} *)
 
+type log_level = [
+  | `Error
+  | `Warning
+  | `Info
+  | `Debug
+]
+(** Log levels, in order from most urgent to least. *)
+
+val initialize_log :
+  ?backtraces:bool ->
+  ?async_exception_hook:bool ->
+  ?level:log_level ->
+  ?enable:bool ->
+  unit ->
+    unit
+(** Dream does not initialize its logging back end on program start. This is
+    meant to allow a Dream web application to be linked into a larger binary as
+    a subcommand, without affecting the runtime of that larger binary in any
+    way. Instead, this function, [Dream.initialize_log], is called internally by
+    the various Dream loggers (such as {!Dream.log}) the first time they are
+    used. You can also call this function explicitly during program
+    initialization, before using the loggers, in order to configure the back end
+    or disable it completely.
+
+    [~backtraces:true], the default, causes Dream to call
+    {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Printexc.html#VALrecord_backtrace}
+    [Printexc.record_backtrace↪]}, which makes exception backtraces available
+    when logging exceptions.
+
+    [~async_exception_hook:true], the default, causes Dream to set
+    {{:https://ocsigen.org/lwt/latest/api/Lwt#VALasync_exception_hook}
+    [Lwt.async_exception_hook↪]} so as to forward all asynchronous exceptions to
+    the logger, and not terminate the process.
+
+    [~level] sets the log level threshould for the entire binary. The default is
+    [`Info].
+
+    [~enable:false] disables Dream logging completely. This can help sanitize
+    output for testing. *)
+
+
+
+(** {1:error_page Error page}
+
+    Dream passes all errors to a single error handler that is immediately above
+    the HTTP server layer. This includes:
+
+    - Exceptions raised by the application, and rejected promises.
+    - 4xx and 5xx responses returned by the application.
+    - Protocol-level errors, such as TLS handshake failures and malformed HTTP
+      requests.
+
+    This allows you to customize all of your application's error handling in one
+    place.
+
+    The easiest way to customize is to call {!Dream.error_template} to create a
+    customized version of the default error handler. It will log errors like the
+    default handler, and, when a response is possible, it will call your
+    template to generate the response. Pass this customized error handler to
+    {!Dream.run}.
+
+    The default error handler used by {!Dream.run} uses a default template,
+    which generates responses with no body. This prevents leakage of strings, in
+    particular unlocalized strings in any natural language.
+
+    If you want full control over error handling, including replacing the
+    logging done by the default handler, you can define a {!Dream.error_handler}
+    directly, to process all values of type {!Dream.type-error}. *)
+
+(* TODO Make it response of response? *)
+(* TODO _ future-proofing of the variants. *)
 type error = {
   condition : [
     | `Response
@@ -632,33 +708,176 @@ type error = {
   request : request option;
   response : response option;
   client : string option;
-  severity : Log.level;
+  severity : log_level;
   debug : bool;
   will_send_response : bool;
 }
+(** Generalized Dream errors.
+
+    [condition] describes the error itself. [`Response] means the error is a
+    4xx or 5xx response, available in field [response]. The default error
+    handler logs error strings and exceptions, but does not log error responses,
+    because they have been generated explicitly by the application. They are
+    typically already noted by {!Dream.logger}, if the logger is being used.
+
+    [layer] is [`App] if the error was generated by the application, and one of
+    the other values if the error was generated by one of the protocol state
+    machines inside {!Dream.run}. For example, in case the client sends an
+    HTTP/1.1 request so malformed that it can't be parsed at all, an error with
+    [layer = `HTTP] will be generated. The default error handler uses the layer
+    to prepend helpful strings to its log messages.
+
+    [caused_by] indicates which side likely caused the error. Server errors
+    suggest bugs, and correspond to 5xx responses. Client errors can be noise,
+    or indicate buggy clients or attempted attacks. Client errors correspond to
+    4xx responses.
+
+    [request] is a request associated with the error, if there is one. A request
+    might not be available if, for example, the error is a failure to parse an
+    HTTP/1.1 request at all, or perform a TLS handshake. In case of a WebSocket
+    error, the request is the client's original request to establish the
+    WebSocket connection.
+
+    [response] is either a response that was generated by the application, or a
+    suggested response generated by the context where the error occurred. In
+    case of a WebSocket error, the response is the application's original
+    connection agreement response created by {!Dream.websocket}.
+
+    [client] is the client's address, if available. For example,
+    [127.0.0.1:56001].
+
+    [severity] is the likely severity of the error. This is usually [`Error] for
+    server errors, and [`Warning] for client errors. The default error handler
+    logs the error at level [severity].
+
+    [debug] is [true] if debugging is enabled on the server. If so, the default
+    error handler gathers various fields from any available request, formats the
+    error condition, and passes the resulting string to the template. The
+    default template shows this string in its repsonse, instead of returning a
+    response with no body.
+
+    [will_send_response] is [true] in error contexts where Dream will still send
+    a response. A typical example is when there is an application exception —
+    Dream will still send at least an empty [500 Internal Server Error], if not
+    changed by the template. Conversely, in case of a TLS handshake failure,
+    there is no client to send an HTTP response to, so no response will be sent.
+    In this latter case, the default error handler does not call the template at
+    all. *)
 
 type error_handler = error -> response option Lwt.t
+(** Error handlers generate responses for errors with
+    [will_send_response = true]. They typically also log errors along the way.
+    See {!Dream.type-error}. You can define your own freely if you need to —
+    it's a bare function.
 
-val error_handler_with_template :
+    If an error handler raises an exception, rejects its result promise, or
+    returns [None] when [will_send_response = true] in the error it is handling,
+    this is a double fault. Dream prints an emergency message to one of its
+    sub-logs, and, depending on the context, does nothing else, sends an empty
+    [500 Internal Server Error], or closes a connection.
+
+    The behavior of Dream's built-in error handler is described at
+    {!Dream.type-error}. *)
+
+(* TODO Should sanitize template output here or set to text/plain to prevent XSS
+   against developer. *)
+val error_template :
   (debug_info:string option -> response -> response Lwt.t) -> error_handler
+(** Customizes the default error handler by specifying a template.
+    {[
+      let my_error_handler =
+        Dream.error_template (fun ~debug_info response ->
+          let body =
+            match debug_info with
+            | Some string -> string
+            | None -> Dream.status_to_string (Dream.status response)
+          in
+
+          response
+          |> Dream.with_body body
+          |> Lwt.return)
+    ]}
+
+    [response] is a response suggested by the error context. Its most
+    interseting field is {!Dream.val-status}, which is often used in pretty
+    templates to generate the main error text.
+
+    If the error is a 4xx or 5xx response generated by your application, it will
+    be passed to the template in [response]. Otherwise, [response] is typically
+    an empty response pre-filled with status [400 Bad Request] or [500 Internal
+    Server Error], according to whether the underlying error was likely caused
+    by the client or the server. The error template will typically customize
+    [response]; however, it can also ignore the response and generate a fresh
+    one.
+
+    [~debug_info] will be [Some info] when debugging is enabled for the
+    application with [Dream.run ~debug:true]. [info] is a string containing an
+    error description, stack trace, request state, and other information.
+
+    Note that not all contexts are capable of using all fields of the response
+    returned by the template. For example, some HTTP contexts are hardcoded
+    upstream to send either [400 Bad Request] or [500 Internal Server Error],
+    regardless of the status returned by the template. They still send the
+    template's body, however.
+
+    Raising an exception or rejecting the final promise in the template may
+    cause an empty [500 Internal Server Error] to be sent to the client, if the
+    context requires it. See {!Dream.error_handler}. *)
+
+
+
+(** {1 Variables}
+
+    Dream provides two variable scopes for writing middlewares:
+
+    - Per-message (“local”) variables.
+    - Per-server (“global”) variables.
+
+    Variables can be used to implicitly pass values from middlewares to wrapped
+    handlers. For example, Dream assigns each request an id, which is stored in
+    a “local” (request) variable. {!Dream.request_id} can then be called on that
+    request; it internally reads that variable. *)
+
+type 'a local
+(** Per-message variables. *)
+
+type 'a global
+(** Per-server variables. *)
+
+val new_local : ?debug:('a -> string * string) -> unit -> 'a local
+(** Declares a fresh variable of type ['a] in all messages. In each message, the
+    variable is initially unset. The optional [~debug] parameter provides a
+    function that converts the variable's value to a pair of [key, value]
+    strings. This causes the variable to be included in debug info by the
+    default error handler when debugging is enabled. *)
+
+val local : 'a local -> _ message -> 'a option
+(** Retrieves the value of the given per-message variable, if it is set. *)
+
+val with_local : 'a local -> 'a -> 'b message -> 'b message
+(** Creates a new message by setting or replacing the variable with the given
+    value. *)
+
+val new_global : ?debug:('a -> string * string) -> (unit -> 'a) -> 'a global
+(** [Dream.new_global initializer] declares a fresh variable of type ['a] in all
+    servers. The first time the variable is accessed, [ititializer ()] is called
+    to create its initial value.
+
+    Global variables cannot themselves be changed, because the server-wide
+    application context is shared between all requests. This means that global
+    variables are typically refs or other mutable data structures, such as hash
+    tables — as is often the case with regular OCaml globals. *)
+
+val global : 'a global -> request -> 'a
+(** Retrieves the value of the given per-server variable. *)
+
+
 
 (** {1 HTTP} *)
 
-val serve :
-  ?interface:string ->
-  ?port:int ->
-  ?stop:unit Lwt.t ->
-  ?debug:bool ->
-  ?error_handler:error_handler ->
-  ?prefix:string ->
-  ?app:app ->
-  ?https:[ `No | `OpenSSL | `OCaml_TLS ] ->
-  ?certificate_file:string ->
-  ?key_file:string ->
-  ?certificate_string:string ->
-  ?key_string:string ->
-  handler ->
-    unit Lwt.t
+(* type app
+
+val new_app : unit -> app *)
 
 val run :
   ?interface:string ->
@@ -667,7 +886,7 @@ val run :
   ?debug:bool ->
   ?error_handler:error_handler ->
   ?prefix:string ->
-  ?app:app ->
+  (* ?app:app -> *)
   ?https:[ `No | `OpenSSL | `OCaml_TLS ] ->
   ?certificate_file:string ->
   ?key_file:string ->
@@ -678,6 +897,116 @@ val run :
   ?graceful_stop:bool ->
   handler ->
     unit
+(** [Dream.run handler] runs the web application represented by [handler] as a
+    web server, by default at {{:http://localhost:8080}
+    http://localhost:8080 ↪}. All other arguments are optional. The server runs
+    until there is a newline on STDIN. In practice, this means you can stop the
+    server by pressing ENTER.
+
+    This function calls {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun}
+    [Lwt_main.run↪]} internally, and so is intended to be used as the main loop
+    of a program. {!Dream.serve} is a version of [Dream.run] that does not call
+    [Lwt_main.run]. Indeed, [Dream.run] is a wrapper around {!Dream.serve}.
+
+    [~interface] and [~port] specify the network interface and port to listen
+    on. Use [~interface:"0.0.0.0"] to bind to all interfaces. The default values
+    are ["localhost"] and [8080].
+
+    [~stop] is a promise that causes the server to stop when it resolves. The
+    server stops accepting new requests. Requests that have already entered the
+    web application continue to be processed. The default value is a promise
+    that never resolves. However, see also [~stop_on_input].
+
+    [~debug:true] enables debug information in {{!error_page} error templates}.
+    It is [false] by default, to help prevent accidental deployment with
+    debugging on.
+
+    [~error_handler] receives all errors, including exceptions, 4xx and 5xx
+    responses, and protocol-level errors. See {{!error_page} Error page} for
+    details. The default handler logs all errors, and sends empty responses, to
+    avoid accidental leakage of unlocalized strings to the client.
+
+    [~prefix] is a site prefix for applications that are not running at the root
+    ([/]) of their domain, and receiving requests with the prefix included in
+    the target. A top-most router in the application will check that each
+    request has the expected path prefix, and remove it before routing. This
+    allows the application's routes to assume that the root is ["/"]. This is
+    the first “hop” in Dream's composable routing. The default value is [""]: no
+    prefix.
+
+    [~https] enables HTTPS. The default value is [`No]. The other options select
+    the TLS library. If using [~https:`OpenSSL], you should install opam package
+    `lwt_ssl`. If using [~https:`OCaml_TLS], you should install opam package
+    `tls`. In both cases, you should also specify [~certificate_file] and
+    [~key_file]. However, for development, Dream includes a compiled-in
+    localhost certificate that is completely insecure. It allows testing HTTPS
+    without obtaining or generating your own certificates, so using only the
+    [~https] argument. The development certificate can be found in
+    {{:https://github.com/aantron/dream/tree/master/src/certificate}
+    src/certificate/ ↪} in the Dream source code, and reviewed with
+
+    {[
+      openssl x509 -in localhost.crt -text -noout
+    ]}
+
+    Enabling HTTPS also enables transparent upgrading of connections to HTTP/2,
+    if the client requests it. HTTP/2 without HTTPS (known as h2c) is not
+    supported by Dream at the moment — but it is also not supported by most
+    browsers.
+
+    [~certificate_file] and [~key_file] specify the certificate and key file,
+    respectively, when using [~https]. They are not required for development,
+    but are required for production. Dream will write a warning to the log if
+    you are using [~https], don't provide [~certificate_file] and [~key_file],
+    and [~interface] is not ["localhost"].
+
+    [~certificate_string] and [~key_string] allow specifying a certificate and
+    key from memory. Dream's handling of these is completely insecure at the
+    moment: they are written to temporary files. These arguments are only
+    intended for development, for use with an insecure certificate, as a
+    fallback in case there is a problem with Dream's built-in development
+    certificate, and it is inconvenient to generate separate files.
+
+    The last three arguments, [?greeting], [?stop_on_input], and
+    [?graceful_stop] can be used to gradually disable convenience features of
+    [Dream.run]. Once all three are disabled, you may want to switch to
+    using {!Dream.serve}.
+
+    [~greeting:false] disables the start-up log message that prints a link to
+    the web application.
+
+    [~stop_on_input:false] disables stopping the server on input on STDIN.
+
+    [~graceful_stop:false] disables waiting for one second after stop, before
+    exiting from [Dream.run], which is done to let already-running request
+    handlers complete. *)
+
+val serve :
+  ?interface:string ->
+  ?port:int ->
+  ?stop:unit Lwt.t ->
+  ?debug:bool ->
+  ?error_handler:error_handler ->
+  ?prefix:string ->
+  (* ?app:app -> *)
+  ?https:[ `No | `OpenSSL | `OCaml_TLS ] ->
+  ?certificate_file:string ->
+  ?key_file:string ->
+  ?certificate_string:string ->
+  ?key_string:string ->
+  handler ->
+    unit Lwt.t
+(** Same as {!Dream.run}, but returns a promise that does not resolve until the
+    server stops listening, instead of calling
+    {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun} [Lwt_main.run↪]} on
+    it, and lacks some of the higher-level conveniences such as monitoring STDIN
+    and graceful exit.
+
+    This function is meant for integrating Dream applications into larger
+    programs that have their own procedures for starting and stopping the web
+    server.
+
+    All arguments have the same meanings as they have in {!Dream.run}. *)
 
 
 
@@ -692,7 +1021,7 @@ val base64url : string -> string
 val random : int -> string
 (** Returns the given number of random bytes. This function uses a
     {{:https://github.com/mirage/mirage-crypto} cryptographically secure random
-    number generator}. *)
+    number generator ↪}. *)
 
 
 
@@ -733,7 +1062,7 @@ val test : ?prefix:string -> handler -> (request -> response)
 val sort_headers : (string * string) list -> (string * string) list
 (** Sorts headers by name. Headers with the same name are not sorted by value or
     otherwise reordered, because order is significant for some headers. See
-    {{:https://tools.ietf.org/html/rfc7230#section-3.2.2} RFC 7230 §3.2.2} on
+    {{:https://tools.ietf.org/html/rfc7230#section-3.2.2} RFC 7230 §3.2.2 ↪} on
     header order. This function can help sanitize output before comparison. *)
 
 (* TODO DOC that [stop] only stops the server listening - requests already
@@ -757,3 +1086,8 @@ val sort_headers : (string * string) list -> (string * string) list
    response. *)
 
 (* TODO Add clone. *)
+
+(* TODO meta description. *)
+
+(* TODO Guidance for Dream libraries: publish routes if you have routes, not
+   handlers or middlewares. *)

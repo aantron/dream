@@ -59,4 +59,4 @@ val websocket_handshake :
 
 
 (* Logger also used by elsewhere in the HTTP integration. *)
-val log : Dream__middleware.Log.log
+val log : Dream__middleware.Log.sub_log

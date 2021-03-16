@@ -1,2 +1,2 @@
 let require : unit =
-  Dream.Log.initialize ~enable:false ()
+  Dream.initialize_log ~enable:false ()

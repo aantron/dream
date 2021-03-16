@@ -11,6 +11,8 @@ let all_cookies = Dream__middleware.Cookie.all_cookies
 let cookie = Dream__middleware.Cookie.cookie
 let add_set_cookie = Dream__middleware.Cookie.add_set_cookie
 
+include Dream__middleware.Log
+
 let logger =
   Dream__middleware.Log.logger
 
@@ -20,21 +22,13 @@ let logger =
 (* let synchronous next_handler request =
   Lwt.return (next_handler request) *)
 
-type ('a, 'b) log_writer =
-  ('a, 'b) Dream__middleware.Log.log_writer
-
 let default_log =
-  Dream__middleware.Log.new_log (Logs.Src.name Logs.default)
+  Dream__middleware.Log.sub_log (Logs.Src.name Logs.default)
 
 let error = default_log.error
 let warning = default_log.warning
 let info = default_log.info
 let debug = default_log.debug
-
-module Log = Dream__middleware.Log
-
-let new_log =
-  Log.new_log
 
 include Dream__middleware.Router
 
@@ -59,7 +53,7 @@ let form_get =
 include Dream__http.Error
 include Dream__http.Http
 
-let error_handler_with_template =
+let error_template =
   Dream__http.Error_handler.customize
 
 let random =

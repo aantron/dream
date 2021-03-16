@@ -696,7 +696,7 @@ let serve
     ?debug
     ?(error_handler = Error_handler.default)
     ?(prefix = "")
-    ?(app = Dream.new_app ())
+    (* ?(app = Dream.new_app ()) *)
     ?(https = `No)
     ?certificate_file
     ?key_file
@@ -712,7 +712,7 @@ let serve
     ?debug
     ~error_handler
     ~prefix
-    ~app
+    ~app:(Dream.new_app ())
     ~https
     ?certificate_file
     ?key_file
@@ -727,7 +727,7 @@ let run
     ?debug
     ?(error_handler = Error_handler.default)
     ?(prefix = "")
-    ?(app = Dream.new_app ())
+    (* ?(app = Dream.new_app ()) *)
     ?(https = `No)
     ?certificate_file
     ?key_file
@@ -777,7 +777,7 @@ let run
       ?debug
       ~error_handler
       ~prefix
-      ~app
+      ~app:(Dream.new_app ())
       ~https
       ?certificate_file ?key_file
       ?certificate_string ?key_string

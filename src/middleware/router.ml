@@ -124,7 +124,7 @@ let crumbs : (string * string) list Dream.local =
   Dream.new_local ()
 
 let log =
-  Log.new_log "dream.router"
+  Log.sub_log "dream.router"
 
 let missing_crumb name =
   let message = Printf.sprintf "Missing path parameter (Dream.crumb) %S" name in
