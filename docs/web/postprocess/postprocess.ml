@@ -533,4 +533,11 @@ let () =
   let error = soup $ "#type-error" |> Soup.R.parent in
   Soup.prepend_child error error_template;
 
+  let add_backing_line element =
+    Soup.create_element ~class_:"backing" "div"
+    |> Soup.prepend_child element
+  in
+  soup $$ "h2" |> iter add_backing_line;
+  soup $$ ".spec[id]" |> iter add_backing_line;
+
   Soup.(to_string content |> write_file destination)

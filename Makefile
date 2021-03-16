@@ -34,9 +34,12 @@ docs :
 
 WATCH := \
 	docs/web/site/docs.css \
+	docs/web/site/docs.js \
 	docs/web/site/*.md \
 	src/dream.mli \
-	docs/web/postprocess
+	docs/web/postprocess \
+	docs/web/templates/*.html \
+	docs/web/soupault.conf
 
 .PHONY : docs-watch
 docs-watch :

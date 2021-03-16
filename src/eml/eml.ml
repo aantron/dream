@@ -5,6 +5,9 @@
 
 
 
+(* TODO Support exiting a template when the indent level drops below the leading
+   level of the starting line. *)
+
 (* Location handling is done by updating a reference with the location of the
    last character read. This is pretty fragile, and depends on the tokenizer
    never looking so far forward as to invalidate the locations that it cares

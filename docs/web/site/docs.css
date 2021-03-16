@@ -1,11 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Cantarell&family=Fahkwang:wght@200;400&family=Numans&family=Sen&family=Spartan:wght@100&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Open+Sans:wght@300;400;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap');
-/* TODO Get rid of these imports; use data URLs. */
-/* TODO Scroll bar theming. */
-/* TODO Pilcrows on hover. */
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 100;
+  src: local(''),
+       url('lato-v17-latin-100.woff2') format('woff2');
+}
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
@@ -14,7 +13,49 @@ body {
   color: white;
   font-size: 16px;
   line-height: 24px;
-  padding-bottom: 72px;
+  padding-bottom: 24px;
+}
+
+footer {
+  margin-top: 120px;
+  opacity: 0.5;
+}
+
+body > * {
+  max-width: 50rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+pre, code {
+  font-size: 15px;
+  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+}
+
+pre {
+  background-color: #29323d;
+  padding: 12px;
+}
+
+.spec > pre {
+  background: none;
+  padding: 0;
+}
+
+code {
+  background-color: #101316;
+  padding: 1px 7px;
+}
+
+pre > code,
+.spec > code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+a > code {
+  color: inherit;
 }
 
 p, pre {
@@ -22,38 +63,36 @@ p, pre {
   margin-bottom: 12px;
 }
 
+.spec > pre {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
 p + p {
   margin-top: 24px;
+}
+
+#pp-preamble > ol > li {
+  margin-top: 60px;
+  margin-bottom: 72px;
+}
+
+body.index h1 {
+  text-align: center;
+  font-family: Lato, sans-serif;
+  font-size: 800%;
+  font-weight: 100;
+  text-transform: uppercase;
 }
 
 h2 {
   margin-top: 96px;
   margin-bottom: 24px;
   font-weight: 400;
-  color: #eee;
-}
-
-nav.odoc-toc {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100%;
-}
-
-.spec-doc > :first-child {
-  margin-top: 0;
-}
-
-body.home header {
-  background-color: #2a383f;
-  color: #eee;
-  margin: 0;
-  padding-top: 3em;
-  padding-bottom: 3em;
 }
 
 a, a:visited, a:active {
-  color: #b8ceff;
+  color: #a9c4ff;
   text-decoration: none;
 }
 
@@ -61,44 +100,38 @@ a:hover {
   text-decoration: underline;
 }
 
-pre, code {
-  /* font-family: Fira Code, monospace; */
-  /* font-weight: 200; */
-  font-size: 15px;
-  /* background-color: rgba(16,22,26,.3); */
-  font-family: monospace;
+nav.odoc-toc {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 18em;
+  background-color: #394b59;
+  box-shadow: 1px 0 0 rgb(16 22 26 / 40%);
+  line-height: 30px;
 }
 
-/* body {
-  max-width: 50rem;
-} */
-
-body.home h1 {
-  text-align: center;
-  /* font-family: Fahkwang; */
-  /* font-family: Spartan; */
-  font-family: Lato;
-  font-size: 800%;
-  margin: 0;
-  font-weight: 100;
-  text-transform: uppercase;
+nav.odoc-toc ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
 
-body.home header pre {
-  margin-left: auto;
-  margin-right: auto;
-  width: 22em;
+nav.odoc-toc a,
+nav.odoc-toc a:visited,
+nav.odoc-toc a:active {
+  color: inherit;
+  display: inline-block;
+  width: 100%;
 }
 
-body.home .odoc-content {
-  max-width: 50em;
-  margin-left: auto;
-  margin-right: auto;
-  padding-top: 3em;
+nav.odoc-toc li {
+  padding-left: 3em;
 }
 
-.spec-doc {
-  padding-left: 2em;
+nav.odoc-toc .current-section {
+  background-color: #2c3b47;
 }
 
 .hljs-module-access, .hljs-keyword, .keyword {
@@ -113,33 +146,16 @@ body.home .odoc-content {
   color: #BDDCDC;
 }
 
-#pp-preamble pre, .spec-doc > pre {
-  background-color: rgba(0, 0, 0, 0.075);
-  padding: 12px;
+.spec-doc > :first-child {
+  margin-top: 0;
 }
 
-#pp-preamble code, .spec-doc > p code, a > code {
-  background-color: rgba(0, 0, 0, 0.2);
-  padding: 1px 5px;
-}
-
-#pp-preamble > ol > li {
-  margin-top: 60px;
-  margin-bottom: 72px;
-}
-
-pre code {
-  background: none !important;
-  padding: 0 !important;
+.spec-doc {
+  padding-left: 2em;
 }
 
 ol {
   padding-left: 18px;
-}
-
-.spec > pre {
-  margin-top: 24px;
-  margin-bottom: 24px;
 }
 
 .spec {
@@ -172,7 +188,18 @@ h2 > .anchor {
   font-size: 15px;
 }
 
-/* TODO Some reasonable color. */
-:target {
-  background-color: rgba(255, 255, 255, 0.1);
+:target .backing {
+  background-color: #2a3843;
+}
+
+.backing {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1.1em;
+  z-index: -1;
+}
+
+.spec .backing {
+  height: 1.5em;
 }

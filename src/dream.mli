@@ -86,9 +86,9 @@
 
     If you prefer a vaguely “algebraic” take on Dream:
 
-    - Literal handlers are atoms.
-    - Middleware is for sequential composition (AND-like).
-    - Routes are for alternative composition (OR-like). *)
+    - Literal handlers are {b atoms}.
+    - Middleware is for {b sequential composition} (AND-like).
+    - Routes are for {b alternative composition} (OR-like). *)
 
 (** {1 Main types} *)
 
