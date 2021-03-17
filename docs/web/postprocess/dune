@@ -1,6 +1,6 @@
 (executable
- (name postprocess)
- (modules postprocess)
+ (name index)
+ (modules index)
  (libraries common lambdasoup))
 
 (executable

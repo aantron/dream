@@ -7,7 +7,7 @@ build :
 	dune build @doc --root $(ROOT) --only-packages $(PACKAGES) \
 	  --no-print-directory --build-dir `pwd`/odoc
 	rm -f site/index.html
-	dune exec -- postprocess/postprocess.exe \
+	dune exec -- postprocess/index.exe \
 	  $(ODOC)/dream/Dream/index.html site/index.html
 	rm -f site/status/index.html
 	dune exec -- postprocess/status.exe \
@@ -23,8 +23,10 @@ watch :
 .PHONY : clean
 clean :
 	rm -rf build
-	rm -f site/api.html
+	rm -f site/index.html
+	rm -f site/status.html
 	rm -rf odoc
+	rm -f actual
 
 .PHONY : deps
 deps :

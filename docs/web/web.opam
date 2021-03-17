@@ -2,12 +2,12 @@ opam-version: "2.0"
 
 depends: [
   "lambdasoup"
-  "mdx"
   "odoc"
-  "omd"
+  "omd" {>= "2.0.0~alpha1"}
   "soupault"
 ]
 
 pin-depends: [
-  ["odoc.2.0.0~master" "git+https://github.com/ocaml/odoc.git#50fcb86ae66bb7d223b0d5e90488c7a911d22541"]
+  ["odoc.2.0.0~master" "git+https://github.com/aantron/odoc.git#50fcb86ae66bb7d223b0d5e90488c7a911d22541"]
+  ["soupault.2.4.1~master" "git+https://github.com/aantron/soupault.git#ef003748b9da4ce9d0deafed6c58da6b537549ee"]
 ]
