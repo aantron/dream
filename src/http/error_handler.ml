@@ -29,21 +29,18 @@ let dump (error : Error.error) =
   let buffer = Buffer.create 4096 in
   let p format = Printf.bprintf buffer format in
 
-  begin match error.condition, error.response with
-  | `Response, Some response ->
+  begin match error.condition with
+  | `Response response ->
     let status = Dream.status response in
     p "%i %s\n" (Dream.status_to_int status) (Dream.status_to_string status)
 
-  | `Response, None ->
-    p "(Internal error: error response, but the response is missing!)\n"
-
-  | `String "", _ ->
+  | `String "" ->
     p "(Library error without description payload)\n"
 
-  | `String string, _ ->
+  | `String string ->
     p "%s\n" string
 
-  | `Exn exn, _ ->
+  | `Exn exn ->
     p "%s\n" (Printexc.to_string exn);
     Printexc.get_backtrace ()
     |> Dream__middleware.Log.iter_backtrace (p "%s\n")
@@ -121,7 +118,7 @@ let customize template (error : Error.error) =
   (* First, log the error. *)
 
   begin match error.condition with
-  | `Response -> ()
+  | `Response _ -> ()
   | `String _ | `Exn _ as condition ->
 
     let client =
@@ -169,8 +166,8 @@ let customize template (error : Error.error) =
     in
 
     let response =
-      match error.condition, error.response with
-      | `Response, Some response -> response
+      match error.condition with
+      | `Response response -> response
       | _ ->
         let status =
           match error.caused_by with
@@ -272,7 +269,7 @@ let app
         in
 
         let error = Error.{
-          condition = `Response;
+          condition = `Response response;
           layer = `App;
           caused_by;
           request = Some request;

@@ -40,8 +40,9 @@
     ]}
 
     This is a complete Dream program that responds to all requests on
-    {{:http://localhost:8080} http://localhost:8080 ↪} with status [200 OK] and body [Hello, world!].
-    The rest of Dream is about defining ever more useful handlers.
+    {{:http://localhost:8080} http://localhost:8080 ↪} with status [200 OK] and
+    body [Hello, world!]. The rest of Dream is about defining ever more useful
+    handlers.
     }
 
     {li
@@ -262,8 +263,6 @@ type client_error = [
       Headers Too Large].
     - {{:https://tools.ietf.org/html/rfc7725} RFC 7725 ↪} for
       [451 Unavailable For Legal Reasons]. *)
-(* TODO Link to helpers once available. *)
-(* TODO Set Nxx as code in other docs. *)
 
 type server_error = [
   | `Internal_Server_Error
@@ -387,9 +386,6 @@ val all_cookies : request -> (string * string) list
 (** Retrieves all cookies, i.e. all [name=value] in all [Cookie:] headers. As
     with {!Dream.cookie}, no decoding is applied to the values. *)
 
-(* TODO Add https getter. *)
-(* TODO Add request_id. *)
-
 
 
 (** {1:common_fields Common fields} *)
@@ -431,19 +427,18 @@ val has_body : _ message -> bool
     This function does not stream the body — it could return [true], and later
     streaming could reveal that the body has length zero. *)
 
-(* TODO Decide what to do about Content-Lengths, and then document it. *)
 val with_body : ?set_content_length:bool -> string -> 'a message -> 'a message
 (** Creates a new message by replacing the body with the given string. *)
 
+
+
 (** {1 Responses} *)
 
-(* TODO Isn't the version meaningless? Document what these options are used for,
-   because they are not used for much. *)
-(* TODO Add ?code argument. *)
 val response :
-  ?version:int * int ->
+  (* ?version:int * int -> *)
   ?status:status ->
-  ?reason:string ->
+  ?code:int ->
+  (* ?reason:string -> *)
   ?headers:(string * string) list ->
   ?set_content_length:bool ->
   string ->
@@ -453,11 +448,13 @@ val response :
     later. The optional arguments set the corresponding fields in the new
     response. Note that the header and body {{!common_fields} updaters} that
     work with [_ message] also work with responses. *)
+(* TODO Document ?code. *)
 
 val respond :
-  ?version:int * int ->
+  (* ?version:int * int -> *)
   ?status:status ->
-  ?reason:string ->
+  ?code:int ->
+  (* ?reason:string -> *)
   ?headers:(string * string) list ->
   ?set_content_length:bool ->
   string ->
@@ -467,8 +464,8 @@ val respond :
     convenient for quickly returning empty error responses, which will be filled
     out later by the top-level error handler. *)
 
-(* TODO LATER Consider adding Dream.or_exn, Dream.bad_response_exns, and some
-   state. Show how to apply a middleware right at a handler. *)
+val status : response -> status
+(** Response status, for example [`OK]. *)
 
 (* TODO All the optionals for Set-Cookie. *)
 (* TODO Or just provide one helper for formatting Set-Cookie and let the user
@@ -482,17 +479,14 @@ val add_set_cookie : string -> string -> response -> response
     are passing in can have [=], [;], or newlines, ... *)
 (* TODO Hints about encodings. *)
 
-val status : response -> status
-(** Response status, for example [`OK]. *)
+(* val reason_override : response -> string option *)
+(* If the response was created with [~reason:r], evaluates to [Some r]. *)
 
-val reason_override : response -> string option
-(** If the response was created with [~reason:r], evaluates to [Some r]. *)
+(* val version_override : response -> (int * int) option *)
+(* If the response was created with [~version:v], evaluates to [Some v]. *)
 
-val version_override : response -> (int * int) option
-(** If the response was created with [~version:v], evaluates to [Some v]. *)
-
-val reason : response -> string
-(** Response reason string, for example ["OK"]. If the response was created with
+(* val reason : response -> string *)
+(* Response reason string, for example ["OK"]. If the response was created with
     [~reason], that string is returned. Otherwise, it is based on the response
     status. *)
 
@@ -747,7 +741,7 @@ val initialize_log :
     the HTTP server layer. This includes:
 
     - Exceptions raised by the application, and rejected promises.
-    - 4xx and 5xx responses returned by the application.
+    - [4xx] and [5xx] responses returned by the application.
     - Protocol-level errors, such as TLS handshake failures and malformed HTTP
       requests.
 
@@ -768,11 +762,9 @@ val initialize_log :
     logging done by the default handler, you can define a {!Dream.error_handler}
     directly, to process all values of type {!Dream.type-error}. *)
 
-(* TODO Make it response of response? *)
-(* TODO _ future-proofing of the variants. *)
 type error = {
   condition : [
-    | `Response
+    | `Response of response
     | `String of string
     | `Exn of exn
   ];
@@ -797,10 +789,11 @@ type error = {
 (** Generalized Dream errors.
 
     [condition] describes the error itself. [`Response] means the error is a
-    4xx or 5xx response, available in field [response]. The default error
-    handler logs error strings and exceptions, but does not log error responses,
-    because they have been generated explicitly by the application. They are
-    typically already noted by {!Dream.logger}, if the logger is being used.
+    [4xx] or [5xx] response. [`String] and [`Exn] should be self-explanatory.
+    The default error handler logs error strings and exceptions, but does not
+    log error responses, because they have been generated explicitly by the
+    application. They are typically already noted by {!Dream.logger}, if the
+    logger is being used.
 
     [layer] is [`App] if the error was generated by the application, and one of
     the other values if the error was generated by one of the protocol state
@@ -810,9 +803,9 @@ type error = {
     to prepend helpful strings to its log messages.
 
     [caused_by] indicates which side likely caused the error. Server errors
-    suggest bugs, and correspond to 5xx responses. Client errors can be noise,
+    suggest bugs, and correspond to [5xx] responses. Client errors can be noise,
     or indicate buggy clients or attempted attacks. Client errors correspond to
-    4xx responses.
+    [4xx] responses.
 
     [request] is a request associated with the error, if there is one. A request
     might not be available if, for example, the error is a failure to parse an
@@ -884,13 +877,13 @@ val error_template :
     interseting field is {!Dream.val-status}, which is often used in pretty
     templates to generate the main error text.
 
-    If the error is a 4xx or 5xx response generated by your application, it will
-    be passed to the template in [response]. Otherwise, [response] is typically
-    an empty response pre-filled with status [400 Bad Request] or [500 Internal
-    Server Error], according to whether the underlying error was likely caused
-    by the client or the server. The error template will typically customize
-    [response]; however, it can also ignore the response and generate a fresh
-    one.
+    If the error is a [4xx] or [5xx] response generated by your application, it
+    will be passed to the template in [response]. Otherwise, [response] is
+    typically an empty response pre-filled with status [400 Bad Request] or [500
+    Internal Server Error], according to whether the underlying error was likely
+    caused by the client or the server. The error template will typically
+    customize [response]; however, it can also ignore the response and generate
+    a fresh one.
 
     [~debug_info] will be [Some info] when debugging is enabled for the
     application with [Dream.run ~debug:true]. [info] is a string containing an
@@ -957,10 +950,6 @@ val global : 'a global -> request -> 'a
 
 (** {1 HTTP} *)
 
-(* type app
-
-val new_app : unit -> app *)
-
 val run :
   ?interface:string ->
   ?port:int ->
@@ -968,7 +957,6 @@ val run :
   ?debug:bool ->
   ?error_handler:error_handler ->
   ?prefix:string ->
-  (* ?app:app -> *)
   ?https:[ `No | `OpenSSL | `OCaml_TLS ] ->
   ?certificate_file:string ->
   ?key_file:string ->
@@ -1003,7 +991,7 @@ val run :
     It is [false] by default, to help prevent accidental deployment with
     debugging on.
 
-    [~error_handler] receives all errors, including exceptions, 4xx and 5xx
+    [~error_handler] receives all errors, including exceptions, [4xx] and [5xx]
     responses, and protocol-level errors. See {{!error_page} Error page} for
     details. The default handler logs all errors, and sends empty responses, to
     avoid accidental leakage of unlocalized strings to the client.
@@ -1070,7 +1058,6 @@ val serve :
   ?debug:bool ->
   ?error_handler:error_handler ->
   ?prefix:string ->
-  (* ?app:app -> *)
   ?https:[ `No | `OpenSSL | `OCaml_TLS ] ->
   ?certificate_file:string ->
   ?key_file:string ->
@@ -1147,29 +1134,19 @@ val sort_headers : (string * string) list -> (string * string) list
     {{:https://tools.ietf.org/html/rfc7230#section-3.2.2} RFC 7230 §3.2.2 ↪} on
     header order. This function can help sanitize output before comparison. *)
 
-(* TODO DOC that [stop] only stops the server listening - requests already
-   in the server can continue executing. *)
-(* TODO DOC Can probably also get `Exn upon failure to stream the body. *)
-(* TODO DOC `Bad_gateway and `Internal_server_error occur when the application
-   returns a negative content-length, or no content-length when one is
-   required. *)
-(* TODO DOC Can't even define the response type fully.. or can we? Can just
-   reuse the Dream response, but note that the status will be ignored. *)
-(* TODO DOC Figure out the behavior of various strings one could pass for the
-   interface and DOCUMENT. *)
-(* TODO DOC What happens if the error handler also raises an exception? *)
-(* TODO DOC Placate the user: the error handler is generally not necessary. *)
+
+
+(** {1 To be categorized} *)
+
+
+
+
+
 (* TODO DOC Give people a tip: a basic response needs either content-length or
    connection: close. *)
-
-(* TODO LATER Add exception Dream.Response/Dream.Respond. *)
-
 (* TODO DOC attempt some graphic that shows what getters retrieve what from the
    response. *)
-
-(* TODO Add clone. *)
-
-(* TODO meta description. *)
-
-(* TODO Guidance for Dream libraries: publish routes if you have routes, not
+(* TODO DOC meta description. *)
+(* TODO DOC Guidance for Dream libraries: publish routes if you have routes, not
    handlers or middlewares. *)
+(* TODO Switch to implicit addition of Content-Length and docuemnt it. *)

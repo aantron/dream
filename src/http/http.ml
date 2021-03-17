@@ -174,18 +174,18 @@ let wrap_handler
           let headers =
             Httpaf.Headers.of_list (Dream.all_headers response) in
 
-          let version =
+          (* let version =
             match Dream.version_override response with
             | None -> None
             | Some (major, minor) -> Some Httpaf.Version.{major; minor}
-          in
+          in *)
           let status =
             to_httpaf_status (Dream.status response) in
-          let reason =
-            Dream.reason_override response in
+          (* let reason =
+            Dream.reason_override response in *)
 
           let httpaf_response =
-            Httpaf.Response.create ?version ?reason ~headers status in
+            Httpaf.Response.create ~headers status in
           let body =
             Httpaf.Reqd.respond_with_streaming conn httpaf_response in
 

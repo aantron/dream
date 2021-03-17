@@ -15,7 +15,7 @@ end
 
 type error = {
   condition : [
-    | `Response
+    | `Response of Dream.response
     | `String of string
     | `Exn of exn
   ];

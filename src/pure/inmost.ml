@@ -119,9 +119,9 @@ type incoming = {
 }
 
 type outgoing = {
-  response_version : (int * int) option;
+  (* response_version : (int * int) option; *)
   status : status;
-  reason : string option;
+  (* reason : string option; *)
   websocket : (string -> string Lwt.t) option;
 }
 
@@ -337,7 +337,7 @@ let with_body ?(set_content_length = true) body response =
   else
     response
 
-let version_override response =
+(* let version_override response =
   response.specific.response_version
 
 let reason_override response =
@@ -346,7 +346,7 @@ let reason_override response =
 let reason response =
   match reason_override response with
   | Some reason -> reason
-  | None -> status_to_string response.specific.status
+  | None -> status_to_string response.specific.status *)
 
 (* TODO Rename. *)
 let is_websocket response =
@@ -462,18 +462,26 @@ let request
 
 
 let response
-    ?version
-    ?(status = `OK)
-    ?reason
+    (* ?version *)
+    ?status
+    ?code
+    (* ?reason *)
     ?(headers = [])
     ?(set_content_length = true)
     body =
 
+  let status =
+    match status, code with
+    | None, None -> `OK
+    | Some status, _ -> status
+    | None, Some code -> int_to_status code
+  in
+
   let rec response = {
     specific = {
-      response_version = version;
+      (* response_version = version; *)
       status;
-      reason;
+      (* reason; *)
       websocket = None;
     };
     headers;
@@ -486,14 +494,15 @@ let response
   with_body ~set_content_length body response
 
 let respond
-    ?version
-    ?(status = `OK)
-    ?reason
-    ?(headers = [])
-    ?(set_content_length = true)
+    (* ?version *)
+    ?status
+    ?code
+    (* ?reason *)
+    ?headers
+    ?set_content_length
     body =
 
-  response ?version ~status ?reason ~headers ~set_content_length body
+  response ?status ?code ?headers ?set_content_length body
   |> Lwt.return
 
 let websocket handler =

@@ -4,10 +4,10 @@
 - Working apps.
   - ✅ Servers abstracted; httpaf implementation provided (should be easy).
     - ✅ Also need built-in H2, websocket.
-    - 🔲 Server-sent events.
+    - 🔲 Server-sent events. This is just some example.
   - ✅ Basic router &mdash; doesn't have to be fast.
-    - 🔲 But need the basic composition story, including the path prefix middleware (almost).
-    - 🔲 Really should improve the router a bit before release. OTOH it might be fast enough already. However, named URL parameters are an absolute requirement.
+    - ✅ But need the basic composition story, including the path prefix middleware (almost).
+    - 🔲 ~~Really should improve the router a bit before release. OTOH it might be fast enough already. However, named URL parameters are an absolute requirement~~.
   - ✅ Basic template engine.
     - 🔲 Further improvements:
       - 🔲 Easy configuration.
@@ -46,7 +46,7 @@
     - 🔲 Needs TLS.
     - 🔲 Built-in dev certificates for localhost, and docs on how to get real ones.
   - 🛑 GraphQL support.
-- 🛑 Excellent docs.
+- 🔲 Excellent docs.
   - How to build a single-binary app.
   - Recommendations.
     - Creating empty error responses and decorating them at the top level.
@@ -71,7 +71,7 @@
   - How to switch web servers.
   - How to create a single-binary web app.
   - Emphasize no hidden strings leaked anywhere.
-- 🛑 Excellent testing framework for apps to use.
+- 🔲 Excellent testing framework for apps to use.
   - `request -> response` function tester.
     - This would probably the fastest way, because the HTTP parser (an external component to the project) does not get involved.
     - Need to be able to set the current time, capture log, etc.
@@ -83,11 +83,11 @@
     - Provide generators and/or accept raw HTTP requests in the tester.
     - Return the actual responses.
       - Provide useful sanitizers.
-- 🛑 Metadata: route listing, etc.
-- 🛑 Migrations.
 - Not included in 1.0.0, but planned eventually:
   - ❌ Multicore/effects version.
   - ❌ QUIC.
   - ❌ h2c support.
+  - ❌ Migrations.
+  - ❌ Metadata: route listing, etc.
 
 <!-- doc probably has to become docs for GitHub. -->
