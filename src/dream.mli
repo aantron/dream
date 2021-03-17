@@ -1082,6 +1082,8 @@ val serve :
 (** {1:web_formats Web formats} *)
 
 val base64url : string -> string
+val from_base64url : string -> (string, string) result
+(* TODO Test it; document. *)
 
 
 

@@ -9,6 +9,12 @@
 let base64url text =
   Base64.encode_string ~alphabet:Base64.uri_safe_alphabet text
 
+let from_base64url text =
+  Base64.decode ~alphabet:Base64.uri_safe_alphabet text
+  |> function
+    | Error (`Msg string) -> Error string
+    | Ok _ as ok -> ok
+
 (* TODO https://www.ietf.org/rfc/rfc4648.txt *)
 (* TODO LATER Decoder also. *)
 (* TODO LATER Once there are enough microformats, make sure to give everything

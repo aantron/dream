@@ -59,8 +59,7 @@ let error_template =
 let random =
   Dream__middleware.Random.random
 
-let base64url =
-  Dream__pure.Formats.base64url
+include Dream__pure.Formats
 
 let test ?(prefix = "") handler request =
   let prefix =
