@@ -26,20 +26,14 @@ https://http2-explained.haxx.se/en/part6
 
 
 
-let to_dream_method = function
-  | #Dream.method_ as method_ -> method_
-  | `Other method_ -> `Method method_
+let to_dream_method method_ =
+  Httpaf.Method.to_string method_ |> Dream.string_to_method
 
-let to_httpaf_status = function
-  | #Httpaf.Status.t as status -> status
-  | `Permanent_redirect -> `Code 308
-  | `Misdirected_request -> `Code 421
-  | `Too_early -> `Code 425
-  | `Precondition_required -> `Code 428
-  | `Too_many_requests -> `Code 429
-  | `Request_header_fields_too_large -> `Code 431
-  | `Unavailable_for_legal_reasons -> `Code 451
-  | `Status code -> `Code code
+let to_httpaf_status status =
+  Dream.status_to_int status |> Httpaf.Status.of_code
+
+let to_h2_status status =
+  Dream.status_to_int status |> H2.Status.of_code
 
 (* TODO Contact upstream: this is from websocketaf/lwt/websocketaf_lwt.ml, but
    it is not exposed. *)
@@ -308,7 +302,7 @@ let wrap_handler_h2
           in
 
           let status =
-            to_httpaf_status (Dream.status response) in
+            to_h2_status (Dream.status response) in
           let httpaf_response =
             H2.Response.create ~headers status in
           let body =

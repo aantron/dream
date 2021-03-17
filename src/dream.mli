@@ -144,9 +144,6 @@ and 'a promise = 'a Lwt.t
 
 
 
-(* TODO Move these to their own page, and provide an abbreviated version on the
-   main API page. *)
-
 type method_ = [
   | `GET
   | `POST
@@ -156,103 +153,187 @@ type method_ = [
   | `CONNECT
   | `OPTIONS
   | `TRACE
+  | `PATCH
   | `Method of string
 ]
 (** HTTP request methods. See
-    {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2 ↪}. *)
+    {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2 ↪},
+    {{:https://tools.ietf.org/html/rfc5789#page-2} RFC 5789 §2 ↪}, and
+    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods} MDN ↪}. The
+    full set of methods is listed on a {{:/status/index.html} separate page},
+    together with some helpers. *)
 
 val method_to_string : method_ -> string
+(** Evaluates to a string representation of the given method. For example,
+    [`GET] is converted to ["GET"]. *)
+
+val string_to_method : string -> method_
+(** Evaluates to the {!method_} corresponding to the given method string. *)
 
 
 
+(* TODO Fix websocket link. *)
 type informational = [
   | `Continue
-  | `Switching_protocols
+  | `Switching_Protocols
 ]
+(** Informational ([1xx]) status codes. See
+    {{:https://tools.ietf.org/html/rfc7231#section-6.2} RFC 7231 §6.2 ↪} and
+    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#information_responses}
+    MDN ↪}. [101 Switching Protocols] is generated internally by
+    {!Dream.websocket}. It is usually not necessary to use it directly. *)
 
-type success = [
+type successful = [
   | `OK
   | `Created
   | `Accepted
-  | `Non_authoritative_information
-  | `No_content
-  | `Reset_content
-  | `Partial_content
+  | `Non_Authoritative_Information
+  | `No_Content
+  | `Reset_Content
+  | `Partial_Content
 ]
+(** Successful ([2xx]) status codes. See
+    {{:https://tools.ietf.org/html/rfc7231#section-6.3} RFC 7231 §6.3 ↪},
+    {{:https://tools.ietf.org/html/rfc7233#section-4.1} RFC 7233 §4.1 ↪} and
+    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#successful_responses}
+    MDN ↪}. The most common is [200 OK]. *)
 
-type redirect = [
-  | `Multiple_choices
-  | `Moved_permanently
+type redirection = [
+  | `Multiple_Choices
+  | `Moved_Permanently
   | `Found
-  | `See_other
-  | `Not_modified
-  | `Use_proxy
-  | `Temporary_redirect
-  | `Permanent_redirect
+  | `See_Other
+  | `Not_Modified
+  | `Temporary_Redirect
+  | `Permanent_Redirect
 ]
+(** Redirection ([3xx]) status codes. See
+    {{:https://tools.ietf.org/html/rfc7231#section-6.4} RFC 7231 §6.4 ↪} and
+    {{:https://tools.ietf.org/html/rfc7538#section-3} RFC 7538 §3 ↪}, and
+    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#redirection_messages}
+    MDN ↪}. Use [303 See Other] to direct clients to follow up with a [GET]
+    request, especially after a form submission. Use [301 Moved Permanently]
+    for permanent redirections. *)
 
 type client_error = [
-  | `Bad_request
+  | `Bad_Request
   | `Unauthorized
-  | `Payment_required
+  | `Payment_Required
   | `Forbidden
-  | `Not_found
-  | `Method_not_allowed
-  | `Not_acceptable
-  | `Proxy_authentication_required
-  | `Request_timeout
+  | `Not_Found
+  | `Method_Not_Allowed
+  | `Not_Acceptable
+  | `Proxy_Authentication_Required
+  | `Request_Timeout
   | `Conflict
   | `Gone
-  | `Length_required
-  | `Precondition_failed
-  | `Payload_too_large
-  | `Uri_too_long
-  | `Unsupported_media_type
-  | `Range_not_satisfiable
-  | `Expectation_failed
-  | `Misdirected_request
-  | `Too_early
-  | `Upgrade_required
-  | `Precondition_required
-  | `Too_many_requests
-  | `Request_header_fields_too_large
-  | `Unavailable_for_legal_reasons
+  | `Length_Required
+  | `Precondition_Failed
+  | `Payload_Too_Large
+  | `URI_Too_Long
+  | `Unsupported_Media_Type
+  | `Range_Not_Satisfiable
+  | `Expectation_Failed
+  | `Misdirected_Request
+  | `Too_Early
+  | `Upgrade_Required
+  | `Precondition_Required
+  | `Too_Many_Requests
+  | `Request_Header_Fields_Too_Large
+  | `Unavailable_For_Legal_Reasons
 ]
+(** Client error ([4xx]) status codes. The most common are [400 Bad Request],
+    [401 Unauthorized], [403 Forbidden], and, of course, [404 Not Found].
+
+    See
+    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#client_error_responses}
+    MDN ↪}, and
+
+    - {{:https://tools.ietf.org/html/rfc7231#section-6.5} RFC 7231 §6.5 ↪} for
+      most client error status codes.
+    - {{:https://tools.ietf.org/html/rfc7233#section-4.4} RFC 7233 §4.4 ↪} for
+      [416 Range Not Satisfiable].
+    - {{:https://tools.ietf.org/html/rfc7540#section-9.1.2} RFC 7540 §9.1.2 ↪}
+      for [421 Misdirected Request].
+    - {{:https://tools.ietf.org/html/rfc8470#section-5.2} RFC 8470 §5.2 ↪} for
+      [425 Too Early].
+    - {{:https://tools.ietf.org/html/rfc6585} RFC 6585 ↪} for
+      [428 Precondition Required], [429 Too Many Requests], and [431 Request
+      Headers Too Large].
+    - {{:https://tools.ietf.org/html/rfc7725} RFC 7725 ↪} for
+      [451 Unavailable For Legal Reasons]. *)
+(* TODO Link to helpers once available. *)
+(* TODO Set Nxx as code in other docs. *)
 
 type server_error = [
-  | `Internal_server_error
-  | `Not_implemented
-  | `Bad_gateway
-  | `Service_unavailable
-  | `Gateway_timeout
-  | `Http_version_not_supported
+  | `Internal_Server_Error
+  | `Not_Implemented
+  | `Bad_Gateway
+  | `Service_Unavailable
+  | `Gateway_Timeout
+  | `HTTP_Version_Not_Supported
 ]
+(** Server error ([5xx]) status codes. See
+    {{:https://tools.ietf.org/html/rfc7231#section-6.6} RFC 7231 §6.6 ↪} and
+    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#server_error_responses}
+    MDN ↪}. The most common of these is [500 Internal Server Error]. *)
 
 type standard_status = [
   | informational
-  | success
-  | redirect
+  | successful
+  | redirection
   | client_error
   | server_error
 ]
+(** Sum of all the status codes declared above. *)
 
 type status = [
   | standard_status
   | `Status of int
 ]
-(** HTTP response statuses. See
-    {{:https://tools.ietf.org/html/rfc7231#section-6} RFC 7231 §6 ↪}. *)
+(** HTTP response status codes. See
+    {{:https://tools.ietf.org/html/rfc7231#section-6} RFC 7231 §6 ↪} and
+    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status} MDN ↪}. The
+    full set of status codes is listed on a
+    {{:/status/index.html#type-informational} separate page}, together with some
+    helpers. *)
 
 val status_to_string : status -> string
+(** Evaluates to a string representation of the given status. For example,
+    [`Not_Found] and [`Status 404] are both converted to ["Not Found"]. Numbers
+    are used for unknown status codes. For example, [`Status 567] is converted
+    to ["567"]. *)
+
 val status_to_reason : status -> string option
+(** Converts known status codes to their string representations. Evaluates to
+    [None] for unknown status codes. *)
+
 val status_to_int : status -> int
+(** Evaluates to the numeric value of the given status code. *)
+
 val int_to_status : int -> status
+(** Evaluates to the symbolic representation of the status code with the given
+    number. *)
 
 val is_informational : status -> bool
-val is_success : status -> bool
-val is_redirect : status -> bool
+(** Evaluates to [true] if the given status is either from type
+    {!Dream.informational}, or is in the range [`Status 100] — [`Status 199]. *)
+
+val is_successful : status -> bool
+(** Like {!Dream.is_informational}, but for type {!Dream.successful} and numeric
+    codes [2xx]. *)
+
+val is_redirection : status -> bool
+(** Like {!Dream.is_informational}, but for type {!Dream.redirection} and
+    numeric codes [3xx]. *)
+
 val is_client_error : status -> bool
+(** Like {!Dream.is_informational}, but for type {!Dream.client_error} and
+    numeric codes [4xx]. *)
+
 val is_server_error : status -> bool
+(** Like {!Dream.is_informational}, but for type {!Dream.server_error} and
+    numeric codes [5xx]. *)
 
 
 
@@ -358,6 +439,7 @@ val with_body : ?set_content_length:bool -> string -> 'a message -> 'a message
 
 (* TODO Isn't the version meaningless? Document what these options are used for,
    because they are not used for much. *)
+(* TODO Add ?code argument. *)
 val response :
   ?version:int * int ->
   ?status:status ->
@@ -1016,7 +1098,7 @@ val base64url : string -> string
 
 
 
-(** {1 Entropy} *)
+(** {1 Randomness} *)
 
 val random : int -> string
 (** Returns the given number of random bytes. This function uses a

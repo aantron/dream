@@ -17,6 +17,7 @@ let%expect_test _ =
   show `CONNECT;
   show `OPTIONS;
   show `TRACE;
+  show `PATCH;
   show (`Method "FOO");
   [%expect {|
     GET
@@ -27,4 +28,5 @@ let%expect_test _ =
     CONNECT
     OPTIONS
     TRACE
+    PATCH
     FOO |}]

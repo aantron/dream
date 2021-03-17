@@ -9,6 +9,8 @@ module Dream = Dream__pure.Inmost
 
 
 
+(* TODO Compare HTTP methods at string. *)
+
 type token =
   | Literal of string
   | Variable of string

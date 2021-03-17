@@ -1,3 +1,14 @@
 (executable
  (name postprocess)
+ (modules postprocess)
+ (libraries common lambdasoup))
+
+(executable
+ (name status)
+ (modules status)
+ (libraries common lambdasoup))
+
+(library
+ (name common)
+ (modules common)
  (libraries lambdasoup))

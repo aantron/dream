@@ -102,4 +102,4 @@ let verify handler request =
   if valid then
     handler request
   else
-    Dream.respond ~status:`Bad_request ""
+    Dream.respond ~status:`Bad_Request ""

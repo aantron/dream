@@ -37,7 +37,7 @@ let urlencoded handler request =
     log.warning (fun m -> m ~request
       "Bad Content-Type '%s'" (Option.value content_type ~default:""));
     (* TODO Need a convenience function for generating a bad request. *)
-    Dream.respond ~status:`Bad_request ""
+    Dream.respond ~status:`Bad_Request ""
 
 (* TODO Use the optional. *)
 let get request =

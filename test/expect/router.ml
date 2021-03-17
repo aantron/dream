@@ -60,7 +60,7 @@ let show ?(prefix = "/") ?(method_ = `GET) target router =
   try
     Dream.request ~method_ ~target ""
     |> Dream.test ~prefix
-      (router @@ fun _ -> Dream.respond ~status:`Not_found "")
+      (router @@ fun _ -> Dream.respond ~status:`Not_Found "")
     |> fun response ->
       let status = Dream.status response
       and body = Lwt_main.run (Dream.body response)

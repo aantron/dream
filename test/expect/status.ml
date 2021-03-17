@@ -14,65 +14,64 @@ let or_none f value =
 
 let informational = [
   `Continue;
-  `Switching_protocols;
+  `Switching_Protocols;
 ]
 
-let success = [
+let successful = [
   `OK;
   `Created;
   `Accepted;
-  `Non_authoritative_information;
-  `No_content;
-  `Reset_content;
-  `Partial_content;
+  `Non_Authoritative_Information;
+  `No_Content;
+  `Reset_Content;
+  `Partial_Content;
 ]
 
-let redirect = [
-  `Multiple_choices;
-  `Moved_permanently;
+let redirection = [
+  `Multiple_Choices;
+  `Moved_Permanently;
   `Found;
-  `See_other;
-  `Not_modified;
-  `Use_proxy;
-  `Temporary_redirect;
-  `Permanent_redirect;
+  `See_Other;
+  `Not_Modified;
+  `Temporary_Redirect;
+  `Permanent_Redirect;
 ]
 
 let client_error = [
-  `Bad_request;
+  `Bad_Request;
   `Unauthorized;
-  `Payment_required;
+  `Payment_Required;
   `Forbidden;
-  `Not_found;
-  `Method_not_allowed;
-  `Not_acceptable;
-  `Proxy_authentication_required;
-  `Request_timeout;
+  `Not_Found;
+  `Method_Not_Allowed;
+  `Not_Acceptable;
+  `Proxy_Authentication_Required;
+  `Request_Timeout;
   `Conflict;
   `Gone;
-  `Length_required;
-  `Precondition_failed;
-  `Payload_too_large;
-  `Uri_too_long;
-  `Unsupported_media_type;
-  `Range_not_satisfiable;
-  `Expectation_failed;
-  `Misdirected_request;
-  `Too_early;
-  `Upgrade_required;
-  `Precondition_required;
-  `Too_many_requests;
-  `Request_header_fields_too_large;
-  `Unavailable_for_legal_reasons;
+  `Length_Required;
+  `Precondition_Failed;
+  `Payload_Too_Large;
+  `URI_Too_Long;
+  `Unsupported_Media_Type;
+  `Range_Not_Satisfiable;
+  `Expectation_Failed;
+  `Misdirected_Request;
+  `Too_Early;
+  `Upgrade_Required;
+  `Precondition_Required;
+  `Too_Many_Requests;
+  `Request_Header_Fields_Too_Large;
+  `Unavailable_For_Legal_Reasons;
 ]
 
 let server_error = [
-  `Internal_server_error;
-  `Not_implemented;
-  `Bad_gateway;
-  `Service_unavailable;
-  `Gateway_timeout;
-  `Http_version_not_supported;
+  `Internal_Server_Error;
+  `Not_Implemented;
+  `Bad_Gateway;
+  `Service_Unavailable;
+  `Gateway_Timeout;
+  `HTTP_Version_Not_Supported;
 ]
 
 
@@ -83,8 +82,8 @@ let show_status status =
   Printf.printf "%3i %-5b %-5b %-5b %-5b %-5b\n    %s\n    %s\n"
     (Dream.status_to_int status)
     (Dream.is_informational status)
-    (Dream.is_success status)
-    (Dream.is_redirect status)
+    (Dream.is_successful status)
+    (Dream.is_redirection status)
     (Dream.is_client_error status)
     (Dream.is_server_error status)
     (or_none Dream.status_to_reason status)
@@ -101,7 +100,7 @@ let%expect_test _ =
         Switching Protocols |}]
 
 let%expect_test _ =
-  success |> List.iter show_status;
+  successful |> List.iter show_status;
   [%expect {|
     200 false true  false false false
         OK
@@ -126,7 +125,7 @@ let%expect_test _ =
         Partial Content |}]
 
 let%expect_test _ =
-  redirect |> List.iter show_status;
+  redirection |> List.iter show_status;
   [%expect {|
     300 false false true  false false
         Multiple Choices
@@ -143,9 +142,6 @@ let%expect_test _ =
     304 false false true  false false
         Not Modified
         Not Modified
-    305 false false true  false false
-        Use Proxy
-        Use Proxy
     307 false false true  false false
         Temporary Redirect
         Temporary Redirect
@@ -263,8 +259,8 @@ let show_status_code code =
   Printf.printf "%3i %-5b %-5b %-5b %-5b %-5b\n    %s\n    %s\n"
     (Dream.status_to_int status)
     (Dream.is_informational status)
-    (Dream.is_success status)
-    (Dream.is_redirect status)
+    (Dream.is_successful status)
+    (Dream.is_redirection status)
     (Dream.is_client_error status)
     (Dream.is_server_error status)
     (or_none Dream.status_to_reason status)
@@ -281,7 +277,7 @@ let%expect_test _ =
         Switching Protocols |}]
 
 let%expect_test _ =
-  success |> List.map Dream.status_to_int |> List.iter show_status_code;
+  successful |> List.map Dream.status_to_int |> List.iter show_status_code;
   [%expect {|
     200 false true  false false false
         OK
@@ -306,7 +302,7 @@ let%expect_test _ =
         Partial Content |}]
 
 let%expect_test _ =
-  redirect |> List.map Dream.status_to_int |> List.iter show_status_code;
+  redirection |> List.map Dream.status_to_int |> List.iter show_status_code;
   [%expect {|
     300 false false true  false false
         Multiple Choices
@@ -323,9 +319,6 @@ let%expect_test _ =
     304 false false true  false false
         Not Modified
         Not Modified
-    305 false false true  false false
-        Use Proxy
-        Use Proxy
     307 false false true  false false
         Temporary Redirect
         Temporary Redirect
@@ -475,6 +468,7 @@ let%expect_test _ =
   show_status_code 207;
   show_status_code 208;
   show_status_code 228;
+  show_status_code 305;
   show_status_code 306;
   show_status_code 418;
   show_status_code 422;
@@ -501,6 +495,9 @@ let%expect_test _ =
     228 false true  false false false
         IM Used
         IM Used
+    305 false false true  false false
+        Use Proxy
+        Use Proxy
     306 false false true  false false
         Switch Proxy
         Switch Proxy

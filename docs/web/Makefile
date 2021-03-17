@@ -7,8 +7,11 @@ build :
 	dune build @doc --root $(ROOT) --only-packages $(PACKAGES) \
 	  --no-print-directory --build-dir `pwd`/odoc
 	rm -f site/index.html
-	dune exec -- \
-	  postprocess/postprocess.exe $(ODOC)/dream/Dream/index.html site/index.html
+	dune exec -- postprocess/postprocess.exe \
+	  $(ODOC)/dream/Dream/index.html site/index.html
+	rm -f site/status/index.html
+	dune exec -- postprocess/status.exe \
+	  $(ODOC)/dream/Dream/index.html site/status.html
 	@echo soupault
 	@dune exec --no-print-directory -- soupault
 

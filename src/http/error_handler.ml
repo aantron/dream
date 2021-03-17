@@ -174,8 +174,8 @@ let customize template (error : Error.error) =
       | _ ->
         let status =
           match error.caused_by with
-          | `Server -> `Internal_server_error
-          | `Client -> `Bad_request
+          | `Server -> `Internal_Server_Error
+          | `Client -> `Bad_Request
         in
         Dream.response ~status ""
     in
@@ -237,9 +237,9 @@ let respond_with_option f =
       f ()
       |> Lwt.map (function
         | Some response -> response
-        | None -> Dream.response ~status:`Internal_server_error ""))
+        | None -> Dream.response ~status:`Internal_Server_Error ""))
     (fun () ->
-      Dream.respond ~status:`Internal_server_error "")
+      Dream.respond ~status:`Internal_Server_Error "")
 
 
 
@@ -310,8 +310,8 @@ let app
 
 
 let default_response = function
-  | `Server -> Dream.response ~status:`Internal_server_error ""
-  | `Client -> Dream.response ~status:`Bad_request ""
+  | `Server -> Dream.response ~status:`Internal_Server_Error ""
+  | `Client -> Dream.response ~status:`Bad_Request ""
 
 let httpaf
     app user's_error_handler =

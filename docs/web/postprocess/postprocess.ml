@@ -1,14 +1,6 @@
-open Soup
+let if_expected = Common.if_expected
 
-let if_expected expected test f =
-  let actual = test () in
-  if actual = expected then
-    f ()
-  else begin
-    Soup.write_file "actual" actual;
-    Printf.ksprintf failwith "Mismatch; wrote %s"
-      (Filename.concat (Sys.getcwd ()) "actual")
-  end
+open Soup
 
 let method_expected = {|<div class="spec type" id="type-method_">
  <a href="#type-method_" class="anchor"></a><code><span><span class="keyword">type</span> method_</span><span> = </span><span>[ </span></code>
@@ -54,6 +46,11 @@ let method_expected = {|<div class="spec type" id="type-method_">
      <a href="#type-method_.TRACE" class="anchor"></a><code><span>| </span></code><code><span>`TRACE</span></code>
     </td>
    </tr>
+   <tr id="type-method_.PATCH" class="anchored">
+    <td class="def constructor">
+     <a href="#type-method_.PATCH" class="anchor"></a><code><span>| </span></code><code><span>`PATCH</span></code>
+    </td>
+   </tr>
    <tr id="type-method_.Method" class="anchored">
     <td class="def constructor">
      <a href="#type-method_.Method" class="anchor"></a><code><span>| </span></code><code><span>`Method <span class="keyword">of</span> string</span></code>
@@ -90,12 +87,12 @@ let status_expected = {|<div class="spec type" id="type-status">
 |}
 
 let status_replacement = {|
-<pre style="margin-bottom: 0;"><span class="keyword">type</span> status = [
+<pre class="compact"><span class="keyword">type</span> status = [
   | `OK
-  | `Moved_permanently
-  | `See_other
-  | `Bad_request
-  | `Not_found
+  | `Moved_Permanently
+  | `See_Other
+  | `Bad_Request
+  | `Not_Found
   | ...
 ]</pre>
 |}
@@ -142,7 +139,7 @@ let conditional_log_expected = {|<div class="spec type" id="type-conditional_log
 |}
 
 let conditional_log_replacement = {|
-<pre style="margin-bottom: 0;"><span class="keyword">type</span> ('a, 'b) conditional_log =
+<pre class="compact"><span class="keyword">type</span> ('a, 'b) conditional_log =
   ((?request:<a href="#type-request">request</a> ->
    ('a, Format.formatter, unit, 'b) format4 -> 'a) -> 'b) ->
     unit
@@ -180,7 +177,7 @@ let sub_log_expected = {|<div class="spec type" id="type-sub_log">
 |}
 
 let sub_log_replacement = {|
-<pre style="margin-bottom: 0;"><span class="keyword">type</span> sub_log = {
+<pre class="compact"><span class="keyword">type</span> sub_log = {
   error   : 'a. ('a, unit) <a href="#type-conditional_log">conditional_log</a>;
   warning : 'a. ('a, unit) <a href="#type-conditional_log">conditional_log</a>;
   info    : 'a. ('a, unit) <a href="#type-conditional_log">conditional_log</a>;
@@ -294,7 +291,7 @@ let error_expected = {|<div class="spec type" id="type-error">
 |}
 
 let error_replacement = {|
-<pre style="margin-bottom: 0;"  ><span class="keyword">type</span> error = {
+<pre class="compact"><span class="keyword">type</span> error = {
   condition : [ `Response | `String of string | `Exn of exn ];
   layer : [ `TLS | `HTTP | `HTTP2 | `WebSocket | `App ];
   caused_by : [ `Server | `Client ];
@@ -490,9 +487,10 @@ let pretty_print_signatures soup =
 let remove_methods_and_statuses soup =
   let selectors = [
     "#val-method_to_string";
+    "#val-string_to_method";
     "#type-informational";
-    "#type-success";
-    "#type-redirect";
+    "#type-successful";
+    "#type-redirection";
     "#type-client_error";
     "#type-server_error";
     "#type-standard_status";
@@ -501,8 +499,8 @@ let remove_methods_and_statuses soup =
     "#val-status_to_int";
     "#val-int_to_status";
     "#val-is_informational";
-    "#val-is_success";
-    "#val-is_redirect";
+    "#val-is_successful";
+    "#val-is_redirection";
     "#val-is_client_error";
     "#val-is_server_error";
   ] in

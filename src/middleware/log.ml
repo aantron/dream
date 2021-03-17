@@ -374,7 +374,7 @@ let logger next_handler request =
       (* Log the elapsed time. If the response is a redirection, log the
          target. *)
       let location =
-        if Dream.is_redirect (Dream.status response) then
+        if Dream.is_redirection (Dream.status response) then
           match Dream.header "Location" response with
           | Some location -> location
           | None -> ""

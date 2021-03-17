@@ -14,6 +14,7 @@ type method_ = [
   | `CONNECT
   | `OPTIONS
   | `TRACE
+  | `PATCH
   | `Method of string
 ]
 
@@ -26,7 +27,20 @@ let method_to_string = function
   | `CONNECT -> "CONNECT"
   | `OPTIONS -> "OPTIONS"
   | `TRACE -> "TRACE"
+  | `PATCH -> "PATCH"
   | `Method method_ -> method_
+
+let string_to_method = function
+  | "GET" -> `GET
+  | "POST" -> `POST
+  | "PUT" -> `PUT
+  | "DELETE" -> `DELETE
+  | "HEAD" -> `HEAD
+  | "CONNECT" -> `CONNECT
+  | "OPTIONS" -> `OPTIONS
+  | "TRACE" -> `TRACE
+  | "PATCH" -> `PATCH
+  | method_ -> `Method method_
 
 include Status
 

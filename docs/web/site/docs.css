@@ -58,6 +58,10 @@ a > code {
   color: inherit;
 }
 
+p > code, li > code, a > code {
+  white-space: nowrap;
+}
+
 p, pre {
   margin-top: 12px;
   margin-bottom: 12px;
@@ -66,6 +70,10 @@ p, pre {
 .spec > pre {
   margin-top: 24px;
   margin-bottom: 24px;
+}
+
+.spec > pre.compact {
+  margin-bottom: 0;
 }
 
 p + p {
@@ -131,7 +139,7 @@ nav.odoc-toc li {
 }
 
 nav.odoc-toc .current-section {
-  background-color: #2c3b47;
+  background-color: #252d37;
 }
 
 .hljs-module-access, .hljs-keyword, .keyword {
@@ -189,7 +197,7 @@ h2 > .anchor {
 }
 
 :target .backing {
-  background-color: #2a3843;
+  background-color: #252d37;
 }
 
 .backing {
