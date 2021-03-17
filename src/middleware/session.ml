@@ -9,157 +9,284 @@
    https://ulrikstrid.github.io/ocaml-cookie/session-cookie-lwt/Session_cookie_lwt/Make/index.html
    https://github.com/inhabitedtype/ocaml-session#readme *)
 
-(* TODO LATER Achieve in-memory sessions. *)
 (* TODO LATER Achieve database sessions. *)
-(* TODO LATER Factor out into a separate library. *)
-
-(* TODO LATER What is the point of the value? *)
-
-(* TODO LATER Expiration, refresh. *)
-
-(* TODO LATER Invalidation. *)
 
 (* TODO Does HTTP/2, for example, allow connection-based session validation, as
    an optimization? Is that secure? *)
 
 (* https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html *)
 
-module Dream =
-struct
-  include Dream__pure.Inmost
-  module Log = Log
-  let add_set_cookie = Cookie.add_set_cookie
-  let base64url = Dream__pure.Formats.base64url
-  let cookie = Cookie.cookie
-  let random = Random.random
-end
+module Dream = Dream__pure.Inmost
 
-let name = "dream.session"
-(* module Log = (val Fw.Logger.create_log name : Fw.Logger.LOG) *)
 
-let cookie = "session"
 
-(* TODO LATER Rearrange, this is just a calque of the earlier webapp session
-   middleware. *)
-let log =
-  Dream.Log.sub_log name
+type request = Dream.request
+type response = Dream.response
 
-type stored = {
-  person : string option;
-}
-
-type t = {
+(* TODO Probably also needs a dirty bit...? Data should be mutable? *)
+(* TODO There is sense in only updating the expiration time, as that can be
+   cheaper than serializing the data. *)
+type 'a session_info = {
   key : string;
-  data : stored;
+  id : string;
+  expires_at : int64;
+  data : 'a;
 }
 
-let sessions = Hashtbl.create 256
+type 'a session = {
+  mutable session_info : 'a session_info;
+  store : 'a store;
+  request : request;
+  use_expires_in : int64;
+}
 
-let session_key {key; _} =
-  key
+and 'a store = {
+  load : request -> 'a session_info option Lwt.t;
+  create : 'a session_info option -> request -> int64 -> 'a session_info Lwt.t;
+  set : 'a session_info -> request -> unit Lwt.t;
+  send : 'a session_info -> request -> response -> response Lwt.t;
+}
 
-let person {data = {person; _}; _} =
-  person
+let session_key session =
+  session.session_info.key
 
-(* The first 48 bits of the key are there just to identify it in the logs. *)
-let identify_key k =
-  String.sub k 0 8
+let session_id session =
+  session.session_info.id
 
-let read_and_touch ~key =
-  Hashtbl.find_opt sessions key
-  (* TODO LATER Need to support OCaml 4.04 or so. No real need for Option
-     module. *)
-  |> Option.map (fun data -> {key; data})
-  |> Lwt.return
+let session_expires_at session =
+  session.session_info.expires_at
 
-let create ?person () =
-  (* TODO LATER Drema really needs a helper for base64url encoding to avoid
-     mistakes at places like this. *)
-  (* TODO Need to add Dream.random as a high-quality entropy source. *)
-  let key = Dream.base64url (Dream.random 36) in
-  let data = {person} in
-  Hashtbl.replace sessions key data;
-  log.debug (fun m -> m "Session %s created" (identify_key key));
-  Lwt.return {key; data}
+let session_data session =
+  session.session_info.data
 
-(* TODO LATER Rename this variable. *)
-(* TODO LATER Decorate the variable with metadata for the debugger. *)
-let key =
-  Dream.new_local ()
+let set_session_data data session =
+  session.session_info <- {session.session_info with data = data};
+  session.store.set session.session_info session.request
 
-(* TODO Replace find_exn by find. *)
-(* TODO Rename. *)
-(* TODO A neat error message if the session is missing when expected. *)
-let get request =
-  Dream.local key request |> Option.get
-
-let switch ?person response =
+let invalidate_session session =
   let open Lwt.Infix in
-
-  create ?person () >>= fun session ->
-
-  Lwt.return (Dream.with_local key session response, session)
-  (* TODO This return is awkward. Should probably set the sesion on the request,
-     not the response, and then it is not necessary to also return it to the
-     caller. The caller can get it from the response, if needed. *)
-
-(* TODO Rename loggers from m to log. *)
-let check handler request =
-  let open Lwt.Infix in
-
-  begin match Dream.cookie cookie request with
-  | None ->
-    log.debug (fun m -> m ~request "Session missing");
-    create () >>= fun session ->
-    Lwt.return (session, true)
-  | Some incoming_key ->
-    read_and_touch ~key:incoming_key >>= fun session ->
-    match session with
-    | None ->
-      log.debug (fun m ->
-        m ~request "Session %s stale" (identify_key incoming_key));
-      create () >>= fun session ->
-      Lwt.return (session, true)
-    | Some session ->
-      log.debug (fun m ->
-        m ~request "Session %s valid" (identify_key incoming_key));
-      Lwt.return (session, false)
-  end
-  >>= fun (session, fresh) ->
-
-  handler (Dream.with_local key session request)
-  >>= fun response ->
-
-  let outgoing_key =
-    match Dream.local key response, fresh with
-    | Some session, _ -> Some (session_key session)
-    | None, true -> Some (session_key session)
-    | None, false -> None
-  in
-
-  (* TODO Add ~secure when running under HTTPS. *)
-  let response =
-    match outgoing_key with
-    | None -> response
-    | Some outgoing_key ->
-      log.debug (fun m -> m ~request
-        "Session %s sent" (identify_key outgoing_key));
-      (* TODO Need all the cookie options: HttpOnly, Scope based on the prefix,
-         well not the domain.  *)
-        (* ~http_only:true ~scope:(Uri.of_string ((Prefix.get req) "/"))
-        (cookie, outgoing_key) resp *)
-      (* TODO Need to replace_set_cookie rather than add_set_cookie. *)
-      Dream.add_set_cookie cookie outgoing_key response
-  in
-
-  Lwt.return response
-
-let destroy request =
-  let {key; _} = get request in
-  Hashtbl.remove sessions key;
+  let expires_at =
+    Int64.add (Unix.gettimeofday () |> Int64.of_float) session.use_expires_in in
+  session.store.create (Some session.session_info) session.request expires_at
+  >>= fun session_info ->
+  session.session_info <- session_info;
   Lwt.return_unit
 
-let key = session_key
+let store ~load ~create ~set ~send = {
+  load;
+  create;
+  set;
+  send;
+}
 
-let identify req =
-  identify_key (session_key (get req))
+(* Used for the default sub-log name, cookie name, and request variable name. *)
+let module_name =
+  "dream.session"
+
+(* TODO Actually use the log somewhere...... *)
+let log =
+  Log.sub_log module_name
+
+(* TODO Make session expiration configurable somewhere. *)
+let expiration_time =
+  Int64.of_int (60 * 60 * 24 * 7 * 2)
+
+(* TODO LATER Need a session garbage collector, probably. *)
+(* TODO LATER Can avoid renewing sessions too often by renewing only when they
+   are at least half-expired. *)
+let sessions request_local_variable store = fun next_handler request ->
+  let open Lwt.Infix in
+
+  let now = Unix.gettimeofday () |> Int64.of_float in
+
+  (* Try to load a session, given the cookies and/or headers in the request. *)
+  store.load request
+  >>= fun maybe_session_info ->
+
+  (* If no session is found, create one. Otherwise, if a session is found,
+     check its expiration time. If too old, re-create a session. The old session
+     is passed to the store so as to copy over any settings that may be
+     relevant. The store can simply ignore it. *)
+  begin match maybe_session_info with
+  | None ->
+    store.create None request (Int64.add now expiration_time)
+
+  | Some session_info ->
+    if now < Int64.add session_info.expires_at expiration_time then
+      let expires_at = Int64.add now expiration_time in
+      Lwt.return {session_info with expires_at}
+    else
+      store.create maybe_session_info request (Int64.add now expiration_time)
+  end
+
+  >>= fun session_info ->
+
+  let session = {
+    session_info;
+    store;
+    request;
+    use_expires_in = expiration_time;
+  } in
+
+  (* TODO Consider also storing the session id in an Lwt key for the logger to
+     use. *)
+  let request = Dream.with_local request_local_variable session request in
+
+  next_handler request
+  >>= fun response ->
+
+  (* Set cookies, or whateer needs to be done. *)
+  store.send session.session_info request response
+
+let session request_local_variable request =
+  match Dream.local request_local_variable request with
+  | Some session -> session
+  | None ->
+    let message = "Dream.session: missing session middleware" in
+    log.error (fun log -> log ~request "%s" message);
+    failwith message
+(* TODO Print the request-local variable name *)
+
+type 'a typed = {
+  sessions : 'a store -> Dream.middleware;
+  session : Dream.request -> 'a session;
+}
+
+let typed request_local_variable = {
+  sessions = sessions request_local_variable;
+  session = session request_local_variable;
+}
+
+
+
+let in_memory_sessions default_value =
+  let hash_table = Hashtbl.create 256 in
+
+  let load request =
+    match Dream.cookie module_name request with
+    | None -> Lwt.return_none
+    | Some potential_session_key ->
+      Lwt.return (Hashtbl.find_opt hash_table potential_session_key)
+  in
+
+  let create _ _ expires_at =
+    let key = Random.random 48 |> Dream__pure.Formats.to_base64url in
+    let id = String.sub key 0 8 in
+    let session_info = {
+      key;
+      id;
+      expires_at;
+      data = default_value;
+    } in
+    Hashtbl.replace hash_table key session_info;
+    Lwt.return session_info
+  in
+
+  let set session_info _ =
+    Hashtbl.replace hash_table session_info.key session_info;
+    Lwt.return_unit
+  in
+
+  (* TODO Cookie scope and security! Use the site prefix from the request. *)
+  let send session_info _ response =
+    response
+    |> Dream.add_set_cookie module_name session_info.key
+    |> Lwt.return
+  in
+
+  store ~load ~create ~set ~send
+
+
+
+module Exported_defaults =
+struct
+  (* TODO Debug info. *)
+  let dictionary_sessions_variable =
+    Dream.new_local ()
+
+  let dictionary_sessions =
+    typed dictionary_sessions_variable
+
+  let sessions_in_memory =
+    dictionary_sessions.sessions (in_memory_sessions [])
+
+  let session_key request =
+    session_key (dictionary_sessions.session request)
+
+  let session_id request =
+    session_id (dictionary_sessions.session request)
+
+  let session_expires_at request =
+    session_expires_at (dictionary_sessions.session request)
+
+  let session key request =
+    request
+    |> dictionary_sessions.session
+    |> session_data
+    |> List.assoc_opt key
+
+  let all_session_values request =
+    request
+    |> dictionary_sessions.session
+    |> session_data
+
+  let set_session key value request =
+    let session = dictionary_sessions.session request in
+    session
+    |> session_data
+    |> List.remove_assoc key
+    |> fun dictionary -> (key, value)::dictionary
+    |> fun dictionary -> set_session_data dictionary session
+
+  let invalidate_session request =
+    invalidate_session (dictionary_sessions.session request)
+end
+
+(* TODO Currently using some sloppy format to flatten string * string lists into
+   cookie-safe strings. It's neither space- nor time-efficient. *)
+let _dictionary_to_string dictionary =
+  let buffer = Buffer.create 4096 in
+
+  dictionary |> List.iter (fun (key, value) ->
+    let key = Dream__pure.Formats.to_base64url key in
+    let value = Dream__pure.Formats.to_base64url value in
+
+    Printf.bprintf buffer "%i_%s%i_%s"
+      (String.length key) key (String.length value) value);
+
+  Buffer.contents buffer
+
+let _string_to_dictionary string =
+  let load_string index =
+    match String.index_from_opt string index '_' with
+    | None -> None
+    | Some underscore_index ->
+      let length_string = String.sub string index (underscore_index - index) in
+      match int_of_string length_string with
+      | exception _ -> None
+      | length ->
+        match String.sub string (underscore_index + 1) length with
+        | exception _ -> None
+        | value ->
+          match Dream__pure.Formats.from_base64url value with
+          | Error _ -> None
+          | Ok value -> Some (value, index + underscore_index + 1 + length)
+  in
+
+  let load_pair index =
+    match load_string index with
+    | None -> None
+    | Some (key, index) ->
+      match load_string index with
+      | None -> None
+      | Some (value, index) ->
+        Some ((key, value), index)
+  in
+
+  let rec load_dictionary index accumulator =
+    match load_pair index with
+    | None -> accumulator
+    | Some (pair, index) -> load_dictionary index (pair::accumulator)
+  in
+
+  load_dictionary 0

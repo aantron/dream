@@ -381,6 +381,8 @@ val cookie : string -> request -> string option
     to reverse it after calling [Dream.cookie]. See {!Dream.add_set_cookie} for
     recommendations about encodings to use and {!web_formats} for encoders and
     decoders. *)
+(* TODO Note about what happens if there are multiple cookies with the same
+   name. *)
 
 val all_cookies : request -> (string * string) list
 (** Retrieves all cookies, i.e. all [name=value] in all [Cookie:] headers. As
@@ -517,18 +519,21 @@ val logger : middleware
 (* val synchronous : (request -> response) -> handler *)
 
 (* TODO LATER Seriously review these signatures and names. *)
-val sessions : middleware
+(* TODO Neater types. *)
+(* val sessions : string Dream__middleware.Session.store -> middleware *)
 (* TODO LATER Expose the session switcher and invalidator. *)
 
-val csrf : middleware
+(* TODO Restore. *)
+(* val csrf : middleware *)
 val form : middleware
 
 (* TODO For a form, you almost always match against a fixed set of fields. But
    for query parameters, there might be mixtures. *)
+(* TODO Add Dream.memoize : (request -> 'a) -> (request -> 'a) *)
 
-type session
+(* type session
 
-val session : request -> session
+val session : request -> session *)
 
 (* TODO Naming, naming. *)
 val form_get : request -> (string * string) list
@@ -606,6 +611,23 @@ val options : string -> handler -> route
 
 val trace : string -> handler -> route
 (** Like {!Dream.get}, but the request's method must be [`TRACE]. *)
+
+
+
+(** {1 Sessions} *)
+
+(* TODO Neater names for everything. *)
+val sessions_in_memory : middleware
+
+val session : string -> request -> string option
+val all_session_values : request -> (string * string) list
+val set_session : string -> string -> request -> unit Lwt.t
+
+val invalidate_session : request -> unit Lwt.t
+
+val session_key : request -> string
+val session_id : request -> string
+val session_expires_at : request -> int64
 
 
 
@@ -898,6 +920,7 @@ val error_template :
     Raising an exception or rejecting the final promise in the template may
     cause an empty [500 Internal Server Error] to be sent to the client, if the
     context requires it. See {!Dream.error_handler}. *)
+(* TODO Rename debug_info to debug_dump. *)
 
 
 
@@ -925,6 +948,11 @@ val new_local : ?debug:('a -> string * string) -> unit -> 'a local
     function that converts the variable's value to a pair of [key, value]
     strings. This causes the variable to be included in debug info by the
     default error handler when debugging is enabled. *)
+(* TODO Provide a way to query the local for its name, which can be used by
+   middlewares for generating nicer error messages when a local is not found.
+   But then the metadata has to become string * 'a -> string, or it can be
+   split into to a separate name and converter to make it even easier to deal
+   with. *)
 
 val local : 'a local -> _ message -> 'a option
 (** Retrieves the value of the given per-message variable, if it is set. *)
@@ -1050,6 +1078,9 @@ val run :
     [~graceful_stop:false] disables waiting for one second after stop, before
     exiting from [Dream.run], which is done to let already-running request
     handlers complete. *)
+(* TODO Consider setting terminal options by default from this function, so that
+   they don't have to be set in Makefiles. *)
+(* TODO Put a README in the src/certificate directory. *)
 
 val serve :
   ?interface:string ->
@@ -1081,7 +1112,7 @@ val serve :
 
 (** {1:web_formats Web formats} *)
 
-val base64url : string -> string
+val to_base64url : string -> string
 val from_base64url : string -> (string, string) result
 (* TODO Test it; document. *)
 

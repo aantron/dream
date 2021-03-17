@@ -8,13 +8,13 @@
 (* http://www.lastbarrier.com/public-claims-and-how-to-validate-a-jwt/ *)
 (* https://jwt.io/ *)
 
-module Dream =
+(* module Dream =
 struct
   include Dream__pure.Inmost
   module Log = Log
   module Session = Session
   (* let add_set_cookie = Cookie.add_set_cookie *)
-  let base64url = Dream__pure.Formats.base64url
+  let base64url = Dream__pure.Formats.to_base64url
   let random = Random.random
 end
 
@@ -102,4 +102,4 @@ let verify handler request =
   if valid then
     handler request
   else
-    Dream.respond ~status:`Bad_Request ""
+    Dream.respond ~status:`Bad_Request "" *)

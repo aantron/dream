@@ -7,9 +7,9 @@
 
 include Dream__pure.Inmost
 
-let all_cookies = Dream__middleware.Cookie.all_cookies
-let cookie = Dream__middleware.Cookie.cookie
-let add_set_cookie = Dream__middleware.Cookie.add_set_cookie
+(* let all_cookies = Dream__middleware.Cookie.all_cookies *)
+(* let cookie = Dream__middleware.Cookie.cookie *)
+(* let add_set_cookie = Dream__middleware.Cookie.add_set_cookie *)
 
 include Dream__middleware.Log
 
@@ -32,17 +32,7 @@ let debug = default_log.debug
 
 include Dream__middleware.Router
 
-type session =
-  Dream__middleware.Session.t
-
-let sessions =
-  Dream__middleware.Session.check
-
-let session =
-  Dream__middleware.Session.get
-
-let csrf =
-  Dream__middleware.Csrf.verify
+include Dream__middleware.Session.Exported_defaults
 
 let form =
   Dream__middleware.Form.urlencoded

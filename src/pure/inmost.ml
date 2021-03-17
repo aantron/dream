@@ -239,6 +239,39 @@ let with_header name value message =
   |> drop_header name
   |> add_header name value
 
+(* TODO LATER Optimize by caching the parsed cookies in a local key. *)
+(* TODO LATER: API: Dream.cookie : string -> request -> string, cookie-option...
+   the thing with cookies is that they have a high likelihood of being absent. *)
+(* TODO LATER Can decide whether to accept multiple Cookie: headers based on
+   request version. But that would entail an actual middleware - is that worth
+   it? *)
+(* TODO LATER Also not efficient, at all. Need faster parser + the cache. *)
+(* TODO DOC Using only raw cookies. *)
+(* TODO However, is it best to URL-encode cookies by default, and provide a
+   variable for opting out? *)
+let all_cookies request =
+  request
+  |> headers "Cookie"
+  |> List.map Formats.from_cookie_encoded
+  |> List.flatten
+
+(* TODO Don't use this exception-raising function, to avoid clobbering user
+   backtraces more. *)
+let cookie_exn name request =
+  snd (all_cookies request |> List.find (fun (name', _) -> name' = name))
+
+let cookie name request =
+  try Some (cookie_exn name request)
+  with Not_found -> None
+
+(* TODO LATER Default encoding. *)
+let add_set_cookie name value response =
+  add_header "Set-Cookie" (Printf.sprintf "%s=%s" name value) response
+
+(* TODO LATER Good defaults for path; taking the path from a request; middleware
+   for site-wide cookies during prototyping. Needs prefix middleware in place
+   first. *)
+
 let has_body message =
   match !(message.body) with
   | `Empty -> false

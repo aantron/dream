@@ -38,3 +38,6 @@ typing `make`.
      example that uses crunch to be truly 1-file even with static content. -->
 <!-- TODO Show self-contained example with ppx_blob. -->
 <!-- TODO HTTP2 example is unnecessary - HTTP2 is transparent. -->
+<!-- TODO Insert sessions example before cookies example. It should be 7,
+     actually, before form, because form is based on CSRF which is based on
+     sessions. For now, it is in h-login. -->

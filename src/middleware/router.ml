@@ -128,17 +128,17 @@ let crumbs : (string * string) list Dream.local =
 let log =
   Log.sub_log "dream.router"
 
-let missing_crumb name =
-  let message = Printf.sprintf "Missing path parameter (Dream.crumb) %S" name in
-  log.error (fun log -> log "%s" message);
+let missing_crumb name request =
+  let message = Printf.sprintf "Dream.crumb: missing path parameter %S" name in
+  log.error (fun log -> log ~request "%s" message);
   failwith message
 
 let crumb name request =
   match Dream.local crumbs request with
-  | None -> missing_crumb name
+  | None -> missing_crumb name request
   | Some crumbs ->
     try List.assoc name crumbs
-    with _ -> missing_crumb name
+    with _ -> missing_crumb name request
 
 let router routes =
   let routes = List.flatten routes in

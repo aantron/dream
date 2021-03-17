@@ -6,7 +6,7 @@
 
 
 (* TODO DOC Recommend direct use of Base64 library for more options. *)
-let base64url text =
+let to_base64url text =
   Base64.encode_string ~alphabet:Base64.uri_safe_alphabet text
 
 let from_base64url text =
@@ -19,6 +19,53 @@ let from_base64url text =
 (* TODO LATER Decoder also. *)
 (* TODO LATER Once there are enough microformats, make sure to give everything
    consistent naming to minimize cognitive load. Like X and from_X. *)
+
+(* TODO Not quite a middleware. *)
+(* TODO DOC We allow multiple headers sent by the client, to support HTTP/2. *)
+
+(* TODO DOC
+   cookie-header = "Cookie:" OWS cookie-string OWS
+   cookie-string = cookie-pair *( ";" SP cookie-pair )
+ cookie-pair       = cookie-name "=" cookie-value
+ cookie-name       = token
+ cookie-value      = *cookie-octet / ( DQUOTE *cookie-octet DQUOTE )
+ cookie-octet      = %x21 / %x23-2B / %x2D-3A / %x3C-5B / %x5D-7E
+                       ; US-ASCII characters excluding CTLs,
+                       ; whitespace DQUOTE, comma, semicolon,
+                       ; and backslash
+https://www.ietf.org/rfc/rfc6265.txt
+
+   The OWS (optional whitespace) rule is used where zero or more linear
+   whitespace characters MAY appear:
+
+   OWS            = *( [ obs-fold ] WSP )
+                    ; "optional" whitespace
+   obs-fold       = CRLF
+
+   OWS SHOULD either not be produced or be produced as a single SP
+   character.
+ token             = <token, defined in [RFC2616], Section 2.2>
+
+  TODO Should make a web microformats library.
+       token          = 1*<any CHAR except CTLs or separators>
+
+TOOD LATER Write a "proper" parser, probably factor it out, too. Hoard all the
+relevant RFCs in doc/rfc
+TODO This is just an initial parser. It is neither fast nor correct.
+TODO This other library should include fold-style interface for reducing
+allocations.
+*)
+(* TODO Difference between "cookie encoding" and "cookie-safe encoding"!!!! *)
+let from_cookie_encoded s =
+  let pairs =
+    s
+    |> String.split_on_char ';'
+    |> List.map (String.split_on_char '=')
+  in
+
+  pairs |> List.fold_left (fun pairs -> function
+    | [name; value] -> (String.trim name, String.trim value)::pairs
+    | _ -> pairs) []
 
 (* TODO Move cookie decoding to here. *)
 
