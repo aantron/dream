@@ -614,20 +614,64 @@ val trace : string -> handler -> route
 
 
 
-(** {1 Sessions} *)
+(* TODO Link out to docs of Dream.Session module. Actually, the module needs to
+   be included here with its whole API. *)
+(* TODO The session manager may need to interact with AJAX in other ways. *)
+(** {1 Sessions}
+
+    TODO:
+
+    - Default Dream sessions store [string -> string] dictionaries.
+    - There are multiple back ends, storing sessions in memory (for
+      development), in a database, stateless in cookies, etc.
+    - This is all actually a specialization of Dream's typed sessions, which are
+      quite flexible. A user can write their own back ends and use sessions of
+      any type. Link to the easy examples. Link to [Dream.Session].
+    - Ultimately, if this is not customizable enough, one can write their own
+      session back end. If still wishing to use the other parts of Dream that
+      depend on sessions, all those parts are configurable by provinding
+      callback functions to use any other session setup.
+    - What do sessions have? App data (the dictionary), but also a secret key,
+      log-friendly id, expiration time.
+    - Mention security.
+    - Mention pre-sessions. *)
 
 (* TODO Neater names for everything. *)
 val sessions_in_memory : middleware
+(** Stores session data server-side in memory, i.e. without persistence. Passes
+    session keys to clients in cookies. Session data is lost when the server
+    process exits. This session middleware is suitable for prototyping, because
+    it has no persistence or key management requirements. *)
 
 val session : string -> request -> string option
+(** Retrieves the value with the given key in the request's session, if the
+    value is present. *)
+
 val all_session_values : request -> (string * string) list
+(** Retrieves the full session dictionary. *)
+
 val set_session : string -> string -> request -> unit Lwt.t
+(** [Dream.set_session key value request] sets a value in the request's session.
+    If there is an existing binding, it is replaced. The data store used by the
+    session middleware may immediately commit the value to storage, so this
+    function returns a promise. *)
 
 val invalidate_session : request -> unit Lwt.t
+(** Invalidates the given session, replacing it with a fresh one (a new
+    pre-session with an empty dictionary). The session store is likely to update
+    storage while creating the new session, so this function returns a
+    promise. *)
 
 val session_key : request -> string
+(** Evaluates to the request's session's key. This is a secret value that is
+    used to identify a client. *)
+
 val session_id : request -> string
+(** Evaluates to the request's session's identifier. This value is not secret;
+    it is suitable for printing to logs for tracing session lifetime. *)
+
 val session_expires_at : request -> int64
+(** Evaluates to the time at which the session will expire. *)
 
 
 

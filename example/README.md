@@ -41,3 +41,5 @@ typing `make`.
 <!-- TODO Insert sessions example before cookies example. It should be 7,
      actually, before form, because form is based on CSRF which is based on
      sessions. For now, it is in h-login. -->
+<!-- TODO Also need an example that demonstrates typed sessions and how trivial
+     they are. -->
