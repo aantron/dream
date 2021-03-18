@@ -85,6 +85,7 @@ module Scope = Hmap.Make (Scope_variable_metadata)
 type app = {
   globals : Scope.t ref;
   mutable debug : bool;
+  mutable secret : string;
 }
 
 let debug app =
@@ -93,10 +94,20 @@ let debug app =
 let set_debug value app =
   app.debug <- value
 
+let secret app =
+  app.secret
+
+let set_secret secret app =
+  app.secret <- secret
+
 let new_app () = {
   globals = ref Scope.empty;
   debug = false;
+  secret = "";
 }
+(* TODO The empty string secret will never be used the way the code is currently
+   set up. However, that it needs to be used temporarily suggests that the code
+   is ill-factored. *)
 
 type 'a message = {
   specific : 'a;

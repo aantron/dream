@@ -88,7 +88,7 @@ let log =
   Log.sub_log module_name
 
 (* TODO Make session expiration configurable somewhere. *)
-let expiration_time =
+let valid_for =
   Int64.of_int (60 * 60 * 24 * 7 * 2)
 
 (* TODO LATER Need a session garbage collector, probably. *)
@@ -109,14 +109,14 @@ let sessions request_local_variable store = fun next_handler request ->
      relevant. The store can simply ignore it. *)
   begin match maybe_session_info with
   | None ->
-    store.create None request (Int64.add now expiration_time)
+    store.create None request (Int64.add now valid_for)
 
   | Some session_info ->
-    if now < Int64.add session_info.expires_at expiration_time then
-      let expires_at = Int64.add now expiration_time in
+    if now < Int64.add session_info.expires_at valid_for then
+      let expires_at = Int64.add now valid_for in
       Lwt.return {session_info with expires_at}
     else
-      store.create maybe_session_info request (Int64.add now expiration_time)
+      store.create maybe_session_info request (Int64.add now valid_for)
   end
 
   >>= fun session_info ->
@@ -125,7 +125,7 @@ let sessions request_local_variable store = fun next_handler request ->
     session_info;
     store;
     request;
-    use_expires_in = expiration_time;
+    use_expires_in = valid_for;
   } in
 
   (* TODO Consider also storing the session id in an Lwt key for the logger to
@@ -169,6 +169,8 @@ let in_memory_sessions default_value =
       Lwt.return (Hashtbl.find_opt hash_table potential_session_key)
   in
 
+  (* TODO Consider UUIDs for session keys rather than just bare random strings.
+     Even though a collision is so unlikely... *)
   let create _ _ expires_at =
     let key = Random.random 48 |> Dream__pure.Formats.to_base64url in
     let id = String.sub key 0 8 in

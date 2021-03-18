@@ -3,6 +3,7 @@
  (name dream__middleware)
  (libraries
   cstruct
+  digestif
   dream.middleware.built_in
   dream.pure
   fmt

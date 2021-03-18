@@ -34,11 +34,16 @@ include Dream__middleware.Router
 
 include Dream__middleware.Session.Exported_defaults
 
-let form =
-  Dream__middleware.Form.urlencoded
+type form_error = [
+  | `Not_form_urlencoded
+  | `CSRF_token_invalid
+]
 
-let form_get =
-  Dream__middleware.Form.get
+let form =
+  Dream__middleware.Form.form
+
+(* let form_get =
+  Dream__middleware.Form.get *)
 
 include Dream__http.Error
 include Dream__http.Http

@@ -5,26 +5,51 @@
 
 
 
-module Dream =
-struct
-  include Dream__pure.Inmost
-  module Log = Log
-  let from_form_urlencoded = Dream__pure.Formats.from_form_urlencoded
-end
+module Dream = Dream__pure.Inmost
 
-let log =
-  Dream.Log.sub_log "dream.form"
+
+
+(* TODO Restore logging. *)
+(* let log =
+  Dream.Log.sub_log "dream.form" *)
 
 let sort form =
   List.stable_sort (fun (key, _) (key', _) -> String.compare key key') form
 
 (* TODO Debug metadata. *)
-let key =
-  Dream.new_local ()
+(* let key =
+  Dream.new_local () *)
+
+(* TODO Custom CSRF checker or session implementation. *)
+
+let form request =
+  let open Lwt.Infix in
+
+  match Dream.header "Content-Type" request with
+  | Some "application/x-www-form-urlencoded" ->
+
+    Dream.body request
+    >>= fun body ->
+
+    let form = Dream__pure.Formats.from_form_urlencoded body in
+    let csrf_token, form =
+      List.partition (fun (name, _) -> name = Csrf.field_name) form in
+
+    begin match csrf_token with
+    | [_, value] ->
+      if not (Csrf.verify value request) then
+        Lwt.return (Error `CSRF_token_invalid)
+      else
+        Lwt.return (Ok (sort form))
+
+    | _ -> Lwt.return (Error `CSRF_token_invalid)
+    end
+
+  | _ -> Lwt.return (Error `Not_form_urlencoded)
 
 (* TODO Add built-in Content-Type thing. *)
 (* TODO Provide well-known Content-Types as predefined strings. *)
-let urlencoded handler request =
+(* let urlencoded handler request =
   let open Lwt.Infix in
 
   match Dream.header "Content-Type" request with
@@ -53,4 +78,4 @@ let consume field request =
   let matching, rest =
     List.partition (fun (field', _) -> field' = field) form in
   let matching = List.map snd matching in
-  matching, Dream.with_local key rest request
+  matching, Dream.with_local key rest request *)

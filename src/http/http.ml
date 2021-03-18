@@ -552,8 +552,9 @@ let serve_with_maybe_https
     ~stop
     ?debug
     ~error_handler
+    ?secret
     ~prefix
-    ~app
+    ?(app = Dream.new_app ())
     ~https
     ?certificate_file ?key_file
     ?certificate_string ?key_string
@@ -562,6 +563,14 @@ let serve_with_maybe_https
   begin match debug with
   | Some debug -> Dream.set_debug debug app;
   | None -> ()
+  end;
+
+  (* TODO The interface needs to allow not messing with the secret if an app is
+     passed. *)
+  (* TODO Key guidance https://security.stackexchange.com/a/146889 *)
+  begin match secret with
+  | Some secret -> Dream.set_secret secret app;
+  | None -> Dream.set_secret (Dream__middleware.Random.random 32) app
   end;
 
   match https with
@@ -683,14 +692,16 @@ let default_interface = "localhost"
 let default_port = 8080
 let never = fst (Lwt.wait ())
 
+
+
 let serve
     ?(interface = default_interface)
     ?(port = default_port)
     ?(stop = never)
     ?debug
     ?(error_handler = Error_handler.default)
+    ?secret
     ?(prefix = "")
-    (* ?(app = Dream.new_app ()) *)
     ?(https = `No)
     ?certificate_file
     ?key_file
@@ -705,8 +716,9 @@ let serve
     ~stop
     ?debug
     ~error_handler
+    ?secret
     ~prefix
-    ~app:(Dream.new_app ())
+    ?app:None
     ~https
     ?certificate_file
     ?key_file
@@ -714,14 +726,16 @@ let serve
     ?key_string
     user's_dream_handler
 
+
+
 let run
     ?(interface = default_interface)
     ?(port = default_port)
     ?(stop = never)
     ?debug
     ?(error_handler = Error_handler.default)
+    ?secret
     ?(prefix = "")
-    (* ?(app = Dream.new_app ()) *)
     ?(https = `No)
     ?certificate_file
     ?key_file
@@ -770,8 +784,9 @@ let run
       ~stop
       ?debug
       ~error_handler
+      ?secret
       ~prefix
-      ~app:(Dream.new_app ())
+      ?app:None
       ~https
       ?certificate_file ?key_file
       ?certificate_string ?key_string

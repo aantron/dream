@@ -304,10 +304,10 @@ let error_replacement = {|
 
 let run_expected = {|<div class="spec value" id="val-run">
  <a href="#val-run" class="anchor"></a><code><span><span class="keyword">val</span> run : <span>?interface:string <span class="arrow">-&gt;</span></span> <span>?port:int <span class="arrow">-&gt;</span></span> <span>?stop:<span>unit <span class="xref-unresolved">Lwt</span>.t</span> <span class="arrow">-&gt;</span></span> <span>?debug:bool <span class="arrow">-&gt;</span></span>
-<span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span> <span>?prefix:string <span class="arrow">-&gt;</span></span> <span>?https:<span>[ `No <span>| `OpenSSL</span> <span>| `OCaml_TLS</span> ]</span> <span class="arrow">-&gt;</span></span>
-<span>?certificate_file:string <span class="arrow">-&gt;</span></span> <span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?certificate_string:string <span class="arrow">-&gt;</span></span>
-<span>?key_string:string <span class="arrow">-&gt;</span></span> <span>?greeting:bool <span class="arrow">-&gt;</span></span> <span>?stop_on_input:bool <span class="arrow">-&gt;</span></span> <span>?graceful_stop:bool <span class="arrow">-&gt;</span></span>
-<span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> unit</span></code>
+<span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span> <span>?secret:string <span class="arrow">-&gt;</span></span> <span>?prefix:string <span class="arrow">-&gt;</span></span>
+<span>?https:<span>[ `No <span>| `OpenSSL</span> <span>| `OCaml_TLS</span> ]</span> <span class="arrow">-&gt;</span></span> <span>?certificate_file:string <span class="arrow">-&gt;</span></span>
+<span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?certificate_string:string <span class="arrow">-&gt;</span></span> <span>?key_string:string <span class="arrow">-&gt;</span></span>
+<span>?greeting:bool <span class="arrow">-&gt;</span></span> <span>?stop_on_input:bool <span class="arrow">-&gt;</span></span> <span>?graceful_stop:bool <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
 |}
 
@@ -318,6 +318,7 @@ let run_replacement = {|
   ?stop:unit Lwt.t ->
   ?debug:bool ->
   ?error_handler:<a href="#type-error_handler">error_handler</a> ->
+  ?secret:string ->
   ?prefix:string ->
   ?https:[ `No | `OpenSSL | `OCaml_TLS ] ->
   ?certificate_file:string ->
@@ -333,9 +334,9 @@ let run_replacement = {|
 
 let serve_expected = {|<div class="spec value" id="val-serve">
  <a href="#val-serve" class="anchor"></a><code><span><span class="keyword">val</span> serve : <span>?interface:string <span class="arrow">-&gt;</span></span> <span>?port:int <span class="arrow">-&gt;</span></span> <span>?stop:<span>unit <span class="xref-unresolved">Lwt</span>.t</span> <span class="arrow">-&gt;</span></span> <span>?debug:bool <span class="arrow">-&gt;</span></span>
-<span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span> <span>?prefix:string <span class="arrow">-&gt;</span></span> <span>?https:<span>[ `No <span>| `OpenSSL</span> <span>| `OCaml_TLS</span> ]</span> <span class="arrow">-&gt;</span></span>
-<span>?certificate_file:string <span class="arrow">-&gt;</span></span> <span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?certificate_string:string <span class="arrow">-&gt;</span></span>
-<span>?key_string:string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <span>unit <span class="xref-unresolved">Lwt</span>.t</span></span></code>
+<span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span> <span>?secret:string <span class="arrow">-&gt;</span></span> <span>?prefix:string <span class="arrow">-&gt;</span></span>
+<span>?https:<span>[ `No <span>| `OpenSSL</span> <span>| `OCaml_TLS</span> ]</span> <span class="arrow">-&gt;</span></span> <span>?certificate_file:string <span class="arrow">-&gt;</span></span>
+<span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?certificate_string:string <span class="arrow">-&gt;</span></span> <span>?key_string:string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <span>unit <span class="xref-unresolved">Lwt</span>.t</span></span></code>
 </div>
 |}
 
@@ -346,6 +347,7 @@ let serve_replacement = {|
   ?stop:unit Lwt.t ->
   ?debug:bool ->
   ?error_handler:<a href="#type-error_handler">error_handler</a> ->
+  ?secret:string ->
   ?prefix:string ->
   ?https:[ `No | `OpenSSL | `OCaml_TLS ] ->
   ?certificate_file:string ->

@@ -509,6 +509,7 @@ val pipeline : middleware list -> middleware
       Dream.pipeline [mw_1; mw_2; ...; mw_n] @@ handler
       mw_1 @@ mw_2 @@ ... @@ mw_n @@ handler
     ]} *)
+(* TODO This code block is highlighted as CSS. Get a better highlight.pack.js. *)
 
 val logger : middleware
 (** Logs incoming requests, times them, and prints timing information when the
@@ -525,7 +526,7 @@ val logger : middleware
 
 (* TODO Restore. *)
 (* val csrf : middleware *)
-val form : middleware
+(* val form : middleware *)
 
 (* TODO For a form, you almost always match against a fixed set of fields. But
    for query parameters, there might be mixtures. *)
@@ -536,7 +537,7 @@ val form : middleware
 val session : request -> session *)
 
 (* TODO Naming, naming. *)
-val form_get : request -> (string * string) list
+(* val form_get : request -> (string * string) list *)
 (* TODO There is no strong reason why Form should be a middleware; it can just
    be a caching getter like Cookie. CSRF will load it on demand depending on
    content-type. Will probably need a Content-Type filter middleware, however,
@@ -545,6 +546,16 @@ val form_get : request -> (string * string) list
    itself? Can just provide some middleware that allows running checks, and
    provide the checks. I guess the main reason why any of these things are
    middlewares is that CSRF can respond on its own. *)
+
+type form_error = [
+  | `Not_form_urlencoded
+  | `CSRF_token_invalid
+]
+(* TODO Distinguish between expired CSRF tokens and other conditions. *)
+
+val form : request -> ((string * string) list, [> form_error ]) result Lwt.t
+(* TODO Provide optionals for disabling CSRF checking and CSRF token field
+   filtering. *)
 
 
 
@@ -611,9 +622,11 @@ val options : string -> handler -> route
 
 val trace : string -> handler -> route
 (** Like {!Dream.get}, but the request's method must be [`TRACE]. *)
+(* TODO Expose patch method. *)
 
 
 
+(* TODO Expose typed sessions in the main API? *)
 (* TODO Link out to docs of Dream.Session module. Actually, the module needs to
    be included here with its whole API. *)
 (* TODO The session manager may need to interact with AJAX in other ways. *)
@@ -1028,6 +1041,7 @@ val run :
   ?stop:unit Lwt.t ->
   ?debug:bool ->
   ?error_handler:error_handler ->
+  ?secret:string ->
   ?prefix:string ->
   ?https:[ `No | `OpenSSL | `OCaml_TLS ] ->
   ?certificate_file:string ->
@@ -1067,6 +1081,9 @@ val run :
     responses, and protocol-level errors. See {{!error_page} Error page} for
     details. The default handler logs all errors, and sends empty responses, to
     avoid accidental leakage of unlocalized strings to the client.
+
+    [~secret] is a key to be used for cryptographic operations. In particular,
+    it heavily used for CSRF tokens.
 
     [~prefix] is a site prefix for applications that are not running at the root
     ([/]) of their domain, and receiving requests with the prefix included in
@@ -1132,6 +1149,7 @@ val serve :
   ?stop:unit Lwt.t ->
   ?debug:bool ->
   ?error_handler:error_handler ->
+  ?secret:string ->
   ?prefix:string ->
   ?https:[ `No | `OpenSSL | `OCaml_TLS ] ->
   ?certificate_file:string ->
