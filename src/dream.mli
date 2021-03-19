@@ -633,6 +633,13 @@ val trace : string -> handler -> route
 val patch : string -> handler -> route
 (** Like {!Dream.get}, but the request's method must be [`PATCH]. *)
 
+val static :
+  ?handler:(string -> string -> request -> response Lwt.t) -> string -> handler
+(* TODO Document.
+
+Dream.get "static/*" (Dream.static "static")
+ *)
+
 
 
 (* TODO Expose typed sessions in the main API? *)

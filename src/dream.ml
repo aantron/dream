@@ -37,6 +37,7 @@ let info = default_log.info
 let debug = default_log.debug
 
 include Dream__middleware.Router
+include Dream__middleware.Static
 
 include Dream__middleware.Session.Exported_defaults
 
