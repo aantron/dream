@@ -292,21 +292,14 @@ let wrap_handler_h2
         >>= fun (response : Dream.response) ->
 
         let forward_response response =
-          (* TODO Automatic setting of Content-Length is a bad idea, actually,
-             for HTTP/2. Need to be careful about headers. *)
           let headers =
-            Dream.all_headers response
-            |> List.filter (fun (name, _) ->
-              String.lowercase_ascii name <> "content-length")
-            |> H2.Headers.of_list
-          in
-
+            H2.Headers.of_list (Dream.all_headers response) in
           let status =
             to_h2_status (Dream.status response) in
-          let httpaf_response =
+          let h2_response =
             H2.Response.create ~headers status in
           let body =
-            H2.Reqd.respond_with_streaming conn httpaf_response in
+            H2.Reqd.respond_with_streaming conn h2_response in
 
           Adapt.forward_body_h2 response body;
 
@@ -460,6 +453,9 @@ let serve_with_details
   (* https://letsencrypt.org/docs/certificates-for-localhost/ *)
 
   (* TODO Clean up this pseudo-middleware stack. *)
+  let user's_dream_handler =
+    Dream__middleware__built_in.Built_in.Content_length.content_length
+      user's_dream_handler in
   let user's_dream_handler =
     Error_handler.app app error_handler user's_dream_handler in
   let user's_dream_handler =

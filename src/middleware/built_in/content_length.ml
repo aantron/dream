@@ -10,35 +10,33 @@ module Dream = Dream__pure.Inmost
 
 
 let add_header response buffered_body =
-
   let length =
     match buffered_body with
     | `Empty -> 0
     | `String body -> String.length body
     | `Bigstring body -> Dream.Bigstring.size_in_bytes body
   in
-
   Lwt.return
     (Dream.add_header "Content-Length" (string_of_int length) response)
 
-
-
-let assign ?(buffer_streams = false) next_handler request =
+(* Add a Content-Length header to HTTP 1.x responses that have a fixed body but
+   don't yet have the header. *)
+let content_length next_handler request =
   let open Lwt.Infix in
 
-  next_handler request
-  >>= fun response ->
-
-  if Dream.has_header "Content-Length" response then
-    Lwt.return response
+  if fst (Dream.version request) <> 1 then
+    next_handler request
 
   else
-    match !(response.body) with
-    | #Dream.buffered_body as buffered_body ->
-      add_header response buffered_body
+    next_handler request
+    >>= fun response ->
 
-    | _ ->
-      if not buffer_streams then
+    if Dream.has_header "Content-Length" response then
+      Lwt.return response
+
+    else
+      match !(response.body) with
+      | #Dream.buffered_body as buffered_body ->
+        add_header response buffered_body
+      | _ ->
         Lwt.return response
-      else
-        Dream.buffer_body response >>= add_header response

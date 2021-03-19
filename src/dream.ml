@@ -49,6 +49,9 @@ type form_error = [
 let form =
   Dream__middleware.Form.form
 
+let content_length =
+  Dream__middleware__built_in.Content_length.content_length
+
 (* let form_get =
   Dream__middleware.Form.get *)
 

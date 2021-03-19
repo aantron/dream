@@ -332,12 +332,8 @@ let body_stream request =
    are setting a new body. Indeed, there might be a concurrent read going on.
    That read should not override the new body. So let it mutate the old
    request's ref; we generate a new request with a new body ref. *)
-let with_body ?(set_content_length = true) body response =
-  let response = update {response with body = ref (`String body)} in
-  if set_content_length then
-    with_header "Content-Length" (string_of_int (String.length body)) response
-  else
-    response
+let with_body body response =
+  update {response with body = ref (`String body)}
 
 (* let version_override response =
   response.specific.response_version
@@ -463,12 +459,9 @@ let request
 
 
 let response
-    (* ?version *)
     ?status
     ?code
-    (* ?reason *)
     ?(headers = [])
-    ?(set_content_length = true)
     body =
 
   let status =
@@ -480,9 +473,7 @@ let response
 
   let rec response = {
     specific = {
-      (* response_version = version; *)
       status;
-      (* reason; *)
       websocket = None;
     };
     headers;
@@ -492,18 +483,15 @@ let response
     last = ref response;
   } in
 
-  with_body ~set_content_length body response
+  with_body body response
 
 let respond
-    (* ?version *)
     ?status
     ?code
-    (* ?reason *)
     ?headers
-    ?set_content_length
     body =
 
-  response ?status ?code ?headers ?set_content_length body
+  response ?status ?code ?headers body
   |> Lwt.return
 
 let websocket handler =

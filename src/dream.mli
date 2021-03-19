@@ -474,7 +474,7 @@ val has_body : _ message -> bool
     This function does not stream the body — it could return [true], and later
     streaming could reveal that the body has length zero. *)
 
-val with_body : ?set_content_length:bool -> string -> 'a message -> 'a message
+val with_body : string -> 'a message -> 'a message
 (** Creates a new message by replacing the body with the given string. *)
 
 
@@ -485,7 +485,6 @@ val response :
   ?status:status ->
   ?code:int ->
   ?headers:(string * string) list ->
-  ?set_content_length:bool ->
   string ->
     response
 (** Creates a new response with the given string as body. Use [""] to return an
@@ -498,7 +497,6 @@ val respond :
   ?status:status ->
   ?code:int ->
   ?headers:(string * string) list ->
-  ?set_content_length:bool ->
   string ->
     response Lwt.t
 (** Same as {!Dream.val-response}, but immediately uses the new response to
@@ -566,6 +564,10 @@ type form_error = [
 val form : request -> ((string * string) list, [> form_error ]) result Lwt.t
 (* TODO Provide optionals for disabling CSRF checking and CSRF token field
    filtering. *)
+
+(* TODO Document middleware as built-in. Link to customizzation of built-in
+   middleware. *)
+val content_length : middleware
 
 
 
@@ -1153,6 +1155,8 @@ val run :
     handlers complete. *)
 (* TODO Consider setting terminal options by default from this function, so that
    they don't have to be set in Makefiles. *)
+(* TODO Split up ~https into ~https:true and a separate library choice, which
+   default probably to OpenSSL. *)
 
 val serve :
   ?interface:string ->
@@ -1249,6 +1253,5 @@ val sort_headers : (string * string) list -> (string * string) list
 (* TODO DOC meta description. *)
 (* TODO DOC Guidance for Dream libraries: publish routes if you have routes, not
    handlers or middlewares. *)
-(* TODO Switch to implicit addition of Content-Length and docuemnt it. *)
 (* TODO DOC Need a syntax highlighter. Highlight.js won't work for templates for
    sure. *)
