@@ -7,6 +7,9 @@
 
 include Dream__pure.Inmost
 
+module Status =
+  Dream__pure.Status
+
 (* let all_cookies = Dream__middleware.Cookie.all_cookies *)
 (* let cookie = Dream__middleware.Cookie.cookie *)
 (* let add_set_cookie = Dream__middleware.Cookie.add_set_cookie *)

@@ -8,6 +8,6 @@ depends: [
 ]
 
 pin-depends: [
-  ["odoc.2.0.0~master" "git+https://github.com/aantron/odoc.git#50fcb86ae66bb7d223b0d5e90488c7a911d22541"]
+  ["odoc.2.0.0~master" "git+https://github.com/aantron/odoc.git#dbb37e20717985edfd8f734e00b9ab6f705d81a4"]
   ["soupault.2.4.1~master" "git+https://github.com/aantron/soupault.git#ef003748b9da4ce9d0deafed6c58da6b537549ee"]
 ]

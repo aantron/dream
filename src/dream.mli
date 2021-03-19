@@ -145,6 +145,14 @@ and 'a promise = 'a Lwt.t
 
 
 
+(** The only purpose of this submodule is to generate a subpage, so as to move
+    helpers and repetitive defintions of seldom-used codes out of the main
+    docs. The module is immediately included in the main API. *)
+module Method_and_status :
+sig
+
+(** {1 Methods} *)
+
 type method_ = [
   | `GET
   | `POST
@@ -160,9 +168,7 @@ type method_ = [
 (** HTTP request methods. See
     {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2 ↪},
     {{:https://tools.ietf.org/html/rfc5789#page-2} RFC 5789 §2 ↪}, and
-    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods} MDN ↪}. The
-    full set of methods is listed on a {{:/status/index.html} separate page},
-    together with some helpers. *)
+    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods} MDN ↪}. *)
 
 val method_to_string : method_ -> string
 (** Evaluates to a string representation of the given method. For example,
@@ -171,7 +177,7 @@ val method_to_string : method_ -> string
 val string_to_method : string -> method_
 (** Evaluates to the {!method_} corresponding to the given method string. *)
 
-
+(** {1 Statuses} *)
 
 (* TODO Fix websocket link. *)
 type informational = [
@@ -290,12 +296,8 @@ type status = [
   | standard_status
   | `Status of int
 ]
-(** HTTP response status codes. See
-    {{:https://tools.ietf.org/html/rfc7231#section-6} RFC 7231 §6 ↪} and
-    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status} MDN ↪}. The
-    full set of status codes is listed on a
-    {{:/status/index.html#type-informational} separate page}, together with some
-    helpers. *)
+(** Status codes, including codes directly represented as integers. See the
+    types above for the full list and references. *)
 
 val status_to_string : status -> string
 (** Evaluates to a string representation of the given status. For example,
@@ -333,6 +335,28 @@ val is_client_error : status -> bool
 val is_server_error : status -> bool
 (** Like {!Dream.is_informational}, but for type {!Dream.server_error} and
     numeric codes [5xx]. *)
+
+end
+
+(**/**)
+include module type of Method_and_status
+(**/**)
+
+type method_ = Method_and_status.method_
+(** HTTP request methods. See
+    {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2 ↪},
+    {{:https://tools.ietf.org/html/rfc5789#page-2} RFC 5789 §2 ↪}, and
+    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods} MDN ↪}. The
+    full set of methods is listed on a {{:/method_and_status/index.html}
+    separate page}, together with some helpers. *)
+
+type status = Method_and_status.status
+(** HTTP response status codes. See
+    {{:https://tools.ietf.org/html/rfc7231#section-6} RFC 7231 §6 ↪} and
+    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status} MDN ↪}. The
+    full set of status codes is listed on a
+    {{:/method_and_status/index.html#type-informational} separate page},
+    together with some helpers. *)
 
 
 

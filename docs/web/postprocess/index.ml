@@ -3,62 +3,7 @@ let if_expected = Common.if_expected
 open Soup
 
 let method_expected = {|<div class="spec type" id="type-method_">
- <a href="#type-method_" class="anchor"></a><code><span><span class="keyword">type</span> method_</span><span> = </span><span>[ </span></code>
- <table>
-  <tbody>
-   <tr id="type-method_.GET" class="anchored">
-    <td class="def constructor">
-     <a href="#type-method_.GET" class="anchor"></a><code><span>| </span></code><code><span>`GET</span></code>
-    </td>
-   </tr>
-   <tr id="type-method_.POST" class="anchored">
-    <td class="def constructor">
-     <a href="#type-method_.POST" class="anchor"></a><code><span>| </span></code><code><span>`POST</span></code>
-    </td>
-   </tr>
-   <tr id="type-method_.PUT" class="anchored">
-    <td class="def constructor">
-     <a href="#type-method_.PUT" class="anchor"></a><code><span>| </span></code><code><span>`PUT</span></code>
-    </td>
-   </tr>
-   <tr id="type-method_.DELETE" class="anchored">
-    <td class="def constructor">
-     <a href="#type-method_.DELETE" class="anchor"></a><code><span>| </span></code><code><span>`DELETE</span></code>
-    </td>
-   </tr>
-   <tr id="type-method_.HEAD" class="anchored">
-    <td class="def constructor">
-     <a href="#type-method_.HEAD" class="anchor"></a><code><span>| </span></code><code><span>`HEAD</span></code>
-    </td>
-   </tr>
-   <tr id="type-method_.CONNECT" class="anchored">
-    <td class="def constructor">
-     <a href="#type-method_.CONNECT" class="anchor"></a><code><span>| </span></code><code><span>`CONNECT</span></code>
-    </td>
-   </tr>
-   <tr id="type-method_.OPTIONS" class="anchored">
-    <td class="def constructor">
-     <a href="#type-method_.OPTIONS" class="anchor"></a><code><span>| </span></code><code><span>`OPTIONS</span></code>
-    </td>
-   </tr>
-   <tr id="type-method_.TRACE" class="anchored">
-    <td class="def constructor">
-     <a href="#type-method_.TRACE" class="anchor"></a><code><span>| </span></code><code><span>`TRACE</span></code>
-    </td>
-   </tr>
-   <tr id="type-method_.PATCH" class="anchored">
-    <td class="def constructor">
-     <a href="#type-method_.PATCH" class="anchor"></a><code><span>| </span></code><code><span>`PATCH</span></code>
-    </td>
-   </tr>
-   <tr id="type-method_.Method" class="anchored">
-    <td class="def constructor">
-     <a href="#type-method_.Method" class="anchor"></a><code><span>| </span></code><code><span>`Method <span class="keyword">of</span> string</span></code>
-    </td>
-   </tr>
-  </tbody>
- </table>
- <code><span> ]</span></code>
+ <a href="#type-method_" class="anchor"></a><code><span><span class="keyword">type</span> method_</span><span> = <a href="Method_and_status/index.html#type-method_">Method_and_status.method_</a></span></code>
 </div>
 |}
 
@@ -67,22 +12,7 @@ let method_replacement = {|
 |}
 
 let status_expected = {|<div class="spec type" id="type-status">
- <a href="#type-status" class="anchor"></a><code><span><span class="keyword">type</span> status</span><span> = </span><span>[ </span></code>
- <table>
-  <tbody>
-   <tr id="type-status.standard_status" class="anchored">
-    <td class="def type">
-     <a href="#type-status.standard_status" class="anchor"></a><code><span>| </span></code><code><span><a href="#type-standard_status">standard_status</a></span></code>
-    </td>
-   </tr>
-   <tr id="type-status.Status" class="anchored">
-    <td class="def constructor">
-     <a href="#type-status.Status" class="anchor"></a><code><span>| </span></code><code><span>`Status <span class="keyword">of</span> int</span></code>
-    </td>
-   </tr>
-  </tbody>
- </table>
- <code><span> ]</span></code>
+ <a href="#type-status" class="anchor"></a><code><span><span class="keyword">type</span> status</span><span> = <a href="Method_and_status/index.html#type-status">Method_and_status.status</a></span></code>
 </div>
 |}
 
@@ -381,16 +311,14 @@ let pretty_print_signatures soup =
     method_expected
     (fun () -> pretty_print method_)
     (fun () ->
-      method_ $$ "> code" |> Soup.iter Soup.delete;
-      Soup.replace (method_ $ "> table") (Soup.parse method_replacement));
+      Soup.replace (method_ $ "> code") (Soup.parse method_replacement));
 
   let status = soup $ "#type-status" in
   if_expected
     status_expected
     (fun () -> pretty_print status)
     (fun () ->
-      status $$ "> code" |> Soup.iter Soup.delete;
-      Soup.replace (status $ "> table") (Soup.parse status_replacement);
+      Soup.replace (status $ "> code") (Soup.parse status_replacement);
       Soup.add_class "multiline" status);
 
   let response = soup $ "#val-response" in
@@ -484,25 +412,9 @@ let pretty_print_signatures soup =
       Soup.replace (request $ "> code") (Soup.parse request_replacement);
       Soup.add_class "multiline" request)
 
-let remove_methods_and_statuses soup =
+let remove_specs soup =
   let selectors = [
-    "#val-method_to_string";
-    "#val-string_to_method";
-    "#type-informational";
-    "#type-successful";
-    "#type-redirection";
-    "#type-client_error";
-    "#type-server_error";
-    "#type-standard_status";
-    "#val-status_to_string";
-    "#val-status_to_reason";
-    "#val-status_to_int";
-    "#val-int_to_status";
-    "#val-is_informational";
-    "#val-is_successful";
-    "#val-is_redirection";
-    "#val-is_client_error";
-    "#val-is_server_error";
+    "#module-Method_and_status";
   ] in
 
   selectors |> List.iter (fun selector ->
@@ -518,14 +430,8 @@ let () =
   $ "nav.odoc-toc"
   |> Soup.prepend_child content;
 
-  let preamble = Soup.create_element ~id:"pp-preamble" "div" in
-  soup
-  $$ "header.odoc-preamble > h1 ~ *"
-  |> Soup.iter (Soup.append_child preamble);
-  Soup.prepend_child content preamble;
-
   pretty_print_signatures soup;
-  remove_methods_and_statuses soup;
+  remove_specs soup;
 
   let error_template = soup $ "#val-error_template" |> Soup.R.parent in
   let error = soup $ "#type-error" |> Soup.R.parent in

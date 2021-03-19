@@ -11,7 +11,8 @@ build :
 	  $(ODOC)/dream/Dream/index.html site/index.html
 	rm -f site/status/index.html
 	dune exec -- postprocess/status.exe \
-	  $(ODOC)/dream/Dream/index.html site/status.html
+	  $(ODOC)/dream/Dream/Method_and_status/index.html \
+	  site/method_and_status.html
 	@echo soupault
 	@dune exec --no-print-directory -- soupault
 

@@ -20,15 +20,21 @@
   - 🔲 URL templates.
   - 🔲 XSS protection helpers.
   - ✅ Cookies.
-    - 🔲 Needs fast parser, caching, etc.2
+    - 🔲 Needs fast parser, caching, etc.
   - ✅ Sessions.
-    - 🔲 Needs configurable back-ends, etc. Currently fixed to in-memory sessions.
+    - ✅ Needs configurable back-ends, etc. Currently fixed to in-memory
+    - 🔲 SQL back end.
+    - 🔲 File back end?
+    - 🔲 Encrypted cookie back end.
   - ✅ CSRF tokens.
-    - 🔲 Needs deps looked at.
-    - 🔲 Needs work in general: code cleanup, more scopes, real secret.
+    - ✅ Needs deps looked at.
+    - ✅ Needs work in general: code cleanup, more scopes, real secret.
   - 🔲 SQL connection pools (needs separate packaging).
   - 🔲 Tag generation helpers.
-  - 🔲 Form, JSON, file uploader parsers (partially external).
+  - 🔲 Form, JSON, file uploader parsers.
+    - ✅ Form.
+    - 🔲 JSON.
+    - 🔲 multipart file upload.
   - 🔲 Client+server localization.
   - 🔲 Static.
     - 🔲 Also provide a package that wraps the static middleware so that we can have an OCaml webserver for local development.
@@ -42,9 +48,9 @@
     - 🔲 cron. Not really a middleware. Should probably recommend something.
     - 🔲 email. Also not middleware. Should also just recommend.
     - 🔲 flash
-  - 🔲 HTTP/2.0 support (h2)
-    - 🔲 Needs TLS.
-    - 🔲 Built-in dev certificates for localhost, and docs on how to get real ones.
+  - ✅ HTTP/2.0 support (h2)
+    - ✅ Needs TLS.
+    - ✅ Built-in dev certificates for localhost, and docs on how to get real ones.
   - 🛑 GraphQL support.
 - 🔲 Excellent docs.
   - How to build a single-binary app.

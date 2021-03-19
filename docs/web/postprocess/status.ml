@@ -2,28 +2,6 @@ let if_expected = Common.if_expected
 
 open Soup
 
-let keep_ids = [
-  "type-method_";
-  "val-method_to_string";
-  "val-string_to_method";
-  "type-informational";
-  "type-successful";
-  "type-redirection";
-  "type-client_error";
-  "type-server_error";
-  "type-standard_status";
-  "type-status";
-  "val-status_to_string";
-  "val-status_to_reason";
-  "val-status_to_int";
-  "val-int_to_status";
-  "val-is_informational";
-  "val-is_successful";
-  "val-is_redirection";
-  "val-is_client_error";
-  "val-is_server_error";
-]
-
 let method_expected = {|<div class="spec type" id="type-method_">
  <a href="#type-method_" class="anchor"></a><code><span><span class="keyword">type</span> method_</span><span> = </span><span>[ </span></code>
  <table>
@@ -538,8 +516,7 @@ let pretty_print_signatures soup =
     (fun () ->
       method_ $$ "> code" |> Soup.iter Soup.delete;
       Soup.replace (method_ $ "> table") (Soup.parse method_replacement);
-      Soup.add_class "multiline" method_;
-      method_ $ "+ .spec-doc" |> Soup.delete);
+      Soup.add_class "multiline" method_);
 
   let rewrite_status_group id expected replacement =
     let group = soup $ id in
@@ -589,8 +566,7 @@ let pretty_print_signatures soup =
     (fun () ->
       status $$ "> code" |> Soup.iter Soup.delete;
       Soup.replace (status $ "> table") (Soup.parse status_replacement);
-      Soup.add_class "multiline" status;
-      status $ "+ .spec-doc" |> Soup.delete)
+      Soup.add_class "multiline" status)
 
 let () =
   let source = Sys.argv.(1) in
@@ -598,26 +574,9 @@ let () =
   let soup = Soup.(read_file source |> parse) in
   let content = soup $ "div.odoc-content" in
 
-  let found = ref [] in
-  content
-  |> Soup.children
-  |> Soup.elements
-  |> Soup.iter (fun element ->
-    match element $? "> .spec[id]" with
-    | None -> Soup.delete element
-    | Some spec ->
-      match Soup.attribute "id" spec with
-      | None -> Soup.delete element
-      | Some id ->
-        if List.mem id keep_ids then
-          found := id::!found
-        else
-          Soup.delete element);
-  let missing = keep_ids |> List.filter (fun id -> not @@ List.mem id !found) in
-  begin match missing with
-  | id::_ -> Printf.ksprintf failwith "Missing id %s" id
-  | [] -> ()
-  end;
+  soup
+  $ "nav.odoc-toc"
+  |> Soup.prepend_child content;
 
   pretty_print_signatures soup;
 

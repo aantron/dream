@@ -69,7 +69,7 @@ pin-depends: [
   ]
   [
     "odoc.2.0.0~master"
-    "git+https://github.com/aantron/odoc.git#50fcb86ae66bb7d223b0d5e90488c7a911d22541"
+    "git+https://github.com/aantron/odoc.git#dbb37e20717985edfd8f734e00b9ab6f705d81a4"
   ]
 ]
 name: "web"
