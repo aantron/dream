@@ -144,6 +144,8 @@ and 'a promise = 'a Lwt.t
 
 
 
+(* TODO Need equality function for methods and statues that normalizes away
+    numeric representations. *)
 (** The only purpose of this submodule is to generate a subpage, so as to move
     helpers and repetitive defintions of seldom-used codes out of the main
     docs. The module is immediately included in the main API. *)

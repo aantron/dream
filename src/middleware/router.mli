@@ -33,6 +33,7 @@ val crumb : string -> Dream.request -> string
 
 type token =
   | Literal of string
-  | Variable of string
+  | Crumb of string
+  | Wildcard of string
 
 val parse : string -> token list

@@ -10,17 +10,31 @@ module Dream = Dream__pure.Inmost
 
 
 (* TODO Compare HTTP methods at string. *)
+(* TODO Test wildcards. *)
+(* TODO Limit character set to permit future extensions. *)
+(* TODO Document *. *)
+(* TODO Forbid wildcard scopes. *)
+(* TODO Will need to restore staged prefixes once there is prefix-querying,
+   middleware because it will need to know the prefix of the nearest router. *)
 
 type token =
   | Literal of string
-  | Variable of string
+  | Crumb of string
+  | Wildcard of string
 
 let rec validate route = function
-  | (Variable "")::_ ->
+  | (Crumb "")::_ ->
     Printf.ksprintf failwith "Empty path parameter name in '%s'" route
-
-  | _::tokens -> validate route tokens
-  | [] -> ()
+  | [Wildcard ""] ->
+    ()
+  | (Wildcard "")::_ ->
+    failwith "Path wildcard must be last"
+  | (Wildcard _)::_ ->
+    failwith "Path wildcard must be just '*'"
+  | _::tokens ->
+    validate route tokens
+  | [] ->
+    ()
 
 let parse string =
 
@@ -38,7 +52,9 @@ let parse string =
     | '/' ->
       parse_component_start tokens (index + 1)
     | ':' ->
-      parse_component tokens (fun s -> Variable s) (index + 1) (index + 1)
+      parse_component tokens (fun s -> Crumb s) (index + 1) (index + 1)
+    | '*' ->
+      parse_component tokens (fun s -> Wildcard s) (index + 1) (index + 1)
     | _ | exception Invalid_argument _ ->
       parse_component tokens (fun s -> Literal s) index index
 
@@ -69,37 +85,37 @@ let rec strip_empty_trailing_token = function
 
 
 type node =
-  | Leaf of Dream.method_ * Dream.handler
-  | Subsite of route
+  | Handler of Dream.method_ * Dream.handler
+  | Scope of route
 
 and route = (token list * node) list
 
 let get pattern handler =
-  [parse pattern, Leaf (`GET, handler)]
+  [parse pattern, Handler (`GET, handler)]
 
 let post pattern handler =
-  [parse pattern, Leaf (`POST, handler)]
+  [parse pattern, Handler (`POST, handler)]
 
 let put pattern handler =
-  [parse pattern, Leaf (`PUT, handler)]
+  [parse pattern, Handler (`PUT, handler)]
 
 let delete pattern handler =
-  [parse pattern, Leaf (`DELETE, handler)]
+  [parse pattern, Handler (`DELETE, handler)]
 
 let head pattern handler =
-  [parse pattern, Leaf (`HEAD, handler)]
+  [parse pattern, Handler (`HEAD, handler)]
 
 let connect pattern handler =
-  [parse pattern, Leaf (`CONNECT, handler)]
+  [parse pattern, Handler (`CONNECT, handler)]
 
 let options pattern handler =
-  [parse pattern, Leaf (`OPTIONS, handler)]
+  [parse pattern, Handler (`OPTIONS, handler)]
 
 let trace pattern handler =
-  [parse pattern, Leaf (`TRACE, handler)]
+  [parse pattern, Handler (`TRACE, handler)]
 
 let patch pattern handler =
-  [parse pattern, Leaf (`PATCH, handler)]
+  [parse pattern, Handler (`PATCH, handler)]
 
 let rec apply middlewares routes =
   let rec compose handler = function
@@ -111,13 +127,14 @@ let rec apply middlewares routes =
   |> List.map (fun (pattern, node) ->
     let node =
       match node with
-      | Leaf (method_, handler) -> Leaf (method_, compose handler middlewares)
-      | Subsite route -> Subsite (apply middlewares [route])
+      | Handler (method_, handler) ->
+        Handler (method_, compose handler middlewares)
+      | Scope route -> Scope (apply middlewares [route])
     in
     pattern, node)
 
 let under prefix routes =
-  [strip_empty_trailing_token (parse prefix), Subsite (List.flatten routes)]
+  [strip_empty_trailing_token (parse prefix), Scope (List.flatten routes)]
 
 let scope prefix middlewares routes =
   under prefix [apply middlewares routes]
@@ -148,47 +165,43 @@ let router routes =
 
   fun next_handler request ->
 
-    let rec find_route bindings prefix path = function
-      | [] -> None
+    (* TODO Probably unnecessary (because it's better to just convert this to a
+       trie), but the method can be checked before descending down the route. *)
+
+    let rec try_routes bindings prefix path routes ok fail =
+      match routes with
+      | [] -> fail ()
       | (pattern, node)::routes ->
-        let rec match_pattern bindings prefix pattern path =
-          match pattern, path with
-          | [], _ -> Some (bindings, List.rev prefix, path)
-          | _, [] -> None
-          | (Literal s)::pattern, s'::path ->
-            if s = s' then
-              match_pattern bindings (s::prefix) pattern path
-            else
-              None
-          | (Variable s)::pattern, s'::path ->
-            if s' = "" then
-              None
-            else
-              match_pattern ((s, s')::bindings) (s'::prefix) pattern path
-        in
-        match match_pattern bindings prefix pattern path with
-        | None ->
-          find_route bindings prefix path routes
-        | Some (new_bindings, new_prefix, new_path) ->
-          match node with
-          | Leaf (method_, handler) ->
-            if method_ = Dream.method_ request && new_path = [] then
-              let request =
-                request
-                |> Dream.with_local crumbs new_bindings
-                |> Dream.with_prefix prefix
-                |> Dream.with_path path
-              in
-              Some (handler, Dream.with_local crumbs new_bindings request)
-            else
-              find_route bindings prefix path routes
-          | Subsite new_routes ->
-            let subroute =
-              find_route new_bindings (prefix @ new_prefix) new_path new_routes
-            in
-            match subroute with
-            | Some _ as result -> result
-            | None -> find_route bindings prefix path routes
+        try_route bindings prefix path pattern node ok (fun () ->
+          try_routes bindings prefix path routes ok fail)
+
+    and try_route bindings prefix path pattern node ok fail =
+      match pattern, path with
+      | [], _ ->
+        try_node bindings prefix path node false ok fail
+      | _,  [] -> fail ()
+      | Literal  s :: pattern, s' :: path when s = s' ->
+        try_route bindings            (s'::prefix) path pattern node ok fail
+      | Literal  _ :: _,       _                      -> fail ()
+      | Crumb    _ :: _,       s' :: _ when s' = ""   -> fail ()
+      | Crumb    s :: pattern, s' :: path ->
+        try_route ((s, s')::bindings) (s'::prefix) path pattern node ok fail
+      | Wildcard _ :: _,       _ ->
+        try_node bindings prefix path node true ok fail
+
+    and try_node bindings prefix path node is_wildcard ok fail =
+      match node with
+      | Handler (method_, handler)
+          when method_ = Dream.method_ request &&
+               (path = [] || is_wildcard) ->
+        request
+        |> Dream.with_local crumbs bindings
+        |> Dream.with_prefix prefix
+        |> Dream.with_path path
+        |> ok handler
+      | Handler _ -> fail ()
+      | Scope routes -> try_routes bindings prefix path routes ok fail
+
     in
 
     (* The next_prefix mechanism is intended for composable indirect routing in
@@ -225,7 +238,7 @@ let router routes =
     | Some path ->
       (* The initial bindings and prefix should be taken from the request
          context when there is indirect nested router support. *)
-      let route = find_route [] next_prefix path routes in
-      match route with
-      | None -> next_handler request
-      | Some (handler, request) -> handler request
+      try_routes
+        [] next_prefix path routes
+        (fun handler request -> handler request)
+        (fun () -> next_handler request)

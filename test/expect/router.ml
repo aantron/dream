@@ -15,7 +15,8 @@ let show_tokens route =
     Dream__middleware.Router.parse route
     |> List.map (function
       | Dream__middleware.Router.Literal s -> Printf.sprintf "%S" s
-      | Dream__middleware.Router.Variable s -> Printf.sprintf ":%S" s)
+      | Dream__middleware.Router.Crumb s -> Printf.sprintf ":%S" s
+      | Dream__middleware.Router.Wildcard s -> Printf.sprintf "*%S" s)
     |> String.concat "; "
     |> Printf.printf "[%s]\n"
   with Failure message ->
@@ -53,6 +54,21 @@ let%expect_test _ =
     Empty path parameter name in '/abc/:'
     Empty path parameter name in '/abc/:/'
     ["abc"; "de:f"; ""] |}]
+
+let%expect_test _ =
+  show_tokens "/*";
+  show_tokens "/abc/*";
+  show_tokens "/abc/*/";
+  show_tokens "/abc/*/ghi";
+  show_tokens "/abc/*def/";
+  show_tokens "/abc/*def/ghi";
+  [%expect {|
+    [*""]
+    ["abc"; *""]
+    Path wildcard must be last
+    Path wildcard must be last
+    Path wildcard must be just '*'
+    Path wildcard must be just '*' |}]
 
 
 
@@ -235,38 +251,6 @@ let%expect_test _ =
   [%expect {|
     Dream.crumb: missing path parameter "x" |}]
 
-(* Router applies middlewares. *)
-
-let%expect_test _ =
-
-  let pipeline = Dream.pipeline [
-    (fun next_handler request -> print_endline "foo"; next_handler request);
-    (fun next_handler request -> print_endline "bar"; next_handler request);
-  ] in
-
-  show "/abc" @@ Dream.router [
-    Dream.scope "/" [pipeline] [
-      Dream.get "/abc" (fun _ -> Dream.respond "baz");
-    ];
-  ];
-  [%expect {|
-    foo
-    bar
-    Response: 200 OK
-    baz |}]
-
-let%expect_test _ =
-  show "/" @@ Dream.router [
-    Dream.scope "/" [
-      (fun next_handler request -> print_endline "foo"; next_handler request);
-      (fun next_handler request -> print_endline "bar"; next_handler request);
-    ] [
-      Dream.get "/abc" (fun _ -> Dream.respond "baz");
-    ];
-  ];
-  [%expect {|
-    Response: 404 Not Found |}]
-
 (* Router respects site prefix. *)
 
 let%expect_test _ =
@@ -291,7 +275,7 @@ let%expect_test _ =
   [%expect {|
     Response: 404 Not Found |}]
 
-(* Subsites work. *)
+(* Direct subsites work. *)
 
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
@@ -302,7 +286,7 @@ let%expect_test _ =
   ];
   [%expect {|
     Response: 200 OK
-    /abc /def |}]
+    /def/abc / |}]
 
 let%expect_test _ =
   show "/def/abc" @@ Dream.router [
@@ -325,7 +309,7 @@ let%expect_test _ =
   ];
   [%expect {|
     Response: 200 OK
-    / /abc/ghi |}]
+    /ghi/abc / |}]
 
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
@@ -363,7 +347,7 @@ let%expect_test _ =
     foo
     bar
     Response: 200 OK
-    /abc /def |}]
+    /def/abc / |}]
 
 let%expect_test _ =
   let pipeline_1 = Dream.pipeline [
@@ -391,5 +375,66 @@ let%expect_test _ =
     Response: 200 OK
     wat |}]
 
+(* Router applies middlewares. *)
+
+let%expect_test _ =
+
+  let pipeline = Dream.pipeline [
+    (fun next_handler request -> print_endline "foo"; next_handler request);
+    (fun next_handler request -> print_endline "bar"; next_handler request);
+  ] in
+
+  show "/abc" @@ Dream.router [
+    Dream.scope "/" [pipeline] [
+      Dream.get "/abc" (fun _ -> Dream.respond "baz");
+    ];
+  ];
+  [%expect {|
+    foo
+    bar
+    Response: 200 OK
+    baz |}]
+
+let%expect_test _ =
+  show "/" @@ Dream.router [
+    Dream.scope "/" [
+      (fun next_handler request -> print_endline "foo"; next_handler request);
+      (fun next_handler request -> print_endline "bar"; next_handler request);
+    ] [
+      Dream.get "/abc" (fun _ -> Dream.respond "baz");
+    ];
+  ];
+  [%expect {|
+    Response: 404 Not Found |}]
+
+(* Router sequence works. *)
+
+let%expect_test _ =
+  show "/abc/def" @@ Dream.pipeline [
+    Dream.router [
+      Dream.get "/abc/ghi" (fun _ -> Dream.respond "first");
+    ];
+    Dream.router [
+      Dream.get "/abc/def" (fun _ -> Dream.respond "second");
+    ];
+  ];
+  [%expect {|
+    Response: 200 OK
+    second |}]
+
+(* Wildcard routes. *)
+
+let%expect_test _ =
+  show "/abc/def" @@ Dream.router [
+    Dream.get "/abc/*" (fun request ->
+      Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+  ];
+  [%expect {|
+    Response: 200 OK
+    /abc /def |}]
+
 (* TODO Indirect nesting works. *)
-(* TODO Try sequence of routers. *)
+(* TODO `Method "GET" works. *)
+(* TODO Empty router. *)
+(* TODO Degenerate top-level route_all. *)
+(* TODO Dream.crumb without a router. *)
