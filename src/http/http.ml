@@ -465,7 +465,7 @@ let serve_with_details
   let user's_dream_handler =
     Dream__middleware__built_in.Built_in.middleware user's_dream_handler in
   let user's_dream_handler = fun request ->
-    let prefix =
+    let _prefix =
       prefix
       |> Dream__pure.Formats.parse_target
       |> fst
@@ -473,8 +473,10 @@ let serve_with_details
     in
 
     request
-    |> Dream.with_next_prefix prefix
+    (* |> Dream.with_prefix prefix *)
     |> user's_dream_handler
+    (* TODO Factor out this whole middleware "stack" and include a site prefix
+       thing. *)
   in
 
   (* Create the wrapped httpaf or h2 handler from the user's Dream handler. *)

@@ -14,8 +14,10 @@ module Dream = Dream__pure.Inmost
 (* TODO Forbid wildcard scopes. *)
 (* TODO Will need to restore staged prefixes once there is prefix-querying,
    middleware because it will need to know the prefix of the nearest router. *)
-(* TODO The prefix currently gets assembled backwars; fix this in the "great
-   nested path and prefix" commit. *)
+(* TODO For full site composition, any_method is needed to forward everything to
+   a subsite handler. *)
+(* TODO Restore the site prefix as a "built-in" middleware. This makes much more
+   sense now that there is a unified error handler beneath it. *)
 
 type token =
   | Literal of string
@@ -192,29 +194,27 @@ let router routes =
     and try_node bindings prefix path node is_wildcard ok fail =
       match node with
       | Handler (method_, handler)
-          when Dream.methods_equal method_ (Dream.method_ request) &&
-               (path = [] || is_wildcard) ->
-        request
-        |> Dream.with_local crumbs bindings
-        |> Dream.with_prefix prefix
-        |> Dream.with_path path
-        |> ok handler
+          when Dream.methods_equal method_ (Dream.method_ request) ->
+        let request = Dream.with_local crumbs bindings request in
+        if is_wildcard then
+          request
+          |> Dream.with_prefix prefix
+          |> Dream.with_path path
+          |> ok handler
+        else
+          if path = [] then
+            ok handler request
+          else
+            fail ()
+
       | Handler _ -> fail ()
       | Scope routes -> try_routes bindings prefix path routes ok fail
 
     in
 
-    (* The next_prefix mechanism is intended for composable indirect routing in
-       the future (i.e. another router hidden in a handler, rather than more
-       routes included with Dream.scope). It is currently only used to pass the
-       site prefix down to the one and only supported top-level router, in order
-       to avoid having to make a decision about how to fail (502?) above the
-       application code if the target does not match the site prefix.
-
-       This code will need to be rearranged somewhat to adapt it for indierct
-       composable routers, mainly to build the prefixes incrementally off each
-       other. *)
-    let rec match_site_prefix prefix path =
+    (* If this is the top-most router, the request may have a site prefix that
+       needs to be checked. *)
+    (* let rec match_site_prefix prefix path =
 
       match prefix, path with
       | prefix_crumb::prefix, path_crumb::path ->
@@ -227,18 +227,24 @@ let router routes =
         Some path
       | _ ->
         None
+    in *)
+
+    let crumbs =
+      match Dream.local crumbs request with
+      | Some crumbs -> crumbs
+      | None -> []
     in
 
-    let next_prefix = Dream.next_prefix request
-    and path = Dream.internal_path request
-    in
+    (* let next_prefix = Dream.next_prefix request *)
+    let prefix = Dream.internal_prefix request in
+    let path = Dream.internal_path request in
 
-    match match_site_prefix next_prefix path with
+    (* match match_site_prefix next_prefix path with
     | None -> next_handler request
-    | Some path ->
-      (* The initial bindings and prefix should be taken from the request
+    | Some path -> *)
+      (* TODO The initial bindings and prefix should be taken from the request
          context when there is indirect nested router support. *)
-      try_routes
-        [] next_prefix path routes
-        (fun handler request -> handler request)
-        (fun () -> next_handler request)
+    try_routes
+      crumbs prefix path routes
+      (fun handler request -> handler request)
+      (fun () -> next_handler request)

@@ -63,7 +63,7 @@ let random =
 include Dream__pure.Formats
 
 let test ?(prefix = "") handler request =
-  let prefix =
+  let _prefix =
     prefix
     |> Dream__pure.Formats.parse_target
     |> fst
@@ -71,7 +71,7 @@ let test ?(prefix = "") handler request =
   in
 
   request
-  |> with_next_prefix prefix
+  (* |> with_next_prefix prefix *)
   |> Dream__middleware__built_in.Built_in.middleware handler
   |> Lwt_main.run
 
