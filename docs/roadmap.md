@@ -36,7 +36,7 @@
     - 🔲 JSON.
     - 🔲 multipart file upload.
   - 🔲 Client+server localization.
-  - 🔲 Static.
+  - ✅ Static.
     - 🔲 Also provide a package that wraps the static middleware so that we can have an OCaml webserver for local development.
   - 🔲 Length limits.
   - 🔲 Websocket design.

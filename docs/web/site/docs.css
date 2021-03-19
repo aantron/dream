@@ -16,6 +16,10 @@ body {
   padding-bottom: 24px;
 }
 
+h1, h2 {
+  color: white;
+}
+
 footer {
   margin-top: 120px;
   opacity: 0.5;

@@ -144,6 +144,8 @@ and 'a promise = 'a Lwt.t
 
 
 
+(* TODO Framework never emits `Method, `Status when not necessary. *)
+(* TODO So capitalized statuses or OCaml-style? *)
 (* TODO Need equality function for methods and statues that normalizes away
     numeric representations. *)
 (** The only purpose of this submodule is to generate a subpage, so as to move
@@ -1105,8 +1107,8 @@ val run :
 
     [~https] enables HTTPS. The default value is [`No]. The other options select
     the TLS library. If using [~https:`OpenSSL], you should install opam package
-    `lwt_ssl`. If using [~https:`OCaml_TLS], you should install opam package
-    `tls`. In both cases, you should also specify [~certificate_file] and
+    [lwt_ssl]. If using [~https:`OCaml_TLS], you should install opam package
+    [tls]. In both cases, you should also specify [~certificate_file] and
     [~key_file]. However, for development, Dream includes a compiled-in
     localhost certificate that is completely insecure. It allows testing HTTPS
     without obtaining or generating your own certificates, so using only the
@@ -1185,7 +1187,7 @@ val serve :
 
 val to_base64url : string -> string
 val from_base64url : string -> (string, string) result
-(* TODO Test it; document. *)
+(* TODO Test it; document, include RFC links. *)
 
 
 
