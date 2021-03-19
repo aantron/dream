@@ -98,6 +98,9 @@ let options pattern handler =
 let trace pattern handler =
   [parse pattern, Leaf (`TRACE, handler)]
 
+let patch pattern handler =
+  [parse pattern, Leaf (`PATCH, handler)]
+
 let rec apply middlewares routes =
   let rec compose handler = function
     | [] -> handler

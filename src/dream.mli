@@ -5,7 +5,6 @@
 
 
 
-(* TODO Get the overview listed in the TOC. *)
 (** {1 Overview}
 
     Dream is built on just five types. The first two, [request] and [response],
@@ -179,7 +178,6 @@ val string_to_method : string -> method_
 
 (** {1 Statuses} *)
 
-(* TODO Fix websocket link. *)
 type informational = [
   | `Continue
   | `Switching_Protocols
@@ -397,16 +395,18 @@ val with_version : int * int -> request -> request
 
 val cookie : string -> request -> string option
 (** Cookies are sent by the client in [Cookie:] headers as [name=value] pairs.
-    This function parses those headers, looking for the given [name]. No
-    decoding is applied to any found [value] — it is returned raw, as sent by
+    This function parses those headers, looking for the given [name].
+
+    No decoding is applied to any found [value] — it is returned raw, as sent by
     the client. Cookies are almost always encoded so as to at least escape [=],
     [;], and newline characters, which are significant to the cookie and HTTP
     parsers. If you applied such an encoding when setting the cookie, you have
     to reverse it after calling [Dream.cookie]. See {!Dream.add_set_cookie} for
     recommendations about encodings to use and {!web_formats} for encoders and
-    decoders. *)
-(* TODO Note about what happens if there are multiple cookies with the same
-   name. *)
+    decoders.
+
+    If the request includes multiple cookies with the same name, one is
+    returned. *)
 
 val all_cookies : request -> (string * string) list
 (** Retrieves all cookies, i.e. all [name=value] in all [Cookie:] headers. As
@@ -461,26 +461,21 @@ val with_body : ?set_content_length:bool -> string -> 'a message -> 'a message
 (** {1 Responses} *)
 
 val response :
-  (* ?version:int * int -> *)
   ?status:status ->
   ?code:int ->
-  (* ?reason:string -> *)
   ?headers:(string * string) list ->
   ?set_content_length:bool ->
   string ->
     response
 (** Creates a new response with the given string as body. Use [""] to return an
     empty response, or if you'd like to assign a stream as the response body
-    later. The optional arguments set the corresponding fields in the new
-    response. Note that the header and body {{!common_fields} updaters} that
-    work with [_ message] also work with responses. *)
-(* TODO Document ?code. *)
+    later. [~code] is offered as an alternative to [~status] for specifying the
+    status code. If both [~status] and [~code] are given, one is chosen
+    arbitrarily. *)
 
 val respond :
-  (* ?version:int * int -> *)
   ?status:status ->
   ?code:int ->
-  (* ?reason:string -> *)
   ?headers:(string * string) list ->
   ?set_content_length:bool ->
   string ->
@@ -533,43 +528,13 @@ val pipeline : middleware list -> middleware
       Dream.pipeline [mw_1; mw_2; ...; mw_n] @@ handler
       mw_1 @@ mw_2 @@ ... @@ mw_n @@ handler
     ]} *)
-(* TODO This code block is highlighted as CSS. Get a better highlight.pack.js. *)
+(* TODO This code block is highlighted as CSS. Get a better
+   highlight.pack.js. *)
 
 val logger : middleware
 (** Logs incoming requests, times them, and prints timing information when the
     next handler has returned a response. Time spent logging is included in the
     timings. *)
-
-(* val content_length : ?buffer_streams:bool -> middleware *)
-(* val synchronous : (request -> response) -> handler *)
-
-(* TODO LATER Seriously review these signatures and names. *)
-(* TODO Neater types. *)
-(* val sessions : string Dream__middleware.Session.store -> middleware *)
-(* TODO LATER Expose the session switcher and invalidator. *)
-
-(* TODO Restore. *)
-(* val csrf : middleware *)
-(* val form : middleware *)
-
-(* TODO For a form, you almost always match against a fixed set of fields. But
-   for query parameters, there might be mixtures. *)
-(* TODO Add Dream.memoize : (request -> 'a) -> (request -> 'a) *)
-
-(* type session
-
-val session : request -> session *)
-
-(* TODO Naming, naming. *)
-(* val form_get : request -> (string * string) list *)
-(* TODO There is no strong reason why Form should be a middleware; it can just
-   be a caching getter like Cookie. CSRF will load it on demand depending on
-   content-type. Will probably need a Content-Type filter middleware, however,
-   because that needs to go before CSRF. Maybe there should be a function form
-   of CSRF? Is there really any reason at all why CSRF should be a middleware
-   itself? Can just provide some middleware that allows running checks, and
-   provide the checks. I guess the main reason why any of these things are
-   middlewares is that CSRF can respond on its own. *)
 
 type form_error = [
   | `Not_form_urlencoded
@@ -598,9 +563,8 @@ val router : route list -> middleware
           Dream.get "/echo/:word" @@ fun request ->
             Dream.respond (Dream.crumb "word" request);
         ]
-        @@ fun _ -> Dream.response ~status:`Not_found ""
+        @@ fun _ -> Dream.respond ~status:`Not_Found ""
     ]} *)
-(* TODO Make sure this code compiles. *)
 
 val crumb : string -> request -> string
 (** Retrieves the given path parameter (“crumb”). If the path parameter is
@@ -646,7 +610,9 @@ val options : string -> handler -> route
 
 val trace : string -> handler -> route
 (** Like {!Dream.get}, but the request's method must be [`TRACE]. *)
-(* TODO Expose patch method. *)
+
+val patch : string -> handler -> route
+(** Like {!Dream.get}, but the request's method must be [`PATCH]. *)
 
 
 
@@ -673,7 +639,6 @@ val trace : string -> handler -> route
     - Mention security.
     - Mention pre-sessions. *)
 
-(* TODO Neater names for everything. *)
 val sessions_in_memory : middleware
 (** Stores session data server-side in memory, i.e. without persistence. Passes
     session keys to clients in cookies. Session data is lost when the server
@@ -684,14 +649,14 @@ val session : string -> request -> string option
 (** Retrieves the value with the given key in the request's session, if the
     value is present. *)
 
-val all_session_values : request -> (string * string) list
-(** Retrieves the full session dictionary. *)
-
 val set_session : string -> string -> request -> unit Lwt.t
 (** [Dream.set_session key value request] sets a value in the request's session.
     If there is an existing binding, it is replaced. The data store used by the
     session middleware may immediately commit the value to storage, so this
     function returns a promise. *)
+
+val all_session_values : request -> (string * string) list
+(** Retrieves the full session dictionary. *)
 
 val invalidate_session : request -> unit Lwt.t
 (** Invalidates the given session, replacing it with a fresh one (a new
@@ -709,10 +674,6 @@ val session_id : request -> string
 
 val session_expires_at : request -> int64
 (** Evaluates to the time at which the session will expire. *)
-
-
-
-(** {1 Streaming} *)
 
 
 
@@ -960,13 +921,13 @@ type error_handler = error -> response option Lwt.t
 (* TODO Should sanitize template output here or set to text/plain to prevent XSS
    against developer. *)
 val error_template :
-  (debug_info:string option -> response -> response Lwt.t) -> error_handler
+  (debug_dump:string option -> response -> response Lwt.t) -> error_handler
 (** Customizes the default error handler by specifying a template.
     {[
       let my_error_handler =
-        Dream.error_template (fun ~debug_info response ->
+        Dream.error_template (fun ~debug_dump response ->
           let body =
-            match debug_info with
+            match debug_dump with
             | Some string -> string
             | None -> Dream.status_to_string (Dream.status response)
           in
@@ -988,7 +949,7 @@ val error_template :
     customize [response]; however, it can also ignore the response and generate
     a fresh one.
 
-    [~debug_info] will be [Some info] when debugging is enabled for the
+    [~debug_dump] will be [Some info] when debugging is enabled for the
     application with [Dream.run ~debug:true]. [info] is a string containing an
     error description, stack trace, request state, and other information.
 
@@ -1001,7 +962,6 @@ val error_template :
     Raising an exception or rejecting the final promise in the template may
     cause an empty [500 Internal Server Error] to be sent to the client, if the
     context requires it. See {!Dream.error_handler}. *)
-(* TODO Rename debug_info to debug_dump. *)
 
 
 
@@ -1165,7 +1125,6 @@ val run :
     handlers complete. *)
 (* TODO Consider setting terminal options by default from this function, so that
    they don't have to be set in Makefiles. *)
-(* TODO Put a README in the src/certificate directory. *)
 
 val serve :
   ?interface:string ->
@@ -1255,12 +1214,6 @@ val sort_headers : (string * string) list -> (string * string) list
 
 
 
-(** {1 To be categorized} *)
-
-
-
-
-
 (* TODO DOC Give people a tip: a basic response needs either content-length or
    connection: close. *)
 (* TODO DOC attempt some graphic that shows what getters retrieve what from the
@@ -1269,3 +1222,5 @@ val sort_headers : (string * string) list -> (string * string) list
 (* TODO DOC Guidance for Dream libraries: publish routes if you have routes, not
    handlers or middlewares. *)
 (* TODO Switch to implicit addition of Content-Length and docuemnt it. *)
+(* TODO DOC Need a syntax highlighter. Highlight.js won't work for templates for
+   sure. *)

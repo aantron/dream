@@ -5,10 +5,13 @@
 
 
 
-include Dream__pure.Inmost
+module Method_and_status =
+struct
+  include Dream__pure.Method
+  include Dream__pure.Status
+end
 
-module Status =
-  Dream__pure.Status
+include Dream__pure.Inmost
 
 (* let all_cookies = Dream__middleware.Cookie.all_cookies *)
 (* let cookie = Dream__middleware.Cookie.cookie *)

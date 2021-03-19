@@ -233,7 +233,7 @@ let%expect_test _ =
       Dream.respond (Dream.crumb "x" request));
   ];
   [%expect {|
-    Missing path parameter (Dream.crumb) "x" |}]
+    Dream.crumb: missing path parameter "x" |}]
 
 (* Router applies middlewares. *)
 

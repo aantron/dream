@@ -293,52 +293,7 @@ autoDetection:O,inherit:K,addPlugin:e=>{a.push(e)},vuePlugin:S(e).VuePlugin
 }),e.debugMode=()=>{i=!1},e.safeMode=()=>{i=!0},e.versionString="10.6.0"
 ;for(const e in R)"object"==typeof R[e]&&t(R[e])
 ;return Object.assign(e,R),e.addPlugin(m),e.addPlugin(P),e.addPlugin(x),e})({})
-}();"object"==typeof exports&&"undefined"!=typeof module&&(module.exports=hljs);hljs.registerLanguage("http",(()=>{"use strict";function e(...e){
-return e.map((e=>{return(n=e)?"string"==typeof n?n:n.source:null;var n
-})).join("")}return n=>{const a="HTTP/(2|1\\.[01])",s=[{className:"attribute",
-begin:e("^",/[A-Za-z][A-Za-z0-9-]*/,"(?=\\:\\s)"),starts:{contains:[{
-className:"punctuation",begin:/: /,relevance:0,starts:{end:"$",relevance:0}}]}
-},{begin:"\\n\\n",starts:{subLanguage:[],endsWithParent:!0}}];return{
-name:"HTTP",aliases:["https"],illegal:/\S/,contains:[{begin:"^(?="+a+" \\d{3})",
-end:/$/,contains:[{className:"meta",begin:a},{className:"number",
-begin:"\\b\\d{3}\\b"}],starts:{end:/\b\B/,illegal:/\S/,contains:s}},{
-begin:"(?=^[A-Z]+ (.*?) "+a+"$)",end:/$/,contains:[{className:"string",
-begin:" ",end:" ",excludeBegin:!0,excludeEnd:!0},{className:"meta",begin:a},{
-className:"keyword",begin:"[A-Z]+"}],starts:{end:/\b\B/,illegal:/\S/,contains:s}
-}]}}})());hljs.registerLanguage("css",(()=>{"use strict"
-;const e=["a","abbr","address","article","aside","audio","b","blockquote","body","button","canvas","caption","cite","code","dd","del","details","dfn","div","dl","dt","em","fieldset","figcaption","figure","footer","form","h1","h2","h3","h4","h5","h6","header","hgroup","html","i","iframe","img","input","ins","kbd","label","legend","li","main","mark","menu","nav","object","ol","p","q","quote","samp","section","span","strong","summary","sup","table","tbody","td","textarea","tfoot","th","thead","time","tr","ul","var","video"],t=["any-hover","any-pointer","aspect-ratio","color","color-gamut","color-index","device-aspect-ratio","device-height","device-width","display-mode","forced-colors","grid","height","hover","inverted-colors","monochrome","orientation","overflow-block","overflow-inline","pointer","prefers-color-scheme","prefers-contrast","prefers-reduced-motion","prefers-reduced-transparency","resolution","scan","scripting","update","width","min-width","max-width","min-height","max-height"],i=["active","any-link","blank","checked","current","default","defined","dir","disabled","drop","empty","enabled","first","first-child","first-of-type","fullscreen","future","focus","focus-visible","focus-within","has","host","host-context","hover","indeterminate","in-range","invalid","is","lang","last-child","last-of-type","left","link","local-link","not","nth-child","nth-col","nth-last-child","nth-last-col","nth-last-of-type","nth-of-type","only-child","only-of-type","optional","out-of-range","past","placeholder-shown","read-only","read-write","required","right","root","scope","target","target-within","user-invalid","valid","visited","where"],o=["after","backdrop","before","cue","cue-region","first-letter","first-line","grammar-error","marker","part","placeholder","selection","slotted","spelling-error"],r=["align-content","align-items","align-self","animation","animation-delay","animation-direction","animation-duration","animation-fill-mode","animation-iteration-count","animation-name","animation-play-state","animation-timing-function","auto","backface-visibility","background","background-attachment","background-clip","background-color","background-image","background-origin","background-position","background-repeat","background-size","border","border-bottom","border-bottom-color","border-bottom-left-radius","border-bottom-right-radius","border-bottom-style","border-bottom-width","border-collapse","border-color","border-image","border-image-outset","border-image-repeat","border-image-slice","border-image-source","border-image-width","border-left","border-left-color","border-left-style","border-left-width","border-radius","border-right","border-right-color","border-right-style","border-right-width","border-spacing","border-style","border-top","border-top-color","border-top-left-radius","border-top-right-radius","border-top-style","border-top-width","border-width","bottom","box-decoration-break","box-shadow","box-sizing","break-after","break-before","break-inside","caption-side","clear","clip","clip-path","color","column-count","column-fill","column-gap","column-rule","column-rule-color","column-rule-style","column-rule-width","column-span","column-width","columns","content","counter-increment","counter-reset","cursor","direction","display","empty-cells","filter","flex","flex-basis","flex-direction","flex-flow","flex-grow","flex-shrink","flex-wrap","float","font","font-display","font-family","font-feature-settings","font-kerning","font-language-override","font-size","font-size-adjust","font-stretch","font-style","font-variant","font-variant-ligatures","font-variation-settings","font-weight","height","hyphens","icon","image-orientation","image-rendering","image-resolution","ime-mode","inherit","initial","justify-content","left","letter-spacing","line-height","list-style","list-style-image","list-style-position","list-style-type","margin","margin-bottom","margin-left","margin-right","margin-top","marks","mask","max-height","max-width","min-height","min-width","nav-down","nav-index","nav-left","nav-right","nav-up","none","normal","object-fit","object-position","opacity","order","orphans","outline","outline-color","outline-offset","outline-style","outline-width","overflow","overflow-wrap","overflow-x","overflow-y","padding","padding-bottom","padding-left","padding-right","padding-top","page-break-after","page-break-before","page-break-inside","perspective","perspective-origin","pointer-events","position","quotes","resize","right","src","tab-size","table-layout","text-align","text-align-last","text-decoration","text-decoration-color","text-decoration-line","text-decoration-style","text-indent","text-overflow","text-rendering","text-shadow","text-transform","text-underline-position","top","transform","transform-origin","transform-style","transition","transition-delay","transition-duration","transition-property","transition-timing-function","unicode-bidi","vertical-align","visibility","white-space","widows","width","word-break","word-spacing","word-wrap","z-index"].reverse()
-;return n=>{const a=(e=>({IMPORTANT:{className:"meta",begin:"!important"},
-HEXCOLOR:{className:"number",begin:"#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})"},
-ATTRIBUTE_SELECTOR_MODE:{className:"selector-attr",begin:/\[/,end:/\]/,
-illegal:"$",contains:[e.APOS_STRING_MODE,e.QUOTE_STRING_MODE]}
-}))(n),l=[n.APOS_STRING_MODE,n.QUOTE_STRING_MODE];return{name:"CSS",
-case_insensitive:!0,illegal:/[=|'\$]/,keywords:{keyframePosition:"from to"},
-classNameAliases:{keyframePosition:"selector-tag"},
-contains:[n.C_BLOCK_COMMENT_MODE,{begin:/-(webkit|moz|ms|o)-(?=[a-z])/
-},n.CSS_NUMBER_MODE,{className:"selector-id",begin:/#[A-Za-z0-9_-]+/,relevance:0
-},{className:"selector-class",begin:"\\.[a-zA-Z-][a-zA-Z0-9_-]*",relevance:0
-},a.ATTRIBUTE_SELECTOR_MODE,{className:"selector-pseudo",variants:[{
-begin:":("+i.join("|")+")"},{begin:"::("+o.join("|")+")"}]},{
-className:"attribute",begin:"\\b("+r.join("|")+")\\b"},{begin:":",end:"[;}]",
-contains:[a.HEXCOLOR,a.IMPORTANT,n.CSS_NUMBER_MODE,...l,{
-begin:/(url|data-uri)\(/,end:/\)/,relevance:0,keywords:{built_in:"url data-uri"
-},contains:[{className:"string",begin:/[^)]/,endsWithParent:!0,excludeEnd:!0}]
-},{className:"built_in",begin:/[\w-]+(?=\()/}]},{
-begin:(s=/@/,((...e)=>e.map((e=>(e=>e?"string"==typeof e?e:e.source:null)(e))).join(""))("(?=",s,")")),
-end:"[{;]",relevance:0,illegal:/:/,contains:[{className:"keyword",
-begin:/@-?\w[\w]*(-\w+)*/},{begin:/\s/,endsWithParent:!0,excludeEnd:!0,
-relevance:0,keywords:{$pattern:/[a-z-]+/,keyword:"and or not only",
-attribute:t.join(" ")},contains:[{begin:/[a-z-]+(?=:)/,className:"attribute"
-},...l,n.CSS_NUMBER_MODE]}]},{className:"selector-tag",
-begin:"\\b("+e.join("|")+")\\b"}]};var s}})());hljs.registerLanguage("json",(()=>{"use strict";return n=>{const e={
-literal:"true false null"
-},i=[n.C_LINE_COMMENT_MODE,n.C_BLOCK_COMMENT_MODE],a=[n.QUOTE_STRING_MODE,n.C_NUMBER_MODE],l={
-end:",",endsWithParent:!0,excludeEnd:!0,contains:a,keywords:e},t={begin:/\{/,
-end:/\}/,contains:[{className:"attr",begin:/"/,end:/"/,
-contains:[n.BACKSLASH_ESCAPE],illegal:"\\n"},n.inherit(l,{begin:/:/
-})].concat(i),illegal:"\\S"},s={begin:"\\[",end:"\\]",contains:[n.inherit(l)],
-illegal:"\\S"};return a.push(t,s),i.forEach((n=>{a.push(n)})),{name:"JSON",
-contains:a,keywords:e,illegal:"\\S"}}})());hljs.registerLanguage("xml",(()=>{"use strict";function e(e){
+}();"object"==typeof exports&&"undefined"!=typeof module&&(module.exports=hljs);hljs.registerLanguage("xml",(()=>{"use strict";function e(e){
 return e?"string"==typeof e?e:e.source:null}function n(e){return a("(?=",e,")")}
 function a(...n){return n.map((n=>e(n))).join("")}function s(...n){
 return"("+n.map((n=>e(n))).join("|")+")"}return e=>{
@@ -366,19 +321,15 @@ className:"tag",begin:/<>|<\/>/},{className:"tag",
 begin:a(/</,n(a(t,s(/\/>/,/>/,/\s/)))),end:/\/?>/,contains:[{className:"name",
 begin:t,relevance:0,starts:m}]},{className:"tag",begin:a(/<\//,n(a(t,/>/))),
 contains:[{className:"name",begin:t,relevance:0},{begin:/>/,relevance:0}]}]}}
-})());hljs.registerLanguage("ocaml",(()=>{"use strict";return e=>({name:"OCaml",
-aliases:["ml"],keywords:{$pattern:"[a-z_]\\w*!?",
-keyword:"and as assert asr begin class constraint do done downto else end exception external for fun function functor if in include inherit! inherit initializer land lazy let lor lsl lsr lxor match method!|10 method mod module mutable new object of open! open or private rec sig struct then to try type val! val virtual when while with parser value",
-built_in:"array bool bytes char exn|5 float int int32 int64 list lazy_t|5 nativeint|5 string unit in_channel out_channel ref",
-literal:"true false"},illegal:/\/\/|>>/,contains:[{className:"literal",
-begin:"\\[(\\|\\|)?\\]|\\(\\)",relevance:0},e.COMMENT("\\(\\*","\\*\\)",{
-contains:["self"]}),{className:"symbol",begin:"'[A-Za-z_](?!')[\\w']*"},{
-className:"type",begin:"`[A-Z][\\w']*"},{className:"type",
-begin:"\\b[A-Z][\\w']*",relevance:0},{begin:"[a-z_]\\w*'[\\w']*",relevance:0
-},e.inherit(e.APOS_STRING_MODE,{className:"string",relevance:0
-}),e.inherit(e.QUOTE_STRING_MODE,{illegal:null}),{className:"number",
-begin:"\\b(0[xX][a-fA-F0-9_]+[Lln]?|0[oO][0-7_]+[Lln]?|0[bB][01_]+[Lln]?|[0-9][0-9_]*([Lln]|(\\.[0-9_]*)?([eE][-+]?[0-9_]+)?)?)",
-relevance:0},{begin:/->/}]})})());hljs.registerLanguage("javascript",(()=>{"use strict"
+})());hljs.registerLanguage("json",(()=>{"use strict";return n=>{const e={
+literal:"true false null"
+},i=[n.C_LINE_COMMENT_MODE,n.C_BLOCK_COMMENT_MODE],a=[n.QUOTE_STRING_MODE,n.C_NUMBER_MODE],l={
+end:",",endsWithParent:!0,excludeEnd:!0,contains:a,keywords:e},t={begin:/\{/,
+end:/\}/,contains:[{className:"attr",begin:/"/,end:/"/,
+contains:[n.BACKSLASH_ESCAPE],illegal:"\\n"},n.inherit(l,{begin:/:/
+})].concat(i),illegal:"\\S"},s={begin:"\\[",end:"\\]",contains:[n.inherit(l)],
+illegal:"\\S"};return a.push(t,s),i.forEach((n=>{a.push(n)})),{name:"JSON",
+contains:a,keywords:e,illegal:"\\S"}}})());hljs.registerLanguage("javascript",(()=>{"use strict"
 ;const e="[A-Za-z$_][0-9A-Za-z$_]*",n=["as","in","of","if","for","while","finally","var","new","function","do","return","void","else","break","catch","instanceof","with","throw","case","default","try","switch","continue","typeof","delete","let","yield","const","class","debugger","async","await","static","import","from","export","extends"],a=["true","false","null","undefined","NaN","Infinity"],s=[].concat(["setInterval","setTimeout","clearInterval","clearTimeout","require","exports","eval","isFinite","isNaN","parseFloat","parseInt","decodeURI","decodeURIComponent","encodeURI","encodeURIComponent","escape","unescape"],["arguments","this","super","console","window","document","localStorage","module","global"],["Intl","DataView","Number","Math","Date","String","RegExp","Object","Function","Boolean","Error","Symbol","Set","Map","WeakSet","WeakMap","Proxy","Reflect","JSON","Promise","Float64Array","Int16Array","Int32Array","Int8Array","Uint16Array","Uint32Array","Float32Array","Array","Uint8Array","Uint8ClampedArray","ArrayBuffer"],["EvalError","InternalError","RangeError","ReferenceError","SyntaxError","TypeError","URIError"])
 ;function r(e){return t("(?=",e,")")}function t(...e){return e.map((e=>{
 return(n=e)?"string"==typeof n?n:n.source:null;var n})).join("")}return i=>{
@@ -438,4 +389,28 @@ beginKeywords:"extends"},i.UNDERSCORE_TITLE_MODE]},{begin:/\b(?=constructor)/,
 end:/[{;]/,excludeEnd:!0,contains:[i.inherit(i.TITLE_MODE,{begin:c}),"self",p]
 },{begin:"(get|set)\\s+(?="+c+"\\()",end:/\{/,keywords:"get set",
 contains:[i.inherit(i.TITLE_MODE,{begin:c}),{begin:/\(\)/},p]},{begin:/\$[(.]/}]
-}}})());
+}}})());hljs.registerLanguage("http",(()=>{"use strict";function e(...e){
+return e.map((e=>{return(n=e)?"string"==typeof n?n:n.source:null;var n
+})).join("")}return n=>{const a="HTTP/(2|1\\.[01])",s=[{className:"attribute",
+begin:e("^",/[A-Za-z][A-Za-z0-9-]*/,"(?=\\:\\s)"),starts:{contains:[{
+className:"punctuation",begin:/: /,relevance:0,starts:{end:"$",relevance:0}}]}
+},{begin:"\\n\\n",starts:{subLanguage:[],endsWithParent:!0}}];return{
+name:"HTTP",aliases:["https"],illegal:/\S/,contains:[{begin:"^(?="+a+" \\d{3})",
+end:/$/,contains:[{className:"meta",begin:a},{className:"number",
+begin:"\\b\\d{3}\\b"}],starts:{end:/\b\B/,illegal:/\S/,contains:s}},{
+begin:"(?=^[A-Z]+ (.*?) "+a+"$)",end:/$/,contains:[{className:"string",
+begin:" ",end:" ",excludeBegin:!0,excludeEnd:!0},{className:"meta",begin:a},{
+className:"keyword",begin:"[A-Z]+"}],starts:{end:/\b\B/,illegal:/\S/,contains:s}
+}]}}})());hljs.registerLanguage("ocaml",(()=>{"use strict";return e=>({name:"OCaml",
+aliases:["ml"],keywords:{$pattern:"[a-z_]\\w*!?",
+keyword:"and as assert asr begin class constraint do done downto else end exception external for fun function functor if in include inherit! inherit initializer land lazy let lor lsl lsr lxor match method!|10 method mod module mutable new object of open! open or private rec sig struct then to try type val! val virtual when while with parser value",
+built_in:"array bool bytes char exn|5 float int int32 int64 list lazy_t|5 nativeint|5 string unit in_channel out_channel ref",
+literal:"true false"},illegal:/\/\/|>>/,contains:[{className:"literal",
+begin:"\\[(\\|\\|)?\\]|\\(\\)",relevance:0},e.COMMENT("\\(\\*","\\*\\)",{
+contains:["self"]}),{className:"symbol",begin:"'[A-Za-z_](?!')[\\w']*"},{
+className:"type",begin:"`[A-Z][\\w']*"},{className:"type",
+begin:"\\b[A-Z][\\w']*",relevance:0},{begin:"[a-z_]\\w*'[\\w']*",relevance:0
+},e.inherit(e.APOS_STRING_MODE,{className:"string",relevance:0
+}),e.inherit(e.QUOTE_STRING_MODE,{illegal:null}),{className:"number",
+begin:"\\b(0[xX][a-fA-F0-9_]+[Lln]?|0[oO][0-7_]+[Lln]?|0[bB][01_]+[Lln]?|[0-9][0-9_]*([Lln]|(\\.[0-9_]*)?([eE][-+]?[0-9_]+)?)?)",
+relevance:0},{begin:/->/}]})})());
