@@ -188,6 +188,14 @@ let%expect_test _ =
     foo |}]
 
 let%expect_test _ =
+  show ~method_:(`Method "POST") "/abc" @@ Dream.router [
+    Dream.post "/abc" (fun _ -> Dream.respond "foo");
+  ];
+  [%expect {|
+    Response: 200 OK
+    foo |}]
+
+let%expect_test _ =
   show ~method_:`POST "/abc" @@ Dream.router [
     Dream.get "/abc" (fun _ -> Dream.respond "foo");
   ];
@@ -200,6 +208,64 @@ let%expect_test _ =
   ];
   [%expect {|
     Response: 404 Not Found |}]
+
+(* Briefly test all the other methods. *)
+
+let%expect_test _ =
+  show ~method_:`PUT "/abc" @@ Dream.router [
+    Dream.put "/abc" (fun _ -> Dream.respond "foo");
+  ];
+  [%expect {|
+    Response: 200 OK
+    foo |}]
+
+let%expect_test _ =
+  show ~method_:`DELETE "/abc" @@ Dream.router [
+    Dream.delete "/abc" (fun _ -> Dream.respond "foo");
+  ];
+  [%expect {|
+    Response: 200 OK
+    foo |}]
+
+let%expect_test _ =
+  show ~method_:`HEAD "/abc" @@ Dream.router [
+    Dream.head "/abc" (fun _ -> Dream.respond "foo");
+  ];
+  [%expect {|
+    Response: 200 OK
+    foo |}]
+
+let%expect_test _ =
+  show ~method_:`CONNECT "/abc" @@ Dream.router [
+    Dream.connect "/abc" (fun _ -> Dream.respond "foo");
+  ];
+  [%expect {|
+    Response: 200 OK
+    foo |}]
+
+let%expect_test _ =
+  show ~method_:`OPTIONS "/abc" @@ Dream.router [
+    Dream.options "/abc" (fun _ -> Dream.respond "foo");
+  ];
+  [%expect {|
+    Response: 200 OK
+    foo |}]
+
+let%expect_test _ =
+  show ~method_:`TRACE "/abc" @@ Dream.router [
+    Dream.trace "/abc" (fun _ -> Dream.respond "foo");
+  ];
+  [%expect {|
+    Response: 200 OK
+    foo |}]
+
+let%expect_test _ =
+  show ~method_:`PATCH "/abc" @@ Dream.router [
+    Dream.patch "/abc" (fun _ -> Dream.respond "foo");
+  ];
+  [%expect {|
+    Response: 200 OK
+    foo |}]
 
 (* Router matches and sets variables. *)
 
@@ -250,6 +316,12 @@ let%expect_test _ =
   ];
   [%expect {|
     Dream.crumb: missing path parameter "x" |}]
+
+let%expect_test _ =
+  show "/" @@ (fun next_handler request ->
+    ignore (Dream.crumb "x" request);
+    next_handler request);
+  [%expect {| Dream.crumb: missing path parameter "x" |}]
 
 (* Router respects site prefix. *)
 
@@ -433,8 +505,73 @@ let%expect_test _ =
     Response: 200 OK
     /abc /def |}]
 
+let%expect_test _ =
+  show "/abc/def" @@ Dream.router [
+    Dream.get "*" (fun request ->
+      Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+  ];
+  [%expect {|
+    Response: 200 OK
+    / /abc/def |}]
+
+let%expect_test _ =
+  show "/abc/def" @@ Dream.router [
+    Dream.get "/*" (fun request ->
+      Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+  ];
+  [%expect {|
+    Response: 200 OK
+    / /abc/def |}]
+
+let%expect_test _ =
+  show "/abc/def" @@ Dream.router [
+    Dream.post "/abc/*" (fun request ->
+      Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+  ];
+  [%expect {| Response: 404 Not Found |}]
+
+let%expect_test _ =
+  show ~method_:`POST "/abc/def" @@ Dream.router [
+    Dream.post "/abc/*" (fun request ->
+      Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+  ];
+  [%expect {|
+    Response: 200 OK
+    /abc /def |}]
+
+(* TODO The prefix is backwards! *)
+let%expect_test _ =
+  show "/abc/def/ghi" @@ Dream.router [
+    Dream.scope "/abc" [] [
+      Dream.get "/def/*" (fun request ->
+        Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+    ];
+  ];
+  [%expect {|
+    Response: 200 OK
+    /def/abc /ghi |}]
+
+let%expect_test _ =
+  show "/abc/def/ghi" @@ Dream.router [
+    Dream.scope "/abc" [] [
+      Dream.get "/*" (fun request ->
+        Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+    ];
+  ];
+  [%expect {|
+    Response: 200 OK
+    /abc /def/ghi |}]
+
+let%expect_test _ =
+  show "/abc/def/ghi" @@ Dream.router [
+    Dream.scope "/abc" [] [
+      Dream.get "*" (fun request ->
+        Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+    ];
+  ];
+  [%expect {|
+    Response: 200 OK
+    /abc /def/ghi |}]
+
 (* TODO Indirect nesting works. *)
-(* TODO `Method "GET" works. *)
-(* TODO Empty router. *)
-(* TODO Degenerate top-level route_all. *)
 (* TODO Dream.crumb without a router. *)

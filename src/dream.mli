@@ -176,7 +176,16 @@ val method_to_string : method_ -> string
     [`GET] is converted to ["GET"]. *)
 
 val string_to_method : string -> method_
-(** Evaluates to the {!method_} corresponding to the given method string. *)
+(** Evaluates to the {!type-method_} corresponding to the given method
+    string. *)
+
+val methods_equal : method_ -> method_ -> bool
+(** Compares two methods, such that equal methods are detected even if one is
+    represented as a string. For example,
+
+    {[
+      Dream.methods_equal `GET (`Method "GET") = true
+    ]} *)
 
 (** {1 Statuses} *)
 
@@ -335,6 +344,14 @@ val is_client_error : status -> bool
 val is_server_error : status -> bool
 (** Like {!Dream.is_informational}, but for type {!Dream.server_error} and
     numeric codes [5xx]. *)
+
+val statuses_equal : status -> status -> bool
+(** Compares two status codes, such that equal codes are detected even if one is
+    represented as a number. For example,
+
+    {[
+      Dream.statuses_equal `Not_Found (`Status 404) = true
+    ]} *)
 
 end
 

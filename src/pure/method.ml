@@ -41,3 +41,6 @@ let string_to_method = function
   | "TRACE" -> `TRACE
   | "PATCH" -> `PATCH
   | method_ -> `Method method_
+
+let methods_equal method_1 method_2 =
+  method_to_string method_1 = method_to_string method_2

@@ -9,13 +9,13 @@ module Dream = Dream__pure.Inmost
 
 
 
-(* TODO Compare HTTP methods at string. *)
-(* TODO Test wildcards. *)
 (* TODO Limit character set to permit future extensions. *)
 (* TODO Document *. *)
 (* TODO Forbid wildcard scopes. *)
 (* TODO Will need to restore staged prefixes once there is prefix-querying,
    middleware because it will need to know the prefix of the nearest router. *)
+(* TODO The prefix currently gets assembled backwars; fix this in the "great
+   nested path and prefix" commit. *)
 
 type token =
   | Literal of string
@@ -192,7 +192,7 @@ let router routes =
     and try_node bindings prefix path node is_wildcard ok fail =
       match node with
       | Handler (method_, handler)
-          when method_ = Dream.method_ request &&
+          when Dream.methods_equal method_ (Dream.method_ request) &&
                (path = [] || is_wildcard) ->
         request
         |> Dream.with_local crumbs bindings

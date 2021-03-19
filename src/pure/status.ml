@@ -282,3 +282,6 @@ let status_to_string status =
   | Some reason, _ -> reason
   | None, `Status code -> string_of_int code
   | _ -> "Unknown" [@coverage off] (* Should be impossible. *)
+
+let statuses_equal status_1 status_2 =
+  status_to_int status_1 = status_to_int status_2
