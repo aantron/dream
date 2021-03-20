@@ -564,6 +564,11 @@ type form_error = [
 val form : request -> ((string * string) list, [> form_error ]) result Lwt.t
 (* TODO Provide optionals for disabling CSRF checking and CSRF token field
    filtering. *)
+(* TODO Factor out common error checking into a middleware, but still forward
+   expired forms to the handler. So will have form_csrf middleware. *)
+(* TODO Actually, can build all the questionable cases into a variant of the
+   right form and just reject them all with the catch-all case that will be
+   required anyway. *)
 
 
 
@@ -640,6 +645,8 @@ val static :
 
 Dream.get "static/*" (Dream.static "static")
  *)
+(* TODO Expose default static handlers. At least the FS one. Should probably
+   also add a crunch-based handler, because it can send nice etags. *)
 
 
 
@@ -1154,6 +1161,7 @@ val run :
    they don't have to be set in Makefiles. *)
 (* TODO Split up ~https into ~https:true and a separate library choice, which
    default probably to OpenSSL. *)
+(* TODO Option for disabling built-in middleware. *)
 
 val serve :
   ?interface:string ->

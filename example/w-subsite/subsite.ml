@@ -17,4 +17,4 @@ let () =
 
   ]
   @@ fun _ ->
-    Dream.respond ~status:`Not_found ""
+    Dream.respond ~status:`Not_Found ""
