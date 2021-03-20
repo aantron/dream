@@ -7,18 +7,14 @@
 
 (* TODO DOC Recommend direct use of Base64 library for more options. *)
 let to_base64url text =
-  Base64.encode_string ~alphabet:Base64.uri_safe_alphabet text
+  Base64.encode_string ~pad:false ~alphabet:Base64.uri_safe_alphabet text
 
 let from_base64url text =
-  Base64.decode ~alphabet:Base64.uri_safe_alphabet text
-  |> function
-    | Error (`Msg string) -> Error string
-    | Ok _ as ok -> ok
+  match Base64.decode ~pad:false ~alphabet:Base64.uri_safe_alphabet text with
+  | Error (`Msg string) -> Error string
+  | Ok _ as ok -> ok
 
 (* TODO https://www.ietf.org/rfc/rfc4648.txt *)
-(* TODO LATER Decoder also. *)
-(* TODO LATER Once there are enough microformats, make sure to give everything
-   consistent naming to minimize cognitive load. Like X and from_X. *)
 
 (* TODO Not quite a middleware. *)
 (* TODO DOC We allow multiple headers sent by the client, to support HTTP/2. *)

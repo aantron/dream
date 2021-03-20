@@ -418,6 +418,27 @@ let remove_specs soup =
   selectors |> List.iter (fun selector ->
     soup $ selector |> Soup.R.parent |> Soup.delete)
 
+let remove_stdlib soup =
+  soup $$ ".xref-unresolved:contains(\"Stdlib\")" |> Soup.iter (fun element ->
+    begin match Soup.next_sibling element with
+    | None -> ()
+    | Some next ->
+      match Soup.element next with
+      | Some _ -> ()
+      | None ->
+        match Soup.leaf_text next with
+        | None -> ()
+        | Some s ->
+          match s.[0] with
+          | '.' ->
+            String.sub s 1 (String.length s - 1)
+            |> Soup.create_text
+            |> Soup.replace next
+          | _ | exception _ -> ()
+    end;
+    delete element;
+  )
+
 let () =
   let source = Sys.argv.(1) in
   let destination = Sys.argv.(2) in
@@ -441,5 +462,7 @@ let () =
   in
   soup $$ "h2" |> iter add_backing_line;
   soup $$ ".spec[id]" |> iter add_backing_line;
+
+  remove_stdlib content;
 
   Soup.(to_string content |> write_file destination)

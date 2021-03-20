@@ -569,6 +569,8 @@ val form : request -> ((string * string) list, [> form_error ]) result Lwt.t
 (* TODO Actually, can build all the questionable cases into a variant of the
    right form and just reject them all with the catch-all case that will be
    required anyway. *)
+(* TODO AJAX CSRF example with X-CSRF-Token, then also with axios in the
+   README. *)
 
 
 
@@ -1078,7 +1080,7 @@ val run :
     server by pressing ENTER.
 
     This function calls {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun}
-    [Lwt_main.run↪]} internally, and so is intended to be used as the main loop
+    [Lwt_main.run ↪]} internally, and so is intended to be used as the main loop
     of a program. {!Dream.serve} is a version of [Dream.run] that does not call
     [Lwt_main.run]. Indeed, [Dream.run] is a wrapper around {!Dream.serve}.
 
@@ -1180,7 +1182,7 @@ val serve :
     unit Lwt.t
 (** Same as {!Dream.run}, but returns a promise that does not resolve until the
     server stops listening, instead of calling
-    {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun} [Lwt_main.run↪]} on
+    {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun} [Lwt_main.run ↪]} on
     it, and lacks some of the higher-level conveniences such as monitoring STDIN
     and graceful exit.
 
@@ -1213,8 +1215,16 @@ val content_length : middleware
 (** {1:web_formats Web formats} *)
 
 val to_base64url : string -> string
+(** Converts the given string its base64url encoding, as specified in
+    {{:https://tools.ietf.org/html/rfc4648#section-5} RFC 4648 §5 ↪}, using a
+    web-safe alphabet and no padding. The resulting string can be used without
+    escaping in URLs, form data, cookies, HTML content, attributes, and
+    JavaScript code. *)
+
 val from_base64url : string -> (string, string) result
-(* TODO Test it; document, include RFC links. *)
+(** Inverse of {!Dream.to_base64url}. *)
+
+(* TODO s/Stdlib.result/result/g *)
 
 
 
@@ -1244,7 +1254,8 @@ val request :
 val test : ?prefix:string -> handler -> (request -> response)
 (** [Dream.test handler] runs a handler the same way the HTTP server
     ({!Dream.run}) would — assigning it a request id and noting the site root
-    prefix, which is used by routers. [Dream.test] calls [Lwt_main.run]
+    prefix, which is used by routers. [Dream.test] calls
+    {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun} [Lwt_main.run↪]}
     internally to await the response, which is why the response returned from
     the test is not wrapped in a promise. If you don't need these facilities,
     you can test [handler] by calling it directly with a request. *)

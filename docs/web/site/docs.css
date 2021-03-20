@@ -48,13 +48,15 @@ pre {
 
 code {
   background-color: #101316;
-  padding: 1px 7px;
+  padding: 1px 6px;
+  margin: 0px 2px;
 }
 
 pre > code,
 .spec > code {
   background: none;
   padding: 0;
+  margin: 0;
   color: inherit;
 }
 
