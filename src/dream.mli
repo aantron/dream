@@ -1183,6 +1183,8 @@ val serve :
 
 val catch : (error -> response Lwt.t) -> middleware
 
+val assign_request_id : middleware
+
 (* TODO Document middleware as built-in. Link to customizzation of built-in
    middleware. *)
 val content_length : middleware

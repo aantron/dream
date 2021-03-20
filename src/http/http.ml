@@ -456,7 +456,7 @@ let serve_with_details
   (* TODO Clean up this pseudo-middleware stack. *)
   let built_in_middleware = Dream.pipeline [
     Dream__middleware.Catch.catch (Error_handler.app error_handler);
-    Dream__middleware.Request_id.request_id;
+    Dream__middleware.Request_id.assign_request_id;
     Dream__middleware.Content_length.content_length;
   ] in
 

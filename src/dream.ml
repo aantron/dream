@@ -57,6 +57,9 @@ include Dream__http.Http
 
 include Dream__middleware.Catch
 
+let assign_request_id =
+  Dream__middleware.Request_id.assign_request_id
+
 let error_template =
   Dream__http.Error_handler.customize
 

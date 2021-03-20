@@ -31,24 +31,23 @@ let lwt_key =
 
 
 
-(* TODO Request id *getter* should be called request_id, not the middleware. *)
+(* TODO Restore the prefix, make the id random, or something else. *)
 (* TODO Now that the request id is built in, there is no good way for the user
    to pass in a prefix... except perhaps through the app. However, this is
    probably worth it, because adding request_id to every single middleware
    stack is extremely annoying, given that you always want it and it's so cheap
    that there is no reason not to use it. It's probably very rare that someone
    needs a prefix. *)
-let request_id ?(prefix = "") next_handler request =
+let assign_request_id next_handler request =
 
-  (* Get the last id for this request's app, increment it, and prepend the
-     prefix. *)
+  (* Get the last id for this request's app. *)
   let last_id_ref : int ref =
     Dream.global last_id request in
 
   incr last_id_ref;
 
   let new_id =
-    prefix ^ (string_of_int !last_id_ref) in
+    string_of_int !last_id_ref in
 
   (* Store the new id in the request and in the Lwt promise values map for
      best-effort delivery to all code that might want the id. Continue into the
