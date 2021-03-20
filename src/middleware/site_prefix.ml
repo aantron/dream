@@ -33,12 +33,14 @@ let chop_site_prefix prefix =
     |> Dream__pure.Formats.trim_empty_trailing_component
   in
 
+  let prefix_reversed = List.rev prefix in
+
   fun next_handler request ->
     match match_site_prefix prefix (Dream.internal_path request) with
     | None ->
       Dream.respond ~status:`Bad_Gateway ""
     | Some path ->
       request
-      |> Dream.with_prefix prefix
+      |> Dream.with_prefix prefix_reversed
       |> Dream.with_path path
       |> next_handler

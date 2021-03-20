@@ -632,6 +632,7 @@ val trace : string -> handler -> route
 
 val patch : string -> handler -> route
 (** Like {!Dream.get}, but the request's method must be [`PATCH]. *)
+(* TODO Compress all these methods visually in the docs. *)
 
 val static :
   ?handler:(string -> string -> request -> response Lwt.t) -> string -> handler

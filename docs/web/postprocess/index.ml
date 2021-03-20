@@ -379,7 +379,8 @@ let pretty_print_signatures soup =
     (fun () -> pretty_print error)
     (fun () ->
       error $$ "> code" |> Soup.iter Soup.delete;
-      Soup.replace (error $ "> table") (Soup.parse error_replacement));
+      Soup.replace (error $ "> table") (Soup.parse error_replacement);
+      Soup.add_class "multiline" error);
 
   let run = soup $ "#val-run" in
   if_expected

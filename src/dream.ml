@@ -13,20 +13,10 @@ end
 
 include Dream__pure.Inmost
 
-(* let all_cookies = Dream__middleware.Cookie.all_cookies *)
-(* let cookie = Dream__middleware.Cookie.cookie *)
-(* let add_set_cookie = Dream__middleware.Cookie.add_set_cookie *)
-
 include Dream__middleware.Log
 
 let logger =
   Dream__middleware.Log.logger
-
-(* let content_length =
-  Dream__middleware.Content_length.assign *)
-
-(* let synchronous next_handler request =
-  Lwt.return (next_handler request) *)
 
 let default_log =
   Dream__middleware.Log.sub_log (Logs.Src.name Logs.default)
@@ -71,19 +61,14 @@ let random =
 include Dream__pure.Formats
 
 let test ?(prefix = "") handler request =
-  let _prefix =
-    prefix
-    |> Dream__pure.Formats.parse_target
-    |> fst
-    |> Dream__pure.Formats.trim_empty_trailing_component
+  let app =
+    assign_request_id
+    @@ chop_site_prefix prefix
+    @@ content_length
+    @@ handler
   in
 
-  handler request
-  (* |> with_next_prefix prefix *)
-  (* |> Dream__middleware__built_in.Built_in.middleware handler *)
-  |> Lwt_main.run
-  (* TODO Restore applying the built-in middleware stack, and add customization
-     like for Dream.run. *)
+  Lwt_main.run (app request)
 
 let log =
   Dream__middleware.Log.convenience_log

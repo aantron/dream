@@ -332,22 +332,31 @@ let%expect_test _ =
     Dream.get "/def" (fun _ -> Dream.respond "foo");
   ];
   [%expect {|
-    Response: 404 Not Found |}]
+    Response: 200 OK
+    foo |}]
 
 let%expect_test _ =
   show ~prefix:"/abc" "/def" @@ Dream.router [
     Dream.get "/def" (fun _ -> Dream.respond "foo");
   ];
   [%expect {|
-    Response: 200 OK
-    foo |}]
+    Response: 502 Bad Gateway |}]
 
 let%expect_test _ =
   show ~prefix:"/abc/def" "/abc" @@ Dream.router [
     Dream.get "/def" (fun _ -> Dream.respond "foo");
   ];
   [%expect {|
-    Response: 404 Not Found |}]
+    Response: 502 Bad Gateway |}]
+
+let%expect_test _ =
+  show ~prefix:"/abc/def" "/abc/def/ghi" @@ Dream.router [
+    Dream.get "/ghi" (fun request ->
+      Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+  ];
+  [%expect {|
+    Response: 200 OK
+    /abc/def /ghi |}]
 
 (* Direct subsites work. *)
 

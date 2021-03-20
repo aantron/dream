@@ -437,6 +437,16 @@ let ocaml_tls = {
 
 
 
+let built_in_middleware error_handler prefix =
+  Dream.pipeline [
+    Dream__middleware.Catch.catch (Error_handler.app error_handler);
+    Dream__middleware.Request_id.assign_request_id;
+    Dream__middleware.Site_prefix.chop_site_prefix prefix;
+    Dream__middleware.Content_length.content_length;
+  ]
+
+
+
 let serve_with_details
     caller_function_for_error_messages
     tls_library
@@ -453,38 +463,8 @@ let serve_with_details
   (* TODO DOC *)
   (* https://letsencrypt.org/docs/certificates-for-localhost/ *)
 
-  (* TODO Clean up this pseudo-middleware stack. *)
-  let built_in_middleware = Dream.pipeline [
-    Dream__middleware.Catch.catch (Error_handler.app error_handler);
-    Dream__middleware.Request_id.assign_request_id;
-    Dream__middleware.Site_prefix.chop_site_prefix prefix;
-    Dream__middleware.Content_length.content_length;
-  ] in
-
-  let user's_dream_handler = built_in_middleware user's_dream_handler in
-
-  (* ignore prefix; *)
-  (* let user's_dream_handler =
-    Dream__middleware__built_in.Built_in.Content_length.content_length
-      user's_dream_handler in
   let user's_dream_handler =
-    (Error_handler.app error_handler) user's_dream_handler in
-  let user's_dream_handler =
-    Dream__middleware__built_in.Built_in.middleware user's_dream_handler in
-  let user's_dream_handler = fun request ->
-    let _prefix =
-      prefix
-      |> Dream__pure.Formats.parse_target
-      |> fst
-      |> Dream__pure.Formats.trim_empty_trailing_component
-    in
-
-    request
-    (* |> Dream.with_prefix prefix *)
-    |> user's_dream_handler
-    (* TODO Factor out this whole middleware "stack" and include a site prefix
-       thing. *)
-  in *)
+    built_in_middleware error_handler prefix user's_dream_handler in
 
   (* Create the wrapped httpaf or h2 handler from the user's Dream handler. *)
   let httpaf_connection_handler =
