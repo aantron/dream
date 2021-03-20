@@ -457,12 +457,13 @@ let serve_with_details
   let built_in_middleware = Dream.pipeline [
     Dream__middleware.Catch.catch (Error_handler.app error_handler);
     Dream__middleware.Request_id.assign_request_id;
+    Dream__middleware.Site_prefix.chop_site_prefix prefix;
     Dream__middleware.Content_length.content_length;
   ] in
 
   let user's_dream_handler = built_in_middleware user's_dream_handler in
 
-  ignore prefix;
+  (* ignore prefix; *)
   (* let user's_dream_handler =
     Dream__middleware__built_in.Built_in.Content_length.content_length
       user's_dream_handler in

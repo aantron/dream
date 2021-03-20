@@ -60,6 +60,8 @@ include Dream__middleware.Catch
 let assign_request_id =
   Dream__middleware.Request_id.assign_request_id
 
+include Dream__middleware.Site_prefix
+
 let error_template =
   Dream__http.Error_handler.customize
 
