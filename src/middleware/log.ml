@@ -30,7 +30,7 @@
 module Dream =
 struct
   include Dream__pure.Inmost
-  module Request_id = Dream__middleware__built_in.Request_id
+  module Request_id = Request_id
 end
 
 

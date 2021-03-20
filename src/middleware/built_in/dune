@@ -1,8 +1,0 @@
-(library
- (public_name dream.middleware.built_in)
- (name dream__middleware__built_in)
- (libraries
-  dream.pure
-  lwt
- )
- (instrumentation (backend bisect_ppx)))

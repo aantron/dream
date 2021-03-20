@@ -50,13 +50,12 @@ let form =
   Dream__middleware.Form.form
 
 let content_length =
-  Dream__middleware__built_in.Content_length.content_length
+  Dream__middleware.Content_length.content_length
 
-(* let form_get =
-  Dream__middleware.Form.get *)
-
-include Dream__http.Error
+include Dream__middleware.Error
 include Dream__http.Http
+
+include Dream__middleware.Catch
 
 let error_template =
   Dream__http.Error_handler.customize
@@ -74,10 +73,12 @@ let test ?(prefix = "") handler request =
     |> Dream__pure.Formats.trim_empty_trailing_component
   in
 
-  request
+  handler request
   (* |> with_next_prefix prefix *)
-  |> Dream__middleware__built_in.Built_in.middleware handler
+  (* |> Dream__middleware__built_in.Built_in.middleware handler *)
   |> Lwt_main.run
+  (* TODO Restore applying the built-in middleware stack, and add customization
+     like for Dream.run. *)
 
 let log =
   Dream__middleware.Log.convenience_log

@@ -6,6 +6,7 @@
 
 
 module Dream = Dream__pure.Inmost
+module Error = Dream__middleware.Error
 
 
 
@@ -453,11 +454,20 @@ let serve_with_details
   (* https://letsencrypt.org/docs/certificates-for-localhost/ *)
 
   (* TODO Clean up this pseudo-middleware stack. *)
-  let user's_dream_handler =
+  let built_in_middleware = Dream.pipeline [
+    Dream__middleware.Catch.catch (Error_handler.app error_handler);
+    Dream__middleware.Request_id.request_id;
+    Dream__middleware.Content_length.content_length;
+  ] in
+
+  let user's_dream_handler = built_in_middleware user's_dream_handler in
+
+  ignore prefix;
+  (* let user's_dream_handler =
     Dream__middleware__built_in.Built_in.Content_length.content_length
       user's_dream_handler in
   let user's_dream_handler =
-    Error_handler.app app error_handler user's_dream_handler in
+    (Error_handler.app error_handler) user's_dream_handler in
   let user's_dream_handler =
     Dream__middleware__built_in.Built_in.middleware user's_dream_handler in
   let user's_dream_handler = fun request ->
@@ -473,7 +483,7 @@ let serve_with_details
     |> user's_dream_handler
     (* TODO Factor out this whole middleware "stack" and include a site prefix
        thing. *)
-  in
+  in *)
 
   (* Create the wrapped httpaf or h2 handler from the user's Dream handler. *)
   let httpaf_connection_handler =

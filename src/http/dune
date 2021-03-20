@@ -7,7 +7,6 @@
   digestif
   dream.localhost
   dream.middleware
-  dream.middleware.built_in
   dream.pure
   gluten
   gluten-lwt-unix

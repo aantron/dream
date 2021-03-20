@@ -6,13 +6,14 @@
 
 
 module Dream = Dream__pure.Inmost
+module Error = Dream__middleware.Error
 
 
 
 (* User's error handlers and defaults. These actually generate error response
    templates and/or do logging. *)
 
-val default : Error.error_handler
+val default : Dream__middleware.Error.error_handler
 val customize :
   (debug_dump:string option -> Dream.response -> Dream.response Lwt.t) ->
     Error.error_handler
@@ -25,10 +26,14 @@ val customize :
    applied and then passed in as arguments where the libraries want error
    handler arguments. *)
 
-val app :
+(* val app :
   Dream.app ->
   Error.error_handler ->
-    Dream.middleware
+    Dream.middleware *)
+
+val app :
+  Error.error_handler ->
+    (Error.error -> Dream.response Lwt.t)
 
 val httpaf :
   Dream.app ->

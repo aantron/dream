@@ -4,7 +4,6 @@
  (libraries
   dream.http
   dream.middleware
-  dream.middleware.built_in
   dream.pure
   logs
   lwt

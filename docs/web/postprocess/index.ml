@@ -28,8 +28,7 @@ let status_replacement = {|
 |}
 
 let response_expected = {|<div class="spec value" id="val-response">
- <a href="#val-response" class="anchor"></a><code><span><span class="keyword">val</span> response : <span>?status:<a href="#type-status">status</a> <span class="arrow">-&gt;</span></span> <span>?code:int <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span>
-<span>?set_content_length:bool <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-response">response</a></span></code>
+ <a href="#val-response" class="anchor"></a><code><span><span class="keyword">val</span> response : <span>?status:<a href="#type-status">status</a> <span class="arrow">-&gt;</span></span> <span>?code:int <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-response">response</a></span></code>
 </div>
 |}
 
@@ -38,7 +37,6 @@ let response_replacement = {|
   ?status:<a href="#type-status">status</a> -&gt;
   ?code:int ->
   ?headers:(string * string) list -&gt;
-  ?set_content_length:bool -&gt;
   string -&gt;
     <a href="#type-response">response</a>
 </pre>
@@ -46,7 +44,7 @@ let response_replacement = {|
 
 let respond_expected = {|<div class="spec value" id="val-respond">
  <a href="#val-respond" class="anchor"></a><code><span><span class="keyword">val</span> respond : <span>?status:<a href="#type-status">status</a> <span class="arrow">-&gt;</span></span> <span>?code:int <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span>
-<span>?set_content_length:bool <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="xref-unresolved">Lwt</span>.t</span></span></code>
+<span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="xref-unresolved">Lwt</span>.t</span></span></code>
 </div>
 |}
 
@@ -55,7 +53,6 @@ let respond_replacement = {|
   ?status:<a href="#type-status">status</a> -&gt;
   ?code:int ->
   ?headers:(string * string) list -&gt;
-  ?set_content_length:bool -&gt;
   string -&gt;
     <a href="#type-response">response</a> Lwt.t
 </pre>

@@ -6,6 +6,7 @@
 
 
 module Dream = Dream__pure.Inmost
+module Error = Dream__middleware.Error
 
 
 
@@ -249,6 +250,12 @@ let respond_with_option f =
    into the framework. *)
 
 let app
+    user's_error_handler =
+    fun error ->
+
+  respond_with_option (fun () -> user's_error_handler error)
+
+(* let app
     app user's_error_handler =
     fun next_handler request ->
 
@@ -302,7 +309,7 @@ let app
         will_send_response = true;
       } in
 
-      respond_with_option (fun () -> user's_error_handler error))
+      respond_with_option (fun () -> user's_error_handler error)) *)
 
 
 

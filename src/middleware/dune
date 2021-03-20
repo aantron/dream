@@ -4,7 +4,6 @@
  (libraries
   cstruct
   digestif
-  dream.middleware.built_in
   dream.pure
   fmt
   fmt.tty

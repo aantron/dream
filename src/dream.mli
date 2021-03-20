@@ -565,10 +565,6 @@ val form : request -> ((string * string) list, [> form_error ]) result Lwt.t
 (* TODO Provide optionals for disabling CSRF checking and CSRF token field
    filtering. *)
 
-(* TODO Document middleware as built-in. Link to customizzation of built-in
-   middleware. *)
-val content_length : middleware
-
 
 
 (** {1 Routing} *)
@@ -1184,6 +1180,16 @@ val serve :
     server.
 
     All arguments have the same meanings as they have in {!Dream.run}. *)
+
+val catch : (error -> response Lwt.t) -> middleware
+
+(* TODO Document middleware as built-in. Link to customizzation of built-in
+   middleware. *)
+val content_length : middleware
+
+(* TODO Expose catch. *)
+(* TODO Move the built-in middlewares to section HTTP and describe them
+   there. *)
 
 
 

@@ -8,7 +8,7 @@
 module Dream =
 struct
   include Dream__pure.Inmost
-  module Log = Dream__middleware.Log
+  module Log = Log
 end
 
 
