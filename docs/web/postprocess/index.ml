@@ -115,6 +115,45 @@ let form_replacement = {|
 ]
 |}
 
+let csrf_result_expected = {|<div class="spec type" id="type-csrf_result">
+ <a href="#type-csrf_result" class="anchor"></a><code><span><span class="keyword">type</span> csrf_result</span><span> = </span><span>[ </span></code>
+ <table>
+  <tbody>
+   <tr id="type-csrf_result.Ok" class="anchored">
+    <td class="def constructor">
+     <a href="#type-csrf_result.Ok" class="anchor"></a><code><span>| </span></code><code><span>`Ok</span></code>
+    </td>
+   </tr>
+   <tr id="type-csrf_result.Expired" class="anchored">
+    <td class="def constructor">
+     <a href="#type-csrf_result.Expired" class="anchor"></a><code><span>| </span></code><code><span>`Expired <span class="keyword">of</span> int64</span></code>
+    </td>
+   </tr>
+   <tr id="type-csrf_result.Wrong_session" class="anchored">
+    <td class="def constructor">
+     <a href="#type-csrf_result.Wrong_session" class="anchor"></a><code><span>| </span></code><code><span>`Wrong_session <span class="keyword">of</span> string</span></code>
+    </td>
+   </tr>
+   <tr id="type-csrf_result.Invalid" class="anchored">
+    <td class="def constructor">
+     <a href="#type-csrf_result.Invalid" class="anchor"></a><code><span>| </span></code><code><span>`Invalid</span></code>
+    </td>
+   </tr>
+  </tbody>
+ </table>
+ <code><span> ]</span></code>
+</div>
+|}
+
+let csrf_result_replacement = {|
+<pre class="compact"><span class="keyword">type</span> csrf_result = [
+  | `Ok
+  | `Expired <span class="keyword">of</span> int64
+  | `Wrong_session <span class="keyword">of</span> string
+  | `Invalid
+]
+|}
+
 let conditional_log_expected = {|<div class="spec type" id="type-conditional_log">
  <a href="#type-conditional_log" class="anchor"></a><code><span><span class="keyword">type</span> <span>('a, 'b) conditional_log</span></span><span> = <span><span>(<span><span>(<span>?request:<a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span><span>(<span class="type-var">'a</span>,&nbsp;<span class="xref-unresolved">Stdlib</span>.Format.formatter,&nbsp;unit,&nbsp;<span class="type-var">'b</span>)</span> <span class="xref-unresolved">Stdlib</span>.format4</span> <span class="arrow">-&gt;</span></span> <span class="type-var">'a</span>)</span> <span class="arrow">-&gt;</span></span> <span class="type-var">'b</span>)</span> <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
@@ -399,6 +438,16 @@ let pretty_print_signatures soup =
       form $$ "> code" |> Soup.iter Soup.delete;
       Soup.replace (form $ "> table") (Soup.parse form_replacement);
       Soup.add_class "multiline" form);
+
+  let csrf_result = soup $ "#type-csrf_result" in
+  if_expected
+    csrf_result_expected
+    (fun () -> pretty_print csrf_result)
+    (fun () ->
+      csrf_result $$ "> code" |> Soup.iter Soup.delete;
+      Soup.replace (csrf_result $ "> table")
+        (Soup.parse csrf_result_replacement);
+      Soup.add_class "multiline" csrf_result);
 
   let conditional_log = soup $ "#type-conditional_log" in
   if_expected

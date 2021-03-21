@@ -32,6 +32,7 @@ include Dream__middleware.Static
 include Dream__middleware.Session.Exported_defaults
 
 include Dream__middleware.Form
+include Dream__middleware.Csrf
 
 let content_length =
   Dream__middleware.Content_length.content_length

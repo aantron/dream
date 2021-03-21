@@ -476,6 +476,59 @@ val with_header : string -> string -> 'a message -> 'a message
 
 
 
+(** {1 Responses} *)
+
+val response :
+  ?status:status ->
+  ?code:int ->
+  ?headers:(string * string) list ->
+  string ->
+    response
+(** Creates a new response with the given string as body. Use [""] to return an
+    empty response, or if you'd like to assign a stream as the response body
+    later. [~code] is offered as an alternative to [~status] for specifying the
+    status code. If both [~status] and [~code] are given, one is chosen
+    arbitrarily. *)
+
+val respond :
+  ?status:status ->
+  ?code:int ->
+  ?headers:(string * string) list ->
+  string ->
+    response Lwt.t
+(** Same as {!Dream.val-response}, but immediately uses the new response to
+    resolve a new promise, and returns that promise. This helper is especially
+    convenient for quickly returning empty error responses, which will be filled
+    out later by the top-level error handler. *)
+
+val status : response -> status
+(** Response status, for example [`OK]. *)
+
+(* TODO All the optionals for Set-Cookie. *)
+(* TODO Or just provide one helper for formatting Set-Cookie and let the user
+   use the header calls to actually add the header...? How often do we need to
+   set a cookie? *)
+val add_set_cookie : string -> string -> response -> response
+(** Adds a [Set-Cookie:] header to the given response for setting the cookie
+    with the given name to the given value. Does not remove any [Set-Cookie:]
+    header that is already present — to do that, use {!Dream.drop_header}. This
+    function does not encode the cookie name nor its value. If the values you
+    are passing in can have [=], [;], or newlines, ... *)
+(* TODO Hints about encodings. *)
+
+(* val reason_override : response -> string option *)
+(* If the response was created with [~reason:r], evaluates to [Some r]. *)
+
+(* val version_override : response -> (int * int) option *)
+(* If the response was created with [~version:v], evaluates to [Some v]. *)
+
+(* val reason : response -> string *)
+(* Response reason string, for example ["OK"]. If the response was created with
+    [~reason], that string is returned. Otherwise, it is based on the response
+    status. *)
+
+
+
 (** {1 Bodies} *)
 
 val body : _ message -> string Lwt.t
@@ -542,81 +595,7 @@ val body_stream_bigstring :
 
 
 
-(** {1 Responses} *)
-
-val response :
-  ?status:status ->
-  ?code:int ->
-  ?headers:(string * string) list ->
-  string ->
-    response
-(** Creates a new response with the given string as body. Use [""] to return an
-    empty response, or if you'd like to assign a stream as the response body
-    later. [~code] is offered as an alternative to [~status] for specifying the
-    status code. If both [~status] and [~code] are given, one is chosen
-    arbitrarily. *)
-
-val respond :
-  ?status:status ->
-  ?code:int ->
-  ?headers:(string * string) list ->
-  string ->
-    response Lwt.t
-(** Same as {!Dream.val-response}, but immediately uses the new response to
-    resolve a new promise, and returns that promise. This helper is especially
-    convenient for quickly returning empty error responses, which will be filled
-    out later by the top-level error handler. *)
-
-val status : response -> status
-(** Response status, for example [`OK]. *)
-
-(* TODO All the optionals for Set-Cookie. *)
-(* TODO Or just provide one helper for formatting Set-Cookie and let the user
-   use the header calls to actually add the header...? How often do we need to
-   set a cookie? *)
-val add_set_cookie : string -> string -> response -> response
-(** Adds a [Set-Cookie:] header to the given response for setting the cookie
-    with the given name to the given value. Does not remove any [Set-Cookie:]
-    header that is already present — to do that, use {!Dream.drop_header}. This
-    function does not encode the cookie name nor its value. If the values you
-    are passing in can have [=], [;], or newlines, ... *)
-(* TODO Hints about encodings. *)
-
-(* val reason_override : response -> string option *)
-(* If the response was created with [~reason:r], evaluates to [Some r]. *)
-
-(* val version_override : response -> (int * int) option *)
-(* If the response was created with [~version:v], evaluates to [Some v]. *)
-
-(* val reason : response -> string *)
-(* Response reason string, for example ["OK"]. If the response was created with
-    [~reason], that string is returned. Otherwise, it is based on the response
-    status. *)
-
-
-
-(** {1 Middleware} *)
-
-val identity : middleware
-(** Does nothing but call its next handler. This is useful on rare occasions
-    when you are forced to provide a middleware, but don't want it to do
-    anything. *)
-
-val pipeline : middleware list -> middleware
-(** Combines a sequence of middlewares into one, such that these two lines are
-    equivalent:
-
-    {[
-      Dream.pipeline [mw_1; mw_2; ...; mw_n] @@ handler
-      mw_1 @@ mw_2 @@ ... @@ mw_n @@ handler
-    ]} *)
-(* TODO This code block is highlighted as CSS. Get a better
-   highlight.pack.js. *)
-
-val logger : middleware
-(** Logs incoming requests, times them, and prints timing information when the
-    next handler has returned a response. Time spent logging is included in the
-    timings. *)
+(** {1 Forms} *)
 
 type form = [
   | `Ok            of (string * string) list
@@ -674,6 +653,59 @@ val form : request -> form Lwt.t
    filtering. *)
 (* TODO AJAX CSRF example with X-CSRF-Token, then also with axios in the
    README. *)
+(* TODO Note that form requires a session to be active, for the CSRF
+   checking. *)
+
+type csrf_result = [
+  | `Ok
+  | `Expired of int64
+  | `Wrong_session of string
+  | `Invalid
+]
+(** Possible outcomes of CSRF token verification. [`Expired] and
+    [`Wrong_session] can occur in normal usage, when a user's form or session
+    expire, respectively. However, they can also indicate attacks, including
+    stolen tokens, stolen tokens from other sessions, or attempts to use a token
+    from an invalidated pre-session after login.
+
+    [`Invalid] indicates a token with a bad signature, a payload that was not
+    generated by Dream, or other serious errors that cannot usually be triggered
+    by normal users. [`Invalid] usually corresponds to bugs or attacks. *)
+
+(* TODO Guidance on how to transmit and receive the token; links. *)
+val csrf_token : ?valid_for:int64 -> request -> string Lwt.t
+(** Returns a fresh CSRF token locked to the given request's {{!sessions}
+    session} and signed with the [~secret] given to {!Dream.run}. [~valid_for]
+    is the token's lifetime, in seconds. The default value is one hour
+    ([3600L]). Dream CSRF token are server-side-stateless. *)
+
+val verify_csrf_token : string -> request -> csrf_result Lwt.t
+(** Checks that the given CSRF token is valid for the request's session. *)
+
+
+
+(** {1 Middleware} *)
+
+val identity : middleware
+(** Does nothing but call its next handler. This is useful on rare occasions
+    when you are forced to provide a middleware, but don't want it to do
+    anything. *)
+
+val pipeline : middleware list -> middleware
+(** Combines a sequence of middlewares into one, such that these two lines are
+    equivalent:
+
+    {[
+      Dream.pipeline [mw_1; mw_2; ...; mw_n] @@ handler
+      mw_1 @@ mw_2 @@ ... @@ mw_n @@ handler
+    ]} *)
+(* TODO This code block is highlighted as CSS. Get a better
+   highlight.pack.js. *)
+
+val logger : middleware
+(** Logs incoming requests, times them, and prints timing information when the
+    next handler has returned a response. Time spent logging is included in the
+    timings. *)
 
 
 
