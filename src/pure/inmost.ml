@@ -8,37 +8,10 @@
 include Method
 include Status
 
-module Bigstring = Bigarray.Array1
+module Bigstring = Body.Bigstring
+type bigstring = Body.bigstring
 
-(* TODO LATER It would be best if the web server would write straight into the
-   framework's buffer, rather than first into its own, with copying to the
-   framework following later. However, in the case of both http/af and h2, it
-   appears that this will require at least a custom integration (at the same
-   level as httpaf-lwt-unix), if it is currently possible at all. Fortunately,
-   this will be an implementation detail of the framework, so we can profile and
-   change it later, as an optimization. *)
-type bigstring =
-  (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigstring.t
 
-(* TODO LATER For now, Dream is following a simple model. The http server layer
-   DOES NOT allocate a buffer, but stores a reading function in the request.
-   When the body is actually needed by something in the web app, it is read to
-   completion. *)
-(* TODO LATER This exposes the framework to large request attacks. *)
-
-(* Not every request will need body reading, so don't allocate a buffer for each
-   requesst - only allocate it upon request. *)
-type buffered_body = [
-  | `Empty
-  | `String of string
-  | `Bigstring of bigstring
-]
-
-type body = [
-  | buffered_body
-  | `Bigstring_stream of (bigstring option -> unit) -> unit
-  | `Reading of buffered_body Lwt.t
-]
 
 module Scope_variable_metadata =
 struct
@@ -76,7 +49,7 @@ let new_app () = {
 type 'a message = {
   specific : 'a;
   headers : (string * string) list;
-  body : body ref;
+  body : Body.body_cell;
   locals : Scope.t;
   first : 'a message;
   last : 'a message ref;
@@ -108,9 +81,6 @@ type 'a promise = 'a Lwt.t
 
 type handler = request -> response Lwt.t
 type middleware = handler -> handler
-
-let new_bigstring length =
-  Bigstring.create Bigarray.char Bigarray.c_layout length
 
 let first message =
   message.first
@@ -256,75 +226,13 @@ let cookie name request =
 let add_set_cookie name value response =
   add_header "Set-Cookie" (Printf.sprintf "%s=%s" name value) response
 
-(* TODO LATER Good defaults for path; taking the path from a request; middleware
-   for site-wide cookies during prototyping. Needs prefix middleware in place
-   first. *)
-
-let has_body message =
-  match !(message.body) with
-  | `Empty -> false
-  | `String "" -> false
-  | `String _ -> true
-  | `Bigstring body -> Bigstring.size_in_bytes body > 0
-  | _ -> true
-
-(* TODO LATER This is the preliminary reader implementation described in
-   comments above. It should eventually be replaced by a 0-copy reader, but that
-   will likely require a much more low-level web server integration. *)
-let buffer_body message : buffered_body Lwt.t =
-  match !(message.body) with
-  | #buffered_body as body -> Lwt.return body
-  | `Reading on_finished -> on_finished
-
-  | `Bigstring_stream stream ->
-    let on_finished, finished = Lwt.wait () in
-    message.body := `Reading on_finished;
-
-    let rec read body length =
-      stream begin function
-      | None ->
-        let body =
-          if Bigstring.size_in_bytes body = 0 then
-            `Empty
-          else
-          `Bigstring (Bigstring.sub body 0 length)
-        in
-        message.body := body;
-        Lwt.wakeup_later finished body
-
-      | Some chunk ->
-        let chunk_length = Bigstring.size_in_bytes chunk in
-        let new_length = length + chunk_length in
-        let body =
-          if new_length <= Bigstring.size_in_bytes body then
-            body
-          else
-            let new_body = new_bigstring (new_length * 2) in
-            Bigstring.blit
-              (Bigstring.sub body 0 length) (Bigstring.sub new_body 0 length);
-            new_body
-        in
-        Bigstring.blit chunk (Bigstring.sub body length chunk_length);
-        read body new_length
-      end
-    in
-
-    read (new_bigstring 4096) 0;
-
-    on_finished
-
 let body request =
-  buffer_body request
-  |> Lwt.map begin function
-    | `Empty -> ""
-    | `String body -> body
-    | `Bigstring body -> Lwt_bytes.to_string body
-  end
+  Body.body request.body
 
 (* TODO LATER There need to be buffering and unbuffering version of this. The
    HTTP server needs a version that does not buffer. The app, by default,
    should get buffering. *)
-let buffered_body_stream body =
+(* let buffered_body_stream body =
   let sent = ref false in
 
   fun k ->
@@ -336,15 +244,16 @@ let buffered_body_stream body =
       | `Empty -> k None
       | `String body -> k (Some (Lwt_bytes.of_string body))
       | `Bigstring body -> k (Some body)
-    end
+    end *)
 
 let body_stream request =
-  match !(request.body) with
+  Body.body_stream request.body
+  (* match !(request.body) with
   | #buffered_body as body -> buffered_body_stream body
   | `Bigstring_stream stream -> stream
   | `Reading on_finished ->
     fun k ->
-      Lwt.on_success on_finished (fun body -> buffered_body_stream body k)
+      Lwt.on_success on_finished (fun body -> buffered_body_stream body k) *)
 
 (* Create a fresh ref. The reason this field has a ref is because it might get
    replaced when a body is forced read. That's not what's happening here - we
@@ -354,16 +263,8 @@ let body_stream request =
 let with_body body response =
   update {response with body = ref (`String body)}
 
-(* let version_override response =
-  response.specific.response_version
-
-let reason_override response =
-  response.specific.reason
-
-let reason response =
-  match reason_override response with
-  | Some reason -> reason
-  | None -> status_to_string response.specific.status *)
+let has_body message =
+  Body.has_body message.body
 
 (* TODO Rename. *)
 let is_websocket response =

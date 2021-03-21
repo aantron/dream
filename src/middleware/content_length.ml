@@ -9,6 +9,7 @@ module Dream = Dream__pure.Inmost
 
 
 
+(* TODO This belongs in the core module. *)
 let add_header response buffered_body =
   let length =
     match buffered_body with
@@ -35,8 +36,9 @@ let content_length next_handler request =
       Lwt.return response
 
     else
+      (* TODO This check belongs in the core module. *)
       match !(response.body) with
-      | #Dream.buffered_body as buffered_body ->
+      | #Dream__pure.Body.buffered_body as buffered_body ->
         add_header response buffered_body
       | _ ->
         Lwt.return response
