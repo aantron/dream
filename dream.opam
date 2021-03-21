@@ -12,6 +12,7 @@ depends: [
   "jwto" {>= "0.2.2"}  # Jwto.get_payload. TODO LATER Probably system deps.
   "lwt"
   "logs" {>= "0.5.0"}
+  "magic-mime"
   "mirage-crypto-rng" {>= "0.8.0"}  # Signature of initialize.
   "ocaml" {>= "4.05.0"}  # String.split_on_char, String.index_from_opt.
   "uri"

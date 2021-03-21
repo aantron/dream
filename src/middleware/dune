@@ -11,6 +11,7 @@
   logs
   lwt
   lwt.unix
+  magic-mime
   mirage-crypto-rng
   mirage-crypto-rng.lwt
  )

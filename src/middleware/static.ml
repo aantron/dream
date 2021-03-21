@@ -70,4 +70,17 @@ let static ?(handler = default_handler) local_root = fun request ->
     | None -> Dream.respond ~status:`Not_Found ""
     | Some path ->
 
+      let open Lwt.Infix in
+
       handler local_root path request
+      >|= fun response ->
+
+      (* TODO Can use a concise helper here. *)
+      let response =
+        if Dream.has_header "Content-Type" response then
+          response
+        else
+          Dream.add_header "Content-Type" (Magic_mime.lookup path) response
+      in
+
+      response

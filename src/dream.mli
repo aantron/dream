@@ -781,6 +781,8 @@ val static :
 (* TODO Document.
 
 Dream.get "static/*" (Dream.static "static")
+
+Now with Content-Type guessing.
  *)
 (* TODO Expose default static handlers. At least the FS one. Should probably
    also add a crunch-based handler, because it can send nice etags. *)
