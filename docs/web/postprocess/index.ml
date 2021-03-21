@@ -58,6 +58,20 @@ let respond_replacement = {|
 </pre>
 |}
 
+let body_stream_bigstring_expected = {|<div class="spec value" id="val-body_stream_bigstring">
+ <a href="#val-body_stream_bigstring" class="anchor"></a><code><span><span class="keyword">val</span> body_stream_bigstring : <span><span>(<span><a href="#type-bigstring">bigstring</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span><span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span><span><span class="type-var">_</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
+|}
+
+let body_stream_bigstring_replacement = {|
+<pre><span class="keyword">val</span> body_stream_bigstring :
+  (<a href="#type-bigstring">bigstring</a> -> int -> int -> unit) ->
+  (unit -> unit) ->
+  (_ <a href="#type-message">message</a>) ->
+    unit
+</pre>
+|}
+
 let form_expected = {|<div class="spec type" id="type-form">
  <a href="#type-form" class="anchor"></a><code><span><span class="keyword">type</span> form</span><span> = </span><span>[ </span></code>
  <table>
@@ -429,6 +443,15 @@ let pretty_print_signatures soup =
     (fun () ->
       Soup.replace (respond $ "> code") (Soup.parse respond_replacement);
       Soup.add_class "multiline" respond);
+
+  let body_stream_bigstring = soup $ "#val-body_stream_bigstring" in
+  if_expected
+    body_stream_bigstring_expected
+    (fun () -> pretty_print body_stream_bigstring)
+    (fun () ->
+      Soup.replace
+        (body_stream_bigstring $ "> code")
+        (Soup.parse body_stream_bigstring_replacement));
 
   let form = soup $ "#type-form" in
   if_expected

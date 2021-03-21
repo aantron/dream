@@ -146,8 +146,6 @@ and 'a promise = 'a Lwt.t
 
 (* TODO Framework never emits `Method, `Status when not necessary. *)
 (* TODO So capitalized statuses or OCaml-style? *)
-(* TODO Need equality function for methods and statues that normalizes away
-    numeric representations. *)
 (** The only purpose of this submodule is to generate a subpage, so as to move
     helpers and repetitive defintions of seldom-used codes out of the main
     docs. The module is immediately included in the main API. *)
@@ -580,14 +578,13 @@ type bigstring =
 val body_stream_bigstring :
   (bigstring -> int -> int -> unit) ->
   (unit -> unit) ->
-  _ message ->
+  (_ message) ->
     unit
 (** [Dream.body_stream_bigstring data eof message] retrieves part of the body of
     the given message without copies or allocations per chunk.
     [data buffer offset length] is called if/when data is available. [eof ()] is
     called when the body has been read to completion. The body is not buffered
     internally by Dream, so it can only be read once by this function. *)
-(* TODO This function needs prettying in postprocessing. *)
 (* TODO If partial application will be required to guarantee no allocation,
    document that. *)
 (* TODO Note that concurrent reading of one request is NOT supported. *)
@@ -700,7 +697,7 @@ val pipeline : middleware list -> middleware
       mw_1 @@ mw_2 @@ ... @@ mw_n @@ handler
     ]} *)
 (* TODO This code block is highlighted as CSS. Get a better
-   highlight.pack.js. *)
+   highlight.pack.js. No, will need a tokenizer probably. *)
 
 val logger : middleware
 (** Logs incoming requests, times them, and prints timing information when the
@@ -1373,10 +1370,6 @@ val assign_request_id : middleware
 val chop_site_prefix : string -> middleware
 (* TODO Get the site prefix from the app. *)
 
-(* TODO Expose catch. *)
-(* TODO Move the built-in middlewares to section HTTP and describe them
-   there. *)
-(* TODO Provide a no-built-in value. *)
 (* TODO Note about stability of built-in middleware during alpha. *)
 
 
