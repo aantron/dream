@@ -40,10 +40,9 @@ let decode string =
   |> Dream.from_form_urlencoded
   |> List.iter (fun (name, value) -> Printf.printf "%S = %S\n" name value)
 
-(* TODO Fix this. *)
 let%expect_test _ =
   decode "";
-  [%expect {| "" = "" |}]
+  [%expect {| |}]
 
 let%expect_test _ =
   decode "=";

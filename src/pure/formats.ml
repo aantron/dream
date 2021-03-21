@@ -67,9 +67,12 @@ let to_form_urlencoded dictionary =
   |> Uri.encoded_of_query
 
 let from_form_urlencoded string =
-  string
-  |> Uri.query_of_encoded
-  |> List.map (fun (name, values) -> name, String.concat "," values)
+  if string = "" then
+    []
+  else
+    string
+    |> Uri.query_of_encoded
+    |> List.map (fun (name, values) -> name, String.concat "," values)
 
 
 

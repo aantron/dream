@@ -389,8 +389,8 @@ val method_ : request -> method_
     {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2 ↪}. *)
 
 val target : request -> string
-(** Request target, for example [/something]. This is the full path as sent by
-    the client or proxy. The site root prefix is included. *)
+(** Request target, for example [/something]. This is the full target as sent by
+    the client or proxy. The site root prefix and query string are included. *)
 
 (**/**)
 (* These are used for router state at the moment, and I am not sure if there is
@@ -413,6 +413,15 @@ val with_method_ : method_ -> request -> request
 val with_version : int * int -> request -> request
 (** Creates a new request from the given one, with the protocol version
     replaced. *)
+
+val query : string -> request -> string option
+(** Retrieves the first query parameter with the given name, if present. *)
+
+val queries : string -> request -> string list
+(** Retrieves all query parameters with the given name. *)
+
+val all_queries : request -> (string * string) list
+(** Retrieves the entire query string as a name-value list. *)
 
 val cookie : string -> request -> string option
 (** Cookies are sent by the client in [Cookie:] headers as [name=value] pairs.
@@ -438,7 +447,8 @@ val all_cookies : request -> (string * string) list
 (** {1:common_fields Common fields} *)
 
 val header : string -> _ message -> string option
-(** Retrieves the first header with the given name, if present. *)
+(** Retrieves the first header with the given name, if present. Header names are
+    case-insensitive. *)
 
 val headers : string -> _ message -> string list
 (** Retrieves all headers with the given name. *)

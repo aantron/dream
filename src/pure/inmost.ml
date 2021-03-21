@@ -89,6 +89,7 @@ type incoming = {
   target : string;
   prefix : string list;
   path : string list;
+  query : (string * string) list;
   request_version : int * int;
 }
 (* Prefix is stored backwards. *)
@@ -163,6 +164,22 @@ let with_version version request =
 
 let status response =
   response.specific.status
+
+let all_queries request =
+  request.specific.query
+
+let query name request =
+  List.assoc_opt name request.specific.query
+
+let queries name request =
+  request.specific.query
+  |> List.fold_left (fun accumulator (name', value) ->
+    if name' = name then
+      value::accumulator
+    else
+      accumulator)
+    []
+  |> List.rev
 
 let all_headers message =
   message.headers
@@ -410,7 +427,7 @@ let request_from_http
     ~headers
     ~body =
 
-  let path, _query = Formats.from_target target in
+  let path, query = Formats.from_target target in
 
   let rec request = {
     specific = {
@@ -420,6 +437,7 @@ let request_from_http
       target;
       prefix = [];
       path = Formats.from_target_path path;
+      query = Formats.from_form_urlencoded query;
       request_version = version;
     };
     headers;
