@@ -31,13 +31,7 @@ include Dream__middleware.Static
 
 include Dream__middleware.Session.Exported_defaults
 
-type form_error = [
-  | `Not_form_urlencoded
-  | `CSRF_token_invalid
-]
-
-let form =
-  Dream__middleware.Form.form
+include Dream__middleware.Form
 
 let content_length =
   Dream__middleware.Content_length.content_length

@@ -83,30 +83,43 @@ let field_name = "dream.csrf"
 (* TODO Check expiration. *)
 (* TODO More graceful handling of bad CSRF, like re-sending the form with
    non-sensitive fields filled in as before. *)
-(* TODO Rename m to log in logging. *)
+(* TODO Where should logging be done? Here or in the caller? *)
+
+type verify_result = [
+  | `Ok
+  | `Expired of int64
+  | `Wrong_session
+  | `Invalid_token
+]
 
 (* TODO Be more verbose... *)
 let verify token request =
   let secret = Dream.secret (Dream.app request) in
 
   match Jwto.decode_and_verify secret token with
-  | Error _ -> false
-  | Ok decoded_token ->
+  | Error _ -> `Invalid_token
 
+  | Ok decoded_token ->
     match Jwto.get_payload decoded_token with
     | ["session", token_session_hash; "time", expires_at] ->
 
-      let now = Unix.gettimeofday () |> Int64.of_float in
       begin match Int64.of_string_opt expires_at with
-      | Some expires_at when expires_at > now ->
+      | None -> `Invalid_token
+      | Some expires_at ->
 
         let real_session_hash = hash_session request in
-        token_session_hash = real_session_hash
+        if token_session_hash <> real_session_hash then
+          `Wrong_session token_session_hash
 
-      | _ -> false
+        else
+          let now = Unix.gettimeofday () |> Int64.of_float in
+          if expires_at > now then
+            `Ok
+          else
+            `Expired expires_at
       end
 
-    | _ -> false
+    | _ -> `Invalid_token
 
 
 

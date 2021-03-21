@@ -9,18 +9,23 @@ module Dream = Dream__pure.Inmost
 
 
 
-(* TODO Restore logging. *)
-(* let log =
-  Dream.Log.sub_log "dream.form" *)
+let log =
+  Log.sub_log "dream.form"
 
 let sort form =
   List.stable_sort (fun (key, _) (key', _) -> String.compare key key') form
 
-(* TODO Debug metadata. *)
-(* let key =
-  Dream.new_local () *)
-
 (* TODO Custom CSRF checker or session implementation. *)
+
+type form = [
+  | `Ok            of (string * string) list
+  | `Expired       of (string * string) list * int64
+  | `Wrong_session of (string * string) list * string
+  | `Invalid_token of (string * string) list
+  | `Missing_token of (string * string) list
+  | `Many_tokens   of (string * string) list
+  | `Not_form_urlencoded
+]
 
 let form request =
   let open Lwt.Infix in
@@ -34,18 +39,30 @@ let form request =
     let form = Dream__pure.Formats.from_form_urlencoded body in
     let csrf_token, form =
       List.partition (fun (name, _) -> name = Csrf.field_name) form in
+    let form = sort form in
 
     begin match csrf_token with
     | [_, value] ->
-      if not (Csrf.verify value request) then
-        Lwt.return (Error `CSRF_token_invalid)
-      else
-        Lwt.return (Ok (sort form))
+      begin match Csrf.verify value request with
+      | `Ok -> Lwt.return (`Ok form)
+      | `Expired time -> Lwt.return (`Expired (form, time))
+      | `Wrong_session id -> Lwt.return (`Wrong_session (form, id))
+      | `Invalid_token -> Lwt.return (`Invalid_token form)
+      end
 
-    | _ -> Lwt.return (Error `CSRF_token_invalid)
+    | [] ->
+      log.warning (fun log -> log ~request "CSRF token missing");
+      Lwt.return (`Missing_token form)
+
+    | _::_::_ ->
+      log.warning (fun log -> log ~request "CSRF token duplicated");
+      Lwt.return (`Many_tokens form)
     end
 
-  | _ -> Lwt.return (Error `Not_form_urlencoded)
+  | _ ->
+    log.warning (fun log -> log ~request
+      "Request Content-Type not application/x-www-form-urlencoded");
+    Lwt.return `Not_form_urlencoded
 
 (* TODO Add built-in Content-Type thing. *)
 (* TODO Provide well-known Content-Types as predefined strings. *)

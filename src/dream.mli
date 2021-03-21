@@ -618,20 +618,19 @@ val logger : middleware
     next handler has returned a response. Time spent logging is included in the
     timings. *)
 
-type form_error = [
+type form = [
+  | `Ok            of (string * string) list
+  | `Expired       of (string * string) list * int64
+  | `Wrong_session of (string * string) list * string
+  | `Invalid_token of (string * string) list
+  | `Missing_token of (string * string) list
+  | `Many_tokens   of (string * string) list
   | `Not_form_urlencoded
-  | `CSRF_token_invalid
 ]
-(* TODO Distinguish between expired CSRF tokens and other conditions. *)
 
-val form : request -> ((string * string) list, [> form_error ]) result Lwt.t
+val form : request -> form Lwt.t
 (* TODO Provide optionals for disabling CSRF checking and CSRF token field
    filtering. *)
-(* TODO Factor out common error checking into a middleware, but still forward
-   expired forms to the handler. So will have form_csrf middleware. *)
-(* TODO Actually, can build all the questionable cases into a variant of the
-   right form and just reject them all with the catch-all case that will be
-   required anyway. *)
 (* TODO AJAX CSRF example with X-CSRF-Token, then also with axios in the
    README. *)
 
