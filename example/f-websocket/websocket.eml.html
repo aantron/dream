@@ -17,6 +17,8 @@ let home =
   </body>
   </html>
 
+open Lwt.Syntax
+
 let () =
   Dream.run
   @@ Dream.logger
@@ -28,7 +30,11 @@ let () =
 
     Dream.get "/websocket"
       (fun _ ->
-        Dream.websocket (fun _ -> Lwt.return "Goodbye!"));
+        Dream.websocket @@ fun websocket ->
+          let* () = Dream.send "Hello?" websocket in
+          let* _ = Dream.receive websocket in
+          let* () = Dream.send "Goodbye!" websocket in
+          Dream.close websocket);
 
   ]
   @@ fun _ ->

@@ -53,16 +53,56 @@ let sha1 s =
    implementation... *)
 let websocket_handler user's_websocket_handler socket =
 
-  (* The current message being assembled, if we get a contin *)
-  (* TODO - for now just receiving fragments. *)
-  (* let message = ref [] in *)
+  (* Frames of the current partial message, in reverse order. *)
+  let message_frames = ref [] in
+
+  (* Queue of received messages. There doesn't appear to be a nice way to
+     achieve backpressure with the current API of websocketaf, so that will have
+     to be added later. The user-facing API of Dream does support backpressure.
+     It's just that this code here reads no matter whether there is a
+     higher-level reader. *)
+  let messages, push_message = Lwt_stream.create () in
+
+  let send kind message =
+    let kind = (kind :> [ `Text | `Binary | `Continuation ]) in
+    Websocketaf.Wsd.send_bytes
+      socket
+      ~kind
+      (Bytes.unsafe_of_string message)
+      ~off:0
+      ~len:(String.length message);
+    Lwt.return_unit
+  in
+
+  let receive () =
+    Lwt_stream.get messages in
+
+  let close () =
+    Websocketaf.Wsd.close socket;
+    Lwt.return_unit
+  in
+
+  let websocket = {
+    Dream.send;
+    receive;
+    close;
+  } in
+
+  (* TODO Needs error handling like the top-level app has! *)
+  Lwt.async (fun () ->
+    user's_websocket_handler websocket);
+
+  (* The code isn't very efficient at the moment, doing multiple copies while
+     assembling a message. However, multi-fragment messages should be relatively
+     rare. *)
 
   (* This function is called on each frame received. In this high-level handler.
      we automatically respond to all control opcodes. *)
-  let frame ~opcode ~is_fin:_ buffer ~off ~len =
+  let frame ~opcode ~is_fin buffer ~off ~len =
     match opcode with
     | `Connection_close ->
-      Websocketaf.Wsd.close socket
+      Websocketaf.Wsd.close socket;
+      push_message None;
     | `Ping ->
       Websocketaf.Wsd.send_pong socket
     | `Pong ->
@@ -71,8 +111,24 @@ let websocket_handler user's_websocket_handler socket =
       ()
 
     | `Text
-    | `Binary
+    | `Binary ->
+      let fragment = Lwt_bytes.to_string (Lwt_bytes.proxy buffer off len) in
+      if is_fin then
+        push_message (Some fragment)
+      else
+        message_frames := [fragment]
+
     | `Continuation ->
+      let fragment = Lwt_bytes.to_string (Lwt_bytes.proxy buffer off len) in
+      message_frames := fragment::!message_frames;
+      if is_fin then begin
+        let message = String.concat "" (List.rev !message_frames) in
+        message_frames := [];
+        push_message (Some message)
+      end
+
+
+    (* | `Continuation ->
       let open Lwt.Infix in
       (Lwt_bytes.proxy buffer off len
       |> Lwt_bytes.to_string
@@ -85,13 +141,15 @@ let websocket_handler user's_websocket_handler socket =
         ~off:0
         ~len:(String.length response);
       Lwt.return_unit)
-      |> ignore
+      |> ignore *)
       (* TODO Need to send errors to the error handler, so these two handlers
          will have to be defined together. *)
   in
 
   let eof () =
-    Websocketaf.Wsd.close socket in
+    push_message None;
+    Websocketaf.Wsd.close socket
+  in
 
   Websocketaf.Server_connection.{frame; eof}
 

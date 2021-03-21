@@ -66,11 +66,15 @@ type incoming = {
 }
 (* Prefix is stored backwards. *)
 
+type websocket = {
+  send : [ `Text | `Binary ] -> string -> unit Lwt.t;
+  receive : unit -> string option Lwt.t;
+  close : unit -> unit Lwt.t;
+}
+
 type outgoing = {
-  (* response_version : (int * int) option; *)
   status : status;
-  (* reason : string option; *)
-  websocket : (string -> string Lwt.t) option;
+  websocket : (websocket -> unit Lwt.t) option;
 }
 
 type request = incoming message
@@ -401,11 +405,21 @@ let respond
   |> Lwt.return
 
 let websocket handler =
-  let response = response "" in
+  let response = response ~status:`Switching_Protocols "" in
   let response =
-    {response with specific = {response.specific with websocket = Some handler}}
+    {response with specific =
+      {response.specific with websocket = Some handler}}
   in
   Lwt.return response
+
+let send ?(kind = `Text) message websocket =
+  websocket.send kind message
+
+let receive websocket =
+  websocket.receive ()
+
+let close websocket =
+  websocket.close ()
 
 let identity handler request =
   handler request

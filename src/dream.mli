@@ -848,11 +848,42 @@ val session_expires_at : request -> int64
 
 
 
+(* TODO Open an issue about frames. *)
 (** {1 WebSockets} *)
 
-(* TODO This signature really needs to be reworked, but it's good enough for a
-   proof of concept, and changes should be easy later. *)
-val websocket : (string -> string Lwt.t) -> response Lwt.t
+type websocket
+(** A WebSocket connection. *)
+
+(* TODO Systematically replace Lwt.t by promise. *)
+val websocket : (websocket -> unit Lwt.t) -> response Lwt.t
+(** Creates a fresh [101 Switching Protocols] response for upgrading to a
+    WebSocket connection. Once this response is returned from the application to
+    Dream's HTTP layer, the HTTP layer will create the actual WebSocket, and
+    call the callback, and your application can begin communicating on the
+    WebSocket:
+
+    {[
+      let my_handler = fun request ->
+        Dream.websocket (fun websocket ->
+          let* () = Dream.send "Hello, world!" websocket in
+          Dream.close websocket);
+    ]} *)
+
+(* TODO What's the exact effect of `Binary? JS receives a Blob? *)
+val send : ?kind:[ `Text | `Binary ] -> string -> websocket -> unit Lwt.t
+(** [Dream.send string websocket] sends a string on a WebSocket as a single
+    message. The returned promise can be used for flow control — wait on it to
+    make sure server-side buffers aren't filling up. [~kind] is [`Text] by
+    default. It can be changed to [~kind:`Binary] to indicate that the data is
+    binary. *)
+
+val receive : websocket -> string option Lwt.t
+(** Retrieves the next message on the given WebSocket. If the WebSocket is
+    closed before a complete message arrives, the promise is fulfilled with
+    [None]. *)
+
+val close : websocket -> unit Lwt.t
+(** Closes the given WebSocket. *)
 
 
 
@@ -1338,6 +1369,7 @@ val chop_site_prefix : string -> middleware
 (* TODO Document middleware as built-in. Link to customizzation of built-in
    middleware. *)
 val content_length : middleware
+(* TODO Transfer-encoding chunked. *)
 
 (* TODO Expose catch. *)
 (* TODO Move the built-in middlewares to section HTTP and describe them
@@ -1400,7 +1432,7 @@ val drop_empty_trailing_path_component : string list -> string list
 (** {1 Randomness} *)
 
 val random : int -> string
-(** Returns the given number of random bytes. This function uses a
+(** Generates the given number of bytes using a
     {{:https://github.com/mirage/mirage-crypto} cryptographically secure random
     number generator ↪}. *)
 

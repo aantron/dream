@@ -22,7 +22,8 @@ h1, h2 {
 
 footer {
   margin-top: 120px;
-  opacity: 0.5;
+  opacity: 0.25;
+  text-align: center;
 }
 
 body > * {
@@ -86,7 +87,7 @@ p + p {
   margin-top: 24px;
 }
 
-#pp-preamble > ol > li {
+.odoc-content > ol > li {
   margin-top: 60px;
   margin-bottom: 72px;
 }
