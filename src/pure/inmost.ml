@@ -218,6 +218,8 @@ let with_header name value message =
 (* TODO DOC Using only raw cookies. *)
 (* TODO However, is it best to URL-encode cookies by default, and provide a
    variable for opting out? *)
+(* TODO DOC We allow multiple headers sent by the client, to support HTTP/2.
+   What is this about? *)
 let all_cookies request =
   request
   |> headers "Cookie"

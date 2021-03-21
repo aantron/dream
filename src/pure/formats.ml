@@ -5,19 +5,13 @@
 
 
 
-(* TODO DOC Recommend direct use of Base64 library for more options. *)
-let to_base64url text =
-  Base64.encode_string ~pad:false ~alphabet:Base64.uri_safe_alphabet text
+let to_base64url string =
+  Base64.encode_string ~pad:false ~alphabet:Base64.uri_safe_alphabet string
 
-let from_base64url text =
-  match Base64.decode ~pad:false ~alphabet:Base64.uri_safe_alphabet text with
+let from_base64url string =
+  match Base64.decode ~pad:false ~alphabet:Base64.uri_safe_alphabet string with
   | Error (`Msg string) -> Error string
   | Ok _ as ok -> ok
-
-(* TODO https://www.ietf.org/rfc/rfc4648.txt *)
-
-(* TODO Not quite a middleware. *)
-(* TODO DOC We allow multiple headers sent by the client, to support HTTP/2. *)
 
 (* TODO DOC
    cookie-header = "Cookie:" OWS cookie-string OWS
@@ -63,19 +57,15 @@ let from_cookie_encoded s =
     | [name; value] -> (String.trim name, String.trim value)::pairs
     | _ -> pairs) []
 
-(* TODO Move cookie decoding to here. *)
+let to_form_urlencoded dictionary =
+  dictionary
+  |> List.map (fun (name, value) -> name, [value])
+  |> Uri.encoded_of_query
 
-(* TODO Name? *)
-(* TODO Not efficient or fully correct (I think). *)
-(* TODO Urldecode each thing. *)
-(* TODO Name is a bit confusing. *)
-let from_form_urlencoded text =
-  text
-  |> String.split_on_char '&'
-  |> List.map (String.split_on_char '=')
-  |> List.fold_left (fun pairs -> function
-    | [name; value] -> (Uri.pct_decode name, Uri.pct_decode value)::pairs
-    | _ -> pairs) []
+let from_form_urlencoded string =
+  string
+  |> Uri.query_of_encoded
+  |> List.map (fun (name, values) -> name, String.concat "," values)
 
 (* Split a target into a path component list and a query string; percent-decode
    path components along the way. The query string is not touched. It is parsed

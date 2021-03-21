@@ -728,9 +728,9 @@ val log : ('a, Format.formatter, unit, unit) format4 -> 'a
     Disregard the obfuscated type: the first argument, [format], is a format
     string as described in the standard library modules
     {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Printf.html#VALfprintf}
-    [Printf↪]} and
+    [Printf ↪]} and
     {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html#VALfprintf}
-    [Format↪]}, and the rest of the arguments are determined by the format
+    [Format ↪]}, and the rest of the arguments are determined by the format
     string. For example:
 
     {[
@@ -819,13 +819,13 @@ val initialize_log :
 
     [~backtraces:true], the default, causes Dream to call
     {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Printexc.html#VALrecord_backtrace}
-    [Printexc.record_backtrace↪]}, which makes exception backtraces available
+    [Printexc.record_backtrace ↪]}, which makes exception backtraces available
     when logging exceptions.
 
     [~async_exception_hook:true], the default, causes Dream to set
     {{:https://ocsigen.org/lwt/latest/api/Lwt#VALasync_exception_hook}
-    [Lwt.async_exception_hook↪]} so as to forward all asynchronous exceptions to
-    the logger, and not terminate the process.
+    [Lwt.async_exception_hook ↪]} so as to forward all asynchronous exceptions
+    to the logger, and not terminate the process.
 
     [~level] sets the log level threshould for the entire binary. The default is
     [`Info].
@@ -1219,12 +1219,21 @@ val to_base64url : string -> string
     {{:https://tools.ietf.org/html/rfc4648#section-5} RFC 4648 §5 ↪}, using a
     web-safe alphabet and no padding. The resulting string can be used without
     escaping in URLs, form data, cookies, HTML content, attributes, and
-    JavaScript code. *)
+    JavaScript code. For more options, see the
+    {{:https://mirage.github.io/ocaml-base64/base64/Base64/index.html} Base64 ↪}
+    library.*)
 
 val from_base64url : string -> (string, string) result
 (** Inverse of {!Dream.to_base64url}. *)
 
-(* TODO s/Stdlib.result/result/g *)
+val to_form_urlencoded : (string * string) list -> string
+(** Inverse of {!Dream.from_form_urlencoded}. *)
+
+val from_form_urlencoded : string -> (string * string) list
+(** Converts form data or a query string from
+    [application/x-www-form-urlencoded] format to a list of name-value pairs.
+    See {{:https://tools.ietf.org/html/rfc1866#section-8.2.1} RFC 1866 §4.2.1
+    ↪}. *)
 
 
 
@@ -1255,7 +1264,7 @@ val test : ?prefix:string -> handler -> (request -> response)
 (** [Dream.test handler] runs a handler the same way the HTTP server
     ({!Dream.run}) would — assigning it a request id and noting the site root
     prefix, which is used by routers. [Dream.test] calls
-    {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun} [Lwt_main.run↪]}
+    {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun} [Lwt_main.run ↪]}
     internally to await the response, which is why the response returned from
     the test is not wrapped in a promise. If you don't need these facilities,
     you can test [handler] by calling it directly with a request. *)
