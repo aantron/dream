@@ -12,10 +12,14 @@ type stream =
   (unit -> unit) ->
     unit
 
+type string_stream =
+  unit -> string option Lwt.t
+
 type body = [
   | `Empty
   | `String of string
   | `Stream of stream
+  | `String_stream of string_stream
 ]
 
 type body_cell =
@@ -66,13 +70,37 @@ let buffer_body body_cell =
 
     on_finished
 
+  | `String_stream stream ->
+    let open Lwt.Infix in
+
+    let buffer = Buffer.create 4096 in
+
+    let rec read () =
+      stream ()
+      >>= function
+        | None ->
+          if Buffer.length buffer = 0 then
+            body_cell := `Empty
+          else
+            body_cell := `String (Buffer.contents buffer);
+
+          Lwt.return_unit
+
+        | Some string ->
+          Buffer.add_string buffer string;
+          read ()
+    in
+
+    read ()
+
 let body body_cell =
   buffer_body body_cell
   |> Lwt.map (fun () ->
     match !body_cell with
     | `Empty -> ""
     | `String body -> body
-    | `Stream _ -> assert false)
+    | `Stream _
+    | `String_stream _ -> assert false)
 
 let body_stream body_cell =
   match !body_cell with
@@ -96,6 +124,10 @@ let body_stream body_cell =
 
     promise
 
+  (* TODO Should we bother with `Empty handling here? *)
+  | `String_stream stream ->
+    stream ()
+
 let body_stream_bigstring data eof body_cell =
   match !body_cell with
   | `Empty ->
@@ -114,3 +146,17 @@ let body_stream_bigstring data eof body_cell =
       (fun () ->
         body_cell := `Empty;
         eof ())
+
+  (* Optimizing this case is not as important, because `String_streams arise
+     primarily in responses, but fast reads happen primarily on requests.
+     However, this also depends on the HTTP layer using the right kind of read
+     for the right kind of stream. *)
+  | `String_stream stream ->
+    Lwt.on_any (stream ())
+      (function
+      | None ->
+        body_cell := `Empty;
+        eof ()
+      | Some string ->
+        data (Lwt_bytes.of_string string) 0 (String.length string))
+      raise

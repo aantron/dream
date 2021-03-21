@@ -8,7 +8,6 @@
 include Method
 include Status
 
-(* module Bigstring = Body.Bigstring *)
 type bigstring = Body.bigstring
 
 
@@ -240,8 +239,11 @@ let body_stream_bigstring data eof message =
    are setting a new body. Indeed, there might be a concurrent read going on.
    That read should not override the new body. So let it mutate the old
    request's ref; we generate a new request with a new body ref. *)
-let with_body body response =
-  update {response with body = ref (`String body)}
+let with_body body message =
+  update {message with body = ref (`String body)}
+
+let with_body_stream stream message =
+  update {message with body = ref (`String_stream stream)}
 
 let has_body message =
   Body.has_body message.body

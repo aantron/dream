@@ -487,12 +487,24 @@ val body : _ message -> string Lwt.t
 val body_stream : _ message -> string option Lwt.t
 (** Retrieves part of the body of the given message. The promise is fulfilled
     with [None] if the body has been read to completion. This interface
-    allocates a string, a promise, and an option, and copies data. It is useful
-    when an application is network-bound. The body is not buffered internally by
-    Dream, so it can only be read once by this function. *)
+    allocates a string, a promise, and an option, and copies data. The body is
+    not buffered internally by Dream, so it can only be read once by this
+    function. *)
 
 val with_body : string -> 'a message -> 'a message
 (** Creates a new message by replacing the body with the given string. *)
+
+val with_body_stream : (unit -> string option Lwt.t) -> 'a message -> 'a message
+(** [Dream.with_body_stream f message] creates a new message, with a stream
+    body represented by the function [f]. If the message is a response, after
+    the response has been returned from the web application to the HTTP layer,
+    whenever the HTTP layer is ready to write data, it will call [f ()].
+    If [f ()] resolves with [Some data], [data] will be written as part of the
+    body. If [f] resolves with [None], the response is finished. Exceptions
+    raised by [f] are passed to the application's {{!error_page} error handler}
+    for logging. Graceful recovery in the sense of sending a neat error response
+    is generally not possible, because a partial response has already been
+    transmitted. *)
 
 val has_body : _ message -> bool
 (** Evalutes to [true] if the given message either has a body that has been
@@ -526,6 +538,7 @@ val body_stream_bigstring :
 (* TODO If partial application will be required to guarantee no allocation,
    document that. *)
 (* TODO Note that concurrent reading of one request is NOT supported. *)
+(* TODO "Raw" write streams require more experience to design. *)
 
 
 
