@@ -44,10 +44,20 @@ let form request =
     begin match csrf_token with
     | [_, value] ->
       begin match Csrf.verify value request with
-      | `Ok -> Lwt.return (`Ok form)
-      | `Expired time -> Lwt.return (`Expired (form, time))
-      | `Wrong_session id -> Lwt.return (`Wrong_session (form, id))
-      | `Invalid_token -> Lwt.return (`Invalid_token form)
+      | `Ok ->
+        Lwt.return (`Ok form)
+
+      | `Expired time ->
+        log.warning (fun log -> log ~request "CSRF token expired");
+        Lwt.return (`Expired (form, time))
+
+      | `Wrong_session id ->
+        log.warning (fun log -> log ~request "CSRF token not for this session");
+        Lwt.return (`Wrong_session (form, id))
+
+      | `Invalid_token ->
+        log.warning (fun log -> log ~request "CSRF token invalid");
+        Lwt.return (`Invalid_token form)
       end
 
     | [] ->

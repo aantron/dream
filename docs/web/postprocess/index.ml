@@ -58,6 +58,63 @@ let respond_replacement = {|
 </pre>
 |}
 
+let form_expected = {|<div class="spec type" id="type-form">
+ <a href="#type-form" class="anchor"></a><code><span><span class="keyword">type</span> form</span><span> = </span><span>[ </span></code>
+ <table>
+  <tbody>
+   <tr id="type-form.Ok" class="anchored">
+    <td class="def constructor">
+     <a href="#type-form.Ok" class="anchor"></a><code><span>| </span></code><code><span>`Ok <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
+    </td>
+   </tr>
+   <tr id="type-form.Expired" class="anchored">
+    <td class="def constructor">
+     <a href="#type-form.Expired" class="anchor"></a><code><span>| </span></code><code><span>`Expired <span class="keyword">of</span> <span><span>(string * string)</span> list</span> * int64</span></code>
+    </td>
+   </tr>
+   <tr id="type-form.Wrong_session" class="anchored">
+    <td class="def constructor">
+     <a href="#type-form.Wrong_session" class="anchor"></a><code><span>| </span></code><code><span>`Wrong_session <span class="keyword">of</span> <span><span>(string * string)</span> list</span> * string</span></code>
+    </td>
+   </tr>
+   <tr id="type-form.Invalid_token" class="anchored">
+    <td class="def constructor">
+     <a href="#type-form.Invalid_token" class="anchor"></a><code><span>| </span></code><code><span>`Invalid_token <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
+    </td>
+   </tr>
+   <tr id="type-form.Missing_token" class="anchored">
+    <td class="def constructor">
+     <a href="#type-form.Missing_token" class="anchor"></a><code><span>| </span></code><code><span>`Missing_token <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
+    </td>
+   </tr>
+   <tr id="type-form.Many_tokens" class="anchored">
+    <td class="def constructor">
+     <a href="#type-form.Many_tokens" class="anchor"></a><code><span>| </span></code><code><span>`Many_tokens <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
+    </td>
+   </tr>
+   <tr id="type-form.Not_form_urlencoded" class="anchored">
+    <td class="def constructor">
+     <a href="#type-form.Not_form_urlencoded" class="anchor"></a><code><span>| </span></code><code><span>`Not_form_urlencoded</span></code>
+    </td>
+   </tr>
+  </tbody>
+ </table>
+ <code><span> ]</span></code>
+</div>
+|}
+
+let form_replacement = {|
+<pre class="compact"><span class="keyword">type</span> form = [
+  | `Ok            <span class="keyword">of</span> (string * string) list
+  | `Expired       <span class="keyword">of</span> (string * string) list * int64
+  | `Wrong_session <span class="keyword">of</span> (string * string) list * string
+  | `Invalid_token <span class="keyword">of</span> (string * string) list
+  | `Missing_token <span class="keyword">of</span> (string * string) list
+  | `Many_tokens   <span class="keyword">of</span> (string * string) list
+  | `Not_form_urlencoded
+]
+|}
+
 let conditional_log_expected = {|<div class="spec type" id="type-conditional_log">
  <a href="#type-conditional_log" class="anchor"></a><code><span><span class="keyword">type</span> <span>('a, 'b) conditional_log</span></span><span> = <span><span>(<span><span>(<span>?request:<a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span><span>(<span class="type-var">'a</span>,&nbsp;<span class="xref-unresolved">Stdlib</span>.Format.formatter,&nbsp;unit,&nbsp;<span class="type-var">'b</span>)</span> <span class="xref-unresolved">Stdlib</span>.format4</span> <span class="arrow">-&gt;</span></span> <span class="type-var">'a</span>)</span> <span class="arrow">-&gt;</span></span> <span class="type-var">'b</span>)</span> <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
@@ -333,6 +390,15 @@ let pretty_print_signatures soup =
     (fun () ->
       Soup.replace (respond $ "> code") (Soup.parse respond_replacement);
       Soup.add_class "multiline" respond);
+
+  let form = soup $ "#type-form" in
+  if_expected
+    form_expected
+    (fun () -> pretty_print form)
+    (fun () ->
+      form $$ "> code" |> Soup.iter Soup.delete;
+      Soup.replace (form $ "> table") (Soup.parse form_replacement);
+      Soup.add_class "multiline" form);
 
   let conditional_log = soup $ "#type-conditional_log" in
   if_expected

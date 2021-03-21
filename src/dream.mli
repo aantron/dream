@@ -627,8 +627,49 @@ type form = [
   | `Many_tokens   of (string * string) list
   | `Not_form_urlencoded
 ]
+(** Form validation results and errors, in order from least to most severe. See
+    {!Dream.val-form} for convenient usage examples. The first three
+    constructors, [`Ok], [`Expired], and [`Wrong_session] can occur in regular
+    usage. The remaining constructors, [`Invalid_token], [`Missing_token],
+    [`Many_tokens], [`Not_form_urlencoded] correspond to bugs or suspicious
+    activity. *)
 
+(* TODO Link to the tag helper for dream.csrf and backup instructions for
+   generating it. *)
 val form : request -> form Lwt.t
+(** Parses the request body as a form. The [Content-Type] must be
+    [application/x-www-form-urlencoded]. Checks that the form contains a CSRF
+    token field [dream.csrf], and checks it for validity. The form fields are
+    returned in sorted order, suitable for pattern matching:
+
+    {[
+      Dream.form request >>= function
+      | `Ok ["email", email; "name", name] -> (* ... *)
+      | _ ->
+        Dream.respond ~status:`Bad_Request ""
+    ]}
+
+    If you want to recover from conditions like expired forms, add extra cases:
+
+    {[
+      Dream.form request >>= function
+      | `Ok      ["email", email; "name", name] -> (* ... *)
+      | `Expired ["email", email; "name", name] -> (* ... *)
+      | _ ->
+        Dream.respond ~status:`Bad_Request ""
+    ]}
+
+    It is recommended not to mutate state or send back sensitive data in the
+    [`Expired] and [`Wrong_session] cases. The cases may indicate ordinary form
+    and session timeout, but they may also indicate attacks against the client's
+    session.
+
+    The remaining cases, including unexpected field sets and the remaining
+    constructors of {!Dream.type-form}, usually indicate either bugs or
+    attacks, and it's usually fine to respond to all of them with [400 Bad
+    Request].
+
+    [Dream.form] writes warnings to the log for any result other than [`Ok]. *)
 (* TODO Provide optionals for disabling CSRF checking and CSRF token field
    filtering. *)
 (* TODO AJAX CSRF example with X-CSRF-Token, then also with axios in the
