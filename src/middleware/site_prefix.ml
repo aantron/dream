@@ -24,13 +24,11 @@ let rec match_site_prefix prefix path =
 
 
 (* TODO The path and prefix representations and accessors need a cleanup. *)
-(* TODO May want to factor out the URL parsing later. *)
 let chop_site_prefix prefix =
   let prefix =
     prefix
-    |> Dream__pure.Formats.parse_target
-    |> fst
-    |> Dream__pure.Formats.trim_empty_trailing_component
+    |> Dream__pure.Formats.from_target_path
+    |> Dream__pure.Formats.drop_empty_trailing_path_component
   in
 
   let prefix_reversed = List.rev prefix in

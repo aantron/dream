@@ -1235,6 +1235,31 @@ val from_form_urlencoded : string -> (string * string) list
     See {{:https://tools.ietf.org/html/rfc1866#section-8.2.1} RFC 1866 §4.2.1
     ↪}. *)
 
+val from_target : string -> string * string
+(** Splits a request target into a path and a query string. *)
+
+val from_target_path : string -> string list
+(** Splits the into components string on [/] and percent-decodes each component.
+    Empty components are dropped, except for the last. This function does not
+    distinguish between absolute and relative paths, and is only meant for
+    routes and request targets. So,
+
+    - [Dream.from_path ""] becomes [[]].
+    - [Dream.from_path "/"] becomes [[""]].
+    - [Dream.from_path "abc"] becomes [["abc"]].
+    - [Dream.from_path "abc/"] becomes [["abc"; ""]].
+    - [Dream.from_path "/abc"] becomes [["abc"]].
+    - [Dream.from_path "a%2Fb"] becomes [["a/b"]].
+    - [Dream.from_path "a//b"] becomes [["a"; "b"]].
+
+    This function is not for use on targets, because it does not treat [?]
+    specially. See {!Dream.from_target} if the argument string is actually a
+    target, and may include a query string. *)
+
+val drop_empty_trailing_path_component : string list -> string list
+(** Drops a last [""] if it is in the argument list. This changes the
+    representation of path [abc/] to the representation of [abc]. *)
+
 
 
 (** {1 Randomness} *)

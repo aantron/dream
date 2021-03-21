@@ -13,6 +13,8 @@ let from_base64url string =
   | Error (`Msg string) -> Error string
   | Ok _ as ok -> ok
 
+
+
 (* TODO DOC
    cookie-header = "Cookie:" OWS cookie-string OWS
    cookie-string = cookie-pair *( ";" SP cookie-pair )
@@ -57,6 +59,8 @@ let from_cookie_encoded s =
     | [name; value] -> (String.trim name, String.trim value)::pairs
     | _ -> pairs) []
 
+
+
 let to_form_urlencoded dictionary =
   dictionary
   |> List.map (fun (name, value) -> name, [value])
@@ -67,27 +71,19 @@ let from_form_urlencoded string =
   |> Uri.query_of_encoded
   |> List.map (fun (name, values) -> name, String.concat "," values)
 
-(* Split a target into a path component list and a query string; percent-decode
-   path components along the way. The query string is not touched. It is parsed
-   lazily by a separate parser. Empty paths ("") become empty component lists.
-   The root ("/") becomes [""]. Trailing slashes result in "" as the last
-   component of the list.
 
-   This parser creates a considerable amount of intermediate values, all of
-   which can be eliminated by optimization if the need arises. *)
-let parse_target target =
-  let path, query =
-    match String.index target '?' with
-    | exception Not_found -> target, ""
-    | question_index ->
-      String.sub target
-        0 question_index,
-      String.sub target
-        (question_index + 1) (String.length target - question_index - 1)
+
+let from_target string =
+  let uri = Uri.of_string string in
+  let query =
+    match Uri.verbatim_query uri with
+    | Some query -> query
+    | None -> ""
   in
+  Uri.path uri, query
 
-  (* Get rid of all empty components except for the last. Not tail-recursive -
-     does it need to be? *)
+let from_target_path =
+  (* Not tail-recursive. *)
   let rec filter_components = function
     | [] -> []
     | [""] as components -> components
@@ -95,24 +91,27 @@ let parse_target target =
     | component::components -> component::(filter_components components)
   in
 
-  let components =
-    if path = "" then
-      []
-    else
-      String.split_on_char '/' path
-      |> filter_components
-      |> List.map Uri.pct_decode
-  in
+  fun string ->
+    let components =
+      if string = "" then
+        []
+      else
+        String.split_on_char '/' string
+        |> filter_components
+        |> List.map Uri.pct_decode
+    in
 
-  components, query
+    components
 
 (* Not tail-recursive. Only called on the site prefix and route fragments during
    app setup. *)
-let rec trim_empty_trailing_component = function
+let rec drop_empty_trailing_path_component = function
   | [] -> []
   | [""] -> []
   | component::components ->
-    component::(trim_empty_trailing_component components)
+    component::(drop_empty_trailing_path_component components)
 
+(* TODO Currently used mainly for debugging; needs to be replaced by an escaping
+   function. *)
 let make_path path =
   "/" ^ (String.concat "/" path)

@@ -410,6 +410,8 @@ let request_from_http
     ~headers
     ~body =
 
+  let path, _query = Formats.from_target target in
+
   let rec request = {
     specific = {
       app;
@@ -417,7 +419,7 @@ let request_from_http
       method_;
       target;
       prefix = [];
-      path = fst (Formats.parse_target target);
+      path = Formats.from_target_path path;
       request_version = version;
     };
     headers;

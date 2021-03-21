@@ -55,6 +55,10 @@ clean : clean-coverage
 	dune clean --root .
 	make --no-print-directory -C docs/web clean
 
+.PHONY : utop
+utop :
+	dune utop -p $(PACKAGES)
+
 .PHONY : todo
 todo :
 	@git grep -n TODO | grep -v fw | grep -v DOC | grep -v LATER | grep -v SELF || true # SELF
