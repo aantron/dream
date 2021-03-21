@@ -511,10 +511,10 @@ let ocaml_tls = {
 
 let built_in_middleware error_handler prefix =
   Dream.pipeline [
+    Dream__middleware.Content_length.content_length;
     Dream__middleware.Catch.catch (Error_handler.app error_handler);
     Dream__middleware.Request_id.assign_request_id;
     Dream__middleware.Site_prefix.chop_site_prefix prefix;
-    Dream__middleware.Content_length.content_length;
   ]
 
 

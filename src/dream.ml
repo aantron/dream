@@ -41,10 +41,7 @@ include Dream__middleware.Error
 include Dream__http.Http
 
 include Dream__middleware.Catch
-
-let assign_request_id =
-  Dream__middleware.Request_id.assign_request_id
-
+include Dream__middleware.Request_id
 include Dream__middleware.Site_prefix
 
 let error_template =
@@ -57,9 +54,9 @@ include Dream__pure.Formats
 
 let test ?(prefix = "") handler request =
   let app =
-    assign_request_id
+    content_length
+    @@ assign_request_id
     @@ chop_site_prefix prefix
-    @@ content_length
     @@ handler
   in
 

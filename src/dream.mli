@@ -1358,6 +1358,11 @@ val serve :
 
     All arguments have the same meanings as they have in {!Dream.run}. *)
 
+(* TODO Document middleware as built-in. Link to customizzation of built-in
+   middleware. *)
+val content_length : middleware
+(* TODO Transfer-encoding chunked. *)
+
 val catch : (error -> response Lwt.t) -> middleware
 (* TODO Move the error handler into the app. *)
 
@@ -1365,11 +1370,6 @@ val assign_request_id : middleware
 
 val chop_site_prefix : string -> middleware
 (* TODO Get the site prefix from the app. *)
-
-(* TODO Document middleware as built-in. Link to customizzation of built-in
-   middleware. *)
-val content_length : middleware
-(* TODO Transfer-encoding chunked. *)
 
 (* TODO Expose catch. *)
 (* TODO Move the built-in middlewares to section HTTP and describe them

@@ -424,12 +424,11 @@ let close websocket =
 let identity handler request =
   handler request
 
-let rec pipeline middlewares =
-  let middlewares = List.rev middlewares in
-  fun handler ->
-    match middlewares with
-    | [] -> handler
-    | middleware::more -> pipeline more (middleware handler)
+let rec pipeline middlewares handler =
+  match middlewares with
+  | [] -> handler
+  | middleware::more -> middleware (pipeline more handler)
+(* TODO Test pipelien after the List.rev fiasco. *)
 
 let sort_headers headers =
   List.stable_sort (fun (name, _) (name', _) -> compare name name') headers
