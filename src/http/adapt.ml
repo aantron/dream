@@ -20,36 +20,40 @@ let forward_body
     (response : Dream.response)
     (body : [ `write ] Httpaf.Body.t) =
 
-  let body_stream =
-    Dream.body_stream response in
+  let open Lwt.Infix in
 
+  (* TODO Use the most appropriate reader. *)
   (* TODO LATER Will also need to monitor buffer accumulation and use flush. *)
   let rec send_body () =
-    body_stream begin function
-    | None -> Httpaf.Body.close_writer body
-    | Some chunk ->
-      Httpaf.Body.write_bigstring body chunk;
+    Dream.body_stream response
+    >>= function
+    | None ->
+      Httpaf.Body.close_writer body;
+      Lwt.return_unit
+    | Some data ->
+      Httpaf.Body.write_string body data;
       send_body ()
-    end
   in
 
-  send_body ()
+  (* TODO Proper handling of the promise. *)
+  ignore (send_body ())
 
 let forward_body_h2
     (response : Dream.response)
     (body : [ `write ] H2.Body.t) =
 
-  let body_stream =
-    Dream.body_stream response in
+  let open Lwt.Infix in
 
   (* TODO LATER Will also need to monitor buffer accumulation and use flush. *)
   let rec send_body () =
-    body_stream begin function
-    | None -> H2.Body.close_writer body
-    | Some chunk ->
-      H2.Body.write_bigstring body chunk;
+    Dream.body_stream response
+    >>= function
+    | None ->
+      H2.Body.close_writer body;
+      Lwt.return_unit
+    | Some data ->
+      H2.Body.write_string body data;
       send_body ()
-    end
   in
 
-  send_body ()
+  ignore (send_body ())

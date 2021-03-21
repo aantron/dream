@@ -134,11 +134,18 @@ let wrap_handler
 
     let body =
       Httpaf.Reqd.request_body conn in
-    let body k =
-      Httpaf.Body.schedule_read body
+    let body =
+      fun data eof ->
+        Httpaf.Body.schedule_read
+          body
+          ~on_eof:eof
+          ~on_read:(fun buffer ~off ~len -> data buffer off len)
+          (* TODO Doesn't this allocate? *)
+    in
+      (* Httpaf.Body.schedule_read body
         ~on_eof:(fun () -> k None)
         ~on_read:(fun buffer ~off ~len ->
-          k (Some (Bigarray_compat.Array1.sub buffer off len))) in
+          k (Some (Bigarray_compat.Array1.sub buffer off len))) in *)
 
     let request : Dream.request =
       Dream.request_from_http
@@ -262,11 +269,18 @@ let wrap_handler_h2
 
     let body =
       H2.Reqd.request_body conn in
-    let body k =
-      H2.Body.schedule_read body
+    let body =
+      fun data eof ->
+        H2.Body.schedule_read
+          body
+          ~on_eof:eof
+          ~on_read:(fun buffer ~off ~len -> data buffer off len)
+    in
+
+      (* H2.Body.schedule_read body
         ~on_eof:(fun () -> k None)
         ~on_read:(fun buffer ~off ~len ->
-          k (Some (Bigarray_compat.Array1.sub buffer off len))) in
+          k (Some (Bigarray_compat.Array1.sub buffer off len))) in *)
 
     let request : Dream.request =
       Dream.request_from_http

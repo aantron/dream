@@ -6,8 +6,7 @@
 
 ## Roadmap
 
-- [ ] Optimizations: router, logger, microparsers (form data, etc.), body stream
-  copies.
+- [ ] Optimizations: router, logger, microparsers (form data, etc.).
 
 ## Name
 

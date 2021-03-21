@@ -474,9 +474,25 @@ val with_header : string -> string -> 'a message -> 'a message
     {!Dream.add_header}. Creates a new message by replacing all headers with the
     given name by one header with that name and the given value. *)
 
+
+
+(** {1 Bodies} *)
+
 val body : _ message -> string Lwt.t
-(** Retrieves the body of the given message (request or response), streaming it
-    to completion first, if necessary. *)
+(** Retrieves the whole body of the given message (request or response),
+    streaming it to completion first, if necessary. When using this function,
+    Dream retains a reference to the body, and it can be accessed multiple
+    times. *)
+
+val body_stream : _ message -> string option Lwt.t
+(** Retrieves part of the body of the given message. The promise is fulfilled
+    with [None] if the body has been read to completion. This interface
+    allocates a string, a promise, and an option, and copies data. It is useful
+    when an application is network-bound. The body is not buffered internally by
+    Dream, so it can only be read once by this function. *)
+
+val with_body : string -> 'a message -> 'a message
+(** Creates a new message by replacing the body with the given string. *)
 
 val has_body : _ message -> bool
 (** Evalutes to [true] if the given message either has a body that has been
@@ -484,8 +500,32 @@ val has_body : _ message -> bool
     This function does not stream the body — it could return [true], and later
     streaming could reveal that the body has length zero. *)
 
-val with_body : string -> 'a message -> 'a message
-(** Creates a new message by replacing the body with the given string. *)
+type bigstring =
+  (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
+(** Byte arrays in the C heap. See
+    {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Bigarray.Array1.html}
+    [Bigarray.Array1 ↪]}. This type is also found in other libraries, so their
+    functions can be used with [Dream.bigstring]:
+
+    - {{:https://github.com/inhabitedtype/bigstringaf/blob/353cb283aef4c261597f68154eb27a138e7ef112/lib/bigstringaf.mli}
+      [Bigstringaf.t ↪]} in bigstringaf, a transitive dependency of Dream.
+    - {{:https://ocsigen.org/lwt/latest/api/Lwt_bytes} [Lwt_bytes.t ↪]} in Lwt,
+      also a dependency of Dream. *)
+
+val body_stream_bigstring :
+  (bigstring -> int -> int -> unit) ->
+  (unit -> unit) ->
+  _ message ->
+    unit
+(** [Dream.body_stream_bigstring data eof message] retrieves part of the body of
+    the given message without copies or allocations per chunk.
+    [data buffer offset length] is called if/when data is available. [eof ()] is
+    called when the body has been read to completion. The body is not buffered
+    internally by Dream, so it can only be read once by this function. *)
+(* TODO This function needs prettying in postprocessing. *)
+(* TODO If partial application will be required to guarantee no allocation,
+   document that. *)
+(* TODO Note that concurrent reading of one request is NOT supported. *)
 
 
 

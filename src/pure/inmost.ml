@@ -8,7 +8,7 @@
 include Method
 include Status
 
-module Bigstring = Body.Bigstring
+(* module Bigstring = Body.Bigstring *)
 type bigstring = Body.bigstring
 
 
@@ -226,34 +226,14 @@ let cookie name request =
 let add_set_cookie name value response =
   add_header "Set-Cookie" (Printf.sprintf "%s=%s" name value) response
 
-let body request =
-  Body.body request.body
+let body message =
+  Body.body message.body
 
-(* TODO LATER There need to be buffering and unbuffering version of this. The
-   HTTP server needs a version that does not buffer. The app, by default,
-   should get buffering. *)
-(* let buffered_body_stream body =
-  let sent = ref false in
+let body_stream message =
+  Body.body_stream message.body
 
-  fun k ->
-    if !sent then
-      k None
-    else begin
-      sent := true;
-      match body with
-      | `Empty -> k None
-      | `String body -> k (Some (Lwt_bytes.of_string body))
-      | `Bigstring body -> k (Some body)
-    end *)
-
-let body_stream request =
-  Body.body_stream request.body
-  (* match !(request.body) with
-  | #buffered_body as body -> buffered_body_stream body
-  | `Bigstring_stream stream -> stream
-  | `Reading on_finished ->
-    fun k ->
-      Lwt.on_success on_finished (fun body -> buffered_body_stream body k) *)
+let body_stream_bigstring data eof message =
+  Body.body_stream_bigstring data eof message.body
 
 (* Create a fresh ref. The reason this field has a ref is because it might get
    replaced when a body is forced read. That's not what's happening here - we
@@ -342,7 +322,7 @@ let request_from_http
       request_version = version;
     };
     headers;
-    body = ref (`Bigstring_stream body);
+    body = ref (`Stream body);
     locals = Scope.empty;
     first = request; (* TODO LATER What OCaml version is required for this? *)
     last = ref request;
@@ -352,14 +332,15 @@ let request_from_http
 
 (* TODO Unify these string-to-stream functions. *)
 let string_to_stream string =
+  let buffer = Lwt_bytes.of_string string in
   let sent = ref false in
 
-  fun k ->
+  fun data eof ->
     if !sent then
-      k None
+      eof ()
     else begin
       sent := true;
-      k (Some (Lwt_bytes.of_string string))
+      data buffer 0 (Lwt_bytes.length buffer)
     end
 
 let request

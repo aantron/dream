@@ -15,7 +15,6 @@ let add_header response buffered_body =
     match buffered_body with
     | `Empty -> 0
     | `String body -> String.length body
-    | `Bigstring body -> Dream.Bigstring.size_in_bytes body
   in
   Lwt.return
     (Dream.add_header "Content-Length" (string_of_int length) response)
@@ -38,7 +37,7 @@ let content_length next_handler request =
     else
       (* TODO This check belongs in the core module. *)
       match !(response.body) with
-      | #Dream__pure.Body.buffered_body as buffered_body ->
+      | `Empty | `String _ as buffered_body ->
         add_header response buffered_body
       | _ ->
         Lwt.return response
