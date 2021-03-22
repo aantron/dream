@@ -15,40 +15,7 @@ let from_base64url string =
 
 
 
-(* TODO DOC
-   cookie-header = "Cookie:" OWS cookie-string OWS
-   cookie-string = cookie-pair *( ";" SP cookie-pair )
- cookie-pair       = cookie-name "=" cookie-value
- cookie-name       = token
- cookie-value      = *cookie-octet / ( DQUOTE *cookie-octet DQUOTE )
- cookie-octet      = %x21 / %x23-2B / %x2D-3A / %x3C-5B / %x5D-7E
-                       ; US-ASCII characters excluding CTLs,
-                       ; whitespace DQUOTE, comma, semicolon,
-                       ; and backslash
-https://www.ietf.org/rfc/rfc6265.txt
-
-   The OWS (optional whitespace) rule is used where zero or more linear
-   whitespace characters MAY appear:
-
-   OWS            = *( [ obs-fold ] WSP )
-                    ; "optional" whitespace
-   obs-fold       = CRLF
-
-   OWS SHOULD either not be produced or be produced as a single SP
-   character.
- token             = <token, defined in [RFC2616], Section 2.2>
-
-  TODO Should make a web microformats library.
-       token          = 1*<any CHAR except CTLs or separators>
-
-TOOD LATER Write a "proper" parser, probably factor it out, too. Hoard all the
-relevant RFCs in doc/rfc
-TODO This is just an initial parser. It is neither fast nor correct.
-TODO This other library should include fold-style interface for reducing
-allocations.
-*)
-(* TODO Difference between "cookie encoding" and "cookie-safe encoding"!!!! *)
-let from_cookie_encoded s =
+let from_cookie s =
   let pairs =
     s
     |> String.split_on_char ';'
@@ -58,6 +25,14 @@ let from_cookie_encoded s =
   pairs |> List.fold_left (fun pairs -> function
     | [name; value] -> (String.trim name, String.trim value)::pairs
     | _ -> pairs) []
+(* Note: found ocaml-cookie and http-cookie libraries, but they appear to have
+   equivalent code for parsing Cookie: headers, so there is no point in using
+   them yet, especially as they have stringent OCaml version constraints for
+   other parts of their code. *)
+(* Note: this parser doesn't actually appear to comply with the RFC strictly. It
+   accepts more characters than the spec allows. It doesn't treate DQUOTE
+   specially. This might not be important, however, if user agents treat cookies
+   as opaque, because then only Dream has to deal with its own cookies. *)
 
 
 

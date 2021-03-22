@@ -213,7 +213,7 @@ let with_header name value message =
 let all_cookies request =
   request
   |> headers "Cookie"
-  |> List.map Formats.from_cookie_encoded
+  |> List.map Formats.from_cookie
   |> List.flatten
 
 (* TODO Don't use this exception-raising function, to avoid clobbering user

@@ -614,7 +614,7 @@ type form = [
 (* TODO Link to the tag helper for dream.csrf and backup instructions for
    generating it. *)
 val form : request -> form Lwt.t
-(** Parses the request body as a form. The [Content-Type] must be
+(** Parses the request body as a form. [Content-Type:] must be
     [application/x-www-form-urlencoded]. Checks that the form contains a CSRF
     token field [dream.csrf], and checks it for validity. The form fields are
     returned in sorted order, suitable for pattern matching:
@@ -1393,12 +1393,18 @@ val from_base64url : string -> (string, string) result
 
 val to_form_urlencoded : (string * string) list -> string
 (** Inverse of {!Dream.from_form_urlencoded}. *)
+(* TODO DOC Does this do any escaping? *)
 
 val from_form_urlencoded : string -> (string * string) list
 (** Converts form data or a query string from
     [application/x-www-form-urlencoded] format to a list of name-value pairs.
-    See {{:https://tools.ietf.org/html/rfc1866#section-8.2.1} RFC 1866 §4.2.1
+    See {{:https://tools.ietf.org/html/rfc1866#section-8.2.1} RFC 1866 §8.2.1
     ↪}. *)
+
+val from_cookie : string -> (string * string) list
+(** Converts a [Cookie:] header value to key-value pairs. See
+    {{:https://tools.ietf.org/html/rfc6265#section-4.2.1} RFC 6265 §4.2.1 ↪}. *)
+(* TODO DOC Do we decode? NO. *)
 
 val from_target : string -> string * string
 (** Splits a request target into a path and a query string. *)

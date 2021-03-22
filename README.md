@@ -36,3 +36,4 @@ The name Dream was inspired by [Morph][morph].
 <!-- Remove name in ddbug_dump paramter. -->
 <!-- content-length not autp-added in error handlers anymore -->
 <!-- esy workflow -->
+<!-- Remove license headers from examples. -->
