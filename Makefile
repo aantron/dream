@@ -23,6 +23,10 @@ test :
 test-watch :
 	@dune build --no-print-directory -w --root . @test/runtest
 
+.PHONY : coverage-serve
+coverage-serve :
+	cd _coverage && dune exec -- serve -p 8082
+
 .PHONY : promote
 promote :
 	dune promote --root .
@@ -44,6 +48,10 @@ WATCH := \
 .PHONY : docs-watch
 docs-watch :
 	fswatch -o $(WATCH) | xargs -L 1 -I FOO make docs --no-print-directory
+
+.PHONY : docs-serve
+docs-serve :
+	cd docs/web/build && dune exec -- serve -p 8081
 
 .PHONY : clean-coverage
 clean-coverage :
