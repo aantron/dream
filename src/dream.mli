@@ -807,7 +807,9 @@ Now with Content-Type guessing.
     - What do sessions have? App data (the dictionary), but also a secret key,
       log-friendly id, expiration time.
     - Mention security.
-    - Mention pre-sessions. *)
+    - Mention pre-sessions.
+    - Note that session middleware doesn't communicate with the client
+      itself. *)
 
 val sessions_in_memory : middleware
 (** Stores session data server-side in memory, i.e. without persistence. Passes
