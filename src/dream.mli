@@ -345,12 +345,12 @@ val is_server_error : status -> bool
 (** Like {!Dream.is_informational}, but for type {!Dream.server_error} and
     numeric codes [5xx]. *)
 
-val statuses_equal : status -> status -> bool
+val status_codes_equal : status -> status -> bool
 (** Compares two status codes, such that equal codes are detected even if one is
     represented as a number. For example,
 
     {[
-      Dream.statuses_equal `Not_Found (`Status 404) = true
+      Dream.status_codes_equal `Not_Found (`Status 404) = true
     ]} *)
 
 end
@@ -556,6 +556,7 @@ val with_body_stream : (unit -> string option Lwt.t) -> 'a message -> 'a message
     for logging. Graceful recovery in the sense of sending a neat error response
     is generally not possible, because a partial response has already been
     transmitted. *)
+(* TODO [f] is called repeatedly. *)
 
 val has_body : _ message -> bool
 (** Evalutes to [true] if the given message either has a body that has been

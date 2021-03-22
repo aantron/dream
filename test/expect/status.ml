@@ -528,3 +528,23 @@ let%expect_test _ =
     511 false false false false true
         Network Authentication Required
         Network Authentication Required |}]
+
+let equal status_1 status_2 =
+  Printf.printf "%B\n" (Dream.status_codes_equal status_1 status_2)
+
+let%expect_test _ =
+  equal `OK `OK;
+  equal `OK `Not_Found;
+  equal `Not_Found `OK;
+  equal `Not_Found `Not_Found;
+  equal `OK (`Status 200);
+  equal (`Status 200) `OK;
+  equal `OK (`Status 404);
+  [%expect {|
+    true
+    false
+    false
+    true
+    true
+    true
+    false |}]
