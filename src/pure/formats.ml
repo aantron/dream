@@ -34,6 +34,94 @@ let from_cookie s =
    specially. This might not be important, however, if user agents treat cookies
    as opaque, because then only Dream has to deal with its own cookies. *)
 
+(* TODO Reasonable, secure defaults. *)
+let to_set_cookie
+    ?expires ?max_age ?domain ?path ?secure ?http_only ?same_site name value =
+
+  let expires =
+    match expires with
+    | None -> ""
+    | Some time ->
+      let time = Unix.gmtime time in
+      let weekday =
+        match time.tm_wday with
+        | 0 -> "Sun" | 1 -> "Mon" | 2 -> "Tue" | 3 -> "Wed" | 4 -> "Thu"
+        | 5 -> "Fri" | 6 -> "Sat"
+        | _ -> assert false
+      in
+      let month =
+        match time.tm_mon with
+        | 0 -> "Jan" | 1 -> "Feb" | 2 -> "Mar" | 3 -> "Apr" | 4 -> "May"
+        | 5 -> "Jun" | 6 -> "Jul" | 7 -> "Aug" | 8 -> "Sep" | 9 -> "Oct"
+        | 10 -> "Nov" | 11 -> "Dec"
+        | _ -> assert false
+      in
+      (* Unix.gmtime docs give range 0..60 for tm_sec, accounting for leap
+         seconds. However, RFC 6265 §5.1.1 states:
+
+         5.  Abort these steps and fail to parse the cookie-date if:
+
+           *  the second-value is greater than 59.
+
+           (Note that leap seconds cannot be represented in this syntax.)
+
+         See https://tools.ietf.org/html/rfc6265#section-5.1.1.
+
+         Even though Unix time does not account for leap seconds, in case I
+         misunderstand the gmtime API, system differences, or future
+         refactoring, make sure no leap seconds creep into the output. *)
+      let seconds =
+        if time.tm_sec < 60 then
+          time.tm_sec
+        else
+          59
+      in
+      Printf.sprintf "; Expires=%s, %02i %s %i %02i:%02i:%02i GMT"
+        weekday time.tm_mday month (time.tm_year + 1900)
+        time.tm_hour time.tm_min seconds
+  in
+
+  let max_age =
+    match max_age with
+    | None -> ""
+    | Some seconds -> Printf.sprintf "; Max-Age=%.0f" (floor seconds)
+  in
+
+  let domain =
+    match domain with
+    | None -> ""
+    | Some domain -> Printf.sprintf "; Domain=%s" domain
+  in
+
+  let path =
+    match path with
+    | None -> ""
+    | Some path -> Printf.sprintf "; Path=%s" path
+  in
+
+  let secure =
+    match secure with
+    | Some true -> "; Secure"
+    | _ -> ""
+  in
+
+  let http_only =
+    match http_only with
+    | Some true -> "; HttpOnly"
+    | _ -> ""
+  in
+
+  let same_site =
+    match same_site with
+    | None -> ""
+    | Some `Strict -> "; SameSite=Strict"
+    | Some `Lax -> "; SameSite=Lax"
+    | Some `None -> "; SameSite=None"
+  in
+
+  Printf.sprintf "%s=%s%s%s%s%s%s%s%s"
+    name value expires max_age domain path secure http_only same_site
+
 
 
 let to_form_urlencoded dictionary =

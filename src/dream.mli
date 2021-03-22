@@ -1406,6 +1406,23 @@ val from_cookie : string -> (string * string) list
     {{:https://tools.ietf.org/html/rfc6265#section-4.2.1} RFC 6265 §4.2.1 ↪}. *)
 (* TODO DOC Do we decode? NO. *)
 
+(* TODO Replace all time by floats. *)
+val to_set_cookie :
+  ?expires:float ->
+  ?max_age:float ->
+  ?domain:string ->
+  ?path:string ->
+  ?secure:bool ->
+  ?http_only:bool ->
+  ?same_site:[ `Strict | `Lax | `None ] ->
+  string ->
+  string ->
+    string
+(* TODO https://tools.ietf.org/html/rfc6265#section-5 *)
+(* TODO https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis-05
+   for same_site. *)
+(* TODO No escaping done. *)
+
 val from_target : string -> string * string
 (** Splits a request target into a path and a query string. *)
 
@@ -1433,6 +1450,7 @@ val drop_empty_trailing_path_component : string list -> string list
 
 
 
+(* TODO Expose current time somewhere. *)
 (** {1 Randomness} *)
 
 val random : int -> string
