@@ -5,7 +5,7 @@
 
 
 
-let%expect_test _ =
+(* let%expect_test _ =
   Dream.cipher
   |> Dream.cipher_name
   |> print_endline;
@@ -14,7 +14,7 @@ let%expect_test _ =
   |> List.iter print_endline;
   [%expect {|
     AEAD_AES_256_GCM
-    AEAD_AES_256_GCM |}]
+    AEAD_AES_256_GCM |}] *)
 
 
 

@@ -448,10 +448,10 @@ let encryption_key request =
 let decryption_keys request =
   request.specific.app.keys
 
-include Cipher
+(* include Cipher *)
 
 (* TODO Also log? Then this needs to be moved out. *)
-let encrypt ?request ?key plaintext =
+(* let encrypt ?request ?key plaintext =
   match request, key with
   | Some request, None -> Cipher.encrypt (encryption_key request) plaintext
   | None, Some key -> Cipher.encrypt key plaintext
@@ -463,4 +463,10 @@ let decrypt ?request ?keys ciphertext =
   | Some request, None -> Cipher.decrypt (decryption_keys request) ciphertext
   | None, Some keys -> Cipher.decrypt keys ciphertext
   | Some _, Some _ -> invalid_arg "Dream.decrypt: both ~request and ~keys passed"
-  | None, None -> invalid_arg "Dream.decrypt: neither ~request nor ~keys passed"
+  | None, None -> invalid_arg "Dream.decrypt: neither ~request nor ~keys passed" *)
+
+let encrypt request plaintext =
+  Cipher.encrypt (encryption_key request) plaintext
+
+let decrypt request ciphertext =
+  Cipher.decrypt (decryption_keys request) ciphertext

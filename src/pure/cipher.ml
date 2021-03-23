@@ -60,6 +60,16 @@ let rec decrypt keys ciphertext =
 
 
 
+(* TODO Switch to XChaCha20-Poly1305, but there is no ready implementation in
+   OCaml of the whole ciphersuite. Mirage-crypto seems to have the
+   components. See https://github.com/mirage/mirage-crypto/issues/111. *)
+(* TODO Also consider https://tools.ietf.org/html/rfc8452,
+   AEAD_AES_256_GCM_SIV. *)
+(* TODO Is it possible to use better nonce generation? Are nonces just taken
+   modulo 2^96 internally? *)
+
+(* Key is good for ~2.5 years if every request e.g. generates one new signed
+   cookie, and the installation is doing 1000 requests per second. *)
 module AEAD_AES_256_GCM =
 struct
   (* Enciphered messages are prefixed with a version. There is only one right
@@ -78,7 +88,8 @@ struct
     '\x00'
 
   let name =
-    "AEAD_AES_256_GCM"
+    "AEAD_AES_256_GCM, " ^
+    "mirage-crypto, key: SHA-256, nonce: 96 bits mirage-crypto-rng"
 
   type key =
     Mirage_crypto.Cipher_block.AES.GCM.key

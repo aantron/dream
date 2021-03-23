@@ -1458,6 +1458,11 @@ val random : int -> string
     {{:https://github.com/mirage/mirage-crypto} cryptographically secure random
     number generator ↪}. *)
 
+val encrypt : request -> string -> string
+
+val decrypt : request -> string -> string option
+
+(*
 type cipher
 
 type key
@@ -1477,7 +1482,7 @@ val decrypt : ?request:request -> ?keys:key list -> string -> string option
 
 val encryption_key : request -> key
 
-val decryption_keys : request -> key list
+val decryption_keys : request -> key list *)
 (* TODO Move most of this to a Cipher module. Base API just needs encrypt and
    decrypt given a request. That will also undo the double optional kludge. *)
 
