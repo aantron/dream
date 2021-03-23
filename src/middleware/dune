@@ -2,7 +2,6 @@
  (public_name dream.middleware)
  (name dream__middleware)
  (libraries
-  cstruct
   digestif
   dream.pure
   fmt
@@ -12,7 +11,5 @@
   lwt
   lwt.unix
   magic-mime
-  mirage-crypto-rng
-  mirage-crypto-rng.lwt
  )
  (instrumentation (backend bisect_ppx)))

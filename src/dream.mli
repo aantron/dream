@@ -1451,12 +1451,35 @@ val drop_empty_trailing_path_component : string list -> string list
 
 
 (* TODO Expose current time somewhere. *)
-(** {1 Randomness} *)
+(** {1 Cryptography} *)
 
 val random : int -> string
 (** Generates the given number of bytes using a
     {{:https://github.com/mirage/mirage-crypto} cryptographically secure random
     number generator ↪}. *)
+
+type cipher
+
+type key
+
+val cipher : cipher
+
+val cipher_name : cipher -> string
+
+val decryption_ciphers : cipher list
+(* TODO Should this be a ref? *)
+
+val derive_key : cipher -> string -> key
+
+val encrypt : ?request:request -> ?key:key -> string -> string
+
+val decrypt : ?request:request -> ?keys:key list -> string -> string option
+
+val encryption_key : request -> key
+
+val decryption_keys : request -> key list
+(* TODO Move most of this to a Cipher module. Base API just needs encrypt and
+   decrypt given a request. That will also undo the double optional kludge. *)
 
 
 

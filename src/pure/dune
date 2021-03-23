@@ -3,9 +3,13 @@
  (name dream__pure)
  (libraries
   base64
+  cstruct
   hmap
   lwt
   lwt.unix
+  mirage-crypto
+  mirage-crypto-rng
+  mirage-crypto-rng.lwt
   uri
  )
  (instrumentation (backend bisect_ppx)))

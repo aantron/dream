@@ -22,6 +22,7 @@ type app = {
   globals : Scope.t ref;
   mutable debug : bool;
   mutable secret : string;
+  mutable keys : Cipher.key list;
 }
 
 let debug app =
@@ -30,16 +31,21 @@ let debug app =
 let set_debug value app =
   app.debug <- value
 
+(* TODO Delete; now using key. *)
 let secret app =
   app.secret
 
 let set_secret secret app =
-  app.secret <- secret
+  app.secret <- secret;
+  app.keys <- [Cipher.derive_key Cipher.cipher secret]
+(* TODO Keys should be obtained as follows: iterate over all ciphers, and within
+   each, iterate over all secrets. *)
 
 let new_app () = {
   globals = ref Scope.empty;
   debug = false;
   secret = "";
+  keys = [Cipher.derive_key Cipher.cipher ""];
 }
 (* TODO The empty string secret will never be used the way the code is currently
    set up. However, that it needs to be used temporarily suggests that the code
@@ -435,3 +441,26 @@ let sort_headers headers =
 
 (* TODO Factor out body code into module Body, maybe also Stream. *)
 (* TODO Declare a stream type and replace all "k" by more or feed. *)
+
+let encryption_key request =
+  List.hd request.specific.app.keys
+
+let decryption_keys request =
+  request.specific.app.keys
+
+include Cipher
+
+(* TODO Also log? Then this needs to be moved out. *)
+let encrypt ?request ?key plaintext =
+  match request, key with
+  | Some request, None -> Cipher.encrypt (encryption_key request) plaintext
+  | None, Some key -> Cipher.encrypt key plaintext
+  | Some _, Some _ -> invalid_arg "Dream.encrypt: both ~request and ~key passed"
+  | None, None -> invalid_arg "Dream.encrypt: neither ~request nor ~key passed"
+
+let decrypt ?request ?keys ciphertext =
+  match request, keys with
+  | Some request, None -> Cipher.decrypt (decryption_keys request) ciphertext
+  | None, Some keys -> Cipher.decrypt keys ciphertext
+  | Some _, Some _ -> invalid_arg "Dream.decrypt: both ~request and ~keys passed"
+  | None, None -> invalid_arg "Dream.decrypt: neither ~request nor ~keys passed"

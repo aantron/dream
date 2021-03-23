@@ -48,7 +48,7 @@ let error_template =
   Dream__http.Error_handler.customize
 
 let random =
-  Dream__middleware.Random.random
+  Dream__pure.Random.random
 
 include Dream__pure.Formats
 

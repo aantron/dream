@@ -5,12 +5,15 @@
 
 
 
-(* TODO LATER Is there something with lighter dependencies? Althoguh perhaps
+(* TODO LATER Is there something with lighter dependencies? Although perhaps
    these are not so bad... *)
 
 let initialize =
   lazy (Mirage_crypto_rng_lwt.initialize ())
 
-let random n =
+let random_buffer n =
   Lazy.force initialize;
-  Cstruct.to_string (Mirage_crypto_rng.generate n)
+  Mirage_crypto_rng.generate n
+
+let random n =
+  Cstruct.to_string (random_buffer n)

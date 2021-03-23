@@ -172,7 +172,8 @@ let in_memory_sessions default_value =
   (* TODO Consider UUIDs for session keys rather than just bare random strings.
      Even though a collision is so unlikely... *)
   let create _ _ expires_at =
-    let key = Random.random 48 |> Dream__pure.Formats.to_base64url in
+    let key =
+      Dream__pure.Random.random 48 |> Dream__pure.Formats.to_base64url in
     let id = String.sub key 0 8 in
     let session_info = {
       key;
