@@ -231,10 +231,6 @@ let cookie name request =
   try Some (cookie_exn name request)
   with Not_found -> None
 
-(* TODO LATER Default encoding. *)
-let add_set_cookie name value response =
-  add_header "Set-Cookie" (Printf.sprintf "%s=%s" name value) response
-
 let body message =
   Body.body message.body
 
@@ -470,3 +466,53 @@ let encrypt request plaintext =
 
 let decrypt request ciphertext =
   Cipher.decrypt (decryption_keys request) ciphertext
+
+(* TODO LATER Default encoding. *)
+let add_set_cookie
+    ?prefix:cookie_prefix
+    ?encrypt:(encrypt_cookie = true)
+    ?expires
+    ?max_age
+    ?domain
+    ?path
+    ?(secure = true)
+    ?(http_only = true)
+    ?(same_site = `Strict)
+    name
+    value
+    request
+    response =
+
+  (* TODO Need the site prefix, not the subsite prefix! *)
+  let path =
+    match path with
+    | Some path -> path
+    | None -> prefix request
+  in
+
+  (* TODO Relation between secure and non-localhost non-https? *)
+
+  let cookie_prefix =
+    match cookie_prefix, domain, path, secure with
+    | Some prefix, _, _, _ -> prefix
+    | None, None, "/", true -> "__Host-"
+    | None, _, _, true -> "__Secure-"
+    | None, _, _, _ -> ""
+  in
+
+  let value =
+    if encrypt_cookie then
+      encrypt request value |> Formats.to_base64url
+    else
+      value
+  in
+
+  let set_cookie =
+    Formats.to_set_cookie
+      ?expires ?max_age ?domain ~path ~secure ~http_only ~same_site
+      (cookie_prefix ^ name) value
+  in
+
+  (* TODO And encrypt. *)
+
+  add_header "Set-Cookie" set_cookie response

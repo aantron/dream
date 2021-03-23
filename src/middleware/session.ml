@@ -173,7 +173,7 @@ let in_memory_sessions default_value =
      Even though a collision is so unlikely... *)
   let create _ _ expires_at =
     let key =
-      Dream__pure.Random.random 48 |> Dream__pure.Formats.to_base64url in
+      Dream__pure.Random.random 38 |> Dream__pure.Formats.to_base64url in
     let id = String.sub key 0 8 in
     let session_info = {
       key;
@@ -191,9 +191,10 @@ let in_memory_sessions default_value =
   in
 
   (* TODO Cookie scope and security! Use the site prefix from the request. *)
-  let send session_info _ response =
+  let send session_info request response =
     response
-    |> Dream.add_set_cookie module_name session_info.key
+    |> Dream.add_set_cookie
+      module_name session_info.key request ~secure:false ~encrypt:false
     |> Lwt.return
   in
 

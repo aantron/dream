@@ -435,6 +435,7 @@ val cookie : string -> request -> string option
 
     If the request includes multiple cookies with the same name, one is
     returned. *)
+(* TODO Need auto-decrypt. *)
 
 val all_cookies : request -> (string * string) list
 (** Retrieves all cookies, i.e. all [name=value] in all [Cookie:] headers. As
@@ -506,13 +507,31 @@ val status : response -> status
 (* TODO Or just provide one helper for formatting Set-Cookie and let the user
    use the header calls to actually add the header...? How often do we need to
    set a cookie? *)
-val add_set_cookie : string -> string -> response -> response
+val add_set_cookie :
+  ?prefix:string ->
+  ?encrypt:bool ->
+  ?expires:float ->
+  ?max_age:float ->
+  ?domain:string ->
+  ?path:string ->
+  ?secure:bool ->
+  ?http_only:bool ->
+  ?same_site:[ `Strict | `Lax | `None ] ->
+  string ->
+  string ->
+  request ->
+  response ->
+    response
 (** Adds a [Set-Cookie:] header to the given response for setting the cookie
     with the given name to the given value. Does not remove any [Set-Cookie:]
     header that is already present — to do that, use {!Dream.drop_header}. This
     function does not encode the cookie name nor its value. If the values you
     are passing in can have [=], [;], or newlines, ... *)
 (* TODO Hints about encodings. *)
+(* TODO Needs big-time prettying in the docs. *)
+
+(* val cookie_prefix : request -> string *)
+(* TODO Might need a separate Cookies docs section at this point. *)
 
 (* val reason_override : response -> string option *)
 (* If the response was created with [~reason:r], evaluates to [Some r]. *)
@@ -575,6 +594,7 @@ type bigstring =
       [Bigstringaf.t ↪]} in bigstringaf, a transitive dependency of Dream.
     - {{:https://ocsigen.org/lwt/latest/api/Lwt_bytes} [Lwt_bytes.t ↪]} in Lwt,
       also a dependency of Dream. *)
+(* TODO Is Cstruct.t also this? *)
 
 val body_stream_bigstring :
   (bigstring -> int -> int -> unit) ->
@@ -810,13 +830,15 @@ Now with Content-Type guessing.
     - Mention security.
     - Mention pre-sessions.
     - Note that session middleware doesn't communicate with the client
-      itself. *)
+      itself.
+    - Recommend using only under HTTPS. *)
 
 val sessions_in_memory : middleware
 (** Stores session data server-side in memory, i.e. without persistence. Passes
     session keys to clients in cookies. Session data is lost when the server
     process exits. This session middleware is suitable for prototyping, because
     it has no persistence or key management requirements. *)
+(* TODO Protocol error on HTTS+(HTTP2)? *)
 
 val session : string -> request -> string option
 (** Retrieves the value with the given key in the request's session, if the
@@ -1418,10 +1440,47 @@ val to_set_cookie :
   string ->
   string ->
     string
+(** [Dream.to_set_cookie name value] formats a [Set-Cookie:] header value. The
+    optional arguments correspond to the attributes specified in
+    {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07} RFC 6265bis
+    ↪}:
+
+    [~expires] sets the expiration date of the cookie. It is a time value in
+    seconds, like returned by
+    {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Unix.html#VALgettimeofday}
+    [Unix.gettimeofday ↪]}. [~max_age] is a time span in seconds. If both are
+    given, compliant clients use [~max_age]. If neither is given, a compliant
+    client deletes the cookie whenever it considers the client-side session to
+    have expired, which typically corresponds to browser close. However, some
+    clients persist cookies without [~expires] and [~max_age] indefinitely. In
+    general, clients may persist cookies beyond their expiration, or delete them
+    before expiration, so web applications should not rely on client-side
+    expiration for server state management.
+
+    [~domain] is used to allow clients to send the cookie to subdomains. When
+    absent, conformant clients send the cookie only when accessing the cookie's
+    origin domain. It is recommended not to use this option.
+
+    [~path]  *)
 (* TODO https://tools.ietf.org/html/rfc6265#section-5 *)
 (* TODO https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis-05
    for same_site. *)
 (* TODO No escaping done. *)
+(* TODO MDN links. *)
+(* TODO requires prettying in the docs. *)
+(* TODO ?request argument for fillign stuff from requests. *)
+(* TODO bis prefixes. *)
+(* TODO Escaping guidelines. *)
+(* TODO Sigining and encryption. *)
+(* TODO Recommend against running any untrusted app on the same host under a
+   different path, on a different port, or on a subdomain. *)
+
+(* val secure_cookie_prefix : string
+
+val host_cookie_prefix : string *)
+(* TODO Expose these. *)
+
+(* TODO Warn about message mutability. *)
 
 val from_target : string -> string * string
 (** Splits a request target into a path and a query string. *)
@@ -1457,6 +1516,10 @@ val random : int -> string
 (** Generates the given number of bytes using a
     {{:https://github.com/mirage/mirage-crypto} cryptographically secure random
     number generator ↪}. *)
+(* TODO Review which TLS protocls are negotiated. *)
+(* TODO Support key retirement? *)
+(* TODO Key derivation. *)
+(* TODO Refuse RC4 in TLS? *)
 
 val encrypt : request -> string -> string
 

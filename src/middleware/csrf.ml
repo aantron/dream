@@ -10,6 +10,8 @@
 
 module Dream = Dream__pure.Inmost
 
+(* TODO Switch to the new cryptography binding, and eliminate jwt dep. *)
+
 (* TODO LATER The crypto situation in OCaml seems a bit sad; it seems necessary
    to depend on gmp etc. Is this in any way avoidable? *)
 (* TODO LATER Perhaps jose + mirage-crypto can solve this. Looks like it needs

@@ -58,6 +58,31 @@ let respond_replacement = {|
 </pre>
 |}
 
+let add_set_cookie_expected = {|<div class="spec value" id="val-add_set_cookie">
+ <a href="#val-add_set_cookie" class="anchor"></a><code><span><span class="keyword">val</span> add_set_cookie : <span>?prefix:string <span class="arrow">-&gt;</span></span> <span>?encrypt:bool <span class="arrow">-&gt;</span></span> <span>?expires:float <span class="arrow">-&gt;</span></span>
+<span>?max_age:float <span class="arrow">-&gt;</span></span> <span>?domain:string <span class="arrow">-&gt;</span></span> <span>?path:string <span class="arrow">-&gt;</span></span> <span>?secure:bool <span class="arrow">-&gt;</span></span> <span>?http_only:bool <span class="arrow">-&gt;</span></span>
+<span>?same_site:<span>[ `Strict <span>| `Lax</span> <span>| `None</span> ]</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <a href="#type-response">response</a></span></code>
+</div>
+|}
+
+let add_set_cookie_replacement = {|
+<pre><span class="keyword">val</span> add_set_cookie :
+  ?prefix:string ->
+  ?encrypt:bool ->
+  ?expires:float ->
+  ?max_age:float ->
+  ?domain:string ->
+  ?path:string ->
+  ?secure:bool ->
+  ?http_only:bool ->
+  ?same_site:[ `Strict | `Lax | `None ] ->
+  string ->
+  string ->
+  <a href="#type-request">request</a> ->
+  <a href="#type-response">response</a> ->
+    <a href="#type-response">response</a>
+</pre>|}
+
 let body_stream_bigstring_expected = {|<div class="spec value" id="val-body_stream_bigstring">
  <a href="#val-body_stream_bigstring" class="anchor"></a><code><span><span class="keyword">val</span> body_stream_bigstring : <span><span>(<span><a href="#type-bigstring">bigstring</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span><span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span><span><span class="type-var">_</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
@@ -443,6 +468,16 @@ let pretty_print_signatures soup =
     (fun () ->
       Soup.replace (respond $ "> code") (Soup.parse respond_replacement);
       Soup.add_class "multiline" respond);
+
+  let add_set_cookie = soup $ "#val-add_set_cookie" in
+  if_expected
+    add_set_cookie_expected
+    (fun () -> pretty_print add_set_cookie)
+    (fun () ->
+      Soup.replace
+        (add_set_cookie $ "> code")
+        (Soup.parse add_set_cookie_replacement);
+      Soup.add_class "multiline" add_set_cookie);
 
   let body_stream_bigstring = soup $ "#val-body_stream_bigstring" in
   if_expected
