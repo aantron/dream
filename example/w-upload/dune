@@ -1,0 +1,8 @@
+(executable
+ (name upload)
+ (libraries dream))
+
+(rule
+ (targets upload.ml)
+ (deps upload.eml.html)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))

@@ -674,6 +674,28 @@ val form : request -> form Lwt.t
 (* TODO Note that form requires a session to be active, for the CSRF
    checking. *)
 
+(* TODO Get rid of this separate call. However, it means requests must become
+   more mutable, in particular there needs to be extensible mutability for body
+   handling, which is already mutable. *)
+val begin_upload : request -> request
+
+type upload_result = [
+  | `File of string * string * string
+  | `Field of string * string
+  | `Done
+]
+
+val upload : request -> upload_result Lwt.t
+(* TODO Document how errors are reported, how this responds to various
+   Content-Types, etc. *)
+(* TODO The API should be something like...
+val upload : request -> [
+  `File of ...
+  `Field of ...
+  `Done
+]
+ *)
+
 type csrf_result = [
   | `Ok
   | `Expired of int64

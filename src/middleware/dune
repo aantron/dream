@@ -11,5 +11,6 @@
   lwt
   lwt.unix
   magic-mime
+  multipart-form-data
  )
  (instrumentation (backend bisect_ppx)))

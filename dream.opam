@@ -15,6 +15,7 @@ depends: [
   "magic-mime"
   "mirage-crypto" {>= "0.8.1"}  # AES-256-GCM.
   "mirage-crypto-rng" {>= "0.8.0"}  # Signature of initialize.
+  "multipart-form-data" {>= "0.3.0"}
   "ocaml" {>= "4.05.0"}  # String.split_on_char, String.index_from_opt.
   "uri"
 
