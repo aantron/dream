@@ -32,6 +32,7 @@ install: [
   ["opam-installer" "--prefix" prefix "src/vendor/h2/h2-lwt.install"]
   ["opam-installer" "--prefix" prefix "src/vendor/h2/h2-lwt-unix.install"]
 ]
+# TODO Set all these packages as conflicts.
 
 # TODO Test dependency cone, i.e. list dependencies actually installed and make
 # sure nothing questionable silently creeps in.
