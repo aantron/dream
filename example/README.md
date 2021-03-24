@@ -1,9 +1,9 @@
 Dream's first several examples make up a **tutorial**. Each example is a
 complete project with a helpful `README`, and plenty of links to next steps and
-documentation. You can begin at [**`1-hello`**](1-hello), or look in the list
-below and jump to whatever interests you!
+documentation. You can begin at [**`1-hello`**](1-hello#files), or look in the
+list below and jump to whatever interests you!
 
-- [**`1-hello`**](1-hello#readme) &nbsp;&mdash;&nbsp; the simplest Dream server
+- [**`1-hello`**](1-hello#files) &nbsp;&mdash;&nbsp; the simplest Dream server
   responds to every request with the same friendly message.
 - [**`2-middleware`**](2-middleware) &nbsp;&mdash;&nbsp; adds the first Dream
   middleware: the *logger*.
