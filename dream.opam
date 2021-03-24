@@ -12,7 +12,9 @@ maintainer: "Anton Bachin <antonbachin@yahoo.com>"
 dev-repo: "git+https://github.com/aantron/dream.git"
 
 build: [
-  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "build" "-p"
+   "dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,h2,h2-lwt,h2-lwt-unix"
+   "-j" jobs]
 ]
 
 # TODO Test dependency cone, i.e. list dependencies actually installed and make

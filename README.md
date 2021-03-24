@@ -38,3 +38,4 @@ The name Dream was inspired by [Morph][morph].
 <!-- content-length not autp-added in error handlers anymore -->
 <!-- esy workflow -->
 <!-- Remove license headers from examples. add note about public domain to README. -->
+<!-- snag: clone must be recursive. -->
