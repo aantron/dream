@@ -1,8 +1,11 @@
-Now we serve a tiny site dynamic site. If you go to
-`http://localhost:8080/echo/foo`, it responds with `foo`. If you change the last
-path component to `bar`, it will respond with `bar` instead:
+# `3-router`
 
-<!-- TODO Link to database example. -->
+<br>
+
+A *router* sends requests to different handlers, depending on their method and
+path. In this example, we still serve `Good morning, world!` at our site root,
+`/`. But, we have a different response for `GET` requests to `/echo/*`, and we
+respond to everything else with `404 Not Found`:
 
 ```ocaml
 let () =
@@ -16,35 +19,51 @@ let () =
 
     Dream.get "/echo/:word"
       (fun request ->
-        request
-        |> Dream.crumb "word"
-        |> Dream.respond);
+        Dream.respond (Dream.param "word" request));
+
   ]
   @@ fun _ ->
-    Dream.respond ~status:`Not_found ""
-
+    Dream.empty `Not_Found
 ```
-
-As you can see, if the router sees a path component that begins with `:`, it
-becomes a variable, which can be accessed in the handler by calling
-`Dream.crumb`. This example also uses `|>`, the
-[standard OCaml operator](https://caml.inria.fr/pub/docs/manual-ocaml/libref/Stdlib.html#VAL(|%3E))
-for piping a value into the last argument of a function.
-
-We are now also resonding to `/favicon.ico` and all other requests with
-`404 Not Found`, which causes most browsers to stop requesting it after the
-first attempt.
-
-<!-- TODO the 404 page. -->
-
-<!-- TODO Link to all the status codes. -->
-<!-- TODO API links -->
 
 <br>
 
-Where to go from here?
+This is also our first dynamic site! A request to `/echo/foo` gets the response
+`foo`, and a request to `/echo/bar` gets `bar`! The syntax `:word` in a route
+creates a path parameter, which can be read with `Dream.param`.
 
-- [**`5-catch`**](../5-catch) handles errors from all your handlers in one
-place.
+<!-- TODO hyperlink Dream.param to docsc, also Dream.logger. -->
 
-<!-- TODO Go to SQL example. -->
+The whole router is a middleware, just like `Dream.logger`. When none of the
+routes match, the router passes the request to the next handler, which is right
+beneath it. In this example, we just respond with `404 Not Found` when that
+happens.
+
+Except for the status code, the `404 Not Found` response is *completely* empty,
+so it might not display well in your browser. In
+[**`8-error-page`**](../8-error-page#files), we will decorate all error
+responses with an error template in one central location.
+
+<br>
+
+The router can do more than match simple routes:
+
+- [**`f-static`**](../f-static#files) forwards all requests with a certain
+  prefix to a static file handler.
+- [**`w-scope`**](../w-scope#files) applies middlewares to groups of routes
+  &mdash; but only when they match.
+- [**`w-subsite`**](../w-subsite#files) attaches a handler as a complete, nested
+  sub-site, which might have its own router.
+
+<br>
+
+**Next steps:**
+
+- [**`4-counter`**](../4-counter#files) counts requests, and exposes a special
+  route for getting the count.
+- [**`5-echo`**](../5-echo#files) is dynamic in another way: by reading the
+  request body.
+
+<br>
+
+[Up to the example index](../#readme)

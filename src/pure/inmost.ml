@@ -368,8 +368,6 @@ let request
     ~headers
     ~body:(string_to_stream body)
 
-
-
 let response
     ?status
     ?code
@@ -405,6 +403,9 @@ let respond
 
   response ?status ?code ?headers body
   |> Lwt.return
+
+let empty status =
+  respond ~status ""
 
 let websocket handler =
   let response = response ~status:`Switching_Protocols "" in

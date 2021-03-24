@@ -9,10 +9,8 @@ let () =
 
     Dream.get "/echo/:word"
       (fun request ->
-        request
-        |> Dream.crumb "word"
-        |> Dream.respond);
+        Dream.respond (Dream.param "word" request));
 
   ]
   @@ fun _ ->
-    Dream.respond ~status:`Not_Found ""
+    Dream.empty `Not_Found

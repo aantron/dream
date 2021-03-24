@@ -26,8 +26,8 @@ code in this example looks like this:
 let () =
   Dream.run
   @@ Dream.logger
-  @@ (fun _ ->
-    Dream.respond "Good morning, world!")
+  @@ fun _ ->
+    Dream.respond "Good morning, world!"
 ```
 
 <br>
@@ -54,8 +54,8 @@ necessary &mdash; it just makes it much easier to see what is going on.
 
 There's not much else to middlewares &mdash; they are really just functions
 from handlers to handlers, so you can create them anywhere. Example
-[**`5-echo`**](../5-echo#files) already shows a simple custom middleware. There
-are also more complicated middlewares defined in
+[**`4-counter`**](../4-counter#files) already shows a simple custom middleware.
+There are also more complicated middlewares defined in
 
 - [**`m-locals`**](../m-locals#files),
 - [**`w-auto-reload`**](../w-auto-reload#files), and
@@ -67,11 +67,9 @@ are also more complicated middlewares defined in
 
 **Next steps:**
 
-- The next example, [**`3-counter`**](../3-counter#files), has some simple
-  server-side state, so we don't always reply with the same text. Also, it
-  prints custom messages to the log.
-- [**`4-router`**](../4-router#files) shows *routes*, the other way to build up
-  handlers in Dream.
+- The next example, [**`3-router`**](../3-router#files), shows *routes*, the
+  other way to build up handlers in Dream.
+- [**`4-counter`**](../4-counter#files) builds the first custom middleware.
 
 <br>
 

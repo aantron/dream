@@ -16,21 +16,22 @@ list below and jump to whatever interests you!
   templates and guard against XSS.
 - [**`7-debug`**](7-debug) &nbsp;&mdash;&nbsp; centralize your error page and
   run the debugger.
-- [**`8-error`**](8-error)
+- [**`8-error-page`**](8-error-page)
 - [**`9-logging`**](9-logging)
-- [**`a-session`**](a-session)
-- [**`b-cookie`**](b-cookie)
-- [**`c-form`**](c-form) &nbsp;&mdash;&nbsp; reading forms and CSRF prevention.
-- [**`d-json`**](d-json)
-- [**`e-static`**](e-static)
-- [**`f-upload`**](f-upload)
-- [**`g-sql`**](g-sql) &nbsp;&mdash;&nbsp; finally CRUD!
-- [**`h-graphql`**](h-graphql)
-- [**`i-streaming`**](i-streaming)
-- [**`j-websocket`**](j-websocket)
-- [**`k-https`**](k-https)
-- [**`l-crypto`**](l-crypto)
-- [**`m-locals`**](m-locals)
+- [**`a-promise`**](a-promise)
+- [**`b-session`**](a-session)
+- [**`c-cookie`**](b-cookie)
+- [**`d-form`**](c-form) &nbsp;&mdash;&nbsp; reading forms and CSRF prevention.
+- [**`e-json`**](d-json)
+- [**`f-static`**](e-static)
+- [**`g-upload`**](f-upload)
+- [**`h-sql`**](g-sql) &nbsp;&mdash;&nbsp; finally CRUD!
+- [**`i-graphql`**](h-graphql)
+- [**`j-streaming`**](i-streaming)
+- [**`k-websocket`**](j-websocket)
+- [**`l-https`**](k-https)
+- [**`m-crypto`**](l-crypto)
+- [**`n-locals`**](m-locals)
 
 That's it for the tutorial!
 
