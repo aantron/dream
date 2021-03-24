@@ -1,5 +1,20 @@
 opam-version: "2.0"
 
+synopsis: "Web framework, concise yet feature-complete"
+
+license: "MIT"
+homepage: "https://github.com/aantron/dream"
+author: "Anton Bachin <antonbachin@yahoo.com>"
+
+bug-reports: "https://github.com/aantron/dream/issues"
+maintainer: "Anton Bachin <antonbachin@yahoo.com>"
+
+dev-repo: "git+https://github.com/aantron/dream.git"
+
+build: [
+  ["dune" "build" "-p" name "-j" jobs]
+]
+
 # TODO Test dependency cone, i.e. list dependencies actually installed and make
 # sure nothing questionable silently creeps in.
 
@@ -17,6 +32,7 @@ depends: [
   "hmap"
   "jwto" {>= "0.2.2"}  # Jwto.get_payload. TODO LATER Probably system deps.
   "lwt"
+  "lwt_ssl"
   "logs" {>= "0.5.0"}
   "magic-mime"
   "mirage-crypto" {>= "0.8.1"}  # AES-256-GCM.
@@ -44,10 +60,4 @@ depends: [
   # Testing, development.
   "alcotest" {with-test}  # TODO LATER Needs constraint.
   "bisect_ppx" {dev & >= "2.5.0"}  # --instrument-with.
-]
-
-# Depopts of Gluten.
-depopts: [
-  "lwt_ssl"
-  "tls"
 ]
