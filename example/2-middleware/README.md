@@ -30,10 +30,10 @@ interesting (and colorful!) output:
 
 ```
 $ make
-08.02.21 22:19:21.126                       Running on http://localhost:8080
-08.02.21 22:19:21.126                       Press ENTER to stop
-08.02.21 22:19:24.927       dream.log  INFO REQ 1 GET / 127.0.0.1:58549 Mozilla/5.0 ...
-08.02.21 22:19:24.928       dream.log  INFO REQ 1 200 in 2 μs
+08.03.21 22:19:21.126                       Running on http://localhost:8080
+08.03.21 22:19:21.126                       Press ENTER to stop
+08.03.21 22:19:24.927       dream.log  INFO REQ 1 GET / 127.0.0.1:58549 Mozilla/5.0 ...
+08.03.21 22:19:24.928       dream.log  INFO REQ 1 200 in 2 μs
 ```
 
 You can write your own messages to the log using `Dream.log`.

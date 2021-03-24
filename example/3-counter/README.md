@@ -31,7 +31,7 @@ When you visit `http://localhost:8080`, you will see this handler's own
 ```
 $ make
 [...]
-08.02.21 22:33:59.869                       REQ 6 The count is now 6
+08.03.21 22:33:59.869                       REQ 6 The count is now 6
 ```
 
 Use `Dream.error`, `Dream.warning`, `Dream.info`, and `Dream.debug` to print

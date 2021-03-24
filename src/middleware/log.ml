@@ -121,7 +121,7 @@ let reporter () =
           else fraction
         in
         Printf.sprintf "%02i.%02i.%02i %02i:%02i:%02i.%03.0f"
-          time.tm_mday time.tm_mon ((time.tm_year + 1900) mod 100)
+          time.tm_mday (time.tm_mon + 1) ((time.tm_year + 1900) mod 100)
           time.tm_hour time.tm_min time.tm_sec clamped_fraction
       in
 

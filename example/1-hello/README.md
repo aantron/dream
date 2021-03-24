@@ -10,8 +10,8 @@ It's the absolute minimum Dream server. It just prints a message to the log at
 startup, telling you where to point your browser:
 
 <pre><code><b>$ make</b>
-08.02.21 21:17:21.471                       Running on http://localhost:8080
-08.02.21 21:17:21.471                       Press ENTER to stop
+08.03.21 21:17:21.471                       Running on http://localhost:8080
+08.03.21 21:17:21.471                       Press ENTER to stop
 </code></pre>
 
 If you go to [http://localhost:8080](http://localhost:8080), you will, of
