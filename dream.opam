@@ -13,7 +13,7 @@ dev-repo: "git+https://github.com/aantron/dream.git"
 
 build: [
   ["dune" "build" "-p"
-   "dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,h2,h2-lwt,h2-lwt-unix"
+   "dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,hpack,h2,h2-lwt,h2-lwt-unix"
    "-j" jobs]
 ]
 
