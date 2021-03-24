@@ -1301,6 +1301,7 @@ val global : 'a global -> request -> 'a
 
 (** {1 HTTP} *)
 
+(* TODO Document adjust_terminal. Or maybe move it to initialize_log? *)
 val run :
   ?interface:string ->
   ?port:int ->
@@ -1317,6 +1318,7 @@ val run :
   ?greeting:bool ->
   ?stop_on_input:bool ->
   ?graceful_stop:bool ->
+  ?adjust_terminal:bool ->
   handler ->
     unit
 (** [Dream.run handler] runs the web application represented by [handler] as a

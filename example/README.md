@@ -118,3 +118,4 @@ Advanced customization:
 <!-- TODO Also need an example that demonstrates typed sessions and how trivial
      they are. -->
 <!-- TODO Need an upload example. Make a hex-dumping server or something. -->
+<!-- TODO Get rid of the Makefiles. -->

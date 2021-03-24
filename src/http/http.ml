@@ -805,7 +805,22 @@ let run
     ?(greeting = true)
     ?(stop_on_input = true)
     ?(graceful_stop = true)
+    ?(adjust_terminal = true)
     user's_dream_handler =
+
+  let adjust_terminal =
+    adjust_terminal && Sys.os_type <> "Win32" && Unix.(isatty stderr) in
+
+  if adjust_terminal then begin
+    (* The mystery terminal escape sequence is $(tput rmam). Prefer this,
+       hopefully it is portable enough. Calling tput seems like a security
+       risk, and I am not aware of an API for doing this programmatically. *)
+    prerr_string "\x1b[?7l";
+    flush stderr;
+    let attributes = Unix.(tcgetattr stderr) in
+    attributes.c_echo <- false;
+    Unix.(tcsetattr stderr TCSANOW) attributes
+  end;
 
   let log = Dream__middleware.Log.convenience_log in
 
@@ -860,6 +875,12 @@ let run
       log "Stopping; allowing 1 second for requests to finish";
       Lwt_unix.sleep 1.
     end
+  end;
+
+  if adjust_terminal then begin
+    (* The escape sequence is $(tput smam). See comment at start of function. *)
+    prerr_string "\x1b[?7h";
+    flush stderr
   end
 
 

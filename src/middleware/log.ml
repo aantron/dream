@@ -42,6 +42,7 @@ let logs_lib_tag : string Logs.Tag.def =
 
 
 
+(* TODO Nice logging for multiline strings? *)
 (* The "back end." I inlined several examples from the Logs, Logs_lwt, and Fmt
    docs into each other, and modified the result, to arrive at this function.
    See those docs for the meanings of the various helpers and values.
