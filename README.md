@@ -21,7 +21,6 @@ The name Dream was inspired by [Morph][morph].
 <!-- TODO dune-workspace at root for examples -->
 <!-- get rid of all warnings in examples -->
 <!-- opam install examples from example dirs, its a mess right now. -->
-<!-- opam install psq in 1-hello. -->
 <!-- warning ~mask in websocketaf, use --profile release anyway -->
 <!-- ::1 IPv6 -->
 <!-- hyperlink localhost in examples -->
@@ -38,17 +37,3 @@ The name Dream was inspired by [Morph][morph].
 <!-- esy workflow -->
 <!-- Remove license headers from examples. add note about public domain to README. -->
 <!-- snag: clone must be recursive. -->
-<!--
-# Hint: try:
-#   dune external-lib-deps --missing -p dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,h2,h2-lwt,h2-lwt-unix -j 15 @install
-#       ocamlc src/vendor/websocketaf/lib/.websocketaf.objs/byte/websocketaf__Websocket.{cmi,cmo,cmt}
-# File "src/vendor/websocketaf/lib/websocket.ml", line 280, characters 33-37:
-# 280 |   let serialize_headers faraday ?mask ~is_fin ~opcode ~payload_length =
-#                                        ^^^^
-# Warning 16 [unerasable-optional-argument]: this optional argument cannot be erased.
-#     ocamlopt src/vendor/websocketaf/lib/.websocketaf.objs/native/websocketaf__Websocket.{cmx,o}
-# File "src/vendor/websocketaf/lib/websocket.ml", line 280, characters 33-37:
-# 280 |   let serialize_headers faraday ?mask ~is_fin ~opcode ~payload_length =
-#                                        ^^^^
-# Warning 16 [unerasable-optional-argument]: this optional argument cannot be erased.
- -->

@@ -13,8 +13,24 @@ dev-repo: "git+https://github.com/aantron/dream.git"
 
 build: [
   ["dune" "build" "-p"
-   "dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,hpack,h2,h2-lwt,h2-lwt-unix"
-   "-j" jobs]
+    "dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,hpack,h2,h2-lwt,h2-lwt-unix"
+    "-j" jobs]
+]
+
+# Extreme abuse.
+install: [
+  ["opam-installer" "--prefix" prefix "dream.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/gluten/gluten.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/gluten/gluten-lwt.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/gluten/gluten-lwt-unix.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/websocketaf/websocketaf.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/httpaf/httpaf.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/httpaf/httpaf-lwt.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/httpaf/httpaf-lwt-unix.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/h2/hpack.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/h2/h2.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/h2/h2-lwt.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/h2/h2-lwt-unix.install"]
 ]
 
 # TODO Test dependency cone, i.e. list dependencies actually installed and make
@@ -41,6 +57,7 @@ depends: [
   "mirage-crypto-rng" {>= "0.8.0"}  # Signature of initialize.
   "multipart-form-data" {>= "0.3.0"}
   "ocaml" {>= "4.05.0"}  # String.split_on_char, String.index_from_opt.
+  "opam-installer" {build}
   "uri"
   "yojson"  # ...
 
@@ -64,3 +81,5 @@ depends: [
   "alcotest" {with-test}  # TODO LATER Needs constraint.
   "bisect_ppx" {dev & >= "2.5.0"}  # --instrument-with.
 ]
+
+# TODO Tags, description.

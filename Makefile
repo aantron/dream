@@ -2,7 +2,7 @@ PACKAGES := dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lw
 
 .PHONY : build
 build :
-	@dune build --no-print-directory -p $(PACKAGES)
+	@dune build --no-print-directory -p $(PACKAGES) @install
 
 .PHONY : watch
 watch :
