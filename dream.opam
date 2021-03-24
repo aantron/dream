@@ -1,5 +1,8 @@
 opam-version: "2.0"
 
+# TODO Test dependency cone, i.e. list dependencies actually installed and make
+# sure nothing questionable silently creeps in.
+
 depends: [
   "base-unix"
   "base64" {>= "3.1.0"}  # Base64.encode_string.
@@ -8,6 +11,8 @@ depends: [
   "cstruct"
   "dune" {>= "2.7.0"}  # --instrument-with.
   "fmt" {>= "0.8.7"}  # `Italic. This constrains Dream to OCaml >= 4.05.
+  "graphql_parser"
+  "graphql-lwt"  # Should be factored out; Menhir as recursive dependency.
   "hmap"
   "jwto" {>= "0.2.2"}  # Jwto.get_payload. TODO LATER Probably system deps.
   "lwt"
@@ -18,6 +23,7 @@ depends: [
   "multipart-form-data" {>= "0.3.0"}
   "ocaml" {>= "4.05.0"}  # String.split_on_char, String.index_from_opt.
   "uri"
+  "yojson"  # ...
 
   # Currently vendored.
   # "gluten"

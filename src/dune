@@ -2,9 +2,11 @@
  (public_name dream)
  (wrapped false)
  (libraries
+  dream.graphql
   dream.http
   dream.middleware
   dream.pure
+  graphql-lwt
   logs
   lwt
   lwt.unix

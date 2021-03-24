@@ -39,6 +39,8 @@ include Dream__middleware.Csrf
 let content_length =
   Dream__middleware.Content_length.content_length
 
+include Dream__graphql.Graphql
+
 include Dream__middleware.Error
 include Dream__http.Http
 

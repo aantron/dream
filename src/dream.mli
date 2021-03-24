@@ -630,6 +630,7 @@ type form = [
     usage. The remaining constructors, [`Invalid_token], [`Missing_token],
     [`Many_tokens], [`Not_form_urlencoded] correspond to bugs or suspicious
     activity. *)
+(* TODO Rename to form_result. *)
 
 (* TODO Link to the tag helper for dream.csrf and backup instructions for
    generating it. *)
@@ -932,6 +933,14 @@ val receive : websocket -> string option Lwt.t
 
 val close : websocket -> unit Lwt.t
 (** Closes the given WebSocket. *)
+
+
+
+(** {1 GraphQL} *)
+
+val graphql : (request -> 'a Lwt.t) -> 'a Graphql_lwt.Schema.schema -> handler
+(* TODO Any neat way to hide the context-maker for super basic usage? *)
+(* TODO Either that, or give it a name so that it's clearer. *)
 
 
 

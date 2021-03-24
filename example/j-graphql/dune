@@ -1,0 +1,3 @@
+(executable
+ (name graphql)
+ (libraries dream))

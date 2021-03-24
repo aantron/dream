@@ -1,0 +1,11 @@
+(library
+ (public_name dream.graphql)
+ (name dream__graphql)
+ (libraries
+  dream.pure
+  graphql_parser
+  graphql-lwt
+  lwt
+  yojson
+ )
+ (instrumentation (backend bisect_ppx)))
