@@ -53,7 +53,7 @@ let buffer_body body_cell =
       Lwt.wakeup_later finished ()
     in
 
-    let data chunk offset chunk_length =
+    let rec data chunk offset chunk_length =
       let new_length = !length + chunk_length in
 
       if new_length > Lwt_bytes.length !buffer then begin
@@ -63,7 +63,9 @@ let buffer_body body_cell =
       end;
 
       Lwt_bytes.blit chunk offset !buffer !length chunk_length;
-      length := new_length
+      length := new_length;
+
+      stream data eof
     in
 
     stream data eof;
