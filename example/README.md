@@ -5,12 +5,12 @@ list below and jump to whatever interests you!
 
 - [**`1-hello`**](1-hello#files) &nbsp;&mdash;&nbsp; the simplest Dream server
   responds to every request with the same friendly message.
-- [**`2-middleware`**](2-middleware) &nbsp;&mdash;&nbsp; adds the first Dream
-  middleware: the *logger*.
-- [**`3-counter`**](3-counter) &nbsp;&mdash;&nbsp; our content is now slightly
-  dynamic!
-- [**`4-router`**](4-router) &nbsp;&mdash;&nbsp; different handlers for
+- [**`2-middleware`**](2-middleware#files) &nbsp;&mdash;&nbsp; adds the first
+  Dream middleware: the *logger*.
+- [**`3-router`**](3-router#files) &nbsp;&mdash;&nbsp; different handlers for
   different paths.
+- [**`4-counter`**](4-counter#files) &nbsp;&mdash;&nbsp; our content is now
+  slightly dynamic!
 - [**`5-echo`**](5-echo)
 - [**`6-template`**](6-template) &nbsp;&mdash;&nbsp; render responses from
   templates and guard against XSS.
@@ -119,3 +119,4 @@ Advanced customization:
      they are. -->
 <!-- TODO Need an upload example. Make a hex-dumping server or something. -->
 <!-- TODO Get rid of the Makefiles. -->
+<!-- TODO Lwt/promise example. -->

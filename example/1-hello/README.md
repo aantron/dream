@@ -26,12 +26,12 @@ course, see `Good morning, world!`.
 
 <br>
 
-Next steps:
+**Next steps:**
 
-- The next example, [**`2-middleware`**](../2-middleware#files) adds a *logger*
+- The next example, [**`2-middleware`**](../2-middleware#files), adds a *logger*
   to the app.
-- [**`3-counter`**](../3-counter) is a really basic app that actually does
-  something in response to requests.
+- [**`3-router`**](../3-router#files) sends requests to different handlers,
+  depending on their path.
 
 <br>
 
