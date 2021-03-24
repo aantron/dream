@@ -747,6 +747,8 @@ val logger : middleware
     next handler has returned a response. Time spent logging is included in the
     timings. *)
 
+val echo : handler
+
 
 
 (** {1 Routing} *)

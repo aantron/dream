@@ -14,6 +14,7 @@ end
 include Dream__pure.Inmost
 
 include Dream__middleware.Log
+include Dream__middleware.Echo
 
 let logger =
   Dream__middleware.Log.logger
