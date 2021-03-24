@@ -21,11 +21,11 @@ module Dream = Dream__pure.Inmost
 
 type token =
   | Literal of string
-  | Crumb of string
+  | Param of string
   | Wildcard of string
 
 let rec validate route = function
-  | (Crumb "")::_ ->
+  | (Param "")::_ ->
     Printf.ksprintf failwith "Empty path parameter name in '%s'" route
   | [Wildcard ""] ->
     ()
@@ -54,7 +54,7 @@ let parse string =
     | '/' ->
       parse_component_start tokens (index + 1)
     | ':' ->
-      parse_component tokens (fun s -> Crumb s) (index + 1) (index + 1)
+      parse_component tokens (fun s -> Param s) (index + 1) (index + 1)
     | '*' ->
       parse_component tokens (fun s -> Wildcard s) (index + 1) (index + 1)
     | _ | exception Invalid_argument _ ->
@@ -144,23 +144,23 @@ let scope prefix middlewares routes =
 
 
 (* TODO LATER Pretty-print for the debugger. *)
-let crumbs : (string * string) list Dream.local =
+let params : (string * string) list Dream.local =
   Dream.new_local ()
 
 let log =
   Log.sub_log "dream.router"
 
-let missing_crumb name request =
-  let message = Printf.sprintf "Dream.crumb: missing path parameter %S" name in
+let missing_param name request =
+  let message = Printf.sprintf "Dream.param: missing path parameter %S" name in
   log.error (fun log -> log ~request "%s" message);
   failwith message
 
-let crumb name request =
-  match Dream.local crumbs request with
-  | None -> missing_crumb name request
-  | Some crumbs ->
-    try List.assoc name crumbs
-    with _ -> missing_crumb name request
+let param name request =
+  match Dream.local params request with
+  | None -> missing_param name request
+  | Some params ->
+    try List.assoc name params
+    with _ -> missing_param name request
 
 let router routes =
   let routes = List.flatten routes in
@@ -185,8 +185,8 @@ let router routes =
       | Literal  s :: pattern, s' :: path when s = s' ->
         try_route bindings            (s'::prefix) path pattern node ok fail
       | Literal  _ :: _,       _                      -> fail ()
-      | Crumb    _ :: _,       s' :: _ when s' = ""   -> fail ()
-      | Crumb    s :: pattern, s' :: path ->
+      | Param    _ :: _,       s' :: _ when s' = ""   -> fail ()
+      | Param    s :: pattern, s' :: path ->
         try_route ((s, s')::bindings) (s'::prefix) path pattern node ok fail
       | Wildcard _ :: _,       _ ->
         try_node bindings prefix path node true ok fail
@@ -195,7 +195,7 @@ let router routes =
       match node with
       | Handler (method_, handler)
           when Dream.methods_equal method_ (Dream.method_ request) ->
-        let request = Dream.with_local crumbs bindings request in
+        let request = Dream.with_local params bindings request in
         if is_wildcard then
           request
           |> Dream.with_prefix prefix
@@ -212,26 +212,9 @@ let router routes =
 
     in
 
-    (* If this is the top-most router, the request may have a site prefix that
-       needs to be checked. *)
-    (* let rec match_site_prefix prefix path =
-
-      match prefix, path with
-      | prefix_crumb::prefix, path_crumb::path ->
-        if path_crumb = prefix_crumb then
-          match_site_prefix prefix path
-        else
-          None
-
-      | [], path ->
-        Some path
-      | _ ->
-        None
-    in *)
-
-    let crumbs =
-      match Dream.local crumbs request with
-      | Some crumbs -> crumbs
+    let params =
+      match Dream.local params request with
+      | Some params -> params
       | None -> []
     in
 
@@ -245,6 +228,6 @@ let router routes =
       (* TODO The initial bindings and prefix should be taken from the request
          context when there is indirect nested router support. *)
     try_routes
-      crumbs prefix path routes
+      params prefix path routes
       (fun handler request -> handler request)
       (fun () -> next_handler request)

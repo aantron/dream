@@ -24,16 +24,16 @@ val patch : string -> Dream.handler -> route
 val scope : string -> Dream.middleware list -> route list -> route
 
 (* The middleware and the path parameter retriever. With respect to path
-   parameters ("crumbs"), the middleware is the setter, and the retriever is,
-   of course, the getter. *)
+   parameters, the middleware is the setter, and the retriever is, of course,
+   the getter. *)
 val router : route list -> Dream.middleware
-val crumb : string -> Dream.request -> string
+val param : string -> Dream.request -> string
 
 (**/**)
 
 type token =
   | Literal of string
-  | Crumb of string
+  | Param of string
   | Wildcard of string
 
 val parse : string -> token list

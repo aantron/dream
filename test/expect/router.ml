@@ -15,7 +15,7 @@ let show_tokens route =
     Dream__middleware.Router.parse route
     |> List.map (function
       | Dream__middleware.Router.Literal s -> Printf.sprintf "%S" s
-      | Dream__middleware.Router.Crumb s -> Printf.sprintf ":%S" s
+      | Dream__middleware.Router.Param s -> Printf.sprintf ":%S" s
       | Dream__middleware.Router.Wildcard s -> Printf.sprintf "*%S" s)
     |> String.concat "; "
     |> Printf.printf "[%s]\n"
@@ -287,7 +287,7 @@ let%expect_test _ =
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
     Dream.get "/abc/:x" (fun request ->
-      Dream.respond (Dream.crumb "x" request));
+      Dream.respond (Dream.param "x" request));
   ];
   [%expect {|
     Response: 200 OK
@@ -296,7 +296,7 @@ let%expect_test _ =
 let%expect_test _ =
   show "/abc/def/ghi" @@ Dream.router [
     Dream.get "/abc/:x/:y" (fun request ->
-      Dream.respond (Dream.crumb "x" request ^ Dream.crumb "y" request));
+      Dream.respond (Dream.param "x" request ^ Dream.param "y" request));
   ];
   [%expect {|
     Response: 200 OK
@@ -312,16 +312,16 @@ let%expect_test _ =
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
     Dream.get "/abc/def" (fun request ->
-      Dream.respond (Dream.crumb "x" request));
+      Dream.respond (Dream.param "x" request));
   ];
   [%expect {|
-    Dream.crumb: missing path parameter "x" |}]
+    Dream.param: missing path parameter "x" |}]
 
 let%expect_test _ =
   show "/" @@ (fun next_handler request ->
-    ignore (Dream.crumb "x" request);
+    ignore (Dream.param "x" request);
     next_handler request);
-  [%expect {| Dream.crumb: missing path parameter "x" |}]
+  [%expect {| Dream.param: missing path parameter "x" |}]
 
 (* Router respects site prefix. *)
 
@@ -398,7 +398,7 @@ let%expect_test _ =
   show "/abc/def" @@ Dream.router [
     Dream.scope "/:x" [] [
       Dream.get "/def" (fun request ->
-        Dream.respond (Dream.crumb "x" request));
+        Dream.respond (Dream.param "x" request));
     ];
   ];
   [%expect {|
@@ -409,7 +409,7 @@ let%expect_test _ =
   show "/abc/def" @@ Dream.router [
     Dream.scope "/:x" [] [
       Dream.get "/:x" (fun request ->
-        Dream.respond (Dream.crumb "x" request));
+        Dream.respond (Dream.param "x" request));
     ];
   ];
   [%expect {|
@@ -619,14 +619,14 @@ let%expect_test _ =
     Response: 200 OK
     /abc/def /ghi |}]
 
-(* Wildcard works with crumbs. *)
+(* Wildcard works with params. *)
 
 let%expect_test _ =
   show "/abc/def/ghi" @@ Dream.router [
     Dream.get "/:x/*" (fun request ->
       Printf.ksprintf Dream.respond "%s %s %s"
         (Dream.prefix request)
-        (Dream.crumb "x" request)
+        (Dream.param "x" request)
         (Dream.path request));
   ];
   [%expect {|
@@ -638,7 +638,7 @@ let%expect_test _ =
     Dream.get "/abc/:x/*" (fun request ->
       Printf.ksprintf Dream.respond "%s %s %s"
         (Dream.prefix request)
-        (Dream.crumb "x" request)
+        (Dream.param "x" request)
         (Dream.path request));
   ];
   [%expect {|
@@ -651,7 +651,7 @@ let%expect_test _ =
       Dream.get "/:x/*" (fun request ->
         Printf.ksprintf Dream.respond "%s %s %s"
           (Dream.prefix request)
-          (Dream.crumb "x" request)
+          (Dream.param "x" request)
           (Dream.path request));
     ];
   ];
@@ -683,8 +683,8 @@ let%expect_test _ =
         Dream.get "/:y" (fun request ->
           Printf.ksprintf Dream.respond "%s %s %s %s"
             (Dream.prefix request)
-            (Dream.crumb "x" request)
-            (Dream.crumb "y" request)
+            (Dream.param "x" request)
+            (Dream.param "y" request)
             (Dream.path request));
       ]
       @@ (fun _ -> Dream.respond ~status:`Not_Found ""))
@@ -701,7 +701,7 @@ let%expect_test _ =
         Dream.get "/:x" (fun request ->
           Printf.ksprintf Dream.respond "%s %s %s"
             (Dream.prefix request)
-            (Dream.crumb "x" request)
+            (Dream.param "x" request)
             (Dream.path request));
       ]
       @@ (fun _ -> Dream.respond ~status:`Not_Found ""))
@@ -710,4 +710,4 @@ let%expect_test _ =
     Response: 200 OK
     /abc def /def |}]
 
-(* TODO Test scope with crumbs and scope with wildcard. *)
+(* TODO Test scope with params and scope with wildcard. *)

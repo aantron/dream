@@ -772,7 +772,8 @@ val router : route list -> middleware
         @@ fun _ -> Dream.respond ~status:`Not_Found ""
     ]} *)
 
-val crumb : string -> request -> string
+(* :((( *)
+val param : string -> request -> string
 (** Retrieves the given path parameter (“crumb”). If the path parameter is
     missing, [Dream.crumb] treats this as a logic error, and raises an
     exception. *)
