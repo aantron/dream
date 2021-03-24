@@ -944,6 +944,24 @@ val graphql : (request -> 'a Lwt.t) -> 'a Graphql_lwt.Schema.schema -> handler
 
 
 
+(* TODO The TOC highlighting JS does not do well on short sections; it detects
+   a next one. Needs to be anchor-target-sensitive. *)
+(** {1 SQL} *)
+
+(* TODO Expose the lower-level helpers. *)
+(* type sql_pool = Caqti_lwt.Pool.t *)
+
+(* val connect_to_sql : ?pool_size:int -> string -> sql_pool Lwt.t *)
+
+(* val use_sql : (sql_connection -> 'a Lwt.t) -> sql_pool -> 'a Lwt.t *)
+
+(* val sql_pool : ?size:int -> string -> middleware *)
+
+(* val sql : (Caqti_lwt.connection -> 'a Lwt.t) -> request -> 'a Lwt.t *)
+(* TODO This should fit very neatly in examples. *)
+
+
+
 (** {1 Logging} *)
 
 val log : ('a, Format.formatter, unit, unit) format4 -> 'a

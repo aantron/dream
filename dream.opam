@@ -7,6 +7,7 @@ depends: [
   "base-unix"
   "base64" {>= "3.1.0"}  # Base64.encode_string.
   "bigarray-compat"
+  "caqti-lwt"
   "conf-libev"  # TODO LATER Get rid of this system dep.
   "cstruct"
   "dune" {>= "2.7.0"}  # --instrument-with.

@@ -2,6 +2,7 @@
  (public_name dream)
  (wrapped false)
  (libraries
+  caqti-lwt
   dream.graphql
   dream.http
   dream.middleware
