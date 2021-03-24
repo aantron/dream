@@ -145,7 +145,8 @@ and 'a promise = 'a Lwt.t
 
 
 (* TODO Framework never emits `Method, `Status when not necessary. *)
-(* TODO So capitalized statuses or OCaml-style? *)
+(* TODO Normalize metods and statuses whenever they are set. Maybe provide a
+   normalize helper? *)
 (** The only purpose of this submodule is to generate a subpage, so as to move
     helpers and repetitive defintions of seldom-used codes out of the main
     docs. The module is immediately included in the main API. *)
@@ -725,6 +726,7 @@ val verify_csrf_token : string -> request -> csrf_result Lwt.t
 
 
 
+(* TODO Move logger to Logging, echo to testing. *)
 (** {1 Middleware} *)
 
 val identity : middleware
@@ -960,6 +962,9 @@ val graphql : (request -> 'a Lwt.t) -> 'a Graphql_lwt.Schema.schema -> handler
 (* val sql : (Caqti_lwt.connection -> 'a Lwt.t) -> request -> 'a Lwt.t *)
 (* TODO This should fit very neatly in examples. *)
 
+(* val sql_stream :
+  (Caqti_lwt.connection -> unit Lwt.t) -> request -> response Lwt.t *)
+(* TODO This function eeds the response as argument. *)
 
 
 (** {1 Logging} *)
@@ -1450,6 +1455,7 @@ val chop_site_prefix : string -> middleware
 
 
 
+(* TODO Add hex encoding. Add secret generation example. *)
 (** {1:web_formats Web formats} *)
 
 val to_base64url : string -> string
@@ -1654,3 +1660,4 @@ val sort_headers : (string * string) list -> (string * string) list
    handlers or middlewares. *)
 (* TODO DOC Need a syntax highlighter. Highlight.js won't work for templates for
    sure. *)
+(* TODO Dream.read_file and Dream.write_file. *)
