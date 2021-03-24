@@ -6,7 +6,7 @@
 	url = https://github.com/aantron/gluten.git
 [submodule "src/vendor/websocketaf"]
 	path = src/vendor/websocketaf
-	url = https://github.com/anmonteiro/websocketaf.git
+	url = https://github.com/aantron/websocketaf.git
 [submodule "src/vendor/h2"]
 	path = src/vendor/h2
 	url = https://github.com/anmonteiro/ocaml-h2.git
