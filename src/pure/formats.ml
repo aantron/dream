@@ -5,6 +5,20 @@
 
 
 
+let html_escape s =
+  let buffer = Buffer.create (String.length s * 2) in
+  s |> String.iter begin function
+    | '&' -> Buffer.add_string buffer "&amp;"
+    | '<' -> Buffer.add_string buffer "&lt;"
+    | '>' -> Buffer.add_string buffer "&gt;"
+    | '"' -> Buffer.add_string buffer "&quot;"
+    | '\'' -> Buffer.add_string buffer "&#x27;"
+    | c -> Buffer.add_char buffer c
+    end;
+  Buffer.contents buffer
+
+
+
 let to_base64url string =
   Base64.encode_string ~pad:false ~alphabet:Base64.uri_safe_alphabet string
 

@@ -1464,6 +1464,11 @@ val chop_site_prefix : string -> middleware
 (* TODO Add hex encoding. Add secret generation example. *)
 (** {1:web_formats Web formats} *)
 
+val html_escape : string -> string
+(** Escapes a string so that it is suitable for use as text inside HTML
+    elements, and quoted attribute values. *)
+(* TODO OWASP links. *)
+
 val to_base64url : string -> string
 (** Converts the given string its base64url encoding, as specified in
     {{:https://tools.ietf.org/html/rfc4648#section-5} RFC 4648 §5 ↪}, using a
@@ -1573,6 +1578,7 @@ val drop_empty_trailing_path_component : string list -> string list
 
 
 (* TODO Expose current time somewhere. *)
+(* TODO Should cryptography be before web formats? *)
 (** {1 Cryptography} *)
 
 val random : int -> string
