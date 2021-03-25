@@ -407,6 +407,9 @@ let respond
 let empty status =
   respond ~status ""
 
+let not_found _ =
+  respond ~status:`Not_Found ""
+
 let websocket handler =
   let response = response ~status:`Switching_Protocols "" in
   let response =

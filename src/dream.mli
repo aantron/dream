@@ -776,9 +776,8 @@ val router : route list -> middleware
 
 (* :((( *)
 val param : string -> request -> string
-(** Retrieves the given path parameter (“crumb”). If the path parameter is
-    missing, [Dream.crumb] treats this as a logic error, and raises an
-    exception. *)
+(** Retrieves the given path parameter. If the path parameter is missing,
+    [Dream.param] treats this as a logic error, and raises an exception. *)
 
 val scope : string -> middleware list -> route list -> route
 (** Groups routes under a common path prefix and set of scoped middlewares. In
@@ -834,6 +833,8 @@ Now with Content-Type guessing.
  *)
 (* TODO Expose default static handlers. At least the FS one. Should probably
    also add a crunch-based handler, because it can send nice etags. *)
+
+val not_found : handler
 
 
 
