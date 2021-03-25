@@ -14,8 +14,8 @@ list below and jump to whatever interests you!
 - [**`4-counter`**](4-counter/#files) &nbsp;&mdash;&nbsp; the first *custom*
   middleware!
 - [**`5-echo`**](5-echo/#files) &nbsp;&mdash;&nbsp; reads request bodies.
-- [**`6-template`**](6-template) &nbsp;&mdash;&nbsp; render responses from
-  templates and guard against XSS.
+- [**`6-template`**](6-template/#files) &nbsp;&mdash;&nbsp; render responses
+  from templates and guard against XSS.
 - [**`7-debug`**](7-debug) &nbsp;&mdash;&nbsp; centralize your error page and
   run the debugger.
 - [**`8-error-page`**](8-error-page)

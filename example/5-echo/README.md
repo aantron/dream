@@ -15,7 +15,7 @@ let () =
   @@ Dream.not_found
 ```
 
-<pre><code><b>$ dune exec --root . ./counter.exe</b></code></pre>
+<pre><code><b>$ dune exec --root . ./echo.exe</b></code></pre>
 
 <br>
 
