@@ -1,3 +1,5 @@
+# Tutorial
+
 Dream's first several examples make up a **tutorial**. Each example is a
 complete project with a helpful `README`, and plenty of links to next steps and
 documentation. You can begin at [**`1-hello`**](1-hello#files), or look in the
@@ -35,10 +37,6 @@ list below and jump to whatever interests you!
 
 That's it for the tutorial!
 
-Scroll down for *everything else*.
-
-<br>
-<br>
 <br>
 
 There are several examples of using Dream with Reason syntax:
@@ -48,15 +46,15 @@ There are several examples of using Dream with Reason syntax:
 - [**`w-reason-fullstack`**]()
 
 <br>
-<br>
-<br>
+
+# Extras
 
 The rest of the examples cover additional topics in a more-standalone fashion.
 They are, however, still complete, self-contained projects in the same style.
 
 The goal of the examples is to cover the great majority of real-world HTTP
-usage, so that perusing them gives a good survey. Please open an issue if
-something is missing!
+usage, so that they make up a good survey. Please open an issue if something is
+missing!
 
 <br>
 
