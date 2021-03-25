@@ -611,14 +611,35 @@ struct
         Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
         Printf.ksprintf print "%s%s\n" (String.make column ' ') code
 
-      (* TODO SUppress escaping on ! *)
-      (* TODO Need escaping: %s, %S, %c, %C, %a, %t. *)
+      (* TODO Really need tests for this. *)
       | `Embedded {line; column; what = format, code} ->
-        Printf.ksprintf print "(Printf.bprintf ___eml_buffer %S
-          (\n" ("%" ^ format);
+        let format, needs_escape =
+          match format.[String.length format - 1] with
+          | '!' ->
+            String.sub format 0 (String.length format - 1), false
+          | 's' | 'S' | 'c' | 'C' | 'a' | 't' ->
+            format, true
+          | _ ->
+            format, false
+        in
+
+        begin
+          if needs_escape then
+            Printf.ksprintf print
+              "(Printf.bprintf ___eml_buffer %S (Dream.html_escape (\n"
+              ("%" ^ format)
+          else
+            Printf.ksprintf print "(Printf.bprintf ___eml_buffer %S (\n"
+              ("%" ^ format)
+        end;
+
         Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
         Printf.ksprintf print "%s%s\n" (String.make column ' ') code;
-        print "));\n"
+
+        if needs_escape then
+          print ")));\n"
+        else
+          print "));\n"
     end
 
   let generate location print templates =
