@@ -247,6 +247,7 @@ let body_stream_bigstring data eof message =
    request's ref; we generate a new request with a new body ref. *)
 let with_body body message =
   update {message with body = ref (`String body)}
+(* TODO Set to `Empty to avoid an allocation if the string is empty. *)
 
 let with_body_stream stream message =
   update {message with body = ref (`String_stream stream)}
@@ -394,6 +395,8 @@ let response
   } in
 
   with_body body response
+  (* TODO Either don't call this if the body is empty, or have it not create a
+     new message if the body is empty. *)
 
 let respond
     ?status

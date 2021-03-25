@@ -68,6 +68,7 @@ Ideas:
 - [**`w-ppx-deriving`**]()
 - [**`w-react-spa`**]()
 - [**`w-subcommand`**]()
+- [**`w-template-directory`**]()
 - [**`w-tyxml`**]()
 
 Basics:
@@ -88,6 +89,7 @@ Security:
 - [**`w-form-expired`**]()
 - [**`w-json-csrf`**]()
 - [**`w-jwt`**]()
+- [**`w-key-rotation`**]()
 - [**`w-upload-csrf`**]()
 
 Techniques:
