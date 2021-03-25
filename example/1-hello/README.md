@@ -28,11 +28,11 @@ course, see `Good morning, world!`.
 
 **Next steps:**
 
-- The next example, [**`2-middleware`**](../2-middleware#files), adds a *logger*
-  to the app.
-- [**`3-router`**](../3-router#files) sends requests to different handlers,
+- The next example, [**`2-middleware`**](../2-middleware/#files), adds a
+  *logger* to the app.
+- [**`3-router`**](../3-router/#files) sends requests to different handlers,
   depending on their path.
 
 <br>
 
-[Up to the example index](../#readme)
+[Up to the tutorial index](../#readme)

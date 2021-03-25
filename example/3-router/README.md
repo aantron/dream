@@ -43,29 +43,29 @@ happens.
 
 Except for the status code, the `404 Not Found` response is *completely* empty,
 so it might not display well in your browser. In
-[**`8-error-page`**](../8-error-page#files), we will decorate all error
+[**`8-error-page`**](../8-error-page/#files), we will decorate all error
 responses with an error template in one central location.
 
 <br>
 
 The router can do more than match simple routes:
 
-- [**`f-static`**](../f-static#files) forwards all requests with a certain
+- [**`f-static`**](../f-static/#files) forwards all requests with a certain
   prefix to a static file handler.
-- [**`w-scope`**](../w-scope#files) applies middlewares to groups of routes
+- [**`w-scope`**](../w-scope/#files) applies middlewares to groups of routes
   &mdash; but only when they match.
-- [**`w-subsite`**](../w-subsite#files) attaches a handler as a complete, nested
-  sub-site, which might have its own router.
+- [**`w-subsite`**](../w-subsite/#files) attaches a handler as a complete,
+  nested sub-site, which might have its own router.
 
 <br>
 
 **Next steps:**
 
-- [**`4-counter`**](../4-counter#files) counts requests, and exposes a special
+- [**`4-counter`**](../4-counter/#files) counts requests, and exposes a special
   route for getting the count.
-- [**`5-echo`**](../5-echo#files) is dynamic in another way: by reading the
+- [**`5-echo`**](../5-echo/#files) is dynamic in another way: by reading the
   request body.
 
 <br>
 
-[Up to the example index](../#readme)
+[Up to the tutorial index](../#readme)

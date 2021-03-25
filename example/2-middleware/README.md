@@ -4,7 +4,7 @@
 
 *Middleware* is just functions that take handlers and wrap them, producing
 handlers that do a little bit more. This example takes the handler from
-[**`1-hello`**](../1-hello#files) and wraps it in one of the most useful
+[**`1-hello`**](../1-hello/#files) and wraps it in one of the most useful
 middlewares, the *logger*:
 
 ```ocaml
@@ -46,31 +46,31 @@ When you run this server and visit
 <!-- TODO Link to Dream.log. -->
 
 You can write your own messages to the log using `Dream.log`. See example
-[**`9-logging`**](../9-logging#files) for more logging options. Now that we have
-the logger, we will use it in all other examples, even though it's not really
-necessary &mdash; it just makes it much easier to see what is going on.
+[**`9-logging`**](../9-logging/#files) for more logging options. Now that we
+have the logger, we will use it in all other examples, even though it's not
+really necessary &mdash; it just makes it much easier to see what is going on.
 
 <br>
 
 There's not much else to middlewares &mdash; they are really just functions
 from handlers to handlers, so you can create them anywhere. Example
-[**`4-counter`**](../4-counter#files) already shows a simple custom middleware.
+[**`4-counter`**](../4-counter/#files) already shows a simple custom middleware.
 There are also more complicated middlewares defined in
 
-- [**`m-locals`**](../m-locals#files),
-- [**`w-auto-reload`**](../w-auto-reload#files), and
-- [**`w-index-html`**](../w-index-html#files).
+- [**`m-locals`**](../m-locals/#files),
+- [**`w-auto-reload`**](../w-auto-reload/#files), and
+- [**`w-index-html`**](../w-index-html/#files).
 
-<!-- TODO Fill out this list -->
+<!-- TODO Fill out this list; probably a-promise belongs here. -->
 
 <br>
 
 **Next steps:**
 
-- The next example, [**`3-router`**](../3-router#files), shows *routes*, the
+- The next example, [**`3-router`**](../3-router/#files), shows *routes*, the
   other way to build up handlers in Dream.
-- [**`4-counter`**](../4-counter#files) builds the first custom middleware.
+- [**`4-counter`**](../4-counter/#files) builds the first custom middleware.
 
 <br>
 
-[Up to the example index](../#readme)
+[Up to the tutorial index](../#readme)

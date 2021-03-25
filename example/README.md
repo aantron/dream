@@ -5,15 +5,15 @@ complete project with a helpful `README`, and plenty of links to next steps and
 documentation. You can begin at [**`1-hello`**](1-hello#files), or look in the
 list below and jump to whatever interests you!
 
-- [**`1-hello`**](1-hello#files) &nbsp;&mdash;&nbsp; the simplest Dream server
+- [**`1-hello`**](1-hello/#files) &nbsp;&mdash;&nbsp; the simplest Dream server
   responds to every request with the same friendly message.
-- [**`2-middleware`**](2-middleware#files) &nbsp;&mdash;&nbsp; adds the first
+- [**`2-middleware`**](2-middleware/#files) &nbsp;&mdash;&nbsp; adds the first
   Dream middleware: the *logger*.
-- [**`3-router`**](3-router#files) &nbsp;&mdash;&nbsp; different handlers for
+- [**`3-router`**](3-router/#files) &nbsp;&mdash;&nbsp; different handlers for
   different paths.
-- [**`4-counter`**](4-counter#files) &nbsp;&mdash;&nbsp; the first *custom*
+- [**`4-counter`**](4-counter/#files) &nbsp;&mdash;&nbsp; the first *custom*
   middleware!
-- [**`5-echo`**](5-echo)
+- [**`5-echo`**](5-echo/#files) &nbsp;&mdash;&nbsp; reads request bodies.
 - [**`6-template`**](6-template) &nbsp;&mdash;&nbsp; render responses from
   templates and guard against XSS.
 - [**`7-debug`**](7-debug) &nbsp;&mdash;&nbsp; centralize your error page and
