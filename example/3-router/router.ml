@@ -12,5 +12,4 @@ let () =
         Dream.respond (Dream.param "word" request));
 
   ]
-  @@ fun _ ->
-    Dream.empty `Not_Found
+  @@ Dream.not_found

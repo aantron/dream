@@ -26,6 +26,8 @@ let () =
     Dream.empty `Not_Found
 ```
 
+<pre><code><b>$ dune exec --root . ./router.exe</b></code></pre>
+
 <br>
 
 This is also our first dynamic site! A request to `/echo/foo` gets the response

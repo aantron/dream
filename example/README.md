@@ -9,8 +9,8 @@ list below and jump to whatever interests you!
   Dream middleware: the *logger*.
 - [**`3-router`**](3-router#files) &nbsp;&mdash;&nbsp; different handlers for
   different paths.
-- [**`4-counter`**](4-counter#files) &nbsp;&mdash;&nbsp; our content is now
-  slightly dynamic!
+- [**`4-counter`**](4-counter#files) &nbsp;&mdash;&nbsp; the first *custom*
+  middleware!
 - [**`5-echo`**](5-echo)
 - [**`6-template`**](6-template) &nbsp;&mdash;&nbsp; render responses from
   templates and guard against XSS.
@@ -106,6 +106,7 @@ Techniques:
 
 Advanced customization:
 
+- [**`w-globals`**]()
 - [**`w-typed-session`**]()
 
 

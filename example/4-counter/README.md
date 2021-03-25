@@ -1,50 +1,58 @@
-This example builds on [**`2-middleware`**](../2-middleware) by showing a
-visitor counter. It also prints the visit count to the log. The counter itself
-is stored in an ordinary global `ref`.
+# `4-counter`
 
-<!-- TODO Link to database example. -->
+<br>
+
+This example defines a custom middleware, `count_requests`, and exposes the
+request count at
+[http://localhost:8080/dashboard](http://localhost:8080/dashboard):
 
 ```ocaml
-let counter = ref 0
+let count = ref 0
+
+let count_requests inner_handler request =
+  count := !count + 1;
+  inner_handler request
 
 let () =
   Dream.run
   @@ Dream.logger
-  @@ (fun _ ->
-    counter := !counter + 1;
-    Dream.log "The count is now %i" !counter;
-    Dream.respond (Printf.sprintf "You are visitor number %i!" !counter))
+  @@ count_requests
+  @@ Dream.router [
+    Dream.get "/dashboard" (fun _ ->
+      Dream.respond (Printf.sprintf "Saw %i request(s)!" !count))
+  ]
+  @@ Dream.not_found
 ```
-
-You may see the count go up by *two* each time you visit
-`http://localhost:8080`. That's probably because your browser is generating
-requests for `/favicon.ico`, which we are also answering with the same handler!
-In [**`4-router`**](../4-router), we will see how to assign different handlers
-to different paths, and reply to missing resources like `/favicon.ico` with
-`404 Not Found`.
+<pre><code><b>$ dune exec --root . ./counter.exe</b></code></pre>
 
 <br>
 
-When you visit `http://localhost:8080`, you will see this handler's own
-`Dream.log` output included in the log:
+As you can see, defining middlewares in Dream is completely trivial! They are
+just functions that take an `inner_handler` as a parameter, and wrap it. They
+act like handlers themselves, which means they typically also take a `request`.
 
-```
-$ make
-[...]
-08.03.21 22:33:59.869                       REQ 6 The count is now 6
-```
-
-Use `Dream.error`, `Dream.warning`, `Dream.info`, and `Dream.debug` to print
-conditionally and with different log levels.
-
-<!-- TODO API links -->
-<!-- TODO Link to creating your own log source? Seems superfluous. -->
+This example's middleware only does something *before* calling the
+`inner_handler`. Example [**`a-promise`**](../a-promise/#files) introduces
+[Lwt](https://github.com/ocsigen/lwt#readme), the promise library used by
+Dream. It uses Lwt to await a response from `inner_handler`, and do something
+*after*.
 
 <br>
 
-Where to go from here?
+Advanced example [**`w-globals`**](../w-globals/#files) shows how to replace
+global state like `count` by state scoped to the application. This is useful if
+you are writing middleware to publish in a library. It's fine to use a global
+`ref` in private code!
 
-- [**`4-router`**](../4-router) shows how to assign different handlers to
-  different paths.
+<br>
 
-<!-- TODO Go to SQL example. -->
+**Next steps:**
+
+- [**`5-echo`**](../5-echo#files) responds to `POST` requests and reads their
+  bodies.
+- [**`6-template`**](../6-template#files) embeds HTML in OCaml... or OCaml in
+  HTML!
+
+<br>
+
+[Up to the example index](../#readme)
