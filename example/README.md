@@ -25,7 +25,8 @@ list below and jump to whatever interests you!
   responses in one place.
 - [**`9-log`**](9-log/#files) &nbsp;&mdash;&nbsp; writing messages to Dream's
   log.
-- [**`a-promise`**](a-promise)
+- [**`a-promise`**](a-promise/#files) &nbsp;&mdash;&nbsp; introduces Lwt, the
+  promise library used by Dream.
 - [**`b-session`**](a-session)
 - [**`c-cookie`**](b-cookie)
 - [**`d-form`**](c-form) &nbsp;&mdash;&nbsp; reading forms and CSRF prevention.

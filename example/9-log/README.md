@@ -71,10 +71,10 @@ let () =
 
 **Next steps:**
 
-- [**`a-promise`**](../a-promise/#files) introduces Lwt, the promise library
-  used by Dream.
-- [**`b-session`**](../b-session/#files) finally back to web development proper
-  &mdash; session management.
+- In [**`a-promise`**](../a-promise/#files), we combine logging with the promise
+  library Lwt to sketch out a custom logger.
+- [**`b-session`**](../b-session/#files) finally returns web development proper
+  with *session management*.
 
 <br>
 
