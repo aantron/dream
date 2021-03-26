@@ -1,5 +1,7 @@
 # Tutorial
 
+<!-- Link to tutorial getting started instructions. -->
+
 Dream's first several examples make up a **tutorial**. Each example is a
 complete project with a helpful `README`, and plenty of links to next steps and
 documentation. You can begin at [**`1-hello`**](1-hello#files), or look in the
@@ -15,7 +17,7 @@ list below and jump to whatever interests you!
   middleware!
 - [**`5-echo`**](5-echo/#files) &nbsp;&mdash;&nbsp; reads request bodies.
 - [**`6-template`**](6-template/#files) &nbsp;&mdash;&nbsp; renders responses
-  from templates and guards against XSS.
+  from inline HTML templates and guards against XSS.
 - [**`7-debug`**](7-debug/#files) &nbsp;&mdash;&nbsp; includes detailed
   information
   about errors in responses.

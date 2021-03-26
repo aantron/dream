@@ -58,7 +58,7 @@ from the standard library. So, you can do things like this:
 
 <!-- Hyperlink Dream.html_escape -->
 
-**Security:**
+## Security
 
 The template automatically passes strings through `Dream.html_escape` before
 inserting them into the output. This only applies to formats that can emit
@@ -90,13 +90,15 @@ you will see that the app safely formats the script tag as text.
 <br>
 
 In general, if you are not using the templater, you should pass any text that
-will be included in HTML through `Dream.html_escape`, unless you can somehow
-guarantee that it does not contain the characters `<`, `>`, `&`, `"`, or `'`.
-Also, always use quoted attributes &mdash; the rules for escaping for unquoted
+will be included in HTML through `Dream.html_escape`, unless you can guarantee
+that it does not contain the characters `<`, `>`, `&`, `"`, or `'`. Also,
+always use quoted attribute values &mdash; the rules for escaping unquoted
 attributes are much more invasive.
 
 <!-- TODO Link out to more template examples. -->
+<!-- TODO Recommend against generating <script>, CSS, etc. -->
 
+<br>
 <br>
 
 **Next steps:**
