@@ -16,11 +16,13 @@ list below and jump to whatever interests you!
 - [**`5-echo`**](5-echo/#files) &nbsp;&mdash;&nbsp; reads request bodies.
 - [**`6-template`**](6-template/#files) &nbsp;&mdash;&nbsp; renders responses
   from templates and guards against XSS.
-- [**`7-debug`**](7-debug) &nbsp;&mdash;&nbsp; includes detailed information
+- [**`7-debug`**](7-debug/#files) &nbsp;&mdash;&nbsp; includes detailed
+  information
   about errors in responses.
-- [**`8-error`**](8-error) &nbsp;&mdash;&nbsp; customize all error responses in
-  one place.
-- [**`9-logging`**](9-logging)
+- [**`8-error`**](8-error/#files) &nbsp;&mdash;&nbsp; customize all error
+  responses in one place.
+- [**`9-log`**](9-log/#files) &nbsp;&mdash;&nbsp; writing messages to Dream's
+  log.
 - [**`a-promise`**](a-promise)
 - [**`b-session`**](a-session)
 - [**`c-cookie`**](b-cookie)

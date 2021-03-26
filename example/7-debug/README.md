@@ -82,9 +82,10 @@ As you can see, the report includes:
 
 The debugger is disabled by default to avoid leaking information by accident in
 a production environment. Whether the debugger is enabled or disabled, Dream
-still writes error messages to the log &mdash; the debugger is only about also
-sending them as *reponses*, which can be easier to work with, especially for
-collaborators who are not currently looking at the log.
+still writes error messages to the server-side log &mdash; the debugger is only
+about also sending them to the client as *reponses*, which can be easier to
+work with, especially for collaborators who are not currently looking at the
+log.
 
 <br>
 
@@ -101,8 +102,8 @@ Both the debugger's output and the non-debug error page are fully customizable
 
 - [**`8-error`**](../8-error/#files) handles all errors in one place, also
   customizing the debugger.
-- [**`9-logging`**](../9=logging/#files) writes messages to the same Dream log
-  at various levels, and creates a sub-log.
+- [**`9-log`**](../9-log/#files) writes messages to the same Dream log at
+  various levels, and creates a sub-log.
 
 <br>
 
