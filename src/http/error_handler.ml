@@ -182,13 +182,13 @@ let customize template (error : Error.error) =
        site of the error handler already has error handlers for catching double
        faults. *)
     response
-    |> template ~debug_dump
+    |> template debug_dump
     |> Lwt.map (fun response -> Some response)
 
 
 
 (* TODO LATER Make a nice default template. *)
-let default_template ~debug_dump response =
+let default_template debug_dump response =
   let response =
     match debug_dump with
     | None -> response

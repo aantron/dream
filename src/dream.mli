@@ -1207,7 +1207,7 @@ type error_handler = error -> response option Lwt.t
 (* TODO Should sanitize template output here or set to text/plain to prevent XSS
    against developer. *)
 val error_template :
-  (debug_dump:string option -> response -> response Lwt.t) -> error_handler
+  (string option -> response -> response Lwt.t) -> error_handler
 (** Customizes the default error handler by specifying a template.
     {[
       let my_error_handler =

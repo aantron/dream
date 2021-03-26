@@ -15,7 +15,7 @@ module Error = Dream__middleware.Error
 
 val default : Dream__middleware.Error.error_handler
 val customize :
-  (debug_dump:string option -> Dream.response -> Dream.response Lwt.t) ->
+  (string option -> Dream.response -> Dream.response Lwt.t) ->
     Error.error_handler
 
 
