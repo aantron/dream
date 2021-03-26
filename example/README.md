@@ -29,7 +29,7 @@ list below and jump to whatever interests you!
   promise library used by Dream.
 - [**`b-session`**](a-session/#files) &nbsp;&mdash;&nbsp; associates state with
   client sessions.
-- [**`c-cookie`**](b-cookie)
+- [**`c-cookie`**](c-cookie/#files) &nbsp;&mdash;&nbsp; sets custom cookies.
 - [**`d-form`**](c-form) &nbsp;&mdash;&nbsp; reading forms and CSRF prevention.
 - [**`e-json`**](d-json)
 - [**`f-static`**](e-static)
