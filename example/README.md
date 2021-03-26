@@ -27,7 +27,8 @@ list below and jump to whatever interests you!
   log.
 - [**`a-promise`**](a-promise/#files) &nbsp;&mdash;&nbsp; introduces Lwt, the
   promise library used by Dream.
-- [**`b-session`**](a-session)
+- [**`b-session`**](a-session/#files) &nbsp;&mdash;&nbsp; associates state with
+  client sessions.
 - [**`c-cookie`**](b-cookie)
 - [**`d-form`**](c-form) &nbsp;&mdash;&nbsp; reading forms and CSRF prevention.
 - [**`e-json`**](d-json)

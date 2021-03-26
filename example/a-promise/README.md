@@ -101,7 +101,8 @@ There are other ways to write *await* and *catch* in Lwt that don't require
 
 **Next steps:**
 
-- [**`b-session`**](../b-session/#files) introduces *session management*.
+- [**`b-session`**](../b-session/#files) introduces *session management* for
+  associating state with clients.
 - [**`c-cookie`**](../c-cookie/#files) shows *cookie handling* in Dream.
 
 <br>
