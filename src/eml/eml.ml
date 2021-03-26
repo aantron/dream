@@ -160,7 +160,7 @@ struct
      significant character on the line that ended the code block, or at the end
      of input. The string contains the whitespace characters from the beginning
      of the line that terminated the code block. *)
-  let scan_code_block : char Stream.t -> token * string =
+  let scan_code_block : string -> char Stream.t -> token * string =
 
     let is_template_line stream : bool * string =
       match Stream.peek stream with
@@ -200,13 +200,13 @@ struct
       end
     in
 
-    fun stream ->
+    fun leading_whitespace stream ->
       let line, column = Location.current () in
       let code, leftover_whitespace = scan_lines stream in
       `Code_block {
         line;
         column;
-        what = code;
+        what = (leading_whitespace ^ code);
       },
       leftover_whitespace
 
@@ -340,19 +340,25 @@ struct
 
   (* Tokenizer state machine. *)
 
-  let rec at_code_block tokens stream =
-    let token, leftover_whitespace = scan_code_block stream in
+  let rec at_code_block tokens leading_whitespace stream =
+    let token, leftover_whitespace =
+      scan_code_block leading_whitespace stream in
     let tokens = token::tokens in
     (* A code block can only be terminated by template text or end of input. *)
     match Stream.peek stream with
     | None -> tokens
-    | Some _ -> at_text_line tokens true leftover_whitespace stream
+    | Some _ ->
+      (* TODO Test that completely blank lines don't break out of the
+         template. *)
+      let indent = String.length leftover_whitespace in
+      at_text_line tokens true indent leftover_whitespace stream
 
-  and at_text_line tokens first leading_whitespace stream =
+  (* TODO Use the detected indentation level for un-indentation later. *)
+  and at_text_line tokens first indent leading_whitespace stream =
     match Stream.peek stream with
     | Some '%' when leading_whitespace = "" ->
       let tokens = (scan_embedded_line stream)::tokens in
-      at_text_line tokens false "" stream
+      at_text_line tokens false indent "" stream
     | _ ->
       let more_whitespace = scan_whitespace stream 0 in
       match Stream.npeek 2 stream with
@@ -360,17 +366,24 @@ struct
         let line, _ = Location.current () in
         let options = scan_terminator_options stream in
         if first then
-          at_text_line ((`Options options)::tokens) false "" stream
+          at_text_line ((`Options options)::tokens) false indent "" stream
         else
           if String.trim options <> "" then
             Printf.ksprintf failwith
               "Line %i: text following closing '%%%%'" line
           else
-            at_code_block tokens stream
+            at_code_block tokens "" stream
       | _ ->
-        at_text tokens (leading_whitespace ^ more_whitespace) stream
+        let all_whitespace = leading_whitespace ^ more_whitespace in
+        if String.length all_whitespace >= indent then
+          at_text tokens indent all_whitespace stream
+        else
+          (* TODO The code_block scanner now needs to also accept leading
+             whitespace. Add tests for that. And add tests for this whole
+             indentation-based breakout. *)
+          at_code_block tokens all_whitespace stream
 
-  and at_text tokens leading_whitespace stream =
+  and at_text tokens indent leading_whitespace stream =
     let token = scan_text leading_whitespace stream in
     let tokens = token::tokens in
     (* Template text could have been terminated by embedded code, a newline, or
@@ -384,16 +397,18 @@ struct
       let tokens = `Newline::tokens in
       begin match Stream.peek stream with
       | None -> tokens
-      | Some ' ' -> at_text_line tokens false "" stream
-      | Some '\n' -> at_text tokens "" stream
-      | Some '%' -> at_text_line tokens false "" stream
-      | Some _ -> Location.adjust (-1); at_code_block tokens stream
+      | Some ' ' -> at_text_line tokens false indent "" stream
+      | Some '\n' -> at_text tokens indent "" stream
+      | Some '%' -> at_text_line tokens false indent "" stream
+      | Some _ -> Location.adjust (-1); at_code_block tokens "" stream
+      (* TODO Is this last case redundant at this point? Should continue with
+         at_text_line; it will detect the un-indentation of the template. *)
       end;
     (* If the text scanner stopped at <, it is actually <% and this is an
        embedded code block. *)
     | Some '<' ->
       let tokens = (scan_embedded stream)::tokens in
-      at_text tokens "" stream
+      at_text tokens indent "" stream
     (* This case should be impossible, because the text parser would have
        consumed any other character. *)
     | Some _ ->
@@ -401,7 +416,7 @@ struct
 
   let scan stream =
     stream
-    |> at_code_block []
+    |> at_code_block [] ""
     |> List.rev
 end
 
