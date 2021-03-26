@@ -57,6 +57,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
+    Options , 1
     Text {| < bar|} |xxx}]
 
 let%expect_test _ =
@@ -65,6 +66,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
+    Options , 2
     Text {|  < bar|} |xxx}]
 
 let%expect_test _ =
@@ -73,6 +75,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
+    Options , 3
     Text {|   < bar|} |xxx}]
 
 let%expect_test _ =
@@ -81,6 +84,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
+    Options , 2
     Text {|  <html>|}
     Newline
     Text {|  </html>|} |xxx}]
@@ -91,6 +95,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
+    Options , 2
     Text {|  <html>|}
     Newline
     Text {|  plain|} |xxx}]
@@ -101,6 +106,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
+    Options , 2
     Text {|  <html>|}
     Newline
     Text {|  </html>|}
@@ -114,6 +120,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
+    Options , 2
     Text {|  |}
     (2, 5) Embedded () a
     Text {||}
@@ -125,6 +132,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
+    Options , 2
     Text {|  |}
     (2, 5) Embedded () a %
     Text {||}
@@ -136,6 +144,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
+    Options , 2
     Text {|  |}
     (2, 5) Embedded () a %
     Text {||}
@@ -147,6 +156,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
+    Options , 2
     Text {|  |}
     (2, 6) Embedded (=) a
     Text {||}
@@ -158,6 +168,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
+    Options , 2
     Text {|  |}
     (2, 5) Embedded () a
     b
@@ -170,6 +181,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
+    Options , 2
     Text {|  |}
     (2, 4) Embedded ()
     Text {||} |xxx}]
@@ -180,6 +192,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
+    Options , 2
     Text {|  |}
     (3, 2) Embedded (
     a)
@@ -191,6 +204,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
+    Options , 2
     Text {|  |}
     (2, 5) Embedded ()
      a
@@ -202,6 +216,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
+    Options , 2
     Text {|  <html>|}
     Newline
     Text {||}
@@ -245,6 +260,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
+    Options , 2
     Text {|  <html>|}
     Newline
     (3, 1) Embedded ()  abc
@@ -264,9 +280,13 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo=
 
+    Options , 2
     Text {|  <html>|}
     Newline
-    Text {| % bar|} |xxx}]
+    (3, 3) Code_block
+
+    (3, 3) Embedded ()  bar
+    Text {||} |xxx}]
 
 let%expect_test _ =
   show "let foo\n  <html>\n\n% bar";
@@ -274,23 +294,27 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo
 
+    Options , 2
     Text {|  <html>|}
     Newline
     Text {||}
     Newline
     (4, 1) Embedded ()  bar
-    Text {||} |xxx}]
+    (4, 5) Code_block |xxx}]
 
+(* TODO Don't break out of templates on lines containing only whitespace! *)
 let%expect_test _ =
   show "let foo\n  <html>\n \n% bar";
   [%expect {xxx|
     (1, 0) Code_block
     let foo
 
+    Options , 2
     Text {|  <html>|}
     Newline
-    Text {| |}
-    Newline
+    (4, 1) Code_block
+
+
     (4, 1) Embedded ()  bar
     Text {||} |xxx}]
 
@@ -300,7 +324,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo
 
-    Options  a = b
+    Options  a = b, 1
     Text {| bar|} |xxx}]
 
 let%expect_test _ =
@@ -309,7 +333,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo
 
-    Options  a = b
+    Options  a = b, 1
     Text {| bar|}
     Newline
     (5, 0) Code_block
@@ -321,7 +345,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo
 
-    Options  a = b
+    Options  a = b, 1
     (3, 3) Code_block |}]
 
 let%expect_test _ =

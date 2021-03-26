@@ -76,8 +76,10 @@ type code_block_token = [
 ]
 
 type options_token = [
-  (* Passes template-wide options to the template code generator phase. *)
-  | `Options of string
+  (* Passes template-wide options to the template code generator phase. The
+     string is any options text found after %%. The int is the indentation level
+     of the token beginning the template, whether %% or an implicit start. *)
+  | `Options of string * int
 ]
 
 type newline_token = [
@@ -114,8 +116,8 @@ struct
   let show = function
     | `Code_block {line; column; what = code} ->
       Printf.sprintf "(%i, %i) Code_block\n%s" (line + 1) column code
-    | `Options options ->
-      Printf.sprintf "Options %s" options
+    | `Options (options, indent) ->
+      Printf.sprintf "Options %s, %i" options indent
     | `Text payload ->
       Printf.sprintf "Text {|%s|}" payload
     | `Newline ->
@@ -364,11 +366,11 @@ struct
       match Stream.npeek 2 stream with
       | ['%'; '%'] ->
         let line, _ = Location.current () in
-        let options = scan_terminator_options stream in
+        let options = scan_terminator_options stream, indent in
         if first then
           at_text_line ((`Options options)::tokens) false indent "" stream
         else
-          if String.trim options <> "" then
+          if String.trim (fst options) <> "" then
             Printf.ksprintf failwith
               "Line %i: text following closing '%%%%'" line
           else
@@ -376,6 +378,12 @@ struct
       | _ ->
         let all_whitespace = leading_whitespace ^ more_whitespace in
         if String.length all_whitespace >= indent then
+          let tokens =
+            if first then
+              (`Options ("", indent))::tokens
+            else
+              tokens
+          in
           at_text tokens indent all_whitespace stream
         else
           (* TODO The code_block scanner now needs to also accept leading
@@ -424,7 +432,7 @@ end
 
 type template = [
   | code_block_token
-  | `Template of string * template_token list list
+  | `Template of (string * int) * template_token list list
 ]
 
 module Transform :
@@ -460,7 +468,10 @@ struct
       | (`Options options)::tokens ->
         template_level options accumulator [] [] tokens
       | (#template_token | `Newline)::_ as tokens ->
-        template_level "" accumulator [] [] tokens
+        (* This case should be impossible due to the addition of `Option tokens
+           at the start of every template, carrying indentation information. So,
+           it should be removed at the next opportunity. *)
+        template_level ("", 0) accumulator [] [] tokens
       | (`Code_block _ as token)::tokens ->
         top_level (token::accumulator) tokens
       | [] ->
@@ -487,7 +498,7 @@ struct
   let map_templates f templates =
     templates
     |> List.map (function
-      | `Template (options, template) -> `Template (options, f template)
+      | `Template (options, template) -> `Template (options, f options template)
       | `Code_block _ as token -> token)
 
 
@@ -501,7 +512,11 @@ struct
       else
         whitespace_prefix (index + 1) s
 
-  let common_whitespace template =
+  (* This function is dead code at this point, because the templater now uses
+     indentation information from the tokenizer, rather than detecting common
+     indentation after tokenization. It can be deleted once the tokenizer's
+     detection is proven robust. *)
+  let _common_whitespace template =
     template
     |> List.fold_left begin fun amount line ->
       match line with
@@ -525,8 +540,8 @@ struct
     end
 
   let unindent templates =
-    templates |> map_templates (fun template ->
-      unindent_template (common_whitespace template) template)
+    templates |> map_templates (fun (_, indent) template ->
+      unindent_template indent template)
 
 
 
@@ -558,7 +573,7 @@ struct
     | [] ->
       List.rev accumulator
 
-  let empty_lines_from_template template =
+  let empty_lines_from_template _ template =
     template
     |> List.map (fun line ->
       if is_empty line then
@@ -587,7 +602,7 @@ struct
     | [] ->
       List.rev accumulator
 
-  let coalesce_template template =
+  let coalesce_template _ template =
     template
     |> List.map (fun line -> (`Text "\n")::line)
     |> List.flatten
@@ -603,7 +618,7 @@ struct
 
 
   let trim templates =
-    templates |> map_templates (fun lines ->
+    templates |> map_templates (fun _ lines ->
       lines |> List.map (fun line ->
         line |> List.filter (function
           | `Text "" -> false
