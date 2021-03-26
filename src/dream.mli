@@ -422,7 +422,13 @@ val queries : string -> request -> string list
 val all_queries : request -> (string * string) list
 (** Retrieves the entire query string as a name-value list. *)
 
-val cookie : string -> request -> string option
+(* TODO Switch to this indentation style in more places. *)
+(* TODO ?prefix or ?cookie_prefix? *)
+(* TODO What is the right default with the prefix? *)
+val cookie :
+  ?match_prefix:bool ->
+  ?decrypt:bool ->
+    string -> request -> string option
 (** Cookies are sent by the client in [Cookie:] headers as [name=value] pairs.
     This function parses those headers, looking for the given [name].
 
@@ -511,7 +517,7 @@ val status : response -> status
    use the header calls to actually add the header...? How often do we need to
    set a cookie? *)
 val add_set_cookie :
-  ?prefix:string ->
+  ?cookie_prefix:string ->
   ?encrypt:bool ->
   ?expires:float ->
   ?max_age:float ->

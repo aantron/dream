@@ -224,12 +224,12 @@ let all_cookies request =
 
 (* TODO Don't use this exception-raising function, to avoid clobbering user
    backtraces more. *)
-let cookie_exn name request =
+(* let cookie_exn name request =
   snd (all_cookies request |> List.find (fun (name', _) -> name' = name))
 
 let cookie name request =
   try Some (cookie_exn name request)
-  with Not_found -> None
+  with Not_found -> None *)
 
 let body message =
   Body.body message.body
@@ -474,9 +474,35 @@ let encrypt request plaintext =
 let decrypt request ciphertext =
   Cipher.decrypt (decryption_keys request) ciphertext
 
+(* TODO Efficient prefix matching. *)
+(* TODO Some actual performance in the implementation. *)
+let cookie
+    ?(match_prefix = true) ?decrypt:(decrypt_cookie = true) name request =
+
+  let test =
+    if match_prefix then
+      fun (name', _) ->
+        name' = name || "__Host-" ^ name' = name || "__Secure-" ^ name' = name
+    else
+      fun (name', _) ->
+        name' = name
+  in
+
+  match all_cookies request |> List.find_opt test with
+  | None -> None
+  | Some (_, value) ->
+    if not decrypt_cookie then
+      Some value
+    else
+      match Formats.from_base64url value with
+      | Error _ ->
+        None
+      | Ok value ->
+        decrypt request value
+
 (* TODO LATER Default encoding. *)
 let add_set_cookie
-    ?prefix:cookie_prefix
+    ?cookie_prefix
     ?encrypt:(encrypt_cookie = true)
     ?expires
     ?max_age
@@ -498,6 +524,10 @@ let add_set_cookie
   in
 
   (* TODO Relation between secure and non-localhost non-https? *)
+  (* TODO Get Secure default from https getter of request, also probably need
+     reverse-proxy oriented middleware here. *)
+  ignore secure;
+  let secure = false in
 
   let cookie_prefix =
     match cookie_prefix, domain, path, secure with
