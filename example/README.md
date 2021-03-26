@@ -14,10 +14,10 @@ list below and jump to whatever interests you!
 - [**`4-counter`**](4-counter/#files) &nbsp;&mdash;&nbsp; the first *custom*
   middleware!
 - [**`5-echo`**](5-echo/#files) &nbsp;&mdash;&nbsp; reads request bodies.
-- [**`6-template`**](6-template/#files) &nbsp;&mdash;&nbsp; render responses
-  from templates and guard against XSS.
-- [**`7-debug`**](7-debug) &nbsp;&mdash;&nbsp; centralize your error page and
-  run the debugger.
+- [**`6-template`**](6-template/#files) &nbsp;&mdash;&nbsp; renders responses
+  from templates and guards against XSS.
+- [**`7-debug`**](7-debug) &nbsp;&mdash;&nbsp; includes detailed information
+  about errors in responses.
 - [**`8-error-page`**](8-error-page)
 - [**`9-logging`**](9-logging)
 - [**`a-promise`**](a-promise)
@@ -121,5 +121,5 @@ Advanced customization:
 <!-- TODO Also need an example that demonstrates typed sessions and how trivial
      they are. -->
 <!-- TODO Need an upload example. Make a hex-dumping server or something. -->
-<!-- TODO Get rid of the Makefiles. -->
 <!-- TODO Lwt/promise example. -->
+<!-- TODO Recommend empty responses -->

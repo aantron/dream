@@ -1,46 +1,108 @@
-Insert the `Dream.catch` middleware to have it handle all errors and exceptions
-in one place:
-
-<!-- TODO Link to database example. -->
-<!-- TODO Update in light of exception handler changes -->
-<!-- TODO Show or mention customization? -->
-
-```ocaml
-let () =
-  Dream.run
-  @@ Dream.logger
-  @@ Dream.catch ~debug:true
-  @@ Dream.router [
-
-    Dream.get "/"
-      (fun _ ->
-        Dream.respond "Good morning, world!");
-
-    Dream.get "/bad"
-      (fun _ ->
-        Dream.respond ~status:`Bad_request "");
-
-    Dream.get "/fail"
-      (fun _ ->
-        raise (Failure "The web app had a fail!"));
-
-  ]
-  @@ fun _ ->
-    Dream.respond ~status:`Not_found ""
-```
-
-<!-- TODO Show the debugger output -->
-<!-- TODO Mention ?template, ?on_error, ?on_exn -->
-<!-- TODO Recommend empty responses -->
-<!-- TODO Show the log -->
-<!-- TODO Point out backtraces -->
-<!-- TODO Explain first and last request tracking -->
+# `7-debug`
 
 <br>
 
-Where to go from here?
+Getting Dream to respond with more debug information is as easy as adding
+`~debug:true` to `Dream.run`:
 
-- [**`5-catch`**](../5-catch) handles errors from all your handlers in one
-place.
+```ocaml
+let () =
+  Dream.run ~debug:true
+  @@ Dream.logger
+  @@ Dream.router [
 
-<!-- TODO Go to SQL example. -->
+    Dream.get "/bad"
+      (fun _ ->
+        Dream.empty `Bad_Request);
+
+    Dream.get "/fail"
+      (fun _ ->
+        raise (Failure "The web app failed!"));
+
+  ]
+  @@ Dream.not_found
+```
+
+<pre><code><b>$ dune exec --root . ./debug.exe</b></code></pre>
+
+<br>
+
+The rest of the app just adds two routes for triggering two kinds of
+failures that the debugger will detail. Visit
+[http://localhost:8080/bad](http://localhost:8080/bad) to trigger a
+`400 Bad Request` response, and
+[http://localhost:8080/fail](http://localhost:8080/fail) to trigger an
+exception. The debugger will show reports like this:
+
+```
+(Failure "The web app failed!")
+Raised at Stdlib__string.index_rec in file "string.ml", line 115, characters 19-34
+Called from Sexplib0__Sexp.Printing.index_of_newline in file "src/sexp.ml", line 113, characters 13-47
+
+From: Application
+Blame: Server
+Severity: Error
+
+Client: 127.0.0.1:61988
+
+GET /fail HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 [...snip...]
+Accept: text/html,application/xhtml+xml, [...snip...]
+Sec-GPC: 1
+Sec-Fetch-Site: none
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Accept-Encoding: gzip, deflate, br
+Accept-Language: en-US;q=0.9,en;q=0.8
+
+dream.request_id.last_id: 2
+```
+<!-- Get the request id in the list. -->
+
+As you can see, the report includes:
+
+- the error message,
+- a stack trace, if the error is an exception,
+- `From:` which part of the HTTP stack reported the error (TLS, HTTP, HTTP/2,
+  WebSockets, or the app),
+- `Blame:` who is likely responsible for the error, the server or the client,
+- `Severity:` a suggested log level for the error,
+- `Client:` the client address,
+- request headers,
+- any request-scoped and application-scoped variables set in the request.
+
+<!-- TODO Link to the tutorial example on variables and also mention that they
+     are advanced and usually internal. -->
+
+<br>
+
+The debugger is disabled by default to avoid leaking information by accident in
+a production environment. Whether the debugger is enabled or disabled, Dream
+still writes error messages to the log &mdash; the debugger is only about also
+sending them as *reponses*, which can be easier to work with, especially for
+collaborators who are not currently looking at the log.
+
+<br>
+
+Both the debugger's output and the non-debug error page are fully customizable
+&mdash; we will do this in the very next example!
+
+<!-- TODO Fix after stack trace is fixed. -->
+<!-- TODO Show the log -->
+
+<br>
+
+**Next steps:**
+
+- [**`8-error-page`**](../8-error-page/#files) handles all errors in one place,
+  also customizing the debugger.
+- [**`9-logging`**](../9=logging/#files) writes messages to the same Dream log
+  at various levels, and creates a sub-log.
+
+<br>
+
+[Up to the tutorial index](../#readme)

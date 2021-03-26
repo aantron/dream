@@ -3,18 +3,13 @@ let () =
   @@ Dream.logger
   @@ Dream.router [
 
-    Dream.get "/"
-      (fun _ ->
-        Dream.respond "Good morning, world!");
-
     Dream.get "/bad"
       (fun _ ->
-        Dream.respond ~status:`Forbidden "");
+        Dream.empty `Bad_Request);
 
     Dream.get "/fail"
       (fun _ ->
-        raise (Failure "The web app had a fail!"));
+        raise (Failure "The web app failed!"));
 
   ]
-  @@ fun _ ->
-    Dream.respond ~status:`Not_Found ""
+  @@ Dream.not_found
