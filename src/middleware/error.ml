@@ -26,6 +26,7 @@ type error = {
     | `WebSocket
     | `App
   ];
+  (* TODO Any point in distinguishing HTTP and HTTP2 errors? *)
   caused_by : [
     | `Server
     | `Client

@@ -103,8 +103,8 @@ attributes are much more invasive.
 
 - [**`7-debug`**](../7-debug/#files) shows how to turn on debug responses, and
   get more info about errors.
-- [**`8-error-page`**](../8-error-page/#files) sets up a central error template
-  for all errors.
+- [**`8-error`**](../8-error/#files) sets up a central error template for all
+  errors.
 
 <br>
 

@@ -93,13 +93,14 @@ Both the debugger's output and the non-debug error page are fully customizable
 
 <!-- TODO Fix after stack trace is fixed. -->
 <!-- TODO Show the log -->
+<!-- TODO API link -->
 
 <br>
 
 **Next steps:**
 
-- [**`8-error-page`**](../8-error-page/#files) handles all errors in one place,
-  also customizing the debugger.
+- [**`8-error`**](../8-error/#files) handles all errors in one place, also
+  customizing the debugger.
 - [**`9-logging`**](../9=logging/#files) writes messages to the same Dream log
   at various levels, and creates a sub-log.
 

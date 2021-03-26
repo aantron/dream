@@ -18,7 +18,8 @@ list below and jump to whatever interests you!
   from templates and guards against XSS.
 - [**`7-debug`**](7-debug) &nbsp;&mdash;&nbsp; includes detailed information
   about errors in responses.
-- [**`8-error-page`**](8-error-page)
+- [**`8-error`**](8-error) &nbsp;&mdash;&nbsp; customize all error responses in
+  one place.
 - [**`9-logging`**](9-logging)
 - [**`a-promise`**](a-promise)
 - [**`b-session`**](a-session)

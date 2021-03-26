@@ -1,0 +1,8 @@
+(executable
+ (name error)
+ (libraries dream))
+
+(rule
+ (targets error.ml)
+ (deps error.eml.ml)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))
