@@ -42,18 +42,17 @@ let response_replacement = {|
 |}
 
 let respond_expected = {|<div class="spec value" id="val-respond">
- <a href="#val-respond" class="anchor"></a><code><span><span class="keyword">val</span> respond : <span>?status:<a href="#type-status">status</a> <span class="arrow">-&gt;</span></span> <span>?code:int <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span>
-<span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="xref-unresolved">Lwt</span>.t</span></span></code>
+ <a href="#val-respond" class="anchor"></a><code><span><span class="keyword">val</span> respond : <span>?status:<a href="#type-status">status</a> <span class="arrow">-&gt;</span></span> <span>?code:int <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let respond_replacement = {|
 <pre><span class="keyword">val</span> respond :
-  ?status:<a href="#type-status">status</a> -&gt;
+  ?status:<a href="#type-status">status</a> ->
   ?code:int ->
-  ?headers:(string * string) list -&gt;
-  string -&gt;
-    <a href="#type-response">response</a> Lwt.t
+  ?headers:(string * string) list ->
+  string ->
+    <a href="#type-response">response</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -360,7 +359,7 @@ let error_replacement = {|
 </pre>|}
 
 let run_expected = {|<div class="spec value" id="val-run">
- <a href="#val-run" class="anchor"></a><code><span><span class="keyword">val</span> run : <span>?interface:string <span class="arrow">-&gt;</span></span> <span>?port:int <span class="arrow">-&gt;</span></span> <span>?stop:<span>unit <span class="xref-unresolved">Lwt</span>.t</span> <span class="arrow">-&gt;</span></span> <span>?debug:bool <span class="arrow">-&gt;</span></span>
+ <a href="#val-run" class="anchor"></a><code><span><span class="keyword">val</span> run : <span>?interface:string <span class="arrow">-&gt;</span></span> <span>?port:int <span class="arrow">-&gt;</span></span> <span>?stop:<span>unit <a href="#type-promise">promise</a></span> <span class="arrow">-&gt;</span></span> <span>?debug:bool <span class="arrow">-&gt;</span></span>
 <span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span> <span>?secret:string <span class="arrow">-&gt;</span></span> <span>?prefix:string <span class="arrow">-&gt;</span></span>
 <span>?https:<span>[ `No <span>| `OpenSSL</span> <span>| `OCaml_TLS</span> ]</span> <span class="arrow">-&gt;</span></span> <span>?certificate_file:string <span class="arrow">-&gt;</span></span>
 <span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?certificate_string:string <span class="arrow">-&gt;</span></span> <span>?key_string:string <span class="arrow">-&gt;</span></span>
@@ -373,7 +372,7 @@ let run_replacement = {|
 <pre><span class="keyword">val</span> run :
   ?interface:string ->
   ?port:int ->
-  ?stop:unit Lwt.t ->
+  ?stop:unit <a href="#type-promise">promise</a> ->
   ?debug:bool ->
   ?error_handler:<a href="#type-error_handler">error_handler</a> ->
   ?secret:string ->
@@ -392,10 +391,10 @@ let run_replacement = {|
 </pre>|}
 
 let serve_expected = {|<div class="spec value" id="val-serve">
- <a href="#val-serve" class="anchor"></a><code><span><span class="keyword">val</span> serve : <span>?interface:string <span class="arrow">-&gt;</span></span> <span>?port:int <span class="arrow">-&gt;</span></span> <span>?stop:<span>unit <span class="xref-unresolved">Lwt</span>.t</span> <span class="arrow">-&gt;</span></span> <span>?debug:bool <span class="arrow">-&gt;</span></span>
+ <a href="#val-serve" class="anchor"></a><code><span><span class="keyword">val</span> serve : <span>?interface:string <span class="arrow">-&gt;</span></span> <span>?port:int <span class="arrow">-&gt;</span></span> <span>?stop:<span>unit <a href="#type-promise">promise</a></span> <span class="arrow">-&gt;</span></span> <span>?debug:bool <span class="arrow">-&gt;</span></span>
 <span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span> <span>?secret:string <span class="arrow">-&gt;</span></span> <span>?prefix:string <span class="arrow">-&gt;</span></span>
 <span>?https:<span>[ `No <span>| `OpenSSL</span> <span>| `OCaml_TLS</span> ]</span> <span class="arrow">-&gt;</span></span> <span>?certificate_file:string <span class="arrow">-&gt;</span></span>
-<span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?certificate_string:string <span class="arrow">-&gt;</span></span> <span>?key_string:string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <span>unit <span class="xref-unresolved">Lwt</span>.t</span></span></code>
+<span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?certificate_string:string <span class="arrow">-&gt;</span></span> <span>?key_string:string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
@@ -403,7 +402,7 @@ let serve_replacement = {|
 <pre><span class="keyword">val</span> serve :
   ?interface:string ->
   ?port:int ->
-  ?stop:unit Lwt.t ->
+  ?stop:unit <a href="#type-promise">promise</a> ->
   ?debug:bool ->
   ?error_handler:<a href="#type-error_handler">error_handler</a> ->
   ?secret:string ->
@@ -414,7 +413,7 @@ let serve_replacement = {|
   ?certificate_string:string ->
   ?key_string:string ->
   <a href="#type-handler">handler</a> ->
-    unit
+    unit <a href="#type-promise">promise</a>
 </pre>|}
 
 let request_expected = {|<div class="spec value" id="val-request">

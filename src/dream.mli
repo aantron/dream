@@ -474,13 +474,13 @@ val respond :
   ?code:int ->
   ?headers:(string * string) list ->
   string ->
-    response Lwt.t
+    response promise
 (** Same as {!Dream.val-response}, but immediately uses the new response to
     resolve a new promise, and returns that promise. This helper is especially
     convenient for quickly returning empty error responses, which will be filled
     out later by the top-level error handler. *)
 
-val empty : status -> response Lwt.t
+val empty : status -> response promise
 
 val status : response -> status
 (** Response status, for example [`OK]. *)
@@ -551,13 +551,13 @@ val all_cookies : request -> (string * string) list
 
 (** {1 Bodies} *)
 
-val body : _ message -> string Lwt.t
+val body : _ message -> string promise
 (** Retrieves the whole body of the given message (request or response),
     streaming it to completion first, if necessary. When using this function,
     Dream retains a reference to the body, and it can be accessed multiple
     times. *)
 
-val body_stream : _ message -> string option Lwt.t
+val body_stream : _ message -> string option promise
 (** Retrieves part of the body of the given message. The promise is fulfilled
     with [None] if the body has been read to completion. This interface
     allocates a string, a promise, and an option, and copies data. The body is
@@ -567,7 +567,8 @@ val body_stream : _ message -> string option Lwt.t
 val with_body : string -> 'a message -> 'a message
 (** Creates a new message by replacing the body with the given string. *)
 
-val with_body_stream : (unit -> string option Lwt.t) -> 'a message -> 'a message
+val with_body_stream :
+  (unit -> string option promise) -> 'a message -> 'a message
 (** [Dream.with_body_stream f message] creates a new message, with a stream
     body represented by the function [f]. If the message is a response, after
     the response has been returned from the web application to the HTTP layer,
@@ -651,7 +652,7 @@ type form = [
 
 (* TODO Link to the tag helper for dream.csrf and backup instructions for
    generating it. *)
-val form : request -> form Lwt.t
+val form : request -> form promise
 (** Parses the request body as a form. [Content-Type:] must be
     [application/x-www-form-urlencoded]. Checks that the form contains a CSRF
     token field [dream.csrf], and checks it for validity. The form fields are
@@ -703,7 +704,7 @@ type upload_result = [
   | `Done
 ]
 
-val upload : request -> upload_result Lwt.t
+val upload : request -> upload_result promise
 (* TODO Document how errors are reported, how this responds to various
    Content-Types, etc. *)
 (* TODO The API should be something like...
@@ -737,7 +738,7 @@ val csrf_token : ?valid_for:int64 -> request -> string
     is the token's lifetime, in seconds. The default value is one hour
     ([3600L]). Dream CSRF token are server-side-stateless. *)
 
-val verify_csrf_token : string -> request -> csrf_result Lwt.t
+val verify_csrf_token : string -> request -> csrf_result promise
 (** Checks that the given CSRF token is valid for the request's session. *)
 
 
@@ -848,7 +849,8 @@ val patch : string -> handler -> route
 (* TODO Compress all these methods visually in the docs. *)
 
 val static :
-  ?handler:(string -> string -> request -> response Lwt.t) -> string -> handler
+  ?handler:(string -> string -> request -> response promise) ->
+    string -> handler
 (* TODO Document.
 
 Dream.get "static/*" (Dream.static "static")
@@ -899,7 +901,7 @@ val session : string -> request -> string option
 (** Retrieves the value with the given key in the request's session, if the
     value is present. *)
 
-val set_session : string -> string -> request -> unit Lwt.t
+val set_session : string -> string -> request -> unit promise
 (** [Dream.set_session key value request] sets a value in the request's session.
     If there is an existing binding, it is replaced. The data store used by the
     session middleware may immediately commit the value to storage, so this
@@ -908,7 +910,7 @@ val set_session : string -> string -> request -> unit Lwt.t
 val all_session_values : request -> (string * string) list
 (** Retrieves the full session dictionary. *)
 
-val invalidate_session : request -> unit Lwt.t
+val invalidate_session : request -> unit promise
 (** Invalidates the given session, replacing it with a fresh one (a new
     pre-session with an empty dictionary). The session store is likely to update
     storage while creating the new session, so this function returns a
@@ -933,8 +935,7 @@ val session_expires_at : request -> int64
 type websocket
 (** A WebSocket connection. *)
 
-(* TODO Systematically replace Lwt.t by promise. *)
-val websocket : (websocket -> unit Lwt.t) -> response Lwt.t
+val websocket : (websocket -> unit promise) -> response promise
 (** Creates a fresh [101 Switching Protocols] response for upgrading to a
     WebSocket connection. Once this response is returned from the application to
     Dream's HTTP layer, the HTTP layer will create the actual WebSocket, and
@@ -949,26 +950,26 @@ val websocket : (websocket -> unit Lwt.t) -> response Lwt.t
     ]} *)
 
 (* TODO What's the exact effect of `Binary? JS receives a Blob? *)
-val send : ?kind:[ `Text | `Binary ] -> string -> websocket -> unit Lwt.t
+val send : ?kind:[ `Text | `Binary ] -> string -> websocket -> unit promise
 (** [Dream.send string websocket] sends a string on a WebSocket as a single
     message. The returned promise can be used for flow control — wait on it to
     make sure server-side buffers aren't filling up. [~kind] is [`Text] by
     default. It can be changed to [~kind:`Binary] to indicate that the data is
     binary. *)
 
-val receive : websocket -> string option Lwt.t
+val receive : websocket -> string option promise
 (** Retrieves the next message on the given WebSocket. If the WebSocket is
     closed before a complete message arrives, the promise is fulfilled with
     [None]. *)
 
-val close : websocket -> unit Lwt.t
+val close : websocket -> unit promise
 (** Closes the given WebSocket. *)
 
 
 
 (** {1 GraphQL} *)
 
-val graphql : (request -> 'a Lwt.t) -> 'a Graphql_lwt.Schema.schema -> handler
+val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
 (* TODO Any neat way to hide the context-maker for super basic usage? *)
 (* TODO Either that, or give it a name so that it's clearer. *)
 
@@ -1213,7 +1214,7 @@ type error = {
     In this latter case, the default error handler does not call the template at
     all. *)
 
-type error_handler = error -> response option Lwt.t
+type error_handler = error -> response option promise
 (** Error handlers generate responses for errors with
     [will_send_response = true]. They typically also log errors along the way.
     See {!Dream.type-error}. You can define your own freely if you need to —
@@ -1231,7 +1232,7 @@ type error_handler = error -> response option Lwt.t
 (* TODO Should sanitize template output here or set to text/plain to prevent XSS
    against developer. *)
 val error_template :
-  (string option -> response -> response Lwt.t) -> error_handler
+  (string option -> response -> response promise) -> error_handler
 (** Customizes the default error handler by specifying a template.
     {[
       let my_error_handler =
@@ -1333,7 +1334,7 @@ val global : 'a global -> request -> 'a
 val run :
   ?interface:string ->
   ?port:int ->
-  ?stop:unit Lwt.t ->
+  ?stop:unit promise ->
   ?debug:bool ->
   ?error_handler:error_handler ->
   ?secret:string ->
@@ -1444,7 +1445,7 @@ val run :
 val serve :
   ?interface:string ->
   ?port:int ->
-  ?stop:unit Lwt.t ->
+  ?stop:unit promise ->
   ?debug:bool ->
   ?error_handler:error_handler ->
   ?secret:string ->
@@ -1455,7 +1456,7 @@ val serve :
   ?certificate_string:string ->
   ?key_string:string ->
   handler ->
-    unit Lwt.t
+    unit promise
 (** Same as {!Dream.run}, but returns a promise that does not resolve until the
     server stops listening, instead of calling
     {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun} [Lwt_main.run ↪]} on
@@ -1473,7 +1474,7 @@ val serve :
 val content_length : middleware
 (* TODO Transfer-encoding chunked. *)
 
-val catch : (error -> response Lwt.t) -> middleware
+val catch : (error -> response promise) -> middleware
 (* TODO Move the error handler into the app. *)
 
 val assign_request_id : middleware
