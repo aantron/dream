@@ -419,38 +419,6 @@ val all_queries : request -> (string * string) list
 
 
 
-(** {1 Headers} *)
-
-val header : string -> _ message -> string option
-(** Retrieves the first header with the given name, if present. Header names are
-    case-insensitive. *)
-
-val headers : string -> _ message -> string list
-(** Retrieves all headers with the given name. *)
-
-val has_header : string -> _ message -> bool
-(** Evaluates to [true] if and only if a header with the given name is
-    present. *)
-
-val all_headers : _ message -> (string * string) list
-(** Retrieves all headers. *)
-
-val add_header : string -> string -> 'a message -> 'a message
-(** Creates a new message (request or response) by adding a header with the
-    given name and value. Note that, for several header name, HTTP permits
-    mutliple headers with the same name. This function therefore does not remove
-    any existing headers with the same name. *)
-
-val drop_header : string -> 'a message -> 'a message
-(** Creates a new message by removing all headers with the given name. *)
-
-val with_header : string -> string -> 'a message -> 'a message
-(** Equivalent to first calling {!Dream.drop_header} and then
-    {!Dream.add_header}. Creates a new message by replacing all headers with the
-    given name by one header with that name and the given value. *)
-
-
-
 (** {1 Responses} *)
 
 val response :
@@ -492,6 +460,38 @@ val status : response -> status
 (* Response reason string, for example ["OK"]. If the response was created with
     [~reason], that string is returned. Otherwise, it is based on the response
     status. *)
+
+
+
+(** {1 Headers} *)
+
+val header : string -> _ message -> string option
+(** Retrieves the first header with the given name, if present. Header names are
+    case-insensitive. *)
+
+val headers : string -> _ message -> string list
+(** Retrieves all headers with the given name. *)
+
+val has_header : string -> _ message -> bool
+(** Evaluates to [true] if and only if a header with the given name is
+    present. *)
+
+val all_headers : _ message -> (string * string) list
+(** Retrieves all headers. *)
+
+val add_header : string -> string -> 'a message -> 'a message
+(** Creates a new message (request or response) by adding a header with the
+    given name and value. Note that, for several header name, HTTP permits
+    mutliple headers with the same name. This function therefore does not remove
+    any existing headers with the same name. *)
+
+val drop_header : string -> 'a message -> 'a message
+(** Creates a new message by removing all headers with the given name. *)
+
+val with_header : string -> string -> 'a message -> 'a message
+(** Equivalent to first calling {!Dream.drop_header} and then
+    {!Dream.add_header}. Creates a new message by replacing all headers with the
+    given name by one header with that name and the given value. *)
 
 
 
