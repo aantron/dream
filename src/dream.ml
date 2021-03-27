@@ -35,6 +35,7 @@ include Dream__middleware.Session.Exported_defaults
 include Dream__middleware.Form
 include Dream__middleware.Upload
 include Dream__middleware.Csrf
+module Tag = Dream__middleware.Tag
 
 let content_length =
   Dream__middleware.Content_length.content_length

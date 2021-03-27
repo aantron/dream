@@ -53,7 +53,7 @@ let csrf_token ?(valid_for = default_valid_for) request =
 
   Jwto.encode Jwto.HS256 secret payload |> Result.get_ok
   (* TODO Can this fail? *)
-  |> Lwt.return
+  (* |> Lwt.return *)
 
 let field_name = "dream.csrf"
 

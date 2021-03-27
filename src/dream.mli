@@ -723,7 +723,7 @@ type csrf_result = [
     by normal users. [`Invalid] usually corresponds to bugs or attacks. *)
 
 (* TODO Guidance on how to transmit and receive the token; links. *)
-val csrf_token : ?valid_for:int64 -> request -> string Lwt.t
+val csrf_token : ?valid_for:int64 -> request -> string
 (** Returns a fresh CSRF token locked to the given request's {{!sessions}
     session} and signed with the [~secret] given to {!Dream.run}. [~valid_for]
     is the token's lifetime, in seconds. The default value is one hour
@@ -731,6 +731,16 @@ val csrf_token : ?valid_for:int64 -> request -> string Lwt.t
 
 val verify_csrf_token : string -> request -> csrf_result Lwt.t
 (** Checks that the given CSRF token is valid for the request's session. *)
+
+
+
+(** {1 Templates} *)
+
+(* TODO Site/subsite prefix from request. *)
+module Tag :
+sig
+  val form : action:string -> request -> string
+end
 
 
 

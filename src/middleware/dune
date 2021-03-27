@@ -14,3 +14,8 @@
   multipart-form-data
  )
  (instrumentation (backend bisect_ppx)))
+
+(rule
+ (targets tag.ml)
+ (deps tag.eml.ml)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))
