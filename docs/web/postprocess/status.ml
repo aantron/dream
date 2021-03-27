@@ -574,10 +574,16 @@ let () =
   let soup = Soup.(read_file source |> parse) in
   let content = soup $ "div.odoc-content" in
 
+  soup $ "nav.odoc-toc > ul" |> Soup.unwrap;
+  soup $ "nav.odoc-toc > li" |> Soup.unwrap;
+  soup $ "nav.odoc-toc > a" |> Soup.delete;
+
   soup
   $ "nav.odoc-toc"
   |> Soup.prepend_child content;
 
   pretty_print_signatures soup;
+
+  Common.add_backing_lines soup;
 
   Soup.(to_string content |> write_file destination)

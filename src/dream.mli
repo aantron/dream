@@ -148,6 +148,8 @@ and 'a promise = 'a Lwt.t
 module Method_and_status :
 sig
 
+(** {0 Methods and status codes} *)
+
 (** {1 Methods} *)
 
 type method_ = [
@@ -183,7 +185,7 @@ val methods_equal : method_ -> method_ -> bool
       Dream.methods_equal `GET (`Method "GET") = true
     ]} *)
 
-(** {1 Statuses} *)
+(** {1:status_codes Status codes} *)
 
 type informational = [
   | `Continue
@@ -355,25 +357,17 @@ end
 include module type of Method_and_status
 (**/**)
 
+
+
+(** {1 Requests} *)
+
 type method_ = Method_and_status.method_
 (** HTTP request methods. See
     {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2 ↪},
     {{:https://tools.ietf.org/html/rfc5789#page-2} RFC 5789 §2 ↪}, and
     {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods} MDN ↪}. The
-    full set of methods is listed on a {{:/method_and_status/index.html}
+    full set of methods is listed on a {{:/method_and_status/index.html#methods}
     separate page}, together with some helpers. *)
-
-type status = Method_and_status.status
-(** HTTP response status codes. See
-    {{:https://tools.ietf.org/html/rfc7231#section-6} RFC 7231 §6 ↪} and
-    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status} MDN ↪}. The
-    full set of status codes is listed on a
-    {{:/method_and_status/index.html#type-informational} separate page},
-    together with some helpers. *)
-
-
-
-(** {1 Requests} *)
 
 val client : request -> string
 (** Client sending the request, for example [127.0.0.1:56001]. *)
@@ -420,6 +414,14 @@ val all_queries : request -> (string * string) list
 
 
 (** {1 Responses} *)
+
+type status = Method_and_status.status
+(** HTTP response status codes. See
+    {{:https://tools.ietf.org/html/rfc7231#section-6} RFC 7231 §6 ↪} and
+    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status} MDN ↪}. The
+    full set of status codes is listed on a
+    {{:/method_and_status/index.html#status_codes} separate page}, together with
+    some helpers. *)
 
 val response :
   ?status:status ->
