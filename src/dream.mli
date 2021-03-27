@@ -473,8 +473,7 @@ val respond :
   ?status:status ->
   ?code:int ->
   ?headers:(string * string) list ->
-  string ->
-    response promise
+    string -> response promise
 (** Same as {!Dream.val-response}, but immediately uses the new response to
     resolve a new promise, and returns that promise. This helper is especially
     convenient for quickly returning empty error responses, which will be filled
@@ -1081,8 +1080,7 @@ val initialize_log :
   ?async_exception_hook:bool ->
   ?level:log_level ->
   ?enable:bool ->
-  unit ->
-    unit
+    unit -> unit
 (** Dream does not initialize its logging back end on program start. This is
     meant to allow a Dream web application to be linked into a larger binary as
     a subcommand, without affecting the runtime of that larger binary in any
@@ -1348,8 +1346,7 @@ val run :
   ?stop_on_input:bool ->
   ?graceful_stop:bool ->
   ?adjust_terminal:bool ->
-  handler ->
-    unit
+    handler -> unit
 (** [Dream.run handler] runs the web application represented by [handler] as a
     web server, by default at {{:http://localhost:8080}
     http://localhost:8080 ↪}. All other arguments are optional. The server runs
@@ -1455,8 +1452,7 @@ val serve :
   ?key_file:string ->
   ?certificate_string:string ->
   ?key_string:string ->
-  handler ->
-    unit promise
+    handler -> unit promise
 (** Same as {!Dream.run}, but returns a promise that does not resolve until the
     server stops listening, instead of calling
     {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun} [Lwt_main.run ↪]} on
@@ -1530,9 +1526,7 @@ val to_set_cookie :
   ?secure:bool ->
   ?http_only:bool ->
   ?same_site:[ `Strict | `Lax | `None ] ->
-  string ->
-  string ->
-    string
+    string -> string -> string
 (** [Dream.to_set_cookie name value] formats a [Set-Cookie:] header value. The
     optional arguments correspond to the attributes specified in
     {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07} RFC 6265bis
@@ -1653,8 +1647,7 @@ val request :
   ?target:string ->
   ?version:int * int ->
   ?headers:(string * string) list ->
-  string ->
-    request
+    string -> request
 (** [Dream.request body] creates a fresh request with the given body for
     testing. The optional arguments set the corresponding {{!request_fields}
     request fields}. *)

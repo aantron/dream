@@ -48,11 +48,10 @@ let respond_expected = {|<div class="spec value" id="val-respond">
 
 let respond_replacement = {|
 <pre><span class="keyword">val</span> respond :
-  ?status:<a href="#type-status">status</a> ->
+  <span class="optional">?status:<a href="#type-status">status</a> ->
   ?code:int ->
-  ?headers:(string * string) list ->
-  string ->
-    <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+  ?headers:(string * string) list -></span>
+    string -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -138,12 +137,12 @@ let form_expected = {|<div class="spec type" id="type-form">
 
 let form_replacement = {|
 <pre class="compact"><span class="keyword">type</span> form = [
-  | `Ok            <span class="keyword">of</span> (string * string) list
-  | `Expired       <span class="keyword">of</span> (string * string) list * int64
-  | `Wrong_session <span class="keyword">of</span> (string * string) list * string
-  | `Invalid_token <span class="keyword">of</span> (string * string) list
-  | `Missing_token <span class="keyword">of</span> (string * string) list
-  | `Many_tokens   <span class="keyword">of</span> (string * string) list
+  | `Ok            <span class="of">of</span> (string * string) list
+  | `Expired       <span class="of">of</span> (string * string) list * int64
+  | `Wrong_session <span class="of">of</span> (string * string) list * string
+  | `Invalid_token <span class="of">of</span> (string * string) list
+  | `Missing_token <span class="of">of</span> (string * string) list
+  | `Many_tokens   <span class="of">of</span> (string * string) list
   | `Not_form_urlencoded
 ]
 |}
@@ -181,8 +180,8 @@ let csrf_result_expected = {|<div class="spec type" id="type-csrf_result">
 let csrf_result_replacement = {|
 <pre class="compact"><span class="keyword">type</span> csrf_result = [
   | `Ok
-  | `Expired <span class="keyword">of</span> int64
-  | `Wrong_session <span class="keyword">of</span> string
+  | `Expired <span class="of">of</span> int64
+  | `Wrong_session <span class="of">of</span> string
   | `Invalid
 ]
 |}
@@ -232,10 +231,10 @@ let sub_log_expected = {|<div class="spec type" id="type-sub_log">
 
 let sub_log_replacement = {|
 <pre class="compact"><span class="keyword">type</span> sub_log = {
-  error   : 'a. ('a, unit) <a href="#type-conditional_log">conditional_log</a>;
-  warning : 'a. ('a, unit) <a href="#type-conditional_log">conditional_log</a>;
-  info    : 'a. ('a, unit) <a href="#type-conditional_log">conditional_log</a>;
-  debug   : 'a. ('a, unit) <a href="#type-conditional_log">conditional_log</a>;
+  error   <span class="of">:</span> 'a. ('a, unit) <a href="#type-conditional_log">conditional_log</a>;
+  warning <span class="of">:</span> 'a. ('a, unit) <a href="#type-conditional_log">conditional_log</a>;
+  info    <span class="of">:</span> 'a. ('a, unit) <a href="#type-conditional_log">conditional_log</a>;
+  debug   <span class="of">:</span> 'a. ('a, unit) <a href="#type-conditional_log">conditional_log</a>;
 }
 </pre>|}
 
@@ -281,12 +280,11 @@ let initialize_log_expected = {|<div class="spec value" id="val-initialize_log">
 
 let initialize_log_replacement = {|
 <pre><span class="keyword">val</span> initialize_log :
-  ?backtraces:bool ->
+  <span class="optional">?backtraces:bool ->
   ?async_exception_hook:bool ->
   ?level:<a href="#type-log_level">log_level</a> ->
-  ?enable:bool ->
-  unit ->
-    unit
+  ?enable:bool -></span>
+    unit -> unit
 </pre>|}
 
 let error_expected = {|<div class="spec type" id="type-error">
@@ -346,15 +344,15 @@ let error_expected = {|<div class="spec type" id="type-error">
 
 let error_replacement = {|
 <pre class="compact"><span class="keyword">type</span> error = {
-  condition : [ `Response of <a href="#type-response">response</a> | `String of string | `Exn of exn ];
-  layer : [ `TLS | `HTTP | `HTTP2 | `WebSocket | `App ];
-  caused_by : [ `Server | `Client ];
-  request : <a href="#type-request">request</a> option;
-  response : <a href="#type-response">response</a> option;
-  client : string option;
-  severity : <a href="#type-log_level">log_level</a>;
-  debug : bool;
-  will_send_response : bool;
+  condition <span class="of">:</span> [ `Response of <a href="#type-response">response</a> | `String of string | `Exn of exn ];
+  layer     <span class="of">:</span> [ `TLS | `HTTP | `HTTP2 | `WebSocket | `App ];
+  caused_by <span class="of">:</span> [ `Server | `Client ];
+  request   <span class="of">:</span> <a href="#type-request">request</a>  option;
+  response  <span class="of">:</span> <a href="#type-response">response</a> option;
+  client    <span class="of">:</span> string     option;
+  severity  <span class="of">:</span> <a href="#type-log_level">log_level</a>;
+  debug     <span class="of">:</span> bool;
+  will_send_response <span class="of">:</span> bool;
 }
 </pre>|}
 
@@ -370,7 +368,7 @@ let run_expected = {|<div class="spec value" id="val-run">
 
 let run_replacement = {|
 <pre><span class="keyword">val</span> run :
-  ?interface:string ->
+  <span class="optional">?interface:string ->
   ?port:int ->
   ?stop:unit <a href="#type-promise">promise</a> ->
   ?debug:bool ->
@@ -385,9 +383,8 @@ let run_replacement = {|
   ?greeting:bool ->
   ?stop_on_input:bool ->
   ?graceful_stop:bool ->
-  ?adjust_terminal:bool ->
-  <a href="#type-handler">handler</a> ->
-    unit
+  ?adjust_terminal:bool -></span>
+    <a href="#type-handler">handler</a> -> unit
 </pre>|}
 
 let serve_expected = {|<div class="spec value" id="val-serve">
@@ -400,7 +397,7 @@ let serve_expected = {|<div class="spec value" id="val-serve">
 
 let serve_replacement = {|
 <pre><span class="keyword">val</span> serve :
-  ?interface:string ->
+  <span class="optional">?interface:string ->
   ?port:int ->
   ?stop:unit <a href="#type-promise">promise</a> ->
   ?debug:bool ->
@@ -411,9 +408,8 @@ let serve_replacement = {|
   ?certificate_file:string ->
   ?key_file:string ->
   ?certificate_string:string ->
-  ?key_string:string ->
-  <a href="#type-handler">handler</a> ->
-    unit <a href="#type-promise">promise</a>
+  ?key_string:string -></span>
+    <a href="#type-handler">handler</a> -> unit <a href="#type-promise">promise</a>
 </pre>|}
 
 let request_expected = {|<div class="spec value" id="val-request">
@@ -424,13 +420,12 @@ let request_expected = {|<div class="spec value" id="val-request">
 
 let request_replacement = {|
 <pre><span class="keyword">val</span> request :
-  ?client:string ->
+  <span class="optional">?client:string ->
   ?method_:<a href="#type-method_">method_</a> ->
   ?target:string ->
   ?version:int * int ->
-  ?headers:(string * string) list ->
-  string ->
-    <a href="#type-request">request</a>
+  ?headers:(string * string) list -></span>
+    string -> <a href="#type-request">request</a>
 </pre>|}
 
 let pretty_print_signatures soup =

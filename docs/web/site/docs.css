@@ -47,12 +47,8 @@ pre {
   padding: 0;
 }
 
-/* .optional {
-  opacity: 0.7;
-} */
-
 code {
-  background-color: #101316;
+  background-color: #212931;
   padding: 1px 6px;
   margin: 0px 2px;
 }
@@ -66,7 +62,7 @@ pre > code,
 }
 
 a > code {
-  color: inherit;
+  color: #b8caea;
 }
 
 p > code, li > code, a > code {
@@ -80,7 +76,6 @@ p, pre {
 
 .spec > pre {
   margin-top: 24px;
-  margin-bottom: 24px;
 }
 
 .spec > pre.compact {
@@ -165,12 +160,17 @@ nav.odoc-toc .current-section {
   color: #BDDCDC;
 }
 
+.of {
+  color: #bec5cd;
+}
+
 .spec-doc > :first-child {
   margin-top: 0;
 }
 
 .spec-doc {
-  padding-left: 2em;
+  padding-left: 2.25em;
+  margin-top: 6px;
 }
 
 ol {
@@ -179,6 +179,7 @@ ol {
 
 .spec {
   margin-top: 24px;
+  color: white;
 }
 
 .anchor {
