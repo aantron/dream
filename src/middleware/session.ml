@@ -170,7 +170,7 @@ let in_memory_sessions default_value =
   let hash_table = Hashtbl.create 256 in
 
   let load request =
-    match Dream.cookie module_name request with
+    match Dream.cookie ~decrypt:false module_name request with
     | None -> Lwt.return_none
     | Some potential_session_key ->
       Lwt.return (Hashtbl.find_opt hash_table potential_session_key)
