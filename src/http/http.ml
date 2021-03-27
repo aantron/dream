@@ -772,6 +772,9 @@ let run
     ?(adjust_terminal = true)
     user's_dream_handler =
 
+  (* TODO Expose a flag for not suppressing SIGPIPE? *)
+  Sys.(set_signal sigpipe Signal_ignore);
+
   let adjust_terminal =
     adjust_terminal && Sys.os_type <> "Win32" && Unix.(isatty stderr) in
 
