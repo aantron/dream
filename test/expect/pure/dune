@@ -1,11 +1,10 @@
 (library
- (name test_expect)
+ (name test_expect_pure)
  (libraries
   base
   dream
   dream.middleware
   dream.pure
-  eml
   lwt
   lwt.unix
   ppx_expect.common
