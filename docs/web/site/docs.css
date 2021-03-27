@@ -1,3 +1,16 @@
+/* This file is part of Dream, released under the MIT license. See
+   LICENSE.md for details, or visit https://github.com/aantron/dream.
+
+   Copyright 2021 Anton Bachin */
+
+
+
+/* Fonts. */
+
+/* TODO Host Iosevka, Iosevka Slab. */
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap');
+
+
 @font-face {
   font-family: 'Lato';
   font-style: normal;
@@ -7,193 +20,159 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
-  margin: 0;
-  background-color: #30404d;
-  color: #eee;
+  font-family: Lato, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 24px;
-  padding-bottom: 24px;
-}
-
-h1, h2, h3 {
-  color: white;
-}
-
-footer {
-  margin-top: 120px;
-  opacity: 0.25;
-  padding-left: 4em;
-}
-
-body > * {
-  max-width: 50rem;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 pre, code {
   font-size: 14px;
-  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+  font-family: Iosevka, SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+}
+
+
+
+/* Colors and presentation styles. */
+
+body {
+  background-color: #2a2a2a;
+  color: #eee;
 }
 
 pre {
-  background-color: #29323d;
-  padding: 12px;
+  background-color: #222;
+  margin-left: 1em;
+  margin-right: 1em;
 }
-
 .spec > pre {
   background: none;
-  padding: 0;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 code {
-  background-color: #212931;
-  padding: 1px 6px;
+  color: #ccc;
+  background-color: black;
+  padding: 0px 6px;
   margin: 0px 2px;
+  white-space: nowrap;
 }
-
 pre > code,
 .spec > code {
   background: none;
   padding: 0;
   margin: 0;
   color: inherit;
+  white-space: inherit;
 }
 
-a > code {
-  color: #b8caea;
-}
-
-p > code, li > code, a > code {
-  white-space: nowrap;
-}
-
-p, pre {
-  margin-top: 12px;
-  margin-bottom: 12px;
-}
-
-.spec > pre {
-  margin-top: 24px;
-}
-
-.spec > pre.compact {
-  margin-bottom: 0;
-}
-
-p + p {
-  margin-top: 24px;
-}
-
-.odoc-content > ol > li {
-  margin-top: 60px;
-  margin-bottom: 72px;
-}
-
-body.index h1 {
-  text-align: center;
-  font-family: Lato, sans-serif;
-  font-size: 800%;
-  font-weight: 100;
-  text-transform: uppercase;
-}
-
-h1 {
-  margin-top: 48px;
-  margin-bottom: 24px;
+h1, h2, h3 {
   font-weight: 400;
-  font-size: 32px;
-}
-
-h2 {
-  margin-top: 96px;
-  margin-bottom: 24px;
-  font-weight: 400;
-}
-
-h3 {
-  margin-top: 36px;
-  margin-bottom: 24px;
-  font-weight: 400;
-}
-
-a, a:visited, a:active {
-  color: #a9c4ff;
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-nav.odoc-toc {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 18em;
-  background-color: #394b59;
-  box-shadow: 1px 0 0 rgb(16 22 26 / 40%);
-  line-height: 30px;
-}
-
-nav.odoc-toc ul {
-  list-style: none;
-  padding: 0;
-  margin-top: 30px;
-  margin-bottom: 30px;
-}
-
-nav.odoc-toc a,
-nav.odoc-toc a:visited,
-nav.odoc-toc a:active {
-  color: inherit;
-  display: inline-block;
-  width: 100%;
-}
-
-nav.odoc-toc li {
-  padding-left: 3em;
-}
-
-nav.odoc-toc .current-section {
-  background-color: #252d37;
-}
-
-.hljs-module-access, .hljs-keyword, .keyword {
-  color: #F49D62;
-}
-
-.hljs-identifier, .hljs-literal, .hljs-type {
-  color: #92BFBF;
-}
-
-.hljs-string {
-  color: #BDDCDC;
-}
-
-.of {
-  color: #bec5cd;
-}
-
-.spec-doc > :first-child {
-  margin-top: 0;
-}
-
-.spec-doc {
-  padding-left: 2.25em;
-  margin-top: 6px;
-  margin-bottom: 24px;
-}
-
-ol {
-  padding-left: 18px;
-}
-
-.spec {
   color: white;
 }
+
+
+
+/* Geometry.
+
+   Some of the styles here are not strictly geometry, but they *depend* on
+   geometry. */
+
+body, p, h1, h2, h3 {
+  margin: 0em;
+}
+
+p + p, p + pre, pre + p {
+  margin-top: 12px;
+}
+
+/* Two-column geometry. */
+@media (min-width: 1240px) {
+  .spec {
+    float: left;
+    width: 30rem;
+  }
+
+  h2:nth-of-type(2), h2:nth-of-type(2) ~ :not(.odoc-spec):not(nav) {
+    margin-left: 30rem;
+  }
+
+  .spec.multiline {
+    margin-bottom: 36px;
+  }
+
+  .spec-doc {
+    float: left;
+    width: 30rem;
+    margin-bottom: 12px;
+  }
+
+  .spec-doc p ~ p:last-child {
+    margin-bottom: 36px;
+  }
+
+  p + .odoc-spec {
+    margin-top: 48px;
+  }
+
+  .spec, h2, h3, footer {
+    clear: both;
+  }
+
+  h2 {
+    padding-top: 96px;
+    margin-bottom: 48px;
+  }
+
+  h3 {
+    padding-top: 24px;
+    margin-bottom: 24px;
+  }
+
+  .odoc-spec:nth-child(even) {
+    background-color: red;
+  }
+}
+@media (min-width: 1400px) {
+  .spec-doc {
+    width: 40rem;
+  }
+}
+@media (min-width: 1520px) {
+  .spec-doc {
+    width: 46rem;
+  }
+}
+
+/* Floating TOC. */
+@media (min-width: 800px) {
+  .odoc-toc {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 12rem;
+    line-height: 30px;
+    border-right: 1px solid #111;
+    background-color: #282828;
+    font-family: Iosevka;
+  }
+
+  body {
+    margin-left: 14rem;
+  }
+}
+
+pre {
+  padding: 12px;
+}
+.spec > pre {
+  padding: 0;
+}
+
+
+
+/* Anchors. */
 
 .anchor {
   visibility: hidden;
@@ -226,7 +205,7 @@ h2 > .anchor, h3 > .anchor {
 }
 
 :target .backing {
-  background-color: #252d37;
+  background-color: #1c1c1c;
 }
 
 .backing {
@@ -240,3 +219,141 @@ h2 > .anchor, h3 > .anchor {
 .spec .backing {
   height: 1.5em;
 }
+
+
+
+
+
+/* Uncateogorized. */
+
+footer {
+  margin-top: 120px;
+  opacity: 0.25;
+  padding-left: 4em;
+}
+
+a > code {
+  color: #b8caea;
+}
+
+/* p, pre {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.spec > pre {
+  margin-top: 24px;
+} */
+
+/* .spec > pre.compact {
+  margin-bottom: 0;
+}
+
+p + p {
+  margin-top: 24px;
+} */
+
+/* .odoc-content > ol > li {
+  margin-top: 60px;
+  margin-bottom: 72px;
+} */
+
+/* body.index h1 {
+  text-align: center;
+  font-family: Lato, sans-serif;
+  font-size: 800%;
+  font-weight: 100;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+h1 {
+  margin-top: 48px;
+  margin-bottom: 24px;
+  font-weight: 400;
+  font-size: 32px;
+}
+
+h2 {
+  margin-top: 96px;
+  margin-bottom: 24px;
+  font-weight: 400;
+  clear: both;
+}
+
+h3 {
+  margin-top: 36px;
+  margin-bottom: 24px;
+  font-weight: 400;
+  clear: both;
+} */
+
+a, a:visited, a:active {
+  color: #a9c4ff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+nav.odoc-toc ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+nav.odoc-toc a,
+nav.odoc-toc a:visited,
+nav.odoc-toc a:active {
+  color: inherit;
+  display: inline-block;
+  width: 100%;
+}
+
+nav.odoc-toc li {
+  padding-left: 2em;
+}
+
+nav.odoc-toc .current-section {
+  background-color: #111;
+}
+
+.hljs-module-access, .hljs-keyword, .keyword {
+  color: #ffef33;
+}
+
+.hljs-identifier, .hljs-literal, .hljs-type {
+  color: #92BFBF;
+}
+
+.hljs-string {
+  color: #BDDCDC;
+}
+
+.of {
+  color: #bec5cd;
+}
+
+/* .spec-doc > :first-child {
+  margin-top: 0;
+}
+
+.spec-doc {
+  padding-left: 2.25em;
+  margin-top: 6px;
+  margin-bottom: 48px;
+} */
+
+/* p + .odoc-spec {
+  margin-top: 48px;
+} */
+
+/* ol {
+  padding-left: 18px; */
+/* }
+
+.spec {
+  color: white;
+} */
