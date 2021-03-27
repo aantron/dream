@@ -1,12 +1,3 @@
-# `d-form`
-
-<br>
-
-TODO
-
-<!-- Adjust once the templater vertical whitespace bug is fixed again. -->
-
-```ocaml
 let show_form ?message request =
   <html>
     <body>
@@ -41,23 +32,3 @@ let () =
 
   ]
   @@ Dream.not_found
-```
-
-<pre><code><b>$ dune exec --root . ./promise.exe</b></code></pre>
-
-<br>
-
-TODO
-
-<br>
-
-**Next steps:**
-
-- [**`b-session`**](../b-session/#files) introduces *session management* for
-  associating state with clients.
-- [**`c-cookie`**](../c-cookie/#files) shows *cookie handling* in Dream.
-
-<br>
-
-[Up to the tutorial index](../#readme)
-

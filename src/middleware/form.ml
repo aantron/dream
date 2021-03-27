@@ -56,6 +56,7 @@ let form request =
         log.warning (fun log -> log ~request "CSRF token not for this session");
         Lwt.return (`Wrong_session (form, id))
 
+      (* TODO Note in docs that the token may be invalid due to key rotation. *)
       | `Invalid ->
         log.warning (fun log -> log ~request "CSRF token invalid");
         Lwt.return (`Invalid_token form)

@@ -1,8 +1,9 @@
 (executable
  (name form)
- (libraries dream))
+ (libraries dream)
+ (preprocess (pps lwt_ppx)))
 
 (rule
  (targets form.ml)
- (deps form.eml.html)
- (action (run eml %{deps} --workspace %{workspace_root})))
+ (deps form.eml.ml)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))
