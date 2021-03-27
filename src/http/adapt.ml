@@ -20,13 +20,10 @@ let forward_body
     (response : Dream.response)
     (body : [ `write ] Httpaf.Body.t) =
 
-  let open Lwt.Infix in
-
   (* TODO Use the most appropriate reader. *)
   (* TODO LATER Will also need to monitor buffer accumulation and use flush. *)
   let rec send_body () =
-    Dream.body_stream response
-    >>= function
+    match%lwt Dream.body_stream response with
     | None ->
       Httpaf.Body.close_writer body;
       Lwt.return_unit
@@ -42,12 +39,9 @@ let forward_body_h2
     (response : Dream.response)
     (body : [ `write ] H2.Body.t) =
 
-  let open Lwt.Infix in
-
   (* TODO LATER Will also need to monitor buffer accumulation and use flush. *)
   let rec send_body () =
-    Dream.body_stream response
-    >>= function
+    match%lwt Dream.body_stream response with
     | None ->
       H2.Body.close_writer body;
       Lwt.return_unit

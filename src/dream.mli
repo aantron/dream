@@ -616,6 +616,20 @@ val body_stream_bigstring :
 
 
 
+(* TODO Switch to :after for external link decoration. *)
+(** {1 JSON} *)
+
+(* type json = [
+  | `Null
+  | `Bool of bool
+  | `Float of float
+  | `String of string
+  | `Array of json list
+  | `Object of (string * json) list
+] *)
+
+
+
 (** {1 Forms} *)
 
 type form = [
@@ -644,7 +658,7 @@ val form : request -> form Lwt.t
     returned in sorted order, suitable for pattern matching:
 
     {[
-      Dream.form request >>= function
+      match%lwt Dream.form request with
       | `Ok ["email", email; "name", name] -> (* ... *)
       | _ ->
         Dream.respond ~status:`Bad_Request ""
@@ -653,7 +667,7 @@ val form : request -> form Lwt.t
     If you want to recover from conditions like expired forms, add extra cases:
 
     {[
-      Dream.form request >>= function
+      match%lwt Dream.form request with
       | `Ok      ["email", email; "name", name] -> (* ... *)
       | `Expired ["email", email; "name", name] -> (* ... *)
       | _ ->

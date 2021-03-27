@@ -10,26 +10,17 @@ module Dream = Dream__pure.Inmost
 
 
 let graphql context schema = fun request ->
-  let open Lwt.Infix in
-
-  Dream.body request
-  >>= fun body ->
-
-  prerr_endline "body";
+  let%lwt body = Dream.body request in
 
   (* TODO Actual error checking, logging, response, etc. *)
   let query = Graphql_parser.parse body |> Result.get_ok in
 
-  context request
-  >>= fun context ->
+  let%lwt context = context request in
 
   (* TODO ?variables *)
   (* TODO ?operation_name *)
-  Graphql_lwt.Schema.execute schema context query
-  >>= fun graphql_response ->
-
   (* TODO Handle all the cases. *)
-  match graphql_response with
+  match%lwt Graphql_lwt.Schema.execute schema context query with
   | Ok (`Response json) ->
     (* TODO Review JSON library choice. *)
     (* TODO Proper headers, etc. *)

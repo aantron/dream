@@ -33,6 +33,7 @@ install: [
   ["opam-installer" "--prefix" prefix "src/vendor/h2/h2-lwt-unix.install"]
 ]
 # TODO Set all these packages as conflicts.
+# TODO Use dune install -p ...
 
 # TODO Test dependency cone, i.e. list dependencies actually installed and make
 # sure nothing questionable silently creeps in.
@@ -51,6 +52,7 @@ depends: [
   "hmap"
   "jwto" {>= "0.2.2"}  # Jwto.get_payload. TODO LATER Probably system deps.
   "lwt"
+  "lwt_ppx"
   "lwt_ssl"
   "logs" {>= "0.5.0"}
   "magic-mime"

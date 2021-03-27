@@ -63,14 +63,12 @@ let upload request =
     let on_result, push_result = Lwt.wait () in
     state := Awaiting push_result;
 
-    let open Lwt.Infix in
-
     Lwt.async (fun () ->
-      Multipart_form_data.parse
-        ~stream:body
-        ~content_type
-        ~callback
-      >>= fun fields ->
+      let%lwt fields =
+        Multipart_form_data.parse
+          ~stream:body
+          ~content_type
+          ~callback in
 
       let push_result =
         match !state with

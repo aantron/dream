@@ -99,13 +99,9 @@ let%expect_test _ =
 
 
 
-open Lwt.Infix
-
 let receive message =
   let rec receive accumulator =
-    Dream.body_stream message
-    >>= fun chunk ->
-    match chunk with
+    match%lwt Dream.body_stream message with
     | None -> Lwt.return (List.rev accumulator)
     | Some chunk -> receive (chunk::accumulator)
   in

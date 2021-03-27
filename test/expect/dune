@@ -13,4 +13,4 @@
   ppx_expect.config_types
  )
  (inline_tests)
- (preprocess (pps ppx_expect)))
+ (preprocess (pps lwt_ppx ppx_expect)))

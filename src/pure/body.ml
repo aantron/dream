@@ -73,24 +73,21 @@ let buffer_body body_cell =
     on_finished
 
   | `String_stream stream ->
-    let open Lwt.Infix in
-
     let buffer = Buffer.create 4096 in
 
     let rec read () =
-      stream ()
-      >>= function
-        | None ->
-          if Buffer.length buffer = 0 then
-            body_cell := `Empty
-          else
-            body_cell := `String (Buffer.contents buffer);
+      match%lwt stream () with
+      | None ->
+        if Buffer.length buffer = 0 then
+          body_cell := `Empty
+        else
+          body_cell := `String (Buffer.contents buffer);
 
-          Lwt.return_unit
+        Lwt.return_unit
 
-        | Some string ->
-          Buffer.add_string buffer string;
-          read ()
+      | Some string ->
+        Buffer.add_string buffer string;
+        read ()
     in
 
     read ()

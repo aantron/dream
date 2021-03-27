@@ -26,13 +26,10 @@ type form = [
 ]
 
 let form request =
-  let open Lwt.Infix in
-
   match Dream.header "Content-Type" request with
   | Some "application/x-www-form-urlencoded" ->
 
-    Dream.body request
-    >>= fun body ->
+    let%lwt body = Dream.body request in
 
     let form = Dream__pure.Formats.from_form_urlencoded body in
     let csrf_token, form =
@@ -41,10 +38,7 @@ let form request =
 
     begin match csrf_token with
     | [_, value] ->
-      Csrf.verify_csrf_token value request
-      >>= fun csrf_result ->
-
-      begin match csrf_result with
+      begin match%lwt Csrf.verify_csrf_token value request with
       | `Ok ->
         Lwt.return (`Ok form)
 

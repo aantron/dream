@@ -126,24 +126,6 @@ let websocket_handler user's_websocket_handler socket =
         message_frames := [];
         push_message (Some message)
       end
-
-
-    (* | `Continuation ->
-      let open Lwt.Infix in
-      (Lwt_bytes.proxy buffer off len
-      |> Lwt_bytes.to_string
-      |> user's_websocket_handler
-      >>= fun response ->
-      Websocketaf.Wsd.send_bytes
-        socket
-        ~kind:`Text
-        (Bytes.unsafe_of_string response)
-        ~off:0
-        ~len:(String.length response);
-      Lwt.return_unit)
-      |> ignore *)
-      (* TODO Need to send errors to the error handler, so these two handlers
-         will have to be defined together. *)
   in
 
   let eof () =
@@ -221,13 +203,10 @@ let wrap_handler
        customizable. *)
     Lwt.async begin fun () ->
       Lwt.catch begin fun () ->
-        let open Lwt.Infix in
-
         (* Do the big call. *)
-        user's_dream_handler request
+        let%lwt response = user's_dream_handler request in
 
         (* Extract the Dream response's headers. *)
-        >>= fun (response : Dream.response) ->
 
         (* This is the default function that translates the Dream response to an
            http/af response and sends it. We pre-define the function, however,
@@ -284,9 +263,11 @@ let wrap_handler
           |> function
           | Ok () -> Lwt.return_unit
           | Error error_string ->
-            Error_handler.websocket_handshake
-              user's_error_handler request response error_string
-            >>= forward_response
+            let%lwt response =
+              Error_handler.websocket_handshake
+                user's_error_handler request response error_string
+            in
+            forward_response response
 
       end
       @@ fun exn ->
@@ -356,13 +337,10 @@ let wrap_handler_h2
        customizable. *)
     Lwt.async begin fun () ->
       Lwt.catch begin fun () ->
-        let open Lwt.Infix in
-
         (* Do the big call. *)
-        user's_dream_handler request
+        let%lwt response = user's_dream_handler request in
 
         (* Extract the Dream response's headers. *)
-        >>= fun (response : Dream.response) ->
 
         let forward_response response =
           let headers =
@@ -462,9 +440,7 @@ let openssl = {
     in
 
     fun client_address unix_socket ->
-      let open Lwt.Infix in
-      perform_tls_handshake client_address unix_socket
-      >>= fun tls_endpoint ->
+      let%lwt tls_endpoint = perform_tls_handshake client_address unix_socket in
       (* TODO LATER This part with getting the negotiated protocol belongs in
          Gluten. Right now, we've picked up a hard dep on OpenSSL. *)
       match Lwt_ssl.ssl_socket tls_endpoint with
@@ -575,13 +551,9 @@ let serve_with_details
         Lwt.return_unit)
   in
 
-
-  let open Lwt.Infix in
-
   (* Look up the low-level address corresponding to the interface. Hopefully,
      this is a local interface. *)
-  Lwt_unix.getaddrinfo interface (string_of_int port) []
-  >>= fun addresses ->
+  let%lwt addresses = Lwt_unix.getaddrinfo interface (string_of_int port) [] in
   match addresses with
   | [] ->
     Printf.ksprintf failwith "Dream.%s: no interface with address %s"
@@ -593,15 +565,13 @@ let serve_with_details
   (* Bring up the HTTP server. Wait for the server to actually get started.
      Then, wait for the ~stop promise. If the ~stop promise ever resolves, stop
      the server. *)
-  Lwt_io.establish_server_with_client_socket
-    listen_address
-    httpaf_connection_handler
-  >>= fun server ->
-  stop
-  >>= fun () ->
+  let%lwt server =
+    Lwt_io.establish_server_with_client_socket
+      listen_address
+      httpaf_connection_handler in
+
+  let%lwt () = stop in
   Lwt_io.shutdown_server server
-  >>= fun () ->
-  Lwt.return_unit
 
 
 
@@ -713,8 +683,6 @@ let serve_with_maybe_https
       Lwt_io.with_temp_file begin fun (certificate_file, certificate_stream) ->
       Lwt_io.with_temp_file begin fun (key_file, key_stream) ->
 
-      let open Lwt.Infix in
-
       if verbose_or_silent <> `Silent then begin
         log.warning (fun log ->
           log "Writing certificate to %s" certificate_file);
@@ -722,14 +690,10 @@ let serve_with_maybe_https
           log "Writing key to %s" key_file);
       end;
 
-      Lwt_io.write certificate_stream certificate_string
-      >>= fun () ->
-      Lwt_io.write key_stream key_string
-      >>= fun () ->
-      Lwt_io.close certificate_stream
-      >>= fun () ->
-      Lwt_io.close key_stream
-      >>= fun () ->
+      let%lwt () = Lwt_io.write certificate_stream certificate_string in
+      let%lwt () = Lwt_io.write key_stream key_string in
+      let%lwt () = Lwt_io.close certificate_stream in
+      let%lwt () = Lwt_io.close key_stream in
 
       serve_with_details
         caller_function_for_error_messages
@@ -851,23 +815,22 @@ let run
   in
 
   Lwt_main.run begin
-    let open Lwt.Infix in
-
-    serve_with_maybe_https
-      "run"
-      ~interface
-      ~port
-      ~stop
-      ?debug
-      ~error_handler
-      ?secret
-      ~prefix
-      ?app:None
-      ~https
-      ?certificate_file ?key_file
-      ?certificate_string ?key_string
-      user's_dream_handler
-    >>= fun () ->
+    let%lwt () =
+      serve_with_maybe_https
+        "run"
+        ~interface
+        ~port
+        ~stop
+        ?debug
+        ~error_handler
+        ?secret
+        ~prefix
+        ?app:None
+        ~https
+        ?certificate_file ?key_file
+        ?certificate_string ?key_string
+        user's_dream_handler
+    in
 
     if not graceful_stop then
       Lwt.return_unit

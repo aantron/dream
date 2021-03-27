@@ -16,8 +16,9 @@
   httpaf-lwt-unix
   lwt
   lwt.unix
+  lwt_ssl
+  ssl
   websocketaf
-
-  lwt_ssl ; Until things moved into Gluten.
-  ssl ; Until Gluten patched.
- ))
+ )
+ (preprocess (pps lwt_ppx))
+ (instrumentation (backend bisect_ppx)))

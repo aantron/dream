@@ -358,10 +358,7 @@ let httpaf
 
   Lwt.async begin fun () ->
     double_faults begin fun () ->
-      let open Lwt.Infix in
-
-      user's_error_handler error
-      >>= fun response ->
+      let%lwt response = user's_error_handler error in
 
       let response =
         match response with
@@ -420,10 +417,7 @@ let h2
 
   Lwt.async begin fun () ->
     double_faults begin fun () ->
-      let open Lwt.Infix in
-
-      user's_error_handler error
-      >>= fun response ->
+      let%lwt response = user's_error_handler error in
 
       let response =
         match response with

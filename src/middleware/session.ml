@@ -64,11 +64,11 @@ let set_session_data data session =
   session.store.set session.session_info session.request
 
 let invalidate_session session =
-  let open Lwt.Infix in
   let expires_at =
     Int64.add (Unix.gettimeofday () |> Int64.of_float) session.use_expires_in in
-  session.store.create (Some session.session_info) session.request expires_at
-  >>= fun session_info ->
+  let%lwt session_info =
+    session.store.create (Some session.session_info) session.request expires_at
+  in
   session.session_info <- session_info;
   Lwt.return_unit
 
@@ -95,38 +95,36 @@ let valid_for =
 (* TODO LATER Can avoid renewing sessions too often by renewing only when they
    are at least half-expired. *)
 let sessions request_local_variable store = fun next_handler request ->
-  let open Lwt.Infix in
 
   let now = Unix.gettimeofday () |> Int64.of_float in
 
   (* Try to load a session, given the cookies and/or headers in the request. *)
-  store.load request
-  >>= fun maybe_session_info ->
+  let%lwt maybe_session_info = store.load request in
 
   (* If no session is found, create one. Otherwise, if a session is found,
      check its expiration time. If too old, re-create a session. The old session
      is passed to the store so as to copy over any settings that may be
      relevant. The store can simply ignore it. *)
-  begin match maybe_session_info with
-  | None ->
-    store.create None request (Int64.add now valid_for)
-    >>= fun session_info ->
-    log.info (fun log -> log "Session %s created" session_info.id);
-    Lwt.return session_info
+  let%lwt session_info =
+    match maybe_session_info with
+    | None ->
+      let%lwt session_info =
+        store.create None request (Int64.add now valid_for) in
+      log.info (fun log -> log "Session %s created" session_info.id);
+      Lwt.return session_info
 
-  | Some session_info ->
-    if now < Int64.add session_info.expires_at valid_for then
-      let expires_at = Int64.add now valid_for in
-      Lwt.return {session_info with expires_at}
-    else
-      store.create maybe_session_info request (Int64.add now valid_for)
-      >>= fun new_session_info ->
-      log.info (fun log -> log "Session %s expired; creatd %s"
-        session_info.id new_session_info.id);
-      Lwt.return new_session_info
-  end
-
-  >>= fun session_info ->
+    | Some session_info ->
+      if now < Int64.add session_info.expires_at valid_for then
+        let expires_at = Int64.add now valid_for in
+        Lwt.return {session_info with expires_at}
+      else begin
+        let%lwt new_session_info =
+          store.create maybe_session_info request (Int64.add now valid_for) in
+        log.info (fun log -> log "Session %s expired; creatd %s"
+          session_info.id new_session_info.id);
+        Lwt.return new_session_info
+      end
+  in
 
   let session = {
     session_info;
@@ -139,8 +137,7 @@ let sessions request_local_variable store = fun next_handler request ->
      use. *)
   let request = Dream.with_local request_local_variable session request in
 
-  next_handler request
-  >>= fun response ->
+  let%lwt response = next_handler request in
 
   (* Set cookies, or whateer needs to be done. *)
   store.send session.session_info request response
