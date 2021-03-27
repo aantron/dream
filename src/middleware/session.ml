@@ -110,6 +110,9 @@ let sessions request_local_variable store = fun next_handler request ->
   begin match maybe_session_info with
   | None ->
     store.create None request (Int64.add now valid_for)
+    >>= fun session_info ->
+    log.info (fun log -> log "Session %s created" session_info.id);
+    Lwt.return session_info
 
   | Some session_info ->
     if now < Int64.add session_info.expires_at valid_for then
@@ -117,6 +120,10 @@ let sessions request_local_variable store = fun next_handler request ->
       Lwt.return {session_info with expires_at}
     else
       store.create maybe_session_info request (Int64.add now valid_for)
+      >>= fun new_session_info ->
+      log.info (fun log -> log "Session %s expired; creatd %s"
+        session_info.id new_session_info.id);
+      Lwt.return new_session_info
   end
 
   >>= fun session_info ->
