@@ -609,6 +609,8 @@ let () =
   let soup = Soup.(read_file source |> parse) in
   let content = soup $ "div.odoc-content" in
 
+  soup $$ "nav.odoc-toc li > ul" |> Soup.iter delete;
+
   soup
   $ "nav.odoc-toc"
   |> Soup.prepend_child content;

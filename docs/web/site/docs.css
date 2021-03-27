@@ -16,7 +16,7 @@ body {
   padding-bottom: 24px;
 }
 
-h1, h2 {
+h1, h2, h3 {
   color: white;
 }
 
@@ -105,6 +105,12 @@ h2 {
   font-weight: 400;
 }
 
+h3 {
+  margin-top: 36px;
+  margin-bottom: 24px;
+  font-weight: 400;
+}
+
 a, a:visited, a:active {
   color: #a9c4ff;
   text-decoration: none;
@@ -171,6 +177,7 @@ nav.odoc-toc .current-section {
 .spec-doc {
   padding-left: 2.25em;
   margin-top: 6px;
+  margin-bottom: 24px;
 }
 
 ol {
@@ -178,7 +185,6 @@ ol {
 }
 
 .spec {
-  margin-top: 24px;
   color: white;
 }
 
@@ -191,7 +197,7 @@ ol {
   text-decoration: none !important;
 }
 
-h2 > .anchor {
+h2 > .anchor, h3 > .anchor {
   margin-top: -1px;
 }
 

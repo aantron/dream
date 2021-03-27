@@ -90,7 +90,7 @@
     - Middleware is for {b sequential composition} (AND-like).
     - Routes are for {b alternative composition} (OR-like). *)
 
-(** {1 Main types} *)
+(** {1 Types} *)
 
 type request = incoming message
 (** HTTP requests, such as [GET /something HTTP/1.1]. *)
@@ -111,32 +111,27 @@ and route
     is the main form of {e alternative composition} in Dream. Routes are created
     by helpers such as {!Dream.get} and {!Dream.scope}. *)
 
-
-
-(** {1 Helper types} *)
+(** {2 Helpers} *)
 
 and _ message
-(** [_ message], read as “any message,” allows {{!common_fields} some functions}
-    to take either requests or responses as arguments, because both are defined
-    in terms of [_ message]. For example:
+(** [_ message], pronounced “any message,” allows {{!headers} some functions} to
+    take either requests or responses as arguments, because both are defined in
+    terms of [_ message]. For example:
 
     {[
       Dream.has_body : _ message -> bool
-    ]}
+    ]} *)
+
+and incoming
+and outgoing
+(** Type parameters for [message] for requests and responses, respectively.
+    These have no meaning other than they are different from each other.
 
     Dream only ever creates requests and responses, i.e. only [incoming message]
     and [outgoing message]. You don't have to worry about anything else, such as
     [int message]. [incoming] and [outgoing] are never mentioned again in the
     docs — this section is only to help with interpreting arguments of type
     [_ message], “any message.” *)
-
-and incoming
-(** Type parameter for [message] for requests. Has no meaning other than it is
-    different from {!outgoing}. *)
-
-and outgoing
-(** Type parameter for [message] for responses. Has no meaning other than it is
-    different from {!incoming}. *)
 
 and 'a promise = 'a Lwt.t
 (** Dream uses {{:https://github.com/ocsigen/lwt} Lwt ↪} for promises and
@@ -378,7 +373,7 @@ type status = Method_and_status.status
 
 
 
-(** {1:request_fields Request fields} *)
+(** {1 Requests} *)
 
 val client : request -> string
 (** Client sending the request, for example [127.0.0.1:56001]. *)
@@ -424,7 +419,7 @@ val all_queries : request -> (string * string) list
 
 
 
-(** {1:common_fields Common fields} *)
+(** {1 Headers} *)
 
 val header : string -> _ message -> string option
 (** Retrieves the first header with the given name, if present. Header names are
@@ -823,29 +818,14 @@ val get : string -> handler -> route
     ]} *)
 
 val post : string -> handler -> route
-(** Like {!Dream.get}, but the request's method must be [`POST]. *)
-
 val put : string -> handler -> route
-(** Like {!Dream.get}, but the request's method must be [`PUT]. *)
-
 val delete : string -> handler -> route
-(** Like {!Dream.get}, but the request's method must be [`DELETE]. *)
-
 val head : string -> handler -> route
-(** Like {!Dream.get}, but the request's method must be [`HEAD]. *)
-
 val connect : string -> handler -> route
-(** Like {!Dream.get}, but the request's method must be [`CONNECT]. *)
-
 val options : string -> handler -> route
-(** Like {!Dream.get}, but the request's method must be [`OPTIONS]. *)
-
 val trace : string -> handler -> route
-(** Like {!Dream.get}, but the request's method must be [`TRACE]. *)
-
 val patch : string -> handler -> route
-(** Like {!Dream.get}, but the request's method must be [`PATCH]. *)
-(* TODO Compress all these methods visually in the docs. *)
+(** Like {!Dream.get}, but for each of the other {{!type-method_} methods}. *)
 
 val static :
   ?handler:(string -> string -> request -> response promise) ->
@@ -1019,6 +999,14 @@ type ('a, 'b) conditional_log =
 (** See {!Dream.val-error} for usage. This type has to be defined, but its
     definition is largely illegible. *)
 
+type log_level = [
+  | `Error
+  | `Warning
+  | `Info
+  | `Debug
+]
+(** Log levels, in order from most urgent to least. *)
+
 val error : ('a, unit) conditional_log
 (** Formats a message and writes it to the log at level [`Error]. The inner
     formatting function is called only if the {{!initialize_log} current log
@@ -1036,13 +1024,10 @@ val error : ('a, unit) conditional_log
     some cases. *)
 
 val warning : ('a, unit) conditional_log
-(** Like {!Dream.val-error}, but the level and threshold are [`Warning]. *)
-
 val info : ('a, unit) conditional_log
-(** Like {!Dream.val-error}, but the level and threshold are [`Info]. *)
-
 val debug : ('a, unit) conditional_log
-(** Like {!Dream.val-error}, but the level and threshold are [`Debug]. *)
+(** Like {!Dream.val-error}, but for each of the other {{!log_level} log
+    levels}. *)
 
 type sub_log = {
   error : 'a. ('a, unit) conditional_log;
@@ -1050,7 +1035,7 @@ type sub_log = {
   info : 'a. ('a, unit) conditional_log;
   debug : 'a. ('a, unit) conditional_log;
 }
-(** Sub-logs. See {!Dream.val-sub_log}. *)
+(** Sub-logs. See {!Dream.val-sub_log} right below. *)
 
 (* TODO How to change levels of individual logs. *)
 val sub_log : string -> sub_log
@@ -1066,14 +1051,6 @@ val sub_log : string -> sub_log
     {[
       log.error ~request (fun log -> log "Validation failed")
     ]} *)
-
-type log_level = [
-  | `Error
-  | `Warning
-  | `Info
-  | `Debug
-]
-(** Log levels, in order from most urgent to least. *)
 
 val initialize_log :
   ?backtraces:bool ->
@@ -1649,8 +1626,8 @@ val request :
   ?headers:(string * string) list ->
     string -> request
 (** [Dream.request body] creates a fresh request with the given body for
-    testing. The optional arguments set the corresponding {{!request_fields}
-    request fields}. *)
+    testing. The optional arguments set the corresponding {{!requests} request
+    fields}. *)
 
 val test : ?prefix:string -> handler -> (request -> response)
 (** [Dream.test handler] runs a handler the same way the HTTP server
