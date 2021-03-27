@@ -1,0 +1,9 @@
+(executable
+ (name long_polling)
+ (libraries dream)
+ (preprocess (pps lwt_ppx)))
+
+(rule
+ (targets long_polling.ml)
+ (deps long_polling.eml.ml)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))
