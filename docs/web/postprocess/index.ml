@@ -59,7 +59,7 @@ let respond_replacement = {|
 |}
 
 let add_set_cookie_expected = {|<div class="spec value" id="val-add_set_cookie">
- <a href="#val-add_set_cookie" class="anchor"></a><code><span><span class="keyword">val</span> add_set_cookie : <span>?prefix:string <span class="arrow">-&gt;</span></span> <span>?encrypt:bool <span class="arrow">-&gt;</span></span> <span>?expires:float <span class="arrow">-&gt;</span></span>
+ <a href="#val-add_set_cookie" class="anchor"></a><code><span><span class="keyword">val</span> add_set_cookie : <span>?cookie_prefix:string <span class="arrow">-&gt;</span></span> <span>?encrypt:bool <span class="arrow">-&gt;</span></span> <span>?expires:float <span class="arrow">-&gt;</span></span>
 <span>?max_age:float <span class="arrow">-&gt;</span></span> <span>?domain:string <span class="arrow">-&gt;</span></span> <span>?path:string <span class="arrow">-&gt;</span></span> <span>?secure:bool <span class="arrow">-&gt;</span></span> <span>?http_only:bool <span class="arrow">-&gt;</span></span>
 <span>?same_site:<span>[ `Strict <span>| `Lax</span> <span>| `None</span> ]</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <a href="#type-response">response</a></span></code>
 </div>
@@ -67,7 +67,7 @@ let add_set_cookie_expected = {|<div class="spec value" id="val-add_set_cookie">
 
 let add_set_cookie_replacement = {|
 <pre><span class="keyword">val</span> add_set_cookie :
-  ?prefix:string ->
+  <span class="optional">?cookie_prefix:string ->
   ?encrypt:bool ->
   ?expires:float ->
   ?max_age:float ->
@@ -75,12 +75,8 @@ let add_set_cookie_replacement = {|
   ?path:string ->
   ?secure:bool ->
   ?http_only:bool ->
-  ?same_site:[ `Strict | `Lax | `None ] ->
-  string ->
-  string ->
-  <a href="#type-request">request</a> ->
-  <a href="#type-response">response</a> ->
-    <a href="#type-response">response</a>
+  ?same_site:[ `Strict | `Lax | `None ] -></span>
+    string -> string -> <a href="#type-request">request</a> -> <a href="#type-response">response</a> -> <a href="#type-response">response</a>
 </pre>|}
 
 let body_stream_bigstring_expected = {|<div class="spec value" id="val-body_stream_bigstring">

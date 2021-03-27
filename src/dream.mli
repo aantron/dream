@@ -516,6 +516,7 @@ val status : response -> status
 (* TODO Or just provide one helper for formatting Set-Cookie and let the user
    use the header calls to actually add the header...? How often do we need to
    set a cookie? *)
+(* TODO Name of ?cookie_prefix? *)
 val add_set_cookie :
   ?cookie_prefix:string ->
   ?encrypt:bool ->
@@ -526,11 +527,7 @@ val add_set_cookie :
   ?secure:bool ->
   ?http_only:bool ->
   ?same_site:[ `Strict | `Lax | `None ] ->
-  string ->
-  string ->
-  request ->
-  response ->
-    response
+    string -> string -> request -> response -> response
 (** Adds a [Set-Cookie:] header to the given response for setting the cookie
     with the given name to the given value. Does not remove any [Set-Cookie:]
     header that is already present — to do that, use {!Dream.drop_header}. This
