@@ -576,6 +576,8 @@ val with_body_stream :
     is generally not possible, because a partial response has already been
     transmitted. *)
 (* TODO [f] is called repeatedly. *)
+(* TODO It would be nice if the returned message was already wrapped in a
+   promise. Does that preclude anything useful, however? *)
 
 val has_body : _ message -> bool
 (** Evalutes to [true] if the given message either has a body that has been
@@ -616,6 +618,7 @@ type bigstring_stream =
     unit
 
 val with_body_stream_bigstring : bigstring_stream -> 'a message -> 'a message
+(* TODO Is there a neat way to end with this as the continuation? *)
 
 
 
