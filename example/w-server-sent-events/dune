@@ -1,0 +1,9 @@
+(executable
+ (name server_sent_events)
+ (libraries dream)
+ (preprocess (pps lwt_ppx)))
+
+(rule
+ (targets server_sent_events.ml)
+ (deps server_sent_events.eml.ml)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))

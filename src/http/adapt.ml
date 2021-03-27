@@ -16,11 +16,14 @@ let address_to_string : Unix.sockaddr -> string = function
 
 
 
+(* TODO Write a test simulating client exit during SSE; this was killing the
+   server at some point. *)
 (* TODO LATER Will also need to monitor buffer accumulation and use flush. *)
 let forward_body_general
     (response : Dream.response)
     write_string
     (write_bigstring : ?off:int -> ?len:int -> Dream.bigstring -> unit)
+    flush
     close =
 
   match !(response.body) with
@@ -39,6 +42,7 @@ let forward_body_general
         Lwt.return_unit
       | Some string ->
         write_string string;
+        flush ignore; (* TODO This needs to be exposed. *)
         send ()
     in
 
@@ -66,6 +70,7 @@ let forward_body
     response
     (Httpaf.Body.write_string body)
     (Httpaf.Body.write_bigstring body)
+    (Httpaf.Body.flush body)
     (fun () -> Httpaf.Body.close_writer body)
 
 let forward_body_h2
@@ -76,4 +81,5 @@ let forward_body_h2
     response
     (H2.Body.write_string body)
     (H2.Body.write_bigstring body)
+    (H2.Body.flush body)
     (fun () -> H2.Body.close_writer body)
