@@ -34,11 +34,10 @@ let response_expected = {|<div class="spec value" id="val-response">
 
 let response_replacement = {|
 <pre><span class="keyword">val</span> response :
-  ?status:<a href="#type-status">status</a> -&gt;
+  <span class="optional">?status:<a href="#type-status">status</a> -&gt;
   ?code:int ->
-  ?headers:(string * string) list -&gt;
-  string -&gt;
-    <a href="#type-response">response</a>
+  ?headers:(string * string) list -&gt;</span>
+    string -&gt; <a href="#type-response">response</a>
 </pre>
 |}
 

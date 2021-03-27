@@ -47,6 +47,10 @@ pre {
   padding: 0;
 }
 
+/* .optional {
+  opacity: 0.7;
+} */
+
 code {
   background-color: #101316;
   padding: 1px 6px;

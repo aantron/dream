@@ -422,32 +422,6 @@ val queries : string -> request -> string list
 val all_queries : request -> (string * string) list
 (** Retrieves the entire query string as a name-value list. *)
 
-(* TODO Switch to this indentation style in more places. *)
-(* TODO ?prefix or ?cookie_prefix? *)
-(* TODO What is the right default with the prefix? *)
-val cookie :
-  ?match_prefix:bool ->
-  ?decrypt:bool ->
-    string -> request -> string option
-(** Cookies are sent by the client in [Cookie:] headers as [name=value] pairs.
-    This function parses those headers, looking for the given [name].
-
-    No decoding is applied to any found [value] — it is returned raw, as sent by
-    the client. Cookies are almost always encoded so as to at least escape [=],
-    [;], and newline characters, which are significant to the cookie and HTTP
-    parsers. If you applied such an encoding when setting the cookie, you have
-    to reverse it after calling [Dream.cookie]. See {!Dream.add_set_cookie} for
-    recommendations about encodings to use and {!web_formats} for encoders and
-    decoders.
-
-    If the request includes multiple cookies with the same name, one is
-    returned. *)
-(* TODO Need auto-decrypt. *)
-
-val all_cookies : request -> (string * string) list
-(** Retrieves all cookies, i.e. all [name=value] in all [Cookie:] headers. As
-    with {!Dream.cookie}, no decoding is applied to the values. *)
-
 
 
 (** {1:common_fields Common fields} *)
@@ -488,8 +462,7 @@ val response :
   ?status:status ->
   ?code:int ->
   ?headers:(string * string) list ->
-  string ->
-    response
+    string -> response
 (** Creates a new response with the given string as body. Use [""] to return an
     empty response, or if you'd like to assign a stream as the response body
     later. [~code] is offered as an alternative to [~status] for specifying the
@@ -512,10 +485,24 @@ val empty : status -> response Lwt.t
 val status : response -> status
 (** Response status, for example [`OK]. *)
 
-(* TODO All the optionals for Set-Cookie. *)
-(* TODO Or just provide one helper for formatting Set-Cookie and let the user
-   use the header calls to actually add the header...? How often do we need to
-   set a cookie? *)
+(* val cookie_prefix : request -> string *)
+(* TODO Might need a separate Cookies docs section at this point. *)
+
+(* val reason_override : response -> string option *)
+(* If the response was created with [~reason:r], evaluates to [Some r]. *)
+
+(* val version_override : response -> (int * int) option *)
+(* If the response was created with [~version:v], evaluates to [Some v]. *)
+
+(* val reason : response -> string *)
+(* Response reason string, for example ["OK"]. If the response was created with
+    [~reason], that string is returned. Otherwise, it is based on the response
+    status. *)
+
+
+
+(** {1 Cookies} *)
+
 (* TODO Name of ?cookie_prefix? *)
 val add_set_cookie :
   ?cookie_prefix:string ->
@@ -534,21 +521,31 @@ val add_set_cookie :
     function does not encode the cookie name nor its value. If the values you
     are passing in can have [=], [;], or newlines, ... *)
 (* TODO Hints about encodings. *)
-(* TODO Needs big-time prettying in the docs. *)
 
-(* val cookie_prefix : request -> string *)
-(* TODO Might need a separate Cookies docs section at this point. *)
+(* TODO Switch to this indentation style in more places. *)
+(* TODO ?prefix or ?cookie_prefix? *)
+(* TODO What is the right default with the prefix? *)
+val cookie :
+  ?match_prefix:bool ->
+  ?decrypt:bool ->
+    string -> request -> string option
+(** Cookies are sent by the client in [Cookie:] headers as [name=value] pairs.
+    This function parses those headers, looking for the given [name].
 
-(* val reason_override : response -> string option *)
-(* If the response was created with [~reason:r], evaluates to [Some r]. *)
+    No decoding is applied to any found [value] — it is returned raw, as sent by
+    the client. Cookies are almost always encoded so as to at least escape [=],
+    [;], and newline characters, which are significant to the cookie and HTTP
+    parsers. If you applied such an encoding when setting the cookie, you have
+    to reverse it after calling [Dream.cookie]. See {!Dream.add_set_cookie} for
+    recommendations about encodings to use and {!web_formats} for encoders and
+    decoders.
 
-(* val version_override : response -> (int * int) option *)
-(* If the response was created with [~version:v], evaluates to [Some v]. *)
+    If the request includes multiple cookies with the same name, one is
+    returned. *)
 
-(* val reason : response -> string *)
-(* Response reason string, for example ["OK"]. If the response was created with
-    [~reason], that string is returned. Otherwise, it is based on the response
-    status. *)
+val all_cookies : request -> (string * string) list
+(** Retrieves all cookies, i.e. all [name=value] in all [Cookie:] headers. As
+    with {!Dream.cookie}, no decoding is applied to the values. *)
 
 
 
