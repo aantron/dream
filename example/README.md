@@ -36,7 +36,7 @@ list below and jump to whatever interests you!
 - [**`g-upload`**](f-upload)
 - [**`h-sql`**](g-sql) &nbsp;&mdash;&nbsp; finally CRUD!
 - [**`i-graphql`**](h-graphql)
-- [**`j-streaming`**](i-streaming)
+- [**`j-stream`**](i-stream)
 - [**`k-websocket`**](j-websocket)
 - [**`l-https`**](k-https)
 - [**`m-crypto`**](l-crypto)
@@ -108,9 +108,9 @@ Techniques:
 - [**`w-long-polling`**]()
 - [**`w-postgres-docker`**]()
 - [**`w-server-sent-events`**]()
-- [**`w-sql-streaming`**]()
-- [**`w-template-streaming`**]()
-- [**`w-websocket-streaming`**]()
+- [**`w-sql-stream`**]()
+- [**`w-template-stream`**]()
+- [**`w-websocket-stream`**]()
 
 Advanced customization:
 
