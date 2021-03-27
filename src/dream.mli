@@ -609,7 +609,13 @@ val body_stream_bigstring :
 (* TODO If partial application will be required to guarantee no allocation,
    document that. *)
 (* TODO Note that concurrent reading of one request is NOT supported. *)
-(* TODO "Raw" write streams require more experience to design. *)
+
+type bigstring_stream =
+  (bigstring -> int -> int -> unit) ->
+  (unit -> unit) ->
+    unit
+
+val with_body_stream_bigstring : bigstring_stream -> 'a message -> 'a message
 
 
 

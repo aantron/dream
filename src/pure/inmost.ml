@@ -9,6 +9,7 @@ include Method
 include Status
 
 type bigstring = Body.bigstring
+type bigstring_stream = Body.bigstring_stream
 
 
 
@@ -256,6 +257,9 @@ let with_body body message =
 
 let with_body_stream stream message =
   update {message with body = ref (`String_stream stream)}
+
+let with_body_stream_bigstring stream message =
+  update {message with body = ref (`Bigstring_stream stream)}
 
 let has_body message =
   Body.has_body message.body

@@ -32,7 +32,7 @@ let%expect_test _ =
 
 
 
-let string_stream chunks : Dream.response =
+let string_stream chunks =
   let chunks = ref chunks in
   Dream.response ""
   |> Dream.with_body_stream (fun () ->
@@ -40,27 +40,14 @@ let string_stream chunks : Dream.response =
     | [] -> Lwt.return_none
     | chunk::more -> chunks := more; Lwt.return (Some chunk))
 
-(* TODO This is still using an internal API, which needs to be exposed in some
-   way. *)
-let bigstring_stream chunks : Dream.request =
+let bigstring_stream chunks =
   let chunks = ref chunks in
-  let body =
-    fun data eof ->
-      match !chunks with
-      | [] -> eof ()
-      | chunk::more ->
-        chunks := more;
-        data (Lwt_bytes.of_string chunk) 0 (String.length chunk)
-  in
-  Dream__pure.Inmost.request_from_http
-    ~app:(Dream__pure.Inmost.new_app ())
-    ~client:""
-    ~method_:`GET
-    ~target:"/"
-    ~version:(1, 1)
-    ~headers:[]
-    ~body
-  |> Obj.magic
+  Dream.response ""
+  |> Dream.with_body_stream_bigstring (fun data eof ->
+    match !chunks with
+    | [] -> eof ()
+    | chunk::more ->
+      chunks := more; data (Lwt_bytes.of_string chunk) 0 (String.length chunk))
 
 
 
