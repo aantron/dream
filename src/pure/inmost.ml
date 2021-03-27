@@ -336,7 +336,7 @@ let request_from_http
       request_version = version;
     };
     headers;
-    body = ref (`Stream body);
+    body = ref (`Bigstring_stream body);
     locals = Scope.empty;
     first = request; (* TODO LATER What OCaml version is required for this? *)
     last = ref request;

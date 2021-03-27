@@ -7,7 +7,7 @@
 
 type bigstring = Lwt_bytes.t
 
-type stream =
+type bigstring_stream =
   (bigstring -> int -> int -> unit) ->
   (unit -> unit) ->
     unit
@@ -18,7 +18,7 @@ type string_stream =
 type body = [
   | `Empty
   | `String of string
-  | `Stream of stream
+  | `Bigstring_stream of bigstring_stream
   | `String_stream of string_stream
 ]
 
@@ -37,7 +37,7 @@ let buffer_body body_cell =
   | `Empty
   | `String _ -> Lwt.return_unit
 
-  | `Stream stream ->
+  | `Bigstring_stream stream ->
     let on_finished, finished = Lwt.wait () in
 
     let length = ref 0 in
@@ -98,7 +98,7 @@ let body body_cell =
     match !body_cell with
     | `Empty -> ""
     | `String body -> body
-    | `Stream _
+    | `Bigstring_stream _
     | `String_stream _ -> assert false)
 
 let body_stream body_cell =
@@ -110,7 +110,7 @@ let body_stream body_cell =
     body_cell := `Empty;
     Lwt.return (Some body)
 
-  | `Stream stream ->
+  | `Bigstring_stream stream ->
     let promise, resolver = Lwt.wait () in
 
     let rec retrieve () =
@@ -156,7 +156,7 @@ let body_stream_bigstring data eof body_cell =
   (* TODO Is it possible to avoid the allocation by relying on the underlying
      stream to return EOF multiple times? If not, try partial application as a
      way to avoid allocation for a reader. *)
-  | `Stream stream ->
+  | `Bigstring_stream stream ->
     let rec receive () =
       stream
         (fun chunk offset length ->
