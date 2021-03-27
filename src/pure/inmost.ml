@@ -246,8 +246,13 @@ let body_stream_bigstring data eof message =
    That read should not override the new body. So let it mutate the old
    request's ref; we generate a new request with a new body ref. *)
 let with_body body message =
-  update {message with body = ref (`String body)}
-(* TODO Set to `Empty to avoid an allocation if the string is empty. *)
+  let body =
+    if String.length body = 0 then
+      `Empty
+    else
+      `String body
+  in
+  update {message with body = ref body}
 
 let with_body_stream stream message =
   update {message with body = ref (`String_stream stream)}
@@ -339,19 +344,6 @@ let request_from_http
 
   request
 
-(* TODO Unify these string-to-stream functions. *)
-let string_to_stream string =
-  let buffer = Lwt_bytes.of_string string in
-  let sent = ref false in
-
-  fun data eof ->
-    if !sent then
-      eof ()
-    else begin
-      sent := true;
-      data buffer 0 (Lwt_bytes.length buffer)
-    end
-
 let request
     ?(client = "127.0.0.1:12345")
     ?(method_ = `GET)
@@ -360,14 +352,36 @@ let request
     ?(headers = [])
     body =
 
-  request_from_http
-    ~app:(new_app ())
-    ~client
-    ~method_
-    ~target
-    ~version
-    ~headers
-    ~body:(string_to_stream body)
+  (* This function is used for debugging, so it's fine to allocate a fake body
+     and then immediately replace it. *)
+  let path, query = Formats.from_target target in
+
+  let body =
+    if String.length body = 0 then
+      `Empty
+    else
+      `String body
+  in
+
+  let rec request = {
+    specific = {
+      app = new_app ();
+      client;
+      method_;
+      target;
+      prefix = [];
+      path = Formats.from_target_path path;
+      query = Formats.from_form_urlencoded query;
+      request_version = version;
+    };
+    headers;
+    body = ref body;
+    locals = Scope.empty;
+    first = request;
+    last = ref request;
+  } in
+
+  request
 
 let response
     ?status
@@ -382,21 +396,26 @@ let response
     | None, Some code -> int_to_status code
   in
 
+  let body =
+    if String.length body = 0 then
+      `Empty
+    else
+      `String body
+  in
+
   let rec response = {
     specific = {
       status;
       websocket = None;
     };
     headers;
-    body = ref `Empty;
+    body = ref body;
     locals = Scope.empty;
     first = response;
     last = ref response;
   } in
 
-  with_body body response
-  (* TODO Either don't call this if the body is empty, or have it not create a
-     new message if the body is empty. *)
+  response
 
 let respond
     ?status
@@ -442,7 +461,6 @@ let rec pipeline middlewares handler =
 let sort_headers headers =
   List.stable_sort (fun (name, _) (name', _) -> compare name name') headers
 
-(* TODO Factor out body code into module Body, maybe also Stream. *)
 (* TODO Declare a stream type and replace all "k" by more or feed. *)
 
 let encryption_key request =

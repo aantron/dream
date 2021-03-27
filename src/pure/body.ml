@@ -113,19 +113,36 @@ let body_stream body_cell =
   | `Stream stream ->
     let promise, resolver = Lwt.wait () in
 
-    stream
-      (fun data offset length ->
-        Some (Lwt_bytes.to_string (Lwt_bytes.proxy data offset length))
-        |> Lwt.wakeup_later resolver)
-      (fun () ->
-        body_cell := `Empty;
-        Lwt.wakeup_later resolver None);
+    let rec retrieve () =
+      stream
+        (fun data offset length ->
+          if length = 0 then
+            retrieve ()
+          else
+            Some (Lwt_bytes.to_string (Lwt_bytes.proxy data offset length))
+            |> Lwt.wakeup_later resolver)
+        (fun () ->
+          body_cell := `Empty;
+          Lwt.wakeup_later resolver None)
+    in
+    retrieve ();
 
     promise
 
-  (* TODO Should we bother with `Empty handling here? *)
   | `String_stream stream ->
-    stream ()
+    let rec retrieve () =
+      let data_promise = stream () in
+      match%lwt data_promise with
+      | None ->
+        body_cell := `Empty;
+        Lwt.return_none
+      | Some chunk ->
+        if String.length chunk = 0 then
+          retrieve ()
+        else
+          data_promise
+    in
+    retrieve ()
 
 let body_stream_bigstring data eof body_cell =
   match !body_cell with
@@ -140,22 +157,35 @@ let body_stream_bigstring data eof body_cell =
      stream to return EOF multiple times? If not, try partial application as a
      way to avoid allocation for a reader. *)
   | `Stream stream ->
-    stream
-      data
-      (fun () ->
-        body_cell := `Empty;
-        eof ())
+    let rec receive () =
+      stream
+        (fun chunk offset length ->
+          if length = 0 then
+            receive ()
+          else
+            data chunk offset length)
+        (fun () ->
+          body_cell := `Empty;
+          eof ())
+    in
+    receive ()
 
   (* Optimizing this case is not as important, because `String_streams arise
      primarily in responses, but fast reads happen primarily on requests.
      However, this also depends on the HTTP layer using the right kind of read
      for the right kind of stream. *)
   | `String_stream stream ->
-    Lwt.on_any (stream ())
-      (function
-      | None ->
-        body_cell := `Empty;
-        eof ()
-      | Some string ->
-        data (Lwt_bytes.of_string string) 0 (String.length string))
-      raise
+    let rec receive () =
+      Lwt.on_any (stream ())
+        (function
+        | None ->
+          body_cell := `Empty;
+          eof ()
+        | Some string ->
+          if String.length string = 0 then
+            receive ()
+          else
+            data (Lwt_bytes.of_string string) 0 (String.length string))
+        raise
+    in
+    receive ()
