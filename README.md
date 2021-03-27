@@ -6,7 +6,8 @@
 
 ## Roadmap
 
-- [ ] Optimizations: router, logger, microparsers (form data, etc.).
+- [ ] Optimizations: router, logger, microparsers (form data, etc.), fully
+      zero-allocation streaming.
 - [ ] WebSocket and stream backpressure.
 - [ ] HTTP3/QUIC.
 

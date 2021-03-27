@@ -153,9 +153,6 @@ let body_stream_bigstring data eof body_cell =
     body_cell := `Empty;
     data (Lwt_bytes.of_string body) 0 (String.length body)
 
-  (* TODO Is it possible to avoid the allocation by relying on the underlying
-     stream to return EOF multiple times? If not, try partial application as a
-     way to avoid allocation for a reader. *)
   | `Bigstring_stream stream ->
     let rec receive () =
       stream
