@@ -550,30 +550,29 @@ val all_cookies : request -> (string * string) list
 (* TODO Will need mappers, etc. *)
 (** {1 Bodies} *)
 
-val body : _ message -> string promise
-(** Retrieves the entire message body. {!Dream.body} stores a reference to the
-    result string in the message, so {!Dream.body} can be used multiple
+val body : request -> string promise
+(** Retrieves the entire request body. {!Dream.body} stores a reference to the
+    result string in the request, so {!Dream.body} can be used multiple
     times. *)
 
-val with_body : string -> 'a message -> 'a message
-(** Replaces the message body, creating a new message. *)
+val with_body : string -> response -> response
+(** Replaces the response body. *)
 
 (** {2 Streaming} *)
 
-(* TODO Rename to stream_body. *)
-val read : _ message -> string option promise
-(** Retrieves part of the message body. The promise is fulfilled with [None] if
-    the body is finished. The chunk is not buffered by Dream, so it can only be
-    read once. *)
+val read : request -> string option promise
+(** Retrieves a chunk of the request body. The promise is fulfilled with [None]
+    if the body is finished. The chunk is not buffered by Dream, so it can only
+    be read once. *)
 
 (* val with_body_stream :
   (unit -> string option promise) -> 'a message -> 'a message *)
 (* TODO Could still use a Dream.respond_with_stream helper. *)
 (* TODO Can still use a multishot, pull stream? *)
-val with_stream : 'a message -> 'a message
-(** Makes the message ready for stream writing with {!Dream.write}. If the
-    message is a response, you should return it from your handler soon after
-    — only one call to {!Dream.write} will proceed until then. *)
+val with_stream : response -> response
+(** Makes the response ready for stream writing with {!Dream.write}. You should
+    return it from your handler soon after — only one call to {!Dream.write}
+    will be accepted before then, and none will actually proceed. *)
 
 (* [Dream.with_body_stream f message] creates a new message, with a stream
     body represented by the function [f]. If the message is a response, after
@@ -589,20 +588,19 @@ val with_stream : 'a message -> 'a message
 (* TODO It would be nice if the returned message was already wrapped in a
    promise. Does that preclude anything useful, however? *)
 
-val write : string -> _ message -> unit promise
-(** Streams out the string. The promise is fulfilled when the stream can accept
-    more writes. *)
+val write : string -> response -> unit promise
+(** Streams out the string. The promise is fulfilled when the response can
+    accept more writes. *)
 
-val flush : _ message -> unit promise
-(** Flushes write buffers. If the message is a response, data is sent to the
-    client. *)
+val flush : response -> unit promise
+(** Flushes write buffers. Data is sent to the client. *)
 
-val close_stream : _ message -> unit promise
-(** Finishes the write stream. *)
+val close_stream : response -> unit promise
+(** Finishes the response stream. *)
 (* TODO close_stream or close_body? *)
 
 (**/**)
-val has_body : _ message -> bool
+(* val has_body : _ message -> bool *)
 (** Evalutes to [true] if the given message either has a body that has been
     streamed and has positive length, or a body that has not been streamed yet.
     This function does not stream the body — it could return [true], and later
@@ -630,25 +628,20 @@ type bigstring =
 (* TODO Is the final unit necessary. *)
 val next :
   bigstring:(bigstring -> int -> int -> unit) ->
-  ?string:(string -> int -> int -> unit) ->
-  ?flush:(unit -> unit) ->
+  (* ?string:(string -> int -> int -> unit) ->
+  ?flush:(unit -> unit) -> *)
   close:(unit -> unit) ->
   exn:(exn -> unit) ->
-  _ message ->
+  request ->
     unit
-(** Waits for the next event on the stream, and calls:
+(** Waits for the next stream event, and calls:
 
     - [~bigstring] with an offset and length, if a {!bigstring} is written.
-    - [~string] if a string is written.
-    - [~flush] if flush is requested.
     - [~close] if close is requested.
-    - [~exn] to report an exception.
+    - [~exn] to report an exception. *)
 
-    If the message is a request provided by Dream, [~string] and [~flush] will
-    never be called, so they are optional. *)
-
-val write_bigstring : bigstring -> int -> int -> _ message -> unit promise
-(** Streams out the bigstring slice. *)
+val write_bigstring : bigstring -> int -> int -> response -> unit promise
+(** Streams out the {!bigstring} slice. *)
 
 (**/**)
 (* TODO Format after settling on it. *)

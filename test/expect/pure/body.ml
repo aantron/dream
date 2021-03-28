@@ -151,7 +151,7 @@ let%expect_test _ =
 let next message =
   let until_done, signal_done = Lwt.wait () in
   let rec next accumulator =
-    Dream.next
+    Dream__pure.Inmost.next
       ~bigstring:(fun data start length ->
         next
           ((Lwt_bytes.to_string
@@ -161,7 +161,7 @@ let next message =
           ((String.sub data start length)::accumulator))
       ~close:(fun () -> Lwt.wakeup_later signal_done (List.rev accumulator))
       ~exn:ignore
-      message
+      (Obj.magic message)
   in
   next [];
   Lwt_main.run until_done

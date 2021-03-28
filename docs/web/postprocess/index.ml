@@ -89,36 +89,31 @@ let bigstring_replacement = {|
 |}
 
 let next_expected = {|<div class="spec value" id="val-next">
- <a href="#val-next" class="anchor"></a><code><span><span class="keyword">val</span> next : <span>bigstring:<span>(<span><a href="#type-bigstring">bigstring</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>?string:<span>(<span>string <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span>
-<span>?flush:<span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>close:<span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>exn:<span>(<span>exn <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span><span><span class="type-var">_</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> unit</span></code>
+ <a href="#val-next" class="anchor"></a><code><span><span class="keyword">val</span> next : <span>bigstring:<span>(<span><a href="#type-bigstring">bigstring</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>close:<span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>exn:<span>(<span>exn <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span>
+<span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
 |}
 
 let next_replacement = {|
 <pre><span class="keyword">val</span> next :
   bigstring:(<a href="#type-bigstring">bigstring</a> -> int -> int -> unit) ->
-  ?string:(string -> int -> int -> unit) ->
-  ?flush:(unit -> unit) ->
   close:(unit -> unit) ->
   exn:(exn -> unit) ->
-  _ <a href="#type-message">message</a> ->
+  <a href="#type-request">request</a> ->
     unit
-</ore>
+</pre>
 |}
 
-(* let body_stream_bigstring_expected = {|<div class="spec value" id="val-body_stream_bigstring">
- <a href="#val-body_stream_bigstring" class="anchor"></a><code><span><span class="keyword">val</span> body_stream_bigstring : <span><span>(<span><a href="#type-bigstring">bigstring</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span><span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span><span><span class="type-var">_</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> unit</span></code>
+let write_bigstring_expected = {|<div class="spec value" id="val-write_bigstring">
+ <a href="#val-write_bigstring" class="anchor"></a><code><span><span class="keyword">val</span> write_bigstring : <span><a href="#type-bigstring">bigstring</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
-let body_stream_bigstring_replacement = {|
-<pre><span class="keyword">val</span> body_stream_bigstring :
-  (<a href="#type-bigstring">bigstring</a> -> int -> int -> unit) ->
-  (unit -> unit) ->
-  (_ <a href="#type-message">message</a>) ->
-    unit
+let write_bigstring_replacement = {|
+<pre><span class="keyword">val</span> write_bigstring :
+  <a href="#type-bigstring">bigstring</a> -> int -> int -> <a href="#type-response">response</a> -> unit <a href="#type-promise">promise</a>
 </pre>
-|} *)
+|}
 
 let form_expected = {|<div class="spec type" id="type-form">
  <a href="#type-form" class="anchor"></a><code><span><span class="keyword">type</span> form</span><span> = </span><span>[ </span></code>
@@ -516,14 +511,14 @@ let pretty_print_signatures soup =
       Soup.replace (next $ "> code") (Soup.parse next_replacement);
       Soup.add_class "multiline" next);
 
-  (* let body_stream_bigstring = soup $ "#val-body_stream_bigstring" in
+  let write_bigstring = soup $ "#val-write_bigstring" in
   if_expected
-    body_stream_bigstring_expected
-    (fun () -> pretty_print body_stream_bigstring)
+    write_bigstring_expected
+    (fun () -> pretty_print write_bigstring)
     (fun () ->
       Soup.replace
-        (body_stream_bigstring $ "> code")
-        (Soup.parse body_stream_bigstring_replacement)); *)
+        (write_bigstring $ "> code") (Soup.parse write_bigstring_replacement);
+      Soup.add_class "multiline" write_bigstring);
 
   let form = soup $ "#type-form" in
   if_expected
