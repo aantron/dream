@@ -19,14 +19,39 @@ let address_to_string : Unix.sockaddr -> string = function
 (* TODO Write a test simulating client exit during SSE; this was killing the
    server at some point. *)
 (* TODO LATER Will also need to monitor buffer accumulation and use flush. *)
+(* TODO Rewrite using Dream.next. *)
 let forward_body_general
     (response : Dream.response)
-    write_string
+    (write_string : ?off:int -> ?len:int -> string -> unit)
     (write_bigstring : ?off:int -> ?len:int -> Dream.bigstring -> unit)
-    flush
+    http_flush
     close =
 
-  match !(response.body) with
+  let rec send () =
+    response
+    |> Dream.next
+      ~bigstring
+      ~string
+      ~flush
+      ~close
+      ~exn:ignore
+
+  and bigstring chunk off len =
+    write_bigstring ~off ~len chunk;
+    send ()
+
+  and string chunk off len =
+    write_string ~off ~len chunk;
+    send ()
+
+  and flush () =
+    http_flush send
+
+  in
+
+  send ()
+
+  (* match !(response.body) with
   | `Empty ->
     close ()
 
@@ -36,7 +61,7 @@ let forward_body_general
 
   | `String_stream _ ->
     let rec send () =
-      match%lwt Dream.body_stream response with
+      match%lwt Dream.read response with
       | None ->
         close ();
         Lwt.return_unit
@@ -60,7 +85,7 @@ let forward_body_general
           close ())
         response
     in
-    send ()
+    send () *)
 
 let forward_body
     (response : Dream.response)

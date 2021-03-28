@@ -1,3 +1,4 @@
 (executable
  (name stream)
- (libraries dream))
+ (libraries dream)
+ (preprocess (pps lwt_ppx)))

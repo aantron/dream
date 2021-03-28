@@ -174,22 +174,48 @@ let wrap_handler
 
     let body =
       Httpaf.Reqd.request_body conn in
-    let body =
+(*
+    let () =
+
+
+
       fun data eof ->
         Httpaf.Body.schedule_read
           body
           ~on_eof:eof
           ~on_read:(fun buffer ~off ~len -> data buffer off len)
           (* TODO Doesn't this allocate? *)
-    in
+    in *)
       (* Httpaf.Body.schedule_read body
         ~on_eof:(fun () -> k None)
         ~on_read:(fun buffer ~off ~len ->
           k (Some (Bigarray_compat.Array1.sub buffer off len))) in *)
 
     let request : Dream.request =
-      Dream.request_from_http
-        ~app ~client ~method_ ~target ~version ~headers ~body in
+      Dream.request_from_http ~app ~client ~method_ ~target ~version ~headers in
+
+    (* TODO Could use a private variant of flush that causes no app-observable
+       side-effects. *)
+    (* TODO It would still help to have a fully pull-based writing API. *)
+    (* TODO The whole body-reading model seems to be broken. How does one detect
+       an exception? *)
+    (* The request body stream. *)
+    Lwt.async begin fun () ->
+      let%lwt () = Dream.flush request in
+      let on_eof () = Dream.close_stream request |> ignore in
+
+      let rec loop () =
+        Httpaf.Body.schedule_read
+          body
+          ~on_eof
+          ~on_read:(fun buffer ~off ~len ->
+            Dream__pure.Body.write_bigstring buffer off len request.body
+            |> ignore;
+            loop ())
+      in
+      loop ();
+      Lwt.return_unit
+    end;
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -308,13 +334,13 @@ let wrap_handler_h2
 
     let body =
       H2.Reqd.request_body conn in
-    let body =
+    (* let body =
       fun data eof ->
         H2.Body.schedule_read
           body
           ~on_eof:eof
           ~on_read:(fun buffer ~off ~len -> data buffer off len)
-    in
+    in *)
 
       (* H2.Body.schedule_read body
         ~on_eof:(fun () -> k None)
@@ -322,8 +348,24 @@ let wrap_handler_h2
           k (Some (Bigarray_compat.Array1.sub buffer off len))) in *)
 
     let request : Dream.request =
-      Dream.request_from_http
-        ~app ~client ~method_ ~target ~version ~headers ~body in
+      Dream.request_from_http ~app ~client ~method_ ~target ~version ~headers in
+
+    Lwt.async begin fun () ->
+      let%lwt () = Dream.flush request in
+      let on_eof () = Dream.close_stream request |> ignore in
+
+      let rec loop () =
+        H2.Body.schedule_read
+          body
+          ~on_eof
+          ~on_read:(fun buffer ~off ~len ->
+            Dream__pure.Body.write_bigstring buffer off len request.body
+            |> ignore;
+            loop ())
+      in
+      loop ();
+      Lwt.return_unit
+    end;
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This

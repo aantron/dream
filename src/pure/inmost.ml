@@ -9,7 +9,7 @@ include Method
 include Status
 
 type bigstring = Body.bigstring
-type bigstring_stream = Body.bigstring_stream
+(* type bigstring_stream = Body.bigstring_stream *)
 
 
 
@@ -235,11 +235,14 @@ let cookie name request =
 let body message =
   Body.body message.body
 
-let body_stream message =
-  Body.body_stream message.body
+let read message =
+  Body.read message.body
 
-let body_stream_bigstring data eof message =
-  Body.body_stream_bigstring data eof message.body
+let next ~bigstring ?string ?flush ~close ~exn message =
+  Body.next ~bigstring ?string ?flush ~close ~exn message.body
+
+(* let body_stream_bigstring data eof message =
+  Body.body_stream_bigstring data eof message.body *)
 
 (* Create a fresh ref. The reason this field has a ref is because it might get
    replaced when a body is forced read. That's not what's happening here - we
@@ -255,11 +258,23 @@ let with_body body message =
   in
   update {message with body = ref body}
 
-let with_body_stream stream message =
-  update {message with body = ref (`String_stream stream)}
+let with_stream message =
+  update {message with body = ref (`Stream (ref `Idle))}
 
-let with_body_stream_bigstring stream message =
-  update {message with body = ref (`Bigstring_stream stream)}
+let write chunk message =
+  Body.write chunk message.body
+
+let write_bigstring chunk offset length message =
+  Body.write_bigstring chunk offset length message.body
+
+let flush message =
+  Body.flush message.body
+
+let close_stream message =
+  Body.close_stream message.body
+
+(* let with_body_stream_bigstring stream message =
+  update {message with body = ref (`Bigstring_stream stream)} *)
 
 let has_body message =
   Body.has_body message.body
@@ -323,8 +338,7 @@ let request_from_http
     ~method_
     ~target
     ~version
-    ~headers
-    ~body =
+    ~headers =
 
   let path, query = Formats.from_target target in
 
@@ -340,7 +354,7 @@ let request_from_http
       request_version = version;
     };
     headers;
-    body = ref (`Bigstring_stream body);
+    body = ref (`Stream (ref `Idle));
     locals = Scope.empty;
     first = request; (* TODO LATER What OCaml version is required for this? *)
     last = ref request;

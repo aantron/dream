@@ -19,6 +19,7 @@ module Dream = Dream__pure.Inmost
   Lwt.return
     (Dream.add_header "Content-Length" (string_of_int length) response) *)
 
+(* TODO Also mind Connection: close. *)
 (* TODO Test in integration with HTTP/2. *)
 (* Add a Content-Length header to HTTP 1.x responses that have a fixed body but
    don't yet have the header. *)
@@ -34,8 +35,7 @@ let content_length next_handler request =
       match !(response.body) with
       | `Empty -> Some 0
       | `String string -> Some (String.length string)
-      | `Bigstring_stream _
-      | `String_stream _ -> None
+      | `Stream _ | `Exn _ -> None
     in
 
     match body_length with

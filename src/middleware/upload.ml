@@ -45,7 +45,7 @@ let upload request =
   match !state with
   | Initial ->
 
-    let body = Lwt_stream.from (fun () -> Dream.body_stream request) in
+    let body = Lwt_stream.from (fun () -> Dream.read request) in
     let content_type = Dream.header "Content-Type" request |> Option.get in
 
     let callback ~name ~filename data =

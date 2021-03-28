@@ -76,7 +76,37 @@ let add_set_cookie_replacement = {|
     string -> string -> <a href="#type-request">request</a> -> <a href="#type-response">response</a> -> <a href="#type-response">response</a>
 </pre>|}
 
-let body_stream_bigstring_expected = {|<div class="spec value" id="val-body_stream_bigstring">
+let bigstring_expected = {|<div class="spec type" id="type-bigstring">
+ <a href="#type-bigstring" class="anchor"></a><code><span><span class="keyword">type</span> bigstring</span><span> = <span><span>(char,&nbsp;<span class="xref-unresolved">Stdlib</span>.Bigarray.int8_unsigned_elt,&nbsp;<span class="xref-unresolved">Stdlib</span>.Bigarray.c_layout)</span> <span class="xref-unresolved">Stdlib</span>.Bigarray.Array1.t</span></span></code>
+</div>
+|}
+
+let bigstring_replacement = {|
+<pre><span class="keyword">type</span> bigstring =
+  (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout)
+    Bigarray.Array1.t
+</pre>
+|}
+
+let next_expected = {|<div class="spec value" id="val-next">
+ <a href="#val-next" class="anchor"></a><code><span><span class="keyword">val</span> next : <span>bigstring:<span>(<span><a href="#type-bigstring">bigstring</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>?string:<span>(<span>string <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span>
+<span>?flush:<span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>close:<span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>exn:<span>(<span>exn <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span><span><span class="type-var">_</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
+|}
+
+let next_replacement = {|
+<pre><span class="keyword">val</span> next :
+  bigstring:(<a href="#type-bigstring">bigstring</a> -> int -> int -> unit) ->
+  ?string:(string -> int -> int -> unit) ->
+  ?flush:(unit -> unit) ->
+  close:(unit -> unit) ->
+  exn:(exn -> unit) ->
+  _ <a href="#type-message">message</a> ->
+    unit
+</ore>
+|}
+
+(* let body_stream_bigstring_expected = {|<div class="spec value" id="val-body_stream_bigstring">
  <a href="#val-body_stream_bigstring" class="anchor"></a><code><span><span class="keyword">val</span> body_stream_bigstring : <span><span>(<span><a href="#type-bigstring">bigstring</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span><span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span><span><span class="type-var">_</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
 |}
@@ -88,7 +118,7 @@ let body_stream_bigstring_replacement = {|
   (_ <a href="#type-message">message</a>) ->
     unit
 </pre>
-|}
+|} *)
 
 let form_expected = {|<div class="spec type" id="type-form">
  <a href="#type-form" class="anchor"></a><code><span><span class="keyword">type</span> form</span><span> = </span><span>[ </span></code>
@@ -470,14 +500,30 @@ let pretty_print_signatures soup =
         (Soup.parse add_set_cookie_replacement);
       Soup.add_class "multiline" add_set_cookie);
 
-  let body_stream_bigstring = soup $ "#val-body_stream_bigstring" in
+  let bigstring = soup $ "#type-bigstring" in
+  if_expected
+    bigstring_expected
+    (fun () -> pretty_print bigstring)
+    (fun () ->
+      Soup.replace (bigstring $ "> code") (Soup.parse bigstring_replacement);
+      Soup.add_class "multiline" bigstring);
+
+  let next = soup $ "#val-next" in
+  if_expected
+    next_expected
+    (fun () -> pretty_print next)
+    (fun () ->
+      Soup.replace (next $ "> code") (Soup.parse next_replacement);
+      Soup.add_class "multiline" next);
+
+  (* let body_stream_bigstring = soup $ "#val-body_stream_bigstring" in
   if_expected
     body_stream_bigstring_expected
     (fun () -> pretty_print body_stream_bigstring)
     (fun () ->
       Soup.replace
         (body_stream_bigstring $ "> code")
-        (Soup.parse body_stream_bigstring_replacement));
+        (Soup.parse body_stream_bigstring_replacement)); *)
 
   let form = soup $ "#type-form" in
   if_expected

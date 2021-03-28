@@ -114,13 +114,14 @@ and route
 (** {2 Helpers} *)
 
 and _ message
-(** [_ message], pronounced “any message,” allows {{!headers} some functions} to
-    take either requests or responses as arguments, because both are defined in
-    terms of [_ message]. For example:
+(** [_ message], pronounced “any message,” allows {{!section-headers} some
+    functions} to take either requests or responses as arguments, because both
+    are defined in terms of [_ message]. For example:
 
     {[
       Dream.has_body : _ message -> bool
     ]} *)
+(* TODO Review which function is used here. *)
 
 and incoming
 and outgoing
@@ -545,27 +546,36 @@ val all_cookies : request -> (string * string) list
 
 
 
+(* TODO Should just contrain the kind of message in each case. *)
+(* TODO Will need mappers, etc. *)
 (** {1 Bodies} *)
 
 val body : _ message -> string promise
-(** Retrieves the whole body of the given message (request or response),
-    streaming it to completion first, if necessary. When using this function,
-    Dream retains a reference to the body, and it can be accessed multiple
+(** Retrieves the entire message body. {!Dream.body} stores a reference to the
+    result string in the message, so {!Dream.body} can be used multiple
     times. *)
 
-val body_stream : _ message -> string option promise
-(** Retrieves part of the body of the given message. The promise is fulfilled
-    with [None] if the body has been read to completion. This interface
-    allocates a string, a promise, and an option, and copies data. The body is
-    not buffered internally by Dream, so it can only be read once by this
-    function. *)
-
 val with_body : string -> 'a message -> 'a message
-(** Creates a new message by replacing the body with the given string. *)
+(** Replaces the message body, creating a new message. *)
 
-val with_body_stream :
-  (unit -> string option promise) -> 'a message -> 'a message
-(** [Dream.with_body_stream f message] creates a new message, with a stream
+(** {2 Streaming} *)
+
+(* TODO Rename to stream_body. *)
+val read : _ message -> string option promise
+(** Retrieves part of the message body. The promise is fulfilled with [None] if
+    the body is finished. The chunk is not buffered by Dream, so it can only be
+    read once. *)
+
+(* val with_body_stream :
+  (unit -> string option promise) -> 'a message -> 'a message *)
+(* TODO Could still use a Dream.respond_with_stream helper. *)
+(* TODO Can still use a multishot, pull stream? *)
+val with_stream : 'a message -> 'a message
+(** Makes the message ready for stream writing with {!Dream.write}. If the
+    message is a response, you should return it from your handler soon after
+    — only one call to {!Dream.write} will proceed until then. *)
+
+(* [Dream.with_body_stream f message] creates a new message, with a stream
     body represented by the function [f]. If the message is a response, after
     the response has been returned from the web application to the HTTP layer,
     whenever the HTTP layer is ready to write data, it will call [f ()].
@@ -579,30 +589,85 @@ val with_body_stream :
 (* TODO It would be nice if the returned message was already wrapped in a
    promise. Does that preclude anything useful, however? *)
 
+val write : string -> _ message -> unit promise
+(** Streams out the string. The promise is fulfilled when the stream can accept
+    more writes. *)
+
+val flush : _ message -> unit promise
+(** Flushes write buffers. If the message is a response, data is sent to the
+    client. *)
+
+val close_stream : _ message -> unit promise
+(** Finishes the write stream. *)
+(* TODO close_stream or close_body? *)
+
+(**/**)
 val has_body : _ message -> bool
 (** Evalutes to [true] if the given message either has a body that has been
     streamed and has positive length, or a body that has not been streamed yet.
     This function does not stream the body — it could return [true], and later
     streaming could reveal that the body has length zero. *)
+(* TODO Should probably be generalized to return more information about what the
+   stream actually is. *)
+(**/**)
+
+(** {2 Low-level streaming} *)
 
 type bigstring =
   (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
 (** Byte arrays in the C heap. See
     {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Bigarray.Array1.html}
-    [Bigarray.Array1 ↪]}. This type is also found in other libraries, so their
-    functions can be used with [Dream.bigstring]:
+    [Bigarray.Array1 ↪]}. This type is also found in several libraries installed
+    by Dream, so their functions can be used with [Dream.bigstring]:
 
     - {{:https://github.com/inhabitedtype/bigstringaf/blob/353cb283aef4c261597f68154eb27a138e7ef112/lib/bigstringaf.mli}
-      [Bigstringaf.t ↪]} in bigstringaf, a transitive dependency of Dream.
-    - {{:https://ocsigen.org/lwt/latest/api/Lwt_bytes} [Lwt_bytes.t ↪]} in Lwt,
-      also a dependency of Dream. *)
-(* TODO Is Cstruct.t also this? *)
+      [Bigstringaf.t ↪]} in bigstringaf.
+    - {{:https://ocsigen.org/lwt/latest/api/Lwt_bytes} [Lwt_bytes.t ↪]} in Lwt.
+    - {{:https://github.com/mirage/ocaml-cstruct/blob/9a8b9a79bdfa2a1b8455bc26689e0228cc6fac8e/lib/cstruct.mli#L139}
+      [Cstruct.buffer ↪]} in Cstruct. *)
 
-val body_stream_bigstring :
+(* TODO Is exn relevant? *)
+(* TODO Is the final unit necessary. *)
+val next :
+  bigstring:(bigstring -> int -> int -> unit) ->
+  ?string:(string -> int -> int -> unit) ->
+  ?flush:(unit -> unit) ->
+  close:(unit -> unit) ->
+  exn:(exn -> unit) ->
+  _ message ->
+    unit
+(** Waits for the next event on the stream, and calls:
+
+    - [~bigstring] with an offset and length, if a {!bigstring} is written.
+    - [~string] if a string is written.
+    - [~flush] if flush is requested.
+    - [~close] if close is requested.
+    - [~exn] to report an exception.
+
+    If the message is a request provided by Dream, [~string] and [~flush] will
+    never be called, so they are optional. *)
+
+val write_bigstring : bigstring -> int -> int -> _ message -> unit promise
+(** Streams out the bigstring slice. *)
+
+(**/**)
+(* TODO Format after settling on it. *)
+(* TODO Needs a unit argument? *)
+(* val write_bigstring :
+  bigstring -> int -> int -> (unit -> unit) -> _ message -> unit *)
+(** Streams out the {!bigstring}. *)
+
+(* TODO Is this even useful for the app? *)
+(* val report : exn -> _ message -> unit *)
+(** Reports an exception to the stream reader. *)
+(**/**)
+
+(**/**)
+(* val body_stream_bigstring :
   (bigstring -> int -> int -> unit) ->
   (unit -> unit) ->
   (_ message) ->
-    unit
+    unit *)
 (** [Dream.body_stream_bigstring data eof message] retrieves part of the body of
     the given message without copies or allocations per chunk.
     [data buffer offset length] is called if/when data is available. [eof ()] is
@@ -612,13 +677,22 @@ val body_stream_bigstring :
    document that. *)
 (* TODO Note that concurrent reading of one request is NOT supported. *)
 
-type bigstring_stream =
+(* type bigstring_stream =
   (bigstring -> int -> int -> unit) ->
   (unit -> unit) ->
     unit
 
-val with_body_stream_bigstring : bigstring_stream -> 'a message -> 'a message
+val with_body_stream_bigstring : bigstring_stream -> 'a message -> 'a message *)
 (* TODO Is there a neat way to end with this as the continuation? *)
+(**/**)
+(*
+Can do:
+
+val with_stream : 'a message -> 'a message
+val to_stream : string -> 'a message -> unit Lwt.t
+val close_stream : 'a message -> unit Lwt.t
+val flush : 'a message -> unit Lwt.t
+*)
 
 
 
@@ -954,6 +1028,7 @@ val receive : websocket -> string option promise
 
 val close : websocket -> unit promise
 (** Closes the given WebSocket. *)
+(* TODO Rename to close_websocket. *)
 
 
 

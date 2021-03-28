@@ -16,4 +16,7 @@ let add_backing_lines soup =
     |> Soup.prepend_child element
   in
   soup $$ "h2" |> Soup.iter add_backing_line;
-  soup $$ ".spec[id]" |> Soup.iter add_backing_line
+  soup $$ "h3" |> Soup.iter add_backing_line;
+  soup $$ ".spec[id]" |> Soup.iter add_backing_line;
+  Soup.prepend_child
+    (soup $ ".odoc-content") (Soup.create_element ~class_:"background" "div")
