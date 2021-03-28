@@ -700,6 +700,25 @@ struct
       print " in\n");
   }
 
+  let stream_reason print = {
+    print;
+
+    init = (fun () ->
+      print "let ___eml_write = string => Dream.write(string, response);\n");
+
+    finish = (fun () ->
+      print "Lwt.return_unit\n");
+
+    text =
+      Printf.ksprintf print "let%%lwt () = ___eml_write(%S);\n";
+
+    format =
+      Printf.ksprintf print "let%%lwt () = Printf.ksprintf(___eml_write, %S)";
+
+    format_end = (fun () ->
+      print ";\n");
+  }
+
   let generate_template_body location output tokens =
     tokens |> List.iter begin function
       | `Text text ->
@@ -762,7 +781,8 @@ struct
           match reason, String.trim options with
           | false, "" -> string print
           | true,  "" -> string_reason print
-          | _, "response" -> stream print
+          | false, "response" -> stream print
+          | true,  "response" -> stream_reason print
           | _, s -> Printf.ksprintf failwith "Unknown template options '%s'" s
         in
         (* By this point, the template should be only one "line," with all the
