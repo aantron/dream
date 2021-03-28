@@ -18,4 +18,4 @@ let () =
         |> Dream.respond)),
 
   ])
-  @@ Dream.not_found
+  @@ Dream.not_found;

@@ -1,0 +1,9 @@
+(executable
+ (name reason_template_stream)
+ (libraries dream)
+ (preprocess (pps lwt_ppx)))
+
+(rule
+ (targets reason_template_stream.re)
+ (deps reason_template_stream.eml.re)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))
