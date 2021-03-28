@@ -24,7 +24,7 @@ struct
   let options = Arg.align [
     "--workspace",
     Arg.Set_string workspace_path,
-    "PATH Relative path to the Dune workspace for better locations"
+    "PATH Relative path to the Dune workspace for better locations";
   ]
 
   let set_file file =

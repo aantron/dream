@@ -629,7 +629,8 @@ end
 
 module Generate :
 sig
-  val generate : string -> (string -> unit) -> template list -> unit
+  val generate :
+    reason:bool -> string -> (string -> unit) -> template list -> unit
 end =
 struct
   type output = {
@@ -660,7 +661,26 @@ struct
       print ");\n");
   }
 
-  (* TODO Test! *)
+  let string_reason print = {
+    print;
+
+    init = (fun () ->
+      print "let ___eml_buffer = Buffer.create(4096);\n");
+
+    finish = (fun () ->
+      print "Buffer.contents(___eml_buffer)\n");
+
+    text =
+      Printf.ksprintf print "Buffer.add_string(___eml_buffer, %S);\n";
+
+    format =
+      Printf.ksprintf print "Printf.bprintf(___eml_buffer, %S)";
+
+    format_end = (fun () ->
+      print ";\n");
+  }
+
+  (* TODO Test in unit tests. *)
   let stream print = {
     print;
 
@@ -731,7 +751,7 @@ struct
           output.print "));\n" *)
     end
 
-  let generate location print templates =
+  let generate ~reason location print templates =
     templates |> List.iter begin function
       | `Code_block {line; what; _} ->
         Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
@@ -739,10 +759,11 @@ struct
 
       | `Template ((options, _), lines) ->
         let output =
-          match String.trim options with
-          | "" -> string print
-          | "response" -> stream print
-          | s -> Printf.ksprintf failwith "Unknown template options '%s'" s
+          match reason, String.trim options with
+          | false, "" -> string print
+          | true,  "" -> string_reason print
+          | _, "response" -> stream print
+          | _, s -> Printf.ksprintf failwith "Unknown template options '%s'" s
         in
         (* By this point, the template should be only one "line," with all the
            newlines built into the strings. We still flatten it, just in
@@ -757,13 +778,19 @@ end
 
 let process_file (input_file, location) =
 
+  let reason, extension =
+    match Filename.extension input_file with
+    | ".re" -> true, ".re"
+    | _ -> false, ".ml"
+  in
+
   let output_file =
     let rec remove_extensions filename =
       match Filename.chop_extension filename with
       | filename -> remove_extensions filename
       | exception Invalid_argument _ -> filename
     in
-    remove_extensions input_file ^ ".ml"
+    remove_extensions input_file ^ extension
   in
 
   (* We don't bother closing these - the OCaml runtime and/or kernel will close
@@ -785,4 +812,4 @@ let process_file (input_file, location) =
   |> Transform.empty_lines
   |> Transform.coalesce
   |> Transform.trim
-  |> Generate.generate location (output_string output_channel)
+  |> Generate.generate ~reason location (output_string output_channel)
