@@ -48,12 +48,12 @@ That's it for the tutorial!
 
 # Reason
 
-There are several examples showing Dream with Reason syntax. They also use esy
-`package.json`.
+There are several examples showing Dream with Reason syntax.
 
-- [**`w-reason-hello`**]()
-- [**`w-reason-template`**]()
-- [**`w-reason-fullstack`**]()
+- [**`r-hello`**]()
+- [**`r-template`**]()
+- [**`r-template-stream`**]()
+- [**`r-fullstack`**]()
 
 <br>
 

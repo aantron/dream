@@ -1,0 +1,3 @@
+(executable
+ (name reason_hello)
+ (libraries dream))
