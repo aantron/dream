@@ -632,14 +632,63 @@ sig
   val generate : string -> (string -> unit) -> template list -> unit
 end =
 struct
-  let generate_template_body location print tokens =
+  type output = {
+    print : string -> unit;
+    init : unit -> unit;
+    finish : unit -> unit;
+    text : string -> unit;
+    format : string -> unit;
+    format_end : unit -> unit;
+  }
+
+  let string print = {
+    print;
+
+    init = (fun () ->
+      print "let ___eml_buffer = Buffer.create 4096 in\n");
+
+    finish = (fun () ->
+      print "(Buffer.contents ___eml_buffer)\n");
+
+    text =
+      Printf.ksprintf print "(Buffer.add_string ___eml_buffer %S);\n";
+
+    format =
+      Printf.ksprintf print "(Printf.bprintf ___eml_buffer %S ";
+
+    format_end = (fun () ->
+      print ");\n");
+  }
+
+  (* TODO Test! *)
+  let stream print = {
+    print;
+
+    init = (fun () ->
+      print "let ___eml_write string = Dream.write string response in\n");
+
+    finish = (fun () ->
+      print "Lwt.return_unit\n");
+
+    text =
+      Printf.ksprintf print "let%%lwt () = ___eml_write %S in\n";
+
+    format =
+      Printf.ksprintf print "let%%lwt () = Printf.ksprintf ___eml_write %S ";
+
+    format_end = (fun () ->
+      print " in\n");
+  }
+
+  let generate_template_body location output tokens =
     tokens |> List.iter begin function
       | `Text text ->
-        Printf.ksprintf print "(Buffer.add_string ___eml_buffer %S);\n" text
+        (* Printf.ksprintf output.print "(Buffer.add_string ___eml_buffer %S);\n" text *)
+        output.text text
 
       | `Embedded {line; column; what = "", code} ->
-        Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
-        Printf.ksprintf print "%s%s\n" (String.make column ' ') code
+        Printf.ksprintf output.print "#%i \"%s\"\n" (line + 1) location;
+        Printf.ksprintf output.print "%s%s\n" (String.make column ' ') code
 
       (* TODO Really need tests for this. *)
       | `Embedded {line; column; what = format, code} ->
@@ -653,23 +702,33 @@ struct
             format, false
         in
 
-        begin
+        output.format ("%" ^ format);
+        if needs_escape then
+          output.print "(Dream.html_escape ";
+        output.print "(\n";
+
+        (* begin
           if needs_escape then
-            Printf.ksprintf print
+            Printf.ksprintf output.print
               "(Printf.bprintf ___eml_buffer %S (Dream.html_escape (\n"
               ("%" ^ format)
           else
-            Printf.ksprintf print "(Printf.bprintf ___eml_buffer %S (\n"
+            Printf.ksprintf output.print "(Printf.bprintf ___eml_buffer %S (\n"
               ("%" ^ format)
-        end;
+        end; *)
 
-        Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
-        Printf.ksprintf print "%s%s\n" (String.make column ' ') code;
+        Printf.ksprintf output.print "#%i \"%s\"\n" (line + 1) location;
+        Printf.ksprintf output.print "%s%s\n" (String.make column ' ') code;
 
         if needs_escape then
-          print ")));\n"
+          output.print ")";
+        output.print ")";
+        output.format_end ();
+
+        (* if needs_escape then
+          output.print ")));\n"
         else
-          print "));\n"
+          output.print "));\n" *)
     end
 
   let generate location print templates =
@@ -678,13 +737,19 @@ struct
         Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
         print what
 
-      | `Template (_options, lines) ->
+      | `Template ((options, _), lines) ->
+        let output =
+          match String.trim options with
+          | "" -> string print
+          | "response" -> stream print
+          | s -> Printf.ksprintf failwith "Unknown template options '%s'" s
+        in
         (* By this point, the template should be only one "line," with all the
            newlines built into the strings. We still flatten it, just in
            case. *)
-        print "let ___eml_buffer = Buffer.create 4096 in\n";
-        generate_template_body location print (List.flatten lines);
-        print "(Buffer.contents ___eml_buffer)\n"
+        output.init ();
+        generate_template_body location output (List.flatten lines);
+        output.finish ()
     end
 end
 

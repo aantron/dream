@@ -569,6 +569,10 @@ val read : request -> string option promise
   (unit -> string option promise) -> 'a message -> 'a message *)
 (* TODO Could still use a Dream.respond_with_stream helper. *)
 (* TODO Can still use a multishot, pull stream? *)
+(* TODO Isn't this call completely redundant? *)
+(* TODO Even though it's redundant for the stream producer, it is necessary in
+   order to tell the server that there is a stream body - unless that becomes
+   the default. *)
 val with_stream : response -> response
 (** Makes the response ready for stream writing with {!Dream.write}. You should
     return it from your handler soon after — only one call to {!Dream.write}
