@@ -45,13 +45,7 @@ let () =
     Dream.get "/" (fun _ -> Dream.respond home);
 
     Dream.get "/push" (fun _ ->
-      let response =
-        Dream.response ""
-        |> Dream.with_stream
-        |> Dream.add_header "Content-Type" "text/event-stream"
-      in
-
-      let rec forward_messages () =
+      let rec forward_messages response =
         let%lwt messages =
           match !server_state with
           | [] ->
@@ -71,11 +65,11 @@ let () =
         |> fun text ->
           let%lwt () = Dream.write text response in
           let%lwt () = Dream.flush response in
-          forward_messages ()
+          forward_messages response
       in
-      Lwt.async forward_messages;
-
-      Lwt.return response);
+      Dream.stream
+        ~headers:["Content-Type", "text/event-stream"]
+        forward_messages);
 
   ]
   @@ Dream.not_found

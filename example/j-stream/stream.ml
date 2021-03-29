@@ -3,9 +3,7 @@ let () =
   @@ Dream.logger
   @@ Dream.router [
     Dream.post "/echo" (fun request ->
-      let response = Dream.with_stream (Dream.response "") in
-
-      Lwt.async begin fun () ->
+      Dream.stream (fun response ->
         let rec loop () =
           match%lwt Dream.read request with
           | Some chunk ->
@@ -15,9 +13,6 @@ let () =
           | None ->
             Dream.close_stream response
         in
-        loop ()
-      end;
-
-      Lwt.return response);
+        loop ()));
   ]
   @@ Dream.not_found

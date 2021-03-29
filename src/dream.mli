@@ -330,12 +330,11 @@ include module type of Method_and_status
 (** {1 Requests} *)
 
 type method_ = Method_and_status.method_
-(** HTTP request methods. See
-    {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2},
-    {{:https://tools.ietf.org/html/rfc5789#page-2} RFC 5789 §2}, and
+(** Request methods. See
+    {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2} and
     {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods} MDN}. The full
-    set of methods is listed on a {{:/method_and_status/index.html#methods}
-    separate page}, together with some helpers. *)
+    set is defined on a {{:/method_and_status/index.html#methods} separate
+    page}. *)
 
 val client : request -> string
 (** Client sending the request. For example, ["127.0.0.1:56001"]. *)
@@ -367,51 +366,71 @@ val with_version : int * int -> request -> request
 (** Replaces the version. See {!Dream.version}. *)
 
 val query : string -> request -> string option
-(** Retrieves the first query parameter with the given name, if present. *)
+(** First query parameter with the given name. See
+    {{:https://tools.ietf.org/html/rfc3986#section-3.4} RFC 3986 §3.4} and
+    example
+    {{:https://github.com/aantron/dream/tree/master/example/w-query#files}
+    [w-query]}. *)
 
 val queries : string -> request -> string list
-(** Retrieves all query parameters with the given name. *)
+(** All query parameters with the given name. *)
 
 val all_queries : request -> (string * string) list
-(** Retrieves the entire query string as a name-value list. *)
+(** Entire query string as a name-value list. *)
 
 
 
 (** {1 Responses} *)
 
 type status = Method_and_status.status
-(** HTTP response status codes. See
+(** Response status codes. See
     {{:https://tools.ietf.org/html/rfc7231#section-6} RFC 7231 §6} and
     {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status} MDN}. The full
-    set of status codes is listed on a
-    {{:/method_and_status/index.html#status_codes} separate page}, together with
-    some helpers. *)
+    set is defined on a {{:/method_and_status/index.html#status_codes} separate
+    page}. *)
+
+val status : response -> status
+(** Response {!type-status}. For example, [`OK]. *)
 
 val response :
   ?status:status ->
   ?code:int ->
   ?headers:(string * string) list ->
     string -> response
-(** Creates a new response with the given string as body. Use [""] to return an
-    empty response, or if you'd like to assign a stream as the response body
-    later. [~code] is offered as an alternative to [~status] for specifying the
-    status code. If both [~status] and [~code] are given, one is chosen
-    arbitrarily. *)
+(** Creates a new {!type-response} with the given string as body. [~code] and
+    [~status] are two ways to specify the {!type-status} code, which is [200 OK]
+    by default. The headers are empty by default. *)
 
 val respond :
   ?status:status ->
   ?code:int ->
   ?headers:(string * string) list ->
     string -> response promise
-(** Same as {!Dream.val-response}, but immediately uses the new response to
-    resolve a new promise, and returns that promise. This helper is especially
-    convenient for quickly returning empty error responses, which will be filled
-    out later by the top-level error handler. *)
+(** Same as {!Dream.val-response}, but the new {!type-response} is wrapped in a
+    {!type-promise}. *)
 
-val empty : status -> response promise
+val empty :
+  ?headers:(string * string) list ->
+    status -> response promise
+(** Same as {!Dream.val-response} with the empty string for a body. *)
 
-val status : response -> status
-(** Response status, for example [`OK]. *)
+val stream :
+  ?status:status ->
+  ?code:int ->
+  ?headers:(string * string) list ->
+    (response -> unit promise) -> response promise
+(** Same as {!Dream.val-respond}, but calls {!Dream.with_stream} internally to
+    prepare the response for stream writing, and then runs the callback
+    asynchronously to do it. See example
+    {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
+    [j-stream]}.
+
+    {[
+      fun request ->
+        Dream.stream (fun response ->
+          let%lwt () = Dream.write "foo" response in
+          Dream.close_stream response)
+    ]} *)
 
 (* val cookie_prefix : request -> string *)
 (* TODO Might need a separate Cookies docs section at this point. *)
@@ -567,7 +586,7 @@ val close_stream : response -> unit promise
 (* TODO close_stream or close_body? *)
 
 (**/**)
-(* val has_body : _ message -> bool *)
+val has_body : _ message -> bool
 (** Evalutes to [true] if the given message either has a body that has been
     streamed and has positive length, or a body that has not been streamed yet.
     This function does not stream the body — it could return [true], and later

@@ -55,6 +55,33 @@ let respond_replacement = {|
 </pre>
 |}
 
+let stream_expected = {|<div class="spec value" id="val-stream">
+ <a href="#val-stream" class="anchor"></a><code><span><span class="keyword">val</span> stream : <span>?status:<a href="#type-status">status</a> <span class="arrow">-&gt;</span></span> <span>?code:int <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span>
+<span><span>(<span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let stream_replacement = {|
+<pre><span class="keyword">val</span> stream :
+  ?status:<a href="#type-status">status</a> ->
+  ?code:int ->
+  ?headers:(string * string) list ->
+    (<a href="#type-response">response</a> -> unit <a href="#type-promise">promise</a>) -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+</pre>
+|}
+
+let empty_expected = {|<div class="spec value" id="val-empty">
+ <a href="#val-empty" class="anchor"></a><code><span><span class="keyword">val</span> empty : <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-status">status</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let empty_replacement = {|
+<pre><span class="keyword">val</span> empty :
+  ?headers:(string * string) list ->
+    status -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+</pre>
+|}
+
 let add_set_cookie_expected = {|<div class="spec value" id="val-add_set_cookie">
  <a href="#val-add_set_cookie" class="anchor"></a><code><span><span class="keyword">val</span> add_set_cookie : <span>?cookie_prefix:string <span class="arrow">-&gt;</span></span> <span>?encrypt:bool <span class="arrow">-&gt;</span></span> <span>?expires:float <span class="arrow">-&gt;</span></span>
 <span>?max_age:float <span class="arrow">-&gt;</span></span> <span>?domain:string <span class="arrow">-&gt;</span></span> <span>?path:string <span class="arrow">-&gt;</span></span> <span>?secure:bool <span class="arrow">-&gt;</span></span> <span>?http_only:bool <span class="arrow">-&gt;</span></span>
@@ -484,6 +511,22 @@ let pretty_print_signatures soup =
     (fun () ->
       Soup.replace (respond $ "> code") (Soup.parse respond_replacement);
       Soup.add_class "multiline" respond);
+
+  let stream = soup $ "#val-stream" in
+  if_expected
+    stream_expected
+    (fun () -> pretty_print stream)
+    (fun () ->
+      Soup.replace (stream $ "> code") (Soup.parse stream_replacement);
+      Soup.add_class "multiline" stream);
+
+  let empty = soup $ "#val-empty" in
+  if_expected
+    empty_expected
+    (fun () -> pretty_print empty)
+    (fun () ->
+      Soup.replace (empty $ "> code") (Soup.parse empty_replacement);
+      Soup.add_class "multiline" empty);
 
   let add_set_cookie = soup $ "#val-add_set_cookie" in
   if_expected

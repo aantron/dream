@@ -18,7 +18,4 @@ let render response =
 let () =
   Dream.run
   @@ Dream.logger
-  @@ fun _ ->
-    let response = Dream.response "" |> Dream.with_stream in
-    Lwt.async (fun () -> render response);
-    Lwt.return response
+  @@ fun _ -> Dream.stream render

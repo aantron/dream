@@ -19,8 +19,4 @@ let render = response => {
 let () =
   Dream.run
   @@ Dream.logger
-  @@ _ => {
-    let response = Dream.response("") |> Dream.with_stream;
-    Lwt.async(() => render(response));
-    Lwt.return(response);
-  };
+  @@ _ => Dream.stream(render);

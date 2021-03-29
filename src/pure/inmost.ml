@@ -444,8 +444,17 @@ let respond
   response ?status ?code ?headers body
   |> Lwt.return
 
-let empty status =
-  respond ~status ""
+let stream ?status ?code ?headers f =
+  let response =
+    response ?status ?code ?headers ""
+    |> with_stream
+  in
+  (* TODO Should set up an error handler for this. *)
+  Lwt.async (fun () -> f response);
+  Lwt.return response
+
+let empty ?headers status =
+  respond ?headers ~status ""
 
 let not_found _ =
   respond ~status:`Not_Found ""
