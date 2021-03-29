@@ -26,9 +26,14 @@ body {
 }
 
 pre, code {
+  font-size: 15px;
+  font-family: Iosevka, SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+}
+
+/* pre, code {
   font-size: 13px;
   font-family: Fira Code, SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
-}
+} */
 
 
 
@@ -50,10 +55,10 @@ pre {
 }
 
 code {
-  color: #ccc;
-  background-color: black;
-  padding: 0px 6px;
-  margin: 0px 2px;
+  color: #ddd;
+  background-color: #111;
+  padding: 0 3px;
+  margin: 0 1px;
   white-space: nowrap;
 }
 pre > code,
@@ -64,10 +69,24 @@ pre > code,
   color: inherit;
   white-space: inherit;
 }
+p > code:first-child {
+  margin-left: -3px;
+}
 
 h1, h2, h3 {
   font-weight: 400;
   color: white;
+}
+
+nav ~ * a[href="#headers"],
+nav ~ * a[href="#routing"],
+nav ~ * a[href="#requests"],
+nav ~ * a[href="#responses"] {
+  font-style: italic;
+}
+
+a[href*=example] {
+  font-weight: bold;
 }
 
 
@@ -76,6 +95,10 @@ h1, h2, h3 {
 
    Some of the styles here are not strictly geometry, but they *depend* on
    geometry. */
+
+body {
+  position: relative;
+}
 
 body, p, h1, h2, h3 {
   margin: 0em;
@@ -98,7 +121,7 @@ p + p, p + pre, pre + p {
   }
 
   .background {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     height: 100%;
@@ -106,8 +129,9 @@ p + p, p + pre, pre + p {
     background-color: #262626;
   }
 
-  h2:nth-of-type(2), h2:nth-of-type(2) ~ :not(.odoc-spec):not(nav) {
+  h2, h2 ~ :not(.odoc-spec):not(nav) {
     margin-left: 30rem;
+    clear: both;
   }
 
   .spec.multiline {
@@ -117,15 +141,18 @@ p + p, p + pre, pre + p {
   .spec-doc {
     float: left;
     width: 30rem;
-    margin-bottom: 24px;
+    margin-bottom: 18px;
   }
 
-  .spec-doc p ~ p:last-child {
+  .spec-doc p ~ p:last-child, .spec-doc p ~ pre:last-child {
     margin-bottom: 36px;
   }
 
   p + .odoc-spec {
-    margin-top: 48px;
+    margin-top: 36px;
+  }
+  .odoc-spec + p {
+    padding-top: 24px;
   }
 
   .spec, h2, h3, footer {
@@ -138,8 +165,13 @@ p + p, p + pre, pre + p {
   }
 
   h3 {
-    padding-top: 24px;
+    padding-top: 48px;
     margin-bottom: 24px;
+  }
+
+  #type-outgoing + .spec-doc {
+    margin-top: -1.5rem;
+    margin-bottom: 48px;
   }
 }
 @media (min-width: 1400px) {
@@ -167,7 +199,7 @@ p + p, p + pre, pre + p {
   }
 
   body {
-    margin-left: 14rem;
+    padding-left: 14rem;
   }
 }
 

@@ -5,138 +5,105 @@
 
 
 
-(** {1 Overview}
+(** {1 Types}
 
-    Dream is built on just five types. The first two, [request] and [response],
-    are the data types of Dream. Requests contain all the interesting fields
-    your application will want to read, and the application will handle requests
-    by creating and returning responses:
+    Dream is built on just five types. The first two are the data types of
+    Dream: *)
 
-    {[
-      type request
-      type response
-    ]}
+type request = incoming message
+(** HTTP requests, such as [GET /something HTTP/1.1]. See
+    {!section-requests}. *)
 
-    The next three types are for building up request-handling functions:
+and response = outgoing message
+(** HTTP responses, such as [200 OK]. See {!section-responses}. *)
 
-    {[
-      type handler = request -> response promise
-      type middleware = handler -> handler
-      type route
-    ]}
+(** The remaining three types are for building up web apps. *)
 
-    {ol
-    {li
-    Handlers are asynchronous functions from requests to responses. They are
-    just bare functions — you can define a handler wherever you need it. Once
-    you have a handler, you can pass it to {!Dream.run} to turn it into a
-    working HTTP server:
+and handler = request -> response promise
+(** Handlers are asynchronous functions from requests to responses. Example
+    {{:https://github.com/aantron/dream/tree/master/example/1-hello#files}
+    [1-hello]} shows the simplest handler, an anonymous function which we pass
+    to {!Dream.run}. This creates a complete web server!
 
     {[
       let () =
         Dream.run (fun _ ->
-          Dream.respond "Hello, world!")
-    ]}
+          Dream.respond "Good morning, world!")
+    ]} *)
 
-    This is a complete Dream program that responds to all requests on
-    {{:http://localhost:8080} http://localhost:8080 ↪} with status [200 OK] and
-    body [Hello, world!]. The rest of Dream is about defining ever more useful
-    handlers.
-    }
-
-    {li
-    Middlewares are functions that take a handler, and run some code before or
-    after the handler runs. The result is a “bigger” handler. Middlewares are
-    also just bare functions, so you can also create them immediately:
-
-    {[
-      let log_requests inner_handler =
-        fun request ->
-          Dream.log "Got a request!";
-          inner_handler request
-    ]}
-
-    This middleware prints a message on every request, before passing the
-    request to the rest of the app. You can use it with {!Dream.run}:
+and middleware = handler -> handler
+(** Middlewares are functions that take a {!handler}, and run some code before
+    or after — producing a “bigger” handler. Example
+    {{:https://github.com/aantron/dream/tree/master/example/2-middleware#files}
+    [2-middleware]} inserts the {!Dream.logger} middleware into a web app:
 
     {[
       let () =
         Dream.run
-          (log_requests (fun _ ->
-            Dream.respond "Hello, world!"))
+        @@ Dream.logger
+        @@ fun _ ->
+          Dream.respond "Good morning, world!"
     ]}
-    }
 
-    {li
-    Routes are used with {!Dream.router} to select which handler each request
-    should go to. They are created with helpers like {!Dream.get} and
+    Examples
+    {{:https://github.com/aantron/dream/tree/master/example/4-counter#files}
+    [4-counter]} and
+    {{:https://github.com/aantron/dream/tree/master/example/a-promise#files}
+    [a-promise]} show user-defined middlewares:
+
+    {[
+      let count_requests inner_handler request =
+        count := !count + 1;
+        inner_handler request
+    ]} *)
+
+and route
+(** Routes tell {!Dream.router} which handler to select for each request. See
+    {!section-routing} and example
+    {{:https://github.com/aantron/dream/tree/master/example/3-router#files}
+    [3-router]}. Routes are created by helpers such as {!Dream.get} and
     {!Dream.scope}:
 
     {[
       Dream.router [
-        Dream.get "/" home_handler;
-
-        Dream.scope "/admin" [] [
+        Dream.scope "/admin" [Dream.sessions_in_memory] [
           Dream.get "/" admin_handler;
           Dream.get "/logout" admin_logout_handler;
         ];
       ]
     ]}
-    }}
 
-    If you prefer a vaguely “algebraic” take on Dream:
+    The three handler-related types have a vaguely algebraic interpretation:
 
-    - Literal handlers are {b atoms}.
-    - Middleware is for {b sequential composition} (AND-like).
-    - Routes are for {b alternative composition} (OR-like). *)
+    - Literal {!type-handler}s are atoms.
+    - {!type-middleware} is for sequential composition (product-like).
+    - {!type-route} is for alternative composition (sum-like).
 
-(** {1 Types} *)
-
-type request = incoming message
-(** HTTP requests, such as [GET /something HTTP/1.1]. *)
-
-and response = outgoing message
-(** HTTP responses, such as [200 OK]. *)
-
-and handler = request -> response promise
-(** Handlers are asynchronous functions from requests to responses. *)
-
-and middleware = handler -> handler
-(** Middlewares are functions that take a handler, and run some code before or
-    after — producing a “bigger” handler. This is the main form of {e sequential
-    composition} in Dream. *)
-
-and route
-(** Routes tell {!Dream.router} which handler to select for each request. This
-    is the main form of {e alternative composition} in Dream. Routes are created
-    by helpers such as {!Dream.get} and {!Dream.scope}. *)
+    {!Dream.scope} implements a distributive law. *)
 
 (** {2 Helpers} *)
 
-and _ message
-(** [_ message], pronounced “any message,” allows {{!section-headers} some
-    functions} to take either requests or responses as arguments, because both
-    are defined in terms of [_ message]. For example:
+and 'a message
+(** ['a message], pronounced “any message,” allows some functions to take either
+    {!type-request} or {!type-response} as arguments, because both are defined
+    in terms of ['a message]. For example, in {!section-headers}:
 
     {[
-      Dream.has_body : _ message -> bool
+      val Dream.header : string -> 'a message -> string option
     ]} *)
-(* TODO Review which function is used here. *)
 
 and incoming
 and outgoing
-(** Type parameters for [message] for requests and responses, respectively.
-    These have no meaning other than they are different from each other.
-
-    Dream only ever creates requests and responses, i.e. only [incoming message]
-    and [outgoing message]. You don't have to worry about anything else, such as
-    [int message]. [incoming] and [outgoing] are never mentioned again in the
-    docs — this section is only to help with interpreting arguments of type
-    [_ message], “any message.” *)
+(** Type parameters for {!message} for {!type-request} and {!type-response},
+    respectively. These have no meaning other than they are different from each
+    other. Dream only ever creates [incoming message] and [outgoing message].
+    [incoming] and [outgoing] are never mentioned again in the docs. *)
 
 and 'a promise = 'a Lwt.t
-(** Dream uses {{:https://github.com/ocsigen/lwt} Lwt ↪} for promises and
-    asynchronous I/O. *)
+(** Dream uses {{:https://github.com/ocsigen/lwt} Lwt} for promises and
+    asynchronous I/O. See example
+    {{:https://github.com/aantron/dream/tree/master/example/a-promise#files}
+    [a-promise]}. *)
 
 
 
@@ -166,9 +133,9 @@ type method_ = [
   | `Method of string
 ]
 (** HTTP request methods. See
-    {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2 ↪},
-    {{:https://tools.ietf.org/html/rfc5789#page-2} RFC 5789 §2 ↪}, and
-    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods} MDN ↪}. *)
+    {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2},
+    {{:https://tools.ietf.org/html/rfc5789#page-2} RFC 5789 §2}, and
+    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods} MDN}. *)
 
 val method_to_string : method_ -> string
 (** Evaluates to a string representation of the given method. For example,
@@ -193,9 +160,9 @@ type informational = [
   | `Switching_Protocols
 ]
 (** Informational ([1xx]) status codes. See
-    {{:https://tools.ietf.org/html/rfc7231#section-6.2} RFC 7231 §6.2 ↪} and
+    {{:https://tools.ietf.org/html/rfc7231#section-6.2} RFC 7231 §6.2} and
     {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#information_responses}
-    MDN ↪}. [101 Switching Protocols] is generated internally by
+    MDN}. [101 Switching Protocols] is generated internally by
     {!Dream.val-websocket}. It is usually not necessary to use it directly. *)
 
 type successful = [
@@ -208,10 +175,10 @@ type successful = [
   | `Partial_Content
 ]
 (** Successful ([2xx]) status codes. See
-    {{:https://tools.ietf.org/html/rfc7231#section-6.3} RFC 7231 §6.3 ↪},
-    {{:https://tools.ietf.org/html/rfc7233#section-4.1} RFC 7233 §4.1 ↪} and
+    {{:https://tools.ietf.org/html/rfc7231#section-6.3} RFC 7231 §6.3},
+    {{:https://tools.ietf.org/html/rfc7233#section-4.1} RFC 7233 §4.1} and
     {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#successful_responses}
-    MDN ↪}. The most common is [200 OK]. *)
+    MDN}. The most common is [200 OK]. *)
 
 type redirection = [
   | `Multiple_Choices
@@ -223,10 +190,10 @@ type redirection = [
   | `Permanent_Redirect
 ]
 (** Redirection ([3xx]) status codes. See
-    {{:https://tools.ietf.org/html/rfc7231#section-6.4} RFC 7231 §6.4 ↪} and
-    {{:https://tools.ietf.org/html/rfc7538#section-3} RFC 7538 §3 ↪}, and
+    {{:https://tools.ietf.org/html/rfc7231#section-6.4} RFC 7231 §6.4} and
+    {{:https://tools.ietf.org/html/rfc7538#section-3} RFC 7538 §3}, and
     {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#redirection_messages}
-    MDN ↪}. Use [303 See Other] to direct clients to follow up with a [GET]
+    MDN}. Use [303 See Other] to direct clients to follow up with a [GET]
     request, especially after a form submission. Use [301 Moved Permanently]
     for permanent redirections. *)
 
@@ -262,20 +229,20 @@ type client_error = [
 
     See
     {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#client_error_responses}
-    MDN ↪}, and
+    MDN}, and
 
-    - {{:https://tools.ietf.org/html/rfc7231#section-6.5} RFC 7231 §6.5 ↪} for
+    - {{:https://tools.ietf.org/html/rfc7231#section-6.5} RFC 7231 §6.5} for
       most client error status codes.
-    - {{:https://tools.ietf.org/html/rfc7233#section-4.4} RFC 7233 §4.4 ↪} for
+    - {{:https://tools.ietf.org/html/rfc7233#section-4.4} RFC 7233 §4.4} for
       [416 Range Not Satisfiable].
-    - {{:https://tools.ietf.org/html/rfc7540#section-9.1.2} RFC 7540 §9.1.2 ↪}
-      for [421 Misdirected Request].
-    - {{:https://tools.ietf.org/html/rfc8470#section-5.2} RFC 8470 §5.2 ↪} for
+    - {{:https://tools.ietf.org/html/rfc7540#section-9.1.2} RFC 7540 §9.1.2} for
+      [421 Misdirected Request].
+    - {{:https://tools.ietf.org/html/rfc8470#section-5.2} RFC 8470 §5.2} for
       [425 Too Early].
-    - {{:https://tools.ietf.org/html/rfc6585} RFC 6585 ↪} for
+    - {{:https://tools.ietf.org/html/rfc6585} RFC 6585} for
       [428 Precondition Required], [429 Too Many Requests], and [431 Request
       Headers Too Large].
-    - {{:https://tools.ietf.org/html/rfc7725} RFC 7725 ↪} for
+    - {{:https://tools.ietf.org/html/rfc7725} RFC 7725} for
       [451 Unavailable For Legal Reasons]. *)
 
 type server_error = [
@@ -287,9 +254,9 @@ type server_error = [
   | `HTTP_Version_Not_Supported
 ]
 (** Server error ([5xx]) status codes. See
-    {{:https://tools.ietf.org/html/rfc7231#section-6.6} RFC 7231 §6.6 ↪} and
+    {{:https://tools.ietf.org/html/rfc7231#section-6.6} RFC 7231 §6.6} and
     {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#server_error_responses}
-    MDN ↪}. The most common of these is [500 Internal Server Error]. *)
+    MDN}. The most common of these is [500 Internal Server Error]. *)
 
 type standard_status = [
   | informational
@@ -364,22 +331,20 @@ include module type of Method_and_status
 
 type method_ = Method_and_status.method_
 (** HTTP request methods. See
-    {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2 ↪},
-    {{:https://tools.ietf.org/html/rfc5789#page-2} RFC 5789 §2 ↪}, and
-    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods} MDN ↪}. The
-    full set of methods is listed on a {{:/method_and_status/index.html#methods}
+    {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2},
+    {{:https://tools.ietf.org/html/rfc5789#page-2} RFC 5789 §2}, and
+    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods} MDN}. The full
+    set of methods is listed on a {{:/method_and_status/index.html#methods}
     separate page}, together with some helpers. *)
 
 val client : request -> string
-(** Client sending the request, for example [127.0.0.1:56001]. *)
+(** Client sending the request. For example, ["127.0.0.1:56001"]. *)
 
 val method_ : request -> method_
-(** Request method, for example [`GET]. See
-    {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2 ↪}. *)
+(** Request method. For example, [`GET]. *)
 
 val target : request -> string
-(** Request target, for example [/something]. This is the full target as sent by
-    the client or proxy. The site root prefix and query string are included. *)
+(** Request target path. For example, ["/something"]. *)
 
 (**/**)
 (* These are used for router state at the moment, and I am not sure if there is
@@ -390,18 +355,16 @@ val path : request -> string
 (**/**)
 
 val version : request -> int * int
-(** Protocol version, such as [(1, 1)] for HTTP/1.1 and [(2, 0)] for HTTP/2. *)
+(** Protocol version. [(1, 1)] for HTTP/1.1 and [(2, 0)] for HTTP/2. *)
 
 val with_client : string -> request -> request
-(** Creates a new request from the given one, with the client string
-    replaced. *)
+(** Replaces the client. See {!Dream.client}. *)
 
 val with_method_ : method_ -> request -> request
-(** Creates a new request from the given one, with the method replaced. *)
+(** Replaces the method. See {!Dream.method_}. *)
 
 val with_version : int * int -> request -> request
-(** Creates a new request from the given one, with the protocol version
-    replaced. *)
+(** Replaces the version. See {!Dream.version}. *)
 
 val query : string -> request -> string option
 (** Retrieves the first query parameter with the given name, if present. *)
@@ -418,9 +381,9 @@ val all_queries : request -> (string * string) list
 
 type status = Method_and_status.status
 (** HTTP response status codes. See
-    {{:https://tools.ietf.org/html/rfc7231#section-6} RFC 7231 §6 ↪} and
-    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status} MDN ↪}. The
-    full set of status codes is listed on a
+    {{:https://tools.ietf.org/html/rfc7231#section-6} RFC 7231 §6} and
+    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status} MDN}. The full
+    set of status codes is listed on a
     {{:/method_and_status/index.html#status_codes} separate page}, together with
     some helpers. *)
 
@@ -468,18 +431,18 @@ val status : response -> status
 
 (** {1 Headers} *)
 
-val header : string -> _ message -> string option
+val header : string -> 'a message -> string option
 (** Retrieves the first header with the given name, if present. Header names are
     case-insensitive. *)
 
-val headers : string -> _ message -> string list
+val headers : string -> 'a message -> string list
 (** Retrieves all headers with the given name. *)
 
-val has_header : string -> _ message -> bool
+val has_header : string -> 'a message -> bool
 (** Evaluates to [true] if and only if a header with the given name is
     present. *)
 
-val all_headers : _ message -> (string * string) list
+val all_headers : 'a message -> (string * string) list
 (** Retrieves all headers. *)
 
 val add_header : string -> string -> 'a message -> 'a message
@@ -550,7 +513,7 @@ val all_cookies : request -> (string * string) list
 (* TODO Will need mappers, etc. *)
 (** {1 Bodies} *)
 
-val body : request -> string promise
+val body : 'a message -> string promise
 (** Retrieves the entire request body. {!Dream.body} stores a reference to the
     result string in the request, so {!Dream.body} can be used multiple
     times. *)
@@ -619,14 +582,14 @@ type bigstring =
   (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
 (** Byte arrays in the C heap. See
     {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Bigarray.Array1.html}
-    [Bigarray.Array1 ↪]}. This type is also found in several libraries installed
+    [Bigarray.Array1]}. This type is also found in several libraries installed
     by Dream, so their functions can be used with [Dream.bigstring]:
 
     - {{:https://github.com/inhabitedtype/bigstringaf/blob/353cb283aef4c261597f68154eb27a138e7ef112/lib/bigstringaf.mli}
-      [Bigstringaf.t ↪]} in bigstringaf.
-    - {{:https://ocsigen.org/lwt/latest/api/Lwt_bytes} [Lwt_bytes.t ↪]} in Lwt.
+      [Bigstringaf.t]} in bigstringaf.
+    - {{:https://ocsigen.org/lwt/latest/api/Lwt_bytes} [Lwt_bytes.t]} in Lwt.
     - {{:https://github.com/mirage/ocaml-cstruct/blob/9a8b9a79bdfa2a1b8455bc26689e0228cc6fac8e/lib/cstruct.mli#L139}
-      [Cstruct.buffer ↪]} in Cstruct. *)
+      [Cstruct.buffer]} in Cstruct. *)
 
 (* TODO Is exn relevant? *)
 (* TODO Is the final unit necessary. *)
@@ -695,15 +658,6 @@ val flush : 'a message -> unit Lwt.t
 
 (* TODO Switch to :after for external link decoration. *)
 (** {1 JSON} *)
-
-(* type json = [
-  | `Null
-  | `Bool of bool
-  | `Float of float
-  | `String of string
-  | `Array of json list
-  | `Object of (string * json) list
-] *)
 
 
 
@@ -1065,9 +1019,9 @@ val log : ('a, Format.formatter, unit, unit) format4 -> 'a
     Disregard the obfuscated type: the first argument, [format], is a format
     string as described in the standard library modules
     {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Printf.html#VALfprintf}
-    [Printf ↪]} and
+    [Printf]} and
     {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html#VALfprintf}
-    [Format ↪]}, and the rest of the arguments are determined by the format
+    [Format]}, and the rest of the arguments are determined by the format
     string. For example:
 
     {[
@@ -1094,8 +1048,7 @@ val error : ('a, unit) conditional_log
 (** Formats a message and writes it to the log at level [`Error]. The inner
     formatting function is called only if the {{!initialize_log} current log
     level} is [`Error] or higher. This scheme is based on the
-    {{:https://erratique.ch/software/logs/doc/Logs/index.html} Logs ↪}
-    library.
+    {{:https://erratique.ch/software/logs/doc/Logs/index.html} Logs} library.
 
     {[
       Dream.error ~request (fun log -> log "My message, details: %s" details);
@@ -1120,6 +1073,7 @@ type sub_log = {
 }
 (** Sub-logs. See {!Dream.val-sub_log} right below. *)
 
+(* TODO Show examples with calls at different types/format strings. *)
 (* TODO How to change levels of individual logs. *)
 val sub_log : string -> sub_log
 (** Creates a new sub-log with the given name. For example,
@@ -1132,7 +1086,7 @@ val sub_log : string -> sub_log
     default loggers, but prefixes ["myapp.ajax"] to each log message:
 
     {[
-      log.error ~request (fun log -> log "Validation failed")
+      log.error (fun log -> log ~request "Validation failed")
     ]} *)
 
 val initialize_log :
@@ -1152,13 +1106,13 @@ val initialize_log :
 
     [~backtraces:true], the default, causes Dream to call
     {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Printexc.html#VALrecord_backtrace}
-    [Printexc.record_backtrace ↪]}, which makes exception backtraces available
+    [Printexc.record_backtrace]}, which makes exception backtraces available
     when logging exceptions.
 
     [~async_exception_hook:true], the default, causes Dream to set
     {{:https://ocsigen.org/lwt/latest/api/Lwt#VALasync_exception_hook}
-    [Lwt.async_exception_hook ↪]} so as to forward all asynchronous exceptions
-    to the logger, and not terminate the process.
+    [Lwt.async_exception_hook]} so as to forward all asynchronous exceptions to
+    the logger, and not terminate the process.
 
     [~level] sets the log level threshould for the entire binary. The default is
     [`Info].
@@ -1364,7 +1318,7 @@ val new_local : ?debug:('a -> string * string) -> unit -> 'a local
    split into to a separate name and converter to make it even easier to deal
    with. *)
 
-val local : 'a local -> _ message -> 'a option
+val local : 'a local -> 'b message -> 'a option
 (** Retrieves the value of the given per-message variable, if it is set. *)
 
 val with_local : 'a local -> 'a -> 'b message -> 'b message
@@ -1409,12 +1363,12 @@ val run :
     handler -> unit
 (** [Dream.run handler] runs the web application represented by [handler] as a
     web server, by default at {{:http://localhost:8080}
-    http://localhost:8080 ↪}. All other arguments are optional. The server runs
+    http://localhost:8080}. All other arguments are optional. The server runs
     until there is a newline on STDIN. In practice, this means you can stop the
     server by pressing ENTER.
 
     This function calls {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun}
-    [Lwt_main.run ↪]} internally, and so is intended to be used as the main loop
+    [Lwt_main.run]} internally, and so is intended to be used as the main loop
     of a program. {!Dream.serve} is a version of [Dream.run] that does not call
     [Lwt_main.run]. Indeed, [Dream.run] is a wrapper around {!Dream.serve}.
 
@@ -1456,7 +1410,7 @@ val run :
     without obtaining or generating your own certificates, so using only the
     [~https] argument. The development certificate can be found in
     {{:https://github.com/aantron/dream/tree/master/src/certificate}
-    src/certificate/ ↪} in the Dream source code, and reviewed with
+    src/certificate/} in the Dream source code, and reviewed with
 
     {[
       openssl x509 -in localhost.crt -text -noout
@@ -1515,7 +1469,7 @@ val serve :
     handler -> unit promise
 (** Same as {!Dream.run}, but returns a promise that does not resolve until the
     server stops listening, instead of calling
-    {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun} [Lwt_main.run ↪]} on
+    {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun} [Lwt_main.run]} on
     it, and lacks some of the higher-level conveniences such as monitoring STDIN
     and graceful exit.
 
@@ -1552,11 +1506,11 @@ val html_escape : string -> string
 
 val to_base64url : string -> string
 (** Converts the given string its base64url encoding, as specified in
-    {{:https://tools.ietf.org/html/rfc4648#section-5} RFC 4648 §5 ↪}, using a
+    {{:https://tools.ietf.org/html/rfc4648#section-5} RFC 4648 §5}, using a
     web-safe alphabet and no padding. The resulting string can be used without
     escaping in URLs, form data, cookies, HTML content, attributes, and
     JavaScript code. For more options, see the
-    {{:https://mirage.github.io/ocaml-base64/base64/Base64/index.html} Base64 ↪}
+    {{:https://mirage.github.io/ocaml-base64/base64/Base64/index.html} Base64}
     library.*)
 
 val from_base64url : string -> (string, string) result
@@ -1569,12 +1523,12 @@ val to_form_urlencoded : (string * string) list -> string
 val from_form_urlencoded : string -> (string * string) list
 (** Converts form data or a query string from
     [application/x-www-form-urlencoded] format to a list of name-value pairs.
-    See {{:https://tools.ietf.org/html/rfc1866#section-8.2.1} RFC 1866 §8.2.1
-    ↪}. *)
+    See {{:https://tools.ietf.org/html/rfc1866#section-8.2.1} RFC 1866
+    §8.2.1}. *)
 
 val from_cookie : string -> (string * string) list
 (** Converts a [Cookie:] header value to key-value pairs. See
-    {{:https://tools.ietf.org/html/rfc6265#section-4.2.1} RFC 6265 §4.2.1 ↪}. *)
+    {{:https://tools.ietf.org/html/rfc6265#section-4.2.1} RFC 6265 §4.2.1}. *)
 (* TODO DOC Do we decode? NO. *)
 
 (* TODO Replace all time by floats. *)
@@ -1589,13 +1543,13 @@ val to_set_cookie :
     string -> string -> string
 (** [Dream.to_set_cookie name value] formats a [Set-Cookie:] header value. The
     optional arguments correspond to the attributes specified in
-    {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07} RFC 6265bis
-    ↪}:
+    {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07} RFC
+    6265bis}:
 
     [~expires] sets the expiration date of the cookie. It is a time value in
     seconds, like returned by
     {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Unix.html#VALgettimeofday}
-    [Unix.gettimeofday ↪]}. [~max_age] is a time span in seconds. If both are
+    [Unix.gettimeofday]}. [~max_age] is a time span in seconds. If both are
     given, compliant clients use [~max_age]. If neither is given, a compliant
     client deletes the cookie whenever it considers the client-side session to
     have expired, which typically corresponds to browser close. However, some
@@ -1663,7 +1617,7 @@ val drop_empty_trailing_path_component : string list -> string list
 val random : int -> string
 (** Generates the given number of bytes using a
     {{:https://github.com/mirage/mirage-crypto} cryptographically secure random
-    number generator ↪}. *)
+    number generator}. *)
 (* TODO Review which TLS protocls are negotiated. *)
 (* TODO Support key retirement? *)
 (* TODO Key derivation. *)
@@ -1716,7 +1670,7 @@ val test : ?prefix:string -> handler -> (request -> response)
 (** [Dream.test handler] runs a handler the same way the HTTP server
     ({!Dream.run}) would — assigning it a request id and noting the site root
     prefix, which is used by routers. [Dream.test] calls
-    {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun} [Lwt_main.run ↪]}
+    {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun} [Lwt_main.run]}
     internally to await the response, which is why the response returned from
     the test is not wrapped in a promise. If you don't need these facilities,
     you can test [handler] by calling it directly with a request. *)
@@ -1736,7 +1690,7 @@ val last : 'a message -> 'a message
 val sort_headers : (string * string) list -> (string * string) list
 (** Sorts headers by name. Headers with the same name are not sorted by value or
     otherwise reordered, because order is significant for some headers. See
-    {{:https://tools.ietf.org/html/rfc7230#section-3.2.2} RFC 7230 §3.2.2 ↪} on
+    {{:https://tools.ietf.org/html/rfc7230#section-3.2.2} RFC 7230 §3.2.2} on
     header order. This function can help sanitize output before comparison. *)
 
 
