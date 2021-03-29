@@ -451,32 +451,28 @@ val stream :
 (** {1 Headers} *)
 
 val header : string -> 'a message -> string option
-(** Retrieves the first header with the given name, if present. Header names are
-    case-insensitive. *)
+(** First header with the given name. Header names are case-insensitive. See
+    {{:https://tools.ietf.org/html/rfc7230#section-3.2} RFC 7230 §3.2} and
+    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers} MDN}. *)
 
 val headers : string -> 'a message -> string list
-(** Retrieves all headers with the given name. *)
-
-val has_header : string -> 'a message -> bool
-(** Evaluates to [true] if and only if a header with the given name is
-    present. *)
+(** All headers with the given name. *)
 
 val all_headers : 'a message -> (string * string) list
-(** Retrieves all headers. *)
+(** Entire header set as name-value list. *)
 
-val add_header : string -> string -> 'a message -> 'a message
-(** Creates a new message (request or response) by adding a header with the
-    given name and value. Note that, for several header name, HTTP permits
-    mutliple headers with the same name. This function therefore does not remove
-    any existing headers with the same name. *)
+val has_header : string -> 'a message -> bool
+(** Whether the message has a header with the given name. *)
 
 val drop_header : string -> 'a message -> 'a message
-(** Creates a new message by removing all headers with the given name. *)
+(** Removes all headers with the given name. *)
+
+val add_header : string -> string -> 'a message -> 'a message
+(** Appends a header with the given name and value. Does not remove any existing
+    headers with the same name. *)
 
 val with_header : string -> string -> 'a message -> 'a message
-(** Equivalent to first calling {!Dream.drop_header} and then
-    {!Dream.add_header}. Creates a new message by replacing all headers with the
-    given name by one header with that name and the given value. *)
+(** Equivalent to {!Dream.drop_header} followed by {!Dream.add_header}. *)
 
 
 

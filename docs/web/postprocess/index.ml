@@ -82,6 +82,26 @@ let empty_replacement = {|
 </pre>
 |}
 
+let add_header_expected = {|<div class="spec value" id="val-add_header">
+ <a href="#val-add_header" class="anchor"></a><code><span><span class="keyword">val</span> add_header : <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><span><span class="type-var">'a</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> <a href="#type-message">message</a></span></span></code>
+</div>
+|}
+
+let add_header_replacement = {|
+<pre><span class="keyword">val</span> add_header :
+  string -> string -> 'a <a href="#type-message">message</a> -> 'a <a href="#type-message">message</a>
+|}
+
+let with_header_expected = {|<div class="spec value" id="val-with_header">
+ <a href="#val-with_header" class="anchor"></a><code><span><span class="keyword">val</span> with_header : <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><span><span class="type-var">'a</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> <a href="#type-message">message</a></span></span></code>
+</div>
+|}
+
+let with_header_replacement = {|
+<pre><span class="keyword">val</span> with_header :
+  string -> string -> 'a <a href="#type-message">message</a> -> 'a <a href="#type-message">message</a>
+|}
+
 let add_set_cookie_expected = {|<div class="spec value" id="val-add_set_cookie">
  <a href="#val-add_set_cookie" class="anchor"></a><code><span><span class="keyword">val</span> add_set_cookie : <span>?cookie_prefix:string <span class="arrow">-&gt;</span></span> <span>?encrypt:bool <span class="arrow">-&gt;</span></span> <span>?expires:float <span class="arrow">-&gt;</span></span>
 <span>?max_age:float <span class="arrow">-&gt;</span></span> <span>?domain:string <span class="arrow">-&gt;</span></span> <span>?path:string <span class="arrow">-&gt;</span></span> <span>?secure:bool <span class="arrow">-&gt;</span></span> <span>?http_only:bool <span class="arrow">-&gt;</span></span>
@@ -527,6 +547,20 @@ let pretty_print_signatures soup =
     (fun () ->
       Soup.replace (empty $ "> code") (Soup.parse empty_replacement);
       Soup.add_class "multiline" empty);
+
+  let multiline selector expected replacement =
+    let element = soup $ selector in
+    if_expected
+      expected
+      (fun () -> pretty_print element)
+      (fun () ->
+        Soup.replace (element $ "> code") (Soup.parse replacement);
+        Soup.add_class "multiline" element)
+  in
+
+  multiline "#val-add_header" add_header_expected add_header_replacement;
+  soup $ "#val-add_header" |> remove_class "multiline";
+  multiline "#val-with_header" with_header_expected with_header_replacement;
 
   let add_set_cookie = soup $ "#val-add_set_cookie" in
   if_expected
