@@ -55,8 +55,11 @@ let csrf_token ?(valid_for = default_valid_for) request =
   (* TODO Can this fail? *)
   (* |> Lwt.return *)
 
-(* TODO Logging should be moved here. *)
-let field_name = "dream.csrf"
+let field_name =
+  "dream.csrf"
+
+let log =
+  Log.sub_log field_name
 
 type csrf_result = [
   | `Ok
@@ -69,28 +72,40 @@ let verify_csrf_token token request =
   let secret = Dream.secret (Dream.app request) in
 
   begin match Jwto.decode_and_verify secret token with
-  | Error _ -> `Invalid
+  | Error _ ->
+    log.warning (fun log -> log ~request "CSRF token invalid");
+    `Invalid
 
   | Ok decoded_token ->
     match Jwto.get_payload decoded_token with
     | ["session", token_session_hash; "time", expires_at] ->
 
       begin match Float.of_string_opt expires_at with
-      | None -> `Invalid
+      | None ->
+        log.warning (fun log -> log ~request "CSRF token time field invalid");
+        `Invalid
+
       | Some expires_at ->
 
         let real_session_hash = hash_session request in
-        if token_session_hash <> real_session_hash then
+        if token_session_hash <> real_session_hash then begin
+          log.warning (fun log -> log ~request
+            "CSRF token not for this session");
           `Wrong_session token_session_hash
+        end
 
         else
           let now = Unix.gettimeofday () in
           if expires_at > now then
             `Ok
-          else
+          else begin
+            log.warning (fun log -> log ~request "CSRF token expired");
             `Expired expires_at
+          end
       end
 
-    | _ -> `Invalid
+    | _ ->
+      log.warning (fun log -> log ~request "CSRF token payload invalid");
+      `Invalid
   end
   |> Lwt.return
