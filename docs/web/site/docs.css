@@ -141,6 +141,14 @@ p + p, p + pre, pre + p {
   z-index: -2;
 }
 
+.spec-doc li + li {
+  margin-top: 12px;
+}
+
+.spec-doc ul {
+  margin-top: 24px;
+}
+
 /* Two-column geometry. */
 @media (min-width: 1240px) {
   .spec {

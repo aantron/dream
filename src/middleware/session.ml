@@ -197,8 +197,7 @@ let in_memory_sessions default_value =
   (* TODO Cookie scope and security! Use the site prefix from the request. *)
   let send session_info request response =
     response
-    |> Dream.add_set_cookie
-      module_name session_info.key request ~secure:false ~encrypt:false
+    |> Dream.set_cookie module_name session_info.key request ~encrypt:false
     |> Lwt.return
   in
 

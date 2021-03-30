@@ -102,26 +102,44 @@ let with_header_replacement = {|
   string -> string -> 'a <a href="#type-message">message</a> -> 'a <a href="#type-message">message</a>
 |}
 
-let add_set_cookie_expected = {|<div class="spec value" id="val-add_set_cookie">
- <a href="#val-add_set_cookie" class="anchor"></a><code><span><span class="keyword">val</span> add_set_cookie : <span>?cookie_prefix:string <span class="arrow">-&gt;</span></span> <span>?encrypt:bool <span class="arrow">-&gt;</span></span> <span>?expires:float <span class="arrow">-&gt;</span></span>
-<span>?max_age:float <span class="arrow">-&gt;</span></span> <span>?domain:string <span class="arrow">-&gt;</span></span> <span>?path:string <span class="arrow">-&gt;</span></span> <span>?secure:bool <span class="arrow">-&gt;</span></span> <span>?http_only:bool <span class="arrow">-&gt;</span></span>
-<span>?same_site:<span>[ `Strict <span>| `Lax</span> <span>| `None</span> ]</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <a href="#type-response">response</a></span></code>
+let add_set_cookie_expected = {|<div class="spec value" id="val-set_cookie">
+ <a href="#val-set_cookie" class="anchor"></a><code><span><span class="keyword">val</span> set_cookie : <span>?prefix:<span><span>[ `Host <span>| `Secure</span> ]</span> option</span> <span class="arrow">-&gt;</span></span> <span>?encrypt:bool <span class="arrow">-&gt;</span></span>
+<span>?expires:float <span class="arrow">-&gt;</span></span> <span>?max_age:float <span class="arrow">-&gt;</span></span> <span>?domain:string <span class="arrow">-&gt;</span></span> <span>?path:<span>string option</span> <span class="arrow">-&gt;</span></span>
+<span>?secure:bool <span class="arrow">-&gt;</span></span> <span>?http_only:bool <span class="arrow">-&gt;</span></span> <span>?same_site:<span><span>[ `Strict <span>| `Lax</span> <span>| `None</span> ]</span> option</span> <span class="arrow">-&gt;</span></span>
+<span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <a href="#type-response">response</a></span></code>
 </div>
 |}
 
 let add_set_cookie_replacement = {|
-<pre><span class="keyword">val</span> add_set_cookie :
-  <span class="optional">?cookie_prefix:string ->
+<pre><span class="keyword">val</span> set_cookie :
+  <span class="optional">?prefix:[ `Host | `Secure ] option ->
   ?encrypt:bool ->
   ?expires:float ->
   ?max_age:float ->
   ?domain:string ->
-  ?path:string ->
+  ?path:string option ->
   ?secure:bool ->
   ?http_only:bool ->
-  ?same_site:[ `Strict | `Lax | `None ] -></span>
+  ?same_site:[ `Strict | `Lax | `None ] option -></span>
     string -> string -> <a href="#type-request">request</a> -> <a href="#type-response">response</a> -> <a href="#type-response">response</a>
 </pre>|}
+
+let cookie_expected = {|<div class="spec value" id="val-cookie">
+ <a href="#val-cookie" class="anchor"></a><code><span><span class="keyword">val</span> cookie : <span>?prefix:<span><span>[ `Host <span>| `Secure</span> ]</span> option</span> <span class="arrow">-&gt;</span></span> <span>?decrypt:bool <span class="arrow">-&gt;</span></span>
+<span>?domain:string <span class="arrow">-&gt;</span></span> <span>?path:<span>string option</span> <span class="arrow">-&gt;</span></span> <span>?secure:bool <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string option</span></span></code>
+</div>
+|}
+
+let cookie_replacement = {|
+<pre><span class="keyword">val</span> cookie :
+  ?prefix:[ `Host | `Secure ] option ->
+  ?decrypt:bool ->
+  ?domain:string ->
+  ?path:string option ->
+  ?secure:bool ->
+    string -> <a href="#type-request">request</a> -> string option
+</pre>
+|}
 
 let bigstring_expected = {|<div class="spec type" id="type-bigstring">
  <a href="#type-bigstring" class="anchor"></a><code><span><span class="keyword">type</span> bigstring</span><span> = <span><span>(char,&nbsp;<span class="xref-unresolved">Stdlib</span>.Bigarray.int8_unsigned_elt,&nbsp;<span class="xref-unresolved">Stdlib</span>.Bigarray.c_layout)</span> <span class="xref-unresolved">Stdlib</span>.Bigarray.Array1.t</span></span></code>
@@ -562,7 +580,7 @@ let pretty_print_signatures soup =
   soup $ "#val-add_header" |> remove_class "multiline";
   multiline "#val-with_header" with_header_expected with_header_replacement;
 
-  let add_set_cookie = soup $ "#val-add_set_cookie" in
+  let add_set_cookie = soup $ "#val-set_cookie" in
   if_expected
     add_set_cookie_expected
     (fun () -> pretty_print add_set_cookie)
@@ -571,6 +589,8 @@ let pretty_print_signatures soup =
         (add_set_cookie $ "> code")
         (Soup.parse add_set_cookie_replacement);
       Soup.add_class "multiline" add_set_cookie);
+
+  multiline "#val-cookie" cookie_expected cookie_replacement;
 
   let bigstring = soup $ "#type-bigstring" in
   if_expected

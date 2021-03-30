@@ -22,6 +22,7 @@ module Scope = Hmap.Make (Scope_variable_metadata)
 type app = {
   globals : Scope.t ref;
   mutable debug : bool;
+  mutable https : bool;
   mutable secret : string;
   mutable keys : Cipher.key list;
 }
@@ -45,6 +46,7 @@ let set_secret secret app =
 let new_app () = {
   globals = ref Scope.empty;
   debug = false;
+  https = false;
   secret = "";
   keys = [Cipher.derive_key Cipher.cipher ""];
 }
@@ -104,6 +106,9 @@ let update message =
 
 let client request =
   request.specific.client
+
+let https request =
+  request.specific.app.https
 
 let method_ request =
   request.specific.method_
@@ -519,19 +524,40 @@ let encrypt request plaintext =
 let decrypt request ciphertext =
   Cipher.decrypt (decryption_keys request) ciphertext
 
-(* TODO Efficient prefix matching. *)
+let infer_cookie_prefix prefix domain path secure =
+  match prefix, domain, path, secure with
+    | Some (Some `Host), _, _, _ -> "__Host-"
+    | Some (Some `Secure), _, _, _ -> "__Secure-"
+    | Some None, _, _, _ -> ""
+    | None, None, Some "/", true -> "__Host-"
+    | None, _, _, true -> "__Secure-"
+    | None, _, _, _ -> ""
+
 (* TODO Some actual performance in the implementation. *)
 let cookie
-    ?(match_prefix = true) ?decrypt:(decrypt_cookie = true) name request =
+    ?prefix:cookie_prefix
+    ?decrypt:(decrypt_cookie = true)
+    ?domain
+    ?path
+    ?secure
+    name
+    request =
 
-  let test =
-    if match_prefix then
-      fun (name', _) ->
-        name' = name || "__Host-" ^ name' = name || "__Secure-" ^ name' = name
-    else
-      fun (name', _) ->
-        name' = name
+  let path =
+    match path with
+    | Some path -> path
+    | None -> Some (prefix request)
   in
+
+  let secure =
+    match secure with
+    | Some secure -> secure
+    | None -> https request
+  in
+
+  let cookie_prefix = infer_cookie_prefix cookie_prefix domain path secure in
+  let name = cookie_prefix ^ name in
+  let test = fun (name', _) -> name = name' in
 
   match all_cookies request |> List.find_opt test with
   | None -> None
@@ -546,16 +572,16 @@ let cookie
         decrypt request value
 
 (* TODO LATER Default encoding. *)
-let add_set_cookie
-    ?cookie_prefix
+let set_cookie
+    ?prefix:cookie_prefix
     ?encrypt:(encrypt_cookie = true)
     ?expires
     ?max_age
     ?domain
     ?path
-    ?(secure = true)
+    ?secure
     ?(http_only = true)
-    ?(same_site = `Strict)
+    ?(same_site = Some `Strict)
     name
     value
     request
@@ -565,22 +591,20 @@ let add_set_cookie
   let path =
     match path with
     | Some path -> path
-    | None -> prefix request
+    | None -> Some (prefix request)
   in
 
   (* TODO Relation between secure and non-localhost non-https? *)
   (* TODO Get Secure default from https getter of request, also probably need
      reverse-proxy oriented middleware here. *)
-  ignore secure;
-  let secure = false in
 
-  let cookie_prefix =
-    match cookie_prefix, domain, path, secure with
-    | Some prefix, _, _, _ -> prefix
-    | None, None, "/", true -> "__Host-"
-    | None, _, _, true -> "__Secure-"
-    | None, _, _, _ -> ""
+  let secure =
+    match secure with
+    | Some secure -> secure
+    | None -> https request
   in
+
+  let cookie_prefix = infer_cookie_prefix cookie_prefix domain path secure in
 
   let value =
     if encrypt_cookie then
@@ -591,7 +615,7 @@ let add_set_cookie
 
   let set_cookie =
     Formats.to_set_cookie
-      ?expires ?max_age ?domain ~path ~secure ~http_only ~same_site
+      ?expires ?max_age ?domain ?path ~secure ~http_only ?same_site
       (cookie_prefix ^ name) value
   in
 

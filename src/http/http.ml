@@ -662,6 +662,8 @@ let serve_with_maybe_https
       user's_dream_handler
 
   | `OpenSSL | `OCaml_TLS as tls_library ->
+    app.https <- true;
+
     (* TODO Writing temporary files is extremely questionable for anything
        except the fake localhost certificate. This needs loud warnings. IIRC the
        SSL binding already supports in-memory certificates. Does TLS? In any

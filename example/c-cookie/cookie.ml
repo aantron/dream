@@ -1,5 +1,5 @@
 let () =
-  Dream.run
+  Dream.run ~secret:"foo"
   @@ Dream.logger
   @@ fun request ->
     match Dream.cookie "ui.language" request with
@@ -9,5 +9,5 @@ let () =
 
     | None ->
       Dream.response "Set language preference; come again!"
-      |> Dream.add_set_cookie "ui.language" "ut-OP" request
+      |> Dream.set_cookie "ui.language" "ut-OP" request
       |> Lwt.return

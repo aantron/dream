@@ -339,6 +339,10 @@ type method_ = Method_and_status.method_
 val client : request -> string
 (** Client sending the request. For example, ["127.0.0.1:56001"]. *)
 
+val https : request -> bool
+(** Whether the request was sent over HTTPS. *)
+(* TODO There needs to be a way of setting this based on proxy headers, also. *)
+
 val method_ : request -> method_
 (** Request method. For example, [`GET]. *)
 
@@ -478,49 +482,122 @@ val with_header : string -> string -> 'a message -> 'a message
 
 (** {1 Cookies} *)
 
-(* TODO Name of ?cookie_prefix? *)
-val add_set_cookie :
-  ?cookie_prefix:string ->
+(* TODO Add ability to only sign the cookie? *)
+val set_cookie :
+  ?prefix:[ `Host | `Secure ] option ->
   ?encrypt:bool ->
   ?expires:float ->
   ?max_age:float ->
   ?domain:string ->
-  ?path:string ->
+  ?path:string option ->
   ?secure:bool ->
   ?http_only:bool ->
-  ?same_site:[ `Strict | `Lax | `None ] ->
+  ?same_site:[ `Strict | `Lax | `None ] option ->
     string -> string -> request -> response -> response
-(** Adds a [Set-Cookie:] header to the given response for setting the cookie
-    with the given name to the given value. Does not remove any [Set-Cookie:]
-    header that is already present — to do that, use {!Dream.drop_header}. This
-    function does not encode the cookie name nor its value. If the values you
-    are passing in can have [=], [;], or newlines, ... *)
-(* TODO Hints about encodings. *)
+(** Appends a [Set-Cookie:] header to the given {!response}. Infers the most
+    secure defaults from the {!type-request}.
 
+    {[
+      Dream.set_cookie "my.cookie" "value" request response
+    ]}
+
+    You should specify {!Dream.run} argument [~secret], or the web app will not
+    be able to decrypt cookies from prior starts.
+
+    See example
+    {{:https://github.com/aantron/dream/tree/master/example/c-cookie#files}
+    [c-cookie]}.
+
+    Most of the optional arguments are for overriding inferred defaults.
+    [~expires] and [~max_age] are independently useful.
+
+    - [~prefix] sets [__Host-], [__Secure-], or no prefix, from most secure to
+      least. A conforming client will refuse to accept the cookie if [~domain],
+      [~path], and [~secure] don't match the constraints implied by the prefix.
+      By default, {!Dream.set_cookie} chooses the most restrictive prefix based
+      on the other settings and the {!type-request}. See
+      {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.1.3}
+      RFC 6265bis §4.1.3} and
+      {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#Cookie_prefixes}
+      MDN}.
+    - [~encrypt:false] disables cookie encryption. In that case, you must make
+      sure that the cookie value does not contain [=], [;], or newlines. The
+      easiest way to do so is to pass the value through an encoder like
+      {!Dream.to_base64url}. See {!Dream.run} argument [~secret].
+    - [~expires] sets the [Expires=] attribute. The value is compatible with
+      {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Unix.html#VALgettimeofday}
+      [Unix.gettimeofday]}. See
+      {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.1.2.1}
+      RFC 6265bis §4.1.2.1} and
+      {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#define_the_lifetime_of_a_cookie}
+      MDN}.
+    - [~max_age] sets the [Max-Age=] attribute. See
+      {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.1.2.2}
+      RFC 6265bis §4.1.2.2} and
+      {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#define_the_lifetime_of_a_cookie}
+      MDN}.
+    - [~domain] sets the [Domain=] attribute. See
+      {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.1.2.3}
+      RFC 6265bis §4.1.2.3} and
+      {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#Domain_attribute}
+      MDN}.
+    - [~path] sets the [Path=] attribute. By default, [Path=] set to the site
+      prefix in the {!type-request}, which is usually [/]. See
+      {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.1.2.4}
+      RFC 6265bis §4.1.2.4} and
+      {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#Path_attribute}
+      MDN}.
+    - [~secure] sets the [Secure] attribute. By default, [Secure] is set if
+      {!Dream.https} is [true] for the {!type-request}. See
+      {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.1.2.5}
+      RFC 6265bis §4.1.2.5} and
+      {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#restrict_access_to_cookies}
+      MDN}.
+    - [~http_only] sets the [HttpOnly] attribute. [HttpOnly] is set by default.
+      See
+      {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.1.2.6}
+      RFC 6265bis §4.1.2.6} and
+      {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#restrict_access_to_cookies}
+      MDN}.
+    - [~same_site] sets the [SameSite=] attribute. [SameSite] is set to [Strict]
+      by default. See
+      {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.1.2.7}
+      RFC 6265bis §4.1.2.7} and
+      {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#SameSite_attribute}
+      MDN}.
+
+    {!Dream.to_set_cookie} is a “raw” version of this function that does not do
+    any inference.
+
+ *)
+(* TODO Add a percent encoding and link it. *)
+(* TODO Make the prefix a variant? *)
+(* TODO HTTPS and proxies. *)
+
+(* TODO Mirror set_cookie API. *)
 (* TODO Switch to this indentation style in more places. *)
 (* TODO ?prefix or ?cookie_prefix? *)
 (* TODO What is the right default with the prefix? *)
 val cookie :
-  ?match_prefix:bool ->
+  ?prefix:[ `Host | `Secure ] option ->
   ?decrypt:bool ->
+  ?domain:string ->
+  ?path:string option ->
+  ?secure:bool ->
     string -> request -> string option
-(** Cookies are sent by the client in [Cookie:] headers as [name=value] pairs.
-    This function parses those headers, looking for the given [name].
+(** First cookie with the given name. See example
+    {{:https://github.com/aantron/dream/tree/master/example/c-cookie#files}
+    [c-cookie]}.
 
-    No decoding is applied to any found [value] — it is returned raw, as sent by
-    the client. Cookies are almost always encoded so as to at least escape [=],
-    [;], and newline characters, which are significant to the cookie and HTTP
-    parsers. If you applied such an encoding when setting the cookie, you have
-    to reverse it after calling [Dream.cookie]. See {!Dream.add_set_cookie} for
-    recommendations about encodings to use and {!web_formats} for encoders and
-    decoders.
+    {[
+      Dream.cookie "my.cookie" request
+    ]}
 
-    If the request includes multiple cookies with the same name, one is
-    returned. *)
+    Pass the same optional arguments as to {!Dream.set_cookie} for the same
+    cookie. This will allow {!Dream.cookie} to infer the cookie name prefix. *)
 
 val all_cookies : request -> (string * string) list
-(** Retrieves all cookies, i.e. all [name=value] in all [Cookie:] headers. As
-    with {!Dream.cookie}, no decoding is applied to the values. *)
+(** All cookies, with raw names and values. *)
 
 
 
