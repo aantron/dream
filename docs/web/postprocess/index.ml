@@ -180,43 +180,43 @@ let write_bigstring_replacement = {|
 </pre>
 |}
 
-let form_expected = {|<div class="spec type" id="type-form">
- <a href="#type-form" class="anchor"></a><code><span><span class="keyword">type</span> form</span><span> = </span><span>[ </span></code>
+let form_expected = {|<div class="spec type" id="type-form_result">
+ <a href="#type-form_result" class="anchor"></a><code><span><span class="keyword">type</span> form_result</span><span> = </span><span>[ </span></code>
  <table>
   <tbody>
-   <tr id="type-form.Ok" class="anchored">
+   <tr id="type-form_result.Ok" class="anchored">
     <td class="def constructor">
-     <a href="#type-form.Ok" class="anchor"></a><code><span>| </span></code><code><span>`Ok <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
+     <a href="#type-form_result.Ok" class="anchor"></a><code><span>| </span></code><code><span>`Ok <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
     </td>
    </tr>
-   <tr id="type-form.Expired" class="anchored">
+   <tr id="type-form_result.Expired" class="anchored">
     <td class="def constructor">
-     <a href="#type-form.Expired" class="anchor"></a><code><span>| </span></code><code><span>`Expired <span class="keyword">of</span> <span><span>(string * string)</span> list</span> * int64</span></code>
+     <a href="#type-form_result.Expired" class="anchor"></a><code><span>| </span></code><code><span>`Expired <span class="keyword">of</span> <span><span>(string * string)</span> list</span> * float</span></code>
     </td>
    </tr>
-   <tr id="type-form.Wrong_session" class="anchored">
+   <tr id="type-form_result.Wrong_session" class="anchored">
     <td class="def constructor">
-     <a href="#type-form.Wrong_session" class="anchor"></a><code><span>| </span></code><code><span>`Wrong_session <span class="keyword">of</span> <span><span>(string * string)</span> list</span> * string</span></code>
+     <a href="#type-form_result.Wrong_session" class="anchor"></a><code><span>| </span></code><code><span>`Wrong_session <span class="keyword">of</span> <span><span>(string * string)</span> list</span> * string</span></code>
     </td>
    </tr>
-   <tr id="type-form.Invalid_token" class="anchored">
+   <tr id="type-form_result.Invalid_token" class="anchored">
     <td class="def constructor">
-     <a href="#type-form.Invalid_token" class="anchor"></a><code><span>| </span></code><code><span>`Invalid_token <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
+     <a href="#type-form_result.Invalid_token" class="anchor"></a><code><span>| </span></code><code><span>`Invalid_token <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
     </td>
    </tr>
-   <tr id="type-form.Missing_token" class="anchored">
+   <tr id="type-form_result.Missing_token" class="anchored">
     <td class="def constructor">
-     <a href="#type-form.Missing_token" class="anchor"></a><code><span>| </span></code><code><span>`Missing_token <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
+     <a href="#type-form_result.Missing_token" class="anchor"></a><code><span>| </span></code><code><span>`Missing_token <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
     </td>
    </tr>
-   <tr id="type-form.Many_tokens" class="anchored">
+   <tr id="type-form_result.Many_tokens" class="anchored">
     <td class="def constructor">
-     <a href="#type-form.Many_tokens" class="anchor"></a><code><span>| </span></code><code><span>`Many_tokens <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
+     <a href="#type-form_result.Many_tokens" class="anchor"></a><code><span>| </span></code><code><span>`Many_tokens <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
     </td>
    </tr>
-   <tr id="type-form.Not_form_urlencoded" class="anchored">
+   <tr id="type-form_result.Not_form_urlencoded" class="anchored">
     <td class="def constructor">
-     <a href="#type-form.Not_form_urlencoded" class="anchor"></a><code><span>| </span></code><code><span>`Not_form_urlencoded</span></code>
+     <a href="#type-form_result.Not_form_urlencoded" class="anchor"></a><code><span>| </span></code><code><span>`Not_form_urlencoded</span></code>
     </td>
    </tr>
   </tbody>
@@ -226,9 +226,9 @@ let form_expected = {|<div class="spec type" id="type-form">
 |}
 
 let form_replacement = {|
-<pre class="compact"><span class="keyword">type</span> form = [
+<pre class="compact"><span class="keyword">type</span> form_result = [
   | `Ok            <span class="of">of</span> (string * string) list
-  | `Expired       <span class="of">of</span> (string * string) list * int64
+  | `Expired       <span class="of">of</span> (string * string) list * float
   | `Wrong_session <span class="of">of</span> (string * string) list * string
   | `Invalid_token <span class="of">of</span> (string * string) list
   | `Missing_token <span class="of">of</span> (string * string) list
@@ -248,7 +248,7 @@ let csrf_result_expected = {|<div class="spec type" id="type-csrf_result">
    </tr>
    <tr id="type-csrf_result.Expired" class="anchored">
     <td class="def constructor">
-     <a href="#type-csrf_result.Expired" class="anchor"></a><code><span>| </span></code><code><span>`Expired <span class="keyword">of</span> int64</span></code>
+     <a href="#type-csrf_result.Expired" class="anchor"></a><code><span>| </span></code><code><span>`Expired <span class="keyword">of</span> float</span></code>
     </td>
    </tr>
    <tr id="type-csrf_result.Wrong_session" class="anchored">
@@ -270,7 +270,7 @@ let csrf_result_expected = {|<div class="spec type" id="type-csrf_result">
 let csrf_result_replacement = {|
 <pre class="compact"><span class="keyword">type</span> csrf_result = [
   | `Ok
-  | `Expired <span class="of">of</span> int64
+  | `Expired <span class="of">of</span> float
   | `Wrong_session <span class="of">of</span> string
   | `Invalid
 ]
@@ -617,7 +617,7 @@ let pretty_print_signatures soup =
         (write_bigstring $ "> code") (Soup.parse write_bigstring_replacement);
       Soup.add_class "multiline" write_bigstring);
 
-  let form = soup $ "#type-form" in
+  let form = soup $ "#type-form_result" in
   if_expected
     form_expected
     (fun () -> pretty_print form)

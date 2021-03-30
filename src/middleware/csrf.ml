@@ -39,27 +39,28 @@ let hash_session request =
    may need longer expirations... OTOH maybe not, as they can be refreshed. *)
 
 let default_valid_for =
-  Int64.of_int (60 * 60)
+  60. *. 60.
 
 let csrf_token ?(valid_for = default_valid_for) request =
   let secret = Dream.secret (Dream.app request) in
   let session_hash = hash_session request in
-  let now = Unix.gettimeofday () |> Int64.of_float in
+  let now = Unix.gettimeofday () in
 
   let payload = [
     "session", session_hash;
-    "time", Int64.to_string (Int64.add now valid_for);
+    "time", Printf.sprintf "%.0f" (now +. valid_for);
   ] in
 
   Jwto.encode Jwto.HS256 secret payload |> Result.get_ok
   (* TODO Can this fail? *)
   (* |> Lwt.return *)
 
+(* TODO Logging should be moved here. *)
 let field_name = "dream.csrf"
 
 type csrf_result = [
   | `Ok
-  | `Expired of int64
+  | `Expired of float
   | `Wrong_session of string
   | `Invalid
 ]
@@ -74,7 +75,7 @@ let verify_csrf_token token request =
     match Jwto.get_payload decoded_token with
     | ["session", token_session_hash; "time", expires_at] ->
 
-      begin match Int64.of_string_opt expires_at with
+      begin match Float.of_string_opt expires_at with
       | None -> `Invalid
       | Some expires_at ->
 
@@ -83,7 +84,7 @@ let verify_csrf_token token request =
           `Wrong_session token_session_hash
 
         else
-          let now = Unix.gettimeofday () |> Int64.of_float in
+          let now = Unix.gettimeofday () in
           if expires_at > now then
             `Ok
           else

@@ -690,45 +690,58 @@ val origin_referer_check : middleware
     Future extensions to this function may use [X-Forwarded-Host] or host
     whitelists.
 
-    For more thorough protection, generate CSRF tokens with {!Dream.csrf_token}
-    ... TODO Example. *)
+    For more thorough protection, generate CSRF tokens with {!Dream.csrf_token},
+    send them to the client (for instance, in [<meta>] tags of a single-page
+    application), and require their presence in an [X-CSRF-Token:] header. *)
 (* TODO Basic JSON, JSON token csrf. *)
-(* TODO Future extensions: proxies, whitelists. *)
 
 
 
 (** {1 Forms} *)
 
-type form = [
+type form_result = [
   | `Ok            of (string * string) list
-  | `Expired       of (string * string) list * int64
+  | `Expired       of (string * string) list * float
   | `Wrong_session of (string * string) list * string
   | `Invalid_token of (string * string) list
   | `Missing_token of (string * string) list
   | `Many_tokens   of (string * string) list
   | `Not_form_urlencoded
 ]
-(** Form validation results and errors, in order from least to most severe. See
-    {!Dream.val-form} for convenient usage examples. The first three
-    constructors, [`Ok], [`Expired], and [`Wrong_session] can occur in regular
-    usage. The remaining constructors, [`Invalid_token], [`Missing_token],
-    [`Many_tokens], [`Not_form_urlencoded] correspond to bugs or suspicious
-    activity. *)
-(* TODO Rename to form_result. *)
+(** Form validation results, in order from least to most severe. See
+    {!Dream.val-form} and example
+    {{:https://github.com/aantron/dream/tree/master/example/d-form#files}
+    [d-form]}.
+
+    The first three constructors, [`Ok], [`Expired], and [`Wrong_session] can
+    occur in regular usage.
+
+    The remaining constructors, [`Invalid_token], [`Missing_token],
+    [`Many_tokens], [`Not_form_urlencoded] correspond to bugs, suspicious
+    activity, or tokens so old that decryption keys have since been rotated
+    server-side. *)
 
 (* TODO Link to the tag helper for dream.csrf and backup instructions for
-   generating it. *)
-val form : request -> form promise
-(** Parses the request body as a form. [Content-Type:] must be
-    [application/x-www-form-urlencoded]. Checks that the form contains a CSRF
-    token field [dream.csrf], and checks it for validity. The form fields are
-    returned in sorted order, suitable for pattern matching:
+   generating it; also create that page! *)
+val form : request -> form_result promise
+(** Parses the request body as a form. Performs checks, which are easiest to
+    satisfy by using {!Dream.Tag.form}. See {!section-templates} and example
+    {{:https://github.com/aantron/dream/tree/master/example/d-form#readme}
+    [d-form]},
+
+    - [Content-Type:] must be [application/x-www-form-urlencoded].
+    - The form must have a field named [dream.csrf], containing a CSRF token.
+    - {!Dream.form} calls {!Dream.verify_csrf_token} to check the token.
+
+    The call must be done under a session middleware, since CSRF tokens are
+    bound to sessions. See {!section-sessions}.
+
+    Form fields are returned sorted for easy pattern matching:
 
     {[
       match%lwt Dream.form request with
       | `Ok ["email", email; "name", name] -> (* ... *)
-      | _ ->
-        Dream.respond ~status:`Bad_Request ""
+      | _ -> Dream.empty `Bad_Request
     ]}
 
     If you want to recover from conditions like expired forms, add extra cases:
@@ -737,21 +750,17 @@ val form : request -> form promise
       match%lwt Dream.form request with
       | `Ok      ["email", email; "name", name] -> (* ... *)
       | `Expired ["email", email; "name", name] -> (* ... *)
-      | _ ->
-        Dream.respond ~status:`Bad_Request ""
+      | _ -> Dream.empty `Bad_Request
     ]}
 
     It is recommended not to mutate state or send back sensitive data in the
-    [`Expired] and [`Wrong_session] cases. The cases may indicate ordinary form
-    and session timeout, but they may also indicate attacks against the client's
-    session.
+    [`Expired] and [`Wrong_session] cases, as they {e may} indicate an attack
+    against a client.
 
     The remaining cases, including unexpected field sets and the remaining
-    constructors of {!Dream.type-form}, usually indicate either bugs or
+    constructors of {!Dream.type-form_result}, usually indicate either bugs or
     attacks, and it's usually fine to respond to all of them with [400 Bad
-    Request].
-
-    [Dream.form] writes warnings to the log for any result other than [`Ok]. *)
+    Request]. *)
 (* TODO Provide optionals for disabling CSRF checking and CSRF token field
    filtering. *)
 (* TODO AJAX CSRF example with X-CSRF-Token, then also with axios in the
@@ -783,7 +792,7 @@ val upload : request -> [
 
 type csrf_result = [
   | `Ok
-  | `Expired of int64
+  | `Expired of float
   | `Wrong_session of string
   | `Invalid
 ]
@@ -798,7 +807,7 @@ type csrf_result = [
     by normal users. [`Invalid] usually corresponds to bugs or attacks. *)
 
 (* TODO Guidance on how to transmit and receive the token; links. *)
-val csrf_token : ?valid_for:int64 -> request -> string
+val csrf_token : ?valid_for:float -> request -> string
 (** Returns a fresh CSRF token locked to the given request's {{!sessions}
     session} and signed with the [~secret] given to {!Dream.run}. [~valid_for]
     is the token's lifetime, in seconds. The default value is one hour

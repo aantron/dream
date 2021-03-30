@@ -15,9 +15,9 @@ let log =
 let sort form =
   List.stable_sort (fun (key, _) (key', _) -> String.compare key key') form
 
-type form = [
+type form_result = [
   | `Ok            of (string * string) list
-  | `Expired       of (string * string) list * int64
+  | `Expired       of (string * string) list * float
   | `Wrong_session of (string * string) list * string
   | `Invalid_token of (string * string) list
   | `Missing_token of (string * string) list

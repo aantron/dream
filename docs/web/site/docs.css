@@ -117,7 +117,9 @@ h1, h2, h3 {
 nav ~ * a[href="#headers"],
 nav ~ * a[href="#routing"],
 nav ~ * a[href="#requests"],
-nav ~ * a[href="#responses"] {
+nav ~ * a[href="#responses"],
+nav ~ * a[href="#sessions"],
+nav ~ * a[href="#templates"] {
   font-style: italic;
 }
 
@@ -167,7 +169,8 @@ p + p, p + pre, pre + p {
 }
 #type-bigstring + .spec-doc li + li,
 #val-next + .spec-doc li + li,
-#val-referer_origin_check + .spec-doc li + li {
+#val-origin_referer_check + .spec-doc li + li,
+#val-form + .spec-doc li + li {
   margin-top: 0;
 }
 
