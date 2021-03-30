@@ -166,13 +166,14 @@ p + p, p + pre, pre + p {
   margin-top: 12px;
 }
 #type-bigstring + .spec-doc li + li,
-#val-next + .spec-doc li + li {
+#val-next + .spec-doc li + li,
+#val-referer_origin_check + .spec-doc li + li {
   margin-top: 0;
 }
 
-.spec-doc ul {
+/* .spec-doc ul {
   margin-top: 24px;
-}
+} */
 
 /* Two-column geometry. */
 @media (min-width: 1240px) {
