@@ -663,8 +663,37 @@ val write_bigstring : bigstring -> int -> int -> response -> unit promise
 
 
 
-(* TODO Switch to :after for external link decoration. *)
-(** {1 JSON} *)
+(* TODO Link to examples. *)
+(** {1 JSON}
+
+    Dream presently recommends using
+    {{:https://github.com/ocaml-community/yojson#readme} Yojson}. See also
+    {{:https://github.com/janestreet/ppx_yojson_conv#readme} ppx_yojson_conv}
+    for generating JSON parsers and serializers for OCaml data types. *)
+
+val origin_referer_check : middleware
+(** CSRF protection for AJAX requests. Either the method must be [`GET] or
+    [`HEAD], or:
+
+    - [Origin:] or [Referer:] must be present, and
+    - their value must match [Host:]
+
+    Responds with [400 Bad Request] if the check fails.
+
+    Implements the
+    {{:https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#verifying-origin-with-standard-headers}
+    OWASP Verifying Origin With Standard Headers} CSRF defense-in-depth
+    technique, which is good enough for basic usage. Do not allow [`GET] or
+    [`HEAD] requests to trigger important side effects if relying only on
+    {!Dream.origin_referer_check}.
+
+    Future extensions to this function may use [X-Forwarded-Host] or host
+    whitelists.
+
+    For more thorough protection, generate CSRF tokens with {!Dream.csrf_token}
+    ... TODO Example. *)
+(* TODO Basic JSON, JSON token csrf. *)
+(* TODO Future extensions: proxies, whitelists. *)
 
 
 

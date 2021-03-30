@@ -36,7 +36,7 @@ include Dream__middleware.Static
 
 include Dream__middleware.Session.Exported_defaults
 
-(* include Dream__middleware.Json *)
+include Dream__middleware.Origin_referer_check
 include Dream__middleware.Form
 include Dream__middleware.Upload
 include Dream__middleware.Csrf

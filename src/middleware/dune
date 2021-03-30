@@ -12,6 +12,7 @@
   lwt.unix
   magic-mime
   multipart-form-data
+  uri
  )
  (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))
