@@ -144,6 +144,10 @@ p + p, p + pre, pre + p {
 .spec-doc li + li {
   margin-top: 12px;
 }
+#type-bigstring + .spec-doc li + li,
+#val-next + .spec-doc li + li {
+  margin-top: 0;
+}
 
 .spec-doc ul {
   margin-top: 24px;

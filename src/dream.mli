@@ -436,20 +436,6 @@ val stream :
           Dream.close_stream response)
     ]} *)
 
-(* val cookie_prefix : request -> string *)
-(* TODO Might need a separate Cookies docs section at this point. *)
-
-(* val reason_override : response -> string option *)
-(* If the response was created with [~reason:r], evaluates to [Some r]. *)
-
-(* val version_override : response -> (int * int) option *)
-(* If the response was created with [~version:v], evaluates to [Some v]. *)
-
-(* val reason : response -> string *)
-(* Response reason string, for example ["OK"]. If the response was created with
-    [~reason], that string is returned. Otherwise, it is based on the response
-    status. *)
-
 
 
 (** {1 Headers} *)
@@ -482,6 +468,7 @@ val with_header : string -> string -> 'a message -> 'a message
 
 (** {1 Cookies} *)
 
+(* TODO How to delete cookies. *)
 (* TODO Add ability to only sign the cookie? *)
 val set_cookie :
   ?prefix:[ `Host | `Secure ] option ->
@@ -571,13 +558,8 @@ val set_cookie :
 
  *)
 (* TODO Add a percent encoding and link it. *)
-(* TODO Make the prefix a variant? *)
 (* TODO HTTPS and proxies. *)
 
-(* TODO Mirror set_cookie API. *)
-(* TODO Switch to this indentation style in more places. *)
-(* TODO ?prefix or ?cookie_prefix? *)
-(* TODO What is the right default with the prefix? *)
 val cookie :
   ?prefix:[ `Host | `Secure ] option ->
   ?decrypt:bool ->
@@ -601,51 +583,31 @@ val all_cookies : request -> (string * string) list
 
 
 
-(* TODO Should just contrain the kind of message in each case. *)
-(* TODO Will need mappers, etc. *)
 (** {1 Bodies} *)
 
 val body : 'a message -> string promise
-(** Retrieves the entire request body. {!Dream.body} stores a reference to the
-    result string in the request, so {!Dream.body} can be used multiple
-    times. *)
+(** Retrieves the entire body. Stores a reference, so {!Dream.body} can be used
+    many times. See example
+    {{:https://github.com/aantron/dream/tree/master/example/5-echo#files}
+    [5-echo]}. *)
 
 val with_body : string -> response -> response
-(** Replaces the response body. *)
+(** Replaces the body. *)
 
 (** {2 Streaming} *)
 
 val read : request -> string option promise
-(** Retrieves a chunk of the request body. The promise is fulfilled with [None]
-    if the body is finished. The chunk is not buffered by Dream, so it can only
-    be read once. *)
+(** Retrieves a body chunk. The chunk is not buffered, thus it can only be read
+    once. See example
+    {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
+    [j-stream]}. *)
 
-(* val with_body_stream :
-  (unit -> string option promise) -> 'a message -> 'a message *)
-(* TODO Could still use a Dream.respond_with_stream helper. *)
 (* TODO Can still use a multishot, pull stream? *)
-(* TODO Isn't this call completely redundant? *)
-(* TODO Even though it's redundant for the stream producer, it is necessary in
-   order to tell the server that there is a stream body - unless that becomes
-   the default. *)
 val with_stream : response -> response
-(** Makes the response ready for stream writing with {!Dream.write}. You should
-    return it from your handler soon after — only one call to {!Dream.write}
-    will be accepted before then, and none will actually proceed. *)
-
-(* [Dream.with_body_stream f message] creates a new message, with a stream
-    body represented by the function [f]. If the message is a response, after
-    the response has been returned from the web application to the HTTP layer,
-    whenever the HTTP layer is ready to write data, it will call [f ()].
-    If [f ()] resolves with [Some data], [data] will be written as part of the
-    body. If [f] resolves with [None], the response is finished. Exceptions
-    raised by [f] are passed to the application's {{!error_page} error handler}
-    for logging. Graceful recovery in the sense of sending a neat error response
-    is generally not possible, because a partial response has already been
-    transmitted. *)
-(* TODO [f] is called repeatedly. *)
-(* TODO It would be nice if the returned message was already wrapped in a
-   promise. Does that preclude anything useful, however? *)
+(** Makes the {!response} ready for stream writing with {!Dream.write}. You
+    should return it from your handler soon after — only one call to
+    {!Dream.write} will be accepted before then. See {!Dream.stream} for a more
+    convenient wrapper. *)
 
 val write : string -> response -> unit promise
 (** Streams out the string. The promise is fulfilled when the response can
@@ -656,7 +618,6 @@ val flush : response -> unit promise
 
 val close_stream : response -> unit promise
 (** Finishes the response stream. *)
-(* TODO close_stream or close_body? *)
 
 (**/**)
 val has_body : _ message -> bool
@@ -675,7 +636,7 @@ type bigstring =
 (** Byte arrays in the C heap. See
     {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Bigarray.Array1.html}
     [Bigarray.Array1]}. This type is also found in several libraries installed
-    by Dream, so their functions can be used with [Dream.bigstring]:
+    by Dream, so their functions can be used with {!Dream.bigstring}:
 
     - {{:https://github.com/inhabitedtype/bigstringaf/blob/353cb283aef4c261597f68154eb27a138e7ef112/lib/bigstringaf.mli}
       [Bigstringaf.t]} in bigstringaf.
@@ -683,8 +644,6 @@ type bigstring =
     - {{:https://github.com/mirage/ocaml-cstruct/blob/9a8b9a79bdfa2a1b8455bc26689e0228cc6fac8e/lib/cstruct.mli#L139}
       [Cstruct.buffer]} in Cstruct. *)
 
-(* TODO Is exn relevant? *)
-(* TODO Is the final unit necessary. *)
 val next :
   bigstring:(bigstring -> int -> int -> unit) ->
   (* ?string:(string -> int -> int -> unit) ->
@@ -695,56 +654,12 @@ val next :
     unit
 (** Waits for the next stream event, and calls:
 
-    - [~bigstring] with an offset and length, if a {!bigstring} is written.
-    - [~close] if close is requested.
+    - [~bigstring] with an offset and length, if a {!bigstring} is written,
+    - [~close] if close is requested, and
     - [~exn] to report an exception. *)
 
 val write_bigstring : bigstring -> int -> int -> response -> unit promise
 (** Streams out the {!bigstring} slice. *)
-
-(**/**)
-(* TODO Format after settling on it. *)
-(* TODO Needs a unit argument? *)
-(* val write_bigstring :
-  bigstring -> int -> int -> (unit -> unit) -> _ message -> unit *)
-(** Streams out the {!bigstring}. *)
-
-(* TODO Is this even useful for the app? *)
-(* val report : exn -> _ message -> unit *)
-(** Reports an exception to the stream reader. *)
-(**/**)
-
-(**/**)
-(* val body_stream_bigstring :
-  (bigstring -> int -> int -> unit) ->
-  (unit -> unit) ->
-  (_ message) ->
-    unit *)
-(** [Dream.body_stream_bigstring data eof message] retrieves part of the body of
-    the given message without copies or allocations per chunk.
-    [data buffer offset length] is called if/when data is available. [eof ()] is
-    called when the body has been read to completion. The body is not buffered
-    internally by Dream, so it can only be read once by this function. *)
-(* TODO If partial application will be required to guarantee no allocation,
-   document that. *)
-(* TODO Note that concurrent reading of one request is NOT supported. *)
-
-(* type bigstring_stream =
-  (bigstring -> int -> int -> unit) ->
-  (unit -> unit) ->
-    unit
-
-val with_body_stream_bigstring : bigstring_stream -> 'a message -> 'a message *)
-(* TODO Is there a neat way to end with this as the continuation? *)
-(**/**)
-(*
-Can do:
-
-val with_stream : 'a message -> 'a message
-val to_stream : string -> 'a message -> unit Lwt.t
-val close_stream : 'a message -> unit Lwt.t
-val flush : 'a message -> unit Lwt.t
-*)
 
 
 
