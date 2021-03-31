@@ -366,6 +366,17 @@ let csrf_result_replacement = {|
 ]
 |}
 
+let verify_csrf_token_expected = {|<div class="spec value" id="val-verify_csrf_token">
+ <a href="#val-verify_csrf_token" class="anchor"></a><code><span><span class="keyword">val</span> verify_csrf_token : <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-csrf_result">csrf_result</a> <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let verify_csrf_token_replacement = {|
+<pre><span class="keyword">val</span> verify_csrf_token :
+  string -> <a href="#type-request">request</a> -> <a href="#type-csrf_result">csrf_result</a> <a href="#type-promise">promise</a>
+</pre>
+|}
+
 let conditional_log_expected = {|<div class="spec type" id="type-conditional_log">
  <a href="#type-conditional_log" class="anchor"></a><code><span><span class="keyword">type</span> <span>('a, 'b) conditional_log</span></span><span> = <span><span>(<span><span>(<span>?request:<a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span><span>(<span class="type-var">'a</span>,&nbsp;<span class="xref-unresolved">Stdlib</span>.Format.formatter,&nbsp;unit,&nbsp;<span class="type-var">'b</span>)</span> <span class="xref-unresolved">Stdlib</span>.format4</span> <span class="arrow">-&gt;</span></span> <span class="type-var">'a</span>)</span> <span class="arrow">-&gt;</span></span> <span class="type-var">'b</span>)</span> <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
@@ -743,6 +754,11 @@ let pretty_print_signatures soup =
       Soup.replace (csrf_result $ "> table")
         (Soup.parse csrf_result_replacement);
       Soup.add_class "multiline" csrf_result);
+
+  multiline
+    "#val-verify_csrf_token"
+    verify_csrf_token_expected
+    verify_csrf_token_replacement;
 
   let conditional_log = soup $ "#type-conditional_log" in
   if_expected
