@@ -1052,43 +1052,85 @@ Dream.pipeline [middleware_1; middleware_2; ...; middleware_n] @@ handler
 
 
 
+(* TODO Do anchors actually work for fresh visits? *)
 (** {1 Routing} *)
 
 val router : route list -> middleware
-(** Creates a router from a list of routes. The new router is a middleware which
-    calls its next handler if none of its routes match the request. The router
-    interprets path components prefixed with [:] as parameters, which can be
-    retrieved with {!Dream.crumb}:
+(** Creates a router. Besides interpreting routes, a router is a middleware
+    which calls its next handler if none of its routes match the request. Route
+    components starting with [:] are parameters, which can be retrieved with
+    {!Dream.param}. See example
+    {{:https://github.com/aantron/dream/tree/master/example/3-router#files}
+    [3-router]}.
 
     {[
       let () =
         Dream.run
         @@ Dream.router [
           Dream.get "/echo/:word" @@ fun request ->
-            Dream.respond (Dream.crumb "word" request);
+            Dream.respond (Dream.param "word" request);
         ]
-        @@ fun _ -> Dream.respond ~status:`Not_Found ""
-    ]} *)
+        @@ Dream.not_found
+    ]}
+
+    {!Dream.scope} is the main form of site composition. However, Dream also
+    supports full subsites with [*]:
+
+    {[
+      let () =
+        Dream.run
+        @@ Dream.router {
+          Dream.get "/static/*" @@ Dream.static "www/static";
+        }
+        @@ Dream.not_found
+    ]}
+
+    [*] causes the request's path to be trimmed by the route prefix, and the
+    request's prefix to be extended by it. It is mainly useful for “mounting”
+    {!Dream.static} as a subsite.
+
+    It can also be used as an escape hatch to convert a handler, which may
+    include its own router, into a subsite. However, it is better to compose
+    sites with routes and {!Dream.scope} rather than opaque handlers and [*],
+    because, in the future, it may be possible to query routes for site
+    structure metadata. *)
 
 (* :((( *)
 val param : string -> request -> string
-(** Retrieves the given path parameter. If the path parameter is missing,
-    [Dream.param] treats this as a logic error, and raises an exception. *)
+(** Retrieves the path parameter. If it is missing, {!Dream.param} raises an
+    exception — the program is buggy. *)
 
 val scope : string -> middleware list -> route list -> route
-(** Groups routes under a common path prefix and set of scoped middlewares. In
-    detail, [Dream.scope path middlewares routes] extends the path of each route
-    in [routes] by prefixing each with [path]. If one of [routes] is matched by
-    the router while handling a request, the request is passed through
-    [middlewares] before being given to the route's handler.
+(** Groups routes under a common path prefix and middlewares. Middlewares are
+    run only if a route matches.
 
-    If you only want to apply middlewares, but not prefix the paths, use [""]
-    for the prefix. If you only want to prefix paths, use [[]] for the
-    middleware list. *)
+    {[
+      Dream.scope "/api" [Dream.origin_referer_check] [
+        Dream.get  "/widget" get_widget_handler;
+        Dream.post "/widget" set_widget_handler;
+      ]
+    ]}
+
+    To prefix routes without applying any more middleware, use the empty list:
+
+    {[
+      Dream.scope "/api" [] [
+        (* ...routes... *)
+      ]
+    ]}
+
+    To apply middleware without prefixing the routes, use ["/"]:
+
+    {[
+      Dream.scope "/" [Dream.origin_referer_check] [
+        (* ...routes... *)
+      ]
+    ]}
+
+    Scopes can be nested. *)
 
 val get : string -> handler -> route
-(** [Dream.get path handler] is a route that will cause [handler] to be called
-    if a request has method [`GET] and path [path]. For example:
+(** Forwards [`GET] requests for the given path to the handler.
 
     {[
       Dream.get "/home" home_template
@@ -1104,9 +1146,35 @@ val trace : string -> handler -> route
 val patch : string -> handler -> route
 (** Like {!Dream.get}, but for each of the other {{!type-method_} methods}. *)
 
+val not_found : handler
+(** Always responds with [404 Not Found]. *)
+
 val static :
-  ?handler:(string -> string -> request -> response promise) ->
+  ?handler:(string -> string -> handler) ->
     string -> handler
+(** Serves static files from the given local path. See example
+    {{:https://github.com/aantron/dream/tree/master/example/f-static#files}
+    [f-static]}.
+
+    {[
+      let () =
+        Dream.run
+        @@ Dream.router {
+          Dream.get "/static/*" @@ Dream.static "www/static";
+        }
+        @@ Dream.not_found
+    ]}
+
+    [Dream.static local_path] checks that the request [path] is relative and
+    contains no parent directory references. It then calls [~handler local_root
+    path request]. The default handler responds with a file at [local_root/path]
+    in the file system, or [404 Not Found] if the file does not exist.
+
+    Pass [~handler] to implement any other behavior, including serving files
+    from memory. [~handler] can set headers on its response, including [ETag:]
+
+    If checks on [path] fail, {!Dream.static} responds with [404 Not Found]. *)
+
 (* TODO Document.
 
 Dream.get "static/*" (Dream.static "static")
@@ -1115,8 +1183,6 @@ Now with Content-Type guessing.
  *)
 (* TODO Expose default static handlers. At least the FS one. Should probably
    also add a crunch-based handler, because it can send nice etags. *)
-
-val not_found : handler
 
 
 

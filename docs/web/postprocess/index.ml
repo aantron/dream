@@ -377,6 +377,29 @@ let verify_csrf_token_replacement = {|
 </pre>
 |}
 
+let scope_expected = {|<div class="spec value" id="val-scope">
+ <a href="#val-scope" class="anchor"></a><code><span><span class="keyword">val</span> scope : <span>string <span class="arrow">-&gt;</span></span> <span><span><a href="#type-middleware">middleware</a> list</span> <span class="arrow">-&gt;</span></span> <span><span><a href="#type-route">route</a> list</span> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+</div>
+|}
+
+let scope_replacement = {|
+<pre><span class="keyword">val</span> scope :
+  string -> <a href="#type-middleware">middleware</a> list -> <a href="#type-route">route</a> list -> <a href="#type-route">route</a>
+</pre>
+|}
+
+let static_expected = {|<div class="spec value" id="val-static">
+ <a href="#val-static" class="anchor"></a><code><span><span class="keyword">val</span> static : <span>?handler:<span>(<span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-handler">handler</a>)</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-handler">handler</a></span></code>
+</div>
+|}
+
+let static_replacement = {|
+<pre><span class="keyword">val</span> static :
+  ?handler:(string -> string -> <a href="#type-handler">handler</a>) ->
+    string -> <a href="#type-handler">handler</a>
+</pre>
+|}
+
 let conditional_log_expected = {|<div class="spec type" id="type-conditional_log">
  <a href="#type-conditional_log" class="anchor"></a><code><span><span class="keyword">type</span> <span>('a, 'b) conditional_log</span></span><span> = <span><span>(<span><span>(<span>?request:<a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span><span>(<span class="type-var">'a</span>,&nbsp;<span class="xref-unresolved">Stdlib</span>.Format.formatter,&nbsp;unit,&nbsp;<span class="type-var">'b</span>)</span> <span class="xref-unresolved">Stdlib</span>.format4</span> <span class="arrow">-&gt;</span></span> <span class="type-var">'a</span>)</span> <span class="arrow">-&gt;</span></span> <span class="type-var">'b</span>)</span> <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
@@ -759,6 +782,9 @@ let pretty_print_signatures soup =
     "#val-verify_csrf_token"
     verify_csrf_token_expected
     verify_csrf_token_replacement;
+
+  multiline "#val-scope" scope_expected scope_replacement;
+  multiline "#val-static" static_expected static_replacement;
 
   let conditional_log = soup $ "#type-conditional_log" in
   if_expected

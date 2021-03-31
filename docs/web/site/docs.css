@@ -242,6 +242,10 @@ p + p, p + pre, pre + p {
     margin-top: -1.5rem;
     margin-bottom: 48px;
   }
+  #val-patch + .spec-doc {
+    margin-top: -11.125em;
+    margin-bottom: 200px;
+  }
 }
 @media (min-width: 1400px) {
   .spec-doc {
