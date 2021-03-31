@@ -548,13 +548,18 @@ let serve_with_details
     ~app
     ~certificate_file
     ~key_file
+    ~builtins
     user's_dream_handler =
 
   (* TODO DOC *)
   (* https://letsencrypt.org/docs/certificates-for-localhost/ *)
 
   let user's_dream_handler =
-    built_in_middleware error_handler prefix user's_dream_handler in
+    if builtins then
+      built_in_middleware error_handler prefix user's_dream_handler
+    else
+      user's_dream_handler
+  in
 
   (* Create the wrapped httpaf or h2 handler from the user's Dream handler. *)
   let httpaf_connection_handler =
@@ -631,6 +636,7 @@ let serve_with_maybe_https
     ~https
     ?certificate_file ?key_file
     ?certificate_string ?key_string
+    ~builtins
     user's_dream_handler =
 
   begin match debug with
@@ -659,6 +665,7 @@ let serve_with_maybe_https
       ~app
       ~certificate_file:""
       ~key_file:""
+      ~builtins
       user's_dream_handler
 
   | `OpenSSL | `OCaml_TLS as tls_library ->
@@ -721,6 +728,7 @@ let serve_with_maybe_https
         ~app
         ~certificate_file
         ~key_file
+        ~builtins
         user's_dream_handler
 
     | `Memory (certificate_string, key_string, verbose_or_silent) ->
@@ -750,6 +758,7 @@ let serve_with_maybe_https
         ~app
         ~certificate_file
         ~key_file
+        ~builtins
         user's_dream_handler
 
       end
@@ -771,11 +780,10 @@ let serve
     ?(error_handler = Error_handler.default)
     ?secret
     ?(prefix = "")
-    ?(https = `No)
+    ?(https = false)
     ?certificate_file
     ?key_file
-    ?certificate_string
-    ?key_string
+    ?(builtins = true)
     user's_dream_handler =
 
   serve_with_maybe_https
@@ -788,11 +796,12 @@ let serve
     ?secret
     ~prefix
     ?app:None
-    ~https
+    ~https:(if https then `OpenSSL else `No)
     ?certificate_file
     ?key_file
-    ?certificate_string
-    ?key_string
+    ?certificate_string:None
+    ?key_string:None
+    ~builtins
     user's_dream_handler
 
 
@@ -805,11 +814,10 @@ let run
     ?(error_handler = Error_handler.default)
     ?secret
     ?(prefix = "")
-    ?(https = `No)
+    ?(https = false)
     ?certificate_file
     ?key_file
-    ?certificate_string
-    ?key_string
+    ?(builtins = true)
     ?(greeting = true)
     ?(stop_on_input = true)
     ?(graceful_stop = true)
@@ -837,10 +845,10 @@ let run
 
   if greeting then begin
     let scheme =
-      if https = `No then
-        "http"
-      else
+      if https then
         "https"
+      else
+        "http"
     in
 
     let hostname =
@@ -873,9 +881,10 @@ let run
         ?secret
         ~prefix
         ?app:None
-        ~https
+        ~https:(if https then `OpenSSL else `No)
         ?certificate_file ?key_file
-        ?certificate_string ?key_string
+        ?certificate_string:None ?key_string:None
+        ~builtins
         user's_dream_handler
     in
 

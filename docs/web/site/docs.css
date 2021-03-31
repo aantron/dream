@@ -114,6 +114,8 @@ h1, h2, h3 {
   color: white;
 }
 
+nav ~ * a[href="#builtin"],
+nav ~ * a[href="#errors"],
 nav ~ * a[href="#headers"],
 nav ~ * a[href="#routing"],
 nav ~ * a[href="#requests"],
