@@ -177,6 +177,19 @@ p + p, p + pre, pre + p {
   margin-top: 0;
 }
 
+#type-error + .spec-doc > ul > li + li {
+  margin-top: 18px;
+}
+
+ul ul {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+ul ul li {
+  margin: 0 !important;
+}
+
 /* .spec-doc ul {
   margin-top: 24px;
 } */
@@ -200,6 +213,7 @@ p + p, p + pre, pre + p {
 
   h2, h2 ~ :not(.odoc-spec):not(nav) {
     margin-left: 30rem;
+    max-width: 30rem;
     clear: both;
   }
 
@@ -213,7 +227,7 @@ p + p, p + pre, pre + p {
     margin-bottom: 18px;
   }
 
-  .spec-doc p ~ p:last-child, .spec-doc p ~ pre:last-child {
+  .spec-doc > p ~ p:last-child, .spec-doc > p ~ pre:last-child {
     margin-bottom: 36px;
   }
 
@@ -255,10 +269,16 @@ p + p, p + pre, pre + p {
   .spec-doc {
     width: 40rem;
   }
+  h2, h2 ~ :not(.odoc-spec):not(nav) {
+    max-width: 40rem;
+  }
 }
 @media (min-width: 1520px) {
   .spec-doc {
     width: 46rem;
+  }
+  h2, h2 ~ :not(.odoc-spec):not(nav) {
+    max-width: 46rem;
   }
 }
 

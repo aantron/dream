@@ -524,6 +524,18 @@ let initialize_log_replacement = {|
     unit -> unit
 </pre>|}
 
+let error_template_expected = {|<div class="spec value" id="val-error_template">
+ <a href="#val-error_template" class="anchor"></a><code><span><span class="keyword">val</span> error_template : <span><span>(<span><span>string option</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <a href="#type-error_handler">error_handler</a></span></code>
+</div>
+|}
+
+let error_template_replacement = {|
+<pre><span class="keyword">val</span> error_template :
+  (string option -> <a href="#val-response">response</a> -> <a href="#val-response">response</a> <a href="#type-promise">promise</a>) ->
+    <a href="#type-error_handler">error_handler</a>
+</pre>
+|}
+
 let error_expected = {|<div class="spec type" id="type-error">
  <a href="#type-error" class="anchor"></a><code><span><span class="keyword">type</span> error</span><span> = </span><span>{</span></code>
  <table>
@@ -535,7 +547,7 @@ let error_expected = {|<div class="spec type" id="type-error">
    </tr>
    <tr id="type-error.layer" class="anchored">
     <td class="def record field">
-     <a href="#type-error.layer" class="anchor"></a><code><span>layer : <span>[ `TLS <span>| `HTTP</span> <span>| `HTTP2</span> <span>| `WebSocket</span> <span>| `App</span> ]</span>;</span></code>
+     <a href="#type-error.layer" class="anchor"></a><code><span>layer : <span>[ `App <span>| `HTTP</span> <span>| `HTTP2</span> <span>| `TLS</span> <span>| `WebSocket</span> ]</span>;</span></code>
     </td>
    </tr>
    <tr id="type-error.caused_by" class="anchored">
@@ -581,12 +593,16 @@ let error_expected = {|<div class="spec type" id="type-error">
 
 let error_replacement = {|
 <pre class="compact"><span class="keyword">type</span> error = {
-  condition <span class="of">:</span> [ `Response of <a href="#type-response">response</a> | `String of string | `Exn of exn ];
-  layer     <span class="of">:</span> [ `TLS | `HTTP | `HTTP2 | `WebSocket | `App ];
+  condition <span class="of">:</span> [
+    | `Response of <a href="#type-response">response</a>
+    | `String of string
+    | `Exn of exn
+  ];
+  layer     <span class="of">:</span> [ `App | `HTTP | `HTTP2 | `TLS | `WebSocket ];
   caused_by <span class="of">:</span> [ `Server | `Client ];
   request   <span class="of">:</span> <a href="#type-request">request</a>  option;
   response  <span class="of">:</span> <a href="#type-response">response</a> option;
-  client    <span class="of">:</span> string     option;
+  client    <span class="of">:</span> string   option;
   severity  <span class="of">:</span> <a href="#type-log_level">log_level</a>;
   debug     <span class="of">:</span> bool;
   will_send_response <span class="of">:</span> bool;
@@ -849,6 +865,9 @@ let pretty_print_signatures soup =
         (initialize_log $ "> code")
         (Soup.parse initialize_log_replacement);
       Soup.add_class "multiline" initialize_log);
+
+  multiline
+    "#val-error_template" error_template_expected error_template_replacement;
 
   let error = soup $ "#type-error" in
   if_expected
