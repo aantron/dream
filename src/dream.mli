@@ -912,14 +912,118 @@ val verify_csrf_token : string -> request -> csrf_result promise
 
 
 
-(** {1 Templates} *)
+(* TODO Need a template control flow example. *)
+(** {1 Templates}
 
+    Dream includes a template preprocessor that allows interleaving OCaml and
+    HTML in the same file:
+
+    {v
+let render message =
+  <html>
+    <body>
+      <p>The message is <b><%s message %></b>!</p>
+    </body>
+  </html>
+    v}
+
+    See example
+    {{:https://github.com/aantron/dream/tree/master/example/6-template#files}
+    [6-template]}.
+
+    To build the template, add this to [dune]:
+
+    {v
+(rule
+ (targets template.ml)
+ (deps template.eml.ml)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))
+    v}
+
+    A template begins...
+
+    - {e Implicitly} on a line that starts with [<] and is indented by at least
+      one column. The line is part of the template.
+    - {e Explicitly} after a line that starts with [%%]. The [%%] line is not
+      part of the template.
+
+    A [%%] line can also be used to set template options. The only option
+    supported presently is [%% response] for streaming the template using
+    {!Dream.write}, to a {!type-response} that is in scope. This is shown in
+    example
+    {{:https://github.com/aantron/dream/tree/master/example/w-template-stream#files}
+    [w-template-stream]}.
+
+    A template ends...
+
+    - {e Implicitly}, when the indentation level is less than that of the
+      beginning line.
+    - {e Explicitly} on a line that starts with another [%%].
+
+    Everything outside a template is ordinary OCaml code.
+
+    OCaml code can also be inserted into a template:
+
+    - [<%s code %>] expects [code] to evaluate to a [string], and inserts the
+      [string] into the template.
+    - A line that begins with [%] in the first column is OCaml code inside the
+      template. Its value is not inserted into the template. Indeed, it can be
+      fragments of control-flow constructs.
+    - [<% code %>] is a variant of [%] that can be used for short snippets
+      within template lines.
+
+    The [s] in [<%s code %>] is actually a
+    {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Printf.html}
+    Printf}-style format specification. So, for example, one can print two hex
+    digits using [<%02X code %>].
+
+    [<%s code %>] automatically escapes the result of [code] using
+    {!Dream.html_escape}. This can be suppressed with [!]. [<%s! code %>] prints
+    the result of [code] literally. {!Dream.html_escape} is only safe for use in
+    HTML text and quoted attribute values. It does not offer XSS protection in
+    unquoted attribute values, CSS in [<style>] tags, or literal JavaScript in
+    [<script>] tags.
+
+    The preprocessor will output Reason code if the template source file's
+    extension is [.re], for example [template.eml.re]. See examples
+    {{:https://github.com/aantron/dream/tree/master/example/r-template#files}
+    [r-template]} and
+    {{:https://github.com/aantron/dream/tree/master/example/r-template-stream#files}
+    [r-template-stream]}. *)
+(* TODO Open out-links in a new tab. *)
+
+(* TODO Replace the module by the docs of form, and make all links point to
+   here. *)
 (* TODO Site/subsite prefix from request. *)
 module Tag :
 sig
   val form :
     ?enctype:[ `Multipart_form_data ] -> action:string -> request -> string
 end
+(** See [_tag_form]. *)
+
+val _tag_form :
+  ?enctype:[ `Multipart_form_data ] -> action:string -> request -> string
+(** Generates a [<form>] tag and an [<input>] tag with a CSRF token, suitable
+    for use with {!Dream.val-form} and {!Dream.val-multipart}. For example, in
+    a template,
+
+    {[
+      <%s! Dream.Tag.form ~action:"/" request %>
+        <input name="my.field">
+      </form>
+    ]}
+
+    expands to
+
+    {[
+      <form method="POST" action="/">
+        <input name="dream.csrf" type="hidden" value="some-csrf-token">
+        <input name="my.field">
+      </form>
+    ]}
+
+    Pass [~enctype:`Multipart_form_data] for a file upload form. *)
 
 
 
