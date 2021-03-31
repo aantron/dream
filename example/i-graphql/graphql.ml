@@ -28,10 +28,23 @@ let schema =
   Graphql_lwt.Schema.(schema [
     field "users"
       ~typ:(non_null (list (non_null user)))
-      ~args:Arg.[]
-      ~resolve:(fun _ () -> hardcoded_users);
+      ~args:Arg.[
+        arg "id" ~typ:int;
+      ]
+      ~resolve:(fun _ () id ->
+        match id with
+        | None -> hardcoded_users
+        | Some id' ->
+          match List.find_opt (fun {id; _} -> id = id') hardcoded_users with
+          | None -> []
+          | Some user -> [user]);
   ])
 
 let () =
   Dream.run
-    (Dream.graphql Lwt.return schema)
+  @@ Dream.logger
+  @@ Dream.router [
+    Dream.post "/graphql"  (Dream.graphql Lwt.return schema);
+    Dream.get  "/graphiql" (Dream.graphiql "/graphql");
+  ]
+  @@ Dream.not_found

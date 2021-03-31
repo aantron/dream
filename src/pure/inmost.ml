@@ -201,6 +201,7 @@ let status response =
 let all_queries request =
   request.specific.query
 
+(* TODO percent-decode name and value. *)
 let query name request =
   List.assoc_opt name request.specific.query
 

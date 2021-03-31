@@ -46,6 +46,7 @@ let content_length =
   Dream__middleware.Content_length.content_length
 
 include Dream__graphql.Graphql
+include Dream__graphql.Graphiql
 
 include Dream__middleware.Error
 include Dream__http.Http

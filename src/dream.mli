@@ -1301,8 +1301,30 @@ val close_websocket : websocket -> unit promise
 (** {1 GraphQL} *)
 
 val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
+(** Serves the GraphQL schema. Integrates
+    {{:https://github.com/andreas/ocaml-graphql-server#readme}
+    ocaml-graphql-server} See example
+    {{:https://github.com/aantron/dream/tree/master/example/i-graphql#files}
+    [i-graphql]}. The callback is called on every request to create the context,
+    a value that is passed to each resolver used from the schema. Use
+    [Lwt.return] to use the request itself as the context.
+
+    {[
+      let () =
+        Dream.run
+        @@ Dream.router [
+          Dream.post "/graphql"  (Dream.graphql Lwt.return schema);
+          Dream.get  "/graphiql" (Dream.graphiql "/graphql");
+        ]
+        @@ Dream.not_found
+    ]} *)
+
 (* TODO Any neat way to hide the context-maker for super basic usage? *)
 (* TODO Either that, or give it a name so that it's clearer. *)
+
+val graphiql : string -> handler
+(** Serves {{:https://github.com/graphql/graphiql#readme} GraphiQL}, a GraphQL
+    query editor. The editor submits queries to the given path. *)
 
 
 
