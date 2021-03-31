@@ -74,3 +74,6 @@ let test ?(prefix = "") handler request =
 
 let log =
   Dream__middleware.Log.convenience_log
+
+let _tag_form =
+  Dream__middleware.Tag.form
