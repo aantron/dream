@@ -1028,30 +1028,27 @@ val _tag_form :
 
 
 (* TODO Move logger to Logging, echo to testing. *)
-(** {1 Middleware} *)
+(** {1 Middleware}
+
+    Interesting built-in middlewares are spread throughout the various sections
+    of these docs, according to where they are relevant. This section contains
+    only generic middleware combinators. *)
 
 val identity : middleware
-(** Does nothing but call its next handler. This is useful on rare occasions
-    when you are forced to provide a middleware, but don't want it to do
-    anything. *)
+(** Does nothing but call its inner handler. *)
 
 val pipeline : middleware list -> middleware
 (** Combines a sequence of middlewares into one, such that these two lines are
     equivalent:
 
-    {[
-      Dream.pipeline [mw_1; mw_2; ...; mw_n] @@ handler
-      mw_1 @@ mw_2 @@ ... @@ mw_n @@ handler
-    ]} *)
+    {v
+Dream.pipeline [middleware_1; middleware_2; ...; middleware_n] @@ handler
+    v}
+    {v
+           middleware_1 @@ middleware_2 @@ ... @@ middleware_n @@ handler
+    v} *)
 (* TODO This code block is highlighted as CSS. Get a better
    highlight.pack.js. No, will need a tokenizer probably. *)
-
-val logger : middleware
-(** Logs incoming requests, times them, and prints timing information when the
-    next handler has returned a response. Time spent logging is included in the
-    timings. *)
-
-val echo : handler
 
 
 
@@ -1257,6 +1254,11 @@ val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
 
 
 (** {1 Logging} *)
+
+val logger : middleware
+(** Logs incoming requests, times them, and prints timing information when the
+    next handler has returned a response. Time spent logging is included in the
+    timings. *)
 
 val log : ('a, Format.formatter, unit, unit) format4 -> 'a
 (** [Dream.log format arguments] formats [arguments] and writes them to the log.
@@ -1936,6 +1938,8 @@ val sort_headers : (string * string) list -> (string * string) list
     otherwise reordered, because order is significant for some headers. See
     {{:https://tools.ietf.org/html/rfc7230#section-3.2.2} RFC 7230 §3.2.2} on
     header order. This function can help sanitize output before comparison. *)
+
+val echo : handler
 
 
 
