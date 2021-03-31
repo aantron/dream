@@ -1840,7 +1840,7 @@ val chop_site_prefix : string -> middleware
 
 val html_escape : string -> string
 (** Escapes a string so that it is suitable for use as text inside HTML
-    elements, and quoted attribute values. *)
+    elements and quoted attribute values. *)
 (* TODO OWASP links. *)
 
 val to_base64url : string -> string
@@ -1867,7 +1867,8 @@ val from_form_urlencoded : string -> (string * string) list
 
 val from_cookie : string -> (string * string) list
 (** Converts a [Cookie:] header value to key-value pairs. See
-    {{:https://tools.ietf.org/html/rfc6265#section-4.2.1} RFC 6265 §4.2.1}. *)
+    {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.2.1}
+    RFC 6265bis §4.2.1}. *)
 (* TODO DOC Do we decode? NO. *)
 
 (* TODO Replace all time by floats. *)
@@ -1882,26 +1883,8 @@ val to_set_cookie :
     string -> string -> string
 (** [Dream.to_set_cookie name value] formats a [Set-Cookie:] header value. The
     optional arguments correspond to the attributes specified in
-    {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07} RFC
-    6265bis}:
-
-    [~expires] sets the expiration date of the cookie. It is a time value in
-    seconds, like returned by
-    {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Unix.html#VALgettimeofday}
-    [Unix.gettimeofday]}. [~max_age] is a time span in seconds. If both are
-    given, compliant clients use [~max_age]. If neither is given, a compliant
-    client deletes the cookie whenever it considers the client-side session to
-    have expired, which typically corresponds to browser close. However, some
-    clients persist cookies without [~expires] and [~max_age] indefinitely. In
-    general, clients may persist cookies beyond their expiration, or delete them
-    before expiration, so web applications should not rely on client-side
-    expiration for server state management.
-
-    [~domain] is used to allow clients to send the cookie to subdomains. When
-    absent, conformant clients send the cookie only when accessing the cookie's
-    origin domain. It is recommended not to use this option.
-
-    [~path]  *)
+    {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-5.3}
+    RFC 6265bis §5.3}, and are documented at {!Dream.set_cookie}. *)
 (* TODO https://tools.ietf.org/html/rfc6265#section-5 *)
 (* TODO https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis-05
    for same_site. *)
@@ -1926,7 +1909,7 @@ val from_target : string -> string * string
 (** Splits a request target into a path and a query string. *)
 
 val from_target_path : string -> string list
-(** Splits the into components string on [/] and percent-decodes each component.
+(** Splits the string into components on [/] and percent-decodes each component.
     Empty components are dropped, except for the last. This function does not
     distinguish between absolute and relative paths, and is only meant for
     routes and request targets. So,
@@ -1934,8 +1917,8 @@ val from_target_path : string -> string list
     - [Dream.from_path ""] becomes [[]].
     - [Dream.from_path "/"] becomes [[""]].
     - [Dream.from_path "abc"] becomes [["abc"]].
-    - [Dream.from_path "abc/"] becomes [["abc"; ""]].
     - [Dream.from_path "/abc"] becomes [["abc"]].
+    - [Dream.from_path "abc/"] becomes [["abc"; ""]].
     - [Dream.from_path "a%2Fb"] becomes [["a/b"]].
     - [Dream.from_path "a//b"] becomes [["a"; "b"]].
 
@@ -2034,6 +2017,7 @@ val sort_headers : (string * string) list -> (string * string) list
     header order. This function can help sanitize output before comparison. *)
 
 val echo : handler
+(** Respomds with the request body. *)
 
 
 

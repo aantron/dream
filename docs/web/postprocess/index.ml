@@ -665,7 +665,7 @@ let run_replacement = {|
 let serve_expected = {|<div class="spec value" id="val-serve">
  <a href="#val-serve" class="anchor"></a><code><span><span class="keyword">val</span> serve : <span>?interface:string <span class="arrow">-&gt;</span></span> <span>?port:int <span class="arrow">-&gt;</span></span> <span>?stop:<span>unit <a href="#type-promise">promise</a></span> <span class="arrow">-&gt;</span></span> <span>?debug:bool <span class="arrow">-&gt;</span></span>
 <span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span> <span>?secret:string <span class="arrow">-&gt;</span></span> <span>?prefix:string <span class="arrow">-&gt;</span></span> <span>?https:bool <span class="arrow">-&gt;</span></span>
-<span>?certificate_file:string <span class="arrow">-&gt;</span></span> <span>?builtins:bool <span class="arrow">-&gt;</span></span> <span>?key_file:string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+<span>?certificate_file:string <span class="arrow">-&gt;</span></span> <span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?builtins:bool <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
@@ -684,6 +684,37 @@ let serve_replacement = {|
   ?builtins:bool -></span>
     <a href="#type-handler">handler</a> -> unit <a href="#type-promise">promise</a>
 </pre>|}
+
+let to_set_cookie_expected = {|<div class="spec value" id="val-to_set_cookie">
+ <a href="#val-to_set_cookie" class="anchor"></a><code><span><span class="keyword">val</span> to_set_cookie : <span>?expires:float <span class="arrow">-&gt;</span></span> <span>?max_age:float <span class="arrow">-&gt;</span></span> <span>?domain:string <span class="arrow">-&gt;</span></span>
+<span>?path:string <span class="arrow">-&gt;</span></span> <span>?secure:bool <span class="arrow">-&gt;</span></span> <span>?http_only:bool <span class="arrow">-&gt;</span></span>
+<span>?same_site:<span>[ `Strict <span>| `Lax</span> <span>| `None</span> ]</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let to_set_cookie_replacement = {|
+<pre><span class="keyword">val</span> to_set_cookie :
+  ?expires:float ->
+  ?max_age:float ->
+  ?domain:string ->
+  ?path:string ->
+  ?secure:bool ->
+  ?http_only:bool ->
+  ?same_site:[ `Strict | `Lax | `None ] ->
+    string -> string -> string
+</pre>
+|}
+
+let drop_empty_expected = {|<div class="spec value" id="val-drop_empty_trailing_path_component">
+ <a href="#val-drop_empty_trailing_path_component" class="anchor"></a><code><span><span class="keyword">val</span> drop_empty_trailing_path_component : <span><span>string list</span> <span class="arrow">-&gt;</span></span> <span>string list</span></span></code>
+</div>
+|}
+
+let drop_empty_replacement = {|
+<pre><span class="keyword">val</span> drop_empty_trailing_path_component :
+  string list -> string list
+</pre>
+|}
 
 let request_expected = {|<div class="spec value" id="val-request">
  <a href="#val-request" class="anchor"></a><code><span><span class="keyword">val</span> request : <span>?client:string <span class="arrow">-&gt;</span></span> <span>?method_:<a href="#type-method_">method_</a> <span class="arrow">-&gt;</span></span> <span>?target:string <span class="arrow">-&gt;</span></span> <span>?version:<span>(int * int)</span>
@@ -920,6 +951,13 @@ let pretty_print_signatures soup =
         (serve $ "> code")
         (Soup.parse serve_replacement);
       Soup.add_class "multiline" serve);
+
+  multiline
+    "#val-to_set_cookie" to_set_cookie_expected to_set_cookie_replacement;
+  multiline
+    "#val-drop_empty_trailing_path_component"
+    drop_empty_expected
+    drop_empty_replacement;
 
   let request = soup $ "#val-request" in
   if_expected

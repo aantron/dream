@@ -114,6 +114,10 @@ h1, h2, h3 {
   color: white;
 }
 
+footer {
+  opacity: 0.25;
+}
+
 nav ~ * a[href="#builtin"],
 nav ~ * a[href="#errors"],
 nav ~ * a[href="#headers"],
@@ -156,6 +160,11 @@ body {
 
 body, p, h1, h2, h3 {
   margin: 0em;
+}
+
+footer {
+  padding-top: 120px;
+  padding-bottom: 24px;
 }
 
 p + p, p + pre, pre + p {
@@ -208,12 +217,12 @@ ul ul li {
     position: absolute;
     top: 96px;
     left: 0;
-    height: 100%;
+    height: calc(100% - 96px);
     width: 43rem;
     background-color: #262626;
   }
 
-  h2, h2 ~ :not(.odoc-spec):not(nav) {
+  h2, h2 ~ :not(.odoc-spec):not(nav), footer {
     margin-left: 30rem;
     max-width: 30rem;
     clear: both;
@@ -381,12 +390,6 @@ h3 .backing {
 
 
 /* Uncateogorized. */
-
-footer {
-  margin-top: 120px;
-  opacity: 0.25;
-  padding-left: 4em;
-}
 
 a > code {
   color: #b8caea;
