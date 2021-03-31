@@ -11,6 +11,53 @@ include Status
 type bigstring = Body.bigstring
 (* type bigstring_stream = Body.bigstring_stream *)
 
+type upload_event = [
+  | `File of string * string
+  | `Field of string * string
+  | `Done
+  | `Wrong_content_type
+]
+
+(* TODO multipart-form-data returns 4K-long chunks, so these should be
+   represented as substreams. *)
+(* type multipart_state = [
+  | `Initial
+  | `Awaiting of upload_event Lwt.u
+  | `Uploading of string option Lwt.u * string * string
+  | `First_chunk of string * string * unit Lwt.u
+  | `Next_file of string * string * string * unit Lwt.u
+  | `Files of string * string * unit Lwt.u
+  | `Fields of (string * string) list
+] *)
+
+(* Used for converting the push interface of Multipart_form_data into the pull
+   interface of Dream. *)
+type multipart_state = {
+  mutable initial : bool;
+  mutable event_listener : upload_event Lwt.u option;
+  mutable chunk_listener : string option Lwt.u option;
+  mutable last_field_name : string option;
+  mutable last_file_name : string option;
+  mutable buffered_chunk : string option;
+  mutable next_file : bool;
+  mutable continue : unit Lwt.u;
+  mutable fields : bool;
+  mutable field : unit -> (string * string) option Lwt.t;
+}
+
+let initial_multipart_state () = {
+  initial = true;
+  event_listener = None;
+  chunk_listener = None;
+  last_field_name = None;
+  last_file_name = None;
+  buffered_chunk = None;
+  next_file = false;
+  continue = snd (Lwt.wait ());
+  fields = false;
+  field = fun () -> fst (Lwt.wait ());
+}
+
 
 
 module Scope_variable_metadata =
@@ -72,6 +119,7 @@ type incoming = {
   path : string list;
   query : (string * string) list;
   request_version : int * int;
+  upload : multipart_state;
 }
 (* Prefix is stored backwards. *)
 
@@ -357,6 +405,7 @@ let request_from_http
       path = Formats.from_target_path path;
       query = Formats.from_form_urlencoded query;
       request_version = version;
+      upload = initial_multipart_state ();
     };
     headers;
     body = ref (`Stream (ref `Idle));
@@ -396,6 +445,7 @@ let request
       path = Formats.from_target_path path;
       query = Formats.from_form_urlencoded query;
       request_version = version;
+      upload = initial_multipart_state ();
     };
     headers;
     body = ref body;

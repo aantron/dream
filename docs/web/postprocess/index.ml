@@ -181,42 +181,42 @@ let write_bigstring_replacement = {|
 |}
 
 let form_expected = {|<div class="spec type" id="type-form_result">
- <a href="#type-form_result" class="anchor"></a><code><span><span class="keyword">type</span> form_result</span><span> = </span><span>[ </span></code>
+ <a href="#type-form_result" class="anchor"></a><code><span><span class="keyword">type</span> <span>'a form_result</span></span><span> = </span><span>[ </span></code>
  <table>
   <tbody>
    <tr id="type-form_result.Ok" class="anchored">
     <td class="def constructor">
-     <a href="#type-form_result.Ok" class="anchor"></a><code><span>| </span></code><code><span>`Ok <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
+     <a href="#type-form_result.Ok" class="anchor"></a><code><span>| </span></code><code><span>`Ok <span class="keyword">of</span> <span class="type-var">'a</span></span></code>
     </td>
    </tr>
    <tr id="type-form_result.Expired" class="anchored">
     <td class="def constructor">
-     <a href="#type-form_result.Expired" class="anchor"></a><code><span>| </span></code><code><span>`Expired <span class="keyword">of</span> <span><span>(string * string)</span> list</span> * float</span></code>
+     <a href="#type-form_result.Expired" class="anchor"></a><code><span>| </span></code><code><span>`Expired <span class="keyword">of</span> <span class="type-var">'a</span> * float</span></code>
     </td>
    </tr>
    <tr id="type-form_result.Wrong_session" class="anchored">
     <td class="def constructor">
-     <a href="#type-form_result.Wrong_session" class="anchor"></a><code><span>| </span></code><code><span>`Wrong_session <span class="keyword">of</span> <span><span>(string * string)</span> list</span> * string</span></code>
+     <a href="#type-form_result.Wrong_session" class="anchor"></a><code><span>| </span></code><code><span>`Wrong_session <span class="keyword">of</span> <span class="type-var">'a</span></span></code>
     </td>
    </tr>
    <tr id="type-form_result.Invalid_token" class="anchored">
     <td class="def constructor">
-     <a href="#type-form_result.Invalid_token" class="anchor"></a><code><span>| </span></code><code><span>`Invalid_token <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
+     <a href="#type-form_result.Invalid_token" class="anchor"></a><code><span>| </span></code><code><span>`Invalid_token <span class="keyword">of</span> <span class="type-var">'a</span></span></code>
     </td>
    </tr>
    <tr id="type-form_result.Missing_token" class="anchored">
     <td class="def constructor">
-     <a href="#type-form_result.Missing_token" class="anchor"></a><code><span>| </span></code><code><span>`Missing_token <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
+     <a href="#type-form_result.Missing_token" class="anchor"></a><code><span>| </span></code><code><span>`Missing_token <span class="keyword">of</span> <span class="type-var">'a</span></span></code>
     </td>
    </tr>
    <tr id="type-form_result.Many_tokens" class="anchored">
     <td class="def constructor">
-     <a href="#type-form_result.Many_tokens" class="anchor"></a><code><span>| </span></code><code><span>`Many_tokens <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
+     <a href="#type-form_result.Many_tokens" class="anchor"></a><code><span>| </span></code><code><span>`Many_tokens <span class="keyword">of</span> <span class="type-var">'a</span></span></code>
     </td>
    </tr>
-   <tr id="type-form_result.Not_form_urlencoded" class="anchored">
+   <tr id="type-form_result.Wrong_content_type" class="anchored">
     <td class="def constructor">
-     <a href="#type-form_result.Not_form_urlencoded" class="anchor"></a><code><span>| </span></code><code><span>`Not_form_urlencoded</span></code>
+     <a href="#type-form_result.Wrong_content_type" class="anchor"></a><code><span>| </span></code><code><span>`Wrong_content_type</span></code>
     </td>
    </tr>
   </tbody>
@@ -226,15 +226,105 @@ let form_expected = {|<div class="spec type" id="type-form_result">
 |}
 
 let form_replacement = {|
-<pre class="compact"><span class="keyword">type</span> form_result = [
-  | `Ok            <span class="of">of</span> (string * string) list
-  | `Expired       <span class="of">of</span> (string * string) list * float
-  | `Wrong_session <span class="of">of</span> (string * string) list * string
-  | `Invalid_token <span class="of">of</span> (string * string) list
-  | `Missing_token <span class="of">of</span> (string * string) list
-  | `Many_tokens   <span class="of">of</span> (string * string) list
-  | `Not_form_urlencoded
+<pre class="compact"><span class="keyword">type</span> 'a form_result = [
+  | `Ok            <span class="of">of</span> 'a
+  | `Expired       <span class="of">of</span> 'a * float
+  | `Wrong_session <span class="of">of</span> 'a
+  | `Invalid_token <span class="of">of</span> 'a
+  | `Missing_token <span class="of">of</span> 'a
+  | `Many_tokens   <span class="of">of</span> 'a
+  | `Wrong_content_type
 ]
+|}
+
+let form'_expected = {|<div class="spec value" id="val-form">
+ <a href="#val-form" class="anchor"></a><code><span><span class="keyword">val</span> form : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span><span><span>(string * string)</span> list</span> <a href="#type-form_result">form_result</a></span> <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let form'_replacement = {|
+<pre><span class="keyword">val</span> form :
+  <a href="#type-request">request</a> -> (string * string) list <a href="#type-form_result">form_result</a> <a href="#type-promise">promise</a>
+</pre>
+|}
+
+let part_expected = {|<div class="spec type" id="type-part">
+ <a href="#type-part" class="anchor"></a><code><span><span class="keyword">type</span> part</span><span> = </span><span>[ </span></code>
+ <table>
+  <tbody>
+   <tr id="type-part.Files" class="anchored">
+    <td class="def constructor">
+     <a href="#type-part.Files" class="anchor"></a><code><span>| </span></code><code><span>`Files <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
+    </td>
+   </tr>
+   <tr id="type-part.Value" class="anchored">
+    <td class="def constructor">
+     <a href="#type-part.Value" class="anchor"></a><code><span>| </span></code><code><span>`Value <span class="keyword">of</span> string</span></code>
+    </td>
+   </tr>
+  </tbody>
+ </table>
+ <code><span> ]</span></code>
+</div>
+|}
+
+let part_replacement = {|
+<pre><span class="keyword">type</span> part = [
+  | `Files of (string * string) list
+  | `Value of string
+]
+</pre>
+|}
+
+let multipart_expected = {|<div class="spec value" id="val-multipart">
+ <a href="#val-multipart" class="anchor"></a><code><span><span class="keyword">val</span> multipart : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span><span><span>(string * <a href="#type-part">part</a>)</span> list</span> <a href="#type-form_result">form_result</a></span> <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let multipart_replacement = {|
+<pre><span class="keyword">val</span> multipart :
+  <a href="#type-request">request</a> -> (string * <a href="#type-part">part</a>) list <a href="#type-form_result">form_result</a> <a href="#type-promise">promise</a>
+</pre>
+|}
+
+let upload_event_expected = {|<div class="spec type" id="type-upload_event">
+ <a href="#type-upload_event" class="anchor"></a><code><span><span class="keyword">type</span> upload_event</span><span> = </span><span>[ </span></code>
+ <table>
+  <tbody>
+   <tr id="type-upload_event.File" class="anchored">
+    <td class="def constructor">
+     <a href="#type-upload_event.File" class="anchor"></a><code><span>| </span></code><code><span>`File <span class="keyword">of</span> string * string</span></code>
+    </td>
+   </tr>
+   <tr id="type-upload_event.Field" class="anchored">
+    <td class="def constructor">
+     <a href="#type-upload_event.Field" class="anchor"></a><code><span>| </span></code><code><span>`Field <span class="keyword">of</span> string * string</span></code>
+    </td>
+   </tr>
+   <tr id="type-upload_event.Done" class="anchored">
+    <td class="def constructor">
+     <a href="#type-upload_event.Done" class="anchor"></a><code><span>| </span></code><code><span>`Done</span></code>
+    </td>
+   </tr>
+   <tr id="type-upload_event.Wrong_content_type" class="anchored">
+    <td class="def constructor">
+     <a href="#type-upload_event.Wrong_content_type" class="anchor"></a><code><span>| </span></code><code><span>`Wrong_content_type</span></code>
+    </td>
+   </tr>
+  </tbody>
+ </table>
+ <code><span> ]</span></code>
+</div>
+|}
+
+let upload_event_replacement = {|
+<pre><span class="keyword">type</span> upload_event = [
+  | `File <span class="of">of</span> string * string
+  | `Field <span class="of">of</span> string * string
+  | `Done
+  | `Wrong_content_type
+]
+</pre>
 |}
 
 let csrf_result_expected = {|<div class="spec type" id="type-csrf_result">
@@ -253,7 +343,7 @@ let csrf_result_expected = {|<div class="spec type" id="type-csrf_result">
    </tr>
    <tr id="type-csrf_result.Wrong_session" class="anchored">
     <td class="def constructor">
-     <a href="#type-csrf_result.Wrong_session" class="anchor"></a><code><span>| </span></code><code><span>`Wrong_session <span class="keyword">of</span> string</span></code>
+     <a href="#type-csrf_result.Wrong_session" class="anchor"></a><code><span>| </span></code><code><span>`Wrong_session</span></code>
     </td>
    </tr>
    <tr id="type-csrf_result.Invalid" class="anchored">
@@ -271,7 +361,7 @@ let csrf_result_replacement = {|
 <pre class="compact"><span class="keyword">type</span> csrf_result = [
   | `Ok
   | `Expired <span class="of">of</span> float
-  | `Wrong_session <span class="of">of</span> string
+  | `Wrong_session
   | `Invalid
 ]
 |}
@@ -625,6 +715,24 @@ let pretty_print_signatures soup =
       form $$ "> code" |> Soup.iter Soup.delete;
       Soup.replace (form $ "> table") (Soup.parse form_replacement);
       Soup.add_class "multiline" form);
+
+  multiline "#val-form" form'_expected form'_replacement;
+
+  let type_table selector expected replacement =
+    let element = soup $ selector in
+    if_expected
+      expected
+      (fun () -> pretty_print element)
+      (fun () ->
+        element $$ "> code" |> Soup.iter Soup.delete;
+        Soup.replace (element $ "> table") (Soup.parse replacement);
+        Soup.add_class "multiline" element)
+  in
+
+  type_table "#type-part" part_expected part_replacement;
+  multiline "#val-multipart" multipart_expected multipart_replacement;
+  type_table
+    "#type-upload_event" upload_event_expected upload_event_replacement;
 
   let csrf_result = soup $ "#type-csrf_result" in
   if_expected

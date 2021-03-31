@@ -64,7 +64,7 @@ let log =
 type csrf_result = [
   | `Ok
   | `Expired of float
-  | `Wrong_session of string
+  | `Wrong_session
   | `Invalid
 ]
 
@@ -91,7 +91,7 @@ let verify_csrf_token token request =
         if token_session_hash <> real_session_hash then begin
           log.warning (fun log -> log ~request
             "CSRF token not for this session");
-          `Wrong_session token_session_hash
+          `Wrong_session
         end
 
         else

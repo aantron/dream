@@ -7,7 +7,12 @@
 
 module Dream = Dream__pure.Formats
 
-let form ~action request =
+let form ?enctype ~action request =
+  let enctype =
+    match enctype with
+    | Some _ -> " enctype=\"multipart/form-data\""
+    | None -> ""
+  in
   let token = Csrf.csrf_token request in
-  <form method="POST" action="<%s action %>">
+  <form method="POST" action="<%s action %>"<%s! enctype %>>
   <input name="<%s! Csrf.field_name %>" type="hidden" value="<%s! token %>">

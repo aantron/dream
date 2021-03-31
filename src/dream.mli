@@ -488,8 +488,8 @@ val set_cookie :
       Dream.set_cookie "my.cookie" "value" request response
     ]}
 
-    You should specify {!Dream.run} argument [~secret], or the web app will not
-    be able to decrypt cookies from prior starts.
+    Specify {!Dream.run} argument [~secret], or the web app will not be able to
+    decrypt cookies from prior starts.
 
     See example
     {{:https://github.com/aantron/dream/tree/master/example/c-cookie#files}
@@ -576,7 +576,9 @@ val cookie :
     ]}
 
     Pass the same optional arguments as to {!Dream.set_cookie} for the same
-    cookie. This will allow {!Dream.cookie} to infer the cookie name prefix. *)
+    cookie. This will allow {!Dream.cookie} to infer the cookie name prefix,
+    implementing a transparent cookie round trip with the most secure attributes
+    applicable. *)
 
 val all_cookies : request -> (string * string) list
 (** All cookies, with raw names and values. *)
@@ -699,14 +701,14 @@ val origin_referer_check : middleware
 
 (** {1 Forms} *)
 
-type form_result = [
-  | `Ok            of (string * string) list
-  | `Expired       of (string * string) list * float
-  | `Wrong_session of (string * string) list * string
-  | `Invalid_token of (string * string) list
-  | `Missing_token of (string * string) list
-  | `Many_tokens   of (string * string) list
-  | `Not_form_urlencoded
+type 'a form_result = [
+  | `Ok            of 'a
+  | `Expired       of 'a * float
+  | `Wrong_session of 'a
+  | `Invalid_token of 'a
+  | `Missing_token of 'a
+  | `Many_tokens   of 'a
+  | `Wrong_content_type
 ]
 (** Form validation results, in order from least to most severe. See
     {!Dream.val-form} and example
@@ -717,26 +719,29 @@ type form_result = [
     occur in regular usage.
 
     The remaining constructors, [`Invalid_token], [`Missing_token],
-    [`Many_tokens], [`Not_form_urlencoded] correspond to bugs, suspicious
-    activity, or tokens so old that decryption keys have since been rotated
-    server-side. *)
+    [`Many_tokens], [`Wrong_content_type] correspond to bugs, suspicious
+    activity, or tokens so old that decryption keys have since been rotated on
+    the server. *)
 
 (* TODO Link to the tag helper for dream.csrf and backup instructions for
    generating it; also create that page! *)
-val form : request -> form_result promise
-(** Parses the request body as a form. Performs checks, which are easiest to
-    satisfy by using {!Dream.Tag.form}. See {!section-templates} and example
+val form : request -> (string * string) list form_result promise
+(** Parses the request body as a form. Performs checks, which are made
+    transparent by using {!Dream.Tag.form} in a template. See
+    {!section-templates} and example
     {{:https://github.com/aantron/dream/tree/master/example/d-form#readme}
     [d-form]},
 
     - [Content-Type:] must be [application/x-www-form-urlencoded].
-    - The form must have a field named [dream.csrf], containing a CSRF token.
-    - {!Dream.form} calls {!Dream.verify_csrf_token} to check the token.
+    - The form must have a field named [dream.csrf]. {!Dream.Tag.form} adds such
+      a field.
+    - {!Dream.form} calls {!Dream.verify_csrf_token} to check the token in
+      [dream.csrf].
 
     The call must be done under a session middleware, since CSRF tokens are
     bound to sessions. See {!section-sessions}.
 
-    Form fields are returned sorted for easy pattern matching:
+    Form fields are sorted for easy pattern matching:
 
     {[
       match%lwt Dream.form request with
@@ -759,7 +764,7 @@ val form : request -> form_result promise
 
     The remaining cases, including unexpected field sets and the remaining
     constructors of {!Dream.type-form_result}, usually indicate either bugs or
-    attacks, and it's usually fine to respond to all of them with [400 Bad
+    attacks. It's usually fine to respond to all of them with [400 Bad
     Request]. *)
 (* TODO Provide optionals for disabling CSRF checking and CSRF token field
    filtering. *)
@@ -771,15 +776,90 @@ val form : request -> form_result promise
 (* TODO Get rid of this separate call. However, it means requests must become
    more mutable, in particular there needs to be extensible mutability for body
    handling, which is already mutable. *)
-val begin_upload : request -> request
+(* val begin_upload : request -> request *)
 
-type upload_result = [
-  | `File of string * string * string
+(** {2 Upload} *)
+
+type part = [
+  | `Files of (string * string) list
+  | `Value of string
+]
+(** Field values of an upload form, [<form enctype="multipart/form-data">]. See
+    {!Dream.multipart} and example
+    {{:https://github.com/aantron/dream/tree/master/example/g-upload#files}
+    [g-upload]}.
+
+    - [`Files] is a list of filename-content pairs.
+    - [`Value] is the value of an ordinary form field.
+
+    Parts are then paired with field names by {!Dream.multipart}, making a
+    [(string * part) list].
+
+    For example, if the form has [<input name="foo" type="file" multiple>], and
+    the user selects multiple files, the received field name and {!type-part}
+    will be
+
+    {[
+      ("foo", `Files [
+        ("file1", "data1");
+        ("file2", "data2");
+      ])
+    ]} *)
+
+val multipart : request -> (string * part) list form_result promise
+(** Like {!Dream.form}, but also reads files, and [Content-Type:] must be
+    [multipart/form-data]. The [<form>] tag and CSRF token can be generated in a
+    template with
+
+    {[
+      <%s! Dream.Tag.form ~action:"/" ~enctype:`Multipart_form_data request %>
+    ]}
+
+    See {!Dream.Tag.form}, section {!section-templates}, and example
+    {{:https://github.com/aantron/dream/tree/master/example/g-upload#files}
+    [g-upload]}.
+
+    {!Dream.multipart} reads entire files into memory, so it is only suitable
+    for prototyping, or with yet-to-be-added file size and count limits. See
+    {!Dream.val-upload} below for a streaming version. *)
+
+(** {2 Streaming upload} *)
+
+type upload_event = [
+  | `File of string * string
   | `Field of string * string
   | `Done
+  | `Wrong_content_type
 ]
+(** Upload stream events.
 
-val upload : request -> upload_result promise
+    - [`File (field_name, filename)] begins a file in the stream. The web app
+      should call {!Dream.val-upload_file} until [None], then call
+      {!Dream.val-upload} again.
+    - [`Field (field_name, value)] is a complete field. The web app should call
+      {!Dream.val-upload} next.
+    - [`Done] ends the stream.
+    - [`Wrong_content_type] occurs on the first call to {!Dream.val-upload} if
+      [Content-Type:] is not [multipart/form-data]. *)
+
+val upload : request -> upload_event promise
+(** Receives the next upload stream event.
+
+    Does not verify a CSRF token. There are several ways to add CSRF protection
+    for an upload stream, including:
+
+    - Generate the form with {!Dream.Tag.form}. Check for
+      [`Field ("dream.csrf", token)] during upload and call
+      {!Dream.verify_csrf_token}.
+    - Use {{:https://developer.mozilla.org/en-US/docs/Web/API/FormData}
+      [FormData]} in the client to submit [multipart/form-data] by AJAX, and
+      include a custom header. *)
+
+val upload_file : request -> string option promise
+(** Retrieves a file chunk. *)
+
+(* TODO upload_bigstring *)
+
 (* TODO Document how errors are reported, how this responds to various
    Content-Types, etc. *)
 (* TODO The API should be something like...
@@ -790,10 +870,12 @@ val upload : request -> [
 ]
  *)
 
+(** {2 CSRF tokens} *)
+
 type csrf_result = [
   | `Ok
   | `Expired of float
-  | `Wrong_session of string
+  | `Wrong_session
   | `Invalid
 ]
 (** Possible outcomes of CSRF token verification. [`Expired] and
@@ -823,7 +905,8 @@ val verify_csrf_token : string -> request -> csrf_result promise
 (* TODO Site/subsite prefix from request. *)
 module Tag :
 sig
-  val form : action:string -> request -> string
+  val form :
+    ?enctype:[ `Multipart_form_data ] -> action:string -> request -> string
 end
 
 

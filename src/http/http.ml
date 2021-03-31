@@ -209,9 +209,9 @@ let wrap_handler
           body
           ~on_eof
           ~on_read:(fun buffer ~off ~len ->
-            Dream__pure.Body.write_bigstring buffer off len request.body
-            |> ignore;
-            loop ())
+            Lwt.on_success
+              (Dream__pure.Body.write_bigstring buffer off len request.body)
+              loop)
       in
       loop ();
       Lwt.return_unit
