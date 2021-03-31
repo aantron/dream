@@ -1136,6 +1136,7 @@ val get : string -> handler -> route
       Dream.get "/home" home_template
     ]} *)
 
+(* TODO Column-align. *)
 val post : string -> handler -> route
 val put : string -> handler -> route
 val delete : string -> handler -> route
@@ -1279,7 +1280,7 @@ val send : ?kind:[ `Text | `Binary ] -> string -> websocket -> unit promise
     promise resolves.
 
     With [~kind:`Text], the default, the message is interpreted as a UTF-8
-    string. The client will receive it transcoded to JavaScript's UTF-16-like
+    string. The client will receive it transcoded to JavaScript's UTF-16
     representation.
 
     With [~kind:`Binary], the message will be received unmodified, as either a
@@ -1328,19 +1329,20 @@ val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
 (** {1 Logging} *)
 
 val logger : middleware
-(** Logs incoming requests, times them, and prints timing information when the
-    next handler has returned a response. Time spent logging is included in the
-    timings. *)
+(** Logs and times requests. Time spent logging is included. See example
+    {{:https://github.com/aantron/dream/tree/master/example/2-middleware#files}
+    [2-middleware]}. *)
 
 val log : ('a, Format.formatter, unit, unit) format4 -> 'a
-(** [Dream.log format arguments] formats [arguments] and writes them to the log.
-    Disregard the obfuscated type: the first argument, [format], is a format
-    string as described in the standard library modules
+(** Formats a message and logs it. Disregard the obfuscated type: the first
+    argument is a format string as described in the standard library modules
     {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Printf.html#VALfprintf}
     [Printf]} and
     {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html#VALfprintf}
-    [Format]}, and the rest of the arguments are determined by the format
-    string. For example:
+    [Format]}. The rest of the arguments are determined by the format string.
+    See example
+    {{:https://github.com/aantron/dream/tree/master/example/9-log#files}
+    [9-log]}.
 
     {[
       Dream.log "Counter is now: %i" counter;
@@ -1351,8 +1353,8 @@ type ('a, 'b) conditional_log =
   ((?request:request ->
    ('a, Format.formatter, unit, 'b) format4 -> 'a) -> 'b) ->
     unit
-(** See {!Dream.val-error} for usage. This type has to be defined, but its
-    definition is largely illegible. *)
+(** Loggers. This type is difficult to read — instead, see {!Dream.val-error} for
+    usage. *)
 
 type log_level = [
   | `Error
@@ -1367,16 +1369,19 @@ val error : ('a, unit) conditional_log
     formatting function is called only if the {{!initialize_log} current log
     level} is [`Error] or higher. This scheme is based on the
     {{:https://erratique.ch/software/logs/doc/Logs/index.html} Logs} library.
+    See example
+    {{:https://github.com/aantron/dream/tree/master/example/9-log#files}
+    [9-log]}.
 
     {[
-      Dream.error ~request (fun log -> log "My message, details: %s" details);
+      Dream.error (fun log -> log ~request "My message, details: %s" details);
     ]}
 
-    Pass the optional argument [~request] to [Dream.error] to help it associate
-    the message with a specific request. If not passed, the logging back end
-    will try to guess the request. This usually works, but may be inaccurate in
-    some cases. *)
+    Pass the optional argument [~request] to {!Dream.val-error} to associate the
+    message with a specific request. If not passed, {!Dream.val-error} will try
+    to guess the request. This usually works, but not always. *)
 
+(* TODO Column-align. *)
 val warning : ('a, unit) conditional_log
 val info : ('a, unit) conditional_log
 val debug : ('a, unit) conditional_log
@@ -1400,12 +1405,16 @@ val sub_log : string -> sub_log
       let log = Dream.sub_log "myapp.ajax"
     ]}
 
-    Creates a logger that can be used like {!Dream.val-error} and the other
-    default loggers, but prefixes ["myapp.ajax"] to each log message:
+    ...creates a logger that can be used like {!Dream.val-error} and the other
+    default loggers, but prefixes ["myapp.ajax"] to each log message.
 
     {[
       log.error (fun log -> log ~request "Validation failed")
-    ]} *)
+    ]}
+
+    See [README] of example
+    {{:https://github.com/aantron/dream/tree/master/example/9-log#files}
+    [9-log]}. *)
 
 val initialize_log :
   ?backtraces:bool ->
@@ -1413,30 +1422,29 @@ val initialize_log :
   ?level:log_level ->
   ?enable:bool ->
     unit -> unit
-(** Dream does not initialize its logging back end on program start. This is
-    meant to allow a Dream web application to be linked into a larger binary as
-    a subcommand, without affecting the runtime of that larger binary in any
-    way. Instead, this function, [Dream.initialize_log], is called internally by
-    the various Dream loggers (such as {!Dream.log}) the first time they are
-    used. You can also call this function explicitly during program
-    initialization, before using the loggers, in order to configure the back end
-    or disable it completely.
+(** Initializes Dream's log with the given settings.
 
-    [~backtraces:true], the default, causes Dream to call
-    {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Printexc.html#VALrecord_backtrace}
-    [Printexc.record_backtrace]}, which makes exception backtraces available
-    when logging exceptions.
+    Dream initializes its logging back end lazily. This is so that if a Dream
+    web app is linked into a larger binary, it does not affect that binary's
+    runtime unless the web app runs.
 
-    [~async_exception_hook:true], the default, causes Dream to set
-    {{:https://ocsigen.org/lwt/latest/api/Lwt#VALasync_exception_hook}
-    [Lwt.async_exception_hook]} so as to forward all asynchronous exceptions to
-    the logger, and not terminate the process.
+    This also allows the web app to give logging settings explicitly by calling
+    {!Dream.initialize_log} early in program execution.
 
-    [~level] sets the log level threshould for the entire binary. The default is
-    [`Info].
+    - [~backtraces:true], the default, causes Dream to call
+      {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Printexc.html#VALrecord_backtrace}
+      [Printexc.record_backtrace]}, which makes exception backtraces available.
 
-    [~enable:false] disables Dream logging completely. This can help sanitize
-    output for testing. *)
+    - [~async_exception_hook:true], the default, causes Dream to set
+      {{:https://ocsigen.org/lwt/latest/api/Lwt#VALasync_exception_hook}
+      [Lwt.async_exception_hook]} so as to forward all asynchronous exceptions
+      to the logger, and not terminate the process.
+
+    - [~level] sets the log level threshould for the entire binary. The default
+      is [`Info].
+
+    - [~enable:false] disables Dream logging completely. This can help sanitize
+      output during testing. *)
 
 
 

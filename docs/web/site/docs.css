@@ -246,6 +246,10 @@ p + p, p + pre, pre + p {
     margin-top: -11.125em;
     margin-bottom: 200px;
   }
+  #val-debug + .spec-doc {
+    margin-top: -3.125em;
+    margin-bottom: 72px;
+  }
 }
 @media (min-width: 1400px) {
   .spec-doc {
