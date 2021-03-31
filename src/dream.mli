@@ -1582,7 +1582,8 @@ type error = {
     }} *)
 
 type error_handler = error -> response option promise
-(** Error handlers log errors and convert them into responses.
+(** Error handlers log errors and convert them into responses. Ignore if using
+    {!Dream.error_template}.
 
     If the error has [will_send_response = true], the error handler must return
     a response. Otherwise, it should return [None].
@@ -1641,17 +1642,10 @@ val error_template :
 
 
 
+(* TODO Example links. *)
 (** {1 Variables}
 
-    Dream provides two variable scopes for writing middlewares:
-
-    - Per-message (“local”) variables.
-    - Per-server (“global”) variables.
-
-    Variables can be used to implicitly pass values from middlewares to wrapped
-    handlers. For example, Dream assigns each request an id, which is stored in
-    a “local” (request) variable. {!Dream.request_id} can then be called on that
-    request; it internally reads that variable. *)
+    Dream provides two variable scopes for use by middlewares. *)
 
 type 'a local
 (** Per-message variable. *)
@@ -1659,37 +1653,26 @@ type 'a local
 type 'a global
 (** Per-server variable. *)
 
-val new_local : ?debug:('a -> string * string) -> unit -> 'a local
-(** Declares a fresh variable of type ['a] in all messages. In each message, the
-    variable is initially unset. The optional [~debug] parameter provides a
-    function that converts the variable's value to a pair of [key, value]
-    strings. This causes the variable to be included in debug info by the
-    default error handler when debugging is enabled. *)
-(* TODO Provide a way to query the local for its name, which can be used by
-   middlewares for generating nicer error messages when a local is not found.
-   But then the metadata has to become string * 'a -> string, or it can be
-   split into to a separate name and converter to make it even easier to deal
-   with. *)
+val new_local : ?name:string -> ?show_value:('a -> string) -> unit -> 'a local
+(** Declares a variable of type ['a] in all messages. The variable is initially
+    unset in each message. The optional [~name] and [~show_value] are used by
+    {!Dream.run} [~debug] to show the variable in debug dumps. *)
 
 val local : 'a local -> 'b message -> 'a option
-(** Retrieves the value of the given per-message variable, if it is set. *)
+(** Retrieves the value of the per-message variable. *)
 
 val with_local : 'a local -> 'a -> 'b message -> 'b message
-(** Creates a new message by setting or replacing the variable with the given
-    value. *)
+(** Sets the per-message variable to the value. *)
 
-val new_global : ?debug:('a -> string * string) -> (unit -> 'a) -> 'a global
-(** [Dream.new_global initializer] declares a fresh variable of type ['a] in all
-    servers. The first time the variable is accessed, [ititializer ()] is called
-    to create its initial value.
-
-    Global variables cannot themselves be changed, because the server-wide
-    application context is shared between all requests. This means that global
-    variables are typically refs or other mutable data structures, such as hash
-    tables — as is often the case with regular OCaml globals. *)
+val new_global :
+  ?name:string -> ?show_value:('a -> string) -> (unit -> 'a) -> 'a global
+(** Declares a variable of type ['a] in all servers. The first time the variable
+    is accessed, the given initializer function is called to get its value.
+    Global variables cannot be changed. So, they are typically refs or other
+    mutable data structures, such as hash tables. *)
 
 val global : 'a global -> request -> 'a
-(** Retrieves the value of the given per-server variable. *)
+(** Retrieves the value of the per-server variable. *)
 
 
 

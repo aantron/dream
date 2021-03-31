@@ -19,12 +19,14 @@ let name =
 let last_id =
   Dream.new_global
     (fun () -> ref 0)
-    ~debug:(fun id -> "dream.request_id.last_id", string_of_int !id)
+    ~name:"dream.request_id.last_id"
+    ~show_value:(fun id -> string_of_int !id)
 
 let id =
   Dream.new_local
     ()
-    ~debug:(fun id -> name, id)
+    ~name
+    ~show_value:(fun id -> id)
 
 let lwt_key =
   Lwt.new_key ()

@@ -609,6 +609,31 @@ let error_replacement = {|
 }
 </pre>|}
 
+let new_local_expected = {|<div class="spec value" id="val-new_local">
+ <a href="#val-new_local" class="anchor"></a><code><span><span class="keyword">val</span> new_local : <span>?name:string <span class="arrow">-&gt;</span></span> <span>?show_value:<span>(<span><span class="type-var">'a</span> <span class="arrow">-&gt;</span></span> string)</span> <span class="arrow">-&gt;</span></span> <span>unit <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> <a href="#type-local">local</a></span></span></code>
+</div>
+|}
+
+let new_local_replacement = {|
+<pre><span class="keyword">val</span> new_local :
+  ?name:string ->
+  ?show_value:('a -> string) ->
+    unit -> 'a <a href="#type-local">local</a>
+</pre>
+|}
+
+let new_global_expected = {|<div class="spec value" id="val-new_global">
+ <a href="#val-new_global" class="anchor"></a><code><span><span class="keyword">val</span> new_global : <span>?name:string <span class="arrow">-&gt;</span></span> <span>?show_value:<span>(<span><span class="type-var">'a</span> <span class="arrow">-&gt;</span></span> string)</span> <span class="arrow">-&gt;</span></span> <span><span>(<span>unit <span class="arrow">-&gt;</span></span> <span class="type-var">'a</span>)</span> <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> <a href="#type-global">global</a></span></span></code>
+</div>
+|}
+
+let new_global_replacement = {|
+<pre><span class="keyword">val</span> new_global :
+  ?name:string ->
+  ?show_value:('a -> string) ->
+    (unit -> 'a) -> 'a <a href="#type-global">global</a>
+|}
+
 let run_expected = {|<div class="spec value" id="val-run">
  <a href="#val-run" class="anchor"></a><code><span><span class="keyword">val</span> run : <span>?interface:string <span class="arrow">-&gt;</span></span> <span>?port:int <span class="arrow">-&gt;</span></span> <span>?stop:<span>unit <a href="#type-promise">promise</a></span> <span class="arrow">-&gt;</span></span> <span>?debug:bool <span class="arrow">-&gt;</span></span>
 <span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span> <span>?secret:string <span class="arrow">-&gt;</span></span> <span>?prefix:string <span class="arrow">-&gt;</span></span>
@@ -877,6 +902,9 @@ let pretty_print_signatures soup =
       error $$ "> code" |> Soup.iter Soup.delete;
       Soup.replace (error $ "> table") (Soup.parse error_replacement);
       Soup.add_class "multiline" error);
+
+  multiline "#val-new_local" new_local_expected new_local_replacement;
+  multiline "#val-new_global" new_global_expected new_global_replacement;
 
   let run = soup $ "#val-run" in
   if_expected

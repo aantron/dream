@@ -62,7 +62,7 @@ let initial_multipart_state () = {
 
 module Scope_variable_metadata =
 struct
-  type 'a t = ('a -> string * string) option
+  type 'a t = string option * ('a -> string) option
 end
 module Scope = Hmap.Make (Scope_variable_metadata)
 
@@ -339,17 +339,15 @@ let is_websocket response =
 let fold_scope f initial scope =
   Scope.fold (fun (B (key, value)) accumulator ->
     match Scope.Key.info key with
-    | None -> accumulator
-    | Some converter ->
-      let key_name, value_string = converter value in
-      f key_name value_string accumulator)
+    | Some name, Some show_value -> f name (show_value value) accumulator
+    | _ -> accumulator)
     scope
     initial
 
 type 'a local = 'a Scope.key
 
-let new_local ?debug () =
-  Scope.Key.create debug
+let new_local ?name ?show_value () =
+  Scope.Key.create (name, show_value)
 
 let local key message =
   Scope.find key message.locals
@@ -365,8 +363,8 @@ type 'a global = {
   initializer_ : unit -> 'a;
 }
 
-let new_global ?debug initializer_ = {
-  key = Scope.Key.create debug;
+let new_global ?name ?show_value initializer_ = {
+  key = Scope.Key.create (name, show_value);
   initializer_;
 }
 
