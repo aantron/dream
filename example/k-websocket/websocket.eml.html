@@ -34,7 +34,7 @@ let () =
           let* () = Dream.send "Hello?" websocket in
           let* _ = Dream.receive websocket in
           let* () = Dream.send "Goodbye!" websocket in
-          Dream.close websocket);
+          Dream.close_websocket websocket);
 
   ]
   @@ fun _ ->

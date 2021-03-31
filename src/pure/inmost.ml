@@ -528,7 +528,7 @@ let send ?(kind = `Text) message websocket =
 let receive websocket =
   websocket.receive ()
 
-let close websocket =
+let close_websocket websocket =
   websocket.close ()
 
 let identity handler request =

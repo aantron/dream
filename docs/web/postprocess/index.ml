@@ -400,6 +400,29 @@ let static_replacement = {|
 </pre>
 |}
 
+let websocket_expected = {|<div class="spec value" id="val-websocket">
+ <a href="#val-websocket" class="anchor"></a><code><span><span class="keyword">val</span> websocket : <span><span>(<span><a href="#type-websocket">websocket</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let websocket_replacement = {|
+<pre><span class="keyword">val</span> websocket :
+  (<a href="#type-websocket">websocket</a> -> unit <a href="#type-promise">promise</a>) -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+</pre>
+|}
+
+let send_expected = {|<div class="spec value" id="val-send">
+ <a href="#val-send" class="anchor"></a><code><span><span class="keyword">val</span> send : <span>?kind:<span>[ `Text <span>| `Binary</span> ]</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-websocket">websocket</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let send_replacement = {|
+<pre><span class="keyword">val</span> send :
+  ?kind:[ `Text | `Binary ] ->
+    string -> <a href="#type-websocket">websocket</a> -> unit <a href="#type-promise">promise</a>
+</pre>
+|}
+
 let conditional_log_expected = {|<div class="spec type" id="type-conditional_log">
  <a href="#type-conditional_log" class="anchor"></a><code><span><span class="keyword">type</span> <span>('a, 'b) conditional_log</span></span><span> = <span><span>(<span><span>(<span>?request:<a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span><span>(<span class="type-var">'a</span>,&nbsp;<span class="xref-unresolved">Stdlib</span>.Format.formatter,&nbsp;unit,&nbsp;<span class="type-var">'b</span>)</span> <span class="xref-unresolved">Stdlib</span>.format4</span> <span class="arrow">-&gt;</span></span> <span class="type-var">'a</span>)</span> <span class="arrow">-&gt;</span></span> <span class="type-var">'b</span>)</span> <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
@@ -785,6 +808,8 @@ let pretty_print_signatures soup =
 
   multiline "#val-scope" scope_expected scope_replacement;
   multiline "#val-static" static_expected static_replacement;
+  multiline "#val-websocket" websocket_expected websocket_replacement;
+  multiline "#val-send" send_expected send_replacement;
 
   let conditional_log = soup $ "#type-conditional_log" in
   if_expected

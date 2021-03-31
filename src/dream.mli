@@ -1030,9 +1030,9 @@ val _tag_form :
 (* TODO Move logger to Logging, echo to testing. *)
 (** {1 Middleware}
 
-    Interesting built-in middlewares are spread throughout the various sections
-    of these docs, according to where they are relevant. This section contains
-    only generic middleware combinators. *)
+    Interesting built-in middlewares are scattered throughout the various
+    sections of these docs, according to where they are relevant. This section
+    contains only generic middleware combinators. *)
 
 val identity : middleware
 (** Does nothing but call its inner handler. *)
@@ -1252,41 +1252,47 @@ val session_expires_at : request -> int64
 
 
 (* TODO Open an issue about frames. *)
+(* TODO Links to MDN, RFCs? examples? *)
 (** {1 WebSockets} *)
 
 type websocket
-(** A WebSocket connection. *)
+(** A WebSocket connection. See {{:https://tools.ietf.org/html/rfc6455} RFC
+    6455} and
+    {{:https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API} MDN}. *)
 
 val websocket : (websocket -> unit promise) -> response promise
-(** Creates a fresh [101 Switching Protocols] response for upgrading to a
-    WebSocket connection. Once this response is returned from the application to
-    Dream's HTTP layer, the HTTP layer will create the actual WebSocket, and
-    call the callback, and your application can begin communicating on the
-    WebSocket:
+(** Creates a fresh [101 Switching Protocols] response. Once this response is
+    returned to Dream's HTTP layer, the callback is passed a new {!websocket},
+    and the application can begin using it. See example
+    {{:https://github.com/aantron/dream/tree/master/example/k-websocket#files}
+    [k-websocket]}.
 
     {[
       let my_handler = fun request ->
         Dream.websocket (fun websocket ->
-          let* () = Dream.send "Hello, world!" websocket in
-          Dream.close websocket);
+          let%lwt () = Dream.send "Hello, world!" websocket in
+          Dream.close_websocket websocket);
     ]} *)
 
-(* TODO What's the exact effect of `Binary? JS receives a Blob? *)
 val send : ?kind:[ `Text | `Binary ] -> string -> websocket -> unit promise
-(** [Dream.send string websocket] sends a string on a WebSocket as a single
-    message. The returned promise can be used for flow control — wait on it to
-    make sure server-side buffers aren't filling up. [~kind] is [`Text] by
-    default. It can be changed to [~kind:`Binary] to indicate that the data is
-    binary. *)
+(** Sends a single message. The WebSocket is ready another message when the
+    promise resolves.
+
+    With [~kind:`Text], the default, the message is interpreted as a UTF-8
+    string. The client will receive it transcoded to JavaScript's UTF-16-like
+    representation.
+
+    With [~kind:`Binary], the message will be received unmodified, as either a
+    [Blob] or an [ArrayBuffer]. See
+    {{:https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/binaryType}
+    MDN [WebSocket.binaryType]}. *)
 
 val receive : websocket -> string option promise
-(** Retrieves the next message on the given WebSocket. If the WebSocket is
-    closed before a complete message arrives, the promise is fulfilled with
-    [None]. *)
+(** Retrieves a message. If the WebSocket is closed before a complete message
+    arrives, the result is [None]. *)
 
-val close : websocket -> unit promise
-(** Closes the given WebSocket. *)
-(* TODO Rename to close_websocket. *)
+val close_websocket : websocket -> unit promise
+(** Closes the WebSocket. *)
 
 
 
@@ -1922,6 +1928,7 @@ val drop_empty_trailing_path_component : string list -> string list
 
 
 
+(* TODO Expose some hash functions. *)
 (* TODO Expose current time somewhere. *)
 (* TODO Should cryptography be before web formats? *)
 (** {1 Cryptography} *)
