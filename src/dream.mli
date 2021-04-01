@@ -1219,10 +1219,8 @@ Now with Content-Type guessing.
     - {!Dream.cookie_sessions}
 
     All requests passing through session middleware are assigned a session,
-    either an existing one, or a new, empty session, known as a {e pre-session}.
-
-    The [(string * string) list] are a default specialization of Dream's typed
-    session support. TODO *)
+    either an existing one, or a new, empty session, known as a
+    {e pre-session}. *)
 
 val session : string -> request -> string option
 (** Value from the request's session. *)
@@ -1240,7 +1238,7 @@ val invalidate_session : request -> unit promise
 
 (** {2 Back ends} *)
 
-val memory_sessions : middleware
+val memory_sessions : ?lifetime:float -> middleware
 (** Stores sessions in server memory. Passes session keys to clients in cookies.
     Session data are lost when the server process exits. *)
 (* TODO Protocol error on HTTS+(HTTP2)? *)

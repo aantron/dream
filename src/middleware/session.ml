@@ -5,10 +5,6 @@
 
 
 
-(* https://ulrikstrid.github.io/ocaml-cookie/cookie/Cookie/index.html
-   https://ulrikstrid.github.io/ocaml-cookie/session-cookie-lwt/Session_cookie_lwt/Make/index.html
-   https://github.com/inhabitedtype/ocaml-session#readme *)
-
 (* TODO LATER Achieve database sessions. *)
 
 (* TODO Does HTTP/2, for example, allow connection-based session validation, as
@@ -20,234 +16,206 @@ module Dream = Dream__pure.Inmost
 
 
 
-type request = Dream.request
-type response = Dream.response
-
-(* TODO Probably also needs a dirty bit...? Data should be mutable? *)
-(* TODO There is sense in only updating the expiration time, as that can be
-   cheaper than serializing the data. *)
-type 'a session_info = {
-  key : string;
-  id : string;
-  expires_at : float;
-  data : 'a;
-}
-
-type 'a session = {
-  mutable session_info : 'a session_info;
-  store : 'a store;
-  request : request;
-  use_expires_in : float;
-}
-
-and 'a store = {
-  load : request -> 'a session_info option Lwt.t;
-  create : 'a session_info option -> request -> float -> 'a session_info Lwt.t;
-  set : 'a session_info -> request -> unit Lwt.t;
-  send : 'a session_info -> request -> response -> response Lwt.t;
-}
-
-let session_key session =
-  session.session_info.key
-
-let session_id session =
-  session.session_info.id
-
-let session_expires_at session =
-  session.session_info.expires_at
-
-let session_data session =
-  session.session_info.data
-
-let set_session_data data session =
-  session.session_info <- {session.session_info with data = data};
-  session.store.set session.session_info session.request
-
-let invalidate_session session =
-  let expires_at = Unix.gettimeofday () +. session.use_expires_in in
-  let%lwt session_info =
-    session.store.create (Some session.session_info) session.request expires_at
-  in
-  session.session_info <- session_info;
-  Lwt.return_unit
-
-let store ~load ~create ~set ~send = {
-  load;
-  create;
-  set;
-  send;
-}
-
 (* Used for the default sub-log name, cookie name, and request variable name. *)
-let module_name =
-  "dream.session"
+(* let module_name =
+  "dream.session" *)
 
 (* TODO Actually use the log somewhere...... *)
 let log =
-  Log.sub_log module_name
+  Log.sub_log "dream.session"
 
 (* TODO Make session expiration configurable somewhere. *)
-let valid_for =
-  60. *. 60. *. 24. *. 7. *. 2.
+(* let valid_for =
+  60. *. 60. *. 24. *. 7. *. 2. *)
+
+type 'a back_end = {
+  load : Dream.request -> 'a Lwt.t;
+  send : 'a -> Dream.request -> Dream.response -> Dream.response Lwt.t;
+}
 
 (* TODO LATER Need a session garbage collector, probably. *)
 (* TODO LATER Can avoid renewing sessions too often by renewing only when they
    are at least half-expired. *)
-let sessions request_local_variable store = fun next_handler request ->
+(* TODO To support atomic operations, the loader HAS to be able to load, expire,
+   create, and renew the session. *)
+let middleware local back_end = fun inner_handler request ->
 
-  let now = Unix.gettimeofday () in
+  let%lwt session =
+    back_end.load request in
+  let request =
+    Dream.with_local local session request in
 
-  (* Try to load a session, given the cookies and/or headers in the request. *)
-  let%lwt maybe_session_info = store.load request in
+  let%lwt response =
+    inner_handler request in
 
-  (* TODO Trim the floats to whole numbers of seconds. *)
-  (* If no session is found, create one. Otherwise, if a session is found,
-     check its expiration time. If too old, re-create a session. The old session
-     is passed to the store so as to copy over any settings that may be
-     relevant. The store can simply ignore it. *)
-  let%lwt session_info =
-    match maybe_session_info with
-    | None ->
-      let%lwt session_info =
-        store.create None request (now +. valid_for) in
-      log.info (fun log -> log "Session %s created" session_info.id);
-      Lwt.return session_info
+  back_end.send session request response
 
-    | Some session_info ->
-      if now < session_info.expires_at +. valid_for then
-        let expires_at = now +. valid_for in
-        Lwt.return {session_info with expires_at}
-      else begin
-        let%lwt new_session_info =
-          store.create maybe_session_info request (now +. valid_for) in
-        log.info (fun log -> log "Session %s expired; creatd %s"
-          session_info.id new_session_info.id);
-        Lwt.return new_session_info
-      end
-  in
-
-  let session = {
-    session_info;
-    store;
-    request;
-    use_expires_in = valid_for;
-  } in
-
-  (* TODO Consider also storing the session id in an Lwt key for the logger to
-     use. *)
-  let request = Dream.with_local request_local_variable session request in
-
-  let%lwt response = next_handler request in
-
-  (* Set cookies, or whateer needs to be done. *)
-  store.send session.session_info request response
-
-let session request_local_variable request =
-  match Dream.local request_local_variable request with
-  | Some session -> session
+let getter local request =
+  match Dream.local local request with
+  | Some session ->
+    session
   | None ->
-    let message = "Dream.session: missing session middleware" in
+    let message = "Missing session middleware" in
     log.error (fun log -> log ~request "%s" message);
     failwith message
 (* TODO Print the request-local variable name *)
 
-type 'a typed = {
-  sessions : 'a store -> Dream.middleware;
-  session : Dream.request -> 'a session;
+type 'a typed_middleware = {
+  middleware : 'a back_end -> Dream.middleware;
+  getter : Dream.request -> 'a;
 }
 
-let typed request_local_variable = {
-  sessions = sessions request_local_variable;
-  session = session request_local_variable;
+let typed_middleware ?show_value () =
+  let local = Dream.new_local ~name:"dream.session" ?show_value () in
+  {
+    middleware = middleware local;
+    getter = getter local;
+  }
+
+
+
+type session = {
+  key : string;
+  id : string;
+  mutable expires_at : float;
+  mutable payload : (string * string) list;
 }
 
+type operations = {
+  set : string -> string -> unit Lwt.t;
+  invalidate : unit -> unit Lwt.t;
+  mutable dirty : bool;
+}
 
+let cookie =
+  "dream.session"
 
-let memory_sessions default_value =
-  let hash_table = Hashtbl.create 256 in
+let (|>?) =
+  Option.bind
 
-  let load request =
-    match Dream.cookie ~decrypt:false module_name request with
-    | None -> Lwt.return_none
-    | Some potential_session_key ->
-      Lwt.return (Hashtbl.find_opt hash_table potential_session_key)
-  in
-
-  (* TODO Consider UUIDs for session keys rather than just bare random strings.
-     Even though a collision is so unlikely... *)
-  let create _ _ expires_at =
-    let key =
-      Dream__pure.Random.random 38 |> Dream__pure.Formats.to_base64url in
-    let id = String.sub key 0 8 in
-    let session_info = {
-      key;
-      id;
-      expires_at;
-      data = default_value;
-    } in
-    Hashtbl.replace hash_table key session_info;
-    Lwt.return session_info
-  in
-
-  let set session_info _ =
-    Hashtbl.replace hash_table session_info.key session_info;
-    Lwt.return_unit
-  in
-
-  (* TODO Cookie scope and security! Use the site prefix from the request. *)
-  let send session_info request response =
-    response
-    |> Dream.set_cookie module_name session_info.key request ~encrypt:false
-    |> Lwt.return
-  in
-
-  store ~load ~create ~set ~send
-
-
-
-module Exported_defaults =
+module Memory =
 struct
-  (* TODO Debug info. *)
-  let dictionary_sessions_variable =
-    Dream.new_local ()
+  let rec create hash_table expires_at =
+    let key =
+      Dream__pure.Random.random 33 |> Dream__pure.Formats.to_base64url in
+    if Hashtbl.mem hash_table key then
+      create hash_table expires_at
+    else begin
+      let session = {
+        key;
+        id = Dream__pure.Random.random 9 |> Dream__pure.Formats.to_base64url;
+        expires_at;
+        payload = [];
+      } in
+      Hashtbl.replace hash_table key session;
+      session
+    end
 
-  let dictionary_sessions =
-    typed dictionary_sessions_variable
+  let set session name value =
+    session.payload
+    |> List.remove_assoc name
+    |> fun dictionary -> (name, value)::dictionary
+    |> fun dictionary -> session.payload <- dictionary;
+    Lwt.return_unit
 
-  let memory_sessions =
-    dictionary_sessions.sessions (memory_sessions [])
+  let invalidate hash_table lifetime operations session =
+    Hashtbl.remove hash_table !session.key;
+    session := create hash_table (Unix.gettimeofday () +. lifetime);
+    operations.dirty <- true;
+    Lwt.return_unit
 
-  let session_key request =
-    session_key (dictionary_sessions.session request)
+  let operations hash_table lifetime session dirty =
+    let rec operations = {
+      set =
+        (fun name value -> set !session name value);
+      invalidate =
+        (fun () -> invalidate hash_table lifetime operations session);
+      dirty;
+    } in
+    operations
 
-  let session_id request =
-    session_id (dictionary_sessions.session request)
+  let load hash_table lifetime request =
+    let now = Unix.gettimeofday () in
 
-  let session_expires_at request =
-    session_expires_at (dictionary_sessions.session request)
+    let valid_session =
+      Dream.cookie ~decrypt:false "dream.session" request
+      |>? Hashtbl.find_opt hash_table
+      |>? fun session ->
+        if session.expires_at > now then
+          Some session
+        else begin
+          Hashtbl.remove hash_table session.key;
+          None
+        end
+    in
 
-  let session key request =
-    request
-    |> dictionary_sessions.session
-    |> session_data
-    |> List.assoc_opt key
+    let dirty, session =
+      match valid_session with
+      | Some session ->
+        if session.expires_at -. now > (lifetime /. 2.) then
+          false, session
+        else begin
+          session.expires_at <- now +. lifetime;
+          true, session
+        end
+      | None ->
+        true, create hash_table (now +. lifetime)
+    in
 
-  let all_session_values request =
-    request
-    |> dictionary_sessions.session
-    |> session_data
+    let session = ref session in
+    Lwt.return (operations hash_table lifetime session dirty, session)
 
-  let set_session key value request =
-    let session = dictionary_sessions.session request in
-    session
-    |> session_data
-    |> List.remove_assoc key
-    |> fun dictionary -> (key, value)::dictionary
-    |> fun dictionary -> set_session_data dictionary session
+  let send (operations, session) request response =
+    if not operations.dirty then
+      Lwt.return response
+    else
+      let max_age = !session.expires_at -. Unix.gettimeofday () in
+      Lwt.return
+        (Dream.set_cookie
+          cookie !session.key request response ~encrypt:false ~max_age)
 
-  let invalidate_session request =
-    invalidate_session (dictionary_sessions.session request)
+  let back_end lifetime =
+    let hash_table = Hashtbl.create 256 in
+    {
+      load = load hash_table lifetime;
+      send;
+    }
 end
+
+let {middleware; getter} =
+  typed_middleware ()
+    ~show_value:(fun (_, session) ->
+      !session.payload
+      |> List.map (fun (name, value) -> Printf.sprintf "%S: %S" name value)
+      |> String.concat ", "
+      |> Printf.sprintf "%s [%s]" !session.id)
+
+let two_weeks =
+  60. *. 60. *. 24. *. 7. *. 2.
+
+let memory_sessions ?(lifetime = two_weeks) =
+  middleware (Memory.back_end lifetime)
+
+let session name request =
+  List.assoc_opt name (!(snd (getter request)).payload)
+
+let set_session name value request =
+  (fst (getter request)).set name value
+
+let all_session_values request =
+  !(snd (getter request)).payload
+
+let invalidate_session request =
+  (fst (getter request)).invalidate ()
+
+let session_key request =
+  !(snd (getter request)).key
+
+let session_id request =
+  !(snd (getter request)).id
+
+let session_expires_at request =
+  !(snd (getter request)).expires_at
 
 (* TODO Currently using some sloppy format to flatten string * string lists into
    cookie-safe strings. It's neither space- nor time-efficient. *)
