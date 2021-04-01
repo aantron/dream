@@ -684,7 +684,7 @@ val origin_referer_check : middleware
 
     Implements the
     {{:https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#verifying-origin-with-standard-headers}
-    OWASP Verifying Origin With Standard Headers} CSRF defense-in-depth
+    OWASP {i Verifying Origin With Standard Headers}} CSRF defense-in-depth
     technique, which is good enough for basic usage. Do not allow [`GET] or
     [`HEAD] requests to trigger important side effects if relying only on
     {!Dream.origin_referer_check}.
@@ -1287,7 +1287,7 @@ val send : ?kind:[ `Text | `Binary ] -> string -> websocket -> unit promise
     With [~kind:`Binary], the message will be received unmodified, as either a
     [Blob] or an [ArrayBuffer]. See
     {{:https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/binaryType}
-    MDN [WebSocket.binaryType]}. *)
+    MDN, [WebSocket.binaryType]}. *)
 
 val receive : websocket -> string option promise
 (** Retrieves a message. If the WebSocket is closed before a complete message
@@ -1303,10 +1303,10 @@ val close_websocket : websocket -> unit promise
 val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
 (** Serves the GraphQL schema. Integrates
     {{:https://github.com/andreas/ocaml-graphql-server#readme}
-    ocaml-graphql-server} See example
+    ocaml-graphql-server}. See example
     {{:https://github.com/aantron/dream/tree/master/example/i-graphql#files}
-    [i-graphql]}. The callback is called on every request to create the context,
-    a value that is passed to each resolver used from the schema. Use
+    [i-graphql]}. The callback is called on every request to create the
+    {e context}, a value that is passed to each resolver from the schema. Use
     [Lwt.return] to use the request itself as the context.
 
     {[
@@ -1330,23 +1330,50 @@ val graphiql : string -> handler
 
 (* TODO The TOC highlighting JS does not do well on short sections; it detects
    a next one. Needs to be anchor-target-sensitive. *)
-(** {1 SQL} *)
+(* TODO Docker hints. *)
+(* TODO Automatic foreign key support in Sqlite3. *)
+(** {1 SQL}
 
-(* TODO Expose the lower-level helpers. *)
-(* type sql_pool = Caqti_lwt.Pool.t *)
+    Dream provides thin convenience functions over
+    {{:https://github.com/paurkedal/ocaml-caqti/#readme} Caqti}, an SQL
+    interface with several back ends. Dream installs the core
+    {{:https://opam.ocaml.org/packages/caqti/} [caqti]} package, but you should
+    also install at least one of:
 
-(* val connect_to_sql : ?pool_size:int -> string -> sql_pool Lwt.t *)
+    - {{:https://opam.ocaml.org/packages/caqti-driver-sqlite3/}
+      [caqti-driver-sqlite3]}
+    - {{:https://opam.ocaml.org/packages/caqti-driver-postgresql/}
+      [caqti-driver-postgresql]}
+    - {{:https://opam.ocaml.org/packages/caqti-driver-mariadb/}
+      [caqti-driver-mariadb]}
 
-(* val use_sql : (sql_connection -> 'a Lwt.t) -> sql_pool -> 'a Lwt.t *)
+    They are separated because each has its own system library dependencies.
+    Regardless of which you install, usage on the OCaml level is the same. The
+    differences are in SQL syntax, and in external SQL server or file setup. See
 
-(* val sql_pool : ?size:int -> string -> middleware *)
+    - {{:https://sqlite.org/lang.html} SQLite3, {i SQL As Understood By SQLite}}
+    - {{:https://www.postgresql.org/docs/13/sql.html} PostgreSQL, {i The SQL
+      Language}}
+    - {{:https://mariadb.com/kb/en/sql-statements-structure/} MariaDB, {i SQL
+      Statements & Structure}} *)
 
-(* val sql : (Caqti_lwt.connection -> 'a Lwt.t) -> request -> 'a Lwt.t *)
-(* TODO This should fit very neatly in examples. *)
+(* TODO Document size. *)
+val sql_pool : ?size:int -> string -> middleware
+(** Makes an SQL connection pool available to its inner handler. *)
 
-(* val sql_stream :
-  (Caqti_lwt.connection -> unit Lwt.t) -> request -> response Lwt.t *)
-(* TODO This function eeds the response as argument. *)
+(* TODO Work out the example. *)
+val sql : (Caqti_lwt.connection -> 'a promise) -> request -> 'a promise
+(** Runs the callback with a connection from the SQL pool.
+
+    {[
+      let () =
+        Dream.run
+        @@ Dream.sql_pool "sqlite3://db.sqlite"
+        @@ fun request ->
+          request |> Dream.sql (fun db ->
+            (* ... *))
+    ]} *)
+
 
 
 (** {1 Logging} *)

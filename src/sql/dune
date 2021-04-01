@@ -1,0 +1,11 @@
+(library
+ (public_name dream.sql)
+ (name dream__sql)
+ (libraries
+  caqti
+  caqti-lwt
+  dream.middleware
+  dream.pure
+  uri)
+ (preprocess (pps lwt_ppx))
+ (instrumentation (backend bisect_ppx)))
