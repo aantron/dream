@@ -15,6 +15,7 @@ let log =
 let pool : (_, Caqti_error.connect) Caqti_lwt.Pool.t option ref Dream.global =
   Dream.new_global (fun () -> ref None)
 
+(* TODO Set PRAGMA foreign_keys on SQLite3 connections. *)
 let sql_pool ?size uri inner_handler request =
   let pool_cell = Dream.global pool request in
   begin match !pool_cell with

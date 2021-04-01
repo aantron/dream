@@ -96,6 +96,8 @@ let (|>?) =
 let new_id () =
   Dream__pure.Random.random 9 |> Dream__pure.Formats.to_base64url
 
+(* TODO Must test session sharing. Should there be at-a-distance
+   invalidation? *)
 module Memory =
 struct
   let rec create hash_table expires_at =

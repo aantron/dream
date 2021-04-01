@@ -1244,16 +1244,23 @@ val memory_sessions : ?lifetime:float -> middleware
 (* TODO Protocol error on HTTS+(HTTP2)? *)
 (* TODO Recommend HTTPS. *)
 
-(**/**)
-(* TODO Schema expectations. *)
-(* val sql_sessions : middleware *)
-(** Stores sessions in an SQL database. Passes session keys to clients in
-    cookies. Must be used under {!Dream.sql_pool}. *)
-(**/**)
-
 val cookie_sessions : ?lifetime:float -> middleware
 (** Stores sessions in encrypted cookies. Pass {!Dream.run} [~secret] to be able
     to decrypt cookies from previous server runs. *)
+
+(* TODO Schema expectations. *)
+val sql_sessions : ?lifetime:float -> middleware
+(** Stores sessions in an SQL database. Passes session keys to clients in
+    cookies. Must be used under {!Dream.sql_pool}. Expects a table
+
+    {v
+CREATE TABLE dream_session (
+  key TEXT NOT NULL PRIMARY KEY,
+  id TEXT NOT NULL,
+  expires_at REAL NOT NULL,
+  payload TEXT NOT NULL
+)
+    v} *)
 
 (** {2 Metadata} *)
 

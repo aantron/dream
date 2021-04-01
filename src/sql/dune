@@ -6,6 +6,7 @@
   caqti-lwt
   dream.middleware
   dream.pure
-  uri)
+  uri
+  yojson)
  (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))
