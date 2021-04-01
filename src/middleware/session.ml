@@ -87,11 +87,14 @@ type operations = {
   mutable dirty : bool;
 }
 
-let cookie =
+let session_cookie =
   "dream.session"
 
 let (|>?) =
   Option.bind
+
+let new_id () =
+  Dream__pure.Random.random 9 |> Dream__pure.Formats.to_base64url
 
 module Memory =
 struct
@@ -103,7 +106,7 @@ struct
     else begin
       let session = {
         key;
-        id = Dream__pure.Random.random 9 |> Dream__pure.Formats.to_base64url;
+        id = new_id ();
         expires_at;
         payload = [];
       } in
@@ -138,7 +141,7 @@ struct
     let now = Unix.gettimeofday () in
 
     let valid_session =
-      Dream.cookie ~decrypt:false "dream.session" request
+      Dream.cookie ~decrypt:false session_cookie request
       |>? Hashtbl.find_opt hash_table
       |>? fun session ->
         if session.expires_at > now then
@@ -172,7 +175,7 @@ struct
       let max_age = !session.expires_at -. Unix.gettimeofday () in
       Lwt.return
         (Dream.set_cookie
-          cookie !session.key request response ~encrypt:false ~max_age)
+          session_cookie !session.key request response ~encrypt:false ~max_age)
 
   let back_end lifetime =
     let hash_table = Hashtbl.create 256 in
@@ -180,6 +183,115 @@ struct
       load = load hash_table lifetime;
       send;
     }
+end
+
+(* TODO This probably needs format prefixes. *)
+(* TODO JSON is probably not a good choice for the contents. However, there
+   doesn't seem to be a good alternative in opam right now, so using JSON. *)
+module Cookie =
+struct
+  let create expires_at = {
+    key = "N/A";
+    id = new_id ();
+    expires_at;
+    payload = [];
+  }
+
+  let set operations session name value =
+    session.payload
+    |> List.remove_assoc name
+    |> fun dictionary -> (name, value)::dictionary
+    |> fun dictionary -> session.payload <- dictionary;
+    operations.dirty <- true;
+    Lwt.return_unit
+
+  let invalidate lifetime operations session =
+    session := create (Unix.gettimeofday () +. lifetime);
+    operations.dirty <- true;
+    Lwt.return_unit
+
+  let operations lifetime session dirty =
+    let rec operations = {
+      set = (fun name value -> set operations !session name value);
+      invalidate = (fun () -> invalidate lifetime operations session);
+      dirty;
+    } in
+    operations
+
+  let load lifetime request =
+    let now = Unix.gettimeofday () in
+
+    let valid_session =
+      Dream.cookie session_cookie request
+      |>? fun value ->
+        (* TODO Is there a non-raising version of this? *)
+        match Yojson.Basic.from_string value |> Yojson.Basic.Util.to_assoc with
+        | ["id", `String id;
+           "expires_at", expires_at;
+           "payload", `Assoc payload] ->
+
+          begin match expires_at with
+          | `Float n -> Some n
+          | `Int n -> Some (Float.of_int n)
+          | _ -> None
+          end
+          |>? fun expires_at ->
+            if expires_at <= now then
+              None
+            else
+              let payload =
+                (* TODO Don't raise. *)
+                payload |> List.map (function
+                  | name, `String value -> name, value
+                  | _ -> failwith "Bad payload")
+              in
+              Some {
+                key = "N/A";
+                id;
+                expires_at;
+                payload;
+              }
+
+        | _ -> None
+    in
+
+    let dirty, session =
+      match valid_session with
+      | Some session ->
+        if session.expires_at -. now > (lifetime /. 2.) then
+          false, session
+        else begin
+          session.expires_at <- now +. lifetime;
+          true, session
+        end
+      | None ->
+        true, create (now +. lifetime)
+    in
+
+    let session = ref session in
+    Lwt.return (operations lifetime session dirty, session)
+
+  let send (operations, session) request response =
+    if not operations.dirty then
+      Lwt.return response
+    else
+      let max_age = !session.expires_at -. Unix.gettimeofday () in
+      let value =
+        `Assoc [
+          "id", `String !session.id;
+          "expires_at", `Float !session.expires_at;
+          "payload", `Assoc (!session.payload |> List.map (fun (name, value) ->
+            name, `String value))
+        ]
+        |> Yojson.Basic.to_string
+      in
+      Lwt.return
+        (Dream.set_cookie session_cookie value request response ~max_age)
+
+  let back_end lifetime = {
+    load = load lifetime;
+    send;
+  }
 end
 
 let {middleware; getter} =
@@ -195,6 +307,9 @@ let two_weeks =
 
 let memory_sessions ?(lifetime = two_weeks) =
   middleware (Memory.back_end lifetime)
+
+let cookie_sessions ?(lifetime = two_weeks) =
+  middleware (Cookie.back_end lifetime)
 
 let session name request =
   List.assoc_opt name (!(snd (getter request)).payload)
@@ -216,52 +331,3 @@ let session_id request =
 
 let session_expires_at request =
   !(snd (getter request)).expires_at
-
-(* TODO Currently using some sloppy format to flatten string * string lists into
-   cookie-safe strings. It's neither space- nor time-efficient. *)
-let _dictionary_to_string dictionary =
-  let buffer = Buffer.create 4096 in
-
-  dictionary |> List.iter (fun (key, value) ->
-    let key = Dream__pure.Formats.to_base64url key in
-    let value = Dream__pure.Formats.to_base64url value in
-
-    Printf.bprintf buffer "%i_%s%i_%s"
-      (String.length key) key (String.length value) value);
-
-  Buffer.contents buffer
-
-let _string_to_dictionary string =
-  let load_string index =
-    match String.index_from_opt string index '_' with
-    | None -> None
-    | Some underscore_index ->
-      let length_string = String.sub string index (underscore_index - index) in
-      match int_of_string length_string with
-      | exception _ -> None
-      | length ->
-        match String.sub string (underscore_index + 1) length with
-        | exception _ -> None
-        | value ->
-          match Dream__pure.Formats.from_base64url value with
-          | Error _ -> None
-          | Ok value -> Some (value, index + underscore_index + 1 + length)
-  in
-
-  let load_pair index =
-    match load_string index with
-    | None -> None
-    | Some (key, index) ->
-      match load_string index with
-      | None -> None
-      | Some (value, index) ->
-        Some ((key, value), index)
-  in
-
-  let rec load_dictionary index accumulator =
-    match load_pair index with
-    | None -> accumulator
-    | Some (pair, index) -> load_dictionary index (pair::accumulator)
-  in
-
-  load_dictionary 0

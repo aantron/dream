@@ -13,6 +13,7 @@
   magic-mime
   multipart-form-data
   uri
+  yojson
  )
  (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

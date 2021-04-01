@@ -1249,11 +1249,11 @@ val memory_sessions : ?lifetime:float -> middleware
 (* val sql_sessions : middleware *)
 (** Stores sessions in an SQL database. Passes session keys to clients in
     cookies. Must be used under {!Dream.sql_pool}. *)
+(**/**)
 
-(* val cookie_sessions : middleware *)
+val cookie_sessions : ?lifetime:float -> middleware
 (** Stores sessions in encrypted cookies. Pass {!Dream.run} [~secret] to be able
     to decrypt cookies from previous server runs. *)
-(**/**)
 
 (** {2 Metadata} *)
 
