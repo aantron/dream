@@ -24,7 +24,7 @@ let show_form ?message request =
 let () =
   Dream.run
   @@ Dream.logger
-  @@ Dream.sessions_in_memory
+  @@ Dream.memory_sessions
   @@ Dream.router [
 
     Dream.get  "/"

@@ -4,7 +4,8 @@
 
 TODO
 
-<!-- Adjust once the templater vertical whitespace bug is fixed again. -->
+<!-- TODO Adjust once the templater vertical whitespace bug is fixed again. -->
+<!-- TODO Updated pasted code. -->
 
 ```ocaml
 let show_form ?message request =

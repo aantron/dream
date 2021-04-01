@@ -8,7 +8,7 @@ Introducing sessions is straightforward:
 let () =
   Dream.run
   @@ Dream.logger
-  @@ Dream.sessions_in_memory
+  @@ Dream.memory_sessions
   @@ fun request ->
     match Dream.session "user" request with
     | None ->
@@ -26,7 +26,7 @@ let () =
 <br>
 
 The first time you access the app, it “logs you in” by saving you user name in a
-session. The session manager, `Dream.sessions_in_memory`, a middleware, adds a
+session. The session manager, `Dream.memory_sessions`, a middleware, adds a
 session ID cookie to the response. The next time you access the app, the
 session is looked up again by ID, and the app recognizes you as logged in!
 
@@ -47,10 +47,10 @@ managers that store session data either...
 - client-side, in **encrypted cookies** sent to the client.
 
 Client-side sessions actually work out of the box &mdash; just replace
-`Dream.sessions_in_memory` with `Dream.client_side_sessions`. However, if you
-don't also pass `~secret` to `Dream.run`, Dream generates a random encryption
-key each time it starts, so the useful lifetime of these sessions is the same
-as for in-memory sessions anyway &mdash; the lifetime of the web app process.
+`Dream.memory_sessions` with `Dream.cookie_sessions`. However, if you don't
+also pass `~secret` to `Dream.run`, Dream generates a random encryption key
+each time it starts, so the useful lifetime of these sessions is the same as
+for in-memory sessions anyway &mdash; the lifetime of the web app process.
 
 <!-- TODO Link to recommendations. -->
 

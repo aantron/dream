@@ -20,7 +20,7 @@ let report files =
 let () =
   Dream.run
   @@ Dream.logger
-  @@ Dream.sessions_in_memory
+  @@ Dream.memory_sessions
   @@ Dream.router [
 
     Dream.get  "/" (fun request ->

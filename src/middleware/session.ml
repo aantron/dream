@@ -29,7 +29,7 @@ type response = Dream.response
 type 'a session_info = {
   key : string;
   id : string;
-  expires_at : int64;
+  expires_at : float;
   data : 'a;
 }
 
@@ -37,12 +37,12 @@ type 'a session = {
   mutable session_info : 'a session_info;
   store : 'a store;
   request : request;
-  use_expires_in : int64;
+  use_expires_in : float;
 }
 
 and 'a store = {
   load : request -> 'a session_info option Lwt.t;
-  create : 'a session_info option -> request -> int64 -> 'a session_info Lwt.t;
+  create : 'a session_info option -> request -> float -> 'a session_info Lwt.t;
   set : 'a session_info -> request -> unit Lwt.t;
   send : 'a session_info -> request -> response -> response Lwt.t;
 }
@@ -64,8 +64,7 @@ let set_session_data data session =
   session.store.set session.session_info session.request
 
 let invalidate_session session =
-  let expires_at =
-    Int64.add (Unix.gettimeofday () |> Int64.of_float) session.use_expires_in in
+  let expires_at = Unix.gettimeofday () +. session.use_expires_in in
   let%lwt session_info =
     session.store.create (Some session.session_info) session.request expires_at
   in
@@ -89,18 +88,19 @@ let log =
 
 (* TODO Make session expiration configurable somewhere. *)
 let valid_for =
-  Int64.of_int (60 * 60 * 24 * 7 * 2)
+  60. *. 60. *. 24. *. 7. *. 2.
 
 (* TODO LATER Need a session garbage collector, probably. *)
 (* TODO LATER Can avoid renewing sessions too often by renewing only when they
    are at least half-expired. *)
 let sessions request_local_variable store = fun next_handler request ->
 
-  let now = Unix.gettimeofday () |> Int64.of_float in
+  let now = Unix.gettimeofday () in
 
   (* Try to load a session, given the cookies and/or headers in the request. *)
   let%lwt maybe_session_info = store.load request in
 
+  (* TODO Trim the floats to whole numbers of seconds. *)
   (* If no session is found, create one. Otherwise, if a session is found,
      check its expiration time. If too old, re-create a session. The old session
      is passed to the store so as to copy over any settings that may be
@@ -109,17 +109,17 @@ let sessions request_local_variable store = fun next_handler request ->
     match maybe_session_info with
     | None ->
       let%lwt session_info =
-        store.create None request (Int64.add now valid_for) in
+        store.create None request (now +. valid_for) in
       log.info (fun log -> log "Session %s created" session_info.id);
       Lwt.return session_info
 
     | Some session_info ->
-      if now < Int64.add session_info.expires_at valid_for then
-        let expires_at = Int64.add now valid_for in
+      if now < session_info.expires_at +. valid_for then
+        let expires_at = now +. valid_for in
         Lwt.return {session_info with expires_at}
       else begin
         let%lwt new_session_info =
-          store.create maybe_session_info request (Int64.add now valid_for) in
+          store.create maybe_session_info request (now +. valid_for) in
         log.info (fun log -> log "Session %s expired; creatd %s"
           session_info.id new_session_info.id);
         Lwt.return new_session_info
@@ -163,7 +163,7 @@ let typed request_local_variable = {
 
 
 
-let in_memory_sessions default_value =
+let memory_sessions default_value =
   let hash_table = Hashtbl.create 256 in
 
   let load request =
@@ -214,8 +214,8 @@ struct
   let dictionary_sessions =
     typed dictionary_sessions_variable
 
-  let sessions_in_memory =
-    dictionary_sessions.sessions (in_memory_sessions [])
+  let memory_sessions =
+    dictionary_sessions.sessions (memory_sessions [])
 
   let session_key request =
     session_key (dictionary_sessions.session request)

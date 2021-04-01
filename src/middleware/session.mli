@@ -13,7 +13,7 @@ type 'a session
 
 val session_key : 'a session -> string
 val session_id : 'a session -> string
-val session_expires_at : 'a session -> int64
+val session_expires_at : 'a session -> float
 val session_data : 'a session -> 'a
 val set_session_data : 'a -> 'a session -> unit Lwt.t
 val invalidate_session : 'a session -> unit Lwt.t
@@ -42,7 +42,7 @@ type response = Dream.response
 val store :
   load:(request -> 'a session_info option Lwt.t) ->
   create:
-    ('a session_info option -> request -> int64 -> 'a session_info Lwt.t) ->
+    ('a session_info option -> request -> float -> 'a session_info Lwt.t) ->
   set:('a session_info -> request -> unit Lwt.t) ->
   send:('a session_info -> request -> response -> response Lwt.t) ->
     'a store
@@ -50,13 +50,13 @@ val store :
 (* TODO The default value is really the weakness of this scheme, as compared
    with a lazy session. However, a lazy session is more annoying, again, for
    CSRF, etc. *)
-val in_memory_sessions : 'a -> 'a store
+val memory_sessions : 'a -> 'a store
 
 
 
 module Exported_defaults :
 sig
-   val sessions_in_memory : Dream.middleware
+   val memory_sessions : Dream.middleware
 
    val session : string -> Dream.request -> string option
    val all_session_values : Dream.request -> (string * string) list
@@ -66,5 +66,5 @@ sig
 
    val session_key : Dream.request -> string
    val session_id : Dream.request -> string
-   val session_expires_at : Dream.request -> int64
+   val session_expires_at : Dream.request -> float
 end
