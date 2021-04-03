@@ -5,15 +5,11 @@
 
 
 
+@import url('https://fonts.googleapis.com/css2?family=Tenor+Sans&display=swap');
+
 /* Fonts. */
 
-/* @font-face {
-  font-family: 'Lato';
-  font-style: normal;
-  font-weight: 100;
-  src: local(''),
-       url('lato-v17-latin-100.woff2') format('woff2');
-} */
+/* TODO Host Tenor Sans */
 
 @font-face {
   font-family: 'Lato';
@@ -41,7 +37,7 @@
 
 @font-face {
   font-family: 'Iosevka';
-  font-style: norma;
+  font-style: normal;
   font-weight: 400;
   src: local(''),
        url('iosevka-regular.woff2') format('woff2');
@@ -52,6 +48,13 @@
   font-style: normal;
   font-weight: 400;
   src: url('fa-solid-900.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: FontAwesomeBrands;
+  font-style: normal;
+  font-weight: 400;
+  src: url('fa-brands-400.woff2') format('woff2');
 }
 
 body {
@@ -66,56 +69,120 @@ pre, code {
   font-family: Iosevka, SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
 }
 
-/* pre, code {
-  font-size: 13px;
-  font-family: Fira Code, SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
-} */
+header pre {
+  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+}
+
+header code {
+  font-size: 16px;
+}
+
+h1 {
+  font-family: Tenor Sans, Lato, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
+}
+
+h1 {
+  font-size: 96px;
+  line-height: 1;
+  position: relative;
+  left: -11px;
+}
+
+h6 {
+  font-size: 20px;
+  font-weight: normal;
+}
+
+.blurbs {
+  font-size: 18px;
+  line-height: 28px;
+}
 
 
 
 /* Colors and presentation styles. */
 
 body {
-  background-color: #2a2a2a;
+  background-color: #2c2c2c;
   color: #eee;
 }
 
-pre {
-  background-color: #222;
+.odoc-content pre {
+  background-color: #111;
   margin-left: 1em;
   margin-right: 1em;
+  border: 1px solid black;
 }
-.spec > pre {
+.odoc-content .spec > pre {
   background: none;
   margin: 0;
+  border: none;
 }
 
-code {
+.odoc-content code {
   color: #ddd;
   background-color: #111;
   padding: 0 3px;
   margin: 0 1px;
   white-space: nowrap;
+  line-height: 20px;
 }
-pre > code,
-.spec > code {
+.odoc-content pre > code,
+.odoc-content .spec > code {
   background: none;
   padding: 0;
   margin: 0;
   color: inherit;
   white-space: inherit;
+  line-height: inherit;
 }
-/* p > code:first-child {
-  margin-left: -3px;
-} */
 
 h1, h2, h3 {
   font-weight: 400;
   color: white;
 }
 
+header {
+  background-color: #32353d;
+}
+
+header .topmost {
+  background-color: #181818;
+}
+
+h1 {
+  text-shadow: -2px 2px black;
+}
+
+header pre {
+  padding: 27px 18px;
+  background-color: #1c1c1c;
+  line-height: 27px;
+}
+
+.blurbs {
+  color: white;
+}
+
+header pre, header pre code {
+  font-size: 18px;
+}
+
+header p {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+header p .title {
+  font-family: Tenor Sans;
+}
+
 footer {
-  opacity: 0.25;
+  color: #666;
+}
+
+:target .backing {
+  background-color: #1c1c1c;
 }
 
 nav ~ * a[href="#builtin"],
@@ -137,14 +204,80 @@ a[href^=http]::after {
   content: "\f35d";
   font-family: FontAwesome;
   font-size: 10px;
+  line-height: 18px;
   color: #6e8ccf;
   position: relative;
   top: -0.5px;
   margin-left: 2px;
   margin-right: 3px;
 }
-a[href^=http] > code {
+.odoc-content a[href^=http] > code {
   margin-right: -3px;
+}
+
+a, a:visited, a:active {
+  color: #a9c4ff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.odoc-content a > code {
+  color: #b8caea;
+}
+
+.hljs-module-access, .hljs-keyword, .keyword {
+  color: #ffef33;
+}
+
+.hljs-identifier, .hljs-literal, .hljs-type {
+  color: #92BFBF;
+}
+
+.hljs-string {
+  color: #BDDCDC;
+}
+
+.of {
+  color: #bec5cd;
+}
+
+.topmost ul {
+  list-style: none;
+}
+
+.topmost ul li {
+  height: 24px;
+}
+
+.topmost ul li::before
+{
+  display: inline-block;
+  width: 2rem;
+  padding-right: 0.25rem;
+  text-align: center;
+  font-family: FontAwesome, FontAwesomeBrands;
+  font-size: 15px;
+}
+
+.topmost ul li:nth-child(3)::before {
+  content: '\f09b';
+}
+
+.topmost ul li:nth-child(1)::before {
+  content: '\f126';
+}
+
+.topmost ul li:nth-child(2)::before {
+  content: '\f49e';
+  font-size: 13px;
+}
+
+.topmost ul li:nth-child(4)::before {
+  content: '\f303';
+  font-size: 14px;
 }
 
 
@@ -158,8 +291,12 @@ body {
   position: relative;
 }
 
-body, p, h1, h2, h3 {
-  margin: 0em;
+.odoc-spec {
+  max-width: 45rem;
+}
+
+body, p, h1, h2, h3, h6 {
+  margin: 0;
 }
 
 footer {
@@ -173,6 +310,40 @@ p + p, p + pre, pre + p {
 
 .background {
   z-index: -2;
+}
+
+header {
+  overflow: auto;
+  padding-bottom: 36px;
+}
+
+header h1, header h6 {
+  /* text-align: center; */
+}
+
+header .topmost {
+  padding-top: 12px;
+  padding-bottom: 24px;
+}
+
+h2 {
+  padding-top: 96px;
+  margin-bottom: 48px;
+}
+
+h3 {
+  padding-top: 48px;
+  margin-bottom: 24px;
+}
+
+p + .odoc-spec {
+  margin-top: 36px;
+}
+
+.spec-doc {
+  margin-top: 12px;
+  margin-bottom: 36px;
+  margin-left: 1rem;
 }
 
 .spec-doc li + li {
@@ -207,6 +378,10 @@ ul ul li {
 
 /* Two-column geometry. */
 @media (min-width: 1240px) {
+  .odoc-spec {
+    max-width: none;
+  }
+
   .spec {
     float: left;
     width: 28rem;
@@ -215,17 +390,22 @@ ul ul li {
 
   .background {
     position: absolute;
-    top: 96px;
+    top: 0;
     left: 0;
-    height: calc(100% - 96px);
+    height: 100%;
     width: 43rem;
     background-color: #262626;
+    border-right: 1px solid #2222;
   }
 
   h2, h2 ~ :not(.odoc-spec):not(nav), footer {
     margin-left: 30rem;
     max-width: 30rem;
     clear: both;
+  }
+  .odoc-content > pre {
+    margin-left: 31rem !important;
+    max-width: 28rem !important;
   }
 
   .spec.multiline {
@@ -235,7 +415,14 @@ ul ul li {
   .spec-doc {
     float: left;
     width: 30rem;
+    margin-top: 0;
     margin-bottom: 18px;
+    margin-left: 0;
+  }
+
+  header .blurbs {
+    float: left;
+    width: 30rem;
   }
 
   .spec-doc > p ~ p:last-child, .spec-doc > p ~ pre:last-child {
@@ -275,46 +462,163 @@ ul ul li {
     margin-top: -3.125em;
     margin-bottom: 72px;
   }
+
+  header .topmost {
+    padding-left: 14rem;
+    overflow: auto;
+  }
+
+  .topmost .titles {
+    float: left;
+    width: 29.6em;
+  }
+
+  .topmost ul {
+    float: left;
+    max-width: 46em;
+    padding-left: 0;
+  }
+
+  header pre {
+    float: left;
+    width: 24rem;
+    margin-top: 48px;
+    margin-left: 14rem;
+    margin-right: 4rem;
+  }
+
+  header .blurbs {
+    float: left;
+    margin-top: 24px;
+    max-width: 46rem;
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 @media (min-width: 1400px) {
   .spec-doc {
     width: 40rem;
   }
-  h2, h2 ~ :not(.odoc-spec):not(nav) {
+
+  header .blurbs {
+    width: 40rem;
+  }
+
+  h2, h2 ~ :not(.odoc-spec):not(nav), footer {
     max-width: 40rem;
+  }
+
+  .odoc-content > pre {
+    max-width: 38rem !important;
   }
 }
 @media (min-width: 1520px) {
   .spec-doc {
     width: 46rem;
   }
-  h2, h2 ~ :not(.odoc-spec):not(nav) {
+
+  header .blurbs {
+    width: 46rem;
+  }
+
+  h2, h2 ~ :not(.odoc-spec):not(nav), footer {
     max-width: 46rem;
+  }
+
+  .odoc-content > pre {
+    max-width: 44rem !important;
   }
 }
 
 /* Floating TOC. */
+body > *:not(header), .topmost, .blurbs {
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.odoc-toc ul {
+  columns: 2;
+  list-style: none;
+}
+
+h2:first-of-type {
+  padding-top: 48px;
+}
+
+@media (min-width: 550px) {
+  .odoc-toc ul {
+    columns: 3;
+  }
+}
+
 @media (min-width: 800px) {
+  body > * {
+    padding-left: 0;
+    padding-right: 0;
+    /* padding-left: 14rem; */
+  }
+
+  .odoc-content, body > footer {
+    padding-left: 14rem;
+  }
+
   .odoc-toc {
-    position: fixed;
-    top: 0;
+    position: absolute;
+    /* top: 580px; */
     left: 0;
     height: 100%;
     width: 12rem;
+    overflow-y: scroll;
+    scrollbar-width: none;
     line-height: 30px;
-    border-right: 1px solid #111;
+    border-right: 1px solid #1e1e1e;
     background-color: #222;
+    color: #ddd;
+  }
+  .odoc-toc::-webkit-scrollbar {
+    display: none;
+  }
+  .odoc-toc.fixed {
+    position: fixed;
+    top: 0;
   }
 
-  body {
-    padding-left: 14rem;
+  .odoc-toc ul {
+    columns: 1;
+    padding: 0;
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
+
+  .odoc-toc li {
+    padding-left: 2em;
+  }
+
+  .odoc-toc a,
+  .odoc-toc a:visited,
+  .odoc-toc a:active {
+    color: inherit;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .odoc-toc.fixed .current-section {
+    background-color: #92a4cc;
+    color: black;
+    font-weight: bold;
+    /* background-color: black;
+    font-weight: bold; */
+  }
+
+  h2:first-of-type {
+    padding-top: 36px;
   }
 }
 
-pre {
+.odoc-content pre {
   padding: 12px;
 }
-.spec > pre {
+.odoc-content .spec > pre {
   padding: 0;
 }
 
@@ -362,10 +666,6 @@ h2 .anchor::before, h3 .anchor::before {
   left: 0px;
 }
 
-:target .backing {
-  background-color: #1c1c1c;
-}
-
 .backing {
   position: absolute;
   left: 0;
@@ -384,135 +684,3 @@ h3 .backing {
 .spec .backing {
   height: 1.5em;
 }
-
-
-
-
-
-/* Uncateogorized. */
-
-a > code {
-  color: #b8caea;
-}
-
-/* p, pre {
-  margin-top: 12px;
-  margin-bottom: 12px;
-}
-
-.spec > pre {
-  margin-top: 24px;
-} */
-
-/* .spec > pre.compact {
-  margin-bottom: 0;
-}
-
-p + p {
-  margin-top: 24px;
-} */
-
-/* .odoc-content > ol > li {
-  margin-top: 60px;
-  margin-bottom: 72px;
-} */
-
-/* body.index h1 {
-  text-align: center;
-  font-family: Lato, sans-serif;
-  font-size: 800%;
-  font-weight: 100;
-  text-transform: uppercase;
-  line-height: 1;
-}
-
-h1 {
-  margin-top: 48px;
-  margin-bottom: 24px;
-  font-weight: 400;
-  font-size: 32px;
-}
-
-h2 {
-  margin-top: 96px;
-  margin-bottom: 24px;
-  font-weight: 400;
-  clear: both;
-}
-
-h3 {
-  margin-top: 36px;
-  margin-bottom: 24px;
-  font-weight: 400;
-  clear: both;
-} */
-
-a, a:visited, a:active {
-  color: #a9c4ff;
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-nav.odoc-toc ul {
-  list-style: none;
-  padding: 0;
-  margin-top: 30px;
-  margin-bottom: 30px;
-}
-
-nav.odoc-toc a,
-nav.odoc-toc a:visited,
-nav.odoc-toc a:active {
-  color: inherit;
-  display: inline-block;
-  width: 100%;
-}
-
-nav.odoc-toc li {
-  padding-left: 2em;
-}
-
-nav.odoc-toc .current-section {
-  background-color: #111;
-}
-
-.hljs-module-access, .hljs-keyword, .keyword {
-  color: #ffef33;
-}
-
-.hljs-identifier, .hljs-literal, .hljs-type {
-  color: #92BFBF;
-}
-
-.hljs-string {
-  color: #BDDCDC;
-}
-
-.of {
-  color: #bec5cd;
-}
-
-/* .spec-doc > :first-child {
-  margin-top: 0;
-}
-
-.spec-doc {
-  padding-left: 2.25em;
-  margin-top: 6px;
-  margin-bottom: 48px;
-} */
-
-/* p + .odoc-spec {
-  margin-top: 48px;
-} */
-
-/* ol {
-  padding-left: 18px; */
-/* }
-
-.spec {
-  color: white;
-} */

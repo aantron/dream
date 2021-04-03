@@ -75,7 +75,7 @@ and route
 
     The three handler-related types have a vaguely algebraic interpretation:
 
-    - Literal {!type-handler}s are atoms.
+    - Literal handlers are atoms.
     - {!type-middleware} is for sequential composition (product-like).
     - {!type-route} is for alternative composition (sum-like).
 
@@ -2088,7 +2088,7 @@ val sort_headers : (string * string) list -> (string * string) list
     header order. This function can help sanitize output before comparison. *)
 
 val echo : handler
-(** Respomds with the request body. *)
+(** Responds with the request body. *)
 
 
 

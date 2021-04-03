@@ -17,13 +17,141 @@
 <body class="index">
 
 <header>
-  <h1>Dream</h1>
+  <div class="topmost">
+    <div class="titles">
+      <h1>Dream</h1>
+      <h6>Tidy Web framework for OCaml and ReasonML</h6>
+    </div>
+
+    <ul>
+      <li><code>1.0.0~alpha1</code></li>
+      <li><code>opam install dream</code></li>
+      <li><a href="https://github.com/aantron/dream">GitHub</a></li>
+      <li><a href="https://github.com/aantron/dream/blob/master/src/dream.mli">Edit these docs</a></li>
+    </ul>
+  </div>
+
+  <pre><span class="keyword">let</span> greet who =
+  <span class="hljs-type">&lt;html></span>
+    <span class="hljs-type">&lt;body></span>
+      <span class="hljs-type">&lt;h1></span><span class="hljs-string">Hello, </span>&lt;%s who %><span class="hljs-string">!</span><span class="hljs-type">&lt;/h1></span>
+    <span class="hljs-type">&lt;/body></span>
+  <span class="hljs-type">&lt;/html></span>
+
+<span class="keyword">let</span> <span class="hljs-string">()</span> =
+  <span class="hljs-type">Dream</span>.run
+  <span class="hljs-string">@@</span> <span class="hljs-type">Dream</span>.logger
+  <span class="hljs-string">@@</span> <span class="hljs-type">Dream</span>.router <span class="hljs-string">[</span>
+    <span class="hljs-type">Dream</span>.get <span class="hljs-string">"/"</span> <span class="hljs-string">@@</span> <span class="keyword">fun</span> _ ->
+      <span class="hljs-type">Dream</span>.respond (greet <span class="hljs-string">"world"</span>);
+  <span class="hljs-string">]</span>
+  <span class="hljs-string">@@</span> <span class="hljs-type">Dream</span>.not_found</pre>
+
+  <!-- Send TLS link to HTTPS example. -->
+
+  <div class="blurbs">
+    <p>
+      <span class="title"><strong>Dream</strong></span> is an easy-to-use Web
+      framework, whose entire <a href="#types">interface</a> fits on this page!
+    </p>
+
+    <p>
+      It supports <a href="#servers">TLS</a>,
+      <a href="#websockets">WebSockets</a>, and <a href="#graphql">GraphQL</a>.
+      HTTP/2 support is <a href="#servers">transparent</a>. It also includes:
+
+    <ul>
+      <li>
+        a nice <a href="#logging">log</a> and default OCaml runtime
+        configuration;
+      </li>
+      <li>
+        easy-to-use, secure helpers for round-tripping
+        <a href="#cookies">cookies</a> and <a href="#forms">forms</a>;
+      </li>
+      <li>
+        <a href="#templates">templates</a> that interleave OCaml with the
+        already-familiar HTML;
+      </li>
+      <li>
+        a fully composable <a href="#routing">router</a>;
+      </li>
+      <li>
+        <a href="#sessions">session management</a> with pluggable
+        <a href="#back-ends">back ends</a>; and
+      </li>
+      <li>
+        unified <a href="#errors">error handling</a> that leaks no English
+        strings from any level of your app.
+      </li>
+    </ul>
+
+    <p>
+      You can integrate Dream into a fully self-contained binary, or run it in
+      large deployments behind proxies. Dream assumes no databases, environment
+      variables, or configuration files, and requires no setup beyond installing
+      the one package, <code>dream</code>.
+    </p>
+
+    <p>
+      Dream sticks to base OCaml types as much as possible, introducing only a
+      few <a href="#types">types</a> of its own. Dream handlers and middlewares
+      are just bare functions. Dream has a flat namespace and aims for maximal
+      clarity.
+    </p>
+
+    <p>
+      This page is the API documentation, but Dream also has:
+    </p>
+
+    <ul>
+      <li>
+        A <a href="https://github.com/aantron/dream/tree/master/example#readme">
+        Tutorial</a> &mdash; get started at
+        <a href="https://github.com/aantron/dream/tree/master/example/1-hello#files">
+        <code>1-hello</code></a>!
+      </li>
+      <li>
+        Many <a href="https://github.com/aantron/dream/tree/master/example#reason">
+        Examples</a>, covering all kinds of scenarios.
+      </li>
+    </ul>
+  </div>
 </header>
+
+<!-- TODO Real getting started instructions link. -->
+
+<!-- <header>
+  <p>
+    <span class="title">Dream</span> is a web framework ...
+
+    HTTP2, TLS, runs without a proxy, integration, scaling, GraphQL, etc.
+  </p>
+
+  <pre><code>let greet who =
+  &lt;html>&lt;body>&lt;h1>Hello, &lt;%s who %>!&lt;/h1>&lt;/body>&lt;/html>
+
+let () =
+  Dream.run
+  @@ Dream.logger
+  @@ Dream.router [
+    Dream.get "/" @@ fun _request -> Dream.respond (greet "world");
+  ]
+  @@ Dream.not_found
+  </code></pre>
+</header> -->
 
 <!-- Replaced by Soupault with postprocessed odoc output. -->
 <div id="api"></div>
 
-<footer>Copyright © 2021 Anton Bachin. Released under the MIT license.</footer>
+<footer>
+  Copyright © 2021 Anton Bachin.
+  <br>
+  Released under the MIT license. See
+  <a href="https://github.com/aantron/dream/blob/master/LICENSE.md">
+    LICENSE.md
+  </a>
+</footer>
 
 </body>
 </html>

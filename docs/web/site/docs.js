@@ -26,4 +26,19 @@ function current_section() {
   }
 };
 
-window.onscroll = current_section;
+function sidebar_position() {
+  var toc = document.querySelector(".odoc-toc");
+  var header = document.querySelector("header");
+  if (window.scrollY >= header.offsetHeight)
+    toc.classList.add("fixed");
+  else {
+    toc.classList.remove("fixed");
+  }
+};
+
+function scroll() {
+  current_section();
+  sidebar_position();
+};
+
+window.onscroll = scroll;

@@ -190,6 +190,8 @@ end
 (* TODO This probably needs format prefixes. *)
 (* TODO JSON is probably not a good choice for the contents. However, there
    doesn't seem to be a good alternative in opam right now, so using JSON. *)
+(* TODO Should still generate and send keys, for potential revocation
+   implementations. *)
 module Cookie =
 struct
   let create expires_at = {
