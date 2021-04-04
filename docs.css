@@ -1,0 +1,768 @@
+/* This file is part of Dream, released under the MIT license. See
+   LICENSE.md for details, or visit https://github.com/aantron/dream.
+
+   Copyright 2021 Anton Bachin */
+
+
+
+/* Fonts. */
+
+@font-face {
+  font-family: Lato;
+  font-style: normal;
+  font-weight: 400;
+  src: local(''),
+       url('lato-v17-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: Lato;
+  font-style: normal;
+  font-weight: 700;
+  src: local(''),
+       url('lato-v17-latin-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: Lato;
+  font-style: italic;
+  font-weight: 400;
+  src: local(''),
+       url('lato-v17-latin-italic.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: Iosevka;
+  font-style: normal;
+  font-weight: 400;
+  src: local(''),
+       url('iosevka-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: FontAwesome;
+  font-style: normal;
+  font-weight: 400;
+  src: url('fa-solid-900.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: FontAwesomeBrands;
+  font-style: normal;
+  font-weight: 400;
+  src: url('fa-brands-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Tenor Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('tenor-sans-v12-latin-regular.woff2') format('woff2');
+}
+
+
+
+/* Theme */
+
+/* Dark theme (default) */
+:root, body:not([data-theme="light"]) {
+  --bg-color: #131618;
+  --text-color: #c9d1d9;
+  --code-bg-color: #2c333b;
+  --border-color: #282828;
+  --link-color: #8dc5ff;
+  --external-link-color: #5d7fcd;
+  --anchor-color: #bfcdea;
+
+  --of-color: #bec5cd;
+  --target-backing-color: #390022;
+
+  --hljs-keyword-color: #ff6c9b;
+  --hljs-identifier-color: #70df5c;
+  --hljs-tag-color: #c28eff;
+  --hljs-string-color: #e3db7a;
+}
+
+/* Light theme */
+:root, body[data-theme="light"] {
+  --bg-color: #f5f7fa;
+  --text-color: #1f2937;
+  --code-bg-color: #eef1f6;
+  --header-bg-color: #f5f7fa;
+  --border-color: #e0e0e0;
+  --link-color: #1c7ed6;
+  --external-link-color: #1d4ed8;
+  --anchor-color: #888;
+
+  --of-color: #6b7280;
+  --target-backing-color: #f7f6f3;
+
+  --hljs-keyword-color: #d94879;
+  --hljs-identifier-color: #22863a;
+  --hljs-tag-color: #6f42c1;
+  --hljs-string-color: #b94e48;
+}
+
+body {
+  font-family: Lato, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-family: Lato;
+}
+
+pre, code {
+  font-size: 15px;
+  font-family: Iosevka, SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+}
+
+header pre {
+  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+}
+
+header code {
+  font-size: 16px;
+}
+
+h1 {
+  font-family: Tenor Sans, Lato, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
+}
+
+h1 {
+  font-size: 96px;
+  line-height: 1;
+  position: relative;
+  left: -11px;
+}
+
+h6 {
+  font-size: 20px;
+  font-weight: normal;
+}
+
+
+
+/* Colors and presentation styles. */
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.odoc-content pre {
+  background-color: var(--code-bg-color);
+  margin-left: 1em;
+  margin-right: 1em;
+  border: 1px solid var(--border-color);
+}
+.odoc-content .spec > pre {
+  background: none;
+  margin: 0;
+  border: none;
+}
+
+.odoc-content code {
+  /* color: #ddd; */
+  background-color: var(--code-bg-color);
+  padding: 0 5px;
+  margin: 0 1px;
+  white-space: nowrap;
+  line-height: 20px;
+  font-size: 13.5px;
+}
+.odoc-content pre > code,
+.odoc-content .spec > code {
+  background: none;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  white-space: inherit;
+  line-height: inherit;
+  font-size: 15px;
+}
+.spec-doc pre > code {
+  font-size: 13.5px;
+}
+
+/* h1, h2, h3 {
+  font-weight: 400;
+  color: white;
+} */
+
+/* .spec {
+  color: white;
+} */
+
+header {
+  background-color: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+header .topmost {
+  /* background-color: #0f131a; */
+  border-bottom: 1px solid var(--border-color);
+}
+
+.topmost .toolbar {
+  float: right;
+}
+
+.topmost .toggle-theme-btn {
+  all: unset;
+  position: relative;
+}
+
+.topmost .toggle-theme-btn::before {
+  content: "\F185"; /* sun */
+  position: absolute;
+  left: calc(0% - 16px + -8px);
+  top: calc(0% + 4px);
+  width: 16px;
+  height: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: FontAwesome, FontAwesomeBrands;
+  font-size: 15px;
+}
+
+body:not([data-theme="light"]) .topmost .toggle-theme-btn::before {
+  content: "\F186"; /* moon */
+}
+
+header pre {
+  padding: 27px 18px;
+  /* background-color: #202020; */
+  line-height: 27px;
+}
+
+.blurbs {
+  /* color: white; */
+}
+
+header pre, header pre code {
+  font-size: 18px;
+}
+
+header p {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+header p .title {
+  font-family: Tenor Sans;
+}
+
+footer {
+  color: #666;
+}
+
+:target .backing {
+  background-color: var(--target-backing-color);
+}
+
+nav ~ * a[href="#builtin"],
+nav ~ * a[href="#errors"],
+nav ~ * a[href="#headers"],
+nav ~ * a[href="#routing"],
+nav ~ * a[href="#requests"],
+nav ~ * a[href="#responses"],
+nav ~ * a[href="#sessions"],
+nav ~ * a[href="#templates"] {
+  font-style: italic;
+}
+
+header a[href*=example], .spec-doc a[href*=example] {
+  font-weight: bold;
+}
+
+header a[href^=http]::after, .spec-doc a[href^=http]::after {
+  content: "\f35d";
+  font-family: FontAwesome;
+  font-size: 10px;
+  line-height: 18px;
+  color: var(--external-link-color);
+  position: relative;
+  top: -1px;
+  margin-left: 2px;
+  margin-right: 3px;
+}
+.odoc-content a[href^=http] > code {
+  margin-right: -3px;
+}
+
+a, a:visited, a:active {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.odoc-content a > code {
+  color: var(--link-color);
+}
+
+.hljs-module-access, .hljs-keyword, .keyword {
+  color: var(--hljs-keyword-color);
+}
+
+.hljs-identifier, .hljs-literal, .hljs-type {
+  color: var(--hljs-identifier-color);
+}
+
+.hljs-tag {
+  color: var(--hljs-tag-color);
+}
+
+.hljs-string {
+  color: var(--hljs-string-color);
+}
+
+.of {
+  color: var(--of-color);
+}
+
+.topmost ul {
+  list-style: none;
+}
+
+.topmost ul li {
+  height: 24px;
+}
+
+.topmost ul li::before
+{
+  display: inline-block;
+  width: 2rem;
+  padding-right: 0.25rem;
+  text-align: center;
+  font-family: FontAwesome, FontAwesomeBrands;
+  font-size: 15px;
+}
+
+.topmost ul li:nth-child(3)::before {
+  content: '\f09b';
+}
+
+.topmost ul li:nth-child(1)::before {
+  content: '\f126';
+}
+
+.topmost ul li:nth-child(2)::before {
+  content: '\f49e';
+  font-size: 13px;
+}
+
+.topmost ul li:nth-child(4)::before {
+  content: '\f303';
+  font-size: 14px;
+}
+
+
+
+/* Geometry.
+
+   Some of the styles here are not strictly geometry, but they *depend* on
+   geometry. */
+
+body {
+  position: relative;
+}
+
+.odoc-spec {
+  max-width: 45rem;
+}
+
+body, p, h1, h2, h3, h6 {
+  margin: 0;
+}
+
+footer {
+  padding-top: 120px;
+  padding-bottom: 24px;
+}
+
+p + p, p + pre, pre + p {
+  margin-top: 12px;
+}
+
+.background {
+  z-index: -2;
+}
+
+header {
+  overflow: auto;
+  padding-bottom: 72px;
+}
+
+header .topmost {
+  padding-top: 12px;
+  padding-bottom: 24px;
+  margin-bottom: 48px;
+}
+
+header .blurbs {
+  max-width: 46em;
+}
+
+h2 {
+  padding-top: 96px;
+  margin-bottom: 48px;
+}
+
+h3 {
+  padding-top: 48px;
+  margin-bottom: 24px;
+}
+
+p + .odoc-spec {
+  margin-top: 36px;
+}
+
+.spec-doc {
+  margin-top: 12px;
+  margin-bottom: 36px;
+  margin-left: 1rem;
+}
+
+.spec-doc li + li {
+  margin-top: 12px;
+}
+#type-bigstring + .spec-doc li + li,
+#val-next + .spec-doc li + li,
+#val-origin_referrer_check + .spec-doc li + li,
+#val-form + .spec-doc li + li,
+#type-part + .spec-doc li + li,
+#val-upload + .spec-doc li + li,
+#val-static + .spec-doc li + li,
+#val-from_path + .spec-doc li + li {
+  margin-top: 0;
+}
+
+#type-error + .spec-doc > ul > li + li {
+  margin-top: 18px;
+}
+
+ul ul {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+ul ul li {
+  margin: 0 !important;
+}
+
+/* Two-column geometry. */
+@media (min-width: 1240px) {
+  .odoc-spec {
+    max-width: none;
+  }
+
+  .spec {
+    float: left;
+    width: 28rem;
+    margin-right: 2em;
+  }
+
+  .background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 43rem;
+    /* background-color: #262626; */
+    border-right: 1px solid var(--border-color);
+  }
+
+  h2, h2 ~ :not(.odoc-spec):not(nav), footer {
+    margin-left: 30rem;
+    max-width: 30rem;
+    clear: both;
+  }
+  .odoc-content > pre {
+    margin-left: 31rem !important;
+    max-width: 28rem !important;
+  }
+
+  .spec.multiline {
+    margin-bottom: 36px;
+  }
+
+  .spec-doc {
+    float: left;
+    width: 30rem;
+    margin-top: 0;
+    margin-bottom: 12px;
+    margin-left: 0;
+  }
+
+  header .blurbs {
+    float: left;
+    width: 30rem;
+  }
+
+  .spec-doc > p ~ p:last-child, .spec-doc > p ~ pre:last-child {
+    margin-bottom: 36px;
+  }
+
+  p + .odoc-spec {
+    margin-top: 48px;
+  }
+  .odoc-spec + p {
+    padding-top: 24px;
+  }
+
+  .spec, h2, h3, footer {
+    clear: both;
+  }
+
+  h2 {
+    padding-top: 96px;
+    margin-bottom: 48px;
+  }
+
+  h3 {
+    padding-top: 48px;
+    margin-bottom: 24px;
+  }
+
+  #type-server + .spec-doc {
+    margin-top: -26px;
+    margin-bottom: 48px;
+  }
+  #val-patch + .spec-doc {
+    margin-top: -11.125em;
+    margin-bottom: 200px;
+  }
+  #val-debug + .spec-doc {
+    margin-top: -3.125em;
+    margin-bottom: 72px;
+  }
+
+  header .topmost {
+    padding-left: 14rem;
+    overflow: auto;
+  }
+
+  .topmost .titles {
+    float: left;
+    width: 29.6em;
+  }
+
+  .topmost ul {
+    float: left;
+    max-width: 46em;
+    padding-left: 0;
+  }
+
+  header pre {
+    float: left;
+    width: 24rem;
+    margin-top: 48px;
+    margin-left: 14rem;
+    margin-right: 4rem;
+  }
+
+  header .blurbs {
+    float: left;
+    margin-top: 24px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+@media (min-width: 1400px) {
+  .spec-doc {
+    width: 40rem;
+  }
+
+  header .blurbs {
+    width: 40rem;
+  }
+
+  h2, h2 ~ :not(.odoc-spec):not(nav), footer {
+    max-width: 40rem;
+  }
+
+  .odoc-content > pre {
+    max-width: 38rem !important;
+  }
+}
+@media (min-width: 1520px) {
+  .spec-doc {
+    width: 46rem;
+  }
+
+  header .blurbs {
+    width: 46rem;
+  }
+
+  h2, h2 ~ :not(.odoc-spec):not(nav), footer {
+    max-width: 46rem;
+  }
+
+  .odoc-content > pre {
+    max-width: 44rem !important;
+  }
+}
+
+/* Floating TOC. */
+body > *:not(header), .topmost, .blurbs {
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.odoc-toc ul {
+  columns: 2;
+  list-style: none;
+}
+
+h2:first-of-type {
+  padding-top: 48px;
+}
+
+@media (min-width: 550px) {
+  .odoc-toc ul {
+    columns: 3;
+  }
+}
+
+@media (min-width: 800px) {
+  body > * {
+    padding-left: 0;
+    padding-right: 0;
+    /* padding-left: 14rem; */
+  }
+
+  .odoc-content, body > footer {
+    padding-left: 14rem;
+  }
+
+  .odoc-toc {
+    position: absolute;
+    /* top: 580px; */
+    left: 0;
+    height: 100%;
+    width: 12rem;
+    overflow-y: scroll;
+    scrollbar-width: none;
+    line-height: 30px;
+    border-right: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    /* color: #ddd; */
+  }
+  .odoc-toc::-webkit-scrollbar {
+    display: none;
+  }
+  .odoc-toc.fixed {
+    position: fixed;
+    top: 0;
+  }
+
+  .odoc-toc ul {
+    columns: 1;
+    padding: 0;
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
+
+  .odoc-toc li {
+    padding-left: 2em;
+  }
+
+  .odoc-toc a,
+  .odoc-toc a:visited,
+  .odoc-toc a:active {
+    color: inherit;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .odoc-toc.fixed .current-section {
+    /* background-color: #1c2a3b; */
+    /* color: black;
+    font-weight: bold; */
+    /* background-color: black;
+    font-weight: bold; */
+  }
+
+  .odoc-toc.fixed .current-section::before {
+    content: "—";
+    position: absolute;
+    left: 0.75rem;
+  }
+
+  h2:first-of-type {
+    padding-top: 36px;
+  }
+}
+
+.odoc-content pre {
+  padding: 12px;
+}
+.odoc-content .spec > pre {
+  padding: 0;
+}
+
+
+
+/* Anchors. */
+
+.anchor {
+  visibility: hidden;
+  position: absolute;
+  margin-left: -15px;
+  margin-top: 1px;
+  padding-right: 12px;
+  text-decoration: none !important;
+}
+
+h1 > .anchor {
+  display: none;
+}
+
+h2 > .anchor, h3 > .anchor {
+  margin-top: -1px;
+}
+
+.multiline > .anchor {
+  margin-top: -1px;
+}
+
+:hover > .anchor {
+  visibility: visible;
+}
+
+.anchor:before {
+  content: "#";
+  content: '\f0c1';
+  font-family: FontAwesome;
+  font-size: 10px;
+  font-style: oblique;
+  color: var(--anchor-color);
+  position: relative;
+  top: -1.75px;
+  left: -4px;
+}
+h2 .anchor::before, h3 .anchor::before {
+  left: 0px;
+}
+
+.backing {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  z-index: -1;
+}
+
+h2 .backing {
+  height: 1.1em;
+}
+
+h3 .backing {
+  height: 1.3em;
+}
+
+.spec .backing {
+  height: 1.5em;
+}
