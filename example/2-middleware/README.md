@@ -40,9 +40,9 @@ When you run this server and visit
 
 You can write your own messages to the log using
 [`Dream.log`](https://aantron.github.io/dream/#val-log). See example
-[**`9-logging`**](../9-logging/#files) for more logging options. Now that we
-have the logger, we will use it in all other examples, even though it's not
-really necessary &mdash; it just makes it much easier to see what is going on.
+[**`a-log`**](../a-log/#files) for more logging options. Now that we have the
+logger, we will use it in all other examples, even though it's not really
+necessary &mdash; it just makes it much easier to see what is going on.
 
 <br>
 

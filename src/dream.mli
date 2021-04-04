@@ -48,8 +48,8 @@ and middleware = handler -> handler
     Examples
     {{:https://github.com/aantron/dream/tree/master/example/4-counter#files}
     [4-counter]} and
-    {{:https://github.com/aantron/dream/tree/master/example/a-promise#files}
-    [a-promise]} show user-defined middlewares:
+    {{:https://github.com/aantron/dream/tree/master/example/5-promise#files}
+    [5-promise]} show user-defined middlewares:
 
     {[
       let count_requests inner_handler request =
@@ -102,8 +102,8 @@ and outgoing
 and 'a promise = 'a Lwt.t
 (** Dream uses {{:https://github.com/ocsigen/lwt} Lwt} for promises and
     asynchronous I/O. See example
-    {{:https://github.com/aantron/dream/tree/master/example/a-promise#files}
-    [a-promise]}. *)
+    {{:https://github.com/aantron/dream/tree/master/example/5-promise#files}
+    [5-promise]}. *)
 
 
 
@@ -590,8 +590,8 @@ val all_cookies : request -> (string * string) list
 val body : 'a message -> string promise
 (** Retrieves the entire body. Stores a reference, so {!Dream.body} can be used
     many times. See example
-    {{:https://github.com/aantron/dream/tree/master/example/5-echo#files}
-    [5-echo]}. *)
+    {{:https://github.com/aantron/dream/tree/master/example/6-echo#files}
+    [6-echo]}. *)
 
 val with_body : string -> response -> response
 (** Replaces the body. *)
@@ -929,8 +929,8 @@ let render message =
     v}
 
     See example
-    {{:https://github.com/aantron/dream/tree/master/example/6-template#files}
-    [6-template]}.
+    {{:https://github.com/aantron/dream/tree/master/example/7-template#files}
+    [7-template]}.
 
     To build the template, add this to [dune]:
 
@@ -1413,8 +1413,8 @@ val log : ('a, Format.formatter, unit, unit) format4 -> 'a
     {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html#VALfprintf}
     [Format]}. The rest of the arguments are determined by the format string.
     See example
-    {{:https://github.com/aantron/dream/tree/master/example/9-log#files}
-    [9-log]}.
+    {{:https://github.com/aantron/dream/tree/master/example/a-log#files}
+    [a-log]}.
 
     {[
       Dream.log "Counter is now: %i" counter;
@@ -1442,8 +1442,8 @@ val error : ('a, unit) conditional_log
     level} is [`Error] or higher. This scheme is based on the
     {{:https://erratique.ch/software/logs/doc/Logs/index.html} Logs} library.
     See example
-    {{:https://github.com/aantron/dream/tree/master/example/9-log#files}
-    [9-log]}.
+    {{:https://github.com/aantron/dream/tree/master/example/a-log#files}
+    [a-log]}.
 
     {[
       Dream.error (fun log ->
@@ -1486,8 +1486,8 @@ val sub_log : string -> sub_log
     ]}
 
     See [README] of example
-    {{:https://github.com/aantron/dream/tree/master/example/9-log#files}
-    [9-log]}. *)
+    {{:https://github.com/aantron/dream/tree/master/example/a-log#files}
+    [a-log]}. *)
 
 val initialize_log :
   ?backtraces:bool ->
@@ -1671,8 +1671,8 @@ type error_handler = error -> response option promise
 val error_template :
   (string option -> response -> response promise) -> error_handler
 (** Builds an {!error_handler} from a template. See example
-    {{:https://github.com/aantron/dream/tree/master/example/8-error#files}
-    [8-error]}.
+    {{:https://github.com/aantron/dream/tree/master/example/9-error#files}
+    [9-error]}.
 
     {[
       let my_error_handler =

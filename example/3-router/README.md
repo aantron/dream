@@ -45,7 +45,7 @@ Found` when that happens.
 
 Except for the status code, the `404 Not Found` response is *completely* empty,
 so it might not display well in your browser. In example
-[**`8-error`**](../8-error/#files), we will decorate all error responses with
+[**`9-error`**](../9-error/#files), we will decorate all error responses with
 an error template in one central location.
 
 <br>
@@ -68,8 +68,8 @@ The router can do more than match simple routes:
 
 - [**`4-counter`**](../4-counter/#files) counts requests, and exposes a special
   route for getting the count.
-- [**`5-echo`**](../5-echo/#files) is dynamic in another way: by reading the
-  request body.
+- [**`5-promise`**](../5-promise/#files) introduces Lwt, the promise library
+  used by Dream.
 
 <br>
 

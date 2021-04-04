@@ -36,9 +36,8 @@ which means they usually also
 This example's middleware only does something *before* calling the
 `inner_handler`. To do something *after*, we will need to await the response
 promise with [Lwt](https://github.com/ocsigen/lwt#readme), the promise library
-used by Dream. The next example, [**`5-echo`**](../5-echo/#files), already shows
-a bit of it, but example [**`a-promise`**](../a-promise/#files) introduces Lwt
-more fully.
+used by Dream. The next example, [**`5-promise`**](../5-promise/#files), does
+exactly that!
 
 <!-- TODO
 <br>
@@ -52,10 +51,10 @@ you are writing middleware to publish in a library. It's fine to use a global
 
 **Next steps:**
 
-- [**`5-echo`**](../5-echo/#files) responds to `POST` requests and reads their
+- [**`5-promise`**](../5-promise/#files) shows a middleware that awaits
+  responses using Lwt.
+- [**`6-echo`**](../6-echo/#files) responds to `POST` requests and reads their
   bodies.
-- [**`6-template`**](../6-template/#files) embeds HTML in OCaml... or... OCaml
-  in HTML?
 
 <br>
 

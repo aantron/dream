@@ -15,18 +15,17 @@ list below and jump to whatever interests you!
   different paths.
 - [**`4-counter`**](4-counter/#files) &nbsp;&mdash;&nbsp; the first *custom*
   middleware!
-- [**`5-echo`**](5-echo/#files) &nbsp;&mdash;&nbsp; reads request bodies.
-- [**`6-template`**](6-template/#files) &nbsp;&mdash;&nbsp; renders responses
-  from inline HTML templates and guards against XSS.
-- [**`7-debug`**](7-debug/#files) &nbsp;&mdash;&nbsp; includes detailed
-  information
-  about errors in responses.
-- [**`8-error`**](8-error/#files) &nbsp;&mdash;&nbsp; customize all error
-  responses in one place.
-- [**`9-log`**](9-log/#files) &nbsp;&mdash;&nbsp; writing messages to Dream's
-  log.
-- [**`a-promise`**](a-promise/#files) &nbsp;&mdash;&nbsp; introduces Lwt, the
+- [**`5-promise`**](5-promise/#files) &nbsp;&mdash;&nbsp; introduces Lwt, the
   promise library used by Dream.
+- [**`6-echo`**](6-echo/#files) &nbsp;&mdash;&nbsp; reads request bodies.
+- [**`7-template`**](7-template/#files) &nbsp;&mdash;&nbsp; renders responses
+  from inline HTML templates and guards against XSS.
+- [**`8-debug`**](8-debug/#files) &nbsp;&mdash;&nbsp; includes detailed
+  information about errors in responses.
+- [**`9-error`**](9-error/#files) &nbsp;&mdash;&nbsp; customize all error
+  responses in one place.
+- [**`a-log`**](a-log/#files) &nbsp;&mdash;&nbsp; writing messages to Dream's
+  log.
 - [**`b-session`**](b-session/#files) &nbsp;&mdash;&nbsp; associates state with
   client sessions.
 - [**`c-cookie`**](c-cookie/#files) &nbsp;&mdash;&nbsp; sets custom cookies.
