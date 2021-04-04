@@ -27,20 +27,18 @@ list below and jump to whatever interests you!
   log.
 - [**`a-promise`**](a-promise/#files) &nbsp;&mdash;&nbsp; introduces Lwt, the
   promise library used by Dream.
-- [**`b-session`**](a-session/#files) &nbsp;&mdash;&nbsp; associates state with
+- [**`b-session`**](b-session/#files) &nbsp;&mdash;&nbsp; associates state with
   client sessions.
 - [**`c-cookie`**](c-cookie/#files) &nbsp;&mdash;&nbsp; sets custom cookies.
-- [**`d-form`**](c-form) &nbsp;&mdash;&nbsp; reading forms and CSRF prevention.
-- [**`e-json`**](d-json)
-- [**`f-static`**](e-static)
-- [**`g-upload`**](f-upload)
-- [**`h-sql`**](g-sql) &nbsp;&mdash;&nbsp; finally CRUD!
-- [**`i-graphql`**](h-graphql)
-- [**`j-stream`**](i-stream)
-- [**`k-websocket`**](j-websocket)
-- [**`l-https`**](k-https)
-- [**`m-crypto`**](l-crypto)
-- [**`n-locals`**](m-locals)
+- [**`d-form`**](d-form) &nbsp;&mdash;&nbsp; reading forms and CSRF prevention.
+- [**`e-json`**](e-json)
+- [**`f-static`**](f-static)
+- [**`g-upload`**](g-upload)
+- [**`h-sql`**](h-sql) &nbsp;&mdash;&nbsp; finally CRUD!
+- [**`i-graphql`**](i-graphql)
+- [**`j-stream`**](j-stream)
+- [**`k-websocket`**](k-websocket)
+- [**`k-https`**](k-https)
 
 That's it for the tutorial!
 
