@@ -19,35 +19,76 @@ let () =
   @@ Dream.not_found
 ```
 
-All of Dream is exposed as [one module][api-main], without any submodules, and
-one package, `dream`. Included are:
+<br>
+
+All of Dream is [one flat module][api-main], in one package, `dream`. Included
+are:
 
 - Easy **HTTPS** and **HTTP/2** support, so you can choose to run Dream without
   a proxy.
-- **WebSocket** and **GraphQL** support for your modern web apps.
-- **HTML templates** with embedded OCaml &mdash; use existing skills!
-- Composable **middleware** and **routes**.
-- Easy-to-use to functions for **secure cookies** and **CSRF-safe forms**.
-- **Sessions** with multiple storage back ends.
-- Unified, internationalization-friendly **error handling**.
-- **Cryptography** helpers, key rotation, and a chosen cipher.
-- A neat **logger**, and attention to configuring the OCaml runtime nicely.
+- [**WebSockets**][websocket] and [**GraphQL**][graphql] for your modern Web
+  apps.
+- [**HTML templates**][templates] with embedded OCaml &mdash; use existing
+  skills!
+- Composable [**middleware**][middleware] and [**routes**][routing].
+- Easy-to-use to functions for [**secure cookies**][cookies] and
+  [**CSRF-safe forms**][forms].
+- [**Sessions**][sessions] with pluggable storage [back ends][back-ends].
+- Unified, internationalization-friendly [**error handling**][errors].
+- [**Cryptography**][crypto] helpers, key rotation, and a chosen cipher.
+- A neat [**logger**][logging], and attention to configuring the OCaml runtime
+  nicely.
+
+<br>
 
 Every part of the API is arranged to be easy to use, understand, and remember.
-Dream uses mainly base OCaml types such as `string` and `list`, introducing only
-a few types of its own &mdash; and some of these are just abbreviations for bare
-functions!
+Dream sticks to base OCaml types like `string` and `list`, introducing only a
+few [types][types] of its own &mdash; and some of those are just abbreviations
+for bare functions!
 
 The neat interface is not a limitation. Everything is still configurable by a
 large number of optional arguments. Where necessary, Dream exposes the
-underlying machinery that it is composed from. For example, the default body and
-socket readers return strings, but you can also stream without copying.
+lower-level machinery that it is composed from. For example, the default body
+and WebSocket readers return strings, but you can also do [zero-copy
+streaming][streaming].
 
 You can even run Dream as a [quite bare abstraction][raw] over its [underlying
 set of HTTP libraries][vendor], where it acts only as minimal glue code between
-their slightly different interfaces.
+their slightly different interfaces and takes care of horridness like
+[ALPN][alpn].
 
+[websocket]: https://aantron.github.io/dream/#websockets
+[graphql]: https://aantron.github.io/dream/#graphql
+[templates]: https://github.com/aantron/dream/tree/master/example/6-template#files
+[middleware]: https://github.com/aantron/dream/tree/master/example/4-counter#files
+[routing]: https://aantron.github.io/dream/#routing
+[cookies]: https://github.com/aantron/dream/tree/master/example/c-cookie#files
+[forms]: https://github.com/aantron/dream/tree/master/example/d-form#files
+[sessions]: https://github.com/aantron/dream/tree/master/example/b-session
+[back-ends]: https://aantron.github.io/dream/#back-ends
+[errors]: https://github.com/aantron/dream/tree/master/example/8-error#files
+[crypto]: https://aantron.github.io/dream/#cryptography
+[logging]: https://aantron.github.io/dream/#logging
+[types]: https://aantron.github.io/dream/#types
+[streaming]: https://aantron.github.io/dream/#streaming
 [raw]: https://aantron.github.io/dream/#builtin
+[alpn]: https://en.wikipedia.org/wiki/Application-Layer_Protocol_Negotiation
+
+<br>
+
+## Documentation
+
+- Dream has several dozen [**Examples**][examples], each of which is a complete
+  project in the public domain.
+
+- The first examples make up a [**Tutorial**][examples]. Visit to see the full
+  list and start wherever you  like, or begin at [**`1-hello`**][1-hello], the
+  Dream version of *Hello, world!*
+
+- See the [**API documentation**][api-main].
+
+[examples]: https://github.com/aantron/dream/tree/master/example#readme
+[1-hello]: https://github.com/aantron/dream/tree/master/example/1-hello#files
 
 <!-- TODO Show templates. -->
 
@@ -75,18 +116,18 @@ Dream is based on work by the authors and contributors of its many
 [dependencies][opamfile] and their transitive dependencies. There are, however,
 several influences that cannot be discovered directly:
 
-- Templates are inspired by [ECaml][ecaml] from [Alexander Markov][komar], and
-  [Embedded OCaml Templates][eot] from [Emile Trotignon][trotignon].
-- Dream's handlers and middlewares are directly inspired by [Opium][opium] from
-  [Rudi Grinberg][rgrinberg] and contributors.
+- Templates are inspired by [**ECaml**][ecaml] from [Alexander Markov][komar],
+  and [**Embedded OCaml Templates**][eot] from [Emile Trotignon][trotignon].
+- Dream's handlers and middlewares are directly inspired by [**Opium**][opium]
+  from [Rudi Grinberg][rgrinberg] and contributors.
 - The lower-level HTTP and WebSocket servers are [vendored][vendor] copies of
   [Antonio Nuno Monteiro][anmonteiro]'s forks and original works, with credit
   also due to their contributors, and [Spiros Eliopoulos][seliopou] in
   particular, as the original author of two of the projects.
-- The API docs are instantiated by [Soupault][soupault] from
+- The API docs are instantiated by [**Soupault**][soupault] from
   [Daniil Baturin][dmbaturin].
-- The name was inspired by [Morph][morph] from [Ulrik Strid][ulrikstrid], which
-  was itself partially inspired by [Opium][opium].
+- The name was inspired by [**Morph**][morph] from [Ulrik Strid][ulrikstrid],
+  which was itself partially inspired by [Opium][opium].
 - [Raphael Rafatpanah][persianturtle] and [El-Hassan Wanas][foocraft] provided
   important early feedback.
 
