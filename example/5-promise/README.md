@@ -1,46 +1,41 @@
-# `a-promise`
+# `5-promise`
 
 <br>
 
-In this example, we write a simple version of the logger we've been using since
-example [**`2-middleware`**](../2-middleware/#files), and use our custom logger
-instead! We have to use Lwt, the promise library, because we need to *await* the
-response form the wrapped inner handler, and *catch* if it rejects:
-
-<!-- TODO Hyperlink. -->
+[**`4-counter`**](../4-counter#files) was limited to counting requests *before*
+passing them on to the rest of the app. With the promise library
+[Lwt](https://github.com/ocsigen/lwt), we can await responses, and do something
+*after*. In this example, we separately count requests that were handled
+successfully, and those that caused an exception:
 
 ```ocaml
-let my_logger inner_handler request =
-  Dream.log "%s %s"
-    (Dream.method_to_string (Dream.method_ request))
-    (Dream.target request);
+let successful = ref 0
+let failed = ref 0
 
+let count_requests inner_handler request =
   try%lwt
     let%lwt response = inner_handler request in
-
-    let status = Dream.status response in
-    Dream.log "%i %s"
-      (Dream.status_to_int status)
-      (Dream.status_to_string status);
-
+    successful := !successful + 1;
     Lwt.return response
 
   with exn ->
-    Dream.error (fun log -> log "%s" (Printexc.to_string exn));
+    failed := !failed + 1;
     raise exn
 
 let () =
   Dream.run
-  @@ my_logger
+  @@ Dream.logger
+  @@ count_requests
   @@ Dream.router [
-
-    Dream.get "/"
-      (fun _ ->
-        Dream.respond "Good morning, world!");
 
     Dream.get "/fail"
       (fun _ ->
         raise (Failure "The web app failed!"));
+
+    Dream.get "/" (fun _ ->
+      Dream.respond (Printf.sprintf
+        "%3i request(s) successful\n%3i request(s) failed"
+        !successful !failed));
 
   ]
   @@ Dream.not_found
@@ -50,41 +45,26 @@ let () =
 
 <br>
 
-Visiting various paths with this app gives a log like this:
-
-```
-26.03.21 22:21:16.171                       Running on http://localhost:8080
-26.03.21 22:21:16.171                       Press ENTER to stop
-26.03.21 22:21:28.061                       REQ 1 GET /
-26.03.21 22:21:28.061                       REQ 1 200 OK
-26.03.21 22:21:36.898                       REQ 2 GET /random
-26.03.21 22:21:36.898                       REQ 2 404 Not Found
-26.03.21 22:21:39.332                       REQ 3 GET /fail
-26.03.21 22:21:39.332                 ERROR REQ 3 (Failure "The web app failed!")
-26.03.21 22:21:39.332      dream.http ERROR (Failure "The web app failed!")
-```
-
-See the previous example, [**`9-log`**](../9-log/#files), for more information
-about logging.
-
-<br>
-
-As you can see, the core constructs of Lwt are:
+As you can see, the
+[core constructs](https://ocsigen.org/lwt/latest/api/Ppx_lwt) of Lwt are:
 
 - `let%lwt` to await the result of a promise.
 - `try%lwt` to catch both exceptions and rejections. Lwt promises can only be
   rejected with exceptions, of OCaml type `exn`.
 - `Lwt.return` to resolve a promise.
 
-Besides these, Lwt has a lot of convenience functions, as well as an asychronous
-I/O library.
+Besides these, Lwt has a lot of [convenience
+functions](https://ocsigen.org/lwt/latest/api/Lwt), and an [asychronous
+I/O library](https://ocsigen.org/lwt/latest/api/Lwt_unix).
 
 <!-- TODO Link to read_file and write_file helpers. -->
 <!-- TODO Link to Lwt_unix, Lwt_io, Lwt. -->
 
 <br>
 
-To use `let%lwt`, we need to modify our `dune` file slightly:
+To use `let%lwt`, we need to modify our
+[`dune`](https://github.com/aantron/dream/blob/master/example/5-promise/dune)
+file a bit to include `lwt_ppx`:
 
 <pre><code>(executable
  (name promise)
@@ -93,9 +73,20 @@ To use `let%lwt`, we need to modify our `dune` file slightly:
 </code></pre>
 
 There are other ways to write *await* and *catch* in Lwt that don't require
-`lwt_ppx`, but `lwt_ppx` is the best for preserving nice stack traces.
+`lwt_ppx`, but `lwt_ppx` is presently the best for preserving nice stack traces.
+For example, `let%lwt` is equivalent to...
 
-<!-- TODO Link to other ways. -->
+- [`Lwt.bind`](https://github.com/ocsigen/lwt/blob/c5f895e35a38df2d06f19fd23bf553129b9e95b3/src/core/lwt.mli#L475),
+  which is almost never used directly.
+- [`>>=`](https://github.com/ocsigen/lwt/blob/c5f895e35a38df2d06f19fd23bf553129b9e95b3/src/core/lwt.mli#L1395)
+  from module `Lwt.Infix`.
+- [`let*`](https://github.com/ocsigen/lwt/blob/c5f895e35a38df2d06f19fd23bf553129b9e95b3/src/core/lwt.mli#L1511)
+  from module `Lwt.Syntax`, which is showcased in Lwt's
+  [README](https://github.com/ocsigen/lwt#readme).
+
+This is, in part, the result of Lwt's very long lifetime. It is much older than
+JavaScript promises &mdash; it dates back to 1995! We will stick to `let%lwt`
+in the examples and keep things tidy.
 
 <br>
 

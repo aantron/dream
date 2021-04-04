@@ -1,34 +1,30 @@
-let my_logger inner_handler request =
-  Dream.log "%s %s"
-    (Dream.method_to_string (Dream.method_ request))
-    (Dream.target request);
+let successful = ref 0
+let failed = ref 0
 
+let count_requests inner_handler request =
   try%lwt
     let%lwt response = inner_handler request in
-
-    let status = Dream.status response in
-    Dream.log "%i %s"
-      (Dream.status_to_int status)
-      (Dream.status_to_string status);
-
+    successful := !successful + 1;
     Lwt.return response
 
   with exn ->
-    Dream.error (fun log -> log "%s" (Printexc.to_string exn));
+    failed := !failed + 1;
     raise exn
 
 let () =
   Dream.run
-  @@ my_logger
+  @@ Dream.logger
+  @@ count_requests
   @@ Dream.router [
-
-    Dream.get "/"
-      (fun _ ->
-        Dream.respond "Good morning, world!");
 
     Dream.get "/fail"
       (fun _ ->
         raise (Failure "The web app failed!"));
+
+    Dream.get "/" (fun _ ->
+      Dream.respond (Printf.sprintf
+        "%3i request(s) successful\n%3i request(s) failed"
+        !successful !failed));
 
   ]
   @@ Dream.not_found
