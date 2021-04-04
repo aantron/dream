@@ -377,7 +377,7 @@ let logger next_handler request =
       let location =
         if Dream.is_redirection (Dream.status response) then
           match Dream.header "Location" response with
-          | Some location -> location
+          | Some location -> location ^ " "
           | None -> ""
         else ""
       in
