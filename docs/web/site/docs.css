@@ -93,11 +93,6 @@ h6 {
   font-weight: normal;
 }
 
-.blurbs {
-  font-size: 18px;
-  line-height: 28px;
-}
-
 
 
 /* Colors and presentation styles. */
@@ -143,7 +138,7 @@ h1, h2, h3 {
 }
 
 header {
-  background-color: #32353d;
+  background-color: #29292a;
 }
 
 header .topmost {
@@ -156,7 +151,7 @@ h1 {
 
 header pre {
   padding: 27px 18px;
-  background-color: #1c1c1c;
+  background-color: #1c1c1c87;
   line-height: 27px;
 }
 
@@ -314,7 +309,7 @@ p + p, p + pre, pre + p {
 
 header {
   overflow: auto;
-  padding-bottom: 36px;
+  padding-bottom: 72px;
 }
 
 header h1, header h6 {
@@ -324,6 +319,7 @@ header h1, header h6 {
 header .topmost {
   padding-top: 12px;
   padding-bottom: 24px;
+  margin-bottom: 48px;
 }
 
 h2 {

@@ -31,7 +31,7 @@
     </ul>
   </div>
 
-  <pre><span class="keyword">let</span> greet who =
+  <pre><span class="keyword">let</span> hello who =
   <span class="hljs-type">&lt;html></span>
     <span class="hljs-type">&lt;body></span>
       <span class="hljs-type">&lt;h1></span><span class="hljs-string">Hello, </span>&lt;%s who %><span class="hljs-string">!</span><span class="hljs-type">&lt;/h1></span>
@@ -42,8 +42,8 @@
   <span class="hljs-type">Dream</span>.run
   <span class="hljs-string">@@</span> <span class="hljs-type">Dream</span>.logger
   <span class="hljs-string">@@</span> <span class="hljs-type">Dream</span>.router <span class="hljs-string">[</span>
-    <span class="hljs-type">Dream</span>.get <span class="hljs-string">"/"</span> <span class="hljs-string">@@</span> <span class="keyword">fun</span> _ ->
-      <span class="hljs-type">Dream</span>.respond (greet <span class="hljs-string">"world"</span>);
+    <span class="hljs-type">Dream</span>.get <span class="hljs-string">"/"</span> (<span class="keyword">fun</span> _ ->
+      <span class="hljs-type">Dream</span>.respond (hello <span class="hljs-string">"world"</span>));
   <span class="hljs-string">]</span>
   <span class="hljs-string">@@</span> <span class="hljs-type">Dream</span>.not_found</pre>
 
@@ -51,8 +51,9 @@
 
   <div class="blurbs">
     <p>
-      <span class="title"><strong>Dream</strong></span> is an easy-to-use Web
-      framework, whose entire <a href="#types">interface</a> fits on this page!
+      <span class="title"><strong>Dream</strong></span> is an easy-to-use,
+      boilerplate-free Web framework, whose entire
+      <a href="#types">API</a> fits on this page!
     </p>
 
     <p>
@@ -62,8 +63,7 @@
 
     <ul>
       <li>
-        a nice <a href="#logging">log</a> and default OCaml runtime
-        configuration;
+        a nice <a href="#logging">log</a> and OCaml runtime configuration;
       </li>
       <li>
         easy-to-use, secure helpers for round-tripping
