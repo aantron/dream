@@ -485,6 +485,7 @@ let openssl = {
       let%lwt tls_endpoint = perform_tls_handshake client_address unix_socket in
       (* TODO LATER This part with getting the negotiated protocol belongs in
          Gluten. Right now, we've picked up a hard dep on OpenSSL. *)
+      (* See also https://github.com/anmonteiro/ocaml-h2/blob/66d92f1694b488ea638aa5073c796e164d5fbd9e/examples/alpn/unix/alpn_server_ssl.ml#L57 *)
       match Lwt_ssl.ssl_socket tls_endpoint with
       | None ->
         assert false
