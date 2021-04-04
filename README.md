@@ -3,19 +3,10 @@
 Dream is an easy-to-use, feature-complete Web framework without any boilerplate.
 
 ```ocaml
-let () =
-  Dream.run (fun _ ->
-    Dream.respond "Hello, world!")
-```
-
-This is all you need for a complete, working Web server. You can quickly expand
-your application from there:
-
-```html
-let render param =
+let hello who =
   <html>
     <body>
-      <h1>The URL parameter was <%s param %>!</h1>
+      <h1>Hello, <%s who %>!</h1>
     </body>
   </html>
 
@@ -23,20 +14,40 @@ let () =
   Dream.run
   @@ Dream.logger
   @@ Dream.router [
-    Dream.get "/:word" (fun request ->
-      Dream.respond (render (Dream.param "word" request)));
+    Dream.get "/" (fun _ -> Dream.respond (hello "world"));
   ]
   @@ Dream.not_found
 ```
 
-As you can see, Dream includes:
+All of Dream is exposed as [one module][api-main], without any submodules, and
+one package, `dream`. Included are:
 
-- Embedded HTML templates.
-- Stackable middleware, like `Dream.logger`.
-- A composable router.
+- Easy **HTTPS** and **HTTP/2** support, so you can choose to run Dream without
+  a proxy.
+- **WebSocket** and **GraphQL** support for your modern web apps.
+- **HTML templates** with embedded OCaml &mdash; use existing skills!
+- Composable **middleware** and **routes**.
+- Easy-to-use to functions for **secure cookies** and **CSRF-safe forms**.
+- **Sessions** with multiple storage back ends.
+- Unified, internationalization-friendly **error handling**.
+- **Cryptography** helpers, key rotation, and a chosen cipher.
+- A neat **logger**, and attention to configuring the OCaml runtime nicely.
 
-Dream supports HTTP/1.1, HTTP/2, and HTTPS. You can run a Dream application
-standalone, without a proxy.
+Every part of the API is arranged to be easy to use, understand, and remember.
+Dream uses mainly base OCaml types such as `string` and `list`, introducing only
+a few types of its own &mdash; and some of these are just abbreviations for bare
+functions!
+
+The neat interface is not a limitation. Everything is still configurable by a
+large number of optional arguments. Where necessary, Dream exposes the
+underlying machinery that it is composed from. For example, the default body and
+socket readers return strings, but you can also stream without copying.
+
+You can even run Dream as a [quite bare abstraction][raw] over its [underlying
+set of HTTP libraries][vendor], where it acts only as minimal glue code between
+their slightly different interfaces.
+
+[raw]: https://aantron.github.io/dream/#builtin
 
 <!-- TODO Show templates. -->
 
@@ -53,6 +64,8 @@ standalone, without a proxy.
 ```
 opam install dream
 ```
+
+[api-main]: https://aantron.github.io/dream/#types
 
 <br>
 
