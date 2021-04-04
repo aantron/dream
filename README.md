@@ -13,6 +13,8 @@ Easy-to-use, feature-complete Web framework without any boilerplate.
 <br>
 <br>
 
+*Note: the project is currently in a pre-alpha state; currently writing examples.*
+
 Dream is [**one flat module**][api-main] in **one package**, offering:
 
 - Easy **HTTPS** and **HTTP/2** support &mdash; Dream runs without a proxy.
