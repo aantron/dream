@@ -1,0 +1,51 @@
+<html>
+<head>
+<style>
+
+body {
+  background-color: #1d1d1d;
+  color: #ddd;
+  font-family: Fira Code;
+  font-size: 16px;
+  margin: 1em;
+}
+
+b {
+  color: white;
+}
+
+.dim {
+  color: #777;
+}
+
+.info {
+  color: #7fc56b;
+}
+
+.even, .odd {
+  font-style: italic;
+}
+
+.even {
+  color: #d9ab5e;
+}
+
+.odd {
+  color: #b860ff;
+}
+
+</style>
+</head>
+<body>
+
+<pre><code><b>$ dune exec --root . ./middleware.exe</b>
+<span class="dim">08.03.21 22:19:21.126</span>                       Running on http://localhost:8080
+<span class="dim">08.03.21 22:19:21.126</span>                       Press ENTER to stop
+<span class="dim">08.03.21 22:19:24.927</span>       dream.log  <span class="info">INFO</span> <span class="odd">REQ 1</span> GET / 127.0.0.1:58549 Mozilla/5.0 ...
+<span class="dim">08.03.21 22:19:24.928</span>       dream.log  <span class="info">INFO</span> <span class="odd">REQ 1</span> 200 in 217 μs
+<span class="dim">08.03.21 22:19:26.185</span>       dream.log  <span class="info">INFO</span> <span class="even">REQ 2</span> GET / 127.0.0.1:58551 Mozilla/5.0 ...
+<span class="dim">08.03.21 22:19:26.185</span>       dream.log  <span class="info">INFO</span> <span class="even">REQ 2</span> 200 in 178 μs
+</code></pre>
+
+</body>
+</html>

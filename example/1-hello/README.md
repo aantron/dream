@@ -13,8 +13,8 @@ let () =
 <br>
 
 It's the absolute minimum Dream server. It responds to all requests with the
-same text. At startup, it prints a message to the log, telling you where to
-point your browser. The link is clickable in many terminals.
+same text. At startup, Dream prints a message to the log, telling you where to
+point your browser. Your terminal probably allows you to click the link.
 
 <pre><code><b>$ dune exec --root . ./hello.exe</b>
 08.03.21 21:17:21.471                       Running on http://localhost:8080

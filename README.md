@@ -7,7 +7,7 @@ Easy-to-use, feature-complete Web framework without any boilerplate.
 <br>
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/aantron/dream/master/docs/sample.png"></img>
+<img src="https://raw.githubusercontent.com/aantron/dream/master/docs/asset/sample.png"></img>
 </p>
 
 <br>
