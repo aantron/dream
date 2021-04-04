@@ -5,6 +5,7 @@
 TODO
 
 <!-- Adjust once the templater vertical whitespace bug is fixed again. -->
+<!-- TODO Discuss CSRF. --->
 
 ```ocaml
 let show_form ?message request =

@@ -3,6 +3,7 @@ let () =
   @@ Dream.logger
   @@ Dream.router [
     Dream.post "/echo" (fun request ->
-      Lwt.map Dream.response (Dream.body request));
+      let%lwt body = Dream.body request in
+      Dream.respond body);
   ]
   @@ Dream.not_found

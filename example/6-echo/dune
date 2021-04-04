@@ -1,3 +1,4 @@
 (executable
  (name echo)
- (libraries dream))
+ (libraries dream)
+ (preprocess (pps lwt_ppx)))
