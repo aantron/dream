@@ -9,7 +9,7 @@ let () =
   @@ Dream.logger
   @@ count_requests
   @@ Dream.router [
-    Dream.get "/dashboard" (fun _ ->
+    Dream.get "/" (fun _ ->
       Dream.respond (Printf.sprintf "Saw %i request(s)!" !count));
   ]
   @@ Dream.not_found

@@ -4,7 +4,7 @@
 
 This example shows how easy it is to define a custom middleware,
 `count_requests`. It exposes the request count at
-[http://localhost:8080/dashboard](http://localhost:8080/dashboard):
+[http://localhost:8080/](http://localhost:8080/) in a sort of dashboard:
 
 ```ocaml
 let count = ref 0
@@ -18,7 +18,7 @@ let () =
   @@ Dream.logger
   @@ count_requests
   @@ Dream.router [
-    Dream.get "/dashboard" (fun _ ->
+    Dream.get "/" (fun _ ->
       Dream.respond (Printf.sprintf "Saw %i request(s)!" !count));
   ]
   @@ Dream.not_found
