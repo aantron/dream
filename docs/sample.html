@@ -1,0 +1,75 @@
+<html>
+<head>
+<style>
+
+body {
+  margin: 2em;
+  background-color: #37496e;
+  color: white;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+pre {
+  font-family: Consolas;
+}
+
+.keyword {
+  color: #ffef33;
+}
+
+.html-punct {
+  color: #92BFBF;
+}
+
+.tag {
+  color: #91e3b2;
+}
+
+.template-punct {
+  color: #b3c4ff;
+}
+
+.format {
+  color: #b3c4ff;
+}
+
+.module {
+  color: #b3c4ff;
+}
+
+.punct {
+  color: white;
+}
+
+.string {
+  color: #b7d8df;
+}
+
+.apply {
+  color: #eee;
+}
+
+</style>
+</head>
+<body>
+
+<pre>
+<span class="keyword">let</span> hello who =
+  <span class="html-punct">&lt;</span><span class="tag">html</span><span class="html-punct">></span>
+    <span class="html-punct">&lt;</span><span class="tag">body</span><span class="html-punct">></span>
+      <span class="html-punct">&lt;</span><span class="tag">h1</span><span class="html-punct">></span>Hello, <span class="template-punct"><%</span><span class="format">s</span> who <span class="template-punct">%></span>!<span class="html-punct">&lt;/</span><span class="tag">h1</span><span class="html-punct">></span>
+    <span class="html-punct">&lt;/</span><span class="tag">body</span><span class="html-punct">></span>
+  <span class="html-punct">&lt;/</span><span class="tag">html</span><span class="html-punct">></span>
+
+<span class="keyword">let</span> () =
+  <span class="module">Dream</span>.run
+  <span class="apply">@@</span> <span class="module">Dream</span>.logger
+  <span class="apply">@@</span> <span class="module">Dream</span>.router <span class="punct">[</span>
+    <span class="module">Dream</span>.get <span class="string">"/"</span> (<span class="keyword fun">fun</span> _ <span class="punct">-></span> <span class="module">Dream</span>.respond (hello <span class="string">"world"</span>))<span class="punct">;</span>
+  <span class="punct">]</span>
+  <span class="apply">@@</span> <span class="module">Dream</span>.not_found
+</pre>
+
+</body>
+</html>

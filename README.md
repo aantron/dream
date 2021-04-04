@@ -1,4 +1,7 @@
-# Dream (project and README WIP)
+# Dream
+
+*Note: the project and README are both WIP; currently fleshing out the examples
+and hope to release alpha1 "very soon."*
 
 Dream is an easy-to-use, feature-complete Web framework without any boilerplate.
 
@@ -19,10 +22,18 @@ let () =
   @@ Dream.not_found
 ```
 
+
+
+<!-- <img src="https://raw.githubusercontent.com/aantron/dream/master/docs/sample.png" style="width: 100px;"></img> -->
+
+<!-- ![Dream sample][sample]
+
+[sample]: https://raw.githubusercontent.com/aantron/dream/master/docs/sample.png -->
+
 <br>
 
-All of Dream is [one flat module][api-main], in one package, `dream`. Included
-are:
+All of Dream is [**one flat module**][api-main], in **one package**, `dream`.
+Included are:
 
 - Easy **HTTPS** and **HTTP/2** support, so you can choose to run Dream without
   a proxy.
@@ -118,8 +129,8 @@ several influences that cannot be discovered directly:
 
 - Templates are inspired by [**ECaml**][ecaml] from [Alexander Markov][komar],
   and [**Embedded OCaml Templates**][eot] from [Emile Trotignon][trotignon].
-- Dream's handlers and middlewares are directly inspired by [**Opium**][opium]
-  from [Rudi Grinberg][rgrinberg] and contributors.
+- Dream's handlers and middlewares are simplified from [**Opium**][opium] by
+  [Rudi Grinberg][rgrinberg] and contributors.
 - The lower-level HTTP and WebSocket servers are [vendored][vendor] copies of
   [Antonio Nuno Monteiro][anmonteiro]'s forks and original works, with credit
   also due to their contributors, and [Spiros Eliopoulos][seliopou] in
