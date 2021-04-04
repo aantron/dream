@@ -101,9 +101,9 @@ There are other ways to write *await* and *catch* in Lwt that don't require
 
 **Next steps:**
 
-- [**`b-session`**](../b-session/#files) introduces *session management* for
-  associating state with clients.
-- [**`c-cookie`**](../c-cookie/#files) shows *cookie handling* in Dream.
+- [**`6-echo`**](../6-echo/#files) uses Lwt to read a request body.
+- [**`7-template`**](../7-template/#files) show how to interleave HTML and
+  OCaml.
 
 <br>
 

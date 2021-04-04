@@ -49,14 +49,14 @@ their slightly different interfaces, and takes care of horridness like
 
 [websocket]: https://aantron.github.io/dream/#websockets
 [graphql]: https://aantron.github.io/dream/#graphql
-[templates]: https://github.com/aantron/dream/tree/master/example/6-template#files
+[templates]: https://github.com/aantron/dream/tree/master/example/7-template#files
 [middleware]: https://github.com/aantron/dream/tree/master/example/4-counter#files
 [routing]: https://aantron.github.io/dream/#routing
 [cookies]: https://github.com/aantron/dream/tree/master/example/c-cookie#files
 [forms]: https://github.com/aantron/dream/tree/master/example/d-form#files
 [sessions]: https://github.com/aantron/dream/tree/master/example/b-session#files
 [back-ends]: https://aantron.github.io/dream/#back-ends
-[errors]: https://github.com/aantron/dream/tree/master/example/8-error#files
+[errors]: https://github.com/aantron/dream/tree/master/example/9-error#files
 [crypto]: https://aantron.github.io/dream/#cryptography
 [logging]: https://aantron.github.io/dream/#logging
 [types]: https://aantron.github.io/dream/#types

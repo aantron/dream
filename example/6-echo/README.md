@@ -64,9 +64,9 @@ present them the right way.
 
 **Next steps:**
 
-- [**`6-template`**](../6-template/#files) renders responses from templates and
+- [**`7-template`**](../7-template/#files) renders responses from templates and
   guards against injection attacks (XSS).
-- [**`7-debug`**](../7-debug/#files) renders error information in responses.
+- [**`8-debug`**](../8-debug/#files) renders error information in responses.
 
 <br>
 

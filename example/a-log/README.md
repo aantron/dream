@@ -71,10 +71,9 @@ let () =
 
 **Next steps:**
 
-- In [**`a-promise`**](../a-promise/#files), we combine logging with the promise
-  library Lwt to sketch out a custom logger.
 - [**`b-session`**](../b-session/#files) finally returns web development proper
   with *session management*.
+- [**`c-cookie`**](../c-cookie/#files) shows *cookie handling* in Dream.
 
 <br>
 

@@ -100,9 +100,9 @@ Both the debugger's output and the non-debug error page are fully customizable
 
 **Next steps:**
 
-- [**`8-error`**](../8-error/#files) handles all errors in one place, also
+- [**`9-error`**](../9-error/#files) handles all errors in one place, also
   customizing the debugger.
-- [**`9-log`**](../9-log/#files) writes messages to the same Dream log at
+- [**`a-log`**](../a-log/#files) writes messages to the same Dream log at
   various levels, and creates a sub-log.
 
 <br>
