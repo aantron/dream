@@ -1,4 +1,4 @@
-# Dream
+# Dream (project and README WIP)
 
 Dream is an easy-to-use, feature-complete Web framework without any boilerplate.
 
@@ -34,6 +34,9 @@ As you can see, Dream includes:
 - Embedded HTML templates.
 - Stackable middleware, like `Dream.logger`.
 - A composable router.
+
+Dream supports HTTP/1.1, HTTP/2, and HTTPS. You can run a Dream application
+standalone, without a proxy.
 
 <!-- TODO Show templates. -->
 
