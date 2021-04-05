@@ -50,69 +50,97 @@ There are several examples showing Dream with Reason syntax.
 - [**`r-hello`**](r-hello#files)
 - [**`r-template`**](r-template#files)
 - [**`r-template-stream`**](r-template-stream#files)
-- **`r-fullstack`**
+- `r-fullstack`
 
 <br>
 
-# Extras
+# Examples
 
 The rest of the examples cover additional topics in a more-standalone fashion.
-The goal of the examples is to cover the great majority of real-world HTTP
-usage, so that they make up a good survey. Please open an issue if something is
-missing!
+The goal of the examples is to (eventually) cover the great majority of
+real-world HTTP usage, so that they make up a good survey. Please open an issue
+if something is missing!
 
 <br>
+
+- [**`w-long-polling`**](w-long-polling#files) &nbsp;&mdash;&nbsp; asynchronous
+  communication without WebSockets.
+- [**`w-query`**](w-query#files) &nbsp;&mdash;&nbsp; reading URL query
+  parameters.
+- [**`w-server-sent-events`**](w-server-sent-events#files) &nbsp;&mdash;&nbsp;
+  the server side of JavaScript
+  [`EventSource`](https://developer.mozilla.org/en-US/docs/Web/API/EventSource).
+- [**`w-site-prefix`**](w-site-prefix#files) &nbsp;&mdash;&nbsp; a Web app
+  running not at `/`.
+- [**`w-template-stream`**](w-template-stream#files) &nbsp;&mdash;&nbsp; writing
+  templates asynchronously, one chunk at a time.
+
+<br>
+<br>
+
+# Roadmap
+
+These examples will be trickled in during the alpha releases.
 
 Ideas:
 
-- [**`w-auto-reload`**]()
-- [**`w-fullstack`**]()
-- [**`w-index-html`**]()
-- [**`w-one-binary`**]()
-- [**`w-ppx-deriving`**]()
-- [**`w-react-spa`**]()
-- [**`w-subcommand`**]()
-- [**`w-template-directory`**]()
-- [**`w-tyxml`**]()
+- `w-auto-reload`
+- `w-fullstack`
+- `w-index-html`
+- `w-one-binary`
+- `w-ppx-deriving`
+- `w-react-spa`
+- `w-subcommand`
+- `w-template-directory`
+- `w-tyxml` &nbsp;&mdash;&nbsp; for
+  [TyXML](https://github.com/ocsigen/tyxml/) templates.
 
 Basics:
 
-- [**`w-content-negotiation`**]()
-- [**`w-query`**]()
-- [**`w-scope`**]()
-- [**`w-subsite`**]()
-- [**`w-testing`**]()
+- `w-content-negotiation`
+- [**`w-query`**](w-query#files) &nbsp;&mdash;&nbsp; done.
+- `w-scope` &nbsp;&mdash;&nbsp; for
+  [`Dream.scope`](https://aantron.github.io/dream/#val-scope).
+- `w-subsite` &nbsp;&mdash;&nbsp; for
+  [`*` routes](https://aantron.github.io/dream/#val-router).
+- `w-testing` &nbsp;&mdash;&nbsp; for
+  [*Testing*](https://aantron.github.io/dream/#testing).
 
 Security:
 
-- [**`w-auth`**]()
-- [**`w-client-side-session`**]()
-- [**`w-cors`**]()
-- [**`w-database-session`**]()
-- [**`w-file-session`**]()
-- [**`w-form-expired`**]()
-- [**`w-json-csrf`**]()
-- [**`w-jwt`**]()
-- [**`w-key-rotation`**]()
-- [**`w-upload-csrf`**]()
+- `w-auth`
+- `w-cookie-session` &nbsp;&mdash;&nbsp; for
+  [`Dream.cookie_sessions`](https://aantron.github.io/dream/#val-cookie_sessions).
+- `w-cors`
+- `w-sql-session` &nbsp;&mdash;&nbsp; for
+  [`Dream.sql_sessions`](https://aantron.github.io/dream/#val-sql_sessions).
+- `w-file-session`
+- `w-form-expired` &nbsp;&mdash;&nbsp; for other cases of
+  [`Dream.form`](https://aantron.github.io/dream/#val-form).
+- `w-json-csrf` &nbsp;&mdash;&nbsp; for
+  [`Dream.csrf_token`](https://aantron.github.io/dream/#val-csrf_token) and
+  `X-CSRF-Token:`.
+- `w-jwt`
+- `w-key-rotation` &nbsp;&mdash;&nbsp; for a to-be-added `~secrets` argument
+  to [`Dream.run`](https://aantron.github.io/dream/#val-run), which can specify
+  multiple decryption keys.
+- `w-upload-csrf` &nbsp;&mdash;&nbsp; for
+  [`Dream.csrf_token`](https://aantron.github.io/dream/#val-csrf_token) with
+  [`Dream.upload`](https://aantron.github.io/dream/#val-upload).
 
 Techniques:
 
-- [**`w-etag`**]()
-- [**`w-graphql-sql`**]()
-- [**`w-graphql-subscriptions`**]()
-- [**`w-https-redirect`**]()
-- [**`w-long-polling`**]()
-- [**`w-postgres-docker`**]()
-- [**`w-server-sent-events`**]()
-- [**`w-sql-stream`**]()
-- [**`w-template-stream`**]()
-- [**`w-websocket-stream`**]()
-
-Advanced customization:
-
-- [**`w-globals`**]()
-- [**`w-typed-session`**]()
+- `w-etag`
+- `w-graphql-sql`
+- `w-graphql-subscriptions`
+- `w-https-redirect`
+- [**`w-long-polling`**](w-long-polling#files) &nbsp;&mdash;&nbsp; done.
+- `w-postgres-docker`
+- [**`w-server-sent-events`**](w-server-sent-events#files) &nbsp;&mdash;&nbsp;
+  done.
+- `w-sql-stream`
+- [**`w-template-stream`**](w-template-stream#files) &nbsp;&mdash;&nbsp; done.
+- `w-websocket-stream`
 
 
 <!-- TODO Note that each example is fully self-contained... But also show an
