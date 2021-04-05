@@ -1,7 +1,7 @@
 <h1 align="center">Dream</h1>
 
 <p align="center">
-Easy-to-use, feature-complete Web framework without any boilerplate.
+Easy-to-use, feature-complete Web framework without boilerplate.
 </p>
 
 <br>
@@ -15,7 +15,8 @@ Easy-to-use, feature-complete Web framework without any boilerplate.
 
 *Note: the project is in a pre-alpha state; currently writing examples.*
 
-Dream is [**one flat module**][api-main] in **one package**, offering:
+Dream is **one flat module** in **one package**, documented on
+[**one page**][api-main], but with [**many examples**][tutorial]. It offers:
 
 - Easy **HTTPS** and **HTTP/2** support &mdash; Dream runs without a proxy.
 - [**WebSockets**][websocket] and [**GraphQL**][graphql] for your modern Web
@@ -40,8 +41,8 @@ for bare functions!
 
 The neat interface is not a limitation. Everything is still configurable by a
 large number of optional arguments. Where necessary, Dream exposes the
-lower-level machinery that it is composed from. For example, the default body
-and WebSocket readers return strings, but you can also do [zero-copy
+lower-level machinery that it is composed from. For example, the basic body and
+WebSocket readers return strings, but you can also do [zero-copy
 streaming][streaming].
 
 You can even run Dream as a [quite bare abstraction][raw] over its [underlying
@@ -71,20 +72,20 @@ their slightly different interfaces, and takes care of horridness like
 
 ## Documentation
 
-- Dream has several dozen [**Examples**][examples], each of which is a complete
-  project in the public domain. *Note: only about two dozen actually written
-  ATM.*
-
-- The first examples make up a [**Tutorial**][examples]. Visit to see the full
-  list and start wherever you  like, or begin at [**`1-hello`**][1-hello], the
+- The first examples of Dream make up a [**Tutorial**][tutorial]. See the full
+  list and start wherever you like, or begin at [**`1-hello`**][1-hello], the
   Dream version of *Hello, world!*
 
-- Several of the examples and tutorials are available in
+- Several of the tutorials and examples are available in
   [**Reason syntax**][reason-examples], with more to come over time!
+
+- There are additional [**Examples**][examples], covering various HTTP
+  scenarios.
 
 - See the [**API documentation**][api-main].
 
-[examples]: https://github.com/aantron/dream/tree/master/example#readme
+[tutorial]: https://github.com/aantron/dream/tree/master/example#readme
+[examples]: https://github.com/aantron/dream/tree/master/example#examples
 [1-hello]: https://github.com/aantron/dream/tree/master/example/1-hello#files
 [reason-examples]: https://github.com/aantron/dream/tree/master/example#reason
 
