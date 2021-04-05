@@ -3,7 +3,8 @@ let my_error_template debug_info suggested_response =
   let code = Dream.status_to_int status
   and reason = Dream.status_to_string status in
 
-  let body =
+  suggested_response
+  |> Dream.with_body begin
     <html>
       <body>
         <h1><%i code %> <%s reason %></h1>
@@ -14,10 +15,7 @@ let my_error_template debug_info suggested_response =
 %       end;
       </body>
     </html>
-  in
-
-  suggested_response
-  |> Dream.with_body body
+  end
   |> Lwt.return
 
 let () =
