@@ -47,10 +47,10 @@ That's it for the tutorial!
 
 There are several examples showing Dream with Reason syntax.
 
-- [**`r-hello`**]()
-- [**`r-template`**]()
-- [**`r-template-stream`**]()
-- [**`r-fullstack`**]()
+- [**`r-hello`**](r-hello#files)
+- [**`r-template`**](r-template#files)
+- [**`r-template-stream`**](r-template-stream#files)
+- **`r-fullstack`**
 
 <br>
 

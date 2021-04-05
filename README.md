@@ -20,8 +20,8 @@ Dream is [**one flat module**][api-main] in **one package**, offering:
 - Easy **HTTPS** and **HTTP/2** support &mdash; Dream runs without a proxy.
 - [**WebSockets**][websocket] and [**GraphQL**][graphql] for your modern Web
   apps.
-- [**HTML templates**][templates] with embedded OCaml &mdash; use existing
-  skills!
+- [**HTML templates**][templates] with embedded OCaml or
+  [Reason][reason-templates] &mdash; use existing skills!
 - Composable [**middleware**][middleware] and [**routes**][routing].
 - Easy-to-use functions for [**secure cookies**][cookies] and
   [**CSRF-safe forms**][forms].
@@ -52,6 +52,7 @@ their slightly different interfaces, and takes care of horridness like
 [websocket]: https://aantron.github.io/dream/#websockets
 [graphql]: https://aantron.github.io/dream/#graphql
 [templates]: https://github.com/aantron/dream/tree/master/example/7-template#files
+[reason-templates]: https://github.com/aantron/dream/tree/master/example/r-template#files
 [middleware]: https://github.com/aantron/dream/tree/master/example/4-counter#files
 [routing]: https://aantron.github.io/dream/#routing
 [cookies]: https://github.com/aantron/dream/tree/master/example/c-cookie#files
@@ -78,10 +79,14 @@ their slightly different interfaces, and takes care of horridness like
   list and start wherever you  like, or begin at [**`1-hello`**][1-hello], the
   Dream version of *Hello, world!*
 
+- Several of the examples and tutorials are available in
+  [**Reason syntax**][reason-examples], with more to come over time!
+
 - See the [**API documentation**][api-main].
 
 [examples]: https://github.com/aantron/dream/tree/master/example#readme
 [1-hello]: https://github.com/aantron/dream/tree/master/example/1-hello#files
+[reason-examples]: https://github.com/aantron/dream/tree/master/example#reason
 
 <!-- TODO LATER CI badges, opam link badge, npm badge. -->
 <!-- TODO Clone instructions should include --recursive. -->
