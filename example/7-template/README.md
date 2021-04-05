@@ -77,15 +77,15 @@ already escaped, or if it is safe for some other reason. But be careful!
 To show the danger, let's launch a **script injection (XSS) attack** against
 this tiny web app! First, go to
 [`template.eml.ml`](https://github.com/aantron/dream/blob/master/example/7-template/template.eml.ml#L4),
-change the substitution to `<%s! param %>`, and restart the app. Then, go to
-this URL:
+change the substitution to `<%s! param %>`, and restart the app. Then, visit
+this highly questionable URL:
 
-[http://localhost:8080/%3Cscript%3Ealert(%22foo%22)%3C%2Fscript%3E](http://localhost:8080/%3Cscript%3Ealert(%22foo%22)%3C%2Fscript%3E)
+[http://localhost:8080/%3Cscript%3Ealert(%22Impossible!%22)%3C%2Fscript%3E](http://localhost:8080/%3Cscript%3Ealert(%22Impossible!%22)%3C%2Fscript%3E)
 
-This cryptic and highly questionable URL will cause our web app to display an
-alert box, which we, as the developers, did not intend!
+This URL will cause our web app to display an alert box, which we, as the
+developers, did not intend!
 
-
+![XSS example](https://raw.githubusercontent.com/aantron/dream/master/docs/asset/xss.png)
 
 Despite all the URL-escapes, you may be able to see that the URL contains a
 complete `<script>` tag that runs a potentially arbitrary script. Our app
@@ -93,15 +93,22 @@ happily pastes that script tag into HTML, causing the script to be executed by
 our clients!
 
 If you change the substitution back to `<%s param %>`, and visit that same URL,
-you will see that the app safely formats the script tag as text.
+you will see that the app safely formats the script tag as text:
+
+![XSS prevented](https://raw.githubusercontent.com/aantron/dream/master/docs/asset/no-xss.png)
 
 <br>
 
 In general, if you are not using the templater, you should pass any text that
-will be included in HTML through `Dream.html_escape`, unless you can guarantee
-that it does not contain the characters `<`, `>`, `&`, `"`, or `'`. Also,
-always use quoted attribute values &mdash; the rules for escaping unquoted
-attributes are much more invasive.
+will be included in HTML through
+[`Dream.html_escape`](https://aantron.github.io/dream/#val-html_escape), unless
+you can guarantee that it does not contain the characters `<`, `>`, `&`, `"`,
+or `'`. Also, always use quoted attribute values &mdash; the rules for escaping
+unquoted attributes are much more invasive.
+
+Likewise, escaping inline scripts and CSS is also
+[more complicated](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#rule-3-javascript-encode-before-inserting-untrusted-data-into-javascript-data-values),
+and not supported by Dream.
 
 <!-- TODO Link out to more template examples. -->
 <!-- TODO Recommend against generating <script>, CSS, etc. -->
