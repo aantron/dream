@@ -1,9 +1,9 @@
-# `7-debug`
+# `8-debug`
 
 <br>
 
 Getting Dream to respond with more debug information is as easy as adding
-`~debug:true` to `Dream.run`:
+`~debug:true` to [`Dream.run`](https://aantron.github.io/dream/#val-run):
 
 ```ocaml
 let () =
@@ -82,15 +82,14 @@ As you can see, the report includes:
 
 The debugger is disabled by default to avoid leaking information by accident in
 a production environment. Whether the debugger is enabled or disabled, Dream
-still writes error messages to the server-side log &mdash; the debugger is only
-about also sending them to the client as *reponses*, which can be easier to
-work with, especially for collaborators who are not currently looking at the
-log.
+still writes error messages to the server-side log. The debugger is only about
+also sending error details to the client as *reponses*, which can be easier to
+work with in development.
 
 <br>
 
 Both the debugger's output and the non-debug error page are fully customizable
-&mdash; we will do this in the very next example!
+&mdash; we will do this in the [very next example](../9-error#files)!
 
 <!-- TODO Fix after stack trace is fixed. -->
 <!-- TODO Show the log -->
@@ -100,10 +99,9 @@ Both the debugger's output and the non-debug error page are fully customizable
 
 **Next steps:**
 
-- [**`9-error`**](../9-error/#files) handles all errors in one place, also
+- [**`9-error`**](../9-error#files) handles all errors in one place, also
   customizing the debugger.
-- [**`a-log`**](../a-log/#files) writes messages to the same Dream log at
-  various levels, and creates a sub-log.
+- [**`a-log`**](../a-log#files) shows log levels and sub-logs.
 
 <br>
 
