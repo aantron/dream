@@ -2,10 +2,8 @@
 
 <br>
 
-TODO
-
-<!-- Adjust once the templater vertical whitespace bug is fixed again. -->
-<!-- TODO Discuss CSRF. --->
+With the session middleware from example [**`b-session`**](../b-session#files),
+we can build a [secure form](https://aantron.github.io/dream/#forms):
 
 ```ocaml
 let show_form ?message request =
@@ -44,19 +42,55 @@ let () =
   @@ Dream.not_found
 ```
 
-<pre><code><b>$ dune exec --root . ./promise.exe</b></code></pre>
+<pre><code><b>$ dune exec --root . ./form.exe</b></code></pre>
 
 <br>
 
-TODO
+We didn't write a literal `<form>` tag in the template. Instead, we used
+[`Dream.Tag.form`](https://aantron.github.io/dream/#module-Tag) to generate the
+tag. [`Dream.Tag.form`](https://aantron.github.io/dream/#module-Tag) also snuck
+in a hidden `<input>` field containing a CSRF token:
+
+```html
+<form method="POST" action="/">
+  <input name="dream.csrf" type="hidden" value="j8vjZ6...">
+
+  <!-- The rest we actually wrote ourselves in the template! -->
+  <input name="message" autofocus>
+</form>
+```
+
+This hidden `dream.csrf` field helps to
+[prevent CSRF attacks](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html)
+attacks against the form.
+
+[`Dream.form`](https://aantron.github.io/dream/#val-form) expects `dream.csrf`
+and checks it. If there is anything wrong with the token,
+[`Dream.form`](https://aantron.github.io/dream/#val-form) will return a [value
+other than `` `Ok _``](https://aantron.github.io/dream/#type-form_result).
+
+<br>
+
+The form fields carried inside `` `Ok _`` are returned in sorted order, so you
+can reliably pattern-match on them.
+
+The bad token results, like `` `Expired _``, also carry the form fields. You can
+add handling for them to recover. For example, if you receive an expired form,
+you may want to resend it with some of the fields pre-filled to received
+values, so that the user can try again quickly.
+
+However, do not send back any sensitive data, because *any* result other than
+`` `Ok _`` *might* indicate an attack in progress. That said, `` `Expired _``
+and `` `Wrong_session _`` do often occur during normal user activity. The other
+constructors typically correspond to bugs or attacks, only.
 
 <br>
 
 **Next steps:**
 
-- [**`b-session`**](../b-session/#files) introduces *session management* for
-  associating state with clients.
-- [**`c-cookie`**](../c-cookie/#files) shows *cookie handling* in Dream.
+- [**`e-json`**](../e-json#files) receives and sends JSON.
+- [**`f-static`**](../f-static#files) serves static files from a local
+  directory.
 
 <br>
 

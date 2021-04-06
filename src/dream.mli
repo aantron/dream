@@ -720,7 +720,29 @@ val origin_referer_check : middleware
 
 
 
-(** {1 Forms} *)
+(** {1 Forms}
+
+    {!Dream.Tag.form} and {!Dream.val-form} round-trip secure forms.
+    {!Dream.Tag.form} is used inside a template to generate a form header with a
+    CSRF token:
+
+    {[
+      <%s! Dream.Tag.form ~action:"/" request %>
+        <input name="my.field">
+      </form>
+    ]}
+
+    {!Dream.val-form} recieves the form and checks the CSRF token:
+
+    {[
+      match%lwt Dream.form request with
+      | `Ok ["my.field", value] -> (* ... *)
+      | _ -> Dream.respond `Bad_Request
+    ]}
+
+    See example
+    {{:https://github.com/aantron/dream/tree/master/example/d-form#files}
+    [d-form]}. *)
 
 type 'a form_result = [
   | `Ok            of 'a

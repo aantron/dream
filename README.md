@@ -57,7 +57,7 @@ their slightly different interfaces, and takes care of horridness like
 [middleware]: https://github.com/aantron/dream/tree/master/example/4-counter#files
 [routing]: https://aantron.github.io/dream/#routing
 [cookies]: https://aantron.github.io/dream/#cookies
-[forms]: https://github.com/aantron/dream/tree/master/example/d-form#files
+[forms]: https://aantron.github.io/dream/#forms
 [sessions]: https://github.com/aantron/dream/tree/master/example/b-session#files
 [back-ends]: https://aantron.github.io/dream/#back-ends
 [errors]: https://github.com/aantron/dream/tree/master/example/9-error#files
