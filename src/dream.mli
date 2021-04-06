@@ -1218,7 +1218,9 @@ val static :
     [Dream.static local_path] checks that the request [path] is relative and
     contains no parent directory references. It then calls [~handler local_root
     path request]. The default handler responds with a file at [local_root/path]
-    in the file system, or [404 Not Found] if the file does not exist.
+    in the file system, or [404 Not Found] if the file does not exist. It uses
+    {{:https://github.com/mirage/ocaml-magic-mime} magic-mime} to set the
+    [Content-Type:]
 
     Pass [~handler] to implement any other behavior, including serving files
     from memory. [~handler] can set headers on its response, including [ETag:]

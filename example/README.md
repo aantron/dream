@@ -29,11 +29,12 @@ list below and jump to whatever interests you!
 - [**`b-session`**](b-session/#files) &nbsp;&mdash;&nbsp; associates state with
   client sessions.
 - [**`c-cookie`**](c-cookie/#files) &nbsp;&mdash;&nbsp; sets custom cookies.
-- [**`d-form`**](d-form#files) &nbsp;&mdash;&nbsp; reading forms and CSRF
+- [**`d-form`**](d-form#files) &nbsp;&mdash;&nbsp; reads forms with CSRF
   prevention.
-- [**`e-json`**](e-json#files) &nbsp;&mdash;&nbsp; sending and receiving JSON
+- [**`e-json`**](e-json#files) &nbsp;&mdash;&nbsp; sends and receives JSON
   securely.
-- [**`f-static`**](f-static)
+- [**`f-static`**](f-static) &nbsp;&mdash;&nbsp; serves static files from a
+  local directory.
 - [**`g-upload`**](g-upload)
 - [**`h-sql`**](h-sql) &nbsp;&mdash;&nbsp; finally CRUD!
 - [**`i-graphql`**](i-graphql)
