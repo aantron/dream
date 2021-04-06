@@ -361,10 +361,10 @@ val version : request -> int * int
 (** Protocol version. [(1, 1)] for HTTP/1.1 and [(2, 0)] for HTTP/2. *)
 
 val with_client : string -> request -> request
-(** Replaces the client. See {!Dream.client}. *)
+(** Replaces the client. See {!Dream.val-client}. *)
 
 val with_method_ : method_ -> request -> request
-(** Replaces the method. See {!Dream.method_}. *)
+(** Replaces the method. See {!Dream.type-method_}. *)
 
 val with_version : int * int -> request -> request
 (** Replaces the version. See {!Dream.version}. *)
@@ -481,7 +481,7 @@ val set_cookie :
   ?http_only:bool ->
   ?same_site:[ `Strict | `Lax | `None ] option ->
     string -> string -> request -> response -> response
-(** Appends a [Set-Cookie:] header to the given {!response}. Infers the most
+(** Appends a [Set-Cookie:] header to the {!type-response}. Infers the most
     secure defaults from the {!type-request}.
 
     {[
@@ -606,7 +606,7 @@ val read : request -> string option promise
 
 (* TODO Can still use a multishot, pull stream? *)
 val with_stream : response -> response
-(** Makes the {!response} ready for stream writing with {!Dream.write}. You
+(** Makes the {!type-response} ready for stream writing with {!Dream.write}. You
     should return it from your handler soon after — only one call to
     {!Dream.write} will be accepted before then. See {!Dream.stream} for a more
     convenient wrapper. *)
@@ -710,7 +710,7 @@ type 'a form_result = [
   | `Many_tokens   of 'a
   | `Wrong_content_type
 ]
-(** Form validation results, in order from least to most severe. See
+(** Form CSRF checking results, in order from least to most severe. See
     {!Dream.val-form} and example
     {{:https://github.com/aantron/dream/tree/master/example/d-form#files}
     [d-form]}.
@@ -726,11 +726,11 @@ type 'a form_result = [
 (* TODO Link to the tag helper for dream.csrf and backup instructions for
    generating it; also create that page! *)
 val form : request -> (string * string) list form_result promise
-(** Parses the request body as a form. Performs checks, which are made
-    transparent by using {!Dream.Tag.form} in a template. See
-    {!section-templates} and example
+(** Parses the request body as a form. Performs CSRF checks. Use
+    {!Dream.Tag.form} in a template to transparently generate forms that will
+    pass these checks. See {!section-templates} and example
     {{:https://github.com/aantron/dream/tree/master/example/d-form#readme}
-    [d-form]},
+    [d-form]}.
 
     - [Content-Type:] must be [application/x-www-form-urlencoded].
     - The form must have a field named [dream.csrf]. {!Dream.Tag.form} adds such
@@ -738,8 +738,8 @@ val form : request -> (string * string) list form_result promise
     - {!Dream.form} calls {!Dream.verify_csrf_token} to check the token in
       [dream.csrf].
 
-    The call must be done under a session middleware, since CSRF tokens are
-    bound to sessions. See {!section-sessions}.
+    The call must be done under a session middleware, since each CSRF token is
+    scoped to a session. See {!section-sessions}.
 
     Form fields are sorted for easy pattern matching:
 
@@ -749,7 +749,7 @@ val form : request -> (string * string) list form_result promise
       | _ -> Dream.empty `Bad_Request
     ]}
 
-    If you want to recover from conditions like expired forms, add extra cases:
+    To recover from conditions like expired forms, add extra cases:
 
     {[
       match%lwt Dream.form request with
@@ -1028,7 +1028,6 @@ val _tag_form :
 
 
 
-(* TODO Move logger to Logging, echo to testing. *)
 (** {1 Middleware}
 
     Interesting built-in middlewares are scattered throughout the various
@@ -1286,8 +1285,8 @@ type websocket
 
 val websocket : (websocket -> unit promise) -> response promise
 (** Creates a fresh [101 Switching Protocols] response. Once this response is
-    returned to Dream's HTTP layer, the callback is passed a new {!websocket},
-    and the application can begin using it. See example
+    returned to Dream's HTTP layer, the callback is passed a new
+    {!type-websocket}, and the application can begin using it. See example
     {{:https://github.com/aantron/dream/tree/master/example/k-websocket#files}
     [k-websocket]}.
 
@@ -1398,7 +1397,12 @@ val sql : (Caqti_lwt.connection -> 'a promise) -> request -> 'a promise
 
 
 
-(** {1 Logging} *)
+(** {1 Logging}
+
+    Dream uses the {{:https://erratique.ch/software/logs/doc/Logs/index.html}
+    Logs} library internally, and integrates with all other libraries in your
+    project that are also using it. Dream provides a slightly simplified
+    interface to Logs. *)
 
 val logger : middleware
 (** Logs and times requests. Time spent logging is included. See example
@@ -1439,9 +1443,7 @@ type log_level = [
 val error : ('a, unit) conditional_log
 (** Formats a message and writes it to the log at level [`Error]. The inner
     formatting function is called only if the {{!initialize_log} current log
-    level} is [`Error] or higher. This scheme is based on the
-    {{:https://erratique.ch/software/logs/doc/Logs/index.html} Logs} library.
-    See example
+    level} is [`Error] or higher. See example
     {{:https://github.com/aantron/dream/tree/master/example/a-log#files}
     [a-log]}.
 
@@ -1689,7 +1691,7 @@ val error_template :
     ]}
 
     The error's context suggests [response]. Usually, it's only valid field is
-    {!Dream.status}.
+    {!Dream.val-status}.
 
     - If the error is an exception or rejection from the application, the status
       is usually [500 Internal Server Error].

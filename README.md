@@ -118,13 +118,13 @@ git clone https://github.com/aantron/dream.git --recursive
 
 ## Acknowledgements
 
-Dream is based on work by the authors and contributors of its many
-[dependencies][opamfile] and their transitive dependencies. There are, however,
+Dream is based on work by the authors and contributors of its [**many
+dependencies**][opamfile] and their transitive dependencies. There are, however,
 several influences that cannot be discovered directly:
 
 - Templates are inspired by [**ECaml**][ecaml] from [Alexander Markov][komar]
   and [**Embedded OCaml Templates**][eot] from [Emile Trotignon][trotignon].
-- Dream's handlers and middlewares are simplified from [**Opium**][opium] by
+- Dream's handler and middleware types are simplified from [**Opium**][opium] by
   [Rudi Grinberg][rgrinberg] and contributors.
 - The lower-level HTTP and WebSocket servers are [vendored][vendor] copies of
   [Antonio Nuno Monteiro][anmonteiro]'s forks and original works, with credit
