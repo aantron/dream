@@ -51,8 +51,8 @@ so the application doesn't spend any time formatting a string that it will not
 print. This is the style of the [Logs](https://erratique.ch/software/logs)
 library. Try calling
 [`Dream.initialize_log`](https://aantron.github.io/dream/#val-initialize_log)
-right before [`Dream.run`](https://aantron.github.io/dream/#val-run) to suppress
-the message:
+right before [`Dream.run`](https://aantron.github.io/dream/#val-run), to
+suppress warnings:
 
 ```ocaml
 Dream.initialize_log ~level:`Error ();
@@ -76,8 +76,9 @@ let () =
 **Next steps:**
 
 - [**`b-session`**](../b-session/#files) finally returns web development proper
-  with *session management*.
-- [**`c-cookie`**](../c-cookie/#files) shows *cookie handling* in Dream.
+  with [*session management*](https://aantron.github.io/dream/#sessions).
+- [**`c-cookie`**](../c-cookie/#files) shows [*cookie
+  handling*](https://aantron.github.io/dream/#cookies) in Dream.
 
 <br>
 

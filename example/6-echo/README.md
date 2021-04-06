@@ -55,8 +55,9 @@ present them the right way.
 
 **Next steps:**
 
-- [**`7-template`**](../7-template/#files) builds responses from templates and
-  guards against injection attacks (XSS).
+- [**`7-template`**](../7-template/#files) builds responses from
+  [templates](https://aantron.github.io/dream/#templates) and guards against
+  injection attacks (XSS).
 - [**`8-debug`**](../8-debug/#files) renders error information in responses.
 
 <br>

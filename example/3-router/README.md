@@ -66,10 +66,10 @@ The router can do more than match simple routes:
 
 **Next steps:**
 
-- [**`4-counter`**](../4-counter/#files) counts requests, and exposes a special
-  route for getting the count.
-- [**`5-promise`**](../5-promise/#files) introduces Lwt, the promise library
-  used by Dream.
+- [**`4-counter`**](../4-counter/#files) counts requests, and exposes a route
+  for getting the count.
+- [**`5-promise`**](../5-promise/#files) introduces
+  [Lwt](https://github.com/ocsigen/lwt), the promise library used by Dream.
 
 <br>
 

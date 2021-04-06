@@ -64,8 +64,9 @@ There are also more complicated middlewares defined in
 
 **Next steps:**
 
-- The next example, [**`3-router`**](../3-router/#files), shows *routes*, the
-  other way to build up handlers in Dream.
+- The next example, [**`3-router`**](../3-router/#files), shows
+  [*routes*](https://aantron.github.io/dream/#routing), the other way to build
+  up handlers in Dream.
 - [**`4-counter`**](../4-counter/#files) builds the first custom middleware.
 
 <br>

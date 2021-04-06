@@ -92,9 +92,10 @@ in the examples and keep things tidy.
 
 **Next steps:**
 
-- [**`6-echo`**](../6-echo/#files) uses Lwt to read a request body.
-- [**`7-template`**](../7-template/#files) show how to interleave HTML and
-  OCaml.
+- [**`6-echo`**](../6-echo/#files) uses Lwt to
+  [read a request body](https://aantron.github.io/dream/#val-body).
+- [**`7-template`**](../7-template/#files) show how to [interleave HTML and
+  OCaml](https://aantron.github.io/dream/#templates).
 
 <br>
 

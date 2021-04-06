@@ -52,9 +52,9 @@ you are writing middleware to publish in a library. It's fine to use a global
 **Next steps:**
 
 - [**`5-promise`**](../5-promise/#files) shows a middleware that awaits
-  responses using Lwt.
-- [**`6-echo`**](../6-echo/#files) responds to `POST` requests and reads their
-  bodies.
+  responses using [Lwt](https://github.com/ocsigen/lwt).
+- [**`6-echo`**](../6-echo/#files) responds to `POST` requests and [reads their
+  bodies](https://aantron.github.io/dream/#val-body).
 
 <br>
 

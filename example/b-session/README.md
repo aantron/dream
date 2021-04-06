@@ -2,7 +2,7 @@
 
 <br>
 
-Introducing sessions is straightforward:
+Adding [sessions](https://aantron.github.io/dream/#sessions) is straightforward:
 
 ```ocaml
 let () =

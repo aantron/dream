@@ -120,8 +120,8 @@ and not supported by Dream.
 
 - [**`8-debug`**](../8-debug/#files) shows how to turn on debug responses, and
   get more info about errors.
-- [**`9-error`**](../9-error/#files) sets up a central error template for all
-  errors.
+- [**`9-error`**](../9-error/#files) sets up a central [error
+  template](https://aantron.github.io/dream/#val-error_template) for all errors.
 
 <br>
 

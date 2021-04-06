@@ -99,9 +99,12 @@ Both the debugger's output and the non-debug error page are fully customizable
 
 **Next steps:**
 
-- [**`9-error`**](../9-error#files) handles all errors in one place, also
+- [**`9-error`**](../9-error#files) handles all
+  [errors](https://aantron.github.io/dream/#errors) in one place, also
   customizing the debugger.
-- [**`a-log`**](../a-log#files) shows log levels and sub-logs.
+- [**`a-log`**](../a-log#files) shows [log
+  levels](https://aantron.github.io/dream/#type-log_level) and
+  [sub-logs](https://aantron.github.io/dream/#type-sub_log).
 
 <br>
 
