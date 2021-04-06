@@ -12,7 +12,7 @@ let report files =
   <html>
     <body>
 %     files |> List.iter begin fun (name, content) ->
-        <p><%s name %>, <%i String.length content %>B</p>
+        <p><%s name %>, <%i String.length content %> bytes</p>
 %     end;
     </body>
   </html>
@@ -32,4 +32,4 @@ let () =
       | _ -> Dream.empty `Bad_Request);
 
   ]
-  @@ fun _ -> Dream.respond ~status:`Not_Found ""
+  @@ Dream.not_found

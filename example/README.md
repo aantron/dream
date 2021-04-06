@@ -35,7 +35,7 @@ list below and jump to whatever interests you!
   securely.
 - [**`f-static`**](f-static) &nbsp;&mdash;&nbsp; serves static files from a
   local directory.
-- [**`g-upload`**](g-upload)
+- [**`g-upload`**](g-upload) &nbsp;&mdash;&nbsp; receives file uploads.
 - [**`h-sql`**](h-sql) &nbsp;&mdash;&nbsp; finally CRUD!
 - [**`i-graphql`**](i-graphql)
 - [**`j-stream`**](j-stream)
