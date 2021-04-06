@@ -10,10 +10,11 @@ let () =
   @@ Dream.logger
   @@ Dream.memory_sessions
   @@ fun request ->
+
     match Dream.session "user" request with
     | None ->
       let%lwt () = Dream.invalidate_session request in
-      let%lwt () = Dream.set_session "user" "anastasios" request in
+      let%lwt () = Dream.set_session "user" "alice" request in
       Dream.respond "You weren't logged in; but now you are!"
 
     | Some username ->
@@ -26,74 +27,64 @@ let () =
 <br>
 
 The first time you access the app, it “logs you in” by saving you user name in a
-session. The session manager, `Dream.memory_sessions`, a middleware, adds a
-session ID cookie to the response. The next time you access the app, the
-session is looked up again by ID, and the app recognizes you as logged in!
+session. The session manager,
+[`Dream.memory_sessions`](https://aantron.github.io/dream/#val-memory_sessions),
+a middleware, adds a `dream.session` cookie to the response, containing the
+session key. The next time you access the app, the session is looked up again
+by this key, and the app recognizes you as logged in!
 
-<br>
-
-<!-- TODO: the other built-in session managers. -->
-
-In fact, all of this is a special case of a very flexible session mechanism in
-Dream, which has been configured with tidy defaults. Dream has built-in session
-managers that store session data either...
-
-- server-side, **in memory**, and send a session ID, so you can get started
-  prototyping without configuring a database or encryption keys;
-- server-side, in a **database** &mdash; same as above, but use a database to
-  survive server restarts; or
-- server-side, in a **file** &mdash; also survives restarts, good for
-  prototyping; or
-- client-side, in **encrypted cookies** sent to the client.
-
-Client-side sessions actually work out of the box &mdash; just replace
-`Dream.memory_sessions` with `Dream.cookie_sessions`. However, if you don't
-also pass `~secret` to `Dream.run`, Dream generates a random encryption key
-each time it starts, so the useful lifetime of these sessions is the same as
-for in-memory sessions anyway &mdash; the lifetime of the web app process.
-
-<!-- TODO Link to recommendations. -->
+![Logged in](https://raw.githubusercontent.com/aantron/dream/master/docs/asset/session.png)
 
 <br>
 
 The default sessions provided by Dream contain string-to-string maps (dicts). In
-the example, we created
+this example, we created
 
 ```
 {
-  "user": "anastasios"
+  "user": "alice"
 }
 ```
 
-This is good enough for many apps. However, you can set up Dream sessions to
-store values of any OCaml type. **DOCS TODO; link to the advanced examples**
+<br>
+
+There are two other session back ends:
+
+- [`Dream.cookie_sessions`](https://aantron.github.io/dream/#val-cookie_sessions)
+  stores session data in encrypted cookies. That is, session data is stored on
+  clients, rather than on the server. You can replace `Dream.memory_sessions`
+  with `Dream.cookie_sessions` and it will work right away. However, if you
+  want to be able to decrypt sessions set by previous runs of the server, pass
+  `~secret` to [`Dream.run`](https://aantron.github.io/dream/#val-run) so that
+  it doesn't generate a random key each time.
+- [`Dream.sql_sessions`](https://aantron.github.io/dream/#val-sql_sessions)
+  stores sessions in a database. You can try it after example
+  [**`h-sql`**](../h-sql#files).
 
 <br>
 
-Dream's built-in session managers all create *pre-sessions*. That is, all visits
-to handlers under session middleware get assigned a session. If a visitor is not
-logged in, they still get a new session &mdash; this is a *pre-session*.
-Pre-sessions help generate secure forms for visitors who are not logged in.
-
-TODO Rewrite this paragraph, it is garbage, it's more of a reminder to write a
-real one.
-
-<!-- TODO Link to typed session docs. -->
+All requests passing through a session middleware get assigned a session. If
+they don't have a `dream.session` cookie, they get a fresh, empty session, also
+known as a *pre-session*.
 
 <br>
 
 ## Security
 
-- TODO Fixation
-- TODO Key exhaustion.
+If you log in a user, grant a user or session any enhanced access rights, or
+similar, be sure to replace the existing session with a new one by calling
+[`Dream.invalidate_session`](https://aantron.github.io/dream/#val-invalidate_session).
+This helps to mitigate
+[session fixation](https://en.wikipedia.org/wiki/Session_fixation) attacks. The
+new session will, again, be an empty pre-session.
 
 <br>
 
 **Next steps:**
 
 - Sessions already use cookies internally, but in
-  [**`c-cookie`**](../c-cookie/#files) we set cookies for our own purposes!
-- [**`d-form`**](../d-form/#files) builds secure forms on top of sessions.
+  [**`c-cookie`**](../c-cookie#files) we set cookies for our own purposes!
+- [**`d-form`**](../d-form#files) builds secure forms on top of sessions.
 
 <br>
 
