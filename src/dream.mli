@@ -1195,12 +1195,12 @@ Now with Content-Type guessing.
 (* TODO Link examples. *)
 (** {1 Sessions}
 
-    Dream's default sessions contain [(string * string) list] dictionaries for
+    Dream's default sessions contain string-to-string dictionaries for
     application data. For example, a logged-in session might have
 
     {[
       [
-        "user", "me";
+        "user", "someone";
         "lang", "ut-OP";
       ]
     ]}

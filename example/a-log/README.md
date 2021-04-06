@@ -75,10 +75,9 @@ let () =
 
 **Next steps:**
 
-- [**`b-session`**](../b-session/#files) finally returns web development proper
-  with [*session management*](https://aantron.github.io/dream/#sessions).
-- [**`c-cookie`**](../c-cookie/#files) shows [*cookie
-  handling*](https://aantron.github.io/dream/#cookies) in Dream.
+- [**`b-session`**](../b-session#files) returns web development proper with
+  session management.
+- [**`c-cookie`**](../c-cookie#files) shows cookie handling in Dream.
 
 <br>
 

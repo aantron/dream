@@ -28,11 +28,10 @@ course, see `Good morning, world!`.
 
 **Next steps:**
 
-- The next example, [**`2-middleware`**](../2-middleware/#files), adds a
-  [*logger*](https://aantron.github.io/dream/#val-logger) to the app.
-- [**`3-router`**](../3-router/#files) sends requests to
-  [different handlers](https://aantron.github.io/dream/#routing), depending on
-  their path.
+- The next example, [**`2-middleware`**](../2-middleware#files), adds a logger
+  to the app.
+- [**`3-router`**](../3-router#files) sends requests to different handlers,
+  depending on their path.
 
 <br>
 

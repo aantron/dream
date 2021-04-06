@@ -4,7 +4,7 @@
 
 *Middleware* is just functions that take handlers and wrap them, producing
 bigger handlers that do a little bit more. This example takes the handler from
-[**`1-hello`**](../1-hello/#files) and wraps it in one of the most useful
+[**`1-hello`**](../1-hello#files) and wraps it in one of the most useful
 middlewares, the [*logger*](https://aantron.github.io/dream/#val-logger):
 
 ```ocaml
@@ -40,7 +40,7 @@ When you run this server and visit
 
 You can write your own messages to the log using
 [`Dream.log`](https://aantron.github.io/dream/#val-log). See example
-[**`a-log`**](../a-log/#files) for more logging options. Now that we have the
+[**`a-log`**](../a-log#files) for more logging options. Now that we have the
 logger, we will use it in all other examples, even though it's not really
 necessary &mdash; it just makes it much easier to see what is going on.
 
@@ -48,7 +48,7 @@ necessary &mdash; it just makes it much easier to see what is going on.
 
 There's not much else to middlewares &mdash; they are really just functions
 from handlers to handlers, so you can create them anywhere. Example
-[**`4-counter`**](../4-counter/#files) already shows a simple custom middleware.
+[**`4-counter`**](../4-counter#files) already shows a simple custom middleware.
 
 <!--
 There are also more complicated middlewares defined in
@@ -64,10 +64,10 @@ There are also more complicated middlewares defined in
 
 **Next steps:**
 
-- The next example, [**`3-router`**](../3-router/#files), shows
+- The next example, [**`3-router`**](../3-router#files), shows
   [*routes*](https://aantron.github.io/dream/#routing), the other way to build
   up handlers in Dream.
-- [**`4-counter`**](../4-counter/#files) builds the first custom middleware.
+- [**`4-counter`**](../4-counter#files) builds the first custom middleware.
 
 <br>
 

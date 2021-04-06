@@ -84,18 +84,15 @@ For example, `let%lwt` is equivalent to...
   from module `Lwt.Syntax`, which is showcased in Lwt's
   [README](https://github.com/ocsigen/lwt#readme).
 
-This is, in part, the result of Lwt's very long lifetime. It is much older than
-JavaScript promises &mdash; it dates back to 1995! We will stick to `let%lwt`
-in the examples and keep things tidy.
+We will stick to `let%lwt` in the examples and keep things tidy.
 
 <br>
 
 **Next steps:**
 
-- [**`6-echo`**](../6-echo/#files) uses Lwt to
-  [read a request body](https://aantron.github.io/dream/#val-body).
-- [**`7-template`**](../7-template/#files) show how to [interleave HTML and
-  OCaml](https://aantron.github.io/dream/#templates).
+- [**`6-echo`**](../6-echo#files) uses Dream and Lwt to read a request body.
+- [**`7-template`**](../7-template#files) shows how to interleave HTML and
+  OCaml.
 
 <br>
 
