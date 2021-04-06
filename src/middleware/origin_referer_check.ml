@@ -53,7 +53,7 @@ let origin_referer_check inner_handler request =
         let host_host, host_port =
           match String.split_on_char ':' host with
           | [host; port] -> Some host, Some port
-          | _ -> None, None
+          | _ -> Some host, None
         in
 
         let origin_port =

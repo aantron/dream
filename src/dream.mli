@@ -692,7 +692,11 @@ val write_bigstring : bigstring -> int -> int -> response -> unit promise
     Dream presently recommends using
     {{:https://github.com/ocaml-community/yojson#readme} Yojson}. See also
     {{:https://github.com/janestreet/ppx_yojson_conv#readme} ppx_yojson_conv}
-    for generating JSON parsers and serializers for OCaml data types. *)
+    for generating JSON parsers and serializers for OCaml data types.
+
+    See example
+    {{:https://github.com/aantron/dream/tree/master/example/e-json#files}
+    [e-json]}. *)
 
 val origin_referer_check : middleware
 (** CSRF protection for AJAX requests. Either the method must be [`GET] or
@@ -701,7 +705,9 @@ val origin_referer_check : middleware
     - [Origin:] or [Referer:] must be present, and
     - their value must match [Host:]
 
-    Responds with [400 Bad Request] if the check fails.
+    Responds with [400 Bad Request] if the check fails. See example
+    {{:https://github.com/aantron/dream/tree/master/example/e-json#files}
+    [e-json]}.
 
     Implements the
     {{:https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#verifying-origin-with-standard-headers}
