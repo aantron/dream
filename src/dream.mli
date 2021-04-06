@@ -466,7 +466,28 @@ val with_header : string -> string -> 'a message -> 'a message
 
 
 
-(** {1 Cookies} *)
+(** {1 Cookies}
+
+    {!Dream.set_cookie} and {!Dream.cookie} are designed for round-tripping
+    secure cookies. The most secure settings applicable to the current server
+    are inferred automatically.
+
+    {[
+      Dream.set_cookie "my.cookie" "foo" request response
+      Dream.cookie "my.cookie" request
+    ]}
+
+    The {!Dream.cookie} call evaluates to [Some "foo"], but the actual cookie
+    that is exchanged may look like:
+
+    {v
+__Host-my.cookie=AL7NLA8-so3e47uy0R5E2MpEQ0TtTWztdhq5pTEUT7KSFg; \
+  Path=/; Secure; HttpOnly; SameSite=Strict
+    v}
+
+    {!Dream.set_cookie} has a large number of optional arguments for tweaking
+    the inferred security settings. If you use them, pass the same arguments to
+    {!Dream.cookie} to automatically undo the result. *)
 
 (* TODO How to delete cookies. *)
 (* TODO Add ability to only sign the cookie? *)

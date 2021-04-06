@@ -24,6 +24,7 @@ https://http2-explained.haxx.se/en/part6
  *)
 
 (* TODO In serious need of refactoring because of all the different handlers. *)
+(* TODO Warn on too-short secrets if not binding to localhost. *)
 
 
 
