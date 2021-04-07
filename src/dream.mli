@@ -470,7 +470,9 @@ val with_header : string -> string -> 'a message -> 'a message
 
     {!Dream.set_cookie} and {!Dream.cookie} are designed for round-tripping
     secure cookies. The most secure settings applicable to the current server
-    are inferred automatically.
+    are inferred automatically. See example
+    {{:https://github.com/aantron/dream/tree/master/example/c-cookie#files}
+    [c-cookie]}.
 
     {[
       Dream.set_cookie "my.cookie" "foo" request response

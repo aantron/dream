@@ -59,6 +59,8 @@ started!
 
 ![WebSocket alert](https://raw.githubusercontent.com/aantron/dream/master/docs/asset/websocket.png)
 
+<br>
+
 See [*WebSockets*](https://aantron.github.io/dream/#websockets) in the API docs.
 
 <br>

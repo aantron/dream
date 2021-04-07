@@ -13,8 +13,6 @@ Easy-to-use, feature-complete Web framework without boilerplate.
 <br>
 <br>
 
-*Note: the project is in a pre-alpha state; currently writing examples.*
-
 Dream is **one flat module** in **one package**, documented on
 [**one page**][api-main], but with [**many examples**][tutorial]. It offers:
 
@@ -52,11 +50,11 @@ their slightly different interfaces, and takes care of horridness like
 [ALPN][alpn].
 
 [https]: https://github.com/aantron/dream/tree/master/example/l-https#files
-[websocket]: https://aantron.github.io/dream/#websockets
+[websocket]: https://github.com/aantron/dream/tree/master/example/k-websocket#files
 [graphql]: https://github.com/aantron/dream/tree/master/example/i-graphql#files
 [templates]: https://github.com/aantron/dream/tree/master/example/7-template#files
 [reason-templates]: https://github.com/aantron/dream/tree/master/example/r-template#files
-[middleware]: https://github.com/aantron/dream/tree/master/example/4-counter#files
+[middleware]: https://github.com/aantron/dream/tree/master/example/2-middleware#files
 [routing]: https://github.com/aantron/dream/tree/master/example/3-router#files
 [cookies]: https://aantron.github.io/dream/#cookies
 [forms]: https://aantron.github.io/dream/#forms
@@ -72,30 +70,6 @@ their slightly different interfaces, and takes care of horridness like
 
 <br>
 
-## Documentation
-
-- The first examples of Dream make up a [**Tutorial**][tutorial]. See the full
-  list and start wherever you like, or begin at [**`1-hello`**][1-hello], the
-  Dream version of *Hello, world!*
-
-- Several of the tutorials and examples are available in
-  [**Reason syntax**][reason-examples], with more to come over time!
-
-- There are additional [**Examples**][examples], covering various HTTP
-  scenarios.
-
-- See the [**API documentation**][api-main].
-
-[tutorial]: https://github.com/aantron/dream/tree/master/example#readme
-[examples]: https://github.com/aantron/dream/tree/master/example#examples
-[1-hello]: https://github.com/aantron/dream/tree/master/example/1-hello#files
-[reason-examples]: https://github.com/aantron/dream/tree/master/example#reason
-
-<!-- TODO LATER CI badges, opam link badge, npm badge. -->
-<!-- TODO Clone instructions should include --recursive. -->
-
-<br>
-
 ## Getting started
 
 *TODO opam release, esy instructions, quick-start script.*
@@ -105,6 +79,29 @@ opam install dream
 ```
 
 [api-main]: https://aantron.github.io/dream/#types
+
+<br>
+
+## Documentation
+
+- [**Tutorial**][tutorial] &mdash; Threads together the first several examples
+  of Dream, touching all the basic topics, including security. See the full list
+  and start wherever you like, or begin at [**`1-hello`**][1-hello], the Dream
+  version of *Hello, world!*
+
+- [**Reason syntax**][reason-examples] &mdash; Several of the tutorials and
+  examples are available in Reason syntax, with more to come over time!
+
+- [**Examples**][examples] &mdash; These cover various HTTP scenarios.
+
+- [**API reference**][api-main]
+
+[tutorial]: https://github.com/aantron/dream/tree/master/example#readme
+[examples]: https://github.com/aantron/dream/tree/master/example#examples
+[1-hello]: https://github.com/aantron/dream/tree/master/example/1-hello#files
+[reason-examples]: https://github.com/aantron/dream/tree/master/example#reason
+
+<!-- TODO LATER CI badges, opam link badge, npm badge. -->
 
 <br>
 
@@ -172,6 +169,27 @@ Then:
       zero-allocation streaming.
 - [ ] WebSocket and stream backpressure.
 - [ ] HTTP3/QUIC.
+- [ ] Review JSON.
+- [ ] Review SQL prepared statements.
+- [ ] Switch to AEAD_AES_256_GCM_SIV for the cipher.
+- [ ] WebSocket streaming (frames).
+- [ ] Factor out internal sub-libraries to port Dream to MirageOS, etc.
+- [ ] Token rotation-based session management.
+- [ ] Lots of helpers for decoupling defaults, e.g. forms without CSRF checking,
+      SQL sessions with a different database.
+- [ ] Bundle GraphiQL into a single HTML file that does not access any external
+      CDN.
+- [ ] Maybe a logo.
+- [ ] i18n helper, URL templates.
+- [ ] Auth library.
+- [ ] Maybe REST helpers.
+- [ ] Maybe Async support.
+- [ ] Multicore.
+- [ ] Effects.
+- [ ] Proxy headers support.
+- [ ] Introspection.
+- [ ] Dependency reduction, especially system dependencies.
+- [ ] And *lots*, *lots* more.
 
 
 
