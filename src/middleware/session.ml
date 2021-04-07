@@ -82,7 +82,7 @@ type session = {
 }
 
 type operations = {
-  set : string -> string -> unit Lwt.t;
+  put : string -> string -> unit Lwt.t;
   invalidate : unit -> unit Lwt.t;
   mutable dirty : bool;
 }
@@ -116,7 +116,7 @@ struct
       session
     end
 
-  let set session name value =
+  let put session name value =
     session.payload
     |> List.remove_assoc name
     |> fun dictionary -> (name, value)::dictionary
@@ -131,8 +131,8 @@ struct
 
   let operations hash_table lifetime session dirty =
     let rec operations = {
-      set =
-        (fun name value -> set !session name value);
+      put =
+        (fun name value -> put !session name value);
       invalidate =
         (fun () -> invalidate hash_table lifetime operations session);
       dirty;
@@ -201,7 +201,7 @@ struct
     payload = [];
   }
 
-  let set operations session name value =
+  let put operations session name value =
     session.payload
     |> List.remove_assoc name
     |> fun dictionary -> (name, value)::dictionary
@@ -216,7 +216,7 @@ struct
 
   let operations lifetime session dirty =
     let rec operations = {
-      set = (fun name value -> set operations !session name value);
+      put = (fun name value -> put operations !session name value);
       invalidate = (fun () -> invalidate lifetime operations session);
       dirty;
     } in
@@ -318,8 +318,8 @@ let cookie_sessions ?(lifetime = two_weeks) =
 let session name request =
   List.assoc_opt name (!(snd (getter request)).payload)
 
-let set_session name value request =
-  (fst (getter request)).set name value
+let put_session name value request =
+  (fst (getter request)).put name value
 
 let all_session_values request =
   !(snd (getter request)).payload

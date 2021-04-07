@@ -133,7 +133,7 @@ let rec create db expires_at attempt =
   | () ->
     Lwt.return session
 
-let set request (session : Session.session) name value =
+let put request (session : Session.session) name value =
   session.payload
   |> List.remove_assoc name
   |> fun dictionary -> (name, value)::dictionary
@@ -151,7 +151,7 @@ let invalidate request lifetime operations (session : Session.session ref) =
 
 let operations request lifetime (session : Session.session ref) dirty =
   let rec operations = {
-    Session.set = (fun name value -> set request !session name value);
+    Session.put = (fun name value -> put request !session name value);
     invalidate = (fun () -> invalidate request lifetime operations session);
     dirty;
   } in

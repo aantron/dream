@@ -400,13 +400,13 @@ let static_replacement = {|
 </pre>
 |}
 
-let set_session_expected = {|<div class="spec value" id="val-set_session">
- <a href="#val-set_session" class="anchor"></a><code><span><span class="keyword">val</span> set_session : <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+let set_session_expected = {|<div class="spec value" id="val-put_session">
+ <a href="#val-put_session" class="anchor"></a><code><span><span class="keyword">val</span> put_session : <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let set_session_replacement = {|
-<pre><span class="keyword">val</span> set_session :
+<pre><span class="keyword">val</span> put_session :
   string -> string -> <a href="#type-request">request</a> -> unit <a href="#type-promise">promise</a>
 </pre>
 |}
@@ -949,7 +949,7 @@ let pretty_print_signatures soup =
 
   multiline "#val-scope" scope_expected scope_replacement;
   multiline "#val-static" static_expected static_replacement;
-  multiline "#val-set_session" set_session_expected set_session_replacement;
+  multiline "#val-put_session" set_session_expected set_session_replacement;
   multiline "#val-websocket" websocket_expected websocket_replacement;
   multiline "#val-send" send_expected send_replacement;
   multiline "#val-graphql" graphql_expected graphql_replacement;

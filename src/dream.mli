@@ -1277,9 +1277,9 @@ Now with Content-Type guessing.
 val session : string -> request -> string option
 (** Value from the request's session. *)
 
-val set_session : string -> string -> request -> unit promise
-(** Sets a value in the request's session. The back end may commit the value to
-    storage immediately, so this function returns a promise. *)
+val put_session : string -> string -> request -> unit promise
+(** Mutates a value in the request's session. The back end may commit the value
+    to storage immediately, so this function returns a promise. *)
 
 val all_session_values : request -> (string * string) list
 (** Full session dictionary. *)
