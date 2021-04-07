@@ -37,7 +37,8 @@ list below and jump to whatever interests you!
   a local directory.
 - [**`g-upload`**](g-upload#files) &nbsp;&mdash;&nbsp; receives file uploads.
 - [**`h-sql`**](h-sql#files) &nbsp;&mdash;&nbsp; queries an SQL database.
-- [**`i-graphql`**](i-graphql)
+- [**`i-graphql`**](i-graphql#files) &nbsp;&mdash;&nbsp; serves a GraphQL
+  schema and GraphiQL.
 - [**`j-stream`**](j-stream)
 - [**`k-websocket`**](k-websocket)
 - [**`k-https`**](k-https)

@@ -1395,8 +1395,10 @@ val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
 (* TODO Either that, or give it a name so that it's clearer. *)
 
 val graphiql : string -> handler
-(** Serves {{:https://github.com/graphql/graphiql#readme} GraphiQL}, a GraphQL
-    query editor. The editor submits queries to the given path. *)
+(** Serves
+    {{:https://github.com/graphql/graphiql/tree/main/packages/graphiql#readme}
+    GraphiQL}, a GraphQL query editor. The editor submits queries to the given
+    path. *)
 
 
 
