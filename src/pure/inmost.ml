@@ -546,13 +546,16 @@ let encryption_secret request =
 let decryption_secrets request =
   [request.specific.app.secret]
 
-let encrypt request plaintext =
-  Cipher.encrypt
-    (module Cipher.AEAD_AES_256_GCM) (encryption_secret request) plaintext
+let encrypt ?(secret_prefix = "") request plaintext =
+  let secret =
+    secret_prefix ^ (encryption_secret request) in
+  Cipher.encrypt (module Cipher.AEAD_AES_256_GCM) secret plaintext
 
-let decrypt request ciphertext =
-  Cipher.decrypt
-    (module Cipher.AEAD_AES_256_GCM) (decryption_secrets request) ciphertext
+let decrypt ?(secret_prefix = "") request ciphertext =
+  let secrets =
+    decryption_secrets request
+    |> List.map ((^) secret_prefix) in
+  Cipher.decrypt (module Cipher.AEAD_AES_256_GCM) secrets ciphertext
 
 let infer_cookie_prefix prefix domain path secure =
   match prefix, domain, path, secure with
@@ -599,9 +602,8 @@ let cookie
       | Error _ ->
         None
       | Ok value ->
-        decrypt request value
+        decrypt ~secret_prefix:"dream.cookie-" request value
 
-(* TODO LATER Default encoding. *)
 let set_cookie
     ?prefix:cookie_prefix
     ?encrypt:(encrypt_cookie = true)
@@ -638,7 +640,8 @@ let set_cookie
 
   let value =
     if encrypt_cookie then
-      encrypt request value |> Formats.to_base64url
+      encrypt ~secret_prefix:"dream.cookie-" request value
+      |> Formats.to_base64url
     else
       value
   in
@@ -648,7 +651,5 @@ let set_cookie
       ?expires ?max_age ?domain ?path ~secure ~http_only ?same_site
       (cookie_prefix ^ name) value
   in
-
-  (* TODO And encrypt. *)
 
   add_header "Set-Cookie" set_cookie response

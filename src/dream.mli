@@ -2043,9 +2043,9 @@ val random : int -> string
 (* TODO Key derivation. *)
 (* TODO Refuse RC4 in TLS? *)
 
-val encrypt : request -> string -> string
+val encrypt : ?secret_prefix:string -> request -> string -> string
 
-val decrypt : request -> string -> string option
+val decrypt : ?secret_prefix:string -> request -> string -> string option
 
 (*
 type cipher
