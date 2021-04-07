@@ -672,9 +672,10 @@ let new_global_replacement = {|
 
 let run_expected = {|<div class="spec value" id="val-run">
  <a href="#val-run" class="anchor"></a><code><span><span class="keyword">val</span> run : <span>?interface:string <span class="arrow">-&gt;</span></span> <span>?port:int <span class="arrow">-&gt;</span></span> <span>?stop:<span>unit <a href="#type-promise">promise</a></span> <span class="arrow">-&gt;</span></span> <span>?debug:bool <span class="arrow">-&gt;</span></span>
-<span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span> <span>?secret:string <span class="arrow">-&gt;</span></span> <span>?prefix:string <span class="arrow">-&gt;</span></span> <span>?https:bool <span class="arrow">-&gt;</span></span>
-<span>?certificate_file:string <span class="arrow">-&gt;</span></span> <span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?builtins:bool <span class="arrow">-&gt;</span></span> <span>?greeting:bool <span class="arrow">-&gt;</span></span>
-<span>?stop_on_input:bool <span class="arrow">-&gt;</span></span> <span>?graceful_stop:bool <span class="arrow">-&gt;</span></span> <span>?adjust_terminal:bool <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> unit</span></code>
+<span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span> <span>?secret:string <span class="arrow">-&gt;</span></span> <span>?old_secrets:<span>string list</span> <span class="arrow">-&gt;</span></span> <span>?prefix:string <span class="arrow">-&gt;</span></span>
+<span>?https:bool <span class="arrow">-&gt;</span></span> <span>?certificate_file:string <span class="arrow">-&gt;</span></span> <span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?builtins:bool <span class="arrow">-&gt;</span></span>
+<span>?greeting:bool <span class="arrow">-&gt;</span></span> <span>?stop_on_input:bool <span class="arrow">-&gt;</span></span> <span>?graceful_stop:bool <span class="arrow">-&gt;</span></span>
+<span>?adjust_terminal:bool <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
 |}
 
@@ -686,6 +687,7 @@ let run_replacement = {|
   ?debug:bool ->
   ?error_handler:<a href="#type-error_handler">error_handler</a> ->
   ?secret:string ->
+  ?old_secrets:string list ->
   ?prefix:string ->
   ?https:true ->
   ?certificate_file:string ->
@@ -700,8 +702,9 @@ let run_replacement = {|
 
 let serve_expected = {|<div class="spec value" id="val-serve">
  <a href="#val-serve" class="anchor"></a><code><span><span class="keyword">val</span> serve : <span>?interface:string <span class="arrow">-&gt;</span></span> <span>?port:int <span class="arrow">-&gt;</span></span> <span>?stop:<span>unit <a href="#type-promise">promise</a></span> <span class="arrow">-&gt;</span></span> <span>?debug:bool <span class="arrow">-&gt;</span></span>
-<span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span> <span>?secret:string <span class="arrow">-&gt;</span></span> <span>?prefix:string <span class="arrow">-&gt;</span></span> <span>?https:bool <span class="arrow">-&gt;</span></span>
-<span>?certificate_file:string <span class="arrow">-&gt;</span></span> <span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?builtins:bool <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+<span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span> <span>?secret:string <span class="arrow">-&gt;</span></span> <span>?old_secrets:<span>string list</span> <span class="arrow">-&gt;</span></span> <span>?prefix:string <span class="arrow">-&gt;</span></span>
+<span>?https:bool <span class="arrow">-&gt;</span></span> <span>?certificate_file:string <span class="arrow">-&gt;</span></span> <span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?builtins:bool <span class="arrow">-&gt;</span></span>
+<span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
@@ -713,6 +716,7 @@ let serve_replacement = {|
   ?debug:bool ->
   ?error_handler:<a href="#type-error_handler">error_handler</a> ->
   ?secret:string ->
+  ?old_secrets:string list ->
   ?prefix:string ->
   ?https:bool ->
   ?certificate_file:string ->
@@ -749,6 +753,30 @@ let drop_empty_expected = {|<div class="spec value" id="val-drop_empty_trailing_
 let drop_empty_replacement = {|
 <pre><span class="keyword">val</span> drop_empty_trailing_path_component :
   string list -> string list
+</pre>
+|}
+
+let encrypt_expected = {|<div class="spec value" id="val-encrypt">
+ <a href="#val-encrypt" class="anchor"></a><code><span><span class="keyword">val</span> encrypt : <span>?secret_prefix:string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let encrypt_replacement = {|
+<pre><span class="keyword">val</span> encrypt :
+  ?secret_prefix:string ->
+    <a href="#type-request">request</a> -> string -> string
+</pre>
+|}
+
+let decrypt_expected = {|<div class="spec value" id="val-decrypt">
+ <a href="#val-decrypt" class="anchor"></a><code><span><span class="keyword">val</span> decrypt : <span>?secret_prefix:string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string option</span></span></code>
+</div>
+|}
+
+let decrypt_replacement = {|
+<pre><span class="keyword">val</span> decrypt :
+  ?secret_prefix:string ->
+    <a href="#type-request">request</a> -> string -> string option
 </pre>
 |}
 
@@ -997,6 +1025,8 @@ let pretty_print_signatures soup =
     "#val-drop_empty_trailing_path_component"
     drop_empty_expected
     drop_empty_replacement;
+  multiline "#val-encrypt" encrypt_expected encrypt_replacement;
+  multiline "#val-decrypt" decrypt_expected decrypt_replacement;
 
   let request = soup $ "#val-request" in
   if_expected

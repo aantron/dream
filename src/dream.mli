@@ -2038,21 +2038,41 @@ val drop_empty_trailing_path_component : string list -> string list
 
 (* TODO Expose some hash functions. *)
 (* TODO Expose current time somewhere. *)
-(* TODO Should cryptography be before web formats? *)
 (** {1 Cryptography} *)
 
 val random : int -> string
-(** Generates the given number of bytes using a
+(** Generates the requested number of bytes using a
     {{:https://github.com/mirage/mirage-crypto} cryptographically secure random
     number generator}. *)
 (* TODO Review which TLS protocls are negotiated. *)
-(* TODO Support key retirement? *)
-(* TODO Key derivation. *)
 (* TODO Refuse RC4 in TLS? *)
 
-val encrypt : ?secret_prefix:string -> request -> string -> string
+val encrypt :
+  ?secret_prefix:string ->
+    request -> string -> string
+(** Encrypts the string using the [~secret] in the request. See {!Dream.run} for
+    setting [~secret].
 
-val decrypt : ?secret_prefix:string -> request -> string -> string option
+    The secret is hashed to generate the encryption key. [~secret_prefix] allows
+    prepending a prefix to the secret before hashing. This is meant to make
+    hashes for different usages of the secret distinct. For example, Dream
+    prepends ["dream.cookie-""] when encrypting cookies, and you might prepend
+    ["my.db-""] if using {!Dream.encrypt} for records in a public database. That
+    way, if the hash of the secret used for cookies is compromised, the database
+    records are at least not {e trivially} compromised — but this scheme is not
+    meant to provide strong security. It is often reasonable not to pass
+    anything for [~secret_prefix], because Dream already passes a prefix for all
+    of its own usages. This means that the hash with the empty prefix is
+    different from anything built into Dream. *)
+
+val decrypt :
+  ?secret_prefix:string ->
+    request -> string -> string option
+(** Reverses {!Dream.encrypt}.
+
+    To support secret rotation, the decryption secrets with which decryption is
+    attempted are are [(~secret)::(~old_secrets)]. See the descriptions of
+    [~secret] and [~old_secrets] in {!Dream.run}. *)
 
 (*
 type cipher
