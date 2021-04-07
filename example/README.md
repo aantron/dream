@@ -33,10 +33,10 @@ list below and jump to whatever interests you!
   prevention.
 - [**`e-json`**](e-json#files) &nbsp;&mdash;&nbsp; sends and receives JSON
   securely.
-- [**`f-static`**](f-static) &nbsp;&mdash;&nbsp; serves static files from a
-  local directory.
-- [**`g-upload`**](g-upload) &nbsp;&mdash;&nbsp; receives file uploads.
-- [**`h-sql`**](h-sql) &nbsp;&mdash;&nbsp; finally CRUD!
+- [**`f-static`**](f-static#files) &nbsp;&mdash;&nbsp; serves static files from
+  a local directory.
+- [**`g-upload`**](g-upload#files) &nbsp;&mdash;&nbsp; receives file uploads.
+- [**`h-sql`**](h-sql#files) &nbsp;&mdash;&nbsp; queries an SQL database.
 - [**`i-graphql`**](i-graphql)
 - [**`j-stream`**](j-stream)
 - [**`k-websocket`**](k-websocket)

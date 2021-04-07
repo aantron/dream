@@ -706,7 +706,7 @@ val origin_referer_check : middleware
     - their value must match [Host:]
 
     Responds with [400 Bad Request] if the check fails. See example
-    {{:https://github.com/aantron/dream/tree/master/example/e-json#files}
+    {{:https://github.com/aantron/dream/tree/master/example/e-json#security}
     [e-json]}.
 
     Implements the
@@ -1408,9 +1408,12 @@ val graphiql : string -> handler
 
     Dream provides thin convenience functions over
     {{:https://github.com/paurkedal/ocaml-caqti/#readme} Caqti}, an SQL
-    interface with several back ends. Dream installs the core
-    {{:https://opam.ocaml.org/packages/caqti/} [caqti]} package, but you should
-    also install at least one of:
+    interface with several back ends. See example
+    {{:https://github.com/aantron/dream/tree/master/example/h-sql#files}
+    [h-sql]}.
+
+    Dream installs the core {{:https://opam.ocaml.org/packages/caqti/} [caqti]}
+    package, but you should also install at least one of:
 
     - {{:https://opam.ocaml.org/packages/caqti-driver-sqlite3/}
       [caqti-driver-sqlite3]}
@@ -1435,7 +1438,9 @@ val sql_pool : ?size:int -> string -> middleware
 
 (* TODO Work out the example. *)
 val sql : (Caqti_lwt.connection -> 'a promise) -> request -> 'a promise
-(** Runs the callback with a connection from the SQL pool.
+(** Runs the callback with a connection from the SQL pool. See example
+    {{:https://github.com/aantron/dream/tree/master/example/h-sql#files}
+    [h-sql]}.
 
     {[
       let () =

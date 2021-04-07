@@ -65,7 +65,7 @@ There are two other session back ends, which are persistent:
   [`Dream.run`](https://aantron.github.io/dream/#val-run) so that it doesn't
   generate a random key each time.
 - [`Dream.sql_sessions`](https://aantron.github.io/dream/#val-sql_sessions)
-  stores sessions in a database. You can try it after example
+  stores sessions in a database. It's used in example
   [**`h-sql`**](../h-sql#files).
 
 <br>

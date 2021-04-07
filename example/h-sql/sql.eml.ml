@@ -1,0 +1,53 @@
+module type DB = Caqti_lwt.CONNECTION
+module R = Caqti_request
+module T = Caqti_type
+
+let list_comments =
+  let query =
+    R.collect T.unit T.(tup2 int string)
+      "SELECT id, text FROM comment" in
+  fun (module Db : DB) ->
+    let%lwt comments_or_error = Db.collect_list query () in
+    Caqti_lwt.or_fail comments_or_error
+
+let add_comment =
+  let query =
+    R.exec T.string
+      "INSERT INTO comment (text) VALUES ($1)" in
+  fun text (module Db : DB) ->
+    let%lwt unit_or_error = Db.exec query text in
+    Caqti_lwt.or_fail unit_or_error
+
+let render comments request =
+  <html>
+    <body>
+%     comments |> List.iter (fun (_id, comment) ->
+        <p><%s comment %></p><% ); %>
+      <%s! Dream.Tag.form ~action:"/" request %>
+        <input name="text">
+      </form>
+    </body>
+  </html>
+
+let () =
+  Dream.run
+  @@ Dream.logger
+  @@ Dream.sql_pool "sqlite3:db.sqlite"
+  @@ Dream.sql_sessions
+  @@ Dream.router [
+
+    Dream.get "/" (fun request ->
+      let%lwt comments = Dream.sql list_comments request in
+      Dream.respond (render comments request));
+
+    Dream.post "/" (fun request ->
+      match%lwt Dream.form request with
+      | `Ok ["text", text] ->
+        let%lwt () = Dream.sql (add_comment text) request in
+        let%lwt comments = Dream.sql list_comments request in
+        Dream.respond (render comments request)
+      | _ ->
+        Dream.empty `Bad_Request);
+
+  ]
+  @@ Dream.not_found
