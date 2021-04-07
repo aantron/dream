@@ -88,12 +88,9 @@ opam install dream
   of Dream, touching all the basic topics, including security. See the full list
   and start wherever you like, or begin at [**`1-hello`**][1-hello], the Dream
   version of *Hello, world!*
-
-- [**Reason syntax**][reason-examples] &mdash; Several of the tutorials and
-  examples are available in Reason syntax, with more to come over time!
-
+- [**Reason syntax**][reason-examples] &mdash; Several of the examples are
+  available in Reason syntax, with more to come over time!
 - [**Examples**][examples] &mdash; These cover various HTTP scenarios.
-
 - [**API reference**][api-main]
 
 [tutorial]: https://github.com/aantron/dream/tree/master/example#readme
@@ -102,6 +99,19 @@ opam install dream
 [reason-examples]: https://github.com/aantron/dream/tree/master/example#reason
 
 <!-- TODO LATER CI badges, opam link badge, npm badge. -->
+
+<br>
+
+## Contact
+
+Apart from the [issues](https://github.com/aantron/dream/issues), good places
+to discuss Dream are...
+
+- The [OCaml](https://discord.gg/DyhPFYGr) and/or
+  [Reason](https://discord.gg/YCTDuzbg) Discord servers.
+- The [OCaml Discuss forum](https://discuss.ocaml.org/).
+
+Highlight `@antron` to poke @aantron specifically.
 
 <br>
 
