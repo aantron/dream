@@ -41,7 +41,8 @@ list below and jump to whatever interests you!
   schema and GraphiQL.
 - [**`j-stream`**](j-stream#files) &nbsp;&mdash;&nbsp; streams request and
   response bodies.
-- [**`k-websocket`**](k-websocket)
+- [**`k-websocket`**](k-websocket#files) &nbsp;&mdash;&nbsp; opens a WebSocket
+  between client and server.
 - [**`l-https`**](l-https)
 
 That's it for the tutorial!

@@ -1,23 +1,21 @@
 let home =
   <html>
-  <body>
-  <script>
+    <body>
+      <script>
 
-  var socket = new WebSocket("ws://localhost:8080/websocket");
+      var socket = new WebSocket("ws://localhost:8080/websocket");
 
-  socket.onopen = function () {
-    socket.send("Hello?");
-  };
+      socket.onopen = function () {
+        socket.send("Hello?");
+      };
 
-  socket.onmessage = function (e) {
-    alert(e.data);
-  }
+      socket.onmessage = function (e) {
+        alert(e.data);
+      }
 
-  </script>
-  </body>
+      </script>
+    </body>
   </html>
-
-open Lwt.Syntax
 
 let () =
   Dream.run
@@ -30,12 +28,13 @@ let () =
 
     Dream.get "/websocket"
       (fun _ ->
-        Dream.websocket @@ fun websocket ->
-          let* () = Dream.send "Hello?" websocket in
-          let* _ = Dream.receive websocket in
-          let* () = Dream.send "Goodbye!" websocket in
-          Dream.close_websocket websocket);
+        Dream.websocket (fun websocket ->
+          match%lwt Dream.receive websocket with
+          | Some "Hello?" ->
+            let%lwt () = Dream.send "Good-bye!" websocket in
+            Dream.close_websocket websocket
+          | _ ->
+            Dream.close_websocket websocket));
 
   ]
-  @@ fun _ ->
-    Dream.respond ~status:`Not_Found ""
+  @@ Dream.not_found

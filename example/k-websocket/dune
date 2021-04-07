@@ -1,6 +1,7 @@
 (executable
  (name websocket)
- (libraries dream))
+ (libraries dream)
+ (preprocess (pps lwt_ppx)))
 
 (rule
  (targets websocket.ml)
