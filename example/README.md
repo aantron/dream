@@ -39,9 +39,10 @@ list below and jump to whatever interests you!
 - [**`h-sql`**](h-sql#files) &nbsp;&mdash;&nbsp; queries an SQL database.
 - [**`i-graphql`**](i-graphql#files) &nbsp;&mdash;&nbsp; serves a GraphQL
   schema and GraphiQL.
-- [**`j-stream`**](j-stream)
+- [**`j-stream`**](j-stream#files) &nbsp;&mdash;&nbsp; streams request and
+  response bodies.
 - [**`k-websocket`**](k-websocket)
-- [**`k-https`**](k-https)
+- [**`l-https`**](l-https)
 
 That's it for the tutorial!
 

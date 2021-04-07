@@ -51,7 +51,7 @@ their slightly different interfaces, and takes care of horridness like
 [ALPN][alpn].
 
 [websocket]: https://aantron.github.io/dream/#websockets
-[graphql]: https://aantron.github.io/dream/#graphql
+[graphql]: https://github.com/aantron/dream/tree/master/example/i-graphql#files
 [templates]: https://github.com/aantron/dream/tree/master/example/7-template#files
 [reason-templates]: https://github.com/aantron/dream/tree/master/example/r-template#files
 [middleware]: https://github.com/aantron/dream/tree/master/example/4-counter#files
