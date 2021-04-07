@@ -3,11 +3,6 @@
  (modules index)
  (libraries common lambdasoup))
 
-(executable
- (name status)
- (modules status)
- (libraries common lambdasoup))
-
 (library
  (name common)
  (modules common)

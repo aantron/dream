@@ -1,4 +1,4 @@
-ROOT := ../..
+	ROOT := ../..
 ODOC := odoc/default/_doc/_html
 PACKAGES := dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,h2,h2-lwt,h2-lwt-unix
 
@@ -10,9 +10,6 @@ build :
 	dune exec -- postprocess/index.exe \
 	  $(ODOC)/dream/Dream/index.html site/index.html
 	rm -f site/status/index.html
-	dune exec -- postprocess/status.exe \
-	  $(ODOC)/dream/Dream/Method_and_status/index.html \
-	  site/method_and_status.html
 	@echo soupault
 	@dune exec --no-print-directory -- soupault
 

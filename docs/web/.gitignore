@@ -1,7 +1,6 @@
 build/
 odoc/
 site/index.html
-site/method_and_status.html
 actual
 gh-pages/
 node_modules/
