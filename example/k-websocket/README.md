@@ -63,13 +63,14 @@ started!
 
 See [*WebSockets*](https://aantron.github.io/dream/#websockets) in the API docs.
 
+If you are running under HTTPS, be sure to use `wss://` for the protocol scheme,
+rather than `ws://`, on the client.
+
 <br>
 
-**Next steps:**
+**Last step:**
 
 - [**`l-https`**](../l-https#files) enables HTTPS.
-- [**`m-crypto`**](../m-crypto#files) encrypts strings using Dream's
-  cryptography helpers.
 
 <br>
 

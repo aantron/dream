@@ -38,12 +38,7 @@ request.
 
 <br>
 
-**Next steps:**
-
-- [**`m-crypto`**](../m-crypto) encrypts strings using Dream's cryptographic
-  helpers.
-- [**`n-local`**](../n-local) sets request-local variables, which can be very
-  useful for writing middlewares.
+**That's all for the tutorial!**
 
 <br>
 
