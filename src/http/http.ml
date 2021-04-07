@@ -624,6 +624,9 @@ let serve_with_details
 
 
 
+let is_localhost interface =
+  interface = "localhost" || interface = "127.0.0.1"
+
 (* TODO Validate the prefix here. *)
 let serve_with_maybe_https
     caller_function_for_error_messages
@@ -632,7 +635,7 @@ let serve_with_maybe_https
     ~stop
     ?debug
     ~error_handler
-    ?secret
+    ?(secret = Dream__cipher.Random.random 32)
     ~prefix
     ?(app = Dream.new_app ())
     ~https
@@ -646,13 +649,18 @@ let serve_with_maybe_https
   | None -> ()
   end;
 
+  (* This check will at least catch secrets like "foo" when used on a public
+     interface. *)
+  if not (is_localhost interface) then
+    if String.length secret < 32 then begin
+      log.warning (fun log -> log "Using a short key on a public interface");
+      log.warning (fun log ->
+        log "Consider using Dream.to_base64url (Dream.random 32)");
+  end;
+
   (* TODO The interface needs to allow not messing with the secret if an app is
      passed. *)
-  (* TODO Key guidance https://security.stackexchange.com/a/146889 *)
-  begin match secret with
-  | Some secret -> Dream.set_secret secret app;
-  | None -> Dream.set_secret (Dream__cipher.Random.random 32) app
-  end;
+  Dream.set_secret secret app;
 
   match https with
   | `No ->
@@ -682,9 +690,11 @@ let serve_with_maybe_https
       | None, None, None, None ->
         (* Use the built-in development certificate. However, if the interface
            is not a loopback interface, write a warning. *)
-        if interface <> "localhost" && interface <> "127.0.0.1" then begin
+        if not (is_localhost interface) then begin
           log.warning (fun log ->
             log "Using a development SSL certificate on a public interface");
+          log.warning (fun log ->
+            log "See arguments ~certificate_file and ~key_file");
         end;
 
         `Memory (Dream__localhost.certificate, Dream__localhost.key, `Silent)

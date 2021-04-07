@@ -5,20 +5,11 @@
 
 
 
-(* TODO Review key derivation. Currently using just some hash to satisfy key
-   length requirements. Are there key scope requirements (per-session, etc.)? *)
-(* TODO Still need Digestif? *)
-
-(* TODO Choose key_size 32 (256 bits)? *)
-(* Block size: 16 (128 bits) *)
-(* Tag size: 16 (128 bits) *)
-(* Key length recommendation: 256 bits? *)
-(* 12-bytes nonce from RFC 5116 par. 2.1. *)
-
 (* TODO Review all | exception cases in all code and avoid them as much sa
    possible. *)
 (* TODO Support mixture of encryption and signing. *)
-(* TODO Expose this function? *)
+(* TODO LATER Switch to AEAD_AES_256_GCM_SIV. See
+   https://github.com/mirage/mirage-crypto/issues/111. *)
 
 module type Cipher =
 sig
@@ -31,19 +22,6 @@ sig
   val test_encrypt : secret:string -> nonce:string -> string -> string
 end
 
-(* type cipher =
-  (module Cipher)
-
-type key =
-  | Key_and_cipher : ('k * (module Cipher with type key = 'k)) -> key
-  [@@ocaml.unboxed]
-
-let cipher_name (module Cipher : Cipher) =
-  Cipher.name *)
-
-(* let derive_key (module Cipher : Cipher) secret =
-  Key_and_cipher (Cipher.derive_key secret, (module Cipher)) *)
-
 let encrypt (module Cipher : Cipher) secret plaintext =
   Cipher.encrypt ~secret plaintext
 
@@ -54,16 +32,6 @@ let rec decrypt ((module Cipher : Cipher) as cipher) secrets ciphertext =
     match Cipher.decrypt ~secret ciphertext with
     | Some _ as plaintext -> plaintext
     | None -> decrypt cipher secrets ciphertext
-
-
-
-(* TODO Switch to XChaCha20-Poly1305, but there is no ready implementation in
-   OCaml of the whole ciphersuite. Mirage-crypto seems to have the
-   components. See https://github.com/mirage/mirage-crypto/issues/111. *)
-(* TODO Also consider https://tools.ietf.org/html/rfc8452,
-   AEAD_AES_256_GCM_SIV. *)
-(* TODO Is it possible to use better nonce generation? Are nonces just taken
-   modulo 2^96 internally? *)
 
 (* Key is good for ~2.5 years if every request e.g. generates one new signed
    cookie, and the installation is doing 1000 requests per second. *)
@@ -87,9 +55,6 @@ struct
   let name =
     "AEAD_AES_256_GCM, " ^
     "mirage-crypto, key: SHA-256, nonce: 96 bits mirage-crypto-rng"
-
-  (* type key =
-    Mirage_crypto.Cipher_block.AES.GCM.key *)
 
   let derive_key secret =
     secret
@@ -134,12 +99,3 @@ struct
         | None -> None
         | Some plaintext -> Some (Cstruct.to_string plaintext)
 end
-
-
-
-(* let cipher =
-  (module AEAD_AES_256_GCM : Cipher)
-
-let decryption_ciphers = [
-  cipher;
-] *)

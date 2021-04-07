@@ -1778,7 +1778,6 @@ val error_template :
 (** {1 Servers} *)
 
 (* TODO Try building Iosevka with dotted zero. *)
-(* TODO Document adjust_terminal. Or maybe move it to initialize_log? *)
 (* TODO Add key generators in cryptogrphy module. *)
 (* TODO Link to https example. *)
 val run :
@@ -1819,7 +1818,11 @@ val run :
       low-level errors. See {!section-errors}.
     - [~secret] is a key to be used for cryptographic operations, such as
       signing CSRF tokens. By default, a random secret is generated on each call
-      to {!Dream.run}.
+      to {!Dream.run}. Generate a 256-bit key for production with
+      {[
+        Dream.to_base64url (Dream.random 32)
+      ]}
+      and load it from file or an environment variable.
     - [~prefix] is a site prefix for applications that are not running at the
       root ([/]) of their domain. The default is ["/"], for no prefix.
     - [~https:true] enables HTTPS. You should also specify [~certificate_file]
