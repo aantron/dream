@@ -651,7 +651,7 @@ let serve_with_maybe_https
   (* TODO Key guidance https://security.stackexchange.com/a/146889 *)
   begin match secret with
   | Some secret -> Dream.set_secret secret app;
-  | None -> Dream.set_secret (Dream__pure.Random.random 32) app
+  | None -> Dream.set_secret (Dream__cipher.Random.random 32) app
   end;
 
   match https with

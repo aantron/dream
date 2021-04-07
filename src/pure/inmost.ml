@@ -60,6 +60,9 @@ let initial_multipart_state () = {
 
 
 
+(* TODO Temporary; Ciphers should depend on the core, not the other way. *)
+module Cipher = Dream__cipher.Cipher
+
 module Scope_variable_metadata =
 struct
   type 'a t = string option * ('a -> string) option

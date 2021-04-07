@@ -3,6 +3,7 @@
  (name dream__middleware)
  (libraries
   digestif
+  dream.cipher
   dream.pure
   fmt
   fmt.tty

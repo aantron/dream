@@ -61,7 +61,7 @@ let error_template =
   Dream__http.Error_handler.customize
 
 let random =
-  Dream__pure.Random.random
+  Dream__cipher.Random.random
 
 include Dream__pure.Formats
 

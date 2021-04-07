@@ -3,13 +3,10 @@
  (name dream__pure)
  (libraries
   base64
-  cstruct
+  dream.cipher
   hmap
   lwt
   lwt.unix
-  mirage-crypto
-  mirage-crypto-rng
-  mirage-crypto-rng.lwt
   uri
  )
  (preprocess (pps lwt_ppx))

@@ -1,0 +1,11 @@
+(library
+ (public_name dream.cipher)
+ (name dream__cipher)
+ (libraries
+  cstruct
+  mirage-crypto
+  mirage-crypto-rng
+  mirage-crypto-rng.lwt
+ )
+ (preprocess (pps lwt_ppx))
+ (instrumentation (backend bisect_ppx)))

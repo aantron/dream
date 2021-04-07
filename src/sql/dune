@@ -4,6 +4,7 @@
  (libraries
   caqti
   caqti-lwt
+  dream.cipher
   dream.middleware
   dream.pure
   uri

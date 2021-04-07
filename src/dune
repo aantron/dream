@@ -3,6 +3,7 @@
  (wrapped false)
  (libraries
   caqti-lwt
+  dream.cipher
   dream.graphql
   dream.http
   dream.middleware

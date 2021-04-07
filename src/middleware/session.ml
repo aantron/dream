@@ -94,7 +94,7 @@ let (|>?) =
   Option.bind
 
 let new_id () =
-  Dream__pure.Random.random 9 |> Dream__pure.Formats.to_base64url
+  Dream__cipher.Random.random 9 |> Dream__pure.Formats.to_base64url
 
 (* TODO Must test session sharing. Should there be at-a-distance
    invalidation? *)
@@ -102,7 +102,7 @@ module Memory =
 struct
   let rec create hash_table expires_at =
     let key =
-      Dream__pure.Random.random 33 |> Dream__pure.Formats.to_base64url in
+      Dream__cipher.Random.random 33 |> Dream__pure.Formats.to_base64url in
     if Hashtbl.mem hash_table key then
       create hash_table expires_at
     else begin

@@ -120,7 +120,7 @@ let remove =
 
 let rec create db expires_at attempt =
   let session = Session.{
-    key = Dream__pure.Random.random 33 |> Dream__pure.Formats.to_base64url;
+    key = Dream__cipher.Random.random 33 |> Dream__pure.Formats.to_base64url;
     id = Session.new_id ();
     expires_at;
     payload = [];
