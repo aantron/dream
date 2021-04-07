@@ -4,5 +4,5 @@
 
 (rule
  (targets websocket.ml)
- (deps websocket.eml.html)
+ (deps websocket.eml.ml)
  (action (run dream_eml %{deps} --workspace %{workspace_root})))
