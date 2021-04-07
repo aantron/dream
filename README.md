@@ -18,7 +18,8 @@ Easy-to-use, feature-complete Web framework without boilerplate.
 Dream is **one flat module** in **one package**, documented on
 [**one page**][api-main], but with [**many examples**][tutorial]. It offers:
 
-- Easy **HTTPS** and **HTTP/2** support &mdash; Dream runs without a proxy.
+- Easy [**HTTPS** and **HTTP/2** support][https] &mdash; Dream runs without a
+  proxy.
 - [**WebSockets**][websocket] and [**GraphQL**][graphql] for your modern Web
   apps.
 - [**HTML templates**][templates] with embedded OCaml or
@@ -50,6 +51,7 @@ set of HTTP libraries][vendor], where it acts only as minimal glue code between
 their slightly different interfaces, and takes care of horridness like
 [ALPN][alpn].
 
+[https]: https://github.com/aantron/dream/tree/master/example/l-https#files
 [websocket]: https://aantron.github.io/dream/#websockets
 [graphql]: https://github.com/aantron/dream/tree/master/example/i-graphql#files
 [templates]: https://github.com/aantron/dream/tree/master/example/7-template#files

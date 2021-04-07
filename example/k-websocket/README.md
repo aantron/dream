@@ -66,8 +66,8 @@ See [*WebSockets*](https://aantron.github.io/dream/#websockets) in the API docs.
 **Next steps:**
 
 - [**`l-https`**](../l-https#files) enables HTTPS.
-- [**`m-crypto`**](../m-crypto) encrypts strings using Dream's cryptographic
-  helpers.
+- [**`m-crypto`**](../m-crypto#files) encrypts strings using Dream's
+  cryptography helpers.
 
 <br>
 
