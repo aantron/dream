@@ -1787,6 +1787,7 @@ val run :
   ?debug:bool ->
   ?error_handler:error_handler ->
   ?secret:string ->
+  ?old_secrets:string list ->
   ?prefix:string ->
   ?https:bool ->
   ?certificate_file:string ->
@@ -1823,6 +1824,8 @@ val run :
         Dream.to_base64url (Dream.random 32)
       ]}
       and load it from file or an environment variable.
+    - [~old_secrets] is a list of previous secrets that can still be used for
+      decryption, but not for encryption. This is intended for key rotation.
     - [~prefix] is a site prefix for applications that are not running at the
       root ([/]) of their domain. The default is ["/"], for no prefix.
     - [~https:true] enables HTTPS. You should also specify [~certificate_file]
@@ -1862,6 +1865,7 @@ val serve :
   ?debug:bool ->
   ?error_handler:error_handler ->
   ?secret:string ->
+  ?old_secrets:string list ->
   ?prefix:string ->
   ?https:bool ->
   ?certificate_file:string ->

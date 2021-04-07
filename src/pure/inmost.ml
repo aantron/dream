@@ -73,7 +73,7 @@ type app = {
   globals : Scope.t ref;
   mutable debug : bool;
   mutable https : bool;
-  mutable secret : string;
+  mutable secrets : string list;
 }
 
 let debug app =
@@ -84,20 +84,17 @@ let set_debug value app =
 
 (* TODO Delete; now using key. *)
 let secret app =
-  app.secret
+  List.hd app.secrets
 
-let set_secret secret app =
-  app.secret <- secret
+let set_secrets secrets app =
+  app.secrets <- secrets
 
 let new_app () = {
   globals = ref Scope.empty;
   debug = false;
   https = false;
-  secret = "";
+  secrets = [];
 }
-(* TODO The empty string secret will never be used the way the code is currently
-   set up. However, that it needs to be used temporarily suggests that the code
-   is ill-factored. *)
 
 type 'a message = {
   specific : 'a;
@@ -541,10 +538,10 @@ let sort_headers headers =
   List.stable_sort (fun (name, _) (name', _) -> compare name name') headers
 
 let encryption_secret request =
-  request.specific.app.secret
+  List.hd request.specific.app.secrets
 
 let decryption_secrets request =
-  [request.specific.app.secret]
+  request.specific.app.secrets
 
 let encrypt ?(secret_prefix = "") request plaintext =
   let secret =

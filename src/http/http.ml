@@ -636,6 +636,7 @@ let serve_with_maybe_https
     ?debug
     ~error_handler
     ?(secret = Dream__cipher.Random.random 32)
+    ?(old_secrets = [])
     ~prefix
     ?(app = Dream.new_app ())
     ~https
@@ -660,7 +661,7 @@ let serve_with_maybe_https
 
   (* TODO The interface needs to allow not messing with the secret if an app is
      passed. *)
-  Dream.set_secret secret app;
+  Dream.set_secrets (secret::old_secrets) app;
 
   match https with
   | `No ->
@@ -791,6 +792,7 @@ let serve
     ?debug
     ?(error_handler = Error_handler.default)
     ?secret
+    ?old_secrets
     ?(prefix = "")
     ?(https = false)
     ?certificate_file
@@ -806,6 +808,7 @@ let serve
     ?debug
     ~error_handler
     ?secret
+    ?old_secrets
     ~prefix
     ?app:None
     ~https:(if https then `OpenSSL else `No)
@@ -825,6 +828,7 @@ let run
     ?debug
     ?(error_handler = Error_handler.default)
     ?secret
+    ?old_secrets
     ?(prefix = "")
     ?(https = false)
     ?certificate_file
@@ -891,6 +895,7 @@ let run
         ?debug
         ~error_handler
         ?secret
+        ?old_secrets
         ~prefix
         ?app:None
         ~https:(if https then `OpenSSL else `No)
