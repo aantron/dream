@@ -18,11 +18,11 @@
 
 
 
-let key_1 =
-  Dream__cipher.Cipher.AEAD_AES_256_GCM.derive_key "abc"
+let secret_1 =
+  "abc"
 
-let key_2 =
-  Dream__cipher.Cipher.AEAD_AES_256_GCM.derive_key "def"
+let secret_2 =
+  "def"
 
 let nonce_1 =
   "abcdefghijkl"
@@ -30,20 +30,20 @@ let nonce_1 =
 let nonce_2 =
   "opqrstuvwxyz"
 
-let encrypt key nonce plaintext =
-  Dream__cipher.Cipher.AEAD_AES_256_GCM.test_encrypt key ~nonce plaintext
+let encrypt secret nonce plaintext =
+  Dream__cipher.Cipher.AEAD_AES_256_GCM.test_encrypt ~secret ~nonce plaintext
   |> Dream.to_base64url
   |> print_endline
 
 let%expect_test _ =
-  encrypt key_1 nonce_1 "foo";
-  encrypt key_1 nonce_1 "fon";
-  encrypt key_1 nonce_2 "foo";
-  encrypt key_1 nonce_2 "fon";
-  encrypt key_2 nonce_1 "foo";
-  encrypt key_2 nonce_1 "fon";
-  encrypt key_2 nonce_2 "foo";
-  encrypt key_2 nonce_2 "fon";
+  encrypt secret_1 nonce_1 "foo";
+  encrypt secret_1 nonce_1 "fon";
+  encrypt secret_1 nonce_2 "foo";
+  encrypt secret_1 nonce_2 "fon";
+  encrypt secret_2 nonce_1 "foo";
+  encrypt secret_2 nonce_1 "fon";
+  encrypt secret_2 nonce_2 "foo";
+  encrypt secret_2 nonce_2 "fon";
   [%expect {|
     AGFiY2RlZmdoaWprbAzPcSEY4l7tSiDwIkk8ZfrFQQk
     AGFiY2RlZmdoaWprbAzPcCTJ-mJdrOKmcXtgqKJjGrI
@@ -56,24 +56,24 @@ let%expect_test _ =
 
 
 
-let decrypt key ciphertext =
-  match Dream__cipher.Cipher.AEAD_AES_256_GCM.decrypt key ciphertext with
+let decrypt secret ciphertext =
+  match Dream__cipher.Cipher.AEAD_AES_256_GCM.decrypt ~secret ciphertext with
   | None -> print_endline "None"
   | Some plaintext -> Printf.printf "%S\n" plaintext
 
-let encrypt key nonce plaintext =
-  Dream__cipher.Cipher.AEAD_AES_256_GCM.test_encrypt key ~nonce plaintext
+let encrypt secret nonce plaintext =
+  Dream__cipher.Cipher.AEAD_AES_256_GCM.test_encrypt ~secret ~nonce plaintext
 
 let%expect_test _ =
-  decrypt key_1 (encrypt key_1 nonce_1 "foo");
-  decrypt key_1 (encrypt key_1 nonce_2 "foo");
-  decrypt key_1 (encrypt key_2 nonce_1 "foo");
-  decrypt key_1 (encrypt key_1 nonce_1 "bar");
-  decrypt key_2 (encrypt key_1 nonce_1 "foo");
-  decrypt key_1 "";
-  decrypt key_1 "ab";
-  decrypt key_1 "\x00abcdefghijklmnopqrstuvwxyz";
-  decrypt key_1 "\x01abcdefghijklmnopqrstuvwxyz";
+  decrypt secret_1 (encrypt secret_1 nonce_1 "foo");
+  decrypt secret_1 (encrypt secret_1 nonce_2 "foo");
+  decrypt secret_1 (encrypt secret_2 nonce_1 "foo");
+  decrypt secret_1 (encrypt secret_1 nonce_1 "bar");
+  decrypt secret_2 (encrypt secret_1 nonce_1 "foo");
+  decrypt secret_1 "";
+  decrypt secret_1 "ab";
+  decrypt secret_1 "\x00abcdefghijklmnopqrstuvwxyz";
+  decrypt secret_1 "\x01abcdefghijklmnopqrstuvwxyz";
   [%expect {|
     "foo"
     "foo"

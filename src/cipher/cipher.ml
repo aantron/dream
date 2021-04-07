@@ -25,16 +25,13 @@ sig
   val prefix : char
   val name : string
 
-  type key
+  val encrypt : secret:string -> string -> string
+  val decrypt : secret:string -> string -> string option
 
-  val derive_key : string -> key
-  val encrypt : key -> string -> string
-  val decrypt : key -> string -> string option
-
-  val test_encrypt : key -> nonce:string -> string -> string
+  val test_encrypt : secret:string -> nonce:string -> string -> string
 end
 
-type cipher =
+(* type cipher =
   (module Cipher)
 
 type key =
@@ -42,21 +39,21 @@ type key =
   [@@ocaml.unboxed]
 
 let cipher_name (module Cipher : Cipher) =
-  Cipher.name
+  Cipher.name *)
 
-let derive_key (module Cipher : Cipher) secret =
-  Key_and_cipher (Cipher.derive_key secret, (module Cipher))
+(* let derive_key (module Cipher : Cipher) secret =
+  Key_and_cipher (Cipher.derive_key secret, (module Cipher)) *)
 
-let encrypt (Key_and_cipher (key, (module Cipher))) plaintext =
-  Cipher.encrypt key plaintext
+let encrypt (module Cipher : Cipher) secret plaintext =
+  Cipher.encrypt ~secret plaintext
 
-let rec decrypt keys ciphertext =
-  match keys with
+let rec decrypt ((module Cipher : Cipher) as cipher) secrets ciphertext =
+  match secrets with
   | [] -> None
-  | Key_and_cipher (key, (module Cipher)) :: keys ->
-    match Cipher.decrypt key ciphertext with
+  | secret::secrets ->
+    match Cipher.decrypt ~secret ciphertext with
     | Some _ as plaintext -> plaintext
-    | None -> decrypt keys ciphertext
+    | None -> decrypt cipher secrets ciphertext
 
 
 
@@ -91,8 +88,8 @@ struct
     "AEAD_AES_256_GCM, " ^
     "mirage-crypto, key: SHA-256, nonce: 96 bits mirage-crypto-rng"
 
-  type key =
-    Mirage_crypto.Cipher_block.AES.GCM.key
+  (* type key =
+    Mirage_crypto.Cipher_block.AES.GCM.key *)
 
   let derive_key secret =
     secret
@@ -100,7 +97,9 @@ struct
     |> Mirage_crypto.Hash.SHA256.digest
     |> Mirage_crypto.Cipher_block.AES.GCM.of_secret
 
-  let encrypt_with_nonce key nonce plaintext =
+  (* TODO Memoize keys or otherwise avoid key derivation on every call. *)
+  let encrypt_with_nonce secret nonce plaintext =
+    let key = derive_key secret in
     let ciphertext =
       Mirage_crypto.Cipher_block.AES.GCM.authenticate_encrypt
         ~key
@@ -111,13 +110,14 @@ struct
 
     "\x00" ^ (Cstruct.to_string nonce) ^ ciphertext
 
-  let encrypt key plaintext =
-    encrypt_with_nonce key (Random.random_buffer 12) plaintext
+  let encrypt ~secret plaintext =
+    encrypt_with_nonce secret (Random.random_buffer 12) plaintext
 
-  let test_encrypt key ~nonce plaintext =
-    encrypt_with_nonce key (Cstruct.of_string nonce) plaintext
+  let test_encrypt ~secret ~nonce plaintext =
+    encrypt_with_nonce secret (Cstruct.of_string nonce) plaintext
 
-  let decrypt key ciphertext =
+  let decrypt ~secret ciphertext =
+    let key = derive_key secret in
     if String.length ciphertext < 14 then
       None
     else
@@ -137,9 +137,9 @@ end
 
 
 
-let cipher =
+(* let cipher =
   (module AEAD_AES_256_GCM : Cipher)
 
 let decryption_ciphers = [
   cipher;
-]
+] *)

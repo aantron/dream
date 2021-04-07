@@ -74,7 +74,6 @@ type app = {
   mutable debug : bool;
   mutable https : bool;
   mutable secret : string;
-  mutable keys : Cipher.key list;
 }
 
 let debug app =
@@ -88,17 +87,13 @@ let secret app =
   app.secret
 
 let set_secret secret app =
-  app.secret <- secret;
-  app.keys <- [Cipher.derive_key Cipher.cipher secret]
-(* TODO Keys should be obtained as follows: iterate over all ciphers, and within
-   each, iterate over all secrets. *)
+  app.secret <- secret
 
 let new_app () = {
   globals = ref Scope.empty;
   debug = false;
   https = false;
   secret = "";
-  keys = [Cipher.derive_key Cipher.cipher ""];
 }
 (* TODO The empty string secret will never be used the way the code is currently
    set up. However, that it needs to be used temporarily suggests that the code
@@ -545,36 +540,19 @@ let rec pipeline middlewares handler =
 let sort_headers headers =
   List.stable_sort (fun (name, _) (name', _) -> compare name name') headers
 
-(* TODO Declare a stream type and replace all "k" by more or feed. *)
+let encryption_secret request =
+  request.specific.app.secret
 
-let encryption_key request =
-  List.hd request.specific.app.keys
-
-let decryption_keys request =
-  request.specific.app.keys
-
-(* include Cipher *)
-
-(* TODO Also log? Then this needs to be moved out. *)
-(* let encrypt ?request ?key plaintext =
-  match request, key with
-  | Some request, None -> Cipher.encrypt (encryption_key request) plaintext
-  | None, Some key -> Cipher.encrypt key plaintext
-  | Some _, Some _ -> invalid_arg "Dream.encrypt: both ~request and ~key passed"
-  | None, None -> invalid_arg "Dream.encrypt: neither ~request nor ~key passed"
-
-let decrypt ?request ?keys ciphertext =
-  match request, keys with
-  | Some request, None -> Cipher.decrypt (decryption_keys request) ciphertext
-  | None, Some keys -> Cipher.decrypt keys ciphertext
-  | Some _, Some _ -> invalid_arg "Dream.decrypt: both ~request and ~keys passed"
-  | None, None -> invalid_arg "Dream.decrypt: neither ~request nor ~keys passed" *)
+let decryption_secrets request =
+  [request.specific.app.secret]
 
 let encrypt request plaintext =
-  Cipher.encrypt (encryption_key request) plaintext
+  Cipher.encrypt
+    (module Cipher.AEAD_AES_256_GCM) (encryption_secret request) plaintext
 
 let decrypt request ciphertext =
-  Cipher.decrypt (decryption_keys request) ciphertext
+  Cipher.decrypt
+    (module Cipher.AEAD_AES_256_GCM) (decryption_secrets request) ciphertext
 
 let infer_cookie_prefix prefix domain path secure =
   match prefix, domain, path, secure with
