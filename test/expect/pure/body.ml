@@ -102,6 +102,7 @@ let%expect_test _ =
 
 
 let read message =
+  let message : Dream.request = Obj.magic message in
   let rec read accumulator =
     match%lwt Dream.read message with
     | None -> Lwt.return (List.rev accumulator)

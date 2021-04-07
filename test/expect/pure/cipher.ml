@@ -19,10 +19,10 @@
 
 
 let key_1 =
-  Dream__pure.Cipher.AEAD_AES_256_GCM.derive_key "abc"
+  Dream__cipher.Cipher.AEAD_AES_256_GCM.derive_key "abc"
 
 let key_2 =
-  Dream__pure.Cipher.AEAD_AES_256_GCM.derive_key "def"
+  Dream__cipher.Cipher.AEAD_AES_256_GCM.derive_key "def"
 
 let nonce_1 =
   "abcdefghijkl"
@@ -31,7 +31,7 @@ let nonce_2 =
   "opqrstuvwxyz"
 
 let encrypt key nonce plaintext =
-  Dream__pure.Cipher.AEAD_AES_256_GCM.test_encrypt key ~nonce plaintext
+  Dream__cipher.Cipher.AEAD_AES_256_GCM.test_encrypt key ~nonce plaintext
   |> Dream.to_base64url
   |> print_endline
 
@@ -57,12 +57,12 @@ let%expect_test _ =
 
 
 let decrypt key ciphertext =
-  match Dream__pure.Cipher.AEAD_AES_256_GCM.decrypt key ciphertext with
+  match Dream__cipher.Cipher.AEAD_AES_256_GCM.decrypt key ciphertext with
   | None -> print_endline "None"
   | Some plaintext -> Printf.printf "%S\n" plaintext
 
 let encrypt key nonce plaintext =
-  Dream__pure.Cipher.AEAD_AES_256_GCM.test_encrypt key ~nonce plaintext
+  Dream__cipher.Cipher.AEAD_AES_256_GCM.test_encrypt key ~nonce plaintext
 
 let%expect_test _ =
   decrypt key_1 (encrypt key_1 nonce_1 "foo");
