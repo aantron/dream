@@ -796,6 +796,16 @@ let request_replacement = {|
     string -> <a href="#type-request">request</a>
 </pre>|}
 
+let sort_headers_expected = {|<div class="spec value" id="val-sort_headers">
+ <a href="#val-sort_headers" class="anchor"></a><code><span><span class="keyword">val</span> sort_headers : <span><span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span> <span><span>(string * string)</span> list</span></span></code>
+</div>
+|}
+
+let sort_headers_replacement = {|
+<pre><span class="keyword">val</span> sort_headers :
+  (string * string) list -> (string * string) list
+</pre>|}
+
 let pretty_print_signatures soup =
   let method_ = soup $ "#type-method_" in
   if_expected
@@ -1034,7 +1044,9 @@ let pretty_print_signatures soup =
     (fun () -> pretty_print request)
     (fun () ->
       Soup.replace (request $ "> code") (Soup.parse request_replacement);
-      Soup.add_class "multiline" request)
+      Soup.add_class "multiline" request);
+
+  multiline "#val-sort_headers" sort_headers_expected sort_headers_replacement
 
 let remove_specs soup =
   let selectors = [
