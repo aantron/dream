@@ -83,6 +83,7 @@ depends: [
   # Testing, development.
   "alcotest" {with-test}  # TODO LATER Needs constraint.
   "bisect_ppx" {dev & >= "2.5.0"}  # --instrument-with.
+  "ppx_expect" {with-test}
 ]
 
 # TODO Tags, description.

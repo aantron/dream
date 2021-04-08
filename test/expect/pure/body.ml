@@ -5,7 +5,7 @@
 
 
 
-let has_body message =
+(* let has_body message =
   Printf.printf "%B\n" (Dream.has_body message)
 
 let%expect_test _ =
@@ -28,7 +28,7 @@ let%expect_test _ =
     true
     true
     false
-    true |}]
+    true |}] *)
 
 
 

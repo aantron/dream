@@ -3,7 +3,7 @@
 <!-- Link to tutorial getting started instructions. -->
 
 Dream's first several examples make up a **tutorial**. Each example is a
-complete project with a helpful `README`, and plenty of links to next steps and
+complete project with a helpful README, and plenty of links to next steps and
 documentation. You can begin at [**`1-hello`**](1-hello#files), or look in the
 list below and jump to whatever interests you!
 

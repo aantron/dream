@@ -84,7 +84,7 @@ opam install .
 
 Note: the clone *must* be `--recursive`, because Dream [vendors several
 packages][vendor] as git submodules. Also, if you have `gluten`, `httpaf`, `h2`,
-or `websocketaf`, or their `gluten-*`, etc., subpackages, independently
+or `websocketaf`, or their `gluten-*`, etc., subpackages independently
 installed in your switch, you may have to remove them with `opam remove` to
 avoid conflicts. However, they should not be pulled into a basic build of Dream
 and most programs that use it.

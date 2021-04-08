@@ -3,6 +3,7 @@ opam-version: "2.0"
 depends: [
   "ISO8601" {= "0.2.6"}
   "astring" {= "0.8.5"}
+  "base-bigarray" {= "base"}
   "base-bytes" {= "base"}
   "base-threads" {= "base"}
   "base-unix" {= "base"}
@@ -10,13 +11,12 @@ depends: [
   "bigarray-compat" {= "1.0.0"}
   "cmdliner" {= "1.0.4"}
   "conf-libev" {= "4-11"}
-  "conf-m4" {= "1"}
-  "containers" {= "3.2"}
+  "containers" {= "3.3"}
   "cppo" {= "1.6.7"}
-  "csexp" {= "1.4.0"}
+  "csexp" {= "1.5.1"}
   "cstruct" {= "6.0.0"}
-  "dune" {= "2.8.2"}
-  "dune-configurator" {= "2.8.2"}
+  "dune" {= "2.8.5"}
+  "dune-configurator" {= "2.8.5"}
   "ezjsonm" {= "1.2.0"}
   "fileutils" {= "0.6.3"}
   "fmt" {= "0.8.9"}
@@ -29,20 +29,22 @@ depends: [
   "lua-ml" {= "0.9.2"}
   "lwt" {= "5.4.0"}
   "markup" {= "1.0.0-1"}
-  "menhir" {= "20201216"}
-  "menhirLib" {= "20201216"}
-  "menhirSdk" {= "20201216"}
+  "menhir" {= "20210310"}
+  "menhirLib" {= "20210310"}
+  "menhirSdk" {= "20210310"}
   "mmap" {= "1.1.0"}
-  "ocaml" {= "4.11.2"}
+  "ocaml" {= "4.12.0"}
+  "ocaml-base-compiler" {= "4.12.0"}
   "ocaml-compiler-libs" {= "v0.12.3"}
+  "ocaml-config" {= "2"}
   "ocaml-migrate-parsetree" {= "2.1.0"}
+  "ocaml-options-vanilla" {= "1"}
   "ocaml-syntax-shims" {= "1.0.0"}
   "ocamlbuild" {= "0.14.0"}
-  "ocamlfind" {= "1.8.1"}
+  "ocamlfind" {= "1.9.1"}
   "ocplib-endian" {= "1.1"}
   "odate" {= "0.6"}
   "odoc" {= "2.0.0~master"}
-  "omd" {= "2.0.0~alpha1"}
   "ppx_derivers" {= "1.2.1"}
   "ppx_deriving" {= "5.2.1"}
   "ppxlib" {= "0.22.0"}
@@ -50,11 +52,11 @@ depends: [
   "result" {= "1.5"}
   "seq" {= "base"}
   "sexplib0" {= "v0.14.0"}
-  "soupault" {= "2.4.1~master"}
+  "soupault" {= "2.5.0"}
   "spelll" {= "0.3"}
   "stdlib-shims" {= "0.3.0"}
   "stringext" {= "1.6.0"}
-  "toml" {= "6.0.0"}
+  "toml" {= "7.0.0"}
   "topkg" {= "1.0.3"}
   "tsort" {= "2.0.0"}
   "tyxml" {= "4.4.0"}
@@ -63,14 +65,7 @@ depends: [
   "uutf" {= "1.0.2"}
 ]
 pin-depends: [
-  [
-    "soupault.2.4.1~master"
-    "git+https://github.com/aantron/soupault.git#ef003748b9da4ce9d0deafed6c58da6b537549ee"
-  ]
-  [
-    "odoc.2.0.0~master"
-    "git+https://github.com/aantron/odoc.git#dbb37e20717985edfd8f734e00b9ab6f705d81a4"
-  ]
+  ["odoc.2.0.0~master" "git+https://github.com/aantron/odoc.git#dbb37e20717985edfd8f734e00b9ab6f705d81a4"]
 ]
 name: "web"
 version: "dev"
