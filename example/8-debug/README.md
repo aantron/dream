@@ -17,7 +17,7 @@ let () =
 
     Dream.get "/fail"
       (fun _ ->
-        raise (Failure "The web app failed!"));
+        raise (Failure "The Web app failed!"));
 
   ]
   @@ Dream.not_found
@@ -35,7 +35,7 @@ failures that the debugger will detail. Visit
 exception. The debugger will show reports like this:
 
 ```
-(Failure "The web app failed!")
+(Failure "The Web app failed!")
 Raised at Stdlib__string.index_rec in file "string.ml", line 115, characters 19-34
 Called from Sexplib0__Sexp.Printing.index_of_newline in file "src/sexp.ml", line 113, characters 13-47
 

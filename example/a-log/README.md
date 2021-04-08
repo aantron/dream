@@ -19,7 +19,7 @@ let () =
     Dream.get "/fail"
       (fun _ ->
         Dream.warning (fun log -> log "Raising an exception!");
-        raise (Failure "The web app failed!"));
+        raise (Failure "The Web app failed!"));
 
   ]
   @@ Dream.not_found
@@ -75,7 +75,7 @@ let () =
 
 **Next steps:**
 
-- [**`b-session`**](../b-session#files) returns web development proper with
+- [**`b-session`**](../b-session#files) returns Web development proper with
   session management.
 - [**`c-cookie`**](../c-cookie#files) shows cookie handling in Dream.
 

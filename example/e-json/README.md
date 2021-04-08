@@ -86,7 +86,7 @@ implements the
 [OWASP Verifying Origin With Standard Headers](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#verifying-origin-with-standard-headers)
 CSRF protection technique. It doesn't protect `GET` requests, so they shouldn't
 do mutations. It also isn't good enough for cross-origin usage in its current
-form. But it is enough to do AJAX in small and medium web apps without the need
+form. But it is enough to do AJAX in small and medium Web apps without the need
 for [generating tokens](https://aantron.github.io/dream/#csrf-tokens).
 
 This technique relies on that the browser will send matching `Origin:` (or

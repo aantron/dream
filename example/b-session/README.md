@@ -51,7 +51,7 @@ Dream contain string-to-string maps (dicts). In this example, we created
 [`Dream.memory_sessions`](https://aantron.github.io/dream/#val-memory_sessions)
 stores sessions in server memory only. This is great for development, because
 you don't have to worry about a database or a secret key. But it means that all
-session data is lost when the server is restarted. For example, if your web app
+session data is lost when the server is restarted. For example, if your Web app
 logs in users, server restart will log all users out.
 
 There are two other session back ends, which are persistent:

@@ -17,13 +17,13 @@ type request = incoming message
 and response = outgoing message
 (** HTTP responses, such as [200 OK]. See {!section-responses}. *)
 
-(** The remaining three types are for building up web apps. *)
+(** The remaining three types are for building up Web apps. *)
 
 and handler = request -> response promise
 (** Handlers are asynchronous functions from requests to responses. Example
     {{:https://github.com/aantron/dream/tree/master/example/1-hello#files}
     [1-hello]} shows the simplest handler, an anonymous function which we pass
-    to {!Dream.run}. This creates a complete web server!
+    to {!Dream.run}. This creates a complete Web server!
 
     {[
       let () =
@@ -35,7 +35,7 @@ and middleware = handler -> handler
 (** Middlewares are functions that take a {!handler}, and run some code before
     or after — producing a “bigger” handler. Example
     {{:https://github.com/aantron/dream/tree/master/example/2-middleware#files}
-    [2-middleware]} inserts the {!Dream.logger} middleware into a web app:
+    [2-middleware]} inserts the {!Dream.logger} middleware into a Web app:
 
     {[
       let () =
@@ -502,7 +502,7 @@ val set_cookie :
       Dream.set_cookie "my.cookie" "value" request response
     ]}
 
-    Specify {!Dream.run} argument [~secret], or the web app will not be able to
+    Specify {!Dream.run} argument [~secret], or the Web app will not be able to
     decrypt cookies from prior starts.
 
     See example
@@ -876,10 +876,10 @@ type upload_event = [
 ]
 (** Upload stream events.
 
-    - [`File (field_name, filename)] begins a file in the stream. The web app
+    - [`File (field_name, filename)] begins a file in the stream. The Web app
       should call {!Dream.val-upload_file} until [None], then call
       {!Dream.val-upload} again.
-    - [`Field (field_name, value)] is a complete field. The web app should call
+    - [`Field (field_name, value)] is a complete field. The Web app should call
       {!Dream.val-upload} next.
     - [`Done] ends the stream.
     - [`Wrong_content_type] occurs on the first call to {!Dream.val-upload} if
@@ -1545,10 +1545,10 @@ val initialize_log :
 (** Initializes Dream's log with the given settings.
 
     Dream initializes its logging back end lazily. This is so that if a Dream
-    web app is linked into a larger binary, it does not affect that binary's
-    runtime unless the web app runs.
+    Web app is linked into a larger binary, it does not affect that binary's
+    runtime unless the Web app runs.
 
-    This also allows the web app to give logging settings explicitly by calling
+    This also allows the Web app to give logging settings explicitly by calling
     {!Dream.initialize_log} early in program execution.
 
     - [~backtraces:true], the default, causes Dream to call
@@ -1783,7 +1783,7 @@ val run :
   ?graceful_stop:bool ->
   ?adjust_terminal:bool ->
     handler -> unit
-(** Runs the web application represented by the {!handler}, by default at
+(** Runs the Web application represented by the {!handler}, by default at
     {{:http://localhost:8080} http://localhost:8080}.
 
     This function calls {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun}
@@ -1795,7 +1795,7 @@ val run :
     - [~port] is the port to listen on. Defaults to [8080].
     - [~stop] is a promise that causes the server to stop accepting new
       requests, and {!Dream.run} to return. Requests that have already entered
-      the web application continue to be processed. The default value is a
+      the Web application continue to be processed. The default value is a
       promise that never resolves. However, see also [~stop_on_input].
     - [~debug:true] enables debug information in error templates. See
       {!Dream.error_template}. The default is [false], to prevent accidental
@@ -1831,7 +1831,7 @@ val run :
     using {!Dream.serve}.
 
     - [~greeting:false] disables the start-up log message that prints a link to
-      the web application.
+      the Web application.
     - [~stop_on_input:false] disables stopping the server on input on STDIN.
     - [~graceful_stop:false] disables waiting for one second after stop, before
       exiting from [Dream.run].
@@ -1862,7 +1862,7 @@ val serve :
     {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun} [Lwt_main.run]}.
 
     This function is meant for integrating Dream applications into larger
-    programs that have their own procedures for starting and stopping the web
+    programs that have their own procedures for starting and stopping the Web
     server.
 
     All arguments have the same meanings as they have in {!Dream.run}. *)
@@ -1935,7 +1935,7 @@ val html_escape : string -> string
 val to_base64url : string -> string
 (** Converts the given string its base64url encoding, as specified in
     {{:https://tools.ietf.org/html/rfc4648#section-5} RFC 4648 §5}, using a
-    web-safe alphabet and no padding. The resulting string can be used without
+    Web-safe alphabet and no padding. The resulting string can be used without
     escaping in URLs, form data, cookies, HTML content, attributes, and
     JavaScript code. For more options, see the
     {{:https://mirage.github.io/ocaml-base64/base64/Base64/index.html} Base64}

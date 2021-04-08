@@ -11,7 +11,7 @@ let () =
     Dream.get "/fail"
       (fun _ ->
         Dream.warning (fun log -> log "Raising an exception!");
-        raise (Failure "The web app failed!"));
+        raise (Failure "The Web app failed!"));
 
   ]
   @@ Dream.not_found

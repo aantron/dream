@@ -75,14 +75,14 @@ already escaped, or if it is safe for some other reason. But be careful!
 <br>
 
 To show the danger, let's launch a **script injection (XSS) attack** against
-this tiny web app! First, go to
+this tiny Web app! First, go to
 [`template.eml.ml`](https://github.com/aantron/dream/blob/master/example/7-template/template.eml.ml#L4),
 change the substitution to `<%s! param %>`, and restart the app. Then, visit
 this highly questionable URL:
 
 [http://localhost:8080/%3Cscript%3Ealert(%22Impossible!%22)%3C%2Fscript%3E](http://localhost:8080/%3Cscript%3Ealert(%22Impossible!%22)%3C%2Fscript%3E)
 
-This URL will cause our web app to display an alert box, which we, as the
+This URL will cause our Web app to display an alert box, which we, as the
 developers, did not intend!
 
 ![XSS example](https://raw.githubusercontent.com/aantron/dream/master/docs/asset/xss.png)

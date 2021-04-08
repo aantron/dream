@@ -9,7 +9,7 @@ let () =
 
     Dream.get "/fail"
       (fun _ ->
-        raise (Failure "The web app failed!"));
+        raise (Failure "The Web app failed!"));
 
   ]
   @@ Dream.not_found
