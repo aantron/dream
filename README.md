@@ -89,14 +89,15 @@ installed in your switch, you may have to remove them with `opam remove` to
 avoid conflicts. However, they should not be pulled into a basic build of Dream
 and most programs that use it.
 
-After that, go to one of the examples, such as
-[**`1-hello`**](https://github.com/aantron/dream/tree/master/example/1-hello#files),
-and try building it:
+After that, go to one of the examples, such as [**`1-hello`**][1-hello], and
+try building it:
 
 ```
 cd example/1-hello
 dune exec --root . ./hello.exe
 ```
+
+If you prefer Reason syntax, try example [**`r-hello`**][r-hello] instead.
 
 You should be able to copy the example out to a completely separate directory,
 if you didn't use a local `_opam` switch scoped to Dream's clone directory. If
@@ -115,13 +116,15 @@ opam pin add dream /path/to/your/clone
   and start wherever you like, or begin at [**`1-hello`**][1-hello], the Dream
   version of *Hello, world!*
 - [**Reason syntax**][reason-examples] &mdash; Several of the examples are
-  available in Reason syntax, with more to come over time!
+  available in Reason syntax. See [**`r-hello`**][r-hello].
+
 - [**Examples**][examples] &mdash; These cover various HTTP scenarios.
 - [**API reference**][api-main]
 
 [tutorial]: https://github.com/aantron/dream/tree/master/example#readme
 [examples]: https://github.com/aantron/dream/tree/master/example#examples
 [1-hello]: https://github.com/aantron/dream/tree/master/example/1-hello#files
+[r-hello]: https://github.com/aantron/dream/tree/master/example/r-hello#files
 [reason-examples]: https://github.com/aantron/dream/tree/master/example#reason
 [api-main]: https://aantron.github.io/dream/#types
 

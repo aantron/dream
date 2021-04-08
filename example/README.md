@@ -54,7 +54,7 @@ That's it for the tutorial!
 
 There are several examples showing Dream with Reason syntax.
 
-- [**`r-hello`**](r-hello#files)
+- [**`r-hello`**](r-hello#files) &nbsp;&mdash;&nbsp; the simplest Dream server.
 - [**`r-template`**](r-template#files)
 - [**`r-template-stream`**](r-template-stream#files)
 - `r-fullstack`
