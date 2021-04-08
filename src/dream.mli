@@ -328,15 +328,6 @@ val normalize_status : status -> status
 
 (** {1 Requests} *)
 
-(**/**)
-(* type method_ = Method_and_status.method_ *)
-(** Request methods. See
-    {{:https://tools.ietf.org/html/rfc7231#section-4.3} RFC 7231 §4.2} and
-    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods} MDN}. The full
-    set is defined on a {{:/method_and_status/index.html#methods} separate
-    page}. *)
-(**/**)
-
 val client : request -> string
 (** Client sending the request. For example, ["127.0.0.1:56001"]. *)
 
@@ -386,18 +377,6 @@ val all_queries : request -> (string * string) list
 
 (** {1 Responses} *)
 
-(**/**)
-(* type status = Method_and_status.status *)
-(** Response status codes. See
-    {{:https://tools.ietf.org/html/rfc7231#section-6} RFC 7231 §6} and
-    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Status} MDN}. The full
-    set is defined on a {{:/method_and_status/index.html#status_codes} separate
-    page}. *)
-(**/**)
-
-val status : response -> status
-(** Response {!type-status}. For example, [`OK]. *)
-
 val response :
   ?status:status ->
   ?code:int ->
@@ -437,6 +416,9 @@ val stream :
           let%lwt () = Dream.write "foo" response in
           Dream.close_stream response)
     ]} *)
+
+val status : response -> status
+(** Response {!type-status}. For example, [`OK]. *)
 
 
 
