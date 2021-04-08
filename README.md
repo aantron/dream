@@ -49,6 +49,10 @@ set of HTTP libraries][vendor], where it acts only as minimal glue code between
 their slightly different interfaces, and takes care of horridness like
 [ALPN][alpn].
 
+And, even though Dream is presented as one package for ordinary usage, it is
+internally factored into several sub-libraries, according to the different
+dependencies of each, for fast porting to different environments.
+
 [https]: https://github.com/aantron/dream/tree/master/example/l-https#files
 [websocket]: https://github.com/aantron/dream/tree/master/example/k-websocket#files
 [graphql]: https://github.com/aantron/dream/tree/master/example/i-graphql#files
