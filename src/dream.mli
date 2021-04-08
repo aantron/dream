@@ -23,7 +23,10 @@ and handler = request -> response promise
 (** Handlers are asynchronous functions from requests to responses. Example
     {{:https://github.com/aantron/dream/tree/master/example/1-hello#files}
     [1-hello]} shows the simplest handler, an anonymous function which we pass
-    to {!Dream.run}. This creates a complete Web server!
+    to {!Dream.run}. This creates a complete Web server! You can also see the
+    Reason version in example
+    {{:https://github.com/aantron/dream/tree/master/example/r-hello#files}
+    [r-hello]}.
 
     {[
       let () =
@@ -920,9 +923,11 @@ let render message =
   </html>
     v}
 
-    See example
+    See examples
     {{:https://github.com/aantron/dream/tree/master/example/7-template#files}
-    [7-template]}.
+    [7-template]} and
+    {{:https://github.com/aantron/dream/tree/master/example/r-template#files}
+    [r-template]}.
 
     To build the template, add this to [dune]:
 
@@ -943,9 +948,11 @@ let render message =
     A [%%] line can also be used to set template options. The only option
     supported presently is [%% response] for streaming the template using
     {!Dream.write}, to a {!type-response} that is in scope. This is shown in
-    example
+    examples
     {{:https://github.com/aantron/dream/tree/master/example/w-template-stream#files}
-    [w-template-stream]}.
+    [w-template-stream]} and
+    {{:https://github.com/aantron/dream/tree/master/example/r-template-stream#files}
+    [r-template-stream]}.
 
     A template ends...
 

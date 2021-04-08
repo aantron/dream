@@ -123,6 +123,8 @@ and not supported by Dream.
   get more info about errors.
 - [**`9-error`**](../9-error#files) sets up a central error template for all
   errors.
+- [**`r-template`**](../r-template#files) is a Reason syntax version of this
+  example.
 
 <br>
 

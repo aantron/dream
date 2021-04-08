@@ -32,6 +32,7 @@ course, see `Good morning, world!`.
   to the app.
 - [**`3-router`**](../3-router#files) sends requests to different handlers,
   depending on their path.
+- [**`r-hello`**](../r-hello#files) is a Reason syntax version of this example.
 
 <br>
 
