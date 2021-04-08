@@ -2,11 +2,73 @@
 
 <br>
 
-**Next steps:**
+Dream [*templates*](https://aantron.github.io/dream/#templates) interleave
+Reason and HTML, and offer some built-in
+[XSS protection](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html):
+
+```reason
+let render = param => {
+  <html>
+    <body>
+      <h1>The URL parameter was <%s param %>!</h1>
+    </body>
+  </html>
+};
+
+let () =
+  Dream.run
+  @@ Dream.logger
+  @@ Dream.router([
+
+    Dream.get("/:word",
+      (request =>
+        Dream.param("word", request)
+        |> render
+        |> Dream.respond)),
+
+  ])
+  @@ Dream.not_found;
+```
+
+<pre><code><b>$ dune exec --root . ./template.exe</b></code></pre>
 
 <br>
 
-[Up to the tutorial index](../#readme)
+To use the templater, we need to add a stanza to our
+[`dune`](https://github.com/aantron/dream/blob/master/example/r-template/dune)
+file:
+
+<pre><code>(executable
+ (name template)
+ (libraries dream))
+
+<b>(rule
+ (targets template.re)
+ (deps template.eml.re)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))</b>
+</code></pre>
+
+<br>
+
+See section *Security* in the counterpart OCaml example
+[**`7-template`**](../7-template#security) for a discussion of how the templater
+prevents script injection (XSS) attacks, and its limitations. That section even
+disables some of the protection, and launches an XSS attack against the
+template! It works equally well with this example &mdash; the templates are the
+same.
+
+<br>
+
+**See also:**
+
+- [**`r-template-stream`**](../r-template-stream#files) streams a template to a
+  response.
+- [**`9-error`**](../9-error#files) sets up a central error template. The
+  example is in OCaml syntax.
+
+<br>
+
+[Up to the example index](../#reason)
 
 <!-- TODO OWASP link; injection general link. -->
 <!-- TODO Link to template syntax reference. -->
