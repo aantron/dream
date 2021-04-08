@@ -28,12 +28,39 @@ let last_message =
 
 let rec message_loop () =
   let%lwt () = Lwt_unix.sleep (Random.float 2.) in
+
   incr last_message;
   let message = string_of_int !last_message in
   Dream.log "Generated message %s" message;
+
   server_state := message::!server_state;
   !notify ();
+
   message_loop ()
+
+let rec forward_messages response =
+  let%lwt messages =
+    match !server_state with
+    | [] ->
+      let on_message, notify_message = Lwt.wait () in
+      notify := Lwt.wakeup_later notify_message;
+      let%lwt () = on_message in
+      notify := ignore;
+      Lwt.return !server_state
+    | messages ->
+      Lwt.return messages
+  in
+
+  server_state := [];
+
+  messages
+  |> List.rev
+  |> List.map (Printf.sprintf "data: %s\n\n")
+  |> String.concat ""
+  |> fun text ->
+    let%lwt () = Dream.write text response in
+    let%lwt () = Dream.flush response in
+    forward_messages response
 
 let () =
   Lwt.async message_loop;
@@ -45,28 +72,6 @@ let () =
     Dream.get "/" (fun _ -> Dream.respond home);
 
     Dream.get "/push" (fun _ ->
-      let rec forward_messages response =
-        let%lwt messages =
-          match !server_state with
-          | [] ->
-            let on_message, notify_message = Lwt.wait () in
-            notify := Lwt.wakeup_later notify_message;
-            let%lwt () = on_message in
-            notify := ignore;
-            Lwt.return !server_state
-          | messages ->
-            Lwt.return messages
-        in
-        server_state := [];
-        messages
-        |> List.rev
-        |> List.map (Printf.sprintf "data: %s\n\n")
-        |> String.concat ""
-        |> fun text ->
-          let%lwt () = Dream.write text response in
-          let%lwt () = Dream.flush response in
-          forward_messages response
-      in
       Dream.stream
         ~headers:["Content-Type", "text/event-stream"]
         forward_messages);

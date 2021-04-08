@@ -77,8 +77,8 @@ if something is missing!
 - [**`w-query`**](w-query#files) &nbsp;&mdash;&nbsp; reading URL query
   parameters.
 - [**`w-server-sent-events`**](w-server-sent-events#files) &nbsp;&mdash;&nbsp;
-  the server side of JavaScript
-  [`EventSource`](https://developer.mozilla.org/en-US/docs/Web/API/EventSource).
+  [`EventSource`](https://developer.mozilla.org/en-US/docs/Web/API/EventSource),
+  an older alternative to WebSockets.
 - [**`w-site-prefix`**](w-site-prefix#files) &nbsp;&mdash;&nbsp; a Web app
   running not at `/`.
 - [**`w-template-stream`**](w-template-stream#files) &nbsp;&mdash;&nbsp; writing
