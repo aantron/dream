@@ -79,7 +79,7 @@ if something is missing!
 - [**`w-server-sent-events`**](w-server-sent-events#files) &nbsp;&mdash;&nbsp;
   [`EventSource`](https://developer.mozilla.org/en-US/docs/Web/API/EventSource),
   an older alternative to WebSockets.
-- [**`w-template-stream`**](w-template-stream#files) &nbsp;&mdash;&nbsp; writing
+- [**`w-template-stream`**](w-template-stream#files) &nbsp;&mdash;&nbsp; sending
   templates asynchronously, one chunk at a time.
 
 <br>
