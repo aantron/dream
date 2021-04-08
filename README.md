@@ -22,8 +22,9 @@ Dream is **one flat module** in **one package**, documented on
   apps.
 - [**HTML templates**][templates] with embedded OCaml or
   [Reason][reason-templates] &mdash; use existing skills!
+- A simple programming model &mdash; Web apps are [**just functions**][handler]!
 - Composable [**middleware**][middleware] and [**routes**][routing].
-- Easy-to-use functions for [**secure cookies**][cookies] and
+- Easy-to-use helpers for [**secure cookies**][cookies] and
   [**CSRF-safe forms**][forms].
 - [**Sessions**][sessions] with pluggable storage [back ends][back-ends].
 - Unified, internationalization-friendly [**error handling**][errors].
@@ -59,6 +60,7 @@ dependencies of each, for fast porting to different environments.
 [templates]: https://github.com/aantron/dream/tree/master/example/7-template#files
 [reason-templates]: https://github.com/aantron/dream/tree/master/example/r-template#files
 [middleware]: https://github.com/aantron/dream/tree/master/example/2-middleware#files
+[handler]: https://aantron.github.io/dream/#type-handler
 [routing]: https://github.com/aantron/dream/tree/master/example/3-router#files
 [cookies]: https://aantron.github.io/dream/#cookies
 [forms]: https://aantron.github.io/dream/#forms
@@ -121,7 +123,6 @@ opam pin add dream /path/to/your/clone
   version of *Hello, world!*
 - [**Reason syntax**][reason-examples] &mdash; Several of the examples are
   available in Reason syntax. See [**`r-hello`**][r-hello].
-
 - [**Examples**][examples] &mdash; These cover various HTTP scenarios.
 - [**API reference**][api-main]
 
