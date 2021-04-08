@@ -43,5 +43,12 @@ let string_to_method = function
   | method_ -> `Method method_
 
 (* TODO Test this. *)
+(* TODO Technically, this does one allocation in case the string can't be
+   converted to a variant, which can be saved by inlining string_to_method.
+   However, this is probably extremely rare. *)
+let normalize_method = function
+  | `Method method_ -> string_to_method method_
+  | method_ -> method_
+
 let methods_equal method_1 method_2 =
-  method_to_string method_1 = method_to_string method_2
+  normalize_method method_1 = normalize_method method_2

@@ -283,5 +283,11 @@ let status_to_string status =
   | None, `Status code -> string_of_int code
   | _ -> "Unknown" [@coverage off] (* Should be impossible. *)
 
+(* TODO This could also be optimized to save one allocation for `Status. *)
+(* TODO Test specifically this function. *)
+let normalize_status = function
+  | `Status code -> int_to_status code
+  | status -> status
+
 let status_codes_equal status_1 status_2 =
-  status_to_int status_1 = status_to_int status_2
+  normalize_status status_1 = normalize_status status_2
