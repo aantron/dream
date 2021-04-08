@@ -79,8 +79,6 @@ if something is missing!
 - [**`w-server-sent-events`**](w-server-sent-events#files) &nbsp;&mdash;&nbsp;
   [`EventSource`](https://developer.mozilla.org/en-US/docs/Web/API/EventSource),
   an older alternative to WebSockets.
-- [**`w-site-prefix`**](w-site-prefix#files) &nbsp;&mdash;&nbsp; a Web app
-  running not at `/`.
 - [**`w-template-stream`**](w-template-stream#files) &nbsp;&mdash;&nbsp; writing
   templates asynchronously, one chunk at a time.
 
@@ -114,6 +112,7 @@ Basics:
   [`*` routes](https://aantron.github.io/dream/#val-router).
 - `w-testing` &nbsp;&mdash;&nbsp; for
   [*Testing*](https://aantron.github.io/dream/#testing).
+- `w-site-prefix` &nbsp;&mdash;&nbsp; a Web app running not at `/`.
 
 Security:
 
