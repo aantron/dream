@@ -72,8 +72,8 @@ if something is missing!
 
 <br>
 
-- [**`w-long-polling`**](w-long-polling#files) &nbsp;&mdash;&nbsp; asynchronous
-  communication without WebSockets.
+- [**`w-long-polling`**](w-long-polling#files) &nbsp;&mdash;&nbsp; old form of
+  asynchronous communication without WebSockets.
 - [**`w-query`**](w-query#files) &nbsp;&mdash;&nbsp; reading URL query
   parameters.
 - [**`w-server-sent-events`**](w-server-sent-events#files) &nbsp;&mdash;&nbsp;

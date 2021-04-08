@@ -37,8 +37,10 @@ let last_message =
 let rec message_loop () =
   let%lwt () = Lwt_unix.sleep (Random.float 2.) in
   incr last_message;
+
   let message = string_of_int !last_message in
   Dream.log "Generated message %s" message;
+
   begin match !server_state with
   | Client_waiting f ->
     server_state := Messages_accumulating [];
@@ -46,6 +48,7 @@ let rec message_loop () =
   | Messages_accumulating list ->
     server_state := Messages_accumulating (message::list)
   end;
+
   message_loop ()
 
 let () =
