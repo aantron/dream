@@ -8,7 +8,7 @@
 module Dream = Dream__pure.Formats
 
 (* TODO Include the path prefix. *)
-let form ?enctype ~action request =
+let form_tag ?enctype ~action request =
   let enctype =
     match enctype with
     | Some _ -> " enctype=\"multipart/form-data\""

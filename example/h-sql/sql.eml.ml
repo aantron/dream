@@ -23,7 +23,7 @@ let render comments request =
     <body>
 %     comments |> List.iter (fun (_id, comment) ->
         <p><%s comment %></p><% ); %>
-      <%s! Dream.Tag.form ~action:"/" request %>
+      <%s! Dream.form_tag ~action:"/" request %>
         <input name="text">
       </form>
     </body>

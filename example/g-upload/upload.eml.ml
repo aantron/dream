@@ -1,7 +1,7 @@
 let home request =
   <html>
     <body>
-      <%s! Dream.Tag.form ~action:"/" ~enctype:`Multipart_form_data request %>
+      <%s! Dream.form_tag ~action:"/" ~enctype:`Multipart_form_data request %>
         <input name="files" type="file" multiple>
         <button>Submit!</button>
       </form>

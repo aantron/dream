@@ -11,7 +11,7 @@ sizes:
 let home request =
   <html>
     <body>
-      <%s! Dream.Tag.form ~action:"/" ~enctype:`Multipart_form_data request %>
+      <%s! Dream.form_tag ~action:"/" ~enctype:`Multipart_form_data request %>
         <input name="files" type="file" multiple>
         <button>Submit!</button>
       </form>
@@ -78,8 +78,8 @@ streaming file uploads.
 like [`Dream.form`](https://aantron.github.io/dream/#val-form) when it comes to
 [CSRF protection](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html).
 See example [**`d-form`**](../d-form#files). We still use
-[`Dream.Tag.form`](https://aantron.github.io/dream/#module-Tag) to generate the
-form in the template. The only difference is that we now pass it
+[`Dream.form_tag`](https://aantron.github.io/dream/#val-form_tag) to generate
+the form in the template. The only difference is that we now pass it
 ``~enctype:`Multipart_form_data`` to make its output look like this:
 
 ```html
@@ -96,7 +96,7 @@ By contrast with
 [`Dream.multipart`](https://aantron.github.io/dream/#val-multipart),
 [`Dream.upload`](https://aantron.github.io/dream/#val-upload) offers no
 built-in CSRF protection at all at present. You can, however, still use
-[`Dream.Tag.form`](https://aantron.github.io/dream/#module-Tag), and manually
+[`Dream.form_tag`](https://aantron.github.io/dream/#val-form_tag), and manually
 call
 [`Dream.verify_csrf_token`](https://aantron.github.io/dream/#val-verify_csrf_token)
 when you stream a `dream.csrf` field. You'll then have to decide what to do

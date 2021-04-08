@@ -721,12 +721,12 @@ val origin_referer_check : middleware
 
 (** {1 Forms}
 
-    {!Dream.Tag.form} and {!Dream.val-form} round-trip secure forms.
-    {!Dream.Tag.form} is used inside a template to generate a form header with a
+    {!Dream.form_tag} and {!Dream.val-form} round-trip secure forms.
+    {!Dream.form_tag} is used inside a template to generate a form header with a
     CSRF token:
 
     {[
-      <%s! Dream.Tag.form ~action:"/" request %>
+      <%s! Dream.form_tag ~action:"/" request %>
         <input name="my.field">
       </form>
     ]}
@@ -769,13 +769,13 @@ type 'a form_result = [
    generating it; also create that page! *)
 val form : request -> (string * string) list form_result promise
 (** Parses the request body as a form. Performs CSRF checks. Use
-    {!Dream.Tag.form} in a template to transparently generate forms that will
+    {!Dream.form_tag} in a template to transparently generate forms that will
     pass these checks. See {!section-templates} and example
     {{:https://github.com/aantron/dream/tree/master/example/d-form#readme}
     [d-form]}.
 
     - [Content-Type:] must be [application/x-www-form-urlencoded].
-    - The form must have a field named [dream.csrf]. {!Dream.Tag.form} adds such
+    - The form must have a field named [dream.csrf]. {!Dream.form_tag} adds such
       a field.
     - {!Dream.form} calls {!Dream.verify_csrf_token} to check the token in
       [dream.csrf].
@@ -854,11 +854,11 @@ val multipart : request -> (string * part) list form_result promise
     template with
 
     {[
-      <%s! Dream.Tag.form ~action:"/"
+      <%s! Dream.form_tag ~action:"/"
              ~enctype:`Multipart_form_data request %>
     ]}
 
-    See {!Dream.Tag.form}, section {!section-templates}, and example
+    See {!Dream.form_tag}, section {!section-templates}, and example
     {{:https://github.com/aantron/dream/tree/master/example/g-upload#files}
     [g-upload]}.
 
@@ -891,7 +891,7 @@ val upload : request -> upload_event promise
     Does not verify a CSRF token. There are several ways to add CSRF protection
     for an upload stream, including:
 
-    - Generate the form with {!Dream.Tag.form}. Check for
+    - Generate the form with {!Dream.form_tag}. Check for
       [`Field ("dream.csrf", token)] during upload and call
       {!Dream.verify_csrf_token}.
     - Use {{:https://developer.mozilla.org/en-US/docs/Web/API/FormData}
@@ -917,7 +917,7 @@ val upload : request -> [
 
     It's usually not necessary to handle CSRF tokens directly.
 
-    - Form tag generator {!Dream.Tag.form} generates and inserts a CSRF token
+    - Form tag generator {!Dream.form_tag} generates and inserts a CSRF token
       that {!Dream.val-form} and {!Dream.val-multipart} transparently verify.
     - AJAX can be protected from CSRF by {!Dream.origin_referer_check}.
 
@@ -1038,21 +1038,15 @@ let render message =
 (* TODO Replace the module by the docs of form, and make all links point to
    here. *)
 (* TODO Site/subsite prefix from request. *)
-module Tag :
-sig
-  val form :
-    ?enctype:[ `Multipart_form_data ] -> action:string -> request -> string
-end
-(** See [_tag_form]. *)
-
-val _tag_form :
-  ?enctype:[ `Multipart_form_data ] -> action:string -> request -> string
+val form_tag :
+  ?enctype:[ `Multipart_form_data ] ->
+    action:string -> request -> string
 (** Generates a [<form>] tag and an [<input>] tag with a CSRF token, suitable
     for use with {!Dream.val-form} and {!Dream.val-multipart}. For example, in
     a template,
 
     {[
-      <%s! Dream.Tag.form ~action:"/" request %>
+      <%s! Dream.form_tag ~action:"/" request %>
         <input name="my.field">
       </form>
     ]}

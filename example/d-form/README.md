@@ -14,7 +14,7 @@ let show_form ?message request =
 %     | Some message ->
         <p>You entered: <b><%s message %>!</b></p>
 %     end;
-      <%s! Dream.Tag.form ~action:"/" request %>
+      <%s! Dream.form_tag ~action:"/" request %>
         <input name="message" autofocus>
       </form>
     </body>
@@ -47,9 +47,9 @@ let () =
 <br>
 
 We didn't write a literal `<form>` tag in the template. Instead, we used
-[`Dream.Tag.form`](https://aantron.github.io/dream/#module-Tag) to generate the
-tag. [`Dream.Tag.form`](https://aantron.github.io/dream/#module-Tag) also snuck
-in a hidden `<input>` field containing a CSRF token:
+[`Dream.form_tag`](https://aantron.github.io/dream/#val-form_tag) to generate
+the tag. [`Dream.form_tag`](https://aantron.github.io/dream/#val-form_tag) also
+snuck in a hidden `<input>` field containing a CSRF token:
 
 ```html
 <form method="POST" action="/">

@@ -858,6 +858,18 @@ let verify_csrf_token_replacement = {|
 </pre>
 |}
 
+let form_tag_expected = {|<div class="spec value" id="val-form_tag">
+ <a href="#val-form_tag" class="anchor"></a><code><span><span class="keyword">val</span> form_tag : <span>?enctype:<span>[ `Multipart_form_data ]</span> <span class="arrow">-&gt;</span></span> <span>action:string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let form_tag_replacement = {|
+<pre><span class="keyword">val</span> form_tag :
+  ?enctype:[ `Multipart_form_data ] ->
+    action:string -> <a href="#type-request">request</a> -> string
+</pre>
+|}
+
 let scope_expected = {|<div class="spec value" id="val-scope">
  <a href="#val-scope" class="anchor"></a><code><span><span class="keyword">val</span> scope : <span>string <span class="arrow">-&gt;</span></span> <span><span><a href="#type-middleware">middleware</a> list</span> <span class="arrow">-&gt;</span></span> <span><span><a href="#type-route">route</a> list</span> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
 </div>
@@ -1487,6 +1499,7 @@ let pretty_print_signatures soup =
     verify_csrf_token_expected
     verify_csrf_token_replacement;
 
+  multiline "#val-form_tag" form_tag_expected form_tag_replacement;
   multiline "#val-scope" scope_expected scope_replacement;
   multiline "#val-static" static_expected static_replacement;
   multiline "#val-put_session" set_session_expected set_session_replacement;

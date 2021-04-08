@@ -6,7 +6,7 @@ let show_form ?message request =
 %     | Some message ->
         <p>You entered: <b><%s message %>!</b></p>
 %     end;
-      <%s! Dream.Tag.form ~action:"/" request %>
+      <%s! Dream.form_tag ~action:"/" request %>
         <input name="message" autofocus>
       </form>
     </body>

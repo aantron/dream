@@ -41,7 +41,6 @@ include Dream__middleware.Origin_referer_check
 include Dream__middleware.Form
 include Dream__middleware.Upload
 include Dream__middleware.Csrf
-module Tag = Dream__middleware.Tag
 
 let content_length =
   Dream__middleware.Content_length.content_length
@@ -78,5 +77,4 @@ let test ?(prefix = "") handler request =
 let log =
   Dream__middleware.Log.convenience_log
 
-let _tag_form =
-  Dream__middleware.Tag.form
+include Dream__middleware.Tag
