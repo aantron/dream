@@ -1,8 +1,8 @@
 (executable
- (name reason_template)
+ (name template)
  (libraries dream))
 
 (rule
- (targets reason_template.re)
- (deps reason_template.eml.re)
+ (targets template.re)
+ (deps template.eml.re)
  (action (run dream_eml %{deps} --workspace %{workspace_root})))
