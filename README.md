@@ -72,13 +72,39 @@ their slightly different interfaces, and takes care of horridness like
 
 ## Getting started
 
-*TODO opam release, esy instructions, quick-start script.*
+Dream is not yet announced or released! Before release, Dream will get a
+quick-start script, and some other help for getting started quickly. However,
+if you want to try Dream now, you can do:
 
 ```
-opam install dream
+git clone https://github.com/aantron/dream.git --recursive
+cd dream
+opam install .
 ```
 
-[api-main]: https://aantron.github.io/dream/#types
+Note: the clone *must* be `--recursive`, because Dream [vendors several
+packages][vendor] as git submodules. Also, if you have `gluten`, `httpaf`, `h2`,
+or `websocketaf`, or their `gluten-*`, etc., subpackages, independently
+installed in your switch, you may have to remove them with `opam remove` to
+avoid conflicts. However, they should not be pulled into a basic build of Dream
+and most programs that use it.
+
+After that, go to one of the examples, such as
+[**`1-hello`**](https://github.com/aantron/dream/tree/master/example/1-hello#files),
+and try building it:
+
+```
+cd example/1-hello
+dune exec --root . ./hello.exe
+```
+
+You should be able to copy the example out to a completely separate directory,
+if you didn't use a local `_opam` switch scoped to Dream's clone directory. If
+you did, you can pin Dream to your clone in a different opam switch with
+
+```
+opam pin add dream /path/to/your/clone
+```
 
 <br>
 
@@ -97,6 +123,7 @@ opam install dream
 [examples]: https://github.com/aantron/dream/tree/master/example#examples
 [1-hello]: https://github.com/aantron/dream/tree/master/example/1-hello#files
 [reason-examples]: https://github.com/aantron/dream/tree/master/example#reason
+[api-main]: https://aantron.github.io/dream/#types
 
 <!-- TODO LATER CI badges, opam link badge, npm badge. -->
 
