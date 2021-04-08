@@ -881,6 +881,69 @@ let scope_replacement = {|
 </pre>
 |}
 
+let get_expected = {|<div class="spec value" id="val-get">
+ <a href="#val-get" class="anchor"></a><code><span><span class="keyword">val</span> get : <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+</div>
+|}
+
+let get_replacement = {|
+<code><span><span class="keyword">val</span> get &nbsp;&nbsp;&nbsp;&nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+|}
+
+let post_expected = {|<div class="spec value" id="val-post">
+ <a href="#val-post" class="anchor"></a><code><span><span class="keyword">val</span> post : <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+</div>
+|}
+
+let post_replacement = {|
+<code><span><span class="keyword">val</span> post &nbsp;&nbsp;&nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+|}
+
+let put_expected = {|<div class="spec value" id="val-put">
+ <a href="#val-put" class="anchor"></a><code><span><span class="keyword">val</span> put : <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+</div>
+|}
+
+let put_replacement = {|
+<code><span><span class="keyword">val</span> put &nbsp;&nbsp;&nbsp;&nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+|}
+
+let delete_expected = {|<div class="spec value" id="val-delete">
+ <a href="#val-delete" class="anchor"></a><code><span><span class="keyword">val</span> delete : <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+</div>
+|}
+
+let delete_replacement = {|
+<code><span><span class="keyword">val</span> delete &nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+|}
+
+let head_expected = {|<div class="spec value" id="val-head">
+ <a href="#val-head" class="anchor"></a><code><span><span class="keyword">val</span> head : <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+</div>
+|}
+
+let head_replacement = {|
+<code><span><span class="keyword">val</span> head &nbsp;&nbsp;&nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+|}
+
+let trace_expected = {|<div class="spec value" id="val-trace">
+ <a href="#val-trace" class="anchor"></a><code><span><span class="keyword">val</span> trace : <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+</div>
+|}
+
+let trace_replacement = {|
+<code><span><span class="keyword">val</span> trace &nbsp;&nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+|}
+
+let patch_expected = {|<div class="spec value" id="val-patch">
+ <a href="#val-patch" class="anchor"></a><code><span><span class="keyword">val</span> patch : <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+</div>
+|}
+
+let patch_replacement = {|
+<code><span><span class="keyword">val</span> patch &nbsp;&nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+|}
+
 let static_expected = {|<div class="spec value" id="val-static">
  <a href="#val-static" class="anchor"></a><code><span><span class="keyword">val</span> static : <span>?handler:<span>(<span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-handler">handler</a>)</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-handler">handler</a></span></code>
 </div>
@@ -1036,6 +1099,42 @@ let log_level_expected = {|<div class="spec type" id="type-log_level">
 
 let log_level_replacement = {|
 <code><span class="keyword">type</span> log_level = [ `Error | `Warning | `Info | `Debug ]</code>
+|}
+
+let val_error_expected = {|<div class="spec value" id="val-error">
+ <a href="#val-error" class="anchor"></a><code><span><span class="keyword">val</span> error : <span><span>(<span class="type-var">'a</span>,&nbsp;unit)</span> <a href="#type-conditional_log">conditional_log</a></span></span></code>
+</div>
+|}
+
+let val_error_replacement = {|
+<code><span><span class="keyword">val</span> error &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span><span>(<span class="type-var">'a</span>,&nbsp;unit)</span> <a href="#type-conditional_log">conditional_log</a></span></span></code>
+|}
+
+let warning_expected = {|<div class="spec value" id="val-warning">
+ <a href="#val-warning" class="anchor"></a><code><span><span class="keyword">val</span> warning : <span><span>(<span class="type-var">'a</span>,&nbsp;unit)</span> <a href="#type-conditional_log">conditional_log</a></span></span></code>
+</div>
+|}
+
+let warning_replacement = {|
+<code><span><span class="keyword">val</span> warning &nbsp;&nbsp;&nbsp;: <span><span>(<span class="type-var">'a</span>,&nbsp;unit)</span> <a href="#type-conditional_log">conditional_log</a></span></span></code>
+|}
+
+let info_expected = {|<div class="spec value" id="val-info">
+ <a href="#val-info" class="anchor"></a><code><span><span class="keyword">val</span> info : <span><span>(<span class="type-var">'a</span>,&nbsp;unit)</span> <a href="#type-conditional_log">conditional_log</a></span></span></code>
+</div>
+|}
+
+let info_replacement = {|
+<code><span><span class="keyword">val</span> info &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span><span>(<span class="type-var">'a</span>,&nbsp;unit)</span> <a href="#type-conditional_log">conditional_log</a></span></span></code>
+|}
+
+let debug_expected = {|<div class="spec value" id="val-debug">
+ <a href="#val-debug" class="anchor"></a><code><span><span class="keyword">val</span> debug : <span><span>(<span class="type-var">'a</span>,&nbsp;unit)</span> <a href="#type-conditional_log">conditional_log</a></span></span></code>
+</div>
+|}
+
+let debug_replacement = {|
+<code><span><span class="keyword">val</span> debug &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span><span>(<span class="type-var">'a</span>,&nbsp;unit)</span> <a href="#type-conditional_log">conditional_log</a></span></span></code>
 |}
 
 let initialize_log_expected = {|<div class="spec value" id="val-initialize_log">
@@ -1406,6 +1505,15 @@ let pretty_print_signatures soup =
       Soup.replace (empty $ "> code") (Soup.parse empty_replacement);
       Soup.add_class "multiline" empty);
 
+  let replace selector expected replacement =
+    let element = soup $ selector in
+    if_expected
+      expected
+      (fun () -> pretty_print element)
+      (fun () ->
+        Soup.replace (element $ "> code") (Soup.parse replacement))
+  in
+
   let multiline selector expected replacement =
     let element = soup $ selector in
     if_expected
@@ -1416,8 +1524,7 @@ let pretty_print_signatures soup =
         Soup.add_class "multiline" element)
   in
 
-  multiline "#val-add_header" add_header_expected add_header_replacement;
-  soup $ "#val-add_header" |> remove_class "multiline";
+  replace "#val-add_header" add_header_expected add_header_replacement;
   multiline "#val-with_header" with_header_expected with_header_replacement;
 
   let add_set_cookie = soup $ "#val-set_cookie" in
@@ -1501,6 +1608,13 @@ let pretty_print_signatures soup =
 
   multiline "#val-form_tag" form_tag_expected form_tag_replacement;
   multiline "#val-scope" scope_expected scope_replacement;
+  replace "#val-get" get_expected get_replacement;
+  replace "#val-post" post_expected post_replacement;
+  replace "#val-put" put_expected put_replacement;
+  replace "#val-delete" delete_expected delete_replacement;
+  replace "#val-head" head_expected head_replacement;
+  replace "#val-trace" trace_expected trace_replacement;
+  replace "#val-patch" patch_expected patch_replacement;
   multiline "#val-static" static_expected static_replacement;
   multiline "#val-put_session" set_session_expected set_session_replacement;
   multiline "#val-websocket" websocket_expected websocket_replacement;
@@ -1536,6 +1650,11 @@ let pretty_print_signatures soup =
     (fun () ->
       log_level $$ "> code" |> Soup.iter Soup.delete;
       Soup.replace (log_level $ "> table") (Soup.parse log_level_replacement));
+
+  replace "#val-error" val_error_expected val_error_replacement;
+  replace "#val-warning" warning_expected warning_replacement;
+  replace "#val-info" info_expected info_replacement;
+  replace "#val-debug" debug_expected debug_replacement;
 
   let initialize_log = soup $ "#val-initialize_log" in
   if_expected

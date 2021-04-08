@@ -342,7 +342,6 @@ val client : request -> string
 
 val https : request -> bool
 (** Whether the request was sent over HTTPS. *)
-(* TODO There needs to be a way of setting this based on proxy headers, also. *)
 
 val method_ : request -> method_
 (** Request method. For example, [`GET]. *)
@@ -494,8 +493,6 @@ __Host-my.cookie=AL7NLA8-so3e47uy0R5E2MpEQ0TtTWztdhq5pTEUT7KSFg; \
     the inferred security settings. If you use them, pass the same arguments to
     {!Dream.cookie} to automatically undo the result. *)
 
-(* TODO How to delete cookies. *)
-(* TODO Add ability to only sign the cookie? *)
 val set_cookie :
   ?prefix:[ `Host | `Secure ] option ->
   ?encrypt:bool ->
@@ -522,7 +519,8 @@ val set_cookie :
     [c-cookie]}.
 
     Most of the optional arguments are for overriding inferred defaults.
-    [~expires] and [~max_age] are independently useful.
+    [~expires] and [~max_age] are independently useful. In particular, to delete
+    a cookie, use [~expires:0.]
 
     - [~prefix] sets [__Host-], [__Secure-], or no prefix, from most secure to
       least. A conforming client will refuse to accept the cookie if [~domain],
@@ -583,8 +581,6 @@ val set_cookie :
     any inference.
 
  *)
-(* TODO Add a percent encoding and link it. *)
-(* TODO HTTPS and proxies. *)
 
 val cookie :
   ?prefix:[ `Host | `Secure ] option ->
@@ -630,7 +626,6 @@ val read : request -> string option promise
     {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
     [j-stream]}. *)
 
-(* TODO Can still use a multishot, pull stream? *)
 val with_stream : response -> response
 (** Makes the {!type-response} ready for stream writing with {!Dream.write}. You
     should return it from your handler soon after — only one call to
@@ -646,16 +641,6 @@ val flush : response -> unit promise
 
 val close_stream : response -> unit promise
 (** Finishes the response stream. *)
-
-(**/**)
-val has_body : _ message -> bool
-(** Evalutes to [true] if the given message either has a body that has been
-    streamed and has positive length, or a body that has not been streamed yet.
-    This function does not stream the body — it could return [true], and later
-    streaming could reveal that the body has length zero. *)
-(* TODO Should probably be generalized to return more information about what the
-   stream actually is. *)
-(**/**)
 
 (** {2 Low-level streaming} *)
 
@@ -691,7 +676,6 @@ val write_bigstring : bigstring -> int -> int -> response -> unit promise
 
 
 
-(* TODO Link to examples. *)
 (** {1 JSON}
 
     Dream presently recommends using
@@ -727,7 +711,6 @@ val origin_referer_check : middleware
     For more thorough protection, generate CSRF tokens with {!Dream.csrf_token},
     send them to the client (for instance, in [<meta>] tags of a single-page
     application), and require their presence in an [X-CSRF-Token:] header. *)
-(* TODO Basic JSON, JSON token csrf. *)
 
 
 
@@ -777,8 +760,6 @@ type 'a form_result = [
     activity, or tokens so old that decryption keys have since been rotated on
     the server. *)
 
-(* TODO Link to the tag helper for dream.csrf and backup instructions for
-   generating it; also create that page! *)
 val form : request -> (string * string) list form_result promise
 (** Parses the request body as a form. Performs CSRF checks. Use
     {!Dream.form_tag} in a template to transparently generate forms that will
@@ -820,17 +801,6 @@ val form : request -> (string * string) list form_result promise
     constructors of {!Dream.type-form_result}, usually indicate either bugs or
     attacks. It's usually fine to respond to all of them with [400 Bad
     Request]. *)
-(* TODO Provide optionals for disabling CSRF checking and CSRF token field
-   filtering. *)
-(* TODO AJAX CSRF example with X-CSRF-Token, then also with axios in the
-   README. *)
-(* TODO Note that form requires a session to be active, for the CSRF
-   checking. *)
-
-(* TODO Get rid of this separate call. However, it means requests must become
-   more mutable, in particular there needs to be extensible mutability for body
-   handling, which is already mutable. *)
-(* val begin_upload : request -> request *)
 
 (** {2 Upload} *)
 
@@ -913,18 +883,6 @@ val upload : request -> upload_event promise
 val upload_file : request -> string option promise
 (** Retrieves a file chunk. *)
 
-(* TODO upload_bigstring *)
-
-(* TODO Document how errors are reported, how this responds to various
-   Content-Types, etc. *)
-(* TODO The API should be something like...
-val upload : request -> [
-  `File of ...
-  `Field of ...
-  `Done
-]
- *)
-
 (** {2 CSRF tokens}
 
     It's usually not necessary to handle CSRF tokens directly.
@@ -955,7 +913,6 @@ type csrf_result = [
     [`Invalid] can also occur for very old tokens after old keys are no longer
     in use on the server. *)
 
-(* TODO Guidance on how to transmit and receive the token; links. *)
 val csrf_token : ?valid_for:float -> request -> string
 (** Returns a fresh CSRF token bound to the given request's and signed with the
     [~secret] given to {!Dream.run}. [~valid_for] is the token's lifetime, in
@@ -967,7 +924,6 @@ val verify_csrf_token : string -> request -> csrf_result promise
 
 
 
-(* TODO Need a template control flow example. *)
 (** {1 Templates}
 
     Dream includes a template preprocessor that allows interleaving OCaml and
@@ -1045,11 +1001,7 @@ let render message =
     [r-template]} and
     {{:https://github.com/aantron/dream/tree/master/example/r-template-stream#files}
     [r-template-stream]}. *)
-(* TODO Open out-links in a new tab. *)
 
-(* TODO Replace the module by the docs of form, and make all links point to
-   here. *)
-(* TODO Site/subsite prefix from request. *)
 val form_tag :
   ?enctype:[ `Multipart_form_data ] ->
     action:string -> request -> string
@@ -1095,12 +1047,9 @@ Dream.pipeline [middleware_1; middleware_2] @@ handler
     {v
                middleware_1 @@ middleware_2 @@ handler
     v} *)
-(* TODO This code block is highlighted as CSS. Get a better
-   highlight.pack.js. No, will need a tokenizer probably. *)
 
 
 
-(* TODO Do anchors actually work for fresh visits? *)
 (** {1 Routing} *)
 
 val router : route list -> middleware
@@ -1177,22 +1126,21 @@ val scope : string -> middleware list -> route list -> route
 
     Scopes can be nested. *)
 
-val get : string -> handler -> route
+val get     : string -> handler -> route
 (** Forwards [`GET] requests for the given path to the handler.
 
     {[
       Dream.get "/home" home_template
     ]} *)
 
-(* TODO Column-align. *)
-val post : string -> handler -> route
-val put : string -> handler -> route
-val delete : string -> handler -> route
-val head : string -> handler -> route
+val post    : string -> handler -> route
+val put     : string -> handler -> route
+val delete  : string -> handler -> route
+val head    : string -> handler -> route
 val connect : string -> handler -> route
 val options : string -> handler -> route
-val trace : string -> handler -> route
-val patch : string -> handler -> route
+val trace   : string -> handler -> route
+val patch   : string -> handler -> route
 (** Like {!Dream.get}, but for each of the other {{!type-method_} methods}. *)
 
 val not_found : handler
@@ -1226,23 +1174,8 @@ val static :
 
     If checks on [path] fail, {!Dream.static} responds with [404 Not Found]. *)
 
-(* TODO Document.
-
-Dream.get "static/*" (Dream.static "static")
-
-Now with Content-Type guessing.
- *)
-(* TODO Expose default static handlers. At least the FS one. Should probably
-   also add a crunch-based handler, because it can send nice etags. *)
 
 
-
-(* TODO Probably need session GC. *)
-(* TODO Expose typed sessions in the main API? *)
-(* TODO Link out to docs of Dream.Session module. Actually, the module needs to
-   be included here with its whole API. *)
-(* TODO The session manager may need to interact with AJAX in other ways. *)
-(* TODO Link examples. *)
 (** {1 Sessions}
 
     Dream's default sessions contain string-to-string dictionaries for
@@ -1269,7 +1202,11 @@ Now with Content-Type guessing.
 
     All requests passing through session middleware are assigned a session,
     either an existing one, or a new, empty session, known as a
-    {e pre-session}. *)
+    {e pre-session}.
+
+    See example
+    {{:https://github.com/aantron/dream/tree/master/example/b-session#files}
+    [b-session]}. *)
 
 val session : string -> request -> string option
 (** Value from the request's session. *)
@@ -1289,15 +1226,12 @@ val invalidate_session : request -> unit promise
 
 val memory_sessions : ?lifetime:float -> middleware
 (** Stores sessions in server memory. Passes session keys to clients in cookies.
-    Session data are lost when the server process exits. *)
-(* TODO Protocol error on HTTS+(HTTP2)? *)
-(* TODO Recommend HTTPS. *)
+    Session data is lost when the server process exits. *)
 
 val cookie_sessions : ?lifetime:float -> middleware
 (** Stores sessions in encrypted cookies. Pass {!Dream.run} [~secret] to be able
     to decrypt cookies from previous server runs. *)
 
-(* TODO Schema expectations. *)
 val sql_sessions : ?lifetime:float -> middleware
 (** Stores sessions in an SQL database. Passes session keys to clients in
     cookies. Must be used under {!Dream.sql_pool}. Expects a table
@@ -1324,8 +1258,6 @@ val session_expires_at : request -> float
 
 
 
-(* TODO Open an issue about frames. *)
-(* TODO Links to MDN, RFCs? examples? *)
 (** {1 WebSockets} *)
 
 type websocket
@@ -1390,9 +1322,6 @@ val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
         @@ Dream.not_found
     ]} *)
 
-(* TODO Any neat way to hide the context-maker for super basic usage? *)
-(* TODO Either that, or give it a name so that it's clearer. *)
-
 val graphiql : string -> handler
 (** Serves
     {{:https://github.com/graphql/graphiql/tree/main/packages/graphiql#readme}
@@ -1401,10 +1330,6 @@ val graphiql : string -> handler
 
 
 
-(* TODO The TOC highlighting JS does not do well on short sections; it detects
-   a next one. Needs to be anchor-target-sensitive. *)
-(* TODO Docker hints. *)
-(* TODO Automatic foreign key support in Sqlite3. *)
 (** {1 SQL}
 
     Dream provides thin convenience functions over
@@ -1433,11 +1358,9 @@ val graphiql : string -> handler
     - {{:https://mariadb.com/kb/en/sql-statements-structure/} MariaDB, {i SQL
       Statements & Structure}} *)
 
-(* TODO Document size. *)
 val sql_pool : ?size:int -> string -> middleware
 (** Makes an SQL connection pool available to its inner handler. *)
 
-(* TODO Work out the example. *)
 val sql : (Caqti_lwt.connection -> 'a promise) -> request -> 'a promise
 (** Runs the callback with a connection from the SQL pool. See example
     {{:https://github.com/aantron/dream/tree/master/example/h-sql#files}
@@ -1497,7 +1420,7 @@ type log_level = [
 ]
 (** Log levels, in order from most urgent to least. *)
 
-val error : ('a, unit) conditional_log
+val error     : ('a, unit) conditional_log
 (** Formats a message and writes it to the log at level [`Error]. The inner
     formatting function is called only if the {{!initialize_log} current log
     level} is [`Error] or higher. See example
@@ -1513,23 +1436,20 @@ val error : ('a, unit) conditional_log
     message with a specific request. If not passed, {!Dream.val-error} will try
     to guess the request. This usually works, but not always. *)
 
-(* TODO Column-align. *)
-val warning : ('a, unit) conditional_log
-val info : ('a, unit) conditional_log
-val debug : ('a, unit) conditional_log
+val warning   : ('a, unit) conditional_log
+val info      : ('a, unit) conditional_log
+val debug     : ('a, unit) conditional_log
 (** Like {!Dream.val-error}, but for each of the other {{!log_level} log
     levels}. *)
 
 type sub_log = {
-  error : 'a. ('a, unit) conditional_log;
+  error   : 'a. ('a, unit) conditional_log;
   warning : 'a. ('a, unit) conditional_log;
-  info : 'a. ('a, unit) conditional_log;
-  debug : 'a. ('a, unit) conditional_log;
+  info    : 'a. ('a, unit) conditional_log;
+  debug   : 'a. ('a, unit) conditional_log;
 }
 (** Sub-logs. See {!Dream.val-sub_log} right below. *)
 
-(* TODO Show examples with calls at different types/format strings. *)
-(* TODO How to change levels of individual logs. *)
 val sub_log : string -> sub_log
 (** Creates a new sub-log with the given name. For example,
 
@@ -1725,8 +1645,6 @@ type error_handler = error -> response option promise
     The behavior of Dream's default error handler is described at
     {!Dream.type-error}. *)
 
-(* TODO Should sanitize template output here or set to text/plain to prevent XSS
-   against developer. *)
 val error_template :
   (string option -> response -> response promise) -> error_handler
 (** Builds an {!error_handler} from a template. See example
@@ -1738,7 +1656,7 @@ val error_template :
         Dream.error_template (fun ~debug_dump response ->
           let body =
             match debug_dump with
-            | Some string -> string
+            | Some string -> Dream.html_escape string
             | None -> Dream.status_to_string (Dream.status response)
           in
 
@@ -1774,9 +1692,6 @@ val error_template :
 
 (** {1 Servers} *)
 
-(* TODO Try building Iosevka with dotted zero. *)
-(* TODO Add key generators in cryptogrphy module. *)
-(* TODO Link to https example. *)
 val run :
   ?interface:string ->
   ?port:int ->
@@ -1811,9 +1726,13 @@ val run :
       promise that never resolves. However, see also [~stop_on_input].
     - [~debug:true] enables debug information in error templates. See
       {!Dream.error_template}. The default is [false], to prevent accidental
-      deployment with debug output turned on.
+      deployment with debug output turned on. See example
+      {{:https://github.com/aantron/dream/tree/master/example/8-debug#files}
+      [8-debug]}.
     - [~error_handler] handles all errors, both from the application, and
-      low-level errors. See {!section-errors}.
+      low-level errors. See {!section-errors} and example
+      {{:https://github.com/aantron/dream/tree/master/example/9-error#files}
+      [9-error]}.
     - [~secret] is a key to be used for cryptographic operations, such as
       signing CSRF tokens. By default, a random secret is generated on each call
       to {!Dream.run}. Generate a 256-bit key for production with
@@ -1830,7 +1749,9 @@ val run :
       compiled-in
       {{:https://github.com/aantron/dream/tree/master/src/certificate#files}
       localhost certificate}. Enabling HTTPS also enables transparent upgrading
-      of connections to HTTP/2.
+      of connections to HTTP/2. See example
+      {{:https://github.com/aantron/dream/tree/master/example/l-https#files}
+      [l-https]}.
     - [~certificate_file] and [~key_file] specify the certificate and key file,
       respectively, when using [~https]. They are not required for development,
       but are required for production. Dream will write a warning to the log if
@@ -1849,11 +1770,6 @@ val run :
       exiting from [Dream.run].
     - [~adjust_terminal:false] disables adjusting the terminal to disable echo
       and line wrapping. *)
-(* TODO Consider setting terminal options by default from this function, so that
-   they don't have to be set in Makefiles. *)
-(* TODO Split up ~https into ~https:true and a separate library choice, which
-   default probably to OpenSSL. *)
-(* TODO Option for disabling built-in middleware. *)
 
 val serve :
   ?interface:string ->
@@ -1921,7 +1837,6 @@ val content_length : middleware
 val catch : (error -> response promise) -> middleware
 (** Forwards exceptions, rejections, and [4xx], [5xx] responses from the
     application to the error handler. See {!section-errors}. *)
-(* TODO Move the error handler into the app. *)
 
 val assign_request_id : middleware
 (** Assigns an id to each request. *)
@@ -1930,19 +1845,21 @@ val chop_site_prefix : string -> middleware
 (** Removes {!Dream.run} [~prefix] from the path in each request, and adds it to
     the request prefix. Responds with [502 Bad Gateway] if the path does not
     have the expected prefix. *)
-(* TODO Get the site prefix from the app. *)
-
-(* TODO Note about stability of built-in middleware during alpha. *)
 
 
 
-(* TODO Add hex encoding. Add secret generation example. *)
 (** {1:web_formats Web formats} *)
 
 val html_escape : string -> string
 (** Escapes a string so that it is suitable for use as text inside HTML
-    elements and quoted attribute values. *)
-(* TODO OWASP links. *)
+    elements and quoted attribute values. Implements
+    {{:https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#rule-1-html-encode-before-inserting-untrusted-data-into-html-element-content}
+    OWASP {i Cross Site Scripting Prevention Cheat Sheet RULE #1}}.
+
+    This function is {e not} suitable for use with unquoted attributes, inline
+    scripts, or inline CSS. See {i Security} in example
+    {{:https://github.com/aantron/dream/tree/master/example/7-template#security}
+    [7-template]}. *)
 
 val to_base64url : string -> string
 (** Converts the given string its base64url encoding, as specified in
@@ -1957,22 +1874,20 @@ val from_base64url : string -> (string, string) result
 (** Inverse of {!Dream.to_base64url}. *)
 
 val to_form_urlencoded : (string * string) list -> string
-(** Inverse of {!Dream.from_form_urlencoded}. *)
-(* TODO DOC Does this do any escaping? *)
+(** Inverse of {!Dream.from_form_urlencoded}. Percent-encodes names and
+    values. *)
 
 val from_form_urlencoded : string -> (string * string) list
 (** Converts form data or a query string from
     [application/x-www-form-urlencoded] format to a list of name-value pairs.
     See {{:https://tools.ietf.org/html/rfc1866#section-8.2.1} RFC 1866
-    §8.2.1}. *)
+    §8.2.1}. Reverses the percent-encoding of names and values. *)
 
 val from_cookie : string -> (string * string) list
 (** Converts a [Cookie:] header value to key-value pairs. See
     {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.2.1}
-    RFC 6265bis §4.2.1}. *)
-(* TODO DOC Do we decode? NO. *)
+    RFC 6265bis §4.2.1}. Does not apply any decoding to names and values. *)
 
-(* TODO Replace all time by floats. *)
 val to_set_cookie :
   ?expires:float ->
   ?max_age:float ->
@@ -1985,26 +1900,10 @@ val to_set_cookie :
 (** [Dream.to_set_cookie name value] formats a [Set-Cookie:] header value. The
     optional arguments correspond to the attributes specified in
     {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-5.3}
-    RFC 6265bis §5.3}, and are documented at {!Dream.set_cookie}. *)
-(* TODO https://tools.ietf.org/html/rfc6265#section-5 *)
-(* TODO https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis-05
-   for same_site. *)
-(* TODO No escaping done. *)
-(* TODO MDN links. *)
-(* TODO requires prettying in the docs. *)
-(* TODO ?request argument for fillign stuff from requests. *)
-(* TODO bis prefixes. *)
-(* TODO Escaping guidelines. *)
-(* TODO Sigining and encryption. *)
-(* TODO Recommend against running any untrusted app on the same host under a
-   different path, on a different port, or on a subdomain. *)
+    RFC 6265bis §5.3}, and are documented at {!Dream.set_cookie}.
 
-(* val secure_cookie_prefix : string
-
-val host_cookie_prefix : string *)
-(* TODO Expose these. *)
-
-(* TODO Warn about message mutability. *)
+    Does not apply any encoding to names and values. Be sure to encode so that
+    names and values cannot contain `=`, `;`, or newline characters. *)
 
 val from_target : string -> string * string
 (** Splits a request target into a path and a query string. *)
@@ -2033,16 +1932,12 @@ val drop_empty_trailing_path_component : string list -> string list
 
 
 
-(* TODO Expose some hash functions. *)
-(* TODO Expose current time somewhere. *)
 (** {1 Cryptography} *)
 
 val random : int -> string
 (** Generates the requested number of bytes using a
     {{:https://github.com/mirage/mirage-crypto} cryptographically secure random
     number generator}. *)
-(* TODO Review which TLS protocls are negotiated. *)
-(* TODO Refuse RC4 in TLS? *)
 
 val encrypt :
   ?secret_prefix:string ->
@@ -2071,35 +1966,8 @@ val decrypt :
     attempted are are [(~secret)::(~old_secrets)]. See the descriptions of
     [~secret] and [~old_secrets] in {!Dream.run}. *)
 
-(*
-type cipher
-
-type key
-
-val cipher : cipher
-
-val cipher_name : cipher -> string
-
-val decryption_ciphers : cipher list
-(* TODO Should this be a ref? *)
-
-val derive_key : cipher -> string -> key
-
-val encrypt : ?request:request -> ?key:key -> string -> string
-
-val decrypt : ?request:request -> ?keys:key list -> string -> string option
-
-val encryption_key : request -> key
-
-val decryption_keys : request -> key list *)
-(* TODO Move most of this to a Cipher module. Base API just needs encrypt and
-   decrypt given a request. That will also undo the double optional kludge. *)
 
 
-
-(* TODO Example links. *)
-(* TODO Move to under Servers. *)
-(* TODO Link to from Middleware. *)
 (** {1 Variables}
 
     Dream provides two variable scopes for use by middlewares. *)
@@ -2175,16 +2043,3 @@ val sort_headers : (string * string) list -> (string * string) list
 
 val echo : handler
 (** Responds with the request body. *)
-
-
-
-(* TODO DOC Give people a tip: a basic response needs either content-length or
-   connection: close. *)
-(* TODO DOC attempt some graphic that shows what getters retrieve what from the
-   response. *)
-(* TODO DOC meta description. *)
-(* TODO DOC Guidance for Dream libraries: publish routes if you have routes, not
-   handlers or middlewares. *)
-(* TODO DOC Need a syntax highlighter. Highlight.js won't work for templates for
-   sure. *)
-(* TODO Dream.read_file and Dream.write_file. *)
