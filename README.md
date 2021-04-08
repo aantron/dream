@@ -194,14 +194,7 @@ several influences that cannot be discovered directly:
 
 ## Roadmap
 
-1.0.0~alpha1:
-
-- [ ] Finish more of the examples, cross-link everything.
-- [ ] Correct the cipher rotation envelope scheme.
-- [ ] Quick start script.
-
-Then:
-
+- [ ] GraphQL subscriptions.
 - [ ] Optimizations: router, logger, microparsers (form data, etc.), fully
       zero-allocation streaming.
 - [ ] WebSocket and stream backpressure.
