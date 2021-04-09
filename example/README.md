@@ -59,7 +59,8 @@ There are several examples showing Dream with Reason syntax.
   templates and protects against XSS.
 - [**`r-template-stream`**](r-template-stream#files) &nbsp;&mdash;&nbsp; streams
   templates as response bodies.
-- `r-fullstack`
+- [**`r-fullstack-melange`**](r-fullstack-melange#files) &nbsp;&mdash;&nbsp;
+  server *and* client written in Reason!
 
 <br>
 

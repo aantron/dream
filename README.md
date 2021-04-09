@@ -31,7 +31,8 @@ Dream is **one flat module** in **one package**, documented on
 - [**Cryptography**][crypto] helpers, key rotation, and a chosen cipher.
 - A neat [**logger**][logging], and attention to configuring the OCaml runtime
   nicely.
-- **Full-stack ML** with Melange, [ReScript][rescript], or js_of_ocaml.
+- **Full-stack ML** with [Melange][melange], [ReScript][rescript], or
+  js_of_ocaml.
 
 <br>
 
@@ -70,6 +71,7 @@ different dependencies of each, for fast porting to different environments.
 [errors]: https://github.com/aantron/dream/tree/master/example/9-error#files
 [crypto]: https://aantron.github.io/dream/#cryptography
 [logging]: https://github.com/aantron/dream/tree/master/example/2-middleware#files
+[melange]: https://github.com/aantron/dream/tree/master/example/r-fullstack-melange#files
 [rescript]: https://github.com/aantron/dream/tree/master/example/w-fullstack-rescript#files
 [types]: https://aantron.github.io/dream/#types
 [streaming]: https://aantron.github.io/dream/#streaming
@@ -125,7 +127,8 @@ opam pin add dream /path/to/your/clone
   and start wherever you like, or begin at [**`1-hello`**][1-hello], the Dream
   version of *Hello, world!*
 - [**Reason syntax**][reason-examples] &mdash; Several of the examples are
-  available in Reason syntax. See [**`r-hello`**][r-hello].
+  written in Reason. See [**`r-hello`**][r-hello] and
+  [**`r-fullstack-melange`**][melange].
 - [**Examples**][examples] &mdash; These cover various HTTP scenarios.
 - [**API reference**][api-main]
 

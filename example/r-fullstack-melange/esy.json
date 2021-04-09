@@ -1,0 +1,14 @@
+{
+  "name": "fullstack-melange",
+  "dependencies": {
+    "melange": "melange-re/melange",
+    "ocaml": "4.12.x"
+  },
+  "esy": {
+    "buildsInSource": true,
+    "build": ["ln -sfn #{melange.install} node_modules/bs-platform"]
+  },
+  "installConfig": {
+    "pnp": false
+  }
+}

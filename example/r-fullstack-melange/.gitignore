@@ -1,0 +1,12 @@
+# npm.
+node_modules/
+
+# Melange, Dune.
+_build/
+_esy/
+.melange.eobjs/
+dune.bsb
+/dune
+
+# esbuild.
+static/
