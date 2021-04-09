@@ -74,7 +74,9 @@ if something is missing!
 <br>
 
 - [**`w-fullstack-rescript`**](w-fullstack-rescript#files) &nbsp;&mdash;&nbsp;
-  shares OCaml code between server and client.
+  shares OCaml code between server and client using ReScript.
+- [**`w-fullstack-jsoo`**](w-fullstack-jsoo#files) &nbsp;&mdash;&nbsp; shares
+  OCaml code between server and client using js_of_ocaml.
 - [**`w-long-polling`**](w-long-polling#files) &nbsp;&mdash;&nbsp; old form of
   asynchronous communication without WebSockets.
 - [**`w-query`**](w-query#files) &nbsp;&mdash;&nbsp; reads URL query parameters.

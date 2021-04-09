@@ -31,8 +31,8 @@ Dream is **one flat module** in **one package**, documented on
 - [**Cryptography**][crypto] helpers, key rotation, and a chosen cipher.
 - A neat [**logger**][logging], and attention to configuring the OCaml runtime
   nicely.
-- **Full-stack ML** with [Melange][melange], [ReScript][rescript], or
-  js_of_ocaml.
+- **Full-stack ML** with [**Melange**][melange], [**ReScript**][rescript], or
+  [**js_of_ocaml**][jsoo].
 
 <br>
 
@@ -73,6 +73,7 @@ different dependencies of each, for fast porting to different environments.
 [logging]: https://github.com/aantron/dream/tree/master/example/2-middleware#files
 [melange]: https://github.com/aantron/dream/tree/master/example/r-fullstack-melange#files
 [rescript]: https://github.com/aantron/dream/tree/master/example/w-fullstack-rescript#files
+[jsoo]: https://github.com/aantron/dream/tree/master/example/w-fullstack-jsoo#files
 [types]: https://aantron.github.io/dream/#types
 [streaming]: https://aantron.github.io/dream/#streaming
 [raw]: https://aantron.github.io/dream/#builtin
