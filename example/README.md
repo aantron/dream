@@ -72,14 +72,15 @@ if something is missing!
 
 <br>
 
+- [**`w-fullstack-rescript`**](w-fullstack-rescript#files) &nbsp;&mdash;&nbsp;
+  shares OCaml code between server and client.
 - [**`w-long-polling`**](w-long-polling#files) &nbsp;&mdash;&nbsp; old form of
   asynchronous communication without WebSockets.
-- [**`w-query`**](w-query#files) &nbsp;&mdash;&nbsp; reading URL query
-  parameters.
+- [**`w-query`**](w-query#files) &nbsp;&mdash;&nbsp; reads URL query parameters.
 - [**`w-server-sent-events`**](w-server-sent-events#files) &nbsp;&mdash;&nbsp;
   [`EventSource`](https://developer.mozilla.org/en-US/docs/Web/API/EventSource),
   an older alternative to WebSockets.
-- [**`w-template-stream`**](w-template-stream#files) &nbsp;&mdash;&nbsp; sending
+- [**`w-template-stream`**](w-template-stream#files) &nbsp;&mdash;&nbsp; sends
   templates asynchronously, one chunk at a time.
 
 <br>
@@ -92,7 +93,8 @@ These examples will be trickled in during the alpha releases.
 Ideas:
 
 - `w-auto-reload`
-- `w-fullstack`
+- [**`w-fullstack-rescript`**](w-fullstack-rescript#files) &nbsp;&mdash;&nbsp;
+  done.
 - `w-index-html`
 - `w-one-binary`
 - `w-ppx-deriving`

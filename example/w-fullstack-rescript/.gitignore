@@ -1,0 +1,9 @@
+# BuckleScript.
+node_modules/
+lib/
+
+# Dune.
+_build/
+
+# esbuild.
+static/

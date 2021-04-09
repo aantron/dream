@@ -1,0 +1,16 @@
+{
+  "name": "fullstack-rescript",
+  "dependencies": {
+    "bs-platform": "*",
+    "bs-webapi": "*",
+    "esbuild": "*"
+  },
+  "scripts": {
+    "build": "bsb -make-world",
+    "pack":
+      "esbuild lib/js/client/client.js --bundle --outfile=static/client.js",
+    "server": "dune build --root . server/server.exe",
+    "start":
+      "npm run build && npm run pack && dune exec --root . server/server.exe"
+  }
+}
