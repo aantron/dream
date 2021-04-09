@@ -2032,3 +2032,15 @@ val sort_headers : (string * string) list -> (string * string) list
 
 val echo : handler
 (** Responds with the request body. *)
+
+module Make
+  (Time : Mirage_time.S)
+  (Stack : Mirage_stack.V4V6) : sig
+  type stack = Stack.t
+  type t
+
+  val init : port:int -> stack -> t Lwt.t
+  val service : Tls.Config.server option -> handler -> t Paf.service
+  val serve :
+    ?stop:Lwt_switch.t -> 't Paf.service -> 't -> [ `Initialized of unit Lwt.t ]
+end

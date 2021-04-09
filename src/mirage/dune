@@ -1,0 +1,4 @@
+(library
+ (public_name dream.mirage)
+ (name dream__mirage)
+ (libraries bigarray-compat bigstringaf lwt dream.pure dream.middleware paf.alpn paf.mirage))

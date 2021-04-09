@@ -9,6 +9,7 @@
   dream.middleware
   dream.pure
   dream.sql
+  dream.mirage
   graphql-lwt
   logs
   lwt

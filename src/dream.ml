@@ -78,3 +78,47 @@ let log =
   Dream__middleware.Log.convenience_log
 
 include Dream__middleware.Tag
+
+module Make (Time : Mirage_time.S) (Stack : Mirage_stack.V4V6) = struct
+  open Lwt.Infix
+
+  include Paf_mirage.Make (Time) (Stack)
+
+  let edn_of_flow flow =
+    let ipaddr, port = Stack.TCP.dst flow in
+    Fmt.str "%a:%d" Ipaddr.pp ipaddr port
+
+  let alpn = function
+    | `TCP _ -> None
+    | `TLS (_, flow) -> match TLS.epoch flow with
+      | Ok { Tls.Core.alpn_protocol; _ } -> alpn_protocol
+      | _ -> None
+
+  let peer = function
+    | `TCP flow -> edn_of_flow flow
+    | `TLS (edn, _) -> edn
+
+  let injection = function
+    | `TCP flow -> let module R = (val Mimic.repr tcp_protocol) in R.T flow
+    | `TLS (_, flow) -> let module R = (val Mimic.repr tls_protocol) in R.T flow
+
+  let info = { Alpn.alpn; peer; injection; }
+
+  let service tls handler =
+    let accept t =
+      accept t >>= function
+      | Error _ as err -> Lwt.return err
+      | Ok flow -> match tls with
+        | None -> Lwt.return_ok (`TCP flow)
+        | Some tls ->
+          let edn = edn_of_flow flow in
+          TLS.server_of_flow tls flow >>= function
+          | Ok flow -> Lwt.return_ok (`TLS (edn, flow))
+          | Error err ->
+            Stack.TCP.close flow >>= fun () ->
+            Lwt.return_error (err :> [ TLS.write_error | `Msg of string ]) in
+    let app = match tls with
+      | Some _ -> let app = new_app () in app.https <- true ; app
+      | None -> new_app () in
+    Dream__mirage.service (app, handler) info accept close
+end

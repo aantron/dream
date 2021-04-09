@@ -1,5 +1,5 @@
 (lang dune 2.7)
-(implicit_transitive_deps false)
+(implicit_transitive_deps true)
 
 ; TODO LATER
 ; Note: implicit_transitive_deps is useful during massive development, but is

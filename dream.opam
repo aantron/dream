@@ -13,7 +13,7 @@ dev-repo: "git+https://github.com/aantron/dream.git"
 
 build: [
   ["dune" "build" "-p"
-    "dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,hpack,h2,h2-lwt,h2-lwt-unix"
+    "dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,hpack,h2,h2-lwt,h2-lwt-unix,paf"
     "-j" jobs]
 ]
 
@@ -31,6 +31,7 @@ install: [
   ["opam-installer" "--prefix" prefix "src/vendor/h2/h2.install"]
   ["opam-installer" "--prefix" prefix "src/vendor/h2/h2-lwt.install"]
   ["opam-installer" "--prefix" prefix "src/vendor/h2/h2-lwt-unix.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/paf/paf.install"]
 ]
 # TODO Set all these packages as conflicts.
 # TODO Use dune install -p ...
@@ -69,6 +70,7 @@ depends: [
   # "gluten-lwt-unix"
   # "httpaf"
   # "httpaf-lwt-unix"
+  # "paf"
 
   # Dependencies of vendored packages.
   "angstrom" {>= "0.14.0"}
