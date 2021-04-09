@@ -128,8 +128,10 @@ opam pin add dream /path/to/your/clone
   and start wherever you like, or begin at [**`1-hello`**][1-hello], the Dream
   version of *Hello, world!*
 - [**Reason syntax**][reason-examples] &mdash; Several of the examples are
-  written in Reason. See [**`r-hello`**][r-hello] and
-  [**`r-fullstack-melange`**][melange].
+  written in Reason. See [**`r-hello`**][r-hello].
+- [**Full-stack**][fullstack] &mdash; see skeleton projects
+  [**`r-fullstack-melange`**][melange], [**`w-fullstack-rescript`**][rescript],
+  and [**`w-fullstack-jsoo`**][jsoo].
 - [**Examples**][examples] &mdash; These cover various HTTP scenarios.
 - [**API reference**][api-main]
 
@@ -139,6 +141,7 @@ opam pin add dream /path/to/your/clone
 [r-hello]: https://github.com/aantron/dream/tree/master/example/r-hello#files
 [reason-examples]: https://github.com/aantron/dream/tree/master/example#reason
 [api-main]: https://aantron.github.io/dream/#types
+[fullstack]: https://github.com/aantron/dream/tree/master/example#full-stack
 
 <!-- TODO LATER CI badges, opam link badge, npm badge. -->
 

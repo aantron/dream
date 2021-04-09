@@ -91,4 +91,4 @@ client in `./static/client.js`. The example serves the bundled client using
 
 <br>
 
-[Up to the example index](../#examples)
+[Up to the example index](../#full-stack)

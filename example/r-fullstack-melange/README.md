@@ -83,4 +83,4 @@ Then visit [http://localhost:8080](http://localhost:8080), and you will see...
 
 <br>
 
-[Up to the example index](../#reason)
+[Up to the example index](../#full-stack)

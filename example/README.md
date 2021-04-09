@@ -59,8 +59,17 @@ There are several examples showing Dream with Reason syntax.
   templates and protects against XSS.
 - [**`r-template-stream`**](r-template-stream#files) &nbsp;&mdash;&nbsp; streams
   templates as response bodies.
+
+<br>
+
+# Full-stack
+
 - [**`r-fullstack-melange`**](r-fullstack-melange#files) &nbsp;&mdash;&nbsp;
   server *and* client written in Reason!
+- [**`w-fullstack-rescript`**](w-fullstack-rescript#files) &nbsp;&mdash;&nbsp;
+  shares OCaml code between server and client using ReScript.
+- [**`w-fullstack-jsoo`**](w-fullstack-jsoo#files) &nbsp;&mdash;&nbsp; shares
+  OCaml code between server and client using js_of_ocaml.
 
 <br>
 
@@ -73,10 +82,6 @@ if something is missing!
 
 <br>
 
-- [**`w-fullstack-rescript`**](w-fullstack-rescript#files) &nbsp;&mdash;&nbsp;
-  shares OCaml code between server and client using ReScript.
-- [**`w-fullstack-jsoo`**](w-fullstack-jsoo#files) &nbsp;&mdash;&nbsp; shares
-  OCaml code between server and client using js_of_ocaml.
 - [**`w-long-polling`**](w-long-polling#files) &nbsp;&mdash;&nbsp; old form of
   asynchronous communication without WebSockets.
 - [**`w-query`**](w-query#files) &nbsp;&mdash;&nbsp; reads URL query parameters.
