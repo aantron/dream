@@ -51,8 +51,8 @@ their slightly different interfaces, and takes care of horridness like
 [ALPN][alpn].
 
 And, even though Dream is presented as one package for ordinary usage, it is
-internally factored into several sub-libraries, according to the different
-dependencies of each, for fast porting to different environments.
+internally factored into [several sub-libraries][libs], according to the
+different dependencies of each, for fast porting to different environments.
 
 [https]: https://github.com/aantron/dream/tree/master/example/l-https#files
 [websocket]: https://github.com/aantron/dream/tree/master/example/k-websocket#files
@@ -73,6 +73,7 @@ dependencies of each, for fast porting to different environments.
 [streaming]: https://aantron.github.io/dream/#streaming
 [raw]: https://aantron.github.io/dream/#builtin
 [alpn]: https://en.wikipedia.org/wiki/Application-Layer_Protocol_Negotiation
+[libs]: https://github.com/aantron/dream/tree/master/src
 
 <br>
 
