@@ -5,8 +5,13 @@ module Make (Time : Mirage_time.S) (Stack : Mirage_stack.V4V6) = struct
 
   let dream _ = Dream.respond "Hello World!"
 
+  let builtin =
+    Dream.pipeline
+      [ Dream.content_length
+      ; Dream.assign_request_id ]
+
   let start _ stack =
-    let service = HTTP.service None dream in
+    let service = HTTP.service None (builtin dream) in
     HTTP.init ~port:8080 stack >>= fun t ->
     let `Initialized th = HTTP.serve service t in th
 end
