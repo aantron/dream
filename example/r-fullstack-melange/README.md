@@ -80,8 +80,6 @@ Then visit [http://localhost:8080](http://localhost:8080), and you will see...
 
 - [**`7-template`**](../7-template#files) discusses the templater, including
   security. The example is in OCaml syntax.
-- [**`r-template-stream`**](../r-template-stream#files) shows how to stream
-  templates with Reason.
 
 <br>
 
