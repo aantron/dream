@@ -61,7 +61,7 @@ interactive, so we force writing of all output after generating each `<p>` tag.
 
 - [**`r-template`**](../r-template#files) for the simpler way to do templates,
   building up entire bodies as strings.
-- [**`7=template`**](../7-template#security) section *Security* for XSS
+- [**`7-template`**](../7-template#security) section *Security* for XSS
   prevention considerations.
 
 <br>

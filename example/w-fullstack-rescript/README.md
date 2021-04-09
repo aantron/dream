@@ -46,22 +46,22 @@ let () =
 [client/client.res](https://github.com/aantron/dream/blob/master/example/w-fullstack-rescript/client/client.res):
 
 ```rescript
-open Webapi.Dom;
+open Webapi.Dom
 
 let () = {
-  let body = document |> Document.querySelector("body");
+  let body = document |> Document.querySelector("body")
 
   switch (body) {
-  | None => ();
+  | None => ()
   | Some(body) =>
 
-    let text = Common.greet(#Client);
+    let text = Common.greet(#Client)
 
-    let p = document |> Document.createElement("p");
-    p->Element.setInnerText(text);
-    body |> Element.appendChild(p);
-  };
-};
+    let p = document |> Document.createElement("p")
+    p->Element.setInnerText(text)
+    body |> Element.appendChild(p)
+  }
+}
 ```
 
 To run the whole thing, do
