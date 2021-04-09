@@ -16,23 +16,28 @@ Easy-to-use, feature-complete Web framework without boilerplate.
 Dream is **one flat module** in **one package**, documented on
 [**one page**][api-main], but with [**many examples**][tutorial]. It offers:
 
-- Easy [**HTTPS** and **HTTP/2** support][https] &mdash; Dream runs without a
-  proxy.
 - [**WebSockets**][websocket] and [**GraphQL**][graphql] for your modern Web
   apps.
 - [**HTML templates**][templates] with embedded OCaml or
   [Reason][reason-templates] &mdash; use existing skills!
+- [**Sessions**][sessions] with pluggable storage [back ends][back-ends].
+- Easy [**HTTPS** and **HTTP/2** support][https] &mdash; Dream runs without a
+  proxy.
+- Helpers for [**secure cookies**][cookies] and
+  [**CSRF-safe forms**][forms].
+- **Full-stack ML** with clients by [**Melange**][melange],
+  [**ReScript**][rescript], or [**js_of_ocaml**][jsoo].
+
+<br>
+
+...all without sacrificing ease of use &mdash; Dream has:
+
 - A simple programming model &mdash; Web apps are [**just functions**][handler]!
 - Composable [**middleware**][middleware] and [**routes**][routing].
-- Easy-to-use helpers for [**secure cookies**][cookies] and
-  [**CSRF-safe forms**][forms].
-- [**Sessions**][sessions] with pluggable storage [back ends][back-ends].
 - Unified, internationalization-friendly [**error handling**][errors].
 - [**Cryptography**][crypto] helpers, key rotation, and a chosen cipher.
 - A neat [**logger**][logging], and attention to configuring the OCaml runtime
   nicely.
-- **Full-stack ML** with [**Melange**][melange], [**ReScript**][rescript], or
-  [**js_of_ocaml**][jsoo].
 
 <br>
 
