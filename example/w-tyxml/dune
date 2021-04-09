@@ -1,0 +1,3 @@
+(executable
+ (name tyxml)
+ (libraries dream tyxml))
