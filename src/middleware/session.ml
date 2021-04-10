@@ -93,6 +93,14 @@ let session_cookie =
 let (|>?) =
   Option.bind
 
+(* Session key length is based on
+
+     https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#session-id-length
+
+   Extended to the next multiple of 6 for a nice base64 encoding. *)
+let new_key () =
+  Dream__cipher.Random.random 18 |> Dream__pure.Formats.to_base64url
+
 let new_label () =
   Dream__cipher.Random.random 9 |> Dream__pure.Formats.to_base64url
 
@@ -190,12 +198,15 @@ end
 (* TODO This probably needs format prefixes. *)
 (* TODO JSON is probably not a good choice for the contents. However, there
    doesn't seem to be a good alternative in opam right now, so using JSON. *)
-(* TODO Should still generate and send keys, for potential revocation
-   implementations. *)
 module Cookie =
 struct
+  (* Cookie sessions still need keys, even though they are not used as indexes
+     (sic!) into a store:
+
+     - For revocation.
+     - For binding CSRF tokens to sessions. *)
   let create expires_at = {
-    key = "N/A";
+    key = new_key ();
     label = new_label ();
     expires_at;
     payload = [];
@@ -229,10 +240,13 @@ struct
       Dream.cookie session_cookie request
       |>? fun value ->
         (* TODO Is there a non-raising version of this? *)
-        match Yojson.Basic.from_string value |> Yojson.Basic.Util.to_assoc with
-        | ["label", `String label;
-           "expires_at", expires_at;
-           "payload", `Assoc payload] ->
+        match Yojson.Basic.from_string value with
+        | `Assoc [
+            "key", `String key;
+            "label", `String label;
+            "expires_at", expires_at;
+            "payload", `Assoc payload
+          ] ->
 
           begin match expires_at with
           | `Float n -> Some n
@@ -250,7 +264,7 @@ struct
                   | _ -> failwith "Bad payload")
               in
               Some {
-                key = "N/A";
+                key;
                 label;
                 expires_at;
                 payload;
@@ -282,6 +296,7 @@ struct
       let max_age = !session.expires_at -. Unix.gettimeofday () in
       let value =
         `Assoc [
+          "key", `String !session.key;
           "label", `String !session.label;
           "expires_at", `Float !session.expires_at;
           "payload", `Assoc (!session.payload |> List.map (fun (name, value) ->
