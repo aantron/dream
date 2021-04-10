@@ -30,20 +30,20 @@
   </div>
 
   <pre><span class="keyword">let</span> hello who =
-  <span class="hljs-type">&lt;html></span>
-    <span class="hljs-type">&lt;body></span>
-      <span class="hljs-type">&lt;h1></span><span class="hljs-string">Hello, </span>&lt;%s who %><span class="hljs-string">!</span><span class="hljs-type">&lt;/h1></span>
-    <span class="hljs-type">&lt;/body></span>
-  <span class="hljs-type">&lt;/html></span>
+  <span class="hljs-tag">&lt;html></span>
+    <span class="hljs-tag">&lt;body></span>
+      <span class="hljs-tag">&lt;h1></span><span class="hljs-string">Hello, </span>&lt;%s who %><span class="hljs-string">!</span><span class="hljs-tag">&lt;/h1></span>
+    <span class="hljs-tag">&lt;/body></span>
+  <span class="hljs-tag">&lt;/html></span>
 
 <span class="keyword">let</span> <span class="hljs-string">()</span> =
   <span class="hljs-type">Dream</span>.run
-  <span class="hljs-string">@@</span> <span class="hljs-type">Dream</span>.logger
-  <span class="hljs-string">@@</span> <span class="hljs-type">Dream</span>.router <span class="hljs-string">[</span>
+  @@ <span class="hljs-type">Dream</span>.logger
+  @@ <span class="hljs-type">Dream</span>.router <span class="hljs-string">[</span>
     <span class="hljs-type">Dream</span>.get <span class="hljs-string">"/"</span> (<span class="keyword">fun</span> _ ->
       <span class="hljs-type">Dream</span>.respond (hello <span class="hljs-string">"world"</span>));
   <span class="hljs-string">]</span>
-  <span class="hljs-string">@@</span> <span class="hljs-type">Dream</span>.not_found</pre>
+  @@ <span class="hljs-type">Dream</span>.not_found</pre>
 
   <!-- Send TLS link to HTTPS example. -->
 

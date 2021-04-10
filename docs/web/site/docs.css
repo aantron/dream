@@ -103,10 +103,10 @@ body {
 }
 
 .odoc-content pre {
-  background-color: #111;
+  background-color: #1e1e1e;
   margin-left: 1em;
   margin-right: 1em;
-  border: 1px solid black;
+  border: 1px solid #111;
 }
 .odoc-content .spec > pre {
   background: none;
@@ -228,11 +228,15 @@ a:hover {
 }
 
 .hljs-identifier, .hljs-literal, .hljs-type {
-  color: #92BFBF;
+  color: #a4bfdb;
+}
+
+.hljs-tag {
+  color: #a7caff;
 }
 
 .hljs-string {
-  color: #BDDCDC;
+  color: #dcdda7;
 }
 
 .of {
@@ -312,14 +316,14 @@ header {
   padding-bottom: 72px;
 }
 
-header h1, header h6 {
-  /* text-align: center; */
-}
-
 header .topmost {
   padding-top: 12px;
   padding-bottom: 24px;
   margin-bottom: 48px;
+}
+
+header .blurbs {
+  max-width: 46em;
 }
 
 h2 {
@@ -351,7 +355,8 @@ p + .odoc-spec {
 #val-form + .spec-doc li + li,
 #type-part + .spec-doc li + li,
 #type-upload_event + .spec-doc li + li,
-#val-upload + .spec-doc li + li {
+#val-upload + .spec-doc li + li,
+#val-from_target_path + .spec-doc li + li {
   margin-top: 0;
 }
 
@@ -367,10 +372,6 @@ ul ul {
 ul ul li {
   margin: 0 !important;
 }
-
-/* .spec-doc ul {
-  margin-top: 24px;
-} */
 
 /* Two-column geometry. */
 @media (min-width: 1240px) {
@@ -391,7 +392,7 @@ ul ul li {
     height: 100%;
     width: 43rem;
     background-color: #262626;
-    border-right: 1px solid #2222;
+    border-right: 1px solid #303030;
   }
 
   h2, h2 ~ :not(.odoc-spec):not(nav), footer {
@@ -486,7 +487,6 @@ ul ul li {
   header .blurbs {
     float: left;
     margin-top: 24px;
-    max-width: 46rem;
     padding-left: 0;
     padding-right: 0;
   }
