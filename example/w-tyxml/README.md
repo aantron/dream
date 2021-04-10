@@ -73,6 +73,13 @@ let render = path_param =>
 
 <br>
 
+Note: TyXML is able to serialize HTML straight into a response body stream,
+rather than into an intermediary string. However, Dream doesn't expose a
+convenient way for TyXML to do so at the present time. If you need support for
+this, please [open an issue](https://github.com/aantron/dream/issues).
+
+<br>
+
 **See also:**
 
 - [**`7-template`**](../7-template#security) section *Security* on output
