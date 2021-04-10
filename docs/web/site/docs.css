@@ -139,6 +139,7 @@ h1, h2, h3 {
 
 header {
   background-color: #29292a;
+  border-bottom: 1px solid #222;
 }
 
 header .topmost {
@@ -151,7 +152,7 @@ h1 {
 
 header pre {
   padding: 27px 18px;
-  background-color: #1c1c1c87;
+  background-color: #202020;
   line-height: 27px;
 }
 
