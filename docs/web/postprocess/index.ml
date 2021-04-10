@@ -945,13 +945,13 @@ let patch_replacement = {|
 |}
 
 let static_expected = {|<div class="spec value" id="val-static">
- <a href="#val-static" class="anchor"></a><code><span><span class="keyword">val</span> static : <span>?handler:<span>(<span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-handler">handler</a>)</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-handler">handler</a></span></code>
+ <a href="#val-static" class="anchor"></a><code><span><span class="keyword">val</span> static : <span>?loader:<span>(<span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-handler">handler</a>)</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-handler">handler</a></span></code>
 </div>
 |}
 
 let static_replacement = {|
 <pre><span class="keyword">val</span> static :
-  ?handler:(string -> string -> <a href="#type-handler">handler</a>) ->
+  ?loader:(string -> string -> <a href="#type-handler">handler</a>) ->
     string -> <a href="#type-handler">handler</a>
 </pre>
 |}

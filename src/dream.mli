@@ -1135,7 +1135,7 @@ val not_found : handler
 (** Always responds with [404 Not Found]. *)
 
 val static :
-  ?handler:(string -> string -> handler) ->
+  ?loader:(string -> string -> handler) ->
     string -> handler
 (** Serves static files from the given local path. See example
     {{:https://github.com/aantron/dream/tree/master/example/f-static#files}
@@ -1151,14 +1151,14 @@ val static :
     ]}
 
     [Dream.static local_path] checks that the request [path] is relative and
-    contains no parent directory references. It then calls [~handler local_root
-    path request]. The default handler responds with a file at [local_root/path]
+    contains no parent directory references. It then calls [~loader local_root
+    path request]. The default loader responds with a file at [local_root/path]
     in the file system, or [404 Not Found] if the file does not exist. It uses
     {{:https://github.com/mirage/ocaml-magic-mime} magic-mime} to set the
     [Content-Type:]
 
-    Pass [~handler] to implement any other behavior, including serving files
-    from memory. [~handler] can set headers on its response, including [ETag:]
+    Pass [~loader] to implement any other behavior, including serving files
+    from memory. [~loader] can set headers on its response, including [ETag:]
 
     If checks on [path] fail, {!Dream.static} responds with [404 Not Found]. *)
 
