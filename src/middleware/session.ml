@@ -76,7 +76,7 @@ let typed_middleware ?show_value () =
 
 type session = {
   key : string;
-  id : string;
+  label : string;
   mutable expires_at : float;
   mutable payload : (string * string) list;
 }
@@ -93,7 +93,7 @@ let session_cookie =
 let (|>?) =
   Option.bind
 
-let new_id () =
+let new_label () =
   Dream__cipher.Random.random 9 |> Dream__pure.Formats.to_base64url
 
 (* TODO Must test session sharing. Should there be at-a-distance
@@ -108,7 +108,7 @@ struct
     else begin
       let session = {
         key;
-        id = new_id ();
+        label = new_label ();
         expires_at;
         payload = [];
       } in
@@ -196,7 +196,7 @@ module Cookie =
 struct
   let create expires_at = {
     key = "N/A";
-    id = new_id ();
+    label = new_label ();
     expires_at;
     payload = [];
   }
@@ -230,7 +230,7 @@ struct
       |>? fun value ->
         (* TODO Is there a non-raising version of this? *)
         match Yojson.Basic.from_string value |> Yojson.Basic.Util.to_assoc with
-        | ["id", `String id;
+        | ["label", `String label;
            "expires_at", expires_at;
            "payload", `Assoc payload] ->
 
@@ -251,7 +251,7 @@ struct
               in
               Some {
                 key = "N/A";
-                id;
+                label;
                 expires_at;
                 payload;
               }
@@ -282,7 +282,7 @@ struct
       let max_age = !session.expires_at -. Unix.gettimeofday () in
       let value =
         `Assoc [
-          "id", `String !session.id;
+          "label", `String !session.label;
           "expires_at", `Float !session.expires_at;
           "payload", `Assoc (!session.payload |> List.map (fun (name, value) ->
             name, `String value))
@@ -304,7 +304,7 @@ let {middleware; getter} =
       !session.payload
       |> List.map (fun (name, value) -> Printf.sprintf "%S: %S" name value)
       |> String.concat ", "
-      |> Printf.sprintf "%s [%s]" !session.id)
+      |> Printf.sprintf "%s [%s]" !session.label)
 
 let two_weeks =
   60. *. 60. *. 24. *. 7. *. 2.
@@ -330,8 +330,8 @@ let invalidate_session request =
 let session_key request =
   !(snd (getter request)).key
 
-let session_id request =
-  !(snd (getter request)).id
+let session_label request =
+  !(snd (getter request)).label
 
 let session_expires_at request =
   !(snd (getter request)).expires_at

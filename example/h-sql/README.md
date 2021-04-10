@@ -99,8 +99,8 @@ CREATE TABLE comment (
   text NOT NULL);
 
 CREATE TABLE dream_session (
-  key TEXT NOT NULL PRIMARY KEY,
-  id TEXT NOT NULL,
+  key TEXT PRIMARY KEY,
+  label TEXT NOT NULL,
   expires_at REAL NOT NULL,
   payload TEXT NOT NULL
 );

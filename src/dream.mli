@@ -1179,7 +1179,7 @@ val static :
     Sessions also have three pieces of metadata:
 
     - {!Dream.session_key}
-    - {!Dream.session_id}
+    - {!Dream.session_label}
     - {!Dream.session_expires_at}
 
     There are several back ends, which decide where the sessions are stored:
@@ -1226,8 +1226,8 @@ val sql_sessions : ?lifetime:float -> middleware
 
     {v
 CREATE TABLE dream_session (
-  key TEXT NOT NULL PRIMARY KEY,
-  id TEXT NOT NULL,
+  key TEXT PRIMARY KEY,
+  label TEXT NOT NULL,
   expires_at REAL NOT NULL,
   payload TEXT NOT NULL
 )
@@ -1238,8 +1238,8 @@ CREATE TABLE dream_session (
 val session_key : request -> string
 (** Secret value used to identify a client. *)
 
-val session_id : request -> string
-(** Identifier suitable for printing to logs. *)
+val session_label : request -> string
+(** Tracing label suitable for printing to logs. *)
 
 val session_expires_at : request -> float
 (** Time at which the session will expire. *)

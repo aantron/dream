@@ -13,23 +13,8 @@ module Session = Dream__middleware.Session
 let (|>?) =
   Option.bind
 
-(* TODO Expose later, probably as a string -> unit promsie function. *)
-(* let create_table () =
-  let query =
-    Caqti_request.exec Caqti_type.unit {|
-      CREATE TABLE dream_session (
-        key TEXT NOT NULL PRIMARY KEY,
-        id TEXT NOT NULL,
-        expires_at REAL NOT NULL,
-        payload TEXT NOT NULL
-      )
-    |}
-  in
-  ... *)
-
 (* TODO Strongly recommend HTTPS. *)
 (* TODO Session id and HTTP->HTTPS redirects. *)
-(* TODO Rename session key to id, and id to something else. *)
 (* TODO https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#session-id-length *)
 (* TODO Can probably reduce key to 18 bytes. *)
 (* TODO Recommend BeeKeeper in example. *)
@@ -47,26 +32,26 @@ let serialize_payload payload =
 let insert =
   let query =
     R.exec T.(tup4 string string float string) {|
-      INSERT INTO dream_session (key, id, expires_at, payload)
+      INSERT INTO dream_session (key, label, expires_at, payload)
       VALUES ($1, $2, $3, $4)
     |} in
 
   fun (module Db : DB) (session : Session.session) ->
     let payload = serialize_payload session.payload in
     let%lwt result =
-      Db.exec query (session.key, session.id, session.expires_at, payload) in
+      Db.exec query (session.key, session.label, session.expires_at, payload) in
     Caqti_lwt.or_fail result
 
 let find_opt =
   let query =
     R.find_opt T.string T.(tup3 string float string)
-      "SELECT id, expires_at, payload FROM dream_session WHERE key = $1" in
+      "SELECT label, expires_at, payload FROM dream_session WHERE key = $1" in
 
   fun (module Db : DB) key ->
     let%lwt result = Db.find_opt query key in
     match%lwt Caqti_lwt.or_fail result with
     | None -> Lwt.return_none
-    | Some (id, expires_at, payload) ->
+    | Some (label, expires_at, payload) ->
       (* TODO Mind exceptions! *)
       let payload =
         Yojson.Basic.from_string payload
@@ -79,7 +64,7 @@ let find_opt =
       in
       Lwt.return_some Session.{
         key;
-        id;
+        label;
         expires_at;
         payload;
       }
@@ -121,7 +106,7 @@ let remove =
 let rec create db expires_at attempt =
   let session = Session.{
     key = Dream__cipher.Random.random 33 |> Dream__pure.Formats.to_base64url;
-    id = Session.new_id ();
+    label = Session.new_label ();
     expires_at;
     payload = [];
   } in
