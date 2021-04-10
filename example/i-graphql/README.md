@@ -33,7 +33,7 @@ let user =
         ~doc:"User name"
         ~typ:(non_null string)
         ~args:Arg.[]
-        ~resolve:(fun _ user -> user.name);
+        ~resolve:(fun _info user -> user.name);
     ]))
 
 let schema =

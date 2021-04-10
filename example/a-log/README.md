@@ -68,7 +68,7 @@ let my_log =
   Dream.sub_log "my.log"
 
 let () =
-  sub_log.warning (fun log -> log "Hmmm...")
+  my_log.warning (fun log -> log "Hmmm...")
 ```
 
 <br>

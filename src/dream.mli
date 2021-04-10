@@ -1292,13 +1292,11 @@ val close_websocket : websocket -> unit promise
 (** {1 GraphQL} *)
 
 val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
-(** Serves the GraphQL schema. Integrates
+(** [Dream.graphql make_context schema] serves the GraphQL [schema]. Integrates
     {{:https://github.com/andreas/ocaml-graphql-server#readme}
     ocaml-graphql-server}. See example
     {{:https://github.com/aantron/dream/tree/master/example/i-graphql#files}
-    [i-graphql]}. The callback is called on every request to create the
-    {e context}, a value that is passed to each resolver from the schema. Use
-    [Lwt.return] to use the request itself as the context.
+    [i-graphql]}.
 
     {[
       let () =
@@ -1308,13 +1306,33 @@ val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
           Dream.get  "/graphiql" (Dream.graphiql "/graphql");
         ]
         @@ Dream.not_found
+    ]}
+
+    [make_context] is called by {!Dream.val-graphql} on every {!type-request} to
+    create the {e context}, a value that is passed to each resolver from the
+    schema. Passing [Lwt.return], the same as
+
+    {[
+      fun request -> Lwt.return request
+    ]}
+
+    causes the {!type-request} itself to be used as the context:
+
+    {[
+      field "name"
+        ~doc:"User name"
+        ~typ:(non_null string)
+        ~args:Arg.[]
+        ~resolve:(fun info user ->
+          (* The context is in info.ctx *)
+          user.name);
     ]} *)
 
 val graphiql : string -> handler
 (** Serves
     {{:https://github.com/graphql/graphiql/tree/main/packages/graphiql#readme}
-    GraphiQL}, a GraphQL query editor. The editor submits queries to the given
-    path. *)
+    GraphiQL}, a GraphQL query editor. The string gives the GraphQL endpoint
+    that the editor will work with. *)
 
 
 
