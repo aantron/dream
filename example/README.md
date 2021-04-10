@@ -113,6 +113,7 @@ Ideas:
 - `w-template-directory`
 - `w-tyxml` &nbsp;&mdash;&nbsp; for
   [TyXML](https://github.com/ocsigen/tyxml/) templates.
+- `w-chat`
 
 Basics:
 
