@@ -358,6 +358,9 @@ val with_client : string -> request -> request
 val with_method_ : method_ -> request -> request
 (** Replaces the method. See {!Dream.type-method_}. *)
 
+val with_path : string list -> request -> request
+(** Replaces the path. See {!Dream.val-path}. *)
+
 val with_version : int * int -> request -> request
 (** Replaces the version. See {!Dream.version}. *)
 
