@@ -1337,17 +1337,6 @@ let to_set_cookie_replacement = {|
 </pre>
 |}
 
-let drop_empty_expected = {|<div class="spec value" id="val-drop_empty_trailing_path_component">
- <a href="#val-drop_empty_trailing_path_component" class="anchor"></a><code><span><span class="keyword">val</span> drop_empty_trailing_path_component : <span><span>string list</span> <span class="arrow">-&gt;</span></span> <span>string list</span></span></code>
-</div>
-|}
-
-let drop_empty_replacement = {|
-<pre><span class="keyword">val</span> drop_empty_trailing_path_component :
-  string list -> string list
-</pre>
-|}
-
 let encrypt_expected = {|<div class="spec value" id="val-encrypt">
  <a href="#val-encrypt" class="anchor"></a><code><span><span class="keyword">val</span> encrypt : <span>?secret_prefix:string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> string</span></code>
 </div>
@@ -1703,10 +1692,6 @@ let pretty_print_signatures soup =
 
   multiline
     "#val-to_set_cookie" to_set_cookie_expected to_set_cookie_replacement;
-  multiline
-    "#val-drop_empty_trailing_path_component"
-    drop_empty_expected
-    drop_empty_replacement;
   multiline "#val-encrypt" encrypt_expected encrypt_replacement;
   multiline "#val-decrypt" decrypt_expected decrypt_replacement;
 

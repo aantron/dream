@@ -1935,8 +1935,9 @@ val from_target_path : string -> string list
     target, and may include a query string. *)
 
 val drop_trailing_slash : string list -> string list
-(** Drops a last [""] if it is in the argument list. This changes the
-    representation of path [abc/] to the representation of [abc]. *)
+(** Changes the representation of path [abc/] to the representation of [abc] by
+    checking if the last element in the list is [""], and, if it is, dropping
+    it. *)
 
 
 
