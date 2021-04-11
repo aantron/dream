@@ -51,7 +51,7 @@ let%expect_test _ =
 
 let drop path =
   path
-  |> Dream.drop_empty_trailing_path_component
+  |> Dream.drop_trailing_slash
   |> List.map (Printf.sprintf "%S")
   |> String.concat " "
   |> Printf.printf "[%s]\n"

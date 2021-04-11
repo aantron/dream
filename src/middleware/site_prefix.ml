@@ -28,7 +28,7 @@ let chop_site_prefix prefix =
   let prefix =
     prefix
     |> Dream__pure.Formats.from_target_path
-    |> Dream__pure.Formats.drop_empty_trailing_path_component
+    |> Dream__pure.Formats.drop_trailing_slash
   in
 
   let prefix_reversed = List.rev prefix in

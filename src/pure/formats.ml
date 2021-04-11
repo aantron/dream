@@ -185,11 +185,11 @@ let from_target_path =
 
 (* Not tail-recursive. Only called on the site prefix and route fragments during
    app setup. *)
-let rec drop_empty_trailing_path_component = function
+let rec drop_trailing_slash = function
   | [] -> []
   | [""] -> []
   | component::components ->
-    component::(drop_empty_trailing_path_component components)
+    component::(drop_trailing_slash components)
 
 (* TODO Currently used mainly for debugging; needs to be replaced by an escaping
    function. *)

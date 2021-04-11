@@ -1932,7 +1932,7 @@ val from_target_path : string -> string list
     specially. See {!Dream.from_target} if the argument string is actually a
     target, and may include a query string. *)
 
-val drop_empty_trailing_path_component : string list -> string list
+val drop_trailing_slash : string list -> string list
 (** Drops a last [""] if it is in the argument list. This changes the
     representation of path [abc/] to the representation of [abc]. *)
 
