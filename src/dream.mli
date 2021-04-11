@@ -340,15 +340,14 @@ val method_ : request -> method_
 (** Request method. For example, [`GET]. *)
 
 val target : request -> string
-(** Request target path. For example, ["/something"]. *)
+(** Request target. For example, ["/foo/bar"]. See {!Dream.val-path}. *)
 
 (**/**)
-(* These are used for router state at the moment, and I am not sure if there is
-   a public use case for them. I may remove them from the API, and have the
-   test cases access their internal definitions directly. *)
 val prefix : request -> string
-val path : request -> string
 (**/**)
+
+val path : request -> string list
+(** Parsed request path. For example, ["foo"; "bar"]. *)
 
 val version : request -> int * int
 (** Protocol version. [(1, 1)] for HTTP/1.1 and [(2, 0)] for HTTP/2. *)

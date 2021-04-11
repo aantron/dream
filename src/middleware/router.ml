@@ -220,7 +220,7 @@ let router routes =
 
     (* let next_prefix = Dream.next_prefix request *)
     let prefix = Dream.internal_prefix request in
-    let path = Dream.internal_path request in
+    let path = Dream.path request in
 
     (* match match_site_prefix next_prefix path with
     | None -> next_handler request

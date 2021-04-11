@@ -162,14 +162,11 @@ let target request =
 let internal_prefix request =
   request.specific.prefix
 
-let internal_path request =
-  request.specific.path
-
 let prefix request =
   Formats.make_path (List.rev request.specific.prefix)
 
 let path request =
-  Formats.make_path request.specific.path
+  request.specific.path
 
 let version request =
   request.specific.request_version

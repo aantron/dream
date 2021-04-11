@@ -43,7 +43,7 @@ let default_loader local_root path _ =
    re-parse it, to avoid any potential issues with nested / due to any bugs that
    may be introduced. *)
 let validate_path request =
-  let path = Dream.internal_path request in
+  let path = Dream.path request in
 
   let has_dot = List.exists ((=) Filename.current_dir_name) path in
   let has_dotdot = List.exists ((=) Filename.parent_dir_name) path in

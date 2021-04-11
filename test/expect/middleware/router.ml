@@ -8,6 +8,10 @@
 let () =
   ignore Initialize.require
 
+let path request =
+  Dream.path request
+  |> Dream__pure.Formats.make_path
+
 
 
 let show_tokens route =
@@ -352,7 +356,7 @@ let%expect_test _ =
 let%expect_test _ =
   show ~prefix:"/abc/def" "/abc/def/ghi" @@ Dream.router [
     Dream.get "/ghi" (fun request ->
-      Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+      Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {|
     Response: 200 OK
@@ -364,7 +368,7 @@ let%expect_test _ =
   show "/abc/def" @@ Dream.router [
     Dream.scope "/abc" [] [
       Dream.get "/def" (fun request ->
-        Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+        Dream.respond (Dream.prefix request ^ " " ^ path request));
     ];
   ];
   [%expect {|
@@ -375,7 +379,7 @@ let%expect_test _ =
   show "/def/abc" @@ Dream.router [
     Dream.scope "/abc" [] [
       Dream.get "/def" (fun request ->
-        Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+        Dream.respond (Dream.prefix request ^ " " ^ path request));
     ];
   ];
   [%expect {|
@@ -385,10 +389,10 @@ let%expect_test _ =
   show "/abc/ghi" @@ Dream.router [
     Dream.scope "/abc" [] [
       Dream.get "/def" (fun request ->
-        Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+        Dream.respond (Dream.prefix request ^ " " ^ path request));
     ];
     Dream.get "/abc/ghi" (fun request ->
-      Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+      Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {|
     Response: 200 OK
@@ -423,7 +427,7 @@ let%expect_test _ =
       (fun next_handler request -> print_endline "bar"; next_handler request);
     ] [
       Dream.get "/def" (fun request ->
-        Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+        Dream.respond (Dream.prefix request ^ " " ^ path request));
     ];
   ];
   [%expect {|
@@ -510,7 +514,7 @@ let%expect_test _ =
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
     Dream.get "/abc/*" (fun request ->
-      Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+      Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {|
     Response: 200 OK
@@ -519,7 +523,7 @@ let%expect_test _ =
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
     Dream.get "*" (fun request ->
-      Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+      Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {|
     Response: 200 OK
@@ -528,7 +532,7 @@ let%expect_test _ =
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
     Dream.get "/*" (fun request ->
-      Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+      Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {|
     Response: 200 OK
@@ -537,14 +541,14 @@ let%expect_test _ =
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
     Dream.get "/abc/def/*" (fun request ->
-      Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+      Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {| Response: 404 Not Found |}]
 
 let%expect_test _ =
   show "/abc/def/" @@ Dream.router [
     Dream.get "/abc/def/*" (fun request ->
-      Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+      Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {|
     Response: 200 OK
@@ -553,7 +557,7 @@ let%expect_test _ =
 let%expect_test _ =
   show "/abc/def/ghi" @@ Dream.router [
     Dream.get "/abc/def/*" (fun request ->
-      Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+      Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {|
     Response: 200 OK
@@ -562,14 +566,14 @@ let%expect_test _ =
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
     Dream.post "/abc/*" (fun request ->
-      Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+      Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {| Response: 404 Not Found |}]
 
 let%expect_test _ =
   show ~method_:`POST "/abc/def" @@ Dream.router [
     Dream.post "/abc/*" (fun request ->
-      Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+      Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {|
     Response: 200 OK
@@ -579,7 +583,7 @@ let%expect_test _ =
   show "/abc/def/ghi" @@ Dream.router [
     Dream.scope "/abc" [] [
       Dream.get "/def/*" (fun request ->
-        Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+        Dream.respond (Dream.prefix request ^ " " ^ path request));
     ];
   ];
   [%expect {|
@@ -590,7 +594,7 @@ let%expect_test _ =
   show "/abc/def/ghi" @@ Dream.router [
     Dream.scope "/abc" [] [
       Dream.get "/*" (fun request ->
-        Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+        Dream.respond (Dream.prefix request ^ " " ^ path request));
     ];
   ];
   [%expect {|
@@ -601,7 +605,7 @@ let%expect_test _ =
   show "/abc/def/ghi" @@ Dream.router [
     Dream.scope "/abc" [] [
       Dream.get "*" (fun request ->
-        Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+        Dream.respond (Dream.prefix request ^ " " ^ path request));
     ];
   ];
   [%expect {|
@@ -612,7 +616,7 @@ let%expect_test _ =
   show "/abc/def/ghi" @@ Dream.router [
     Dream.scope "/abc/def" [] [
       Dream.get "*" (fun request ->
-        Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+        Dream.respond (Dream.prefix request ^ " " ^ path request));
     ];
   ];
   [%expect {|
@@ -627,7 +631,7 @@ let%expect_test _ =
       Printf.ksprintf Dream.respond "%s %s %s"
         (Dream.prefix request)
         (Dream.param "x" request)
-        (Dream.path request));
+        (path request));
   ];
   [%expect {|
     Response: 200 OK
@@ -639,7 +643,7 @@ let%expect_test _ =
       Printf.ksprintf Dream.respond "%s %s %s"
         (Dream.prefix request)
         (Dream.param "x" request)
-        (Dream.path request));
+        (path request));
   ];
   [%expect {|
     Response: 200 OK
@@ -652,7 +656,7 @@ let%expect_test _ =
         Printf.ksprintf Dream.respond "%s %s %s"
           (Dream.prefix request)
           (Dream.param "x" request)
-          (Dream.path request));
+          (path request));
     ];
   ];
   [%expect {|
@@ -667,7 +671,7 @@ let%expect_test _ =
       request
       |> Dream.router [
         Dream.get "/def" (fun request ->
-          Dream.respond (Dream.prefix request ^ " " ^ Dream.path request));
+          Dream.respond (Dream.prefix request ^ " " ^ path request));
       ]
       @@ (fun _ -> Dream.respond ~status:`Not_Found ""))
   ];
@@ -685,7 +689,7 @@ let%expect_test _ =
             (Dream.prefix request)
             (Dream.param "x" request)
             (Dream.param "y" request)
-            (Dream.path request));
+            (path request));
       ]
       @@ (fun _ -> Dream.respond ~status:`Not_Found ""))
   ];
@@ -702,7 +706,7 @@ let%expect_test _ =
           Printf.ksprintf Dream.respond "%s %s %s"
             (Dream.prefix request)
             (Dream.param "x" request)
-            (Dream.path request));
+            (path request));
       ]
       @@ (fun _ -> Dream.respond ~status:`Not_Found ""))
   ];
