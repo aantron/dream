@@ -153,6 +153,7 @@ Techniques:
 
 - `w-etag`
 - `w-graphql-sql`
+- `w-graphql-mutation`
 - `w-graphql-subscriptions`
 - `w-https-redirect`
 - [**`w-long-polling`**](w-long-polling#files) &nbsp;&mdash;&nbsp; done.
@@ -162,6 +163,7 @@ Techniques:
 - `w-sql-stream`
 - [**`w-template-stream`**](w-template-stream#files) &nbsp;&mdash;&nbsp; done.
 - `w-websocket-stream`
+- `r-graphql`
 
 
 <!-- TODO Note that each example is fully self-contained... But also show an

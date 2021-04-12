@@ -3,7 +3,7 @@
 <br>
 
 Dream [*templates*](https://aantron.github.io/dream/#templates) allow
-interleaving OCaml and HTML in a pretty straightforward way, and help with
+interleaving OCaml and HTML in a straightforward way, and help with
 [XSS protection](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html).
 After looking at the correct example, we will
 [weaken and then exploit it](#security).

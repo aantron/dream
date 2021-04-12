@@ -1,6 +1,6 @@
 opam-version: "2.0"
 
-synopsis: "Web framework, concise yet feature-complete"
+synopsis: "Tidy, feature-complete Web framework"
 
 license: "MIT"
 homepage: "https://github.com/aantron/dream"
@@ -35,22 +35,19 @@ install: [
 # TODO Set all these packages as conflicts.
 # TODO Use dune install -p ...
 
-# TODO Test dependency cone, i.e. list dependencies actually installed and make
-# sure nothing questionable silently creeps in.
-
 depends: [
   "base-unix"
   "base64" {>= "3.1.0"}  # Base64.encode_string.
   "bigarray-compat"
   "caqti-lwt"
-  "conf-libev"  # TODO LATER Get rid of this system dep.
+  "conf-libev"
   "cstruct"
   "dune" {>= "2.7.0"}  # --instrument-with.
   "fmt" {>= "0.8.7"}  # `Italic. This constrains Dream to OCaml >= 4.05.
   "graphql_parser"
   "graphql-lwt"  # Should be factored out; Menhir as recursive dependency.
   "hmap"
-  "jwto" {>= "0.2.2"}  # Jwto.get_payload. TODO LATER Probably system deps.
+  "jwto" {>= "0.2.2"}  # Jwto.get_payload.
   "lwt"
   "lwt_ppx"
   "lwt_ssl"
@@ -81,7 +78,7 @@ depends: [
   "result"  # http/af, websocket/af.
 
   # Testing, development.
-  "alcotest" {with-test}  # TODO LATER Needs constraint.
+  "alcotest" {with-test}
   "bisect_ppx" {dev & >= "2.5.0"}  # --instrument-with.
   "ppx_expect" {with-test}
 ]

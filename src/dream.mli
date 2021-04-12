@@ -1192,8 +1192,7 @@ val static :
     - {!Dream.cookie_sessions}
 
     All requests passing through session middleware are assigned a session,
-    either an existing one, or a new, empty session, known as a
-    {e pre-session}.
+    either an existing one, or a new empty session, known as a {e pre-session}.
 
     See example
     {{:https://github.com/aantron/dream/tree/master/example/b-session#files}
