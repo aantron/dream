@@ -86,7 +86,7 @@ This helps to mitigate
 new session will, again, be an empty pre-session.
 
 It is best to use HTTPS when using sessions, to prevent session cookies from
-being trivially observed by third parties. See
+being easily observed by third parties. See
 [`Dream.run`](https://aantron.github.io/dream/#val-run) argument `~https`, and
 example [**`l-https`**](../l-https#files).
 

@@ -8,7 +8,7 @@
 (** {1 Types}
 
     Dream is built on just five types. The first two are the data types of
-    Dream: *)
+    Dream. Both are abstract, even though they appear to have definitions: *)
 
 type request = incoming message
 (** HTTP requests, such as [GET /something HTTP/1.1]. See
@@ -97,9 +97,10 @@ and 'a message
 and incoming
 and outgoing
 (** Type parameters for {!message} for {!type-request} and {!type-response},
-    respectively. These have no meaning other than they are different from each
-    other. Dream only ever creates [incoming message] and [outgoing message].
-    [incoming] and [outgoing] are never mentioned again in the docs. *)
+    respectively. These are “phantom” types. They have no meaning other than
+    they are different from each other. Dream only ever creates [incoming
+    message] and [outgoing message]. [incoming] and [outgoing] are never
+    mentioned again in the docs. *)
 
 and 'a promise = 'a Lwt.t
 (** Dream uses {{:https://github.com/ocsigen/lwt} Lwt} for promises and
