@@ -114,6 +114,7 @@ Ideas:
 - `w-tyxml` &nbsp;&mdash;&nbsp; for
   [TyXML](https://github.com/ocsigen/tyxml/) templates.
 - `w-chat`
+- `w-fullstack-brr`
 
 Basics:
 
