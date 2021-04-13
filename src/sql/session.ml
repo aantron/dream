@@ -105,7 +105,7 @@ let remove =
 
 let rec create db expires_at attempt =
   let session = Session.{
-    key = Dream__cipher.Random.random 33 |> Dream__pure.Formats.to_base64url;
+    key = Session.new_key ();
     label = Session.new_label ();
     expires_at;
     payload = [];

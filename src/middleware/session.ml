@@ -97,7 +97,17 @@ let (|>?) =
 
      https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#session-id-length
 
-   Extended to the next multiple of 6 for a nice base64 encoding. *)
+   ...extended to the next multiple of 6 for a nice base64 encoding.
+
+   NIST recommends 64 bits:
+
+     https://pages.nist.gov/800-63-3/sp800-63b.html#sec7
+
+   ..and links to OWASP.
+
+   Some rough bounds give a maximal probability of 2^-70 for a collision between
+   two keys among 100,000,000,000 concurrent sessions (5x the monthly traffic of
+   google.com in February 2021). *)
 let new_key () =
   Dream__cipher.Random.random 18 |> Dream__pure.Formats.to_base64url
 
@@ -109,8 +119,7 @@ let new_label () =
 module Memory =
 struct
   let rec create hash_table expires_at =
-    let key =
-      Dream__cipher.Random.random 33 |> Dream__pure.Formats.to_base64url in
+    let key = new_key () in
     if Hashtbl.mem hash_table key then
       create hash_table expires_at
     else begin
