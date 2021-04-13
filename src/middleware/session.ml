@@ -75,7 +75,7 @@ let typed_middleware ?show_value () =
 
 
 type session = {
-  key : string;
+  id : string;
   label : string;
   mutable expires_at : float;
   mutable payload : (string * string) list;
@@ -93,7 +93,7 @@ let session_cookie =
 let (|>?) =
   Option.bind
 
-(* Session key length is based on
+(* Session id length is based on
 
      https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#session-id-length
 
@@ -106,9 +106,9 @@ let (|>?) =
    ..and links to OWASP.
 
    Some rough bounds give a maximal probability of 2^-70 for a collision between
-   two keys among 100,000,000,000 concurrent sessions (5x the monthly traffic of
+   two IDs among 100,000,000,000 concurrent sessions (5x the monthly traffic of
    google.com in February 2021). *)
-let new_key () =
+let new_id () =
   Dream__cipher.Random.random 18 |> Dream__pure.Formats.to_base64url
 
 let new_label () =
@@ -119,17 +119,17 @@ let new_label () =
 module Memory =
 struct
   let rec create hash_table expires_at =
-    let key = new_key () in
-    if Hashtbl.mem hash_table key then
+    let id = new_id () in
+    if Hashtbl.mem hash_table id then
       create hash_table expires_at
     else begin
       let session = {
-        key;
+        id;
         label = new_label ();
         expires_at;
         payload = [];
       } in
-      Hashtbl.replace hash_table key session;
+      Hashtbl.replace hash_table id session;
       session
     end
 
@@ -141,7 +141,7 @@ struct
     Lwt.return_unit
 
   let invalidate hash_table lifetime operations session =
-    Hashtbl.remove hash_table !session.key;
+    Hashtbl.remove hash_table !session.id;
     session := create hash_table (Unix.gettimeofday () +. lifetime);
     operations.dirty <- true;
     Lwt.return_unit
@@ -166,7 +166,7 @@ struct
         if session.expires_at > now then
           Some session
         else begin
-          Hashtbl.remove hash_table session.key;
+          Hashtbl.remove hash_table session.id;
           None
         end
     in
@@ -194,7 +194,7 @@ struct
       let max_age = !session.expires_at -. Unix.gettimeofday () in
       Lwt.return
         (Dream.set_cookie
-          session_cookie !session.key request response ~encrypt:false ~max_age)
+          session_cookie !session.id request response ~encrypt:false ~max_age)
 
   let back_end lifetime =
     let hash_table = Hashtbl.create 256 in
@@ -215,7 +215,7 @@ struct
      - For revocation.
      - For binding CSRF tokens to sessions. *)
   let create expires_at = {
-    key = new_key ();
+    id = new_id ();
     label = new_label ();
     expires_at;
     payload = [];
@@ -251,7 +251,7 @@ struct
         (* TODO Is there a non-raising version of this? *)
         match Yojson.Basic.from_string value with
         | `Assoc [
-            "key", `String key;
+            "id", `String id;
             "label", `String label;
             "expires_at", expires_at;
             "payload", `Assoc payload
@@ -273,7 +273,7 @@ struct
                   | _ -> failwith "Bad payload")
               in
               Some {
-                key;
+                id;
                 label;
                 expires_at;
                 payload;
@@ -305,7 +305,7 @@ struct
       let max_age = !session.expires_at -. Unix.gettimeofday () in
       let value =
         `Assoc [
-          "key", `String !session.key;
+          "id", `String !session.id;
           "label", `String !session.label;
           "expires_at", `Float !session.expires_at;
           "payload", `Assoc (!session.payload |> List.map (fun (name, value) ->
@@ -351,8 +351,8 @@ let all_session_values request =
 let invalidate_session request =
   (fst (getter request)).invalidate ()
 
-let session_key request =
-  !(snd (getter request)).key
+let session_id request =
+  !(snd (getter request)).id
 
 let session_label request =
   !(snd (getter request)).label

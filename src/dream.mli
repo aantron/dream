@@ -1181,7 +1181,7 @@ val static :
 
     Sessions also have three pieces of metadata:
 
-    - {!Dream.session_key}
+    - {!Dream.session_id}
     - {!Dream.session_label}
     - {!Dream.session_expires_at}
 
@@ -1215,7 +1215,7 @@ val invalidate_session : request -> unit promise
 (** {2 Back ends} *)
 
 val memory_sessions : ?lifetime:float -> middleware
-(** Stores sessions in server memory. Passes session keys to clients in cookies.
+(** Stores sessions in server memory. Passes session IDs to clients in cookies.
     Session data is lost when the server process exits. *)
 
 val cookie_sessions : ?lifetime:float -> middleware
@@ -1223,12 +1223,12 @@ val cookie_sessions : ?lifetime:float -> middleware
     to decrypt cookies from previous server runs. *)
 
 val sql_sessions : ?lifetime:float -> middleware
-(** Stores sessions in an SQL database. Passes session keys to clients in
+(** Stores sessions in an SQL database. Passes session IDs to clients in
     cookies. Must be used under {!Dream.sql_pool}. Expects a table
 
     {v
 CREATE TABLE dream_session (
-  key TEXT PRIMARY KEY,
+  id TEXT PRIMARY KEY,
   label TEXT NOT NULL,
   expires_at REAL NOT NULL,
   payload TEXT NOT NULL
@@ -1237,7 +1237,7 @@ CREATE TABLE dream_session (
 
 (** {2 Metadata} *)
 
-val session_key : request -> string
+val session_id : request -> string
 (** Secret value used to identify a client. *)
 
 val session_label : request -> string

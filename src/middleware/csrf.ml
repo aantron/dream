@@ -28,7 +28,7 @@ module Dream = Dream__pure.Inmost
    work with community session managers. *)
 let hash_session request =
   request
-  |> Session.session_key
+  |> Session.session_id
   |> Digestif.SHA256.digest_string
   |> Digestif.SHA256.to_raw_string
   |> Dream__pure.Formats.to_base64url

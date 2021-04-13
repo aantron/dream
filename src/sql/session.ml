@@ -13,11 +13,6 @@ module Session = Dream__middleware.Session
 let (|>?) =
   Option.bind
 
-(* TODO Strongly recommend HTTPS. *)
-(* TODO Session id and HTTP->HTTPS redirects. *)
-(* TODO https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#session-id-length *)
-(* TODO Can probably reduce key to 18 bytes. *)
-(* TODO Recommend BeeKeeper in example. *)
 module type DB = Caqti_lwt.CONNECTION
 
 module R = Caqti_request
@@ -32,23 +27,23 @@ let serialize_payload payload =
 let insert =
   let query =
     R.exec T.(tup4 string string float string) {|
-      INSERT INTO dream_session (key, label, expires_at, payload)
+      INSERT INTO dream_session (id, label, expires_at, payload)
       VALUES ($1, $2, $3, $4)
     |} in
 
   fun (module Db : DB) (session : Session.session) ->
     let payload = serialize_payload session.payload in
     let%lwt result =
-      Db.exec query (session.key, session.label, session.expires_at, payload) in
+      Db.exec query (session.id, session.label, session.expires_at, payload) in
     Caqti_lwt.or_fail result
 
 let find_opt =
   let query =
     R.find_opt T.string T.(tup3 string float string)
-      "SELECT label, expires_at, payload FROM dream_session WHERE key = $1" in
+      "SELECT label, expires_at, payload FROM dream_session WHERE id = $1" in
 
-  fun (module Db : DB) key ->
-    let%lwt result = Db.find_opt query key in
+  fun (module Db : DB) id ->
+    let%lwt result = Db.find_opt query id in
     match%lwt Caqti_lwt.or_fail result with
     | None -> Lwt.return_none
     | Some (label, expires_at, payload) ->
@@ -63,7 +58,7 @@ let find_opt =
           | _ -> failwith "Bad payload"
       in
       Lwt.return_some Session.{
-        key;
+        id;
         label;
         expires_at;
         payload;
@@ -72,27 +67,27 @@ let find_opt =
 let refresh =
   let query =
     R.exec T.(tup2 float string)
-      "UPDATE dream_session SET expires_at = $1 WHERE key = $2" in
+      "UPDATE dream_session SET expires_at = $1 WHERE id = $2" in
 
   fun (module Db : DB) (session : Session.session) ->
-    let%lwt result = Db.exec query (session.expires_at, session.key) in
+    let%lwt result = Db.exec query (session.expires_at, session.id) in
     Caqti_lwt.or_fail result
 
 let update =
   let query =
     R.exec T.(tup2 string string)
-      "UPDATE dream_session SET payload = $1 WHERE key = $2" in
+      "UPDATE dream_session SET payload = $1 WHERE id = $2" in
 
   fun (module Db : DB) (session : Session.session) ->
     let payload = serialize_payload session.payload in
-    let%lwt result = Db.exec query (payload, session.key) in
+    let%lwt result = Db.exec query (payload, session.id) in
     Caqti_lwt.or_fail result
 
 let remove =
-  let query = R.exec T.string "DELETE FROM dream_session WHERE key = $1" in
+  let query = R.exec T.string "DELETE FROM dream_session WHERE id = $1" in
 
-  fun (module Db : DB) key ->
-    let%lwt result = Db.exec query key in
+  fun (module Db : DB) id ->
+    let%lwt result = Db.exec query id in
     Caqti_lwt.or_fail result
 
 (* TODO Session sharing is greatly complicated by the backing store; is it ok to
@@ -105,7 +100,7 @@ let remove =
 
 let rec create db expires_at attempt =
   let session = Session.{
-    key = Session.new_key ();
+    id = Session.new_id ();
     label = Session.new_label ();
     expires_at;
     payload = [];
@@ -127,7 +122,7 @@ let put request (session : Session.session) name value =
 
 let invalidate request lifetime operations (session : Session.session ref) =
   request |> Sql.sql begin fun db ->
-    let%lwt () = remove db !session.key in
+    let%lwt () = remove db !session.id in
     let%lwt new_session = create db (Unix.gettimeofday () +. lifetime) 1 in
     session := new_session;
     operations.Session.dirty <- true;
@@ -149,14 +144,14 @@ let load lifetime request =
     let%lwt valid_session =
       match Dream.cookie ~decrypt:false Session.session_cookie request with
       | None -> Lwt.return_none
-      | Some key ->
-        match%lwt find_opt db key with
+      | Some id ->
+        match%lwt find_opt db id with
         | None -> Lwt.return_none
         | Some session ->
           if session.expires_at > now then
             Lwt.return (Some session)
           else begin
-            let%lwt () = remove db key in
+            let%lwt () = remove db id in
             Lwt.return_none
           end
     in
@@ -188,7 +183,7 @@ let send (operations, session) request response =
     Lwt.return
       (Dream.set_cookie
         Session.session_cookie
-        !session.key
+        !session.id
         request
         response
         ~encrypt:false

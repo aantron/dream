@@ -88,6 +88,7 @@ We also take the opportunity to try out
 [`Dream.sql_sessions`](https://aantron.github.io/dream/#val-sql_sessions), which
 stores session data persistently in `db.sqlite`! See example
 [**`b-session`**](../b-session#files) for an introduction to session management.
+Both the comments and the sessions survive server restarts.
 
 <br>
 
@@ -96,10 +97,11 @@ stores session data persistently in `db.sqlite`! See example
 ```sql
 CREATE TABLE comment (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  text NOT NULL);
+  text NOT NULL
+);
 
 CREATE TABLE dream_session (
-  key TEXT PRIMARY KEY,
+  id TEXT PRIMARY KEY,
   label TEXT NOT NULL,
   expires_at REAL NOT NULL,
   payload TEXT NOT NULL
@@ -131,6 +133,8 @@ microservices, or other needs, you can switch, for example, to PostgreSQL by...
 - changing the connection URI to `postgres://user:password@host:port`;
 - using `caqti-driver-postgres`;
 - replacing `INTEGER PRIMARY KEY AUTOINCREMENT` by `SERIAL PRIMARY KEY`.
+
+<br>
 
 A good program for examining the database locally is
 [Beekeeper Studio](https://www.beekeeperstudio.io/). Dream might also integrate

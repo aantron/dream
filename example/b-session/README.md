@@ -88,7 +88,9 @@ new session will, again, be an empty pre-session.
 It is best to use HTTPS when using sessions, to prevent session cookies from
 being easily observed by third parties. See
 [`Dream.run`](https://aantron.github.io/dream/#val-run) argument `~https`, and
-example [**`l-https`**](../l-https#files).
+example [**`l-https`**](../l-https#files). If you redirect from HTTP to HTTPS,
+do not issue sessions for HTTP requests. If you do, don't accept them later
+from HTTPS requests.
 
 <br>
 <br>
