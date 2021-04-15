@@ -16,20 +16,26 @@ sig
   val prefix : char
   val name : string
 
-  val encrypt : secret:string -> string -> string
-  val decrypt : secret:string -> string -> string option
+  val encrypt :
+    ?associated_data:string -> secret:string -> string -> string
 
-  val test_encrypt : secret:string -> nonce:string -> string -> string
+  val decrypt :
+    ?associated_data:string -> secret:string -> string -> string option
+
+  val test_encrypt :
+    ?associated_data:string -> secret:string -> nonce:string -> string -> string
 end
 
-let encrypt (module Cipher : Cipher) secret plaintext =
-  Cipher.encrypt ~secret plaintext
+let encrypt (module Cipher : Cipher) ?associated_data secret plaintext =
+  Cipher.encrypt ?associated_data ~secret plaintext
 
-let rec decrypt ((module Cipher : Cipher) as cipher) secrets ciphertext =
+let rec decrypt
+    ((module Cipher : Cipher) as cipher) ?associated_data secrets ciphertext =
+
   match secrets with
   | [] -> None
   | secret::secrets ->
-    match Cipher.decrypt ~secret ciphertext with
+    match Cipher.decrypt ?associated_data ~secret ciphertext with
     | Some _ as plaintext -> plaintext
     | None -> decrypt cipher secrets ciphertext
 
@@ -63,25 +69,29 @@ struct
     |> Mirage_crypto.Cipher_block.AES.GCM.of_secret
 
   (* TODO Memoize keys or otherwise avoid key derivation on every call. *)
-  let encrypt_with_nonce secret nonce plaintext =
+  let encrypt_with_nonce secret nonce plaintext associated_data =
     let key = derive_key secret in
+    let adata = Option.map Cstruct.of_string associated_data in
     let ciphertext =
       Mirage_crypto.Cipher_block.AES.GCM.authenticate_encrypt
         ~key
         ~nonce
+        ?adata
         (Cstruct.of_string plaintext)
       |> Cstruct.to_string
     in
 
     "\x00" ^ (Cstruct.to_string nonce) ^ ciphertext
 
-  let encrypt ~secret plaintext =
-    encrypt_with_nonce secret (Random.random_buffer 12) plaintext
+  let encrypt ?associated_data ~secret plaintext =
+    encrypt_with_nonce
+      secret (Random.random_buffer 12) plaintext associated_data
 
-  let test_encrypt ~secret ~nonce plaintext =
-    encrypt_with_nonce secret (Cstruct.of_string nonce) plaintext
+  let test_encrypt ?associated_data ~secret ~nonce plaintext =
+    encrypt_with_nonce
+      secret (Cstruct.of_string nonce) plaintext associated_data
 
-  let decrypt ~secret ciphertext =
+  let decrypt ?associated_data ~secret ciphertext =
     let key = derive_key secret in
     if String.length ciphertext < 14 then
       None
@@ -89,10 +99,12 @@ struct
       if ciphertext.[0] != prefix then
         None
       else
+        let adata = Option.map Cstruct.of_string associated_data in
         let plaintext =
           Mirage_crypto.Cipher_block.AES.GCM.authenticate_decrypt
             ~key
             ~nonce:(Cstruct.of_string ~off:1 ~len:12 ciphertext)
+            ?adata
             (Cstruct.of_string ciphertext ~off:13)
         in
         match plaintext with
