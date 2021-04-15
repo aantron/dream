@@ -5,59 +5,24 @@
 
 
 
-(* http://www.lastbarrier.com/public-claims-and-how-to-validate-a-jwt/ *)
-(* https://jwt.io/ *)
-
 module Dream = Dream__pure.Inmost
 
-(* TODO Switch to the new cryptography binding, and eliminate jwt dep. *)
-
-(* TODO LATER The crypto situation in OCaml seems a bit sad; it seems necessary
-   to depend on gmp etc. Is this in any way avoidable? *)
-(* TODO LATER Perhaps jose + mirage-crypto can solve this. Looks like it needs
-   an opam release. *)
-
-(* The current version of the Dream CSRF token puts a hash of the session ID
-   into the plaintext portion of a signed JWT, and compares session hashes. The
-   hash function must therefore be (relatively?) secure against collision
-   attacks.
-
-   A future implementation is likely to encrypt the token, including the
-   session ID, instead, in which case it may e possible to avoid hashing it. *)
-(* TODO Generalize the session accessor so that this CSRF token generator can
-   work with community session managers. *)
-let hash_session request =
-  request
-  |> Session.session_id
-  |> Digestif.SHA256.digest_string
-  |> Digestif.SHA256.to_raw_string
-  |> Dream__pure.Formats.to_base64url
-(* TODO Salt the hash. *)
-
-(* TODO Encrypt tokens for some security by obscurity? *)
-
-(* TODO Make the expiration configurable. In particular, AJAX CSRF tokens
-   may need longer expirations... OTOH maybe not, as they can be refreshed. *)
+let field_name =
+  "dream.csrf"
 
 let default_valid_for =
   60. *. 60.
 
 let csrf_token ?(valid_for = default_valid_for) request =
-  let secret = Dream.secret (Dream.app request) in
-  let session_hash = hash_session request in
   let now = Unix.gettimeofday () in
 
-  let payload = [
-    "session", session_hash;
-    "time", Printf.sprintf "%.0f" (now +. valid_for);
-  ] in
-
-  Jwto.encode Jwto.HS256 secret payload |> Result.get_ok
-  (* TODO Can this fail? *)
-  (* |> Lwt.return *)
-
-let field_name =
-  "dream.csrf"
+  `Assoc [
+    "session", `String (Session.session_label request);
+    "expires_at", `Float (floor (now +. valid_for));
+  ]
+  |> Yojson.Basic.to_string
+  |> Dream.encrypt ~associated_data:field_name request
+  |> Dream__pure.Formats.to_base64url
 
 let log =
   Log.sub_log field_name
@@ -69,44 +34,48 @@ type csrf_result = [
   | `Invalid
 ]
 
-let verify_csrf_token token request =
-  let secret = Dream.secret (Dream.app request) in
-
-  begin match Jwto.decode_and_verify secret token with
-  | Error _ ->
-    log.warning (fun log -> log ~request "CSRF token invalid");
+let verify_csrf_token token request = Lwt.return @@
+  match Dream__pure.Formats.from_base64url token with
+  | Error message ->
+    log.warning (fun log -> log ~request "CSRF token not Base64-encoded");
+    log.warning (fun log -> log ~request "%s" message);
     `Invalid
+  | Ok token ->
 
-  | Ok decoded_token ->
-    match Jwto.get_payload decoded_token with
-    | ["session", token_session_hash; "time", expires_at] ->
+  match Dream.decrypt ~associated_data:field_name request token with
+  | None ->
+    log.warning (fun log -> log ~request "CSRF token could not be verified");
+    `Invalid
+  | Some token ->
 
-      begin match Float.of_string_opt expires_at with
-      | None ->
-        log.warning (fun log -> log ~request "CSRF token time field invalid");
-        `Invalid
+  (* TODO Don't raise exceptions. *)
+  match Yojson.Basic.from_string token with
+  | `Assoc [
+      "session", `String token_session_label;
+      "expires_at", (`Float _ | `Int _  as expires_at);
+    ] ->
 
-      | Some expires_at ->
+    let expires_at =
+      match expires_at with
+      | `Float n -> n
+      | `Int n -> float_of_int n
+    in
 
-        let real_session_hash = hash_session request in
-        if token_session_hash <> real_session_hash then begin
-          log.warning (fun log -> log ~request
-            "CSRF token not for this session");
-          `Wrong_session
-        end
-
-        else
-          let now = Unix.gettimeofday () in
-          if expires_at > now then
-            `Ok
-          else begin
-            log.warning (fun log -> log ~request "CSRF token expired");
-            `Expired expires_at
-          end
+    let real_session_label = Session.session_label request in
+    if token_session_label <> real_session_label then begin
+      log.warning (fun log -> log ~request
+        "CSRF token not for this session");
+      `Wrong_session
+    end
+    else
+      let now = Unix.gettimeofday () in
+      if expires_at > now then
+        `Ok
+      else begin
+        log.warning (fun log -> log ~request "CSRF token expired");
+        `Expired expires_at
       end
 
-    | _ ->
-      log.warning (fun log -> log ~request "CSRF token payload invalid");
-      `Invalid
-  end
-  |> Lwt.return
+  | _ | exception _ ->
+    log.warning (fun log -> log ~request "CSRF token payload invalid");
+    `Invalid

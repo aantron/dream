@@ -47,7 +47,6 @@ depends: [
   "graphql_parser"
   "graphql-lwt"  # Should be factored out; Menhir as recursive dependency.
   "hmap"
-  "jwto" {>= "0.2.2"}  # Jwto.get_payload.
   "lwt"
   "lwt_ppx"
   "lwt_ssl"
