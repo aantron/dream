@@ -210,6 +210,9 @@ let queries name request =
 let all_headers message =
   message.headers
 
+let with_all_headers headers message =
+  update {message with headers}
+
 let headers name message =
   let name = String.lowercase_ascii name in
 

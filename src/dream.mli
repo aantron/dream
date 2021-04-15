@@ -1819,6 +1819,7 @@ val serve :
 
     {[
       Dream.run ~builtins:false
+      @@ Dream.lowercase_headers
       @@ Dream.content_length
       @@ Dream.catch (* ... *)
       @@ Dream.assign_request_id
@@ -1828,6 +1829,9 @@ val serve :
 
     The middleware can be replaced with work-alikes, or omitted to use Dream as
     a fairly raw abstraction layer over low-level HTTP libraries. *)
+
+val lowercase_headers : middleware
+(** Lowercases response headers for HTTP/2 requests. *)
 
 val content_length : middleware
 (** If the request has {!Dream.version} [(1, _)], then...
