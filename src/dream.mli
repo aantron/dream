@@ -942,8 +942,8 @@ let render message =
 
     A template begins...
 
-    - {e Implicitly} on a line that starts with [<] and is indented by at least
-      one column. The line is part of the template.
+    - {e Implicitly} on a line that starts with [<], perhaps with leading
+      whitespace. The line is part of the template.
     - {e Explicitly} after a line that starts with [%%]. The [%%] line is not
       part of the template.
 

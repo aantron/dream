@@ -61,6 +61,11 @@ from the standard library. So, you can do things like this:
 
 <br>
 
+If your template file is mostly HTML, you can give it a name like
+`template.eml.html`, to trigger HTML syntax highlighting by your editor.
+
+<br>
+
 ## Security
 
 The template automatically passes strings through

@@ -5,13 +5,10 @@
 
 
 
-(* TODO Support exiting a template when the indent level drops below the leading
-   level of the starting line. *)
-
 (* Location handling is done by updating a reference with the location of the
    last character read. This is pretty fragile, and depends on the tokenizer
    never looking so far forward as to invalidate the locations that it cares
-   about. Locations are 0-based. The line is first. *)
+   about. Locations are 0-based. *)
 module Location :
 sig
   val current : unit -> int * int
@@ -69,9 +66,9 @@ type 'a with_location = {
 
 type code_block_token = [
   (* A block of OCaml code. These start at the beginning of the input file, and
-     continue until the first line that is indented by at least two spaces, and
-     starts with <.. They occur again whenever the template text is broken out
-     of. Template text ends on the next line that is un-indented again. *)
+     continue until a line that starts with '<'. They occur again whenever the
+     template text ends. Template text ends on a line with less indentation than
+     the first template line, or at a %% terminator. *)
   | `Code_block of string with_location
 ]
 
@@ -164,23 +161,24 @@ struct
      of the line that terminated the code block. *)
   let scan_code_block : string -> char Stream.t -> token * string =
 
-    let is_template_line stream : bool * string =
-      match Stream.peek stream with
-      | Some '%' ->
+    let is_template_line leading_whitespace stream =
+      match leading_whitespace, Stream.peek stream with
+      | (None | Some ""), Some '%' ->
         true, ""
       | _ ->
-        let leading_whitespace = scan_whitespace stream 0 in
+        let more_whitespace = scan_whitespace stream 0 in
         match Stream.npeek 2 stream with
         | '<'::_ ->
-          String.length leading_whitespace >= 1, leading_whitespace
+          true, more_whitespace
         | ['%'; '%'] ->
-          true, leading_whitespace
+          true, more_whitespace
         | _ ->
-          false, leading_whitespace
+          false, more_whitespace
     in
 
-    let rec scan_lines stream =
-      let is_template, whitespace = is_template_line stream in
+    let rec scan_lines leading_whitespace stream =
+      let is_template, whitespace =
+        is_template_line leading_whitespace stream in
       if is_template then
         finish token_buffer, whitespace
       else begin
@@ -190,7 +188,7 @@ struct
           | Some '\n' ->
             Buffer.add_char token_buffer '\n';
             Stream.junk stream;
-            scan_lines stream
+            scan_lines None stream
           | Some c ->
             Buffer.add_char token_buffer c;
             Stream.junk stream;
@@ -203,11 +201,12 @@ struct
     in
 
     fun leading_whitespace stream ->
-      let line, column = Location.current () in
-      let code, leftover_whitespace = scan_lines stream in
+      let line, _column = Location.current () in
+      let code, leftover_whitespace =
+        scan_lines (Some leading_whitespace) stream in
       `Code_block {
         line;
-        column;
+        column = 0;
         what = (leading_whitespace ^ code);
       },
       leftover_whitespace
@@ -355,9 +354,10 @@ struct
       let indent = String.length leftover_whitespace in
       at_text_line tokens true indent leftover_whitespace stream
 
-  (* TODO Use the detected indentation level for un-indentation later. *)
   and at_text_line tokens first indent leading_whitespace stream =
     match Stream.peek stream with
+    | None ->
+      tokens
     | Some '%' when leading_whitespace = "" ->
       let tokens = (scan_embedded_line stream)::tokens in
       at_text_line tokens false indent "" stream
@@ -377,7 +377,8 @@ struct
             at_code_block tokens "" stream
       | _ ->
         let all_whitespace = leading_whitespace ^ more_whitespace in
-        if String.length all_whitespace >= indent then
+        let next = Stream.peek stream in
+        if String.length all_whitespace >= indent || next = Some '\n' then
           let tokens =
             if first then
               (`Options ("", indent))::tokens
@@ -386,9 +387,6 @@ struct
           in
           at_text tokens indent all_whitespace stream
         else
-          (* TODO The code_block scanner now needs to also accept leading
-             whitespace. Add tests for that. And add tests for this whole
-             indentation-based breakout. *)
           at_code_block tokens all_whitespace stream
 
   and at_text tokens indent leading_whitespace stream =
@@ -402,16 +400,17 @@ struct
     | None -> tokens
     | Some '\n' ->
       Stream.junk stream;
-      let tokens = `Newline::tokens in
-      begin match Stream.peek stream with
+      (* let tokens = `Newline::tokens in *)
+      at_text_line (`Newline::tokens) false indent "" stream
+      (* begin match Stream.peek stream with
       | None -> tokens
       | Some ' ' -> at_text_line tokens false indent "" stream
       | Some '\n' -> at_text tokens indent "" stream
       | Some '%' -> at_text_line tokens false indent "" stream
-      | Some _ -> Location.adjust (-1); at_code_block tokens "" stream
+      | Some _ -> Location.adjust (-1); at_code_block tokens "" stream *)
       (* TODO Is this last case redundant at this point? Should continue with
          at_text_line; it will detect the un-indentation of the template. *)
-      end;
+      (* end; *)
     (* If the text scanner stopped at <, it is actually <% and this is an
        embedded code block. *)
     | Some '<' ->
@@ -545,6 +544,8 @@ struct
 
 
 
+  (* Empty lines filtering is dead code at this point. It can be removed once
+     using % to filter empty lines is shown to be practical. *)
   let is_empty line =
     line |> List.for_all (function
       | `Text text -> String.trim text = ""
@@ -746,16 +747,6 @@ struct
           output.print "(Dream.html_escape ";
         output.print "(\n";
 
-        (* begin
-          if needs_escape then
-            Printf.ksprintf output.print
-              "(Printf.bprintf ___eml_buffer %S (Dream.html_escape (\n"
-              ("%" ^ format)
-          else
-            Printf.ksprintf output.print "(Printf.bprintf ___eml_buffer %S (\n"
-              ("%" ^ format)
-        end; *)
-
         Printf.ksprintf output.print "#%i \"%s\"\n" (line + 1) location;
         Printf.ksprintf output.print "%s%s\n" (String.make column ' ') code;
 
@@ -763,11 +754,6 @@ struct
           output.print ")";
         output.print ")";
         output.format_end ();
-
-        (* if needs_escape then
-          output.print ")));\n"
-        else
-          output.print "));\n" *)
     end
 
   let generate ~reason location print templates =
@@ -829,7 +815,7 @@ let process_file (input_file, location) =
   |> Tokenizer.scan
   |> Transform.delimit
   |> Transform.unindent
-  |> Transform.empty_lines
+  (* |> Transform.empty_lines *)
   |> Transform.coalesce
   |> Transform.trim
   |> Generate.generate ~reason location (output_string output_channel)

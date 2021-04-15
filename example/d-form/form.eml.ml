@@ -1,14 +1,17 @@
 let show_form ?message request =
   <html>
     <body>
+
 %     begin match message with
 %     | None -> ()
 %     | Some message ->
         <p>You entered: <b><%s message %>!</b></p>
 %     end;
+
       <%s! Dream.form_tag ~action:"/" request %>
         <input name="message" autofocus>
       </form>
+
     </body>
   </html>
 

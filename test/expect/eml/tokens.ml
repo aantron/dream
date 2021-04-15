@@ -46,10 +46,12 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "let foo =\n< bar";
-  [%expect {|
+  [%expect {xxx|
     (1, 0) Code_block
     let foo =
-    < bar |}]
+
+    Options , 0
+    Text {|< bar|} |xxx}]
 
 let%expect_test _ =
   show "let foo =\n < bar";
@@ -230,8 +232,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
-    (2, 1) Embedded ()  abc
-    Text {||} |xxx}]
+    (2, 1) Embedded ()  abc |xxx}]
 
 let%expect_test _ =
   show "let foo =\n% abc\n";
@@ -239,9 +240,7 @@ let%expect_test _ =
     (1, 0) Code_block
     let foo =
 
-    (2, 1) Embedded ()  abc
-
-    Text {||} |xxx}]
+    (2, 1) Embedded ()  abc |xxx}]
 
 let%expect_test _ =
   show "let foo =\n% abc\n% def";
@@ -251,8 +250,7 @@ let%expect_test _ =
 
     (2, 1) Embedded ()  abc
 
-    (3, 1) Embedded ()  def
-    Text {||} |xxx}]
+    (3, 1) Embedded ()  def |xxx}]
 
 let%expect_test _ =
   show "let foo =\n  <html>\n% abc\n  </html>";
@@ -283,10 +281,8 @@ let%expect_test _ =
     Options , 2
     Text {|  <html>|}
     Newline
-    (3, 3) Code_block
-
-    (3, 3) Embedded ()  bar
-    Text {||} |xxx}]
+    (3, 0) Code_block
+     % bar |xxx}]
 
 let%expect_test _ =
   show "let foo\n  <html>\n\n% bar";
@@ -299,10 +295,8 @@ let%expect_test _ =
     Newline
     Text {||}
     Newline
-    (4, 1) Embedded ()  bar
-    (4, 5) Code_block |xxx}]
+    (4, 1) Embedded ()  bar |xxx}]
 
-(* TODO Don't break out of templates on lines containing only whitespace! *)
 let%expect_test _ =
   show "let foo\n  <html>\n \n% bar";
   [%expect {xxx|
@@ -312,11 +306,21 @@ let%expect_test _ =
     Options , 2
     Text {|  <html>|}
     Newline
-    (4, 1) Code_block
+    Text {| |}
+    Newline
+    (4, 1) Embedded ()  bar |xxx}]
 
+let%expect_test _ =
+  show "let foo = \n  <html>\nbar";
+  [%expect {xxx|
+    (1, 0) Code_block
+    let foo =
 
-    (4, 1) Embedded ()  bar
-    Text {||} |xxx}]
+    Options , 2
+    Text {|  <html>|}
+    Newline
+    (3, 0) Code_block
+    bar |xxx}]
 
 let%expect_test _ =
   show "let foo\n %% a = b\n bar";
@@ -346,7 +350,7 @@ let%expect_test _ =
     let foo
 
     Options  a = b, 1
-    (3, 3) Code_block |}]
+    (3, 0) Code_block |}]
 
 let%expect_test _ =
   show "let foo\n %% a = b\n %% c\n";
