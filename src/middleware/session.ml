@@ -103,6 +103,12 @@ let read_session_id id =
     if id.[0] <> '0' then None
     else Some (String.sub id 1 (String.length id - 1))
 
+let version_value =
+  version_session_id
+
+let read_value =
+  read_session_id
+
 module Memory =
 struct
   let rec create hash_table expires_at =
@@ -193,7 +199,6 @@ struct
     }
 end
 
-(* TODO This probably needs format prefixes. *)
 (* TODO JSON is probably not a good choice for the contents. However, there
    doesn't seem to be a good alternative in opam right now, so using JSON. *)
 module Cookie =
@@ -236,6 +241,7 @@ struct
 
     let valid_session =
       Dream.cookie session_cookie request
+      |>? read_value
       |>? fun value ->
         (* TODO Is there a non-raising version of this? *)
         match Yojson.Basic.from_string value with
@@ -301,6 +307,7 @@ struct
             name, `String value))
         ]
         |> Yojson.Basic.to_string
+        |> version_value
       in
       Lwt.return
         (Dream.set_cookie session_cookie value request response ~max_age)
