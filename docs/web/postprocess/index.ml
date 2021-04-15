@@ -1338,25 +1338,25 @@ let to_set_cookie_replacement = {|
 |}
 
 let encrypt_expected = {|<div class="spec value" id="val-encrypt">
- <a href="#val-encrypt" class="anchor"></a><code><span><span class="keyword">val</span> encrypt : <span>?secret_prefix:string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> string</span></code>
+ <a href="#val-encrypt" class="anchor"></a><code><span><span class="keyword">val</span> encrypt : <span>?associated_data:string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> string</span></code>
 </div>
 |}
 
 let encrypt_replacement = {|
 <pre><span class="keyword">val</span> encrypt :
-  ?secret_prefix:string ->
+  ?associated_data:string ->
     <a href="#type-request">request</a> -> string -> string
 </pre>
 |}
 
 let decrypt_expected = {|<div class="spec value" id="val-decrypt">
- <a href="#val-decrypt" class="anchor"></a><code><span><span class="keyword">val</span> decrypt : <span>?secret_prefix:string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string option</span></span></code>
+ <a href="#val-decrypt" class="anchor"></a><code><span><span class="keyword">val</span> decrypt : <span>?associated_data:string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string option</span></span></code>
 </div>
 |}
 
 let decrypt_replacement = {|
 <pre><span class="keyword">val</span> decrypt :
-  ?secret_prefix:string ->
+  ?associated_data:string ->
     <a href="#type-request">request</a> -> string -> string option
 </pre>
 |}

@@ -1951,20 +1951,19 @@ val random : int -> string
 val encrypt :
   ?associated_data:string ->
     request -> string -> string
-(** Encrypts the string using the [~secret] in the request. See {!Dream.run} for
-    setting [~secret].
+(** Signs and encrypts the string using the [~secret] in the request. See
+    {!Dream.run} for setting [~secret].
 
-    The secret is hashed to generate the encryption key. [~secret_prefix] allows
-    prepending a prefix to the secret before hashing. This is meant to make
-    hashes for different usages of the secret distinct. For example, Dream
-    prepends ["dream.cookie-""] when encrypting cookies, and you might prepend
-    ["my.db-""] if using {!Dream.encrypt} for records in a public database. That
-    way, if the hash of the secret used for cookies is compromised, the database
-    records are at least not {e trivially} compromised — but this scheme is not
-    meant to provide strong security. It is often reasonable not to pass
-    anything for [~secret_prefix], because Dream already passes a prefix for all
-    of its own usages. This means that the hash with the empty prefix is
-    different from anything built into Dream. *)
+    [~associated_data] is included when computing the signature, but not
+    included in the ciphertext. It can be used like a “salt,” to force
+    ciphertexts from different contexts to be distinct, and dependent on the
+    context.
+
+    For example, when {!Dream.set_cookie} encrypts cookie values, it internally
+    passes the cookie names in the associated data. This makes it impossible (or
+    impractical) to use the ciphertext from one cookie as the value of another.
+    The associated data will not match, and the value will be recognized as
+    invalid. *)
 
 val decrypt :
   ?associated_data:string ->
