@@ -598,7 +598,7 @@ let cookie
       | Error _ ->
         None
       | Ok value ->
-        decrypt ~secret_prefix:"dream.cookie-" request value
+        decrypt request value ~associated_data:("dream.cookie-" ^ name)
 
 let set_cookie
     ?prefix:cookie_prefix
@@ -622,10 +622,6 @@ let set_cookie
     | None -> Some (prefix request)
   in
 
-  (* TODO Relation between secure and non-localhost non-https? *)
-  (* TODO Get Secure default from https getter of request, also probably need
-     reverse-proxy oriented middleware here. *)
-
   let secure =
     match secure with
     | Some secure -> secure
@@ -634,9 +630,14 @@ let set_cookie
 
   let cookie_prefix = infer_cookie_prefix cookie_prefix domain path secure in
 
+  let name = cookie_prefix ^ name in
+
   let value =
     if encrypt_cookie then
-      encrypt ~secret_prefix:"dream.cookie-" request value
+      (* Give each cookie name a different associated data "space," effectively
+         partitioning valid ciphertexts among the cookies. See also
+         https://github.com/aantron/dream/issues/19#issuecomment-820250853. *)
+      encrypt request value ~associated_data:("dream.cookie-" ^ name)
       |> Formats.to_base64url
     else
       value
@@ -644,8 +645,7 @@ let set_cookie
 
   let set_cookie =
     Formats.to_set_cookie
-      ?expires ?max_age ?domain ?path ~secure ~http_only ?same_site
-      (cookie_prefix ^ name) value
+      ?expires ?max_age ?domain ?path ~secure ~http_only ?same_site name value
   in
 
   add_header "Set-Cookie" set_cookie response

@@ -32,6 +32,7 @@ let hash_session request =
   |> Digestif.SHA256.digest_string
   |> Digestif.SHA256.to_raw_string
   |> Dream__pure.Formats.to_base64url
+(* TODO Salt the hash. *)
 
 (* TODO Encrypt tokens for some security by obscurity? *)
 
