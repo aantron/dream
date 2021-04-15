@@ -145,15 +145,18 @@ let load lifetime request =
       match Dream.cookie ~decrypt:false Session.session_cookie request with
       | None -> Lwt.return_none
       | Some id ->
-        match%lwt find_opt db id with
+        match Session.read_session_id id with
         | None -> Lwt.return_none
-        | Some session ->
-          if session.expires_at > now then
-            Lwt.return (Some session)
-          else begin
-            let%lwt () = remove db id in
-            Lwt.return_none
-          end
+        | Some id ->
+          match%lwt find_opt db id with
+          | None -> Lwt.return_none
+          | Some session ->
+            if session.expires_at > now then
+              Lwt.return (Some session)
+            else begin
+              let%lwt () = remove db id in
+              Lwt.return_none
+            end
     in
 
     let%lwt dirty, session =
@@ -179,11 +182,12 @@ let send (operations, session) request response =
   if not operations.Session.dirty then
     Lwt.return response
   else
+    let id = Session.version_session_id !session.Session.id in
     let max_age = !session.Session.expires_at -. Unix.gettimeofday () in
     Lwt.return
       (Dream.set_cookie
         Session.session_cookie
-        !session.id
+        id
         request
         response
         ~encrypt:false

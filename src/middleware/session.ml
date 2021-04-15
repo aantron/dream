@@ -5,39 +5,20 @@
 
 
 
-(* TODO LATER Achieve database sessions. *)
-
-(* TODO Does HTTP/2, for example, allow connection-based session validation, as
-   an optimization? Is that secure? *)
-
 (* https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html *)
 
 module Dream = Dream__pure.Inmost
 
 
 
-(* Used for the default sub-log name, cookie name, and request variable name. *)
-(* let module_name =
-  "dream.session" *)
-
-(* TODO Actually use the log somewhere...... *)
 let log =
   Log.sub_log "dream.session"
-
-(* TODO Make session expiration configurable somewhere. *)
-(* let valid_for =
-  60. *. 60. *. 24. *. 7. *. 2. *)
 
 type 'a back_end = {
   load : Dream.request -> 'a Lwt.t;
   send : 'a -> Dream.request -> Dream.response -> Dream.response Lwt.t;
 }
 
-(* TODO LATER Need a session garbage collector, probably. *)
-(* TODO LATER Can avoid renewing sessions too often by renewing only when they
-   are at least half-expired. *)
-(* TODO To support atomic operations, the loader HAS to be able to load, expire,
-   create, and renew the session. *)
 let middleware local back_end = fun inner_handler request ->
 
   let%lwt session =
@@ -58,7 +39,6 @@ let getter local request =
     let message = "Missing session middleware" in
     log.error (fun log -> log ~request "%s" message);
     failwith message
-(* TODO Print the request-local variable name *)
 
 type 'a typed_middleware = {
   middleware : 'a back_end -> Dream.middleware;
@@ -114,8 +94,15 @@ let new_id () =
 let new_label () =
   Dream__cipher.Random.random 9 |> Dream__pure.Formats.to_base64url
 
-(* TODO Must test session sharing. Should there be at-a-distance
-   invalidation? *)
+let version_session_id id =
+  "0" ^ id
+
+let read_session_id id =
+  if String.length id < 1 then None
+  else
+    if id.[0] <> '0' then None
+    else Some (String.sub id 1 (String.length id - 1))
+
 module Memory =
 struct
   let rec create hash_table expires_at =
@@ -161,6 +148,7 @@ struct
 
     let valid_session =
       Dream.cookie ~decrypt:false session_cookie request
+      |>? read_session_id
       |>? Hashtbl.find_opt hash_table
       |>? fun session ->
         if session.expires_at > now then
@@ -191,10 +179,11 @@ struct
     if not operations.dirty then
       Lwt.return response
     else
+      let id = version_session_id !session.id in
       let max_age = !session.expires_at -. Unix.gettimeofday () in
       Lwt.return
         (Dream.set_cookie
-          session_cookie !session.id request response ~encrypt:false ~max_age)
+          session_cookie id request response ~encrypt:false ~max_age)
 
   let back_end lifetime =
     let hash_table = Hashtbl.create 256 in
