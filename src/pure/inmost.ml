@@ -540,18 +540,19 @@ let encryption_secret request =
 let decryption_secrets request =
   request.specific.app.secrets
 
-let encrypt ?(secret_prefix = "") ?(associated_data = "") request plaintext =
-  let secret =
-    secret_prefix ^ (encryption_secret request) in
+let encrypt ?associated_data request plaintext =
   Cipher.encrypt
-    (module Cipher.AEAD_AES_256_GCM) ~associated_data secret plaintext
+    (module Cipher.AEAD_AES_256_GCM)
+    ?associated_data
+    (encryption_secret request)
+    plaintext
 
-let decrypt ?(secret_prefix = "") ?(associated_data = "") request ciphertext =
-  let secrets =
-    decryption_secrets request
-    |> List.map ((^) secret_prefix) in
+let decrypt ?associated_data request ciphertext =
   Cipher.decrypt
-    (module Cipher.AEAD_AES_256_GCM) ~associated_data secrets ciphertext
+    (module Cipher.AEAD_AES_256_GCM)
+    ?associated_data
+    (decryption_secrets request)
+    ciphertext
 
 let infer_cookie_prefix prefix domain path secure =
   match prefix, domain, path, secure with

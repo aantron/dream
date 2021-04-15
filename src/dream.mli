@@ -1949,7 +1949,6 @@ val random : int -> string
     number generator}. *)
 
 val encrypt :
-  ?secret_prefix:string ->
   ?associated_data:string ->
     request -> string -> string
 (** Encrypts the string using the [~secret] in the request. See {!Dream.run} for
@@ -1968,7 +1967,6 @@ val encrypt :
     different from anything built into Dream. *)
 
 val decrypt :
-  ?secret_prefix:string ->
   ?associated_data:string ->
     request -> string -> string option
 (** Reverses {!Dream.encrypt}.
