@@ -443,6 +443,7 @@ val all_headers : 'a message -> (string * string) list
 val has_header : string -> 'a message -> bool
 (** Whether the message has a header with the given name. *)
 
+(* TODO Sort one item lower. *)
 val drop_header : string -> 'a message -> 'a message
 (** Removes all headers with the given name. *)
 
@@ -1296,9 +1297,11 @@ val close_websocket : websocket -> unit promise
 val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
 (** [Dream.graphql make_context schema] serves the GraphQL [schema]. Integrates
     {{:https://github.com/andreas/ocaml-graphql-server#readme}
-    ocaml-graphql-server}. See example
+    ocaml-graphql-server}. See examples
     {{:https://github.com/aantron/dream/tree/master/example/i-graphql#files}
-    [i-graphql]}.
+    [i-graphql]} and
+    {{:https://github.com/aantron/dream/tree/master/example/w-graphql-subscription#files}
+    [w-graphql-subscription]}.
 
     {[
       let () =

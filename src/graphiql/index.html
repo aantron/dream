@@ -22,38 +22,24 @@
 
     <script src="node_modules/react/umd/react.production.min.js"></script>
     <script src="node_modules/react-dom/umd/react-dom.production.min.js"></script>
-    <link rel="stylesheet" href="node_modules/graphiql/graphiql.min.css" />
+    <script src="node_modules/graphiql/graphiql.min.js"></script>
+    <link rel="stylesheet" href="node_modules/graphiql/graphiql.min.css">
   </head>
   <body>
-    <div id="graphiql">Loading...</div>
-    <script src="node_modules/graphiql/graphiql.min.js"></script>
+    <div id="graphiql"></div>
     <script>
-      function graphQLFetcher(graphQLParams) {
-        return fetch(
-          '%%ENDPOINT%%',
-          {
-            method: 'post',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(graphQLParams),
-            credentials: 'omit',
-          },
-        ).then(function (response) {
-          return response.json().catch(function () {
-            return response.text();
-          });
-        });
-      }
+      var endpoint = "%%ENDPOINT%%";
+      var wsSchema = location.protocol === "https:" ? "wss:" : "ws:";
+      var wsEndpoint = wsSchema + "//" + window.location.host + endpoint;
+
+      var fetcher = GraphiQL.createFetcher({
+        url: endpoint,
+        subscriptionUrl: wsEndpoint
+      });
 
       ReactDOM.render(
-        React.createElement(GraphiQL, {
-          fetcher: graphQLFetcher,
-          defaultVariableEditorOpen: true,
-        }),
-        document.getElementById('graphiql'),
-      );
+        React.createElement(GraphiQL, {fetcher: fetcher}),
+        document.getElementById("graphiql"));
     </script>
   </body>
 </html>

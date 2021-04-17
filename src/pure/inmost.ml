@@ -508,6 +508,8 @@ let empty ?headers status =
 let not_found _ =
   respond ~status:`Not_Found ""
 
+(* TODO Require the method to be `GET? Or just rely on the users for that?
+   Require Upgrade: websocket? *)
 let websocket handler =
   let response = response ~status:`Switching_Protocols "" in
   let response =

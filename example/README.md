@@ -82,6 +82,8 @@ if something is missing!
 
 <br>
 
+- [**`w-graphql-subscription`**](w-graphql-subscription#files)
+  &nbsp;&mdash;&nbsp; GraphQL subscriptions.
 - [**`w-tyxml`**](w-tyxml#files) &nbsp;&mdash;&nbsp; uses TyXML for type-checked
   HTML templating.
 - [**`w-long-polling`**](w-long-polling#files) &nbsp;&mdash;&nbsp; old form of
