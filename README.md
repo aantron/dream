@@ -63,7 +63,7 @@ different dependencies of each, for fast porting to different environments.
 
 [https]: https://github.com/aantron/dream/tree/master/example/l-https#files
 [websocket]: https://github.com/aantron/dream/tree/master/example/k-websocket#files
-[graphql]: https://github.com/aantron/dream/tree/master/example/i-graphql#files
+[graphql]: https://github.com/aantron/dream/tree/master/example/w-graphql-subscription#files
 [templates]: https://github.com/aantron/dream/tree/master/example/7-template#files
 [reason-templates]: https://github.com/aantron/dream/tree/master/example/r-template#files
 [middleware]: https://github.com/aantron/dream/tree/master/example/2-middleware#files
@@ -217,7 +217,7 @@ several influences that cannot be discovered directly:
 
 ## Roadmap
 
-- [ ] GraphQL subscriptions.
+- [x] GraphQL subscriptions.
 - [ ] Optimizations: router, logger, microparsers (form data, etc.), fully
       zero-allocation streaming.
 - [ ] WebSocket and stream backpressure.
@@ -228,9 +228,9 @@ several influences that cannot be discovered directly:
 - [ ] WebSocket streaming (frames).
 - [ ] Factor out internal sub-libraries to port Dream to MirageOS, etc.
 - [ ] Token rotation-based session management.
-- [ ] Lots of helpers for decoupling defaults, e.g. forms without CSRF checking,
-      SQL sessions with a different database.
-- [ ] Bundle GraphiQL into a single HTML file that does not access any external
+- [ ] Lots of optionals for decoupling defaults, e.g. forms without CSRF
+      checking, SQL sessions with a different database.
+- [x] Bundle GraphiQL into a single HTML file that does not access any external
       CDN.
 - [ ] Maybe a logo.
 - [ ] i18n helper, URL templates.

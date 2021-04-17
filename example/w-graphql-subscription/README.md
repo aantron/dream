@@ -5,6 +5,10 @@
 This example sets up a GraphQL subscription, which receives events that count up
 to 3:
 
+![Subscription](https://raw.githubusercontent.com/aantron/dream/master/docs/asset/subscription.gif)
+
+<br>
+
 ```ocaml
 let count until =
   let stream, push = Lwt_stream.create () in
@@ -56,9 +60,7 @@ subscription {
 }
 ```
 
-You will see something like this:
-
-![Subscription](https://raw.githubusercontent.com/aantron/dream/master/docs/asset/subscription.gif)
+...and you should behavior like in the GIF above!
 
 <br>
 
