@@ -443,13 +443,12 @@ val all_headers : 'a message -> (string * string) list
 val has_header : string -> 'a message -> bool
 (** Whether the message has a header with the given name. *)
 
-(* TODO Sort one item lower. *)
-val drop_header : string -> 'a message -> 'a message
-(** Removes all headers with the given name. *)
-
 val add_header : string -> string -> 'a message -> 'a message
 (** Appends a header with the given name and value. Does not remove any existing
     headers with the same name. *)
+
+val drop_header : string -> 'a message -> 'a message
+(** Removes all headers with the given name. *)
 
 val with_header : string -> string -> 'a message -> 'a message
 (** Equivalent to {!Dream.drop_header} followed by {!Dream.add_header}. *)

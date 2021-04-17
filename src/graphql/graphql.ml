@@ -72,6 +72,10 @@ let run_query make_context schema request json =
 
 (* WebSocket transport. *)
 
+(* TODO Refuse second connection_init. *)
+(* TODO Close WebSocket with the right status codes. Is this even
+   exposed upstream? *)
+
 let operation_id json =
   Yojson.Basic.Util.(json |> member "id" |> to_string_option)
 
@@ -119,6 +123,7 @@ let complete_message id =
    be split into frames. Also, should there be a limit on incoming message
    size? *)
 (* TODO Add Dream.any; use it in examples. *)
+(* TODO Take care to pass around the request Lwt.key in async, etc. *)
 let handle_over_websocket make_context schema subscriptions request websocket =
   let rec loop () =
     match%lwt Dream.receive websocket with
