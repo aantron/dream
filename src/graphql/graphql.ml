@@ -107,3 +107,17 @@ let graphql context schema = fun request ->
         |> Dream.respond
           ~status:`Bad_Request
           ~headers:["Content-Type", "application/json"]
+
+
+
+(* TODO May want to escape the endpoint string. *)
+let graphiql graphql_endpoint =
+  let html =
+    lazy begin
+      Dream__graphiql.content
+      |> Str.(global_replace (regexp (quote "%%ENDPOINT%%")) graphql_endpoint)
+    end
+  in
+
+  fun _request ->
+    Dream.respond (Lazy.force html)

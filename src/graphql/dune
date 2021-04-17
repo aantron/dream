@@ -2,17 +2,14 @@
  (public_name dream.graphql)
  (name dream__graphql)
  (libraries
+  dream.graphiql
   dream.middleware
   dream.pure
   graphql_parser
   graphql-lwt
   lwt
+  str
   yojson
  )
  (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))
-
-(rule
- (targets graphiql.ml)
- (deps graphiql.eml.html)
- (action (run dream_eml %{deps} --workspace %{workspace_root})))

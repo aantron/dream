@@ -1,0 +1,15 @@
+(library
+ (public_name dream.graphiql)
+ (name dream__graphiql))
+
+(rule
+ (targets dream__graphiql.ml)
+ (deps
+  (:bundle index.bundle.html))
+ (action
+  (with-stdout-to
+   %{targets}
+   (progn
+    (echo "let content = {html|")
+    (cat %{bundle})
+    (echo "|html}")))))
