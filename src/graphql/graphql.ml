@@ -250,19 +250,14 @@ let handle_over_websocket make_context schema subscriptions request websocket =
 (* TODO A lot of Bad_Request responses should become Not_Found to leak less
    info. Or 200 OK? *)
 (* TODO Check the sub-protocol. *)
-(* TODO Add ~headers to Dream.websocket. *)
 let graphql make_context schema = fun request ->
   match Dream.method_ request with
   | `GET ->
     begin match Dream.header "Upgrade" request with
     | Some "websocket" ->
-      let%lwt response =
-        Dream.websocket
-          (handle_over_websocket
-            make_context schema (Hashtbl.create 16) request) in
-      response
-      |> Dream.add_header "Sec-WebSocket-Protocol" "graphql-transport-ws"
-      |> Lwt.return
+      Dream.websocket
+        ~headers:["Sec-WebSocket-Protocol", "graphql-transport-ws"]
+        (handle_over_websocket make_context schema (Hashtbl.create 16) request)
     | _ ->
       log.warning (fun log -> log ~request "Upgrade: websocket header missing");
       Dream.empty `Bad_Request

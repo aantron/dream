@@ -1258,7 +1258,10 @@ type websocket
     6455} and
     {{:https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API} MDN}. *)
 
-val websocket : (websocket -> unit promise) -> response promise
+val websocket :
+  ?headers:(string * string) list ->
+  (websocket -> unit promise) ->
+    response promise
 (** Creates a fresh [101 Switching Protocols] response. Once this response is
     returned to Dream's HTTP layer, the callback is passed a new
     {!type-websocket}, and the application can begin using it. See example

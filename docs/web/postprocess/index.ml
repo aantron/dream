@@ -977,13 +977,15 @@ let set_session_replacement = {|
 |}
 
 let websocket_expected = {|<div class="spec value" id="val-websocket">
- <a href="#val-websocket" class="anchor"></a><code><span><span class="keyword">val</span> websocket : <span><span>(<span><a href="#type-websocket">websocket</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
+ <a href="#val-websocket" class="anchor"></a><code><span><span class="keyword">val</span> websocket : <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span> <span><span>(<span><a href="#type-websocket">websocket</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let websocket_replacement = {|
 <pre><span class="keyword">val</span> websocket :
-  (<a href="#type-websocket">websocket</a> -> unit <a href="#type-promise">promise</a>) -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+  ?headers:(string * string) list ->
+  (<a href="#type-websocket">websocket</a> -> unit <a href="#type-promise">promise</a>) ->
+    <a href="#type-response">response</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
