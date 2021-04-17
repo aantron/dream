@@ -944,6 +944,15 @@ let patch_replacement = {|
 <code><span><span class="keyword">val</span> patch &nbsp;&nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
 |}
 
+let any_expected = {|<div class="spec value" id="val-any">
+ <a href="#val-any" class="anchor"></a><code><span><span class="keyword">val</span> any : <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+</div>
+|}
+
+let any_replacement = {|
+<code><span><span class="keyword">val</span> any &nbsp;&nbsp;&nbsp;&nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+|}
+
 let static_expected = {|<div class="spec value" id="val-static">
  <a href="#val-static" class="anchor"></a><code><span><span class="keyword">val</span> static : <span>?loader:<span>(<span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-handler">handler</a>)</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-handler">handler</a></span></code>
 </div>
@@ -1604,6 +1613,7 @@ let pretty_print_signatures soup =
   replace "#val-head" head_expected head_replacement;
   replace "#val-trace" trace_expected trace_replacement;
   replace "#val-patch" patch_expected patch_replacement;
+  replace "#val-any" any_expected any_replacement;
   multiline "#val-static" static_expected static_replacement;
   multiline "#val-put_session" set_session_expected set_session_replacement;
   multiline "#val-websocket" websocket_expected websocket_replacement;

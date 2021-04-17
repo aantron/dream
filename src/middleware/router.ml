@@ -86,8 +86,18 @@ let rec strip_empty_trailing_token = function
 
 
 
+type method_set = [
+  | Dream.method_
+  | `Any
+]
+
+let method_matches method_set method_ =
+  match method_set with
+  | #Dream.method_ as method' -> Dream.methods_equal method' method_
+  | `Any -> true
+
 type node =
-  | Handler of Dream.method_ * Dream.handler
+  | Handler of method_set * Dream.handler
   | Scope of route
 
 and route = (token list * node) list
@@ -118,6 +128,9 @@ let trace pattern handler =
 
 let patch pattern handler =
   [parse pattern, Handler (`PATCH, handler)]
+
+let any pattern handler =
+  [parse pattern, Handler (`Any, handler)]
 
 let rec apply middlewares routes =
   let rec compose handler = function
@@ -194,7 +207,7 @@ let router routes =
     and try_node bindings prefix path node is_wildcard ok fail =
       match node with
       | Handler (method_, handler)
-          when Dream.methods_equal method_ (Dream.method_ request) ->
+          when method_matches method_ (Dream.method_ request) ->
         let request = Dream.with_local params bindings request in
         if is_wildcard then
           request

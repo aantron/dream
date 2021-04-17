@@ -19,6 +19,7 @@ val connect : string -> Dream.handler -> route
 val options : string -> Dream.handler -> route
 val trace : string -> Dream.handler -> route
 val patch : string -> Dream.handler -> route
+val any : string -> Dream.handler -> route
 
 (* Route groups. *)
 val scope : string -> Dream.middleware list -> route list -> route

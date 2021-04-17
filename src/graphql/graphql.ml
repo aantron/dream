@@ -122,7 +122,6 @@ let complete_message id =
 (* TODO Once WebSocket streaming is properly supported, outgoing messages must
    be split into frames. Also, should there be a limit on incoming message
    size? *)
-(* TODO Add Dream.any; use it in examples. *)
 (* TODO Take care to pass around the request Lwt.key in async, etc. *)
 let handle_over_websocket make_context schema subscriptions request websocket =
   let rec loop () =

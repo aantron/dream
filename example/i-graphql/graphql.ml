@@ -42,7 +42,7 @@ let () =
   @@ Dream.logger
   @@ Dream.origin_referer_check
   @@ Dream.router [
-    Dream.post "/graphql"  (Dream.graphql Lwt.return schema);
-    Dream.get  "/graphiql" (Dream.graphiql "/graphql");
+    Dream.any "/graphql"  (Dream.graphql Lwt.return schema);
+    Dream.get "/graphiql" (Dream.graphiql "/graphql");
   ]
   @@ Dream.not_found

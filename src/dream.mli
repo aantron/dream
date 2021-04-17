@@ -1134,6 +1134,9 @@ val trace   : string -> handler -> route
 val patch   : string -> handler -> route
 (** Like {!Dream.get}, but for each of the other {{!type-method_} methods}. *)
 
+val any     : string -> handler -> route
+(** Like {!Dream.get}, but does not check the method. *)
+
 val not_found : handler
 (** Always responds with [404 Not Found]. *)
 
