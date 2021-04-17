@@ -29,8 +29,10 @@ let log =
 
 let make_error message =
   `Assoc [
-    "errors", `Assoc [
-      "message", `String message
+    "errors", `List [
+      `Assoc [
+        "message", `String message
+      ]
     ]
   ]
 
@@ -45,7 +47,6 @@ let run_query make_context schema request json =
   | None -> Lwt.return (Error (make_error "No query"))
   | Some query ->
 
-  (* TODO Parse errors should likely be returned to the client. *)
   match Graphql_parser.parse query with
   | Error message -> Lwt.return (Error (make_error message))
   | Ok query ->
@@ -72,7 +73,6 @@ let run_query make_context schema request json =
 
 (* WebSocket transport. *)
 
-(* TODO Refuse second connection_init. *)
 (* TODO Close WebSocket with the right status codes. Is this even
    exposed upstream? *)
 
@@ -88,9 +88,9 @@ let close_and_clean subscriptions websocket =
     Hashtbl.iter (fun _ close -> close ()) subscriptions;
     Lwt.return_unit
 
-let connection_message type_ =
+let ack_message =
   `Assoc [
-    "type", `String type_;
+    "type", `String "connection_ack";
   ]
   |> Yojson.Basic.to_string
 
@@ -123,8 +123,9 @@ let complete_message id =
    be split into frames. Also, should there be a limit on incoming message
    size? *)
 (* TODO Take care to pass around the request Lwt.key in async, etc. *)
+(* TODO Test client complete racing against a stream. *)
 let handle_over_websocket make_context schema subscriptions request websocket =
-  let rec loop () =
+  let rec loop inited =
     match%lwt Dream.receive websocket with
     | None ->
       log.info (fun log -> log ~request "GraphQL WebSocket closed by client");
@@ -142,54 +143,72 @@ let handle_over_websocket make_context schema subscriptions request websocket =
 
     match Yojson.Basic.Util.(json |> member "type" |> to_string_option) with
     | None ->
-      log.warning (fun log -> log  ~request "GraphQL message lacks a type");
+      log.warning (fun log -> log ~request "GraphQL message lacks a type");
       close_and_clean subscriptions websocket
     | Some message_type ->
 
     match message_type with
     | "connection_init" ->
-      let%lwt () = Dream.send (connection_message "connection_ack") websocket in
-      loop ()
+      if inited then begin
+        log.warning (fun log -> log ~request "Duplicate connection_init");
+        close_and_clean subscriptions websocket
+      end
+      else begin
+        let%lwt () = Dream.send ack_message websocket in
+        loop true
+      end
 
     | "complete" ->
-      begin match operation_id json with
-      | None ->
-        log.warning (fun log ->
-          log ~request "client complete: operation id missing");
+      if not inited then begin
+        log.warning (fun log -> log ~request "complete before connection_init");
         close_and_clean subscriptions websocket
-      | Some id ->
-        begin match Hashtbl.find_opt subscriptions id with
-        | None -> ()
-        | Some close -> close ()
-        end;
-        loop ()
+      end
+      else begin
+        match operation_id json with
+        | None ->
+          log.warning (fun log ->
+            log ~request "client complete: operation id missing");
+          close_and_clean subscriptions websocket
+        | Some id ->
+          begin match Hashtbl.find_opt subscriptions id with
+          | None -> ()
+          | Some close -> close ()
+          end;
+          loop inited
       end
 
     | "subscribe" ->
-      begin match operation_id json with
-      | None ->
-        log.warning (fun log -> log ~request "subscribe: operation id missing");
+      if not inited then begin
+        log.warning (fun log ->
+          log ~request "subscribe before connection_init");
         close_and_clean subscriptions websocket
-      | Some id ->
+      end
+      else begin
+        match operation_id json with
+        | None ->
+          log.warning (fun log -> log ~request "subscribe: operation id missing");
+          close_and_clean subscriptions websocket
+        | Some id ->
 
         let payload = json |> Yojson.Basic.Util.member "payload" in
 
         Lwt.async begin fun () ->
+          let subscribed = ref false in
+
           try%lwt
             match%lwt run_query make_context schema request payload with
             | Error json ->
               log.warning (fun log ->
                 log ~request
                   "subscribe: error %s" (Yojson.Basic.to_string json));
-              let%lwt () = Dream.send (error_message id json) websocket in
-              loop ()
+              Dream.send (error_message id json) websocket
 
             (* It's not clear that this case ever occurs, because graphql-ws is
                only used for subscriptions, at the protocol level. *)
             | Ok (`Response json) ->
               let%lwt () = Dream.send (data_message id json) websocket in
               let%lwt () = Dream.send (complete_message id) websocket in
-              loop ()
+              Lwt.return_unit
 
             | Ok (`Stream (stream, close)) ->
               match Hashtbl.mem subscriptions id with
@@ -199,7 +218,8 @@ let handle_over_websocket make_context schema subscriptions request websocket =
                 close_and_clean subscriptions websocket
               | false ->
 
-              Hashtbl.add subscriptions id close;
+              Hashtbl.replace subscriptions id close;
+              subscribed := true;
 
               let%lwt () =
                 stream |> Lwt_stream.iter_s (function
@@ -212,31 +232,43 @@ let handle_over_websocket make_context schema subscriptions request websocket =
                     Dream.send (error_message id json) websocket)
               in
 
-              Dream.send (complete_message id) websocket
+              let%lwt () = Dream.send (complete_message id) websocket in
+              Hashtbl.remove subscriptions id;
+              Lwt.return_unit
 
-            with exn ->
-              log.error (fun log ->
-                log ~request "Exception while handling WebSocket message:");
-              log.error (fun log ->
-                log ~request "%s" (Printexc.to_string exn));
-              Printexc.get_backtrace ()
-              |> Dream__middleware.Log.iter_backtrace (fun line ->
-                log.error (fun log -> log ~request "%s" line));
+          with exn ->
+            log.error (fun log ->
+              log ~request "Exception while handling WebSocket message:");
+            log.error (fun log ->
+              log ~request "%s" (Printexc.to_string exn));
+            Printexc.get_backtrace ()
+            |> Dream__middleware.Log.iter_backtrace (fun line ->
+              log.error (fun log -> log ~request "%s" line));
 
-              try%lwt close_and_clean subscriptions websocket
-              with _ -> Lwt.return_unit
+            try%lwt
+              let%lwt () =
+                Dream.send
+                  (error_message id (make_error "Internal Server Error"))
+                  websocket
+              in
+              if !subscribed then
+                Dream.send (complete_message id) websocket
+              else
+                Lwt.return_unit
+            with _ ->
+              Lwt.return_unit
           end;
 
-        loop ()
+        loop inited
       end
 
     | message_type ->
       log.warning (fun log ->
         log ~request "Unknown WebSocket message type '%s'" message_type);
-      loop ()
+      close_and_clean subscriptions websocket
   in
 
-  loop ()
+  loop false
 
 
 
@@ -245,22 +277,19 @@ let handle_over_websocket make_context schema subscriptions request websocket =
    Supports either POST requests carrying a GraphQL query, or GET requests
    carrying WebSocket upgrade headers. *)
 
-(* TODO How to do some kind of client verification for WebSocket requests, given
-   that the method is GET? *)
-(* TODO A lot of Bad_Request responses should become Not_Found to leak less
-   info. Or 200 OK? *)
-(* TODO Check the sub-protocol. *)
 let graphql make_context schema = fun request ->
   match Dream.method_ request with
   | `GET ->
-    begin match Dream.header "Upgrade" request with
-    | Some "websocket" ->
+    let upgrade = Dream.header "Upgrade" request
+    and protocol = Dream.header "Sec-WebSocket-Protocol" request in
+    begin match upgrade, protocol with
+    | Some "websocket", Some "graphql-transport-ws" ->
       Dream.websocket
         ~headers:["Sec-WebSocket-Protocol", "graphql-transport-ws"]
         (handle_over_websocket make_context schema (Hashtbl.create 16) request)
     | _ ->
       log.warning (fun log -> log ~request "Upgrade: websocket header missing");
-      Dream.empty `Bad_Request
+      Dream.empty `Not_Found
     end
 
   | `POST ->
@@ -294,12 +323,22 @@ let graphql make_context schema = fun request ->
   | method_ ->
     log.error (fun log -> log ~request
       "Method %s; must be GET or POST" (Dream.method_to_string method_));
-    Dream.empty `Bad_Request
+    Dream.empty `Not_Found
 
 
 
-(* TODO May want to escape the endpoint string. *)
 let graphiql graphql_endpoint =
+  begin match String.index_opt graphql_endpoint '"' with
+  | None -> ()
+  | Some _ ->
+    log.error (fun log ->
+      log "GraphQL endpoint route '%s' contains '\"'" graphql_endpoint);
+    log.error (fun log ->
+      log "If intentional, please open an issue about supporting this");
+    log.error (fun log ->
+      log "https://github.com/aantron/dream/issues")
+  end;
+
   let html =
     lazy begin
       Dream__graphiql.content
