@@ -1292,8 +1292,10 @@ val receive : websocket -> string option promise
 (** Retrieves a message. If the WebSocket is closed before a complete message
     arrives, the result is [None]. *)
 
-val close_websocket : websocket -> unit promise
-(** Closes the WebSocket. *)
+val close_websocket : ?code:int -> websocket -> unit promise
+(** Closes the WebSocket. [~code] is usually not necessary, but is needed for
+    some protocols based on WebSockets. See
+    {{:https://tools.ietf.org/html/rfc6455#section-7.4} RFC 6455 §7.4}. *)
 
 
 

@@ -121,7 +121,7 @@ type incoming = {
 type websocket = {
   send : [ `Text | `Binary ] -> string -> unit Lwt.t;
   receive : unit -> string option Lwt.t;
-  close : unit -> unit Lwt.t;
+  close : int option -> unit Lwt.t;
 }
 
 type outgoing = {
@@ -522,8 +522,8 @@ let send ?(kind = `Text) message websocket =
 let receive websocket =
   websocket.receive ()
 
-let close_websocket websocket =
-  websocket.close ()
+let close_websocket ?code websocket =
+  websocket.close code
 
 let identity handler request =
   handler request

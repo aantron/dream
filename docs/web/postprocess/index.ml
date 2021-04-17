@@ -1001,6 +1001,17 @@ let send_replacement = {|
 </pre>
 |}
 
+let close_websocket_expected = {|<div class="spec value" id="val-close_websocket">
+ <a href="#val-close_websocket" class="anchor"></a><code><span><span class="keyword">val</span> close_websocket : <span>?code:int <span class="arrow">-&gt;</span></span> <span><a href="#type-websocket">websocket</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let close_websocket_replacement = {|
+<pre><span class="keyword">val</span> close_websocket :
+  ?code:int -> <a href="#type-websocket">websocket</a> -> unit <a href="#type-promise">promise</a>
+</pre>
+|}
+
 let graphql_expected = {|<div class="spec value" id="val-graphql">
  <a href="#val-graphql" class="anchor"></a><code><span><span class="keyword">val</span> graphql : <span><span>(<span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><span><span class="type-var">'a</span> <span class="xref-unresolved">Graphql_lwt</span>.Schema.schema</span> <span class="arrow">-&gt;</span></span> <a href="#type-handler">handler</a></span></code>
 </div>
@@ -1620,6 +1631,8 @@ let pretty_print_signatures soup =
   multiline "#val-put_session" set_session_expected set_session_replacement;
   multiline "#val-websocket" websocket_expected websocket_replacement;
   multiline "#val-send" send_expected send_replacement;
+  multiline "#val-close_websocket"
+    close_websocket_expected close_websocket_replacement;
   multiline "#val-graphql" graphql_expected graphql_replacement;
   multiline "#val-sql" sql_expected sql_replacement;
 

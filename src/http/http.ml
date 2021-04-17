@@ -78,8 +78,9 @@ let websocket_handler user's_websocket_handler socket =
   let receive () =
     Lwt_stream.get messages in
 
-  let close () =
-    Websocketaf.Wsd.close socket;
+  let close code =
+    let code = Option.map (fun code -> `Other code) code in
+    Websocketaf.Wsd.close ?code socket;
     Lwt.return_unit
   in
 

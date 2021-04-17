@@ -73,14 +73,11 @@ let run_query make_context schema request json =
 
 (* WebSocket transport. *)
 
-(* TODO Close WebSocket with the right status codes. Is this even
-   exposed upstream? *)
-
 let operation_id json =
   Yojson.Basic.Util.(json |> member "id" |> to_string_option)
 
-let close_and_clean subscriptions websocket =
-  match%lwt Dream.close_websocket websocket with
+let close_and_clean ?code subscriptions websocket =
+  match%lwt Dream.close_websocket ?code websocket with
   | _ ->
     Hashtbl.iter (fun _ close -> close ()) subscriptions;
     Lwt.return_unit
@@ -138,20 +135,21 @@ let handle_over_websocket make_context schema subscriptions request websocket =
     match Yojson.Basic.from_string message with
     | exception _ ->
       log.warning (fun log -> log ~request "GraphQL message is not JSON");
-      close_and_clean subscriptions websocket
+      close_and_clean subscriptions websocket ~code:4400
     | json ->
 
     match Yojson.Basic.Util.(json |> member "type" |> to_string_option) with
     | None ->
       log.warning (fun log -> log ~request "GraphQL message lacks a type");
-      close_and_clean subscriptions websocket
+      close_and_clean subscriptions websocket ~code:4400
     | Some message_type ->
 
     match message_type with
+
     | "connection_init" ->
       if inited then begin
         log.warning (fun log -> log ~request "Duplicate connection_init");
-        close_and_clean subscriptions websocket
+        close_and_clean subscriptions websocket ~code:4429
       end
       else begin
         let%lwt () = Dream.send ack_message websocket in
@@ -161,14 +159,14 @@ let handle_over_websocket make_context schema subscriptions request websocket =
     | "complete" ->
       if not inited then begin
         log.warning (fun log -> log ~request "complete before connection_init");
-        close_and_clean subscriptions websocket
+        close_and_clean subscriptions websocket ~code:4401
       end
       else begin
         match operation_id json with
         | None ->
           log.warning (fun log ->
             log ~request "client complete: operation id missing");
-          close_and_clean subscriptions websocket
+          close_and_clean subscriptions websocket ~code:4400
         | Some id ->
           begin match Hashtbl.find_opt subscriptions id with
           | None -> ()
@@ -181,13 +179,13 @@ let handle_over_websocket make_context schema subscriptions request websocket =
       if not inited then begin
         log.warning (fun log ->
           log ~request "subscribe before connection_init");
-        close_and_clean subscriptions websocket
+        close_and_clean subscriptions websocket ~code:4401
       end
       else begin
         match operation_id json with
         | None ->
           log.warning (fun log -> log ~request "subscribe: operation id missing");
-          close_and_clean subscriptions websocket
+          close_and_clean subscriptions websocket ~code:4400
         | Some id ->
 
         let payload = json |> Yojson.Basic.Util.member "payload" in
@@ -215,7 +213,7 @@ let handle_over_websocket make_context schema subscriptions request websocket =
               | true ->
                 log.warning (fun log ->
                   log ~request "subscribe: duplicate operation id");
-                close_and_clean subscriptions websocket
+                close_and_clean subscriptions websocket ~code:4409
               | false ->
 
               Hashtbl.replace subscriptions id close;
@@ -265,7 +263,7 @@ let handle_over_websocket make_context schema subscriptions request websocket =
     | message_type ->
       log.warning (fun log ->
         log ~request "Unknown WebSocket message type '%s'" message_type);
-      close_and_clean subscriptions websocket
+      close_and_clean subscriptions websocket ~code:4400
   in
 
   loop false
