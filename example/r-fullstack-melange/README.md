@@ -34,7 +34,7 @@ let () =
     Dream.get("/",
       (_ => Dream.respond(home))),
 
-    Dream.get("/static/*",
+    Dream.get("/static/**",
       Dream.static("./static")),
 
   ])

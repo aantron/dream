@@ -1062,24 +1062,24 @@ val router : route list -> middleware
     ]}
 
     {!Dream.scope} is the main form of site composition. However, Dream also
-    supports full subsites with [*]:
+    supports full subsites with [**]:
 
     {[
       let () =
         Dream.run
         @@ Dream.router [
-          Dream.get "/static/*" @@ Dream.static "www/static";
+          Dream.get "/static/**" @@ Dream.static "www/static";
         ]
         @@ Dream.not_found
     ]}
 
-    [*] causes the request's path to be trimmed by the route prefix, and the
+    [**] causes the request's path to be trimmed by the route prefix, and the
     request's prefix to be extended by it. It is mainly useful for “mounting”
     {!Dream.static} as a subsite.
 
     It can also be used as an escape hatch to convert a handler, which may
     include its own router, into a subsite. However, it is better to compose
-    sites with routes and {!Dream.scope} rather than opaque handlers and [*],
+    sites with routes and {!Dream.scope} rather than opaque handlers and [**],
     because, in the future, it may be possible to query routes for site
     structure metadata. *)
 
@@ -1151,7 +1151,7 @@ val static :
       let () =
         Dream.run
         @@ Dream.router {
-          Dream.get "/static/*" @@ Dream.static "www/static";
+          Dream.get "/static/**" @@ Dream.static "www/static";
         }
         @@ Dream.not_found
     ]}

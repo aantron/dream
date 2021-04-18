@@ -60,19 +60,23 @@ let%expect_test _ =
     ["abc"; "de:f"; ""] |}]
 
 let%expect_test _ =
-  show_tokens "/*";
-  show_tokens "/abc/*";
-  show_tokens "/abc/*/";
-  show_tokens "/abc/*/ghi";
+  show_tokens "/**";
+  show_tokens "/abc/**";
+  show_tokens "/abc/**/";
+  show_tokens "/abc/**/ghi";
   show_tokens "/abc/*def/";
   show_tokens "/abc/*def/ghi";
+  show_tokens "/abc/**def/";
+  show_tokens "/abc/**def/ghi";
   [%expect {|
-    [*""]
-    ["abc"; *""]
+    [*"*"]
+    ["abc"; *"*"]
     Path wildcard must be last
     Path wildcard must be last
-    Path wildcard must be just '*'
-    Path wildcard must be just '*' |}]
+    Path wildcard must be just '**'
+    Path wildcard must be just '**'
+    Path wildcard must be just '**'
+    Path wildcard must be just '**' |}]
 
 
 
@@ -513,7 +517,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
-    Dream.get "/abc/*" (fun request ->
+    Dream.get "/abc/**" (fun request ->
       Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {|
@@ -522,7 +526,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
-    Dream.get "*" (fun request ->
+    Dream.get "**" (fun request ->
       Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {|
@@ -531,7 +535,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
-    Dream.get "/*" (fun request ->
+    Dream.get "/**" (fun request ->
       Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {|
@@ -540,14 +544,14 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
-    Dream.get "/abc/def/*" (fun request ->
+    Dream.get "/abc/def/**" (fun request ->
       Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {| Response: 404 Not Found |}]
 
 let%expect_test _ =
   show "/abc/def/" @@ Dream.router [
-    Dream.get "/abc/def/*" (fun request ->
+    Dream.get "/abc/def/**" (fun request ->
       Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {|
@@ -556,7 +560,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/abc/def/ghi" @@ Dream.router [
-    Dream.get "/abc/def/*" (fun request ->
+    Dream.get "/abc/def/**" (fun request ->
       Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {|
@@ -565,14 +569,14 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
-    Dream.post "/abc/*" (fun request ->
+    Dream.post "/abc/**" (fun request ->
       Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {| Response: 404 Not Found |}]
 
 let%expect_test _ =
   show ~method_:`POST "/abc/def" @@ Dream.router [
-    Dream.post "/abc/*" (fun request ->
+    Dream.post "/abc/**" (fun request ->
       Dream.respond (Dream.prefix request ^ " " ^ path request));
   ];
   [%expect {|
@@ -582,7 +586,7 @@ let%expect_test _ =
 let%expect_test _ =
   show "/abc/def/ghi" @@ Dream.router [
     Dream.scope "/abc" [] [
-      Dream.get "/def/*" (fun request ->
+      Dream.get "/def/**" (fun request ->
         Dream.respond (Dream.prefix request ^ " " ^ path request));
     ];
   ];
@@ -593,7 +597,7 @@ let%expect_test _ =
 let%expect_test _ =
   show "/abc/def/ghi" @@ Dream.router [
     Dream.scope "/abc" [] [
-      Dream.get "/*" (fun request ->
+      Dream.get "/**" (fun request ->
         Dream.respond (Dream.prefix request ^ " " ^ path request));
     ];
   ];
@@ -604,7 +608,7 @@ let%expect_test _ =
 let%expect_test _ =
   show "/abc/def/ghi" @@ Dream.router [
     Dream.scope "/abc" [] [
-      Dream.get "*" (fun request ->
+      Dream.get "**" (fun request ->
         Dream.respond (Dream.prefix request ^ " " ^ path request));
     ];
   ];
@@ -615,7 +619,7 @@ let%expect_test _ =
 let%expect_test _ =
   show "/abc/def/ghi" @@ Dream.router [
     Dream.scope "/abc/def" [] [
-      Dream.get "*" (fun request ->
+      Dream.get "**" (fun request ->
         Dream.respond (Dream.prefix request ^ " " ^ path request));
     ];
   ];
@@ -627,7 +631,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/abc/def/ghi" @@ Dream.router [
-    Dream.get "/:x/*" (fun request ->
+    Dream.get "/:x/**" (fun request ->
       Printf.ksprintf Dream.respond "%s %s %s"
         (Dream.prefix request)
         (Dream.param "x" request)
@@ -639,7 +643,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/abc/def/ghi" @@ Dream.router [
-    Dream.get "/abc/:x/*" (fun request ->
+    Dream.get "/abc/:x/**" (fun request ->
       Printf.ksprintf Dream.respond "%s %s %s"
         (Dream.prefix request)
         (Dream.param "x" request)
@@ -652,7 +656,7 @@ let%expect_test _ =
 let%expect_test _ =
   show "/abc/def/ghi" @@ Dream.router [
     Dream.scope "/abc" [] [
-      Dream.get "/:x/*" (fun request ->
+      Dream.get "/:x/**" (fun request ->
         Printf.ksprintf Dream.respond "%s %s %s"
           (Dream.prefix request)
           (Dream.param "x" request)
@@ -667,7 +671,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
-    Dream.get "/abc/*" (fun request ->
+    Dream.get "/abc/**" (fun request ->
       request
       |> Dream.router [
         Dream.get "/def" (fun request ->
@@ -681,7 +685,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
-    Dream.get "/:x/*" (fun request ->
+    Dream.get "/:x/**" (fun request ->
       request
       |> Dream.router [
         Dream.get "/:y" (fun request ->
@@ -699,7 +703,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   show "/abc/def" @@ Dream.router [
-    Dream.get "/:x/*" (fun request ->
+    Dream.get "/:x/**" (fun request ->
       request
       |> Dream.router [
         Dream.get "/:x" (fun request ->
@@ -714,4 +718,12 @@ let%expect_test _ =
     Response: 200 OK
     /abc def /def |}]
 
-(* TODO Test scope with params and scope with wildcard. *)
+(* It's possible to match OPTIONS *. *)
+
+let%expect_test _ =
+  show ~method_:`OPTIONS "*" @@ Dream.router [
+    Dream.options "*" (fun _ -> Dream.respond "matched");
+  ];
+  [%expect {|
+    Response: 200 OK
+    matched |}]

@@ -27,16 +27,20 @@ type token =
 let rec validate route = function
   | (Param "")::_ ->
     Printf.ksprintf failwith "Empty path parameter name in '%s'" route
-  | [Wildcard ""] ->
+  | [Wildcard "*"] ->
     ()
-  | (Wildcard "")::_ ->
+  | (Wildcard "*")::_ ->
     failwith "Path wildcard must be last"
   | (Wildcard _)::_ ->
-    failwith "Path wildcard must be just '*'"
+    failwith "Path wildcard must be just '**'"
   | _::tokens ->
     validate route tokens
   | [] ->
     ()
+
+let make_star_or_wildcard = function
+  | "" -> Literal "*"
+  | s -> Wildcard s
 
 let parse string =
 
@@ -56,7 +60,7 @@ let parse string =
     | ':' ->
       parse_component tokens (fun s -> Param s) (index + 1) (index + 1)
     | '*' ->
-      parse_component tokens (fun s -> Wildcard s) (index + 1) (index + 1)
+      parse_component tokens make_star_or_wildcard (index + 1) (index + 1)
     | _ | exception Invalid_argument _ ->
       parse_component tokens (fun s -> Literal s) index index
 

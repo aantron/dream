@@ -16,7 +16,7 @@ let () =
   Dream.run
   @@ Dream.logger
   @@ Dream.router [
-    Dream.get "/static/*" (Dream.static ".")
+    Dream.get "/static/**" (Dream.static ".")
   ]
   @@ Dream.not_found
 ```
@@ -30,13 +30,13 @@ very directory at `/static`! Obviously, you shouldn't do this in a real app
 
 <br>
 
-The static route ends with `*`. This is a [subsite
+The static route ends with `**`. This is a [subsite
 route](https://aantron.github.io/dream/#val-router). Generally, you should
-prefer [`Dream.scope`](https://aantron.github.io/dream/#val-scope) to `*`,
+prefer [`Dream.scope`](https://aantron.github.io/dream/#val-scope) to `**`,
 because [`Dream.scope`](https://aantron.github.io/dream/#val-scope) will
 support router introspection, if it is added in the future.
 
-However, `*` is exactly what it is needed for
+However, `**` is exactly what it is needed for
 [`Dream.static`](https://aantron.github.io/dream/#val-static). Pure
 introspection of a static subsite is impossible to begin with, because the
 available sub-routes depend on the actual files in the file system.

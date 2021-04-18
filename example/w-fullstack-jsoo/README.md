@@ -33,7 +33,7 @@ let () =
     Dream.get "/"
       (fun _ -> Dream.respond home);
 
-    Dream.get "/static/*"
+    Dream.get "/static/**"
       (Dream.static "./static");
 
   ]
