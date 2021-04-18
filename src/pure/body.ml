@@ -7,38 +7,6 @@
 
 type bigstring = Lwt_bytes.t
 
-(* type bigstring_stream =
-  (bigstring -> int -> int -> unit) ->
-  (unit -> unit) ->
-    unit
-
-type string_stream =
-  unit -> string option Lwt.t *)
-
-(* TODO:
-A body can have store up to one buffer, because of an early write. Or can it?
-maybe that first write should just store what it needs on the heap soemwhere,
-and just not resolve its promise.
-
- *)
-
-(* TODO So how is one of these things "opened?" As the writer, I need to first
-   mark the stream for writing, as a stream. After that, how do I push into
-   the stream?
-
-   A writer needs to
-
-   1. wait until a reader is there.
-   2. trigger the reader.
-
-   How to do this with a minimum of allocations? How can a writer *wait*?
-
-   - If the writer stores a CPS function, to be triggered by a future reader,
-   that closure has to be allocated.
-
-   - Can instead store 3 states: reader waiting, writer waiting, neither
-     waiting. *)
-
 (* The stream representation can be replaced by a record with mutable fields for
    0-allocation streaming. *)
 type writer =

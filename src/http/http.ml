@@ -10,21 +10,7 @@ module Error = Dream__middleware.Error
 
 
 
-(* TODO DOC https://http2-explained.haxx.se/en
-https://http2-explained.haxx.se/en/part6
-- Stream priorities.
-- Header compression options.
-- Stream reset.
-- Push.
-- Flow control.
-
-- https://github.com/httpwg/http2-spec/wiki/Implementations
-- BREACH safety?
-- https://github.com/anmonteiro/ocaml-quic
- *)
-
 (* TODO In serious need of refactoring because of all the different handlers. *)
-(* TODO Warn on too-short secrets if not binding to localhost. *)
 
 
 
@@ -44,12 +30,6 @@ let sha1 s =
   |> Digestif.SHA1.digest_string
   |> Digestif.SHA1.to_raw_string
 
-
-
-(* TODO DOC https://tools.ietf.org/html/rfc6455 *)
-(* https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers *)
-(* TODO Offer a "raw" mode that allows the client to stream frames without the
-   intermediate buffer in which message reassembly occurs. *)
 (* TODO It appears that backpressure is impossible in the underlying
    implementation... *)
 let websocket_handler user's_websocket_handler socket =

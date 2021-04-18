@@ -8,13 +8,11 @@ build :
 watch :
 	@dune build --no-print-directory -p $(PACKAGES) -w
 
-# TODO LATER After https://github.com/aantron/bisect_ppx/issues/369, get rid of
-# --root argument.
 .PHONY : test
 test :
 	@find . -name '*.coverage' | xargs rm -f
 	@dune build --no-print-directory \
-	  --instrument-with bisect_ppx --root . --force @test/runtest
+	  --instrument-with bisect_ppx --force @test/runtest
 	@bisect-ppx-report html
 	@bisect-ppx-report summary
 	@echo See _coverage/index.html

@@ -13,3 +13,5 @@
     (echo "let content = {html|")
     (cat %{bundle})
     (echo "|html}")))))
+
+(data_only_dirs node_modules)

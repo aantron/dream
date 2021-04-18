@@ -9,7 +9,6 @@ include Method
 include Status
 
 type bigstring = Body.bigstring
-(* type bigstring_stream = Body.bigstring_stream *)
 
 type upload_event = [
   | `File of string * string
@@ -17,18 +16,6 @@ type upload_event = [
   | `Done
   | `Wrong_content_type
 ]
-
-(* TODO multipart-form-data returns 4K-long chunks, so these should be
-   represented as substreams. *)
-(* type multipart_state = [
-  | `Initial
-  | `Awaiting of upload_event Lwt.u
-  | `Uploading of string option Lwt.u * string * string
-  | `First_chunk of string * string * unit Lwt.u
-  | `Next_file of string * string * string * unit Lwt.u
-  | `Files of string * string * unit Lwt.u
-  | `Fields of (string * string) list
-] *)
 
 (* Used for converting the push interface of Multipart_form_data into the pull
    interface of Dream. *)

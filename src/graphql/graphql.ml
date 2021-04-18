@@ -62,8 +62,6 @@ let run_query make_context schema request json =
       None
   in
 
-  (* TODO Consider passing the variables and operation name to the
-     context-maker. *)
   let%lwt context = make_context request in
 
   Graphql_lwt.Schema.execute
@@ -114,11 +112,6 @@ let complete_message id =
   ]
   |> Yojson.Basic.to_string
 
-(* TODO What should be passed for creating the context for WebSocket
-   transport? *)
-(* TODO Once WebSocket streaming is properly supported, outgoing messages must
-   be split into frames. Also, should there be a limit on incoming message
-   size? *)
 (* TODO Take care to pass around the request Lwt.key in async, etc. *)
 (* TODO Test client complete racing against a stream. *)
 let handle_over_websocket make_context schema subscriptions request websocket =
@@ -184,7 +177,8 @@ let handle_over_websocket make_context schema subscriptions request websocket =
       else begin
         match operation_id json with
         | None ->
-          log.warning (fun log -> log ~request "subscribe: operation id missing");
+          log.warning (fun log ->
+            log ~request "subscribe: operation id missing");
           close_and_clean subscriptions websocket ~code:4400
         | Some id ->
 

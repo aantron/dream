@@ -1,7 +1,4 @@
-type user = {
-  id : int;
-  name : string;
-}
+type user = {id : int; name : string}
 
 let hardcoded_users = [
   {id = 1; name = "alice"};
@@ -25,9 +22,7 @@ let schema =
   Graphql_lwt.Schema.(schema [
     field "users"
       ~typ:(non_null (list (non_null user)))
-      ~args:Arg.[
-        arg "id" ~typ:int;
-      ]
+      ~args:Arg.[arg "id" ~typ:int]
       ~resolve:(fun _info () id ->
         match id with
         | None -> hardcoded_users
