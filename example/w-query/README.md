@@ -10,9 +10,9 @@ let () =
   Dream.run (fun request ->
     match Dream.query "echo" request with
     | None ->
-      Dream.respond "Use ?echo=foo to give a message to echo!"
+      Dream.html "Use ?echo=foo to give a message to echo!"
     | Some message ->
-      Dream.respond (Dream.html_escape message))
+      Dream.html (Dream.html_escape message))
 ```
 
 <pre><code><b>$ dune exec --root . ./query.exe</b></code></pre>

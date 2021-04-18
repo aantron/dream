@@ -16,6 +16,7 @@ let my_error_template debug_info suggested_response =
   and reason = Dream.status_to_string status in
 
   suggested_response
+  |> Dream.with_header "Content-Type" Dream.text_html
   |> Dream.with_body begin
     <html>
       <body>

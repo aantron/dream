@@ -536,6 +536,34 @@ let respond_replacement = {|
 </pre>
 |}
 
+let html_expected = {|<div class="spec value" id="val-html">
+ <a href="#val-html" class="anchor"></a><code><span><span class="keyword">val</span> html : <span>?status:<a href="#type-status">status</a> <span class="arrow">-&gt;</span></span> <span>?code:int <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let html_replacement = {|
+<pre><span class="keyword">val</span> html :
+  <span class="optional">?status:<a href="#type-status">status</a> ->
+  ?code:int ->
+  ?headers:(string * string) list -></span>
+    string -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+</pre>
+|}
+
+let json_expected = {|<div class="spec value" id="val-json">
+ <a href="#val-json" class="anchor"></a><code><span><span class="keyword">val</span> json : <span>?status:<a href="#type-status">status</a> <span class="arrow">-&gt;</span></span> <span>?code:int <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let json_replacement = {|
+<pre><span class="keyword">val</span> json :
+  <span class="optional">?status:<a href="#type-status">status</a> ->
+  ?code:int ->
+  ?headers:(string * string) list -></span>
+    string -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+</pre>
+|}
+
 let stream_expected = {|<div class="spec value" id="val-stream">
  <a href="#val-stream" class="anchor"></a><code><span><span class="keyword">val</span> stream : <span>?status:<a href="#type-status">status</a> <span class="arrow">-&gt;</span></span> <span>?code:int <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span>
 <span><span>(<span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
@@ -1480,20 +1508,15 @@ let pretty_print_signatures soup =
       Soup.replace (status $ "> table") (Soup.parse status_replacement);
       Soup.add_class "multiline" status);
 
-  (* let method_ = soup $ "#type-method_" in
-  if_expected
-    method_expected
-    (fun () -> pretty_print method_)
-    (fun () ->
-      Soup.replace (method_ $ "> code") (Soup.parse method_replacement)); *)
-
-  (* let status = soup $ "#type-status" in
-  if_expected
-    status_expected
-    (fun () -> pretty_print status)
-    (fun () ->
-      Soup.replace (status $ "> code") (Soup.parse status_replacement);
-      Soup.add_class "multiline" status); *)
+  let multiline selector expected replacement =
+    let element = soup $ selector in
+    if_expected
+      expected
+      (fun () -> pretty_print element)
+      (fun () ->
+        Soup.replace (element $ "> code") (Soup.parse replacement);
+        Soup.add_class "multiline" element)
+  in
 
   let response = soup $ "#val-response" in
   if_expected
@@ -1510,6 +1533,9 @@ let pretty_print_signatures soup =
     (fun () ->
       Soup.replace (respond $ "> code") (Soup.parse respond_replacement);
       Soup.add_class "multiline" respond);
+
+  multiline "#val-html" html_expected html_replacement;
+  multiline "#val-json" json_expected json_replacement;
 
   let stream = soup $ "#val-stream" in
   if_expected
@@ -1534,16 +1560,6 @@ let pretty_print_signatures soup =
       (fun () -> pretty_print element)
       (fun () ->
         Soup.replace (element $ "> code") (Soup.parse replacement))
-  in
-
-  let multiline selector expected replacement =
-    let element = soup $ selector in
-    if_expected
-      expected
-      (fun () -> pretty_print element)
-      (fun () ->
-        Soup.replace (element $ "> code") (Soup.parse replacement);
-        Soup.add_class "multiline" element)
   in
 
   replace "#val-add_header" add_header_expected add_header_replacement;

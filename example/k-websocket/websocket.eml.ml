@@ -24,7 +24,7 @@ let () =
 
     Dream.get "/"
       (fun _ ->
-        Dream.respond home);
+        Dream.html home);
 
     Dream.get "/websocket"
       (fun _ ->

@@ -36,7 +36,7 @@ let chop_site_prefix prefix =
   fun next_handler request ->
     match match_site_prefix prefix (Dream.path request) with
     | None ->
-      Dream.respond ~status:`Bad_Gateway ""
+      Dream.empty `Bad_Gateway
     | Some path ->
       request
       |> Dream.with_prefix prefix_reversed

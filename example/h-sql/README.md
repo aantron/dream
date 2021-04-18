@@ -48,14 +48,14 @@ let () =
 
     Dream.get "/" (fun request ->
       let%lwt comments = Dream.sql list_comments request in
-      Dream.respond (render comments request));
+      Dream.html (render comments request));
 
     Dream.post "/" (fun request ->
       match%lwt Dream.form request with
       | `Ok ["text", text] ->
         let%lwt () = Dream.sql (add_comment text) request in
         let%lwt comments = Dream.sql list_comments request in
-        Dream.respond (render comments request)
+        Dream.html (render comments request)
       | _ ->
         Dream.empty `Bad_Request);
 

@@ -21,4 +21,4 @@ let render = response => {
 let () =
   Dream.run
   @@ Dream.logger
-  @@ _ => Dream.stream(render);
+  @@ _ => Dream.stream(~headers=[("Content-Type", Dream.text_html)], render);

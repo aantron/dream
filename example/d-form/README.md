@@ -31,13 +31,13 @@ let () =
 
     Dream.get  "/"
       (fun request ->
-        Dream.respond (show_form request));
+        Dream.html (show_form request));
 
     Dream.post "/"
       (fun request ->
         match%lwt Dream.form request with
         | `Ok ["message", message] ->
-          Dream.respond (show_form ~message request)
+          Dream.html (show_form ~message request)
         | _ ->
           Dream.empty `Bad_Request);
 

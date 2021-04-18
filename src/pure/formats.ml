@@ -216,3 +216,11 @@ let rec drop_trailing_slash = function
    function. *)
 let make_path path =
   "/" ^ (String.concat "/" path)
+
+
+
+let text_html =
+  "text/html; charset=utf-8"
+
+let application_json =
+  "application/json"

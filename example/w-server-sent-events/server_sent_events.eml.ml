@@ -69,7 +69,7 @@ let () =
   @@ Dream.logger
   @@ Dream.router [
 
-    Dream.get "/" (fun _ -> Dream.respond home);
+    Dream.get "/" (fun _ -> Dream.html home);
 
     Dream.get "/push" (fun _ ->
       Dream.stream

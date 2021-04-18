@@ -1,3 +1,3 @@
 let () =
   Dream.run (fun _ ->
-    Dream.respond "Good morning, world!")
+    Dream.html "Good morning, world!")

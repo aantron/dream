@@ -21,7 +21,7 @@ let default_loader local_root path _ =
       Lwt_io.(with_file ~mode:Input file)(fun channel ->
         Lwt_io.read channel
         |> Lwt.map Dream.response))
-    (fun _exn -> Dream.respond ~status:`Not_Found "")
+    (fun _exn -> Dream.empty `Not_Found)
 
 (* TODO Add ETag handling. *)
 (* TODO Add automatic Content-Type handling. *)
@@ -63,11 +63,11 @@ let validate_path request =
 let static ?(loader = default_loader) local_root = fun request ->
 
   if not @@ Dream.methods_equal (Dream.method_ request) `GET then
-    Dream.respond ~status:`Method_Not_Allowed ""
+    Dream.empty `Not_Found
 
   else
     match validate_path request with
-    | None -> Dream.respond ~status:`Not_Found ""
+    | None -> Dream.empty `Not_Found
     | Some path ->
 
       let%lwt response = loader local_root path request in

@@ -34,11 +34,11 @@ let () =
   @@ Dream.router [
 
     Dream.get  "/" (fun request ->
-      Dream.respond (home request));
+      Dream.html (home request));
 
     Dream.post "/" (fun request ->
       match%lwt Dream.multipart request with
-      | `Ok ["files", `Files files] -> Dream.respond (report files)
+      | `Ok ["files", `Files files] -> Dream.html (report files)
       | _ -> Dream.empty `Bad_Request);
 
   ]

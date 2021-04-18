@@ -33,7 +33,7 @@ let () =
   @@ Dream.router [
 
     Dream.get "/"
-      (fun _ -> Dream.respond home);
+      (fun _ -> Dream.html home);
 
     Dream.get "/static/**"
       (Dream.static "./static");

@@ -1,3 +1,3 @@
 let () =
   Dream.run(_ =>
-    Dream.respond("Good morning, reasonable world!"));
+    Dream.html("Good morning, reasonable world!"));

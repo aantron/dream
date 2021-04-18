@@ -23,8 +23,12 @@ let () =
   Dream.run
   @@ Dream.logger
   @@ Dream.router [
+
     Dream.post "/echo" (fun request ->
-      Dream.stream (echo request));
+      Dream.stream
+        ~headers:["Content-Type", "application/octet-stream"]
+        (echo request));
+
   ]
   @@ Dream.not_found
 ```

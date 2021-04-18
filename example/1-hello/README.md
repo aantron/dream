@@ -7,7 +7,7 @@ This project is so simple that it doesn't even log requests!
 ```ocaml
 let () =
   Dream.run (fun _ ->
-    Dream.respond "Good morning, world!")
+    Dream.html "Good morning, world!")
 ```
 
 <br>

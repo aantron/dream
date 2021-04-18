@@ -237,7 +237,7 @@ let respond_with_option f =
         | Some response -> response
         | None -> Dream.response ~status:`Internal_Server_Error ""))
     (fun () ->
-      Dream.respond ~status:`Internal_Server_Error "")
+      Dream.empty `Internal_Server_Error)
 
 
 

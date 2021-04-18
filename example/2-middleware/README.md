@@ -11,7 +11,7 @@ middlewares, the [*logger*](https://aantron.github.io/dream/#val-logger):
 let () =
   Dream.run
     (Dream.logger (fun _ ->
-      Dream.respond "Good morning, world!"))
+      Dream.html "Good morning, world!"))
 ```
 
 <br>
@@ -27,7 +27,7 @@ in this example looks like this:
 let () =
   Dream.run
   @@ Dream.logger
-  @@ fun _ -> Dream.respond "Good morning, world!"
+  @@ fun _ -> Dream.html "Good morning, world!"
 ```
 
 <br>

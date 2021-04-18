@@ -15,7 +15,7 @@ let () =
       (request =>
         Dream.param("word", request)
         |> render
-        |> Dream.respond)),
+        |> Dream.html)),
 
   ])
   @@ Dream.not_found;

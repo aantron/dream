@@ -9,7 +9,7 @@ Enabling HTTPS in Dream is very easy: just pass `~https:true` to
 let () =
   Dream.run ~https:true
   @@ Dream.logger
-  @@ fun _ -> Dream.respond "Good morning, world!"
+  @@ fun _ -> Dream.html "Good morning, world!"
 ```
 
 <pre><code><b>$ dune exec --root . ./https.exe</b></code></pre>

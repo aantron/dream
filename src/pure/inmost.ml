@@ -471,14 +471,29 @@ let response
 
   response
 
-let respond
-    ?status
-    ?code
-    ?headers
-    body =
-
+let respond ?status ?code ?headers body =
   response ?status ?code ?headers body
   |> Lwt.return
+
+let html ?status ?code ?headers body =
+  let response = response ?status ?code ?headers body in
+  let response =
+    if has_header "Content-Type" response then
+      response
+    else
+      add_header "Content-Type" Formats.text_html response
+  in
+  Lwt.return response
+
+let json ?status ?code ?headers body =
+  let response = response ?status ?code ?headers body in
+  let response =
+    if has_header "Content-Type" response then
+      response
+    else
+      add_header "Content-Type" Formats.application_json response
+  in
+  Lwt.return response
 
 let stream ?status ?code ?headers f =
   let response =

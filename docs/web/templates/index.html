@@ -44,7 +44,7 @@
   @@ <span class="hljs-type">Dream</span>.logger
   @@ <span class="hljs-type">Dream</span>.router <span class="hljs-string">[</span>
     <span class="hljs-type">Dream</span>.get <span class="hljs-string">"/"</span> (<span class="keyword">fun</span> _ ->
-      <span class="hljs-type">Dream</span>.respond (hello <span class="hljs-string">"world"</span>));
+      <span class="hljs-type">Dream</span>.html (hello <span class="hljs-string">"world"</span>));
   <span class="hljs-string">]</span>
   @@ <span class="hljs-type">Dream</span>.not_found</pre>
 
@@ -119,28 +119,6 @@
     </ul>
   </div>
 </header>
-
-<!-- TODO Real getting started instructions link. -->
-
-<!-- <header>
-  <p>
-    <span class="title">Dream</span> is a web framework ...
-
-    HTTP2, TLS, runs without a proxy, integration, scaling, GraphQL, etc.
-  </p>
-
-  <pre><code>let greet who =
-  &lt;html>&lt;body>&lt;h1>Hello, &lt;%s who %>!&lt;/h1>&lt;/body>&lt;/html>
-
-let () =
-  Dream.run
-  @@ Dream.logger
-  @@ Dream.router [
-    Dream.get "/" @@ fun _request -> Dream.respond (greet "world");
-  ]
-  @@ Dream.not_found
-  </code></pre>
-</header> -->
 
 <!-- Replaced by Soupault with postprocessed odoc output. -->
 <div id="api"></div>

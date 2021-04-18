@@ -12,17 +12,13 @@ It can also be greatly simplified with
 
 ```ocaml
 let to_json request =
-
   match Dream.header "Content-Type" request with
   | Some "application/json" ->
-
     let%lwt body = Dream.body request in
-
     begin match Yojson.Basic.from_string body with
     | exception _ -> Lwt.return None
     | json -> Lwt.return (Some json)
     end
-
   | _ -> Lwt.return None
 
 let () =
@@ -45,7 +41,7 @@ let () =
 
             `String message
             |> Yojson.Basic.to_string
-            |> Dream.respond ~headers:["Content-Type", "application/json"]);
+            |> Dream.json);
 
   ]
   @@ Dream.not_found

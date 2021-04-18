@@ -7,7 +7,7 @@ This example shows the simplest Dream program one could write:
 ```reason
 let () =
   Dream.run(_ =>
-    Dream.respond("Good morning, reasonable world!"));
+    Dream.html("Good morning, reasonable world!"));
 ```
 
 <pre><code><b>$ dune exec --root . ./hello.exe</b>

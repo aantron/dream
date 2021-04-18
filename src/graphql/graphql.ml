@@ -294,16 +294,16 @@ let graphql make_context schema = fun request ->
       begin match%lwt run_query make_context schema request json with
       | Error json ->
         Yojson.Basic.to_string json
-        |> Dream.respond ~headers:["Content-Type", "application/json"]
+        |> Dream.json
 
       | Ok (`Response json) ->
         Yojson.Basic.to_string json
-        |> Dream.respond ~headers:["Content-Type", "application/json"]
+        |> Dream.json
 
       | Ok (`Stream _) ->
         make_error "Subscriptions and streaming should use WebSocket transport"
         |> Yojson.Basic.to_string
-        |> Dream.respond ~headers:["Content-Type", "application/json"]
+        |> Dream.json
       end
 
     | _ ->
@@ -339,4 +339,4 @@ let graphiql graphql_endpoint =
   in
 
   fun _request ->
-    Dream.respond (Lazy.force html)
+    Dream.html (Lazy.force html)

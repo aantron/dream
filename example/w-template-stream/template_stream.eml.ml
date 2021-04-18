@@ -20,4 +20,4 @@ let render response =
 let () =
   Dream.run
   @@ Dream.logger
-  @@ fun _ -> Dream.stream render
+  @@ fun _ -> Dream.stream ~headers:["Content-Type", Dream.text_html] render

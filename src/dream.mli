@@ -31,7 +31,7 @@ and handler = request -> response promise
     {[
       let () =
         Dream.run (fun _ ->
-          Dream.respond "Good morning, world!")
+          Dream.html "Good morning, world!")
     ]} *)
 
 and middleware = handler -> handler
@@ -44,7 +44,7 @@ and middleware = handler -> handler
       let () =
         Dream.run
         @@ Dream.logger
-        @@ fun _ -> Dream.respond "Good morning, world!"
+        @@ fun _ -> Dream.html "Good morning, world!"
     ]}
 
     Examples
@@ -389,7 +389,14 @@ val response :
     string -> response
 (** Creates a new {!type-response} with the given string as body. [~code] and
     [~status] are two ways to specify the {!type-status} code, which is [200 OK]
-    by default. The headers are empty by default. *)
+    by default. The headers are empty by default.
+
+    Note that browsers may interpret lack of a [Content-Type:] header as if its
+    value were [application/octet-stream] or [text/html; charset=us-ascii],
+    which will prevent correct interpretation of UTF-8 strings. Either add a
+    [Content-Type:] header using [~headers] or {!Dream.add_header}, or use a
+    wrapper like {!Dream.html}. The modern [Content-Type:] for HTML is
+    [text/html; charset=utf-8]. See {!Dream.text_html}. *)
 
 val respond :
   ?status:status ->
@@ -398,6 +405,23 @@ val respond :
     string -> response promise
 (** Same as {!Dream.val-response}, but the new {!type-response} is wrapped in a
     {!type-promise}. *)
+
+val html :
+  ?status:status ->
+  ?code:int ->
+  ?headers:(string * string) list ->
+    string -> response promise
+(** Same as {!Dream.respond}, but adds [Content-Type: text/html; charset=utf-8]
+    if [Content-Type:] is absent from [~headers]. See {!Dream.text_html}. *)
+
+val json :
+  ?status:status ->
+  ?code:int ->
+  ?headers:(string * string) list ->
+    string -> response promise
+(** Same as {!Dream.respond}, but adds [Content-Type: application/json] if
+    [Content-Type:] is absent from [~headers]. See
+    {!Dream.application_json}. *)
 
 val empty :
   ?headers:(string * string) list ->
@@ -718,7 +742,7 @@ val origin_referer_check : middleware
     {[
       match%lwt Dream.form request with
       | `Ok ["my.field", value] -> (* ... *)
-      | _ -> Dream.respond `Bad_Request
+      | _ -> Dream.empty `Bad_Request
     ]}
 
     See example
@@ -1056,7 +1080,7 @@ val router : route list -> middleware
         Dream.run
         @@ Dream.router [
           Dream.get "/echo/:word" @@ fun request ->
-            Dream.respond (Dream.param "word" request);
+            Dream.html (Dream.param "word" request);
         ]
         @@ Dream.not_found
     ]}
@@ -1969,6 +1993,12 @@ val drop_trailing_slash : string list -> string list
 (** Changes the representation of path [abc/] to the representation of [abc] by
     checking if the last element in the list is [""], and, if it is, dropping
     it. *)
+
+val text_html : string
+(** The string ["text/html; charset=utf-8"] for [Content-Type:] headers. *)
+
+val application_json : string
+(** The string ["application/json"] for [Content-Type:] headers. *)
 
 
 

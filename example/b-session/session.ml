@@ -8,8 +8,8 @@ let () =
     | None ->
       let%lwt () = Dream.invalidate_session request in
       let%lwt () = Dream.put_session "user" "alice" request in
-      Dream.respond "You weren't logged in; but now you are!"
+      Dream.html "You weren't logged in; but now you are!"
 
     | Some username ->
       Printf.ksprintf
-        Dream.respond "Welcome back, %s!" (Dream.html_escape username)
+        Dream.html "Welcome back, %s!" (Dream.html_escape username)

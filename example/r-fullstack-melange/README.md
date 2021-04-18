@@ -32,7 +32,7 @@ let () =
   @@ Dream.router([
 
     Dream.get("/",
-      (_ => Dream.respond(home))),
+      (_ => Dream.html(home))),
 
     Dream.get("/static/**",
       Dream.static("./static")),

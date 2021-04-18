@@ -20,7 +20,7 @@ let () =
       (fun request ->
         render (Dream.param "word" request)
         |> html_to_string
-        |> Dream.respond);
+        |> Dream.html);
 
   ]
   @@ Dream.not_found

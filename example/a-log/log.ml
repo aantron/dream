@@ -6,7 +6,7 @@ let () =
     Dream.get "/"
       (fun request ->
         Dream.log "Sending greeting to %s!" (Dream.client request);
-        Dream.respond "Good morning, world!");
+        Dream.html "Good morning, world!");
 
     Dream.get "/fail"
       (fun _ ->

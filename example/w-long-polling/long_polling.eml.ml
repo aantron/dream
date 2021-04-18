@@ -58,7 +58,7 @@ let () =
   @@ Dream.logger
   @@ Dream.router [
 
-    Dream.get "/" (fun _ -> Dream.respond home);
+    Dream.get "/" (fun _ -> Dream.html home);
 
     Dream.get "/poll" (fun _ ->
       match !server_state with
@@ -67,11 +67,11 @@ let () =
       | Messages_accumulating [] ->
         let response_promise, respond = Lwt.wait () in
         server_state := Client_waiting (fun message ->
-          Lwt.wakeup_later respond (Dream.response message));
+          Lwt.wakeup_later respond (Dream.html message));
         response_promise
       | Messages_accumulating messages ->
         server_state := Messages_accumulating [];
-        Dream.respond (String.concat "\n" (List.rev messages)));
+        Dream.html (String.concat "\n" (List.rev messages)));
 
   ]
   @@ Dream.not_found

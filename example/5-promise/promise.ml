@@ -22,7 +22,7 @@ let () =
         raise (Failure "The Web app failed!"));
 
     Dream.get "/" (fun _ ->
-      Dream.respond (Printf.sprintf
+      Dream.html (Printf.sprintf
         "%3i request(s) successful\n%3i request(s) failed"
         !successful !failed));
 
