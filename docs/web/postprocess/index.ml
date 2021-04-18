@@ -1339,6 +1339,17 @@ let serve_replacement = {|
     <a href="#type-handler">handler</a> -> unit <a href="#type-promise">promise</a>
 </pre>|}
 
+let to_percent_encoded_expected = {|<div class="spec value" id="val-to_percent_encoded">
+ <a href="#val-to_percent_encoded" class="anchor"></a><code><span><span class="keyword">val</span> to_percent_encoded : <span>?international:bool <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let to_percent_encoded_replacement = {|
+<pre><span class="keyword">val</span> to_percent_encoded :
+  ?international:bool -> string -> string
+</pre>
+|}
+
 let to_set_cookie_expected = {|<div class="spec value" id="val-to_set_cookie">
  <a href="#val-to_set_cookie" class="anchor"></a><code><span><span class="keyword">val</span> to_set_cookie : <span>?expires:float <span class="arrow">-&gt;</span></span> <span>?max_age:float <span class="arrow">-&gt;</span></span> <span>?domain:string <span class="arrow">-&gt;</span></span>
 <span>?path:string <span class="arrow">-&gt;</span></span> <span>?secure:bool <span class="arrow">-&gt;</span></span> <span>?http_only:bool <span class="arrow">-&gt;</span></span>
@@ -1715,6 +1726,8 @@ let pretty_print_signatures soup =
         (Soup.parse serve_replacement);
       Soup.add_class "multiline" serve);
 
+  multiline "#val-to_percent_encoded"
+    to_percent_encoded_expected to_percent_encoded_replacement;
   multiline
     "#val-to_set_cookie" to_set_cookie_expected to_set_cookie_replacement;
   multiline "#val-encrypt" encrypt_expected encrypt_replacement;

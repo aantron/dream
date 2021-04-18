@@ -138,6 +138,27 @@ let to_set_cookie
 
 
 
+let iri_safe_octets =
+  String.init 128 (fun i -> Char.chr (i + 128))
+
+(* TODO This triggers an upstream bug that causes a mutation. *)
+let iri_generic =
+  `Custom (`Generic, iri_safe_octets, "")
+
+let to_percent_encoded ?(international = true) string =
+  let component =
+    if international then iri_generic
+    else `Path
+    (* TODO Workaround for https://github.com/mirage/ocaml-uri/pull/156; `Path
+       should be `Generic. *)
+  in
+  Uri.pct_encode ~component string
+
+let from_percent_encoded string =
+  Uri.pct_decode string
+
+
+
 let to_form_urlencoded dictionary =
   dictionary
   |> List.map (fun (name, value) -> name, [value])

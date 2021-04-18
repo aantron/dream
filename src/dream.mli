@@ -1895,6 +1895,23 @@ val to_base64url : string -> string
 val from_base64url : string -> string option
 (** Inverse of {!Dream.to_base64url}. *)
 
+val to_percent_encoded : ?international:bool -> string -> string
+(** Percent-encodes a string for use inside a URL.
+
+    [~international] is [true] by default, and causes non-ASCII bytes to be
+    preserved. This is suitable for display to users, including in [<a href="">]
+    attributes, which are displayed in browser status lines. See
+    {{:https://tools.ietf.org/html/rfc3987} RFC 3987}.
+
+    Use [~international:false] for compatibility with legacy systems, or when
+    constructing URL fragments from untrusted input that may not match the
+    interface language(s) the user expects. In the latter case, similar letters
+    from different writing scripts can be used to mislead users about the
+    targets of links. *)
+
+val from_percent_encoded : string -> string
+(** Inverse of {!Dream.to_percent_encoded}. *)
+
 val to_form_urlencoded : (string * string) list -> string
 (** Inverse of {!Dream.from_form_urlencoded}. Percent-encodes names and
     values. *)
