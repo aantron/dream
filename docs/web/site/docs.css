@@ -116,12 +116,12 @@ body {
 
 .odoc-content code {
   /* color: #ddd; */
-  /* background-color: #444; */
-  padding: 0 3px;
+  /* background-color: #2c333b; */
+  padding: 0 5px;
   margin: 0 1px;
   white-space: nowrap;
   line-height: 20px;
-  font-size: 14px;
+  font-size: 13.5px;
 }
 .odoc-content pre > code,
 .odoc-content .spec > code {
@@ -134,7 +134,7 @@ body {
   font-size: 15px;
 }
 .spec-doc pre > code {
-  font-size: 14px;
+  font-size: 13.5px;
 }
 
 /* h1, h2, h3 {

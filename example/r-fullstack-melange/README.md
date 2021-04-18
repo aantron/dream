@@ -67,7 +67,7 @@ let () = {
 To run, do
 
 <pre><code><b>npm install
-npm run start
+npm start
 </b></code></pre>
 
 Then visit [http://localhost:8080](http://localhost:8080), and you will see...

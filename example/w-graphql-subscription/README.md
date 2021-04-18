@@ -12,28 +12,29 @@ to 3:
 ```ocaml
 let count until =
   let stream, push = Lwt_stream.create () in
+  let close () = push None in
 
   Lwt.async begin fun () ->
     let rec loop n =
       let%lwt () = Lwt_unix.sleep 0.5 in
       if n > until
-      then (push None; Lwt.return_unit)
+      then (close (); Lwt.return_unit)
       else (push (Some n); loop (n + 1))
     in
     loop 1
   end;
 
-  stream
+  stream, close
 
 let schema =
   let open Graphql_lwt.Schema in
   schema []
     ~subscriptions:[
       subscription_field "count"
-        ~typ:(non_null (int))
+        ~typ:(non_null int)
         ~args:Arg.[arg "until" ~typ:(non_null int)]
         ~resolve:(fun _info until ->
-          Lwt.return (Ok (count until, ignore)))
+          Lwt.return (Ok (count until)))
     ]
 
 let () =
@@ -55,7 +56,7 @@ Visit [http://localhost:8080/graphiql](http://localhost:8080/graphiql), and run
 
 ```graphql
 subscription {
-  count
+  count(until: 3)
 }
 ```
 
