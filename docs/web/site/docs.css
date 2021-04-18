@@ -98,12 +98,12 @@ h6 {
 /* Colors and presentation styles. */
 
 body {
-  background-color: #2c2c2c;
-  color: #eee;
+  background-color: #131618;
+  color: #c9d1d9;
 }
 
 .odoc-content pre {
-  background-color: #1e1e1e;
+  background-color: #1a1f26;
   margin-left: 1em;
   margin-right: 1em;
   border: 1px solid #111;
@@ -115,12 +115,13 @@ body {
 }
 
 .odoc-content code {
-  color: #ddd;
-  background-color: #111;
+  /* color: #ddd; */
+  /* background-color: #444; */
   padding: 0 3px;
   margin: 0 1px;
   white-space: nowrap;
   line-height: 20px;
+  font-size: 14px;
 }
 .odoc-content pre > code,
 .odoc-content .spec > code {
@@ -130,20 +131,29 @@ body {
   color: inherit;
   white-space: inherit;
   line-height: inherit;
+  font-size: 15px;
+}
+.spec-doc pre > code {
+  font-size: 14px;
 }
 
-h1, h2, h3 {
+/* h1, h2, h3 {
   font-weight: 400;
   color: white;
-}
+} */
+
+/* .spec {
+  color: white;
+} */
 
 header {
-  background-color: #29292a;
-  border-bottom: 1px solid #222;
+  background-color: #131618;
+  border-bottom: 1px solid #282828;
 }
 
 header .topmost {
-  background-color: #181818;
+  /* background-color: #0f131a; */
+  border-bottom: 1px solid #282828;
 }
 
 h1 {
@@ -152,12 +162,12 @@ h1 {
 
 header pre {
   padding: 27px 18px;
-  background-color: #202020;
+  /* background-color: #202020; */
   line-height: 27px;
 }
 
 .blurbs {
-  color: white;
+  /* color: white; */
 }
 
 header pre, header pre code {
@@ -178,7 +188,7 @@ footer {
 }
 
 :target .backing {
-  background-color: #1c1c1c;
+  background-color: #390022;
 }
 
 nav ~ * a[href="#builtin"],
@@ -201,7 +211,7 @@ a[href^=http]::after {
   font-family: FontAwesome;
   font-size: 10px;
   line-height: 18px;
-  color: #6e8ccf;
+  color: #5d7fcd;
   position: relative;
   top: -0.5px;
   margin-left: 2px;
@@ -212,7 +222,7 @@ a[href^=http]::after {
 }
 
 a, a:visited, a:active {
-  color: #a9c4ff;
+  color: #8dc5ff;
   text-decoration: none;
 }
 
@@ -221,23 +231,23 @@ a:hover {
 }
 
 .odoc-content a > code {
-  color: #b8caea;
+  color: #8dc5ff;
 }
 
 .hljs-module-access, .hljs-keyword, .keyword {
-  color: #ffef33;
+  color: #ff6c9b;
 }
 
 .hljs-identifier, .hljs-literal, .hljs-type {
-  color: #a4bfdb;
+  color: #70df5c;
 }
 
 .hljs-tag {
-  color: #a7caff;
+  color: #c28eff;
 }
 
 .hljs-string {
-  color: #dcdda7;
+  color: #e3db7a;
 }
 
 .of {
@@ -392,8 +402,8 @@ ul ul li {
     left: 0;
     height: 100%;
     width: 43rem;
-    background-color: #262626;
-    border-right: 1px solid #303030;
+    /* background-color: #262626; */
+    border-right: 1px solid #282828;
   }
 
   h2, h2 ~ :not(.odoc-spec):not(nav), footer {
@@ -414,7 +424,7 @@ ul ul li {
     float: left;
     width: 30rem;
     margin-top: 0;
-    margin-bottom: 18px;
+    margin-bottom: 12px;
     margin-left: 0;
   }
 
@@ -568,9 +578,9 @@ h2:first-of-type {
     overflow-y: scroll;
     scrollbar-width: none;
     line-height: 30px;
-    border-right: 1px solid #1e1e1e;
-    background-color: #222;
-    color: #ddd;
+    border-right: 1px solid #262626;
+    background-color: #131618;
+    /* color: #ddd; */
   }
   .odoc-toc::-webkit-scrollbar {
     display: none;
@@ -600,11 +610,17 @@ h2:first-of-type {
   }
 
   .odoc-toc.fixed .current-section {
-    background-color: #92a4cc;
-    color: black;
-    font-weight: bold;
+    /* background-color: #1c2a3b; */
+    /* color: black;
+    font-weight: bold; */
     /* background-color: black;
     font-weight: bold; */
+  }
+
+  .odoc-toc.fixed .current-section::before {
+    content: "—";
+    position: absolute;
+    left: 0.75rem;
   }
 
   h2:first-of-type {
