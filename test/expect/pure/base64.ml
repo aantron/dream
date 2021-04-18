@@ -29,8 +29,8 @@ let%expect_test _ =
 
 let decode string =
   match Dream.from_base64url string with
-  | Ok string -> Printf.printf "%S\n" string
-  | Error error -> print_endline error
+  | Some string -> Printf.printf "%S\n" string
+  | None -> print_endline "None"
 
 let%expect_test _ =
   decode "YWJj";
@@ -41,4 +41,4 @@ let%expect_test _ =
     "abc"
     "a"
     "a"
-    Malformed input |}]
+    None |}]

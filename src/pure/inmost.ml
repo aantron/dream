@@ -586,9 +586,9 @@ let cookie
       Some value
     else
       match Formats.from_base64url value with
-      | Error _ ->
+      | None ->
         None
-      | Ok value ->
+      | Some value ->
         decrypt request value ~associated_data:("dream.cookie-" ^ name)
 
 let set_cookie

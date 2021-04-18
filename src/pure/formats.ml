@@ -24,8 +24,8 @@ let to_base64url string =
 
 let from_base64url string =
   match Base64.decode ~pad:false ~alphabet:Base64.uri_safe_alphabet string with
-  | Error (`Msg string) -> Error string
-  | Ok _ as ok -> ok
+  | Error _ -> None
+  | Ok result -> Some result
 
 
 

@@ -1892,7 +1892,7 @@ val to_base64url : string -> string
     {{:https://mirage.github.io/ocaml-base64/base64/Base64/index.html} Base64}
     library.*)
 
-val from_base64url : string -> (string, string) result
+val from_base64url : string -> string option
 (** Inverse of {!Dream.to_base64url}. *)
 
 val to_form_urlencoded : (string * string) list -> string
