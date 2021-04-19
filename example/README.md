@@ -98,6 +98,8 @@ if something is missing!
   an older alternative to WebSockets.
 - [**`w-template-stream`**](w-template-stream#files) &nbsp;&mdash;&nbsp; sends
   templates asynchronously, one chunk at a time.
+- [**`w-stress-response`**](w-stress-response#files) &nbsp;&mdash;&nbsp;
+  benchmarks streaming very large responses.
 
 <br>
 <br>
