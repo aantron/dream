@@ -91,7 +91,18 @@ different dependencies of each, for fast porting to different environments.
 
 Dream is not yet announced or released! Before release, Dream will get a
 quick-start script, and some other help for getting started quickly. However,
-if you want to try Dream now, you can do:
+if you want to try Dream now, you can add:
+
+```
+"dependencies": {
+  "@opam/dream": "aantron/dream:dream.opam"
+}
+```
+
+to your `esy.json`. See example [**`w-esy`**][esy-example] for a minimal
+project.
+
+Alternatively, if you are using opam:
 
 ```
 git clone https://github.com/aantron/dream.git --recursive
@@ -123,6 +134,8 @@ you did, you can pin Dream to your clone in a different opam switch with
 ```
 opam pin add dream /path/to/your/clone
 ```
+
+[esy-example]: https://github.com/aantron/dream/tree/master/example/w-esy#files
 
 <br>
 
