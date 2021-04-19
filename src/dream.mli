@@ -411,16 +411,15 @@ val html :
   ?code:int ->
   ?headers:(string * string) list ->
     string -> response promise
-(** Same as {!Dream.respond}, but adds [Content-Type: text/html; charset=utf-8]
-    if [Content-Type:] is absent from [~headers]. See {!Dream.text_html}. *)
+(** Same as {!Dream.respond}, but adds [Content-Type: text/html; charset=utf-8].
+    See {!Dream.text_html}. *)
 
 val json :
   ?status:status ->
   ?code:int ->
   ?headers:(string * string) list ->
     string -> response promise
-(** Same as {!Dream.respond}, but adds [Content-Type: application/json] if
-    [Content-Type:] is absent from [~headers]. See
+(** Same as {!Dream.respond}, but adds [Content-Type: application/json]. See
     {!Dream.application_json}. *)
 
 val redirect :
@@ -429,9 +428,9 @@ val redirect :
   ?headers:(string * string) list ->
     string -> response promise
 (** Creates a new {!type-response}. Adds a [Location:] header with the given
-    string, if [Location:] is absent from [~headers]. The default status code is
-    [303 See Other], for a temporary redirection. Use
-    [~status:`Moved_Permanently] for a permanent redirection. *)
+    string. The default status code is [303 See Other], for a temporary
+    redirection. Use [~status:`Moved_Permanently] or [~code:301] for a permanent
+    redirection. *)
 
 val empty :
   ?headers:(string * string) list ->
