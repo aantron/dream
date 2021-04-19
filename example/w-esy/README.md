@@ -99,8 +99,9 @@ languages. Melange compiles OCaml and Reason.
 
 - [**`w-fullstack-rescript`**](../w-fullstack-rescript#files) for full-stack
   development with ReScript.
-- [**`w-fullstack-melange`**](../r-fullstack-melange#files) for full-stack
+- [**`r-fullstack-melange`**](../r-fullstack-melange#files) for full-stack
   development with Melange and Reason syntax.
+- [**`w-fswatch`**](../w-fswatch#files) for a development watcher.
 
 <br>
 

@@ -32,9 +32,13 @@ course, see `Good morning, world!`.
   to the app.
 - [**`3-router`**](../3-router#files) sends requests to different handlers,
   depending on their path.
+
+**See also:**
+
 - [**`r-hello`**](../r-hello#files) is a Reason syntax version of this example.
 - [**`w-esy`**](../w-esy#files) wraps this example in an [esy](https://esy.sh/)
   package, for an npm-like development experience.
+- [**`w-fswatch`**](../w-fswatch#files) sets up a primitive development watcher.
 
 
 <br>

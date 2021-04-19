@@ -803,6 +803,11 @@ let serve
 
 
 
+let read_stop_from_stdin () =
+  match%lwt Lwt_io.(read_char stdin) with
+  | _ -> Lwt.return_unit
+  | exception End_of_file -> fst (Lwt.task ())
+
 let run
     ?(interface = default_interface)
     ?(port = default_port)
@@ -862,7 +867,7 @@ let run
 
   let stop =
     if stop_on_input then
-      Lwt.choose [stop; Lwt.map ignore Lwt_io.(read_char stdin)]
+      Lwt.choose [stop; read_stop_from_stdin ()]
     else
       stop
   in

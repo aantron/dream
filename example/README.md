@@ -86,6 +86,8 @@ if something is missing!
   &nbsp;&mdash;&nbsp; GraphQL subscriptions.
 - [**`w-esy`**](w-esy#files) &nbsp;&mdash;&nbsp; shows how to depend on Dream
   using [esy](https://esy.sh/), an npm-like package manager.
+- [**`w-fswatch`**](w-fswatch#files) &nbsp;&mdash;&nbsp; sets up a development
+  watcher using fswatch.
 - [**`w-tyxml`**](w-tyxml#files) &nbsp;&mdash;&nbsp; uses TyXML for type-checked
   HTML templating.
 - [**`w-long-polling`**](w-long-polling#files) &nbsp;&mdash;&nbsp; old form of

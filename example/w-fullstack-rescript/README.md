@@ -89,6 +89,7 @@ client in `./static/client.js`. The example serves the bundled client using
 - [**`w-esy`**](../w-esy#files) packages the server with
   [esy](https://esy.sh/), an npm-like package manager, for a full-stack
   npm-like workflow.
+- [**`w-fswatch`**](../w-fswatch#files) sets up a primitive development watcher.
 - [**`f-static`**](../r-hello#files) presents
   [`Dream.static`](https://aantron.github.io/dream/#val-static).
 
