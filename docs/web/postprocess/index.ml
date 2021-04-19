@@ -564,6 +564,21 @@ let json_replacement = {|
 </pre>
 |}
 
+let val_redirect_expected = {|<div class="spec value" id="val-redirect">
+ <a href="#val-redirect" class="anchor"></a><code><span><span class="keyword">val</span> redirect : <span>?status:<a href="#type-status">status</a> <span class="arrow">-&gt;</span></span> <span>?code:int <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span>
+<span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let val_redirect_replacement = {|
+<pre><span class="keyword">val</span> redirect :
+  <span class="optional">?status:<a href="#type-status">status</a> ->
+  ?code:int ->
+  ?headers:(string * string) list -></span>
+    string -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+</pre>
+|}
+
 let stream_expected = {|<div class="spec value" id="val-stream">
  <a href="#val-stream" class="anchor"></a><code><span><span class="keyword">val</span> stream : <span>?status:<a href="#type-status">status</a> <span class="arrow">-&gt;</span></span> <span>?code:int <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span>
 <span><span>(<span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
@@ -1536,6 +1551,7 @@ let pretty_print_signatures soup =
 
   multiline "#val-html" html_expected html_replacement;
   multiline "#val-json" json_expected json_replacement;
+  multiline "#val-redirect" val_redirect_expected val_redirect_replacement;
 
   let stream = soup $ "#val-stream" in
   if_expected

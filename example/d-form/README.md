@@ -89,6 +89,18 @@ constructors typically correspond to bugs or attacks, only.
 
 <br>
 
+This example replied to the form POST directly with HTML. In most cases, it is
+better to use [`Dream.redirect`](https://aantron.github.io/dream/#val-redirect)
+instead, to forward the browser to another page that will display the outcome.
+Using a redirection prevents form resubmission on refresh. This is especially
+important on login forms and other sensitive pages.
+
+However, this server is so simple that it doesn't store the data anywhere, and
+the data is not sensitive, so we took a shortcut. See
+[**`h-sql`**](../h-sql#files) for an example with a proper redirection.
+
+<br>
+
 **Next steps:**
 
 - [**`e-json`**](../e-json#files) receives and sends JSON.

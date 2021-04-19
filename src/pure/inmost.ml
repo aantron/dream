@@ -495,6 +495,21 @@ let json ?status ?code ?headers body =
   in
   Lwt.return response
 
+let redirect ?status ?code ?headers location =
+  let status =
+    match status, code with
+    | None, None -> Some (`See_Other)
+    | _ -> status
+  in
+  let response = response ?status ?code ?headers location in
+  let response =
+    if has_header "Location" response then
+      response
+    else
+      add_header "Location" location response
+  in
+  Lwt.return response
+
 let stream ?status ?code ?headers f =
   let response =
     response ?status ?code ?headers ""

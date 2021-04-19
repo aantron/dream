@@ -423,6 +423,16 @@ val json :
     [Content-Type:] is absent from [~headers]. See
     {!Dream.application_json}. *)
 
+val redirect :
+  ?status:status ->
+  ?code:int ->
+  ?headers:(string * string) list ->
+    string -> response promise
+(** Creates a new {!type-response}. Adds a [Location:] header with the given
+    string, if [Location:] is absent from [~headers]. The default status code is
+    [303 See Other], for a temporary redirection. Use
+    [~status:`Moved_Permanently] for a permanent redirection. *)
+
 val empty :
   ?headers:(string * string) list ->
     status -> response promise
