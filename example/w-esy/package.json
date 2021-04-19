@@ -5,6 +5,6 @@
     "ocaml": "4.12.x"
   },
   "scripts": {
-    "run": "build dune exec --root . ./hello.exe"
+    "run": "dune exec --root . ./hello.exe"
   }
 }
