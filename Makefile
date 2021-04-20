@@ -1,4 +1,4 @@
-PACKAGES := dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,h2,h2-lwt,h2-lwt-unix
+PACKAGES := dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,hpack,h2,h2-lwt,h2-lwt-unix
 
 .PHONY : build
 build :
@@ -60,6 +60,7 @@ clean : clean-coverage
 	dune clean
 	dune clean --root .
 	make --no-print-directory -C docs/web clean
+	rm -rf src/graphiql/node_modules dream-* _release
 
 .PHONY : utop
 utop :
@@ -72,3 +73,54 @@ todo :
 .PHONY : todo-all
 todo-all :
 	@git grep -n TODO | grep -v SELF # SELF
+
+VERSION := $(shell git describe --abbrev=0)
+RELEASE := dream-$(VERSION)
+FILES := src test dream.opam dune-project LICENSE.md README.md
+
+.PHONY : release
+release : clean
+	rm -rf $(RELEASE) $(RELEASE).tar $(RELEASE).tar.gz _release
+	mkdir $(RELEASE)
+	cp -r $(FILES) $(RELEASE)
+	rm -rf $(RELEASE)/src/vendor/gluten/.github
+	rm -rf $(RELEASE)/src/vendor/gluten/async
+	rm -rf $(RELEASE)/src/vendor/gluten/mirage
+	rm -rf $(RELEASE)/src/vendor/gluten/nix
+	rm -rf $(RELEASE)/src/vendor/httpaf/.github
+	rm -rf $(RELEASE)/src/vendor/httpaf/async
+	rm -rf $(RELEASE)/src/vendor/httpaf/benchmarks
+	rm -rf $(RELEASE)/src/vendor/httpaf/certificates
+	rm -rf $(RELEASE)/src/vendor/httpaf/examples
+	rm -rf $(RELEASE)/src/vendor/httpaf/images
+	rm -rf $(RELEASE)/src/vendor/httpaf/lib_test
+	rm -rf $(RELEASE)/src/vendor/httpaf/mirage
+	rm -rf $(RELEASE)/src/vendor/httpaf/nix
+	rm -rf $(RELEASE)/src/vendor/h2/.github
+	rm -rf $(RELEASE)/src/vendor/h2/async
+	rm -rf $(RELEASE)/src/vendor/h2/certificates
+	rm -rf $(RELEASE)/src/vendor/h2/examples
+	rm -rf $(RELEASE)/src/vendor/h2/lib_test
+	rm -rf $(RELEASE)/src/vendor/h2/mirage
+	rm -rf $(RELEASE)/src/vendor/h2/nix
+	rm -rf $(RELEASE)/src/vendor/h2/spec
+	rm -rf $(RELEASE)/src/vendor/h2/vegeta-plot.png
+	rm -rf $(RELEASE)/src/vendor/websocketaf/.github
+	rm -rf $(RELEASE)/src/vendor/websocketaf/async
+	rm -rf $(RELEASE)/src/vendor/websocketaf/examples
+	rm -rf $(RELEASE)/src/vendor/websocketaf/lib_test
+	rm -rf $(RELEASE)/src/vendor/websocketaf/mirage
+	rm -rf $(RELEASE)/src/vendor/websocketaf/nix
+	tar cf $(RELEASE).tar $(RELEASE)
+	ls -l $(RELEASE).tar
+	gzip -9 $(RELEASE).tar
+	mkdir -p _release
+	cp $(RELEASE).tar.gz _release
+	(cd _release && tar xf $(RELEASE).tar.gz)
+	opam pin add -y --no-action dream _release/$(RELEASE) --kind=path
+	opam reinstall -y --verbose dream
+	cd example/1-hello && dune exec --root . ./hello.exe
+	opam remove -y dream
+	opam pin remove -y dream
+	md5sum $(RELEASE).tar.gz
+	ls -l $(RELEASE).tar.gz
