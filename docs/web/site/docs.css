@@ -116,7 +116,7 @@ body {
 
 .odoc-content code {
   /* color: #ddd; */
-  /* background-color: #2c333b; */
+  background-color: #2c333b;
   padding: 0 5px;
   margin: 0 1px;
   white-space: nowrap;
@@ -367,6 +367,7 @@ p + .odoc-spec {
 #type-part + .spec-doc li + li,
 #type-upload_event + .spec-doc li + li,
 #val-upload + .spec-doc li + li,
+#val-static + .spec-doc li + li,
 #val-from_target_path + .spec-doc li + li {
   margin-top: 0;
 }

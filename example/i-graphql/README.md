@@ -74,6 +74,10 @@ to protect future extensions of it
 [against CSRF](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#identifying-source-origin-via-originreferer-header). See example
 [**`e-json`**](../e-json#security) for more details on how this works.
 
+If you'd like to do I/O or other asynchronous operations in your resolvers, use
+[`io_field`](https://github.com/andreas/ocaml-graphql-server#lwt-support)
+rather than `field`.
+
 See example [**`w-graphql-subscription`**](../w-graphql-subscription#files) for
 an example with a GraphQL subscription.
 

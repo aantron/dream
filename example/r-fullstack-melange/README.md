@@ -76,6 +76,11 @@ Then visit [http://localhost:8080](http://localhost:8080), and you will see...
 
 <br>
 
+As a footnote, it is also possible to write both the server and client in this
+example in OCaml syntax.
+
+<br>
+
 **See also:**
 
 - [**`w-esy`**](../w-esy#files) details the server's [esy](https://esy.sh/)

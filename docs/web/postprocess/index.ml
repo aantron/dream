@@ -602,7 +602,7 @@ let empty_expected = {|<div class="spec value" id="val-empty">
 let empty_replacement = {|
 <pre><span class="keyword">val</span> empty :
   ?headers:(string * string) list ->
-    status -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+    <a href="#type-status">status</a> -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -1775,14 +1775,6 @@ let pretty_print_signatures soup =
 
   multiline "#val-sort_headers" sort_headers_expected sort_headers_replacement
 
-(* let remove_specs soup =
-  let selectors = [
-    "#module-Method_and_status";
-  ] in
-
-  selectors |> List.iter (fun selector ->
-    soup $ selector |> Soup.R.parent |> Soup.delete) *)
-
 let remove_stdlib soup =
   soup $$ ".xref-unresolved:contains(\"Stdlib\")" |> Soup.iter (fun element ->
     begin match Soup.next_sibling element with
@@ -1802,6 +1794,16 @@ let remove_stdlib soup =
           | _ | exception _ -> ()
     end;
     delete element)
+
+let retarget_status soup =
+  soup $$ "a[href=#type-status]"
+  |> Soup.(iter (set_attribute "href" "#status_codes"))
+
+let links_new_tabs soup =
+  soup $$ "a[href^=http]"
+  |> Soup.(iter (fun a ->
+    set_attribute "target" "_blank" a;
+    set_attribute "rel" "noreferer noopener" a))
 
 let () =
   let source = Sys.argv.(1) in
@@ -1825,5 +1827,7 @@ let () =
   Common.add_backing_lines soup;
 
   remove_stdlib content;
+  retarget_status content;
+  links_new_tabs content;
 
   Soup.(to_string content |> write_file destination)

@@ -57,6 +57,16 @@ and middleware = handler -> handler
       let count_requests inner_handler request =
         count := !count + 1;
         inner_handler request
+    ]}
+
+    In case you are wondering why the example middleware [count_requests] takes
+    two arguments, while the type says it should take only one, it's because:
+
+    {[
+      middleware
+        = handler -> handler
+        = handler -> (request -> response promise)
+        = handler -> request -> response promise
     ]} *)
 
 and route
@@ -630,8 +640,8 @@ val all_cookies : request -> (string * string) list
 (** {1 Bodies} *)
 
 val body : 'a message -> string promise
-(** Retrieves the entire body. Stores a reference, so {!Dream.body} can be used
-    many times. See example
+(** Retrieves the entire body. Retains a reference to the body, so {!Dream.body}
+    can be used multiple times. See example
     {{:https://github.com/aantron/dream/tree/master/example/6-echo#files}
     [6-echo]}. *)
 
@@ -1176,7 +1186,7 @@ val not_found : handler
 val static :
   ?loader:(string -> string -> handler) ->
     string -> handler
-(** Serves static files from the given local path. See example
+(** Serves static files from a local directory. See example
     {{:https://github.com/aantron/dream/tree/master/example/f-static#files}
     [f-static]}.
 
@@ -1189,20 +1199,36 @@ val static :
         @@ Dream.not_found
     ]}
 
-    [Dream.static local_path] checks that the request [path] is relative and
-    contains no parent directory references. It then calls [~loader local_root
-    path request]. The default loader responds with a file at [local_root/path]
-    in the file system, or [404 Not Found] if the file does not exist. It uses
-    {{:https://github.com/mirage/ocaml-magic-mime} magic-mime} to set the
-    [Content-Type:]
+    [Dream.static local_directory] validates the path substituted for [**] by
+    checking that it is (1) relative and (2) does not contain parent directory
+    references ([..]). If these checks fail, {!Dream.static} responds with [404
+    Not Found].
 
-    Pass [~loader] to implement any other behavior, including serving files
-    from memory. See example
+    If the checks succeed, {!Dream.static} calls [~loader local_directory path
+    request], where
+
+    - [local_directory] is the same directory that was passed to
+      {!Dream.static}.
+    - [path] is what was substituted for [**].
+
+    The default loader joins [local_directory] and [path], and uses the result
+    to respond with a file from the file system. If such a file does not exist,
+    the default loader responds with [404 Not Found].
+
+    See example
     {{:https://github.com/aantron/dream/tree/master/example/w-one-binary#files}
-    [w-one-binary]}. [~loader] can set headers on its response, including
-    [ETag:]
+    [w-one-binary]} for a loader that serves files from memory instead.
 
-    If checks on [path] fail, {!Dream.static} responds with [404 Not Found]. *)
+    {!Dream.static} uses {{:https://github.com/mirage/ocaml-magic-mime}
+    magic-mime} to set a [Content-Type:] header based on the requested file's
+    extension. To suppress the guess, [~loader] can set its own [Content-Type:]
+    header in the response that it returns.
+
+    [~loader] can set additional headers on the response. Of particular interest
+    are headers related to cache control, such as
+    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag}
+    [ETag]}. See {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching}
+    MDN {i HTTP caching}}. *)
 
 
 
@@ -1335,16 +1361,23 @@ val close_websocket : ?code:int -> websocket -> unit promise
 
 
 
-(** {1 GraphQL} *)
+(** {1 GraphQL}
 
-val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
-(** [Dream.graphql make_context schema] serves the GraphQL [schema]. Integrates
-    {{:https://github.com/andreas/ocaml-graphql-server#readme}
+    Dream integrates {{:https://github.com/andreas/ocaml-graphql-server#readme}
     ocaml-graphql-server}. See examples
     {{:https://github.com/aantron/dream/tree/master/example/i-graphql#files}
     [i-graphql]} and
     {{:https://github.com/aantron/dream/tree/master/example/w-graphql-subscription#files}
     [w-graphql-subscription]}.
+
+    If you are also
+    {{:https://github.com/aantron/dream/tree/master/example#full-stack} writing
+    a client in a flavor of OCaml}, consider
+    {{:https://github.com/reasonml-community/graphql-ppx} graphql-ppx} for
+    generating GraphQL queries. *)
+
+val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
+(** [Dream.graphql make_context schema] serves the GraphQL [schema].
 
     {[
       let () =
@@ -1380,7 +1413,12 @@ val graphiql : string -> handler
 (** Serves
     {{:https://github.com/graphql/graphiql/tree/main/packages/graphiql#readme}
     GraphiQL}, a GraphQL query editor. The string gives the GraphQL endpoint
-    that the editor will work with. *)
+    that the editor will work with.
+
+    Dream's build of GraphiQL is found in the
+    {{:https://github.com/aantron/dream/tree/master/src/graphiql} src/graphiql}
+    directory. If you have the need, you can use it as the starting point for
+    your own customized GraphiQL. *)
 
 
 
@@ -1607,8 +1645,8 @@ type error = {
     [condition] describes the error itself.
 
     - [`Response] is a [4xx] or [5xx] response.
-    - [`Exn] is a caught exception.
     - [`String] is an error that has only an English-language description.
+    - [`Exn] is a caught exception.
 
     The default error handler logs [`Exn] and [`Strings], but not [`Response].
     [`Response] is assumed to be deliberate, and already logged by
@@ -1669,9 +1707,9 @@ type error = {
     {li
     [debug] is [true] if {!Dream.run} was called with [~debug].
 
-    If so, the default error handler gathers various fields from any available
+    If so, the default error handler gathers various fields from the current
     request, formats the error condition, and passes the resulting string to the
-    template.
+    template as [debug_dump].
 
     The default template shows this string in its repsonse, instead of returning
     a response with no body.
@@ -1707,19 +1745,19 @@ val error_template :
 
     {[
       let my_error_handler =
-        Dream.error_template (fun ~debug_dump response ->
+        Dream.error_template (fun ~debug_dump suggested_response ->
           let body =
             match debug_dump with
             | Some string -> Dream.html_escape string
-            | None -> Dream.status_to_string (Dream.status response)
+            | None -> Dream.status_to_string (Dream.status suggested_response)
           in
 
-          response
+          suggested_response
           |> Dream.with_body body
           |> Lwt.return)
     ]}
 
-    The error's context suggests [response]. Usually, it's only valid field is
+    The error's context suggests a response. Usually, its only valid field is
     {!Dream.val-status}.
 
     - If the error is an exception or rejection from the application, the status
@@ -1728,7 +1766,7 @@ val error_template :
       itself is passed to the template.
     - For low-level errors, the status is typically either [400 Bad Request] if
       the error was likely caused by the client, and [500 Internal Server Error]
-      if likely caused by the server.
+      if the error was likely caused by the server.
 
     If [~debug] was passed to {!Dream.run}, [~debug_dump] will be [Some info],
     where [info] is a multi-line string containing an error description, stack
