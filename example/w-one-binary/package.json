@@ -7,8 +7,5 @@
   },
   "scripts": {
     "run": "dune exec --root . ./one_binary.exe"
-  },
-  "esy": {
-    "buildsInSource": "_build" 
   }
 }

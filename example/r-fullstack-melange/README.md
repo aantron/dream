@@ -81,6 +81,8 @@ Then visit [http://localhost:8080](http://localhost:8080), and you will see...
 - [**`w-esy`**](../w-esy#files) details the server's [esy](https://esy.sh/)
   packaging.
 - [**`w-fswatch`**](../w-fswatch#files) sets up a primitive development watcher.
+- [**`w-one-binary`**](../w-one-binary#files) bundles assets into a
+  self-contained binary.
 - [**`7-template`**](../7-template#files) discusses the templater, including
   security. The example is in OCaml syntax.
 

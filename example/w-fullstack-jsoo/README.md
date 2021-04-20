@@ -67,4 +67,11 @@ Then visit [http://localhost:8080](http://localhost:8080), and you will see...
 
 <br>
 
+**See also:**
+
+- [**`w-one-binary`**](../w-one-binary#files) for bundling assets into a
+  self-contained binary.
+
+<br>
+
 [Up to the example index](../#full-stack)

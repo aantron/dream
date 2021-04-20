@@ -1197,7 +1197,10 @@ val static :
     [Content-Type:]
 
     Pass [~loader] to implement any other behavior, including serving files
-    from memory. [~loader] can set headers on its response, including [ETag:]
+    from memory. See example
+    {{:https://github.com/aantron/dream/tree/master/example/w-one-binary#files}
+    [w-one-binary]}. [~loader] can set headers on its response, including
+    [ETag:]
 
     If checks on [path] fail, {!Dream.static} responds with [404 Not Found]. *)
 

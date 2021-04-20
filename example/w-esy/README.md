@@ -29,7 +29,8 @@ esy metadata!
 19.04.21 08:57:33.450                       Press ENTER to stop
 </code></pre>
 
-If you go to [http://localhost:8080](http://localhost:8080), you will see
+The first time you run `npx esy`, it will take a few miutes. After the commands
+are done, go to [http://localhost:8080](http://localhost:8080), and you will see
 `Good morning, world!`, just as in [**`1-hello`**](../1-hello#files)!
 
 <br>
@@ -102,6 +103,8 @@ languages. Melange compiles OCaml and Reason.
 - [**`r-fullstack-melange`**](../r-fullstack-melange#files) for full-stack
   development with Melange and Reason syntax.
 - [**`w-fswatch`**](../w-fswatch#files) for a development watcher.
+- [**`w-one-binary`**](../w-one-binary#files) for bundling assets into a
+  self-contained binary.
 
 <br>
 

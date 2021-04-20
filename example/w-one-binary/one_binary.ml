@@ -1,4 +1,4 @@
-let loader _ path _request =
+let loader _root path _request =
   match Assets.read path with
   | None -> Dream.empty `Not_Found
   | Some asset -> Dream.respond asset

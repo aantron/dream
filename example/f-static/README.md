@@ -51,12 +51,13 @@ If you inspect the response headers for our request, you will see
 
 You can replace the file loading behavior of
 [`Dream.static`](https://aantron.github.io/dream/#val-static) by passing it a
-`~handler` argument. One possibility is to use
+`~loader` argument. One possibility is to use
 [crunch](https://github.com/mirage/ocaml-crunch) to compile a directory right
 into your Web app binary, and then serve that directory from memory with
-[`Dream.static`](https://aantron.github.io/dream/#val-static)!
+[`Dream.static`](https://aantron.github.io/dream/#val-static)! See example
+[**`w-one-binary`**](../w-one-binary#files).
 
-You can also use `~handler` to set arbitrary headers on the response.
+You can also use `~loader` to set arbitrary headers on the response.
 
 <br>
 
@@ -64,6 +65,8 @@ You can also use `~handler` to set arbitrary headers on the response.
 
 - [**`g-upload`**](../g-upload#files) receives files instead of serving them.
 - [**`h-sql`**](../h-sql#files) runs SQL queries against a database.
+- [**`w-one-binary`**](../w-one-binary#files) bundles assets into a
+  self-contained binary.
 
 <br>
 
