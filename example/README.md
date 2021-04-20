@@ -75,7 +75,7 @@ There are several examples showing Dream with Reason syntax.
 
 # Examples
 
-The rest of the examples cover additional topics in a more-standalone fashion.
+The rest of the examples cover additional topics in a more standalone fashion.
 The goal of the examples is to (eventually) cover the great majority of
 real-world HTTP usage, so that they make up a good survey. Please open an issue
 if something is missing!

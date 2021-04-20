@@ -1,39 +1,46 @@
 opam-version: "2.0"
 
 synopsis: "Tidy, feature-complete Web framework"
+tags: ["http" "web" "framework" "websocket" "graphql" "server" "http2" "tls"]
+description: """
+Dream is a feature-complete Web framework with a simple programming model and no
+boilerplate. It provides only two data types, request and response.
+
+Almost everything else is either a built-in OCaml type, or an abbreviation for a
+bare function. For example, a Web app, known in Dream as a handler, is just an
+ordinary function from requests to responses. And a middleware is then just a
+function from handlers to handlers.
+
+Within this model, Dream adds:
+
+- Session management with pluggable back ends.
+- A fully composable router.
+- Support for HTTP/1.1, HTTP/2, and HTTPS.
+- WebSockets.
+- GraphQL, including subscriptions and a built-in GraphiQL editor.
+- SQL connection pool helpers.
+- Server-side HTML templates.
+- Automatic secure handling of cookies and forms.
+- Unified, internationalization-friendly error handling.
+- A neat log, and OCaml runtime configuration.
+- Helpers for Web formats, such as Base64url, and a chosen modern cipher.
+
+Because of the simple programming model, everything is optional and composable.
+It is trivailly possible to strip Dream down to just a bare driver of the
+various HTTP protocols.
+
+Dream is presented as a single module, whose API is documented on one page. In
+addition, Dream comes with a large number of examples. Security topics are
+introduced throughout, wherever they are applicable."""
 
 license: "MIT"
 homepage: "https://github.com/aantron/dream"
-author: "Anton Bachin <antonbachin@yahoo.com>"
-
+doc: "https://aantron.github.io/dream"
 bug-reports: "https://github.com/aantron/dream/issues"
-maintainer: "Anton Bachin <antonbachin@yahoo.com>"
-
 dev-repo: "git+https://github.com/aantron/dream.git"
 
-build: [
-  ["dune" "build" "-p"
-    "dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,hpack,h2,h2-lwt,h2-lwt-unix"
-    "-j" jobs]
-]
-
-# Extreme abuse.
-install: [
-  ["opam-installer" "--prefix" prefix "dream.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/gluten/gluten.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/gluten/gluten-lwt.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/gluten/gluten-lwt-unix.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/websocketaf/websocketaf.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/httpaf/httpaf.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/httpaf/httpaf-lwt.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/httpaf/httpaf-lwt-unix.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/h2/hpack.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/h2/h2.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/h2/h2-lwt.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/h2/h2-lwt-unix.install"]
-]
-# TODO Set all these packages as conflicts.
-# TODO Use dune install -p ...
+author: "Anton Bachin <antonbachin@yahoo.com>"
+maintainer: "Anton Bachin <antonbachin@yahoo.com>"
 
 depends: [
   "base-unix"
@@ -43,9 +50,9 @@ depends: [
   "conf-libev"
   "cstruct"
   "dune" {>= "2.7.0"}  # --instrument-with.
-  "fmt" {>= "0.8.7"}  # `Italic. This constrains Dream to OCaml >= 4.05.
+  "fmt" {>= "0.8.7"}  # `Italic.
   "graphql_parser"
-  "graphql-lwt"  # Should be factored out; Menhir as recursive dependency.
+  "graphql-lwt"
   "hmap"
   "lwt"
   "lwt_ppx"
@@ -65,14 +72,16 @@ depends: [
   # "gluten-lwt-unix"
   # "httpaf"
   # "httpaf-lwt-unix"
+  # "h2"
+  # "h2-lwt-unix"
+  # "websocketaf"
 
   # Dependencies of vendored packages.
   "angstrom" {>= "0.14.0"}
   "bigstringaf" {>= "0.4.0"}
-  "digestif" {>= "0.7"}  # websocket/af, sha1, current CSRF tokens.
+  "digestif" {>= "0.7"}  # websocket/af, sha1.
   "faraday" {>= "0.6.1"}
   "faraday-lwt-unix"
-  "ocaml" {>= "4.06.0"}  # Gluten.
   "psq"  # h2.
   "result"  # http/af, websocket/af.
 
@@ -82,4 +91,30 @@ depends: [
   "ppx_expect" {with-test}
 ]
 
-# TODO Tags, description.
+conflicts: [
+  "gluten"
+  "httpaf"
+  "h2"
+  "websocketaf"
+]
+
+build: [
+  ["dune" "build" "-p"
+    "dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,hpack,h2,h2-lwt,h2-lwt-unix"
+    "-j" jobs]
+]
+
+install: [
+  ["opam-installer" "--prefix" prefix "dream.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/gluten/gluten.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/gluten/gluten-lwt.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/gluten/gluten-lwt-unix.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/websocketaf/websocketaf.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/httpaf/httpaf.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/httpaf/httpaf-lwt.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/httpaf/httpaf-lwt-unix.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/h2/hpack.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/h2/h2.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/h2/h2-lwt.install"]
+  ["opam-installer" "--prefix" prefix "src/vendor/h2/h2-lwt-unix.install"]
+]
