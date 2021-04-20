@@ -1,0 +1,9 @@
+(executable
+ (name stress_websocket_send)
+ (libraries dream)
+ (preprocess (pps lwt_ppx)))
+
+(rule
+ (targets stress_websocket_send.ml)
+ (deps stress_websocket_send.eml.ml)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))

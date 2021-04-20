@@ -102,6 +102,8 @@ if something is missing!
   templates asynchronously, one chunk at a time.
 - [**`w-stress-response`**](w-stress-response#files) &nbsp;&mdash;&nbsp;
   benchmarks streaming very large responses.
+- [**`w-stress-websocket-send`**](w-stress-websocket-send#files)
+  &nbsp;&mdash;&nbsp; benchmarks sending WebSocket messages quickly.
 
 <br>
 <br>

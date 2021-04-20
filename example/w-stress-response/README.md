@@ -2,8 +2,8 @@
 
 <br>
 
-This example responds with very large data streams &mdash; 1 GB in 64K chunks by
-default. To use,
+This example responds with very large data streams &mdash; 1 GB in 64 KB chunks
+by default. To use,
 
 <pre><code><b>$ dune exec --root . ./stress_response.exe</b>
 <b>$ curl http://localhost:8080 > /dev/null &</b>

@@ -11,15 +11,13 @@ let stress ?(megabytes = 1024) ?(chunk = 64) response =
   let chunk_a = String.make chunk 'a' in
   let chunk_b = String.make chunk 'b' in
 
-  Dream.log "Starting";
   let start = Unix.gettimeofday () in
 
   let rec loop sent =
     if sent >= limit then
       let%lwt () = Dream.flush response in
       let%lwt () = Dream.close_stream response in
-      let elapsed = Unix.gettimeofday () -. start in
-      Lwt.return elapsed
+      Lwt.return (Unix.gettimeofday () -. start)
     else
       let%lwt () = Dream.write chunk_a response in
       let%lwt () = Dream.write chunk_b response in

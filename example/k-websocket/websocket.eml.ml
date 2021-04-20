@@ -11,7 +11,7 @@ let home =
 
       socket.onmessage = function (e) {
         alert(e.data);
-      }
+      };
 
       </script>
     </body>
