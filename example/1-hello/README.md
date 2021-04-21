@@ -14,7 +14,7 @@ let () =
 
 It's the absolute minimum Dream server. It responds to all requests with the
 same text. At startup, Dream prints a message to the log, telling you where to
-point your browser. Your terminal probably allows you to click the link.
+point your browser. Your terminal probably makes the link clickable.
 
 <pre><code><b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b>
@@ -24,6 +24,16 @@ point your browser. Your terminal probably allows you to click the link.
 
 If you go to [http://localhost:8080](http://localhost:8080), you will, of
 course, see `Good morning, world!`.
+
+<br>
+
+If you'd like to copy out the server binary, you can do it like this:
+
+<pre><code><b>npx esy cp '#{self.target_dir}/default/hello.exe' .
+</b></code></pre>
+
+The name will change as you go through the tutorial examples. It's always the
+name of the `.ml` file, but with `.ml` changed to `.exe`.
 
 <br>
 
