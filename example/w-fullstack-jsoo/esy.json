@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "@opam/dream": "aantron/dream:dream.opam",
+    "@opam/dune": "^2.0",
+    "@opam/js_of_ocaml": "*",
+    "@opam/js_of_ocaml-ppx": "*",
+    "ocaml": "4.12.x"
+  },
+  "esy": {
+    "buildsInSource": "_build",
+    "build": [
+      "dune build --root . client/client.bc.js",
+      "mkdir -p static",
+      "cp _build/default/client/client.bc.js static/client.js",
+      "dune build --root . server/server.exe"
+    ]
+  },
+  "scripts": {
+    "start": "dune exec --root . server/server.exe"
+  }
+}

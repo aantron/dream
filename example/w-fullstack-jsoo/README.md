@@ -61,6 +61,11 @@ cp _build/default/client/client.bc.js static/client.js
 dune exec --root . server/server.exe
 </b></code></pre>
 
+You can also trigger it all with esy with
+
+<pre><code><b>$ npm install esy && npx esy</b>
+<b>$ npx esy start</b></code></pre>
+
 Then visit [http://localhost:8080](http://localhost:8080), and you will see...
 
 ![Full-stack greeting](https://raw.githubusercontent.com/aantron/dream/master/docs/asset/fullstack.png)
