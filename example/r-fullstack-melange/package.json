@@ -6,9 +6,9 @@
     "esy": "*"
   },
   "scripts": {
-    "esy": "esy",
+    "postinstall": "esy",
     "build": "esy bsb -make-world -- --root .",
     "pack": "esbuild _build/default/client/client.js --bundle --outfile=static/client.js",
-    "start": "npm run esy && npm run build && npm run pack && dune exec --root . server/server.exe"
+    "start": "npm run build && npm run pack && esy start"
   }
 }

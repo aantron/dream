@@ -1,14 +1,15 @@
 {
   "name": "fullstack-melange",
   "dependencies": {
+    "@opam/dream": "aantron/dream:dream.opam",
+    "@opam/dune": "^2.0",
     "melange": "melange-re/melange",
     "ocaml": "4.12.x"
   },
   "esy": {
-    "buildsInSource": true,
-    "build": ["ln -sfn #{melange.install} node_modules/bs-platform"]
+    "buildsInSource": "unsafe"
   },
-  "installConfig": {
-    "pnp": false
+  "scripts": {
+    "start": "dune exec --root . server/server.exe"
   }
 }
