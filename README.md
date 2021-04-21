@@ -11,6 +11,10 @@ Easy-to-use, feature-complete Web framework without boilerplate.
 </p>
 
 <br>
+
+<pre align="center"><b>bash -c "$(curl -fsSL https://raw.githubusercontent.com/aantron/dream/master/example/quickstart.sh)"</b></pre>
+
+<br>
 <br>
 
 Dream is **one flat module** in **one package**, documented on
