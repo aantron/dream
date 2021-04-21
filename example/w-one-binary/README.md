@@ -18,6 +18,14 @@ directory into a file `assets.ml`:
   (run ocaml-crunch -m plain assets -o %{target}))))
 </b></code></pre>
 
+crunch comes from the opam repository, so we also add it in
+[`esy.json`](https://github.com/aantron/dream/blob/master/example/w-one-binary/esy.json):
+
+<pre><code>"dependencies": {
+  <b>"@opam/crunch": "*"</b>
+}
+</code></pre>
+
 <br>
 
 The generated `assets.ml` has a signature like this:
@@ -62,8 +70,8 @@ it by setting `Content-Type` yourself when calling
 
 To build the whole setup, just do
 
-<pre><code><b>$ npx esy</b>
-<b>$ npx esy run</b></code></pre>
+<pre><code><b>$ npm install esy && npx esy</b>
+<b>$ npx esy start</b></code></pre>
 
 You can now visit
 [http://localhost:8080/assets/camel.jpeg](http://localhost:8080/assets/camel.jpeg)
@@ -98,7 +106,7 @@ To add more files, just add them to the `assets/` directory and re-run
 
 **See also:**
 
-- [**`w-esy`**](../w-esy#files) for an introduction to packaging with esy.
+- [**`w-esy`**](../w-esy#files) for details on packaging with esy.
 - [**`w-fswatch`**](../w-fswatch#files) for a primitive watcher, which can be
   extended to watch `assets/`.
 - [**`f-static`**](../f-static#files) shows the basics of

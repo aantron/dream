@@ -32,7 +32,8 @@ let () =
   @@ _ => Dream.stream(~headers=[("Content-Type", Dream.text_html)], render);
 ```
 
-<pre><code><b>$ dune exec --root . ./template-stream.exe</b></code></pre>
+<pre><code><b>$ npm install esy && npx esy</b>
+<b>$ npx esy start</b></code></pre>
 
 <br>
 

@@ -84,8 +84,8 @@ if something is missing!
 
 - [**`w-graphql-subscription`**](w-graphql-subscription#files)
   &nbsp;&mdash;&nbsp; GraphQL subscriptions.
-- [**`w-esy`**](w-esy#files) &nbsp;&mdash;&nbsp; shows how to depend on Dream
-  using [esy](https://esy.sh/), an npm-like package manager.
+- [**`w-esy`**](w-esy#files) &nbsp;&mdash;&nbsp; gives detail on packaging with
+  [esy](https://esy.sh/), an npm-like package manager.
 - [**`w-one-binary`**](w-one-binary#files) &nbsp;&mdash;&nbsp; bakes static
   assets into a self-contained server binary.
 - [**`w-fswatch`**](w-fswatch#files) &nbsp;&mdash;&nbsp; sets up a development

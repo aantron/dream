@@ -22,7 +22,8 @@ let () =
         Dream.html "Welcome back, %s!" (Dream.html_escape username)
 ```
 
-<pre><code><b>$ dune exec --root . ./session.exe</b></code></pre>
+<pre><code><b>$ npm install esy && npx esy</b>
+<b>$ npx esy start</b></code></pre>
 
 <br>
 

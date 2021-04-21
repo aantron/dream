@@ -86,9 +86,8 @@ client in `./static/client.js`. The example serves the bundled client using
 
 **See also:**
 
-- [**`w-esy`**](../w-esy#files) packages the server with
-  [esy](https://esy.sh/), an npm-like package manager, for a full-stack
-  npm-like workflow.
+- [**`w-esy`**](../w-esy#files) details the server's [esy](https://esy.sh/)
+  packaging.
 - [**`w-fswatch`**](../w-fswatch#files) sets up a primitive development watcher.
 - [**`w-one-binary`**](../w-one-binary#files) bundles assets into a
   self-contained binary.

@@ -12,7 +12,8 @@ let () =
   @@ fun _ -> Dream.html "Good morning, world!"
 ```
 
-<pre><code><b>$ dune exec --root . ./https.exe</b></code></pre>
+<pre><code><b>$ npm install esy && npx esy</b>
+<b>$ npx esy start</b></code></pre>
 
 <br>
 

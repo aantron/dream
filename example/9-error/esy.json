@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@opam/dream": "aantron/dream:dream.opam",
+    "@opam/dune": "^2.0",
+    "ocaml": "4.12.x"
+  },
+  "scripts": {
+    "start": "dune exec --root . ./error.exe"
+  }
+}

@@ -3,14 +3,12 @@
   "dependencies": {
     "bs-platform": "*",
     "bs-webapi": "*",
-    "esbuild": "*"
+    "esbuild": "*",
+    "esy": "*"
   },
   "scripts": {
     "build": "bsb -make-world",
-    "pack":
-      "esbuild lib/js/client/client.js --bundle --outfile=static/client.js",
-    "server": "dune build --root . server/server.exe",
-    "start":
-      "npm run build && npm run pack && dune exec --root . server/server.exe"
+    "pack": "esbuild lib/js/client/client.js --bundle --outfile=static/client.js",
+    "start": "npm run build && npm run pack && npx esy start"
   }
 }

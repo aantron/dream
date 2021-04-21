@@ -2,8 +2,10 @@
 
 <br>
 
-To depend on Dream using [esy](https://esy.sh/en/), put this in your
-`package.json`:
+To depend on Dream using [esy](https://esy.sh/en/), we use a file `esy.json`.
+It's a lot like
+[`package.json`](https://docs.npmjs.com/cli/v7/configuring-npm/package-json),
+and looks like this:
 
 ```json
 {
@@ -20,18 +22,14 @@ To depend on Dream using [esy](https://esy.sh/en/), put this in your
 
 <br>
 
-You now have a variant of example [**`1-hello`**](../1-hello#files) with proper
-esy metadata!
-
-<pre><code><b>$ npx esy</b>
-<b>$ npx esy run</b>
+<pre><code><b>$ npm install esy && npx esy</b>
+<b>$ npx esy start</b>
 19.04.21 08:57:33.450                       Running on http://localhost:8080
 19.04.21 08:57:33.450                       Press ENTER to stop
 </code></pre>
 
-The first time you run `npx esy`, it will take a few miutes. After the commands
-are done, go to [http://localhost:8080](http://localhost:8080), and you will see
-`Good morning, world!`, just as in [**`1-hello`**](../1-hello#files)!
+The first time you run `npx esy`, it will take a few minutes installing OCaml
+and all the native dependencies inside your project.
 
 <br>
 
@@ -56,43 +54,30 @@ names are prefixed with `@opam`, like `@opam/dream`. You can search the packages
 
 In addition to the files you see in this example, `npx esy` also generates a
 directory called `esy.lock`. It's a set of lock files, similar to
-`package-lock.json`. You should usually commit `esy.lock` &mdash; we left it out
-of this example to keep it in sync with the Dream repo and its upstream
-projects, but this deliberately gives up reproducible builds.
+`package-lock.json`. You should usually commit `esy.lock`. We left it out of
+this example to keep it in sync with the Dream repo and its upstream projects.
+But this deliberately gives up reproducible builds &mdash; something you
+usually want for your own code.
 
 <br>
 
-Once you've got the server in this example building with esy, you can develop a
-JavaScript client as normal, with npm or Yarn. Simply scope this example's
-`package.json`inside an `"esy"` key, and write your usual, client-side
-`package.json` outside:
+You can develop a JavaScript client side-by-side with the server as normal,
+with npm or Yarn. Just add `package.json` like you normally would. You may want
+to include `esy` itself as a *JavaScript* dependency, so that npm will not
+uninstall it from your project:
 
 ```json
 {
-  "esy": {
-    "dependencies": {
-      "@opam/dream": "aantron/dream:dream.opam",
-      "@opam/dune": "^2.0",
-      "ocaml": "4.12.x"
-    },
-    "scripts": {
-      "run": "dune exec --root . ./hello.exe"
-    }
-  },
-
   "dependencies": {
-    "client": "dependencies"
+    "esy": "*",
+    "client": "normal_js_dependencies"
   }
 }
 ```
 
-npm will ignore `"esy"`, while esy will read exactly only `"esy"`! An
-alternative is to rename the server-side `package.json` to `esy.json`.
-
 You can make this even more powerful by writing the client itself in OCaml,
 Reason, or ReScript &mdash; all flavors of OCaml that compile to JavaScript.
-See the examples linked below. The ReScript compiler can compile all three
-languages. Melange compiles OCaml and Reason.
+See the examples linked below.
 
 <br>
 

@@ -37,7 +37,8 @@ let () =
   @@ Dream.not_found
 ```
 
-<pre><code><b>dune exec --root . ./tyxml.exe</b></code></pre>
+<pre><code><b>$ npm install esy && npx esy</b>
+<b>$ npx esy start</b></code></pre>
 
 <br>
 

@@ -4,7 +4,8 @@
 
 Run this example:
 
-<pre><code><b>$ dune exec --root . ./static.exe</b></code></pre>
+<pre><code><b>$ npm install esy && npx esy</b>
+<b>$ npx esy start</b></code></pre>
 
 ...and visit
 [http://localhost:8080/static/static.ml](http://localhost:8080/static/static.ml).

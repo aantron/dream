@@ -1,7 +1,24 @@
+# Dune
 _build/
 .merlin
 *.install
-_coverage/
-scratch/
+
+# opam
 _opam/
+
+# npm
+node_modules/
+example/*/package-lock.json
+
+# esy
+_esy/
+esy.lock
+
+# Release script
 dream-*
+
+# Bisect_ppx
+_coverage/
+
+# Humans
+scratch/

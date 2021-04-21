@@ -2,7 +2,10 @@
 
 <br>
 
-Let's serve a list of comments with a comment form!
+Let's serve a list of comments with a comment form! First, we define a couple of
+prepared statements using
+[Caqti](https://paurkedal.github.io/ocaml-caqti/caqti/Caqti_connect_sig/module-type-S/module-type-CONNECTION/index.html),
+a library for talking to SQL databases:
 
 ```ocaml
 module type DB = Caqti_lwt.CONNECTION
@@ -24,7 +27,12 @@ let add_comment =
   fun text (module Db : DB) ->
     let%lwt unit_or_error = Db.exec query text in
     Caqti_lwt.or_fail unit_or_error
+```
 
+...then, a template for our CSRF-safe form, like in example
+[**`d-form`**](../d-form#files):
+
+```ocaml
 let render comments request =
   <html>
     <body>
@@ -38,7 +46,11 @@ let render comments request =
 
     </body>
   </html>
+```
 
+...and finally, the Web app itself, which connects to `db.sqlite`:
+
+```ocaml
 let () =
   Dream.run
   @@ Dream.logger
@@ -62,7 +74,8 @@ let () =
   @@ Dream.not_found
 ```
 
-<pre><code><b>$ dune exec --root . ./sql.exe</b></code></pre>
+<pre><code><b>$ npm install esy && npx esy</b>
+<b>$ npx esy start</b></code></pre>
 
 <br>
 
@@ -73,22 +86,9 @@ comments!
 
 <br>
 
-Several things are going on in this example. It...
-
-- sets up the boilerplate for two SQL queries, `list_comments` and
-  `add_comment` with
-  [Caqti](https://paurkedal.github.io/ocaml-caqti/caqti/Caqti_connect_sig/module-type-S/module-type-CONNECTION/index.html);
-- defines a template, `render`, for our app's main page;
-- sets up a
-  [pool of SQL connections](https://aantron.github.io/dream/#val-sql_pool) to
-  `db.sqlite`; and
-- sets up two routes, one for displaying the comment list, and one for
-  receiving new comments from our CSRF-safe form (example
-  [**`d-form`**](../d-form#files)).
-
-We also take the opportunity to try out
+We take the opportunity to try out
 [`Dream.sql_sessions`](https://aantron.github.io/dream/#val-sql_sessions), which
-stores session data persistently in `db.sqlite`! See example
+stores session data persistently in `db.sqlite`. See example
 [**`b-session`**](../b-session#files) for an introduction to session management.
 Both the comments and the sessions survive server restarts.
 
@@ -110,7 +110,8 @@ CREATE TABLE dream_session (
 );
 ```
 
-We also had to make an addition to our Dune file:
+We also had to make an addition to our
+[`dune`](https://github.com/aantron/dream/blob/master/example/h-sql/dune) file:
 
 <pre>(executable
  (name sql)
@@ -123,7 +124,13 @@ We also had to make an addition to our Dune file:
  (action (run dream_eml %{deps} --workspace %{workspace_root})))
 </pre>
 
-<!-- TODO Recommend a redirect for better refresh behavior. -->
+...and to
+[`esy.json`](https://github.com/aantron/dream/blob/master/example/h-sql/esy.json):
+
+<pre>"dependencies": {
+  <b>"@opam/caqti-driver-sqlite3": "*"</b>
+}
+</pre>
 
 <br>
 
@@ -138,7 +145,7 @@ microservices, or other needs, you can switch, for example, to PostgreSQL by...
 
 <br>
 
-A good program for examining the database locally is
+A good program for examining databases locally is
 [Beekeeper Studio](https://www.beekeeperstudio.io/). Dream might also integrate
 an optional hosted database UI in the future, and you could choose to serve it
 at some route.

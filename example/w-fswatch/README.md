@@ -9,21 +9,21 @@ package managers such as APT and Homebrew:
 ```sh
 #!/bin/bash
 
-EXE=hello.exe
-dune exec --root . ./$EXE &
+npx esy start &
 fswatch -o hello.ml -l 2 | xargs -L1 bash -c \
-  "killall $EXE || true; (dune exec --root . ./$EXE || true) &"
+  "killall hello.exe || true; (npx esy start || true) &"
 ```
 
 <pre><code><b>$ bash watch.sh</b></code></pre>
 
 <br>
 
-This one rebuilds `hello.exe` every time `hello.ml` changes. It's a bit verbose
-and clunky, but it gets the job done.
+This watcher rebuilds `hello.exe` every time `hello.ml` changes. It's a bit
+verbose and clunky, but it gets the job done. We may be able to offer a better
+solution in the future.
 
 The reason we are not suggesting `dune watch -w` is because it does not kill the
-running server, which we are doing manually with the `killall` command.
+running server, which we are doing manually here, with the `killall` command.
 
 As your project grows, replace `hello.ml` with the list of your source
 directories. For example,
@@ -36,7 +36,7 @@ fswatch -o client server -l 2
 
 **See also:**
 
-- [**`w-esy`**](../w-esy#files) shows [esy](https://esy.sh/) packaging.
+- [**`w-esy`**](../w-esy#files) discusses [esy](https://esy.sh/) packaging.
 
 
 <br>
