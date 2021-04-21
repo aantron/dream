@@ -45,6 +45,24 @@ You can then use the `esy` command without the `npx` prefix.
 
 <br>
 
+If you need to run multiple build steps before `dune exec`, use
+[`esy.build`](https://esy.sh/docs/en/configuration.html#esybuild). Here is an
+example from [**`w-fullstack-jsoo`**](../w-fullstack-jsoo#files):
+
+```json
+"esy": {
+  "buildsInSource": "_build",
+  "build": [
+    "dune build --root . client/client.bc.js",
+    "mkdir -p static",
+    "cp _build/default/client/client.bc.js static/client.js",
+    "dune build --root . server/server.exe"
+  ]
+}
+```
+
+<br>
+
 Many of the packages you can obtain with esy are hosted in
 [opam](https://opam.ocaml.org/), the OCaml package repository. In esy, their
 names are prefixed with `@opam`, like `@opam/dream`. You can search the packages
