@@ -87,22 +87,32 @@ different dependencies of each, for fast porting to different environments.
 
 <br>
 
-## Getting started
-
-Dream is not yet announced or released! Before release, Dream will get a
-quick-start script, and some other help for getting started quickly. However,
-if you want to try Dream now, you can add:
+## Quick start
 
 ```
-"dependencies": {
-  "@opam/dream": "aantron/dream:dream.opam"
-}
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/aantron/dream/master/example/quickstart.sh)"
 ```
 
-to your `esy.json`. See example [**`w-esy`**][esy-example] for a minimal
-project.
+This [script][quickstart.sh] does a sandboxed build of one of the first
+[tutorials][tutorial], [**`2-middleware`**][2-middleware], which you can then
+edit.
 
-Alternatively, if you are using opam:
+It's mostly the same as:
+
+```
+git clone https://github.com/aantron/dream.git
+cd dream/example/2-middleware
+npm install esy && npx esy
+npx esy start
+```
+
+Knowing that, you can start from any other [example][tutorial]. All of them
+include their own build commands. You can copy them out to start your own
+project directory. Especially consider starting with the
+[full-stack examples][fullstack], which build both a Dream server and a
+JavaScript client.
+
+### opam
 
 ```
 git clone https://github.com/aantron/dream.git --recursive
@@ -110,32 +120,18 @@ cd dream
 opam install .
 ```
 
-Note: the clone *must* be `--recursive`, because Dream [vendors several
-packages][vendor] as git submodules. Also, if you have `gluten`, `httpaf`, `h2`,
-or `websocketaf`, or their `gluten-*`, etc., subpackages independently
-installed in your switch, you may have to remove them with `opam remove` to
-avoid conflicts. However, they should not be pulled into a basic build of Dream
-and most programs that use it.
-
 After that, go to one of the examples, such as [**`1-hello`**][1-hello], and
-try building it:
+build it:
 
 ```
 cd example/1-hello
 dune exec --root . ./hello.exe
 ```
 
-If you prefer Reason syntax, try example [**`r-hello`**][r-hello] instead.
-
-You should be able to copy the example out to a completely separate directory,
-if you didn't use a local `_opam` switch scoped to Dream's clone directory. If
-you did, you can pin Dream to your clone in a different opam switch with
-
-```
-opam pin add dream /path/to/your/clone
-```
-
 [esy-example]: https://github.com/aantron/dream/tree/master/example/w-esy#files
+[quickstart.sh]: https://github.com/aantron/dream/blob/master/example/quickstart.sh
+[esy]: https://esy.sh/
+[2-middleware]: https://github.com/aantron/dream/tree/master/example/2-middleware#files
 
 <br>
 
