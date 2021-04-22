@@ -134,6 +134,14 @@ and not supported by Dream.
 
 <br>
 
+**See also:**
+
+- [**`w-tyxml`**](../w-tyxml#files) shows how to use
+  [TyXML](https://github.com/ocsigen/tyxml), a different templater that uses
+  OCaml's type system to prevent emitting many kinds of invalid HTML.
+
+<br>
+
 [Up to the tutorial index](../#readme)
 
 <!-- TODO OWASP link; injection general link. -->

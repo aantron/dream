@@ -972,9 +972,12 @@ let render message =
     {{:https://github.com/aantron/dream/tree/master/example/7-template#files}
     [7-template]} and
     {{:https://github.com/aantron/dream/tree/master/example/r-template#files}
-    [r-template]}.
+    [r-template]}. There is also a typed alternative, provided by an external
+    library, {{:https://github.com/ocsigen/tyxml} TyXML}. See example
+    {{:https://github.com/aantron/dream/tree/master/example/w-tyxml#files}
+    [w-tyxml]}.
 
-    To build the template, add this to [dune]:
+    To use the built-in templates, add this to [dune]:
 
     {v
 (rule
