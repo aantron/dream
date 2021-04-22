@@ -104,6 +104,8 @@ if something is missing!
   benchmarks streaming very large responses.
 - [**`w-stress-websocket-send`**](w-stress-websocket-send#files)
   &nbsp;&mdash;&nbsp; benchmarks sending WebSocket messages quickly.
+- [**`w-multipart-dump`**](w-multipart-dump#files) &nbsp;&mdash;&nbsp; echoes
+  `multipart/form-data` bodies for debugging.
 
 <br>
 <br>
