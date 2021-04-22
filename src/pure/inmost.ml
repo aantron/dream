@@ -11,41 +11,34 @@ include Status
 type bigstring = Body.bigstring
 
 type upload_event = [
-  | `File of string * string
+  | `Part of string option * string option
   | `Field of string * string
   | `Done
   | `Wrong_content_type
 ]
 
-(* Used for converting the push interface of Multipart_form_data into the pull
-   interface of Dream. *)
+(* Used for converting the stream interface of [multipart_form] into
+   the pull interface of stream.
+
+   [state] permits to dissociate the initial state made by
+   [initial_multipart_state] and one which started to consume
+   the body stream (see the call of [Upload.upload]). *)
 type multipart_state = {
-  mutable initial : bool;
-  mutable event_listener : upload_event Lwt.u option;
-  mutable chunk_listener : string option Lwt.u option;
-  mutable last_field_name : string option;
-  mutable last_file_name : string option;
-  mutable buffered_chunk : string option;
-  mutable next_file : bool;
-  mutable continue : unit Lwt.u;
-  mutable fields : bool;
-  mutable field : unit -> (string * string) option Lwt.t;
+  mutable state : [ `Init | `Header | `Part ] ;
+  mutable nth : int;
+  mutable name : string option;
+  mutable filename : string option;
+  mutable stream : (< > * Multipart_form.Header.t * string Lwt_stream.t) Lwt_stream.t;
 }
 
-let initial_multipart_state () = {
-  initial = true;
-  event_listener = None;
-  chunk_listener = None;
-  last_field_name = None;
-  last_file_name = None;
-  buffered_chunk = None;
-  next_file = false;
-  continue = snd (Lwt.wait ());
-  fields = false;
-  field = fun () -> fst (Lwt.wait ());
-}
-
-
+let initial_multipart_state () = 
+  {
+    state= `Init;
+    nth= 0;
+    name= None;
+    filename= None;
+    stream= Lwt_stream.of_list [];
+  }
 
 (* TODO Temporary; Ciphers should depend on the core, not the other way. *)
 module Cipher = Dream__cipher.Cipher

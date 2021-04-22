@@ -65,7 +65,7 @@ depends: [
   "magic-mime"
   "mirage-crypto" {>= "0.8.1"}  # AES-256-GCM.
   "mirage-crypto-rng" {>= "0.8.0"}  # Signature of initialize.
-  "multipart-form-data" {>= "0.3.0"}
+  "multipart_form"
   "ocaml" {>= "4.08.0"}
   "uri" {>= "4.2.0"}
   "yojson"  # ...
@@ -93,6 +93,10 @@ depends: [
   "alcotest" {with-test}
   "bisect_ppx" {dev & >= "2.5.0"}  # --instrument-with.
   "ppx_expect" {with-test}
+]
+
+pin-depends: [
+  [ "multipart_form" "git+https://github.com/dinosaure/multipart_form#8f5b6cb77af1a385155b0aeac40437dba6e56577" ]
 ]
 
 build: [

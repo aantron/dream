@@ -850,29 +850,26 @@ val form : request -> (string * string) list form_result promise
 
 (** {2 Upload} *)
 
-type part = [
-  | `Files of (string * string) list
-  | `Value of string
-]
+type part = { headers : (string * string) list; filename : string option; contents : string; }
 (** Field values of an upload form, [<form enctype="multipart/form-data">]. See
     {!Dream.multipart} and example
     {{:https://github.com/aantron/dream/tree/master/example/g-upload#files}
     [g-upload]}.
 
-    - [`Files] is a list of filename-content pairs.
-    - [`Value] is the value of an ordinary form field.
+    An upload form is composed of a list of [part]s. A part can be a file or
+    a simple value. You can recognize a part as a file if [filename] is specified.
 
     Parts are then paired with field names by {!Dream.multipart}, making a
-    [(string * part) list].
+    [(string * part list) list].
 
     For example, if the form has [<input name="foo" type="file" multiple>], and
     the user selects multiple files, the received field name and {!type-part}
     will be
 
     {[
-      ("foo", `Files [
-        ("file1", "data1");
-        ("file2", "data2");
+      ("foo", [
+        { headers= [ "content-type", ... ]; filename= Some "file1"; contents= "data1"; };
+        { headers= [ "content-type", ... ]; filename= Some "file2"; contents= "data2"; };
       ])
     ]}
 
@@ -881,7 +878,7 @@ type part = [
     OWASP {i File Upload Cheat Sheet}} for security precautions for upload
     forms. *)
 
-val multipart : request -> (string * part) list form_result promise
+val multipart : request -> (string * part list) list form_result promise
 (** Like {!Dream.form}, but also reads files, and [Content-Type:] must be
     [multipart/form-data]. The [<form>] tag and CSRF token can be generated in a
     template with
@@ -902,15 +899,15 @@ val multipart : request -> (string * part) list form_result promise
 (** {2 Streaming upload} *)
 
 type upload_event = [
-  | `File of string * string
+  | `Part of string option * string option
   | `Field of string * string
   | `Done
   | `Wrong_content_type
 ]
 (** Upload stream events.
 
-    - [`File (field_name, filename)] begins a file in the stream. The Web app
-      should call {!Dream.val-upload_file} until [None], then call
+    - [`Part (name, filename)] begins a part in the stream. The Web app
+      should call {!Dream.val-upload_part} until [None], then call
       {!Dream.val-upload} again.
     - [`Field (field_name, value)] is a complete field. The Web app should call
       {!Dream.val-upload} next.
@@ -931,7 +928,7 @@ val upload : request -> upload_event promise
       [FormData]} in the client to submit [multipart/form-data] by AJAX, and
       include a custom header. *)
 
-val upload_file : request -> string option promise
+val upload_part : request -> string option promise
 (** Retrieves a file chunk. *)
 
 (** {2 CSRF tokens}
