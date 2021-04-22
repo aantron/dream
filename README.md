@@ -119,9 +119,7 @@ JavaScript client.
 ### opam
 
 ```
-git clone https://github.com/aantron/dream.git --recursive
-cd dream
-opam install .
+opam install dream
 ```
 
 After that, go to one of the examples, such as [**`1-hello`**][1-hello], and
