@@ -858,7 +858,12 @@ type part = [
         ("file1", "data1");
         ("file2", "data2");
       ])
-    ]} *)
+    ]}
+
+    See
+    {{:https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html}
+    OWASP {i File Upload Cheat Sheet}} for security precautions for upload
+    forms. *)
 
 val multipart : request -> (string * part) list form_result promise
 (** Like {!Dream.form}, but also reads files, and [Content-Type:] must be
@@ -921,8 +926,10 @@ val upload_file : request -> string option promise
       that {!Dream.val-form} and {!Dream.val-multipart} transparently verify.
     - AJAX can be protected from CSRF by {!Dream.origin_referer_check}.
 
-    CSRF functions are exposed for creating custom schemes, and for defense in
-    depth purposes. *)
+    CSRF functions are exposed for creating custom schemes, and for
+    defense-in-depth purposes. See
+    {{:https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html}
+    OWASP {i Cross-Site Request Forgery Prevention Cheat Sheet}}. *)
 
 type csrf_result = [
   | `Ok
@@ -1377,7 +1384,12 @@ val close_websocket : ?code:int -> websocket -> unit promise
     {{:https://github.com/aantron/dream/tree/master/example#full-stack} writing
     a client in a flavor of OCaml}, consider
     {{:https://github.com/reasonml-community/graphql-ppx} graphql-ppx} for
-    generating GraphQL queries. *)
+    generating GraphQL queries.
+
+    See
+    {{:https://cheatsheetseries.owasp.org/cheatsheets/GraphQL_Cheat_Sheet.html}
+    OWASP {i GraphQL Cheat Sheet}} for an overview of security topics related to
+    GraphQL. *)
 
 val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
 (** [Dream.graphql make_context schema] serves the GraphQL [schema].
@@ -1451,7 +1463,11 @@ val graphiql : string -> handler
     - {{:https://www.postgresql.org/docs/13/sql.html} PostgreSQL, {i The SQL
       Language}}
     - {{:https://mariadb.com/kb/en/sql-statements-structure/} MariaDB, {i SQL
-      Statements & Structure}} *)
+      Statements & Structure}}
+
+    For a superficial overview of database security, see
+    {{:https://cheatsheetseries.owasp.org/cheatsheets/Database_Security_Cheat_Sheet.html}
+    OWASP {i Database Security Cheat Sheet}}. *)
 
 val sql_pool : ?size:int -> string -> middleware
 (** Makes an SQL connection pool available to its inner handler. *)
@@ -1467,7 +1483,7 @@ val sql : (Caqti_lwt.connection -> 'a promise) -> request -> 'a promise
         @@ Dream.sql_pool "sqlite3://db.sqlite"
         @@ fun request ->
           request |> Dream.sql (fun db ->
-            (* ... *))
+            (* ... *) |> Dream.html)
     ]} *)
 
 
@@ -1477,7 +1493,14 @@ val sql : (Caqti_lwt.connection -> 'a promise) -> request -> 'a promise
     Dream uses the {{:https://erratique.ch/software/logs/doc/Logs/index.html}
     Logs} library internally, and integrates with all other libraries in your
     project that are also using it. Dream provides a slightly simplified
-    interface to Logs. *)
+    interface to Logs.
+
+    All log output is written to [stderr].
+
+    See
+    {{:https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html}
+    OWASP {i Logging Cheat Sheet}} for a survey of security topics related to
+    logging. *)
 
 val logger : middleware
 (** Logs and times requests. Time spent logging is included. See example
@@ -1612,7 +1635,10 @@ val initialize_log :
     [~error_handler] to customize the error template.
 
     The default error handler logs errors and its template generates
-    completely empty responses, to avoid internationalization issues.
+    completely empty responses, to avoid internationalization issues. In
+    addition, this conforms to the recommendations in
+    {{:https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html}
+    OWASP {i Error Handling Cheat Sheet}}.
 
     For full control over error handling, including logging, you can define an
     {!type-error_handler} directly. *)
@@ -1830,11 +1856,14 @@ val run :
       [9-error]}.
     - [~secret] is a key to be used for cryptographic operations, such as
       signing CSRF tokens. By default, a random secret is generated on each call
-      to {!Dream.run}. Generate a 256-bit key for production with
+      to {!Dream.run}. For production, generate a 256-bit key with
       {[
         Dream.to_base64url (Dream.random 32)
       ]}
-      and load it from file or an environment variable.
+      and load it from file. A medium-sized Web app serving 1000 fresh encrypted
+      cookies per second should rotate keys about once a year. See argument
+      [~old_secrets] below for key rotation. See {!Dream.encrypt} for cipher
+      information.
     - [~old_secrets] is a list of previous secrets that can still be used for
       decryption, but not for encryption. This is intended for key rotation.
     - [~prefix] is a site prefix for applications that are not running at the
@@ -1953,7 +1982,7 @@ val html_escape : string -> string
 (** Escapes a string so that it is suitable for use as text inside HTML
     elements and quoted attribute values. Implements
     {{:https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#rule-1-html-encode-before-inserting-untrusted-data-into-html-element-content}
-    OWASP {i Cross Site Scripting Prevention Cheat Sheet RULE #1}}.
+    OWASP {i Cross-Site Scripting Prevention Cheat Sheet RULE #1}}.
 
     This function is {e not} suitable for use with unquoted attributes, inline
     scripts, or inline CSS. See {i Security} in example
@@ -2077,7 +2106,23 @@ val encrypt :
     passes the cookie names in the associated data. This makes it impossible (or
     impractical) to use the ciphertext from one cookie as the value of another.
     The associated data will not match, and the value will be recognized as
-    invalid. *)
+    invalid.
+
+    The cipher presently used by Dream is
+    {{:https://tools.ietf.org/html/rfc5116#section-5.2} AEAD_AES_256_GCM}. It
+    will be replaced by
+    {{:https://tools.ietf.org/html/rfc8452} AEAD_AES_256_GCM_SIV} as soon as the
+    latter is {{:https://github.com/mirage/mirage-crypto/issues/111} available}.
+    The upgrade will be transparent, because Dream includes a cipher rotation
+    scheme.
+
+    The cipher is suitable for encrypted transmissions and storing data other
+    than credentials. For password or other credential storage, see package
+    {{:https://github.com/Khady/ocaml-argon2} [argon2]}. See
+    {{:https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html}
+    OWASP {i Cryptographic Storage Cheat Sheet}} and
+    {{:https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html}
+    OWASP {i Password Storage Cheat Sheet}}. *)
 
 val decrypt :
   ?associated_data:string ->
@@ -2085,8 +2130,8 @@ val decrypt :
 (** Reverses {!Dream.encrypt}.
 
     To support secret rotation, the decryption secrets with which decryption is
-    attempted are are [(~secret)::(~old_secrets)]. See the descriptions of
-    [~secret] and [~old_secrets] in {!Dream.run}. *)
+    attempted are [(~secret)::(~old_secrets)]. See the descriptions of [~secret]
+    and [~old_secrets] in {!Dream.run}. *)
 
 
 

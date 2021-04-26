@@ -77,6 +77,9 @@ this example to keep it in sync with the Dream repo and its upstream projects.
 But this deliberately gives up reproducible builds &mdash; something you
 usually want for your own code.
 
+If you'd like to find out the exact version of Dream esy installed, you can look
+in `esy.lock/index.json`, or run `npx esy ls-builds`.
+
 <br>
 
 You can develop a JavaScript client side-by-side with the server as normal,

@@ -103,6 +103,10 @@ call
 when you stream a `dream.csrf` field. You'll then have to decide what to do
 about files already received.
 
+See [OWASP File Upload Cheat
+Sheet](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html)
+for a checklist of additional security precautions.
+
 <br>
 <br>
 

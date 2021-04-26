@@ -85,7 +85,9 @@ string that contains the debug info that we saw in the previous example,
 
 If you don't customize the error handler, Dream defaults to sending only empty
 responses, so that your application can be fully localization-friendly &mdash;
-even at the lowest levels.
+even at the lowest levels. This is also in accordance with the [OWASP Error
+Handling Cheat
+Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html).
 
 <br>
 

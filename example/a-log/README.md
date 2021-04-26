@@ -39,7 +39,7 @@ messages in the log, between the others:
 26.03.21 21:25:19.464                  WARN REQ 2 Raising an exception!
 ```
 
-As you can see, the functions take
+Note that this is on `stderr`. As you can see, the functions take
 [`Printf`-style format strings](https://caml.inria.fr/pub/docs/manual-ocaml/libref/Printf.html),
 so you can quickly print values of various types to the log.
 

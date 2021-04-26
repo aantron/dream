@@ -12,14 +12,17 @@ let (//) = Filename.concat
 let sandbox_root = "sandbox"
 
 let starter_server_eml_ml = {|let welcome =
-  <html><head><style>a:visited {color: blue}</style></head><body>
+  <html><head><style>a:visited {color: blue; text-decoration: none;}</style></head><body>
   <h1>Welcome to the Dream Playground!</h1>
   <p>Edit the code to the left, and press <strong>Run</strong> to recompile!</p>
   <p>Links:</p>
   <ul>
-    <li><a href="https://github.com/aantron/dream">GitHub</a></li>
-    <li><a href="https://github.com/aantron/dream/tree/master/example#readme">Tutorial</a></li>
-    <li><a href="https://aantron.github.io/dream">API docs</a></li>
+    <li><a target="_blank" href="https://github.com/aantron/dream">
+      GitHub</a></li>
+    <li><a target="_blank" href="https://github.com/aantron/dream/tree/master/example#readme">
+      Tutorial</a></li>
+    <li><a target="_blank" href="https://aantron.github.io/dream">
+      API docs</a></li>
   </ul>
   </body>
 
