@@ -5,14 +5,10 @@
 
 
 
-@import url('https://fonts.googleapis.com/css2?family=Tenor+Sans&display=swap');
-
 /* Fonts. */
 
-/* TODO Host Tenor Sans */
-
 @font-face {
-  font-family: 'Lato';
+  font-family: Lato;
   font-style: normal;
   font-weight: 400;
   src: local(''),
@@ -20,7 +16,7 @@
 }
 
 @font-face {
-  font-family: 'Lato';
+  font-family: Lato;
   font-style: normal;
   font-weight: 700;
   src: local(''),
@@ -28,7 +24,7 @@
 }
 
 @font-face {
-  font-family: 'Lato';
+  font-family: Lato;
   font-style: italic;
   font-weight: 400;
   src: local(''),
@@ -36,7 +32,7 @@
 }
 
 @font-face {
-  font-family: 'Iosevka';
+  font-family: Iosevka;
   font-style: normal;
   font-weight: 400;
   src: local(''),
@@ -55,6 +51,13 @@
   font-style: normal;
   font-weight: 400;
   src: url('fa-brands-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Tenor Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('tenor-sans-v12-latin-regular.woff2') format('woff2');
 }
 
 body {

@@ -51,6 +51,13 @@ docs-watch :
 docs-serve :
 	cd docs/web/build && dune exec -- serve -p 8081
 
+.PHONY : docs-publish
+docs-publish : docs
+	cp -r docs/web/build/* docs/web/gh-pages/
+	cd docs/web/gh-pages && \
+	  git commit -a --amend --no-edit && \
+		git push --force-with-lease
+
 .PHONY : clean-coverage
 clean-coverage :
 	rm -rf _coverage
