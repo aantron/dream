@@ -1,0 +1,120 @@
+/* This file is part of Dream, released under the MIT license. See LICENSE.md
+   for details, or visit https://github.com/aantron/dream.
+
+   Copyright 2021 Anton Bachin */
+
+
+
+@font-face {
+  font-family: 'Iosevka';
+  font-style: normal;
+  font-weight: 400;
+  src: url('iosevka-regular.woff2') format('woff2');
+}
+
+
+
+body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 22px;
+  background-color: #131618;
+}
+
+#editor {
+  float: left;
+  width: 50%;
+}
+
+#client {
+  float: left;
+  width: 50%;
+}
+
+#textarea .CodeMirror, #client iframe {
+  height: calc(100% - 220px);
+}
+
+
+
+/* Editor */
+
+#log {
+  clear: both;
+  margin: 0;
+  height: 198px;
+  overflow-x: hidden;
+  padding-left: 34px;
+}
+
+.CodeMirror, #log {
+  font-family: Iosevka, SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+}
+
+
+
+/* Client */
+
+#client input {
+  display: inline-block;
+  width: 100%;
+}
+
+#client iframe {
+  border: 0;
+  width: 100%;
+  background-color: #eee;
+}
+
+
+
+/* Syntax */
+
+.cm-s-dream.CodeMirror {
+  background-color: #131618;
+  color: #ddd;
+  border-top: 1px solid #262626;
+  border-bottom: 1px solid #262626;
+  box-sizing: border-box;
+}
+
+.cm-s-dream .CodeMirror-gutters {
+  background: none;
+  border-right: 1px solid #262626;
+}
+
+.cm-s-dream .cm-keyword, .t-magenta {
+  color: #ff6c9b;
+}
+
+.cm-s-dream .cm-operator, .t-cyan {
+  color: #8dc5ff;
+}
+
+.cm-s-dream .cm-string, .t-yellow {
+  color: #e3db7a;
+}
+
+.cm-s-dream .cm-variable {
+  color: #eee;
+}
+
+.cm-s-dream .cm-variable-2, .t-green {
+  color: #70df5c;
+}
+
+#log, .t-white {
+  color: #ddd;
+}
+
+.t-dim {
+  color: #999;
+}
+
+.t-red {
+  color: #ff2300;
+}
+
+.t-blue {
+  color: #81a2ff;
+}

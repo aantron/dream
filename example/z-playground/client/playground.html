@@ -1,0 +1,42 @@
+<!-- This file is part of Dream, released under the MIT license. See LICENSE.md
+     for details, or visit https://github.com/aantron/dream.
+
+     Copyright 2021 Anton Bachin -->
+
+
+
+<html>
+<head>
+
+<title>Dream Playground</title>
+
+<meta name="description" content="Online playground for Dream, the Web framework">
+
+<script src="../node_modules/codemirror/lib/codemirror.js"></script>
+<link rel="stylesheet" href="../node_modules/codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="../node_modules/codemirror/theme/material.css">
+<script src="../node_modules/codemirror/mode/mllike/mllike.js"></script>
+
+<link rel="stylesheet" href="playground.css">
+
+</head>
+<body>
+
+<div id="editor">
+  <header>
+    <button id="run">Run</button>
+  </header>
+  <div id="textarea"></div>
+</div>
+<div id="client">
+  <header>
+    <input id="location"></input>
+  </header>
+  <iframe title="Client connecting to the playground server"></iframe>
+</div>
+<pre id="log"></pre>
+
+<script src="playground.js"></script>
+
+</body>
+</html>

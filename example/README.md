@@ -106,6 +106,8 @@ if something is missing!
   &nbsp;&mdash;&nbsp; benchmarks sending WebSocket messages quickly.
 - [**`w-multipart-dump`**](w-multipart-dump#files) &nbsp;&mdash;&nbsp; echoes
   `multipart/form-data` bodies for debugging.
+- [**`z-playground`**](z-playground#files) &nbsp;&mdash;&nbsp; source code of
+  the Dream playground.
 
 <br>
 <br>
