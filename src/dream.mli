@@ -116,7 +116,14 @@ and 'a promise = 'a Lwt.t
 (** Dream uses {{:https://github.com/ocsigen/lwt} Lwt} for promises and
     asynchronous I/O. See example
     {{:https://github.com/aantron/dream/tree/master/example/5-promise#files}
-    [5-promise]}. *)
+    [5-promise]}.
+
+    Use [raise] to reject promises. If you are writing a library, you may prefer
+    using
+    {{:https://github.com/ocsigen/lwt/blob/9943ba77a5508feaea5e1fb60b011db4179f9c61/src/core/lwt.mli#L459}
+    [Lwt.fail]} in some places, in order to avoid clobbering your user's current
+    exception backtrace — though, in most cases, you should still extend it with
+    [raise] and [let%lwt], instead. *)
 
 
 
