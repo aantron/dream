@@ -6,6 +6,6 @@
   },
   "scripts": {
     "bundle": "mkdir -p static && inliner -m client/playground.html > static/playground.html",
-    "start": "npm run bundle && opam exec -- dune exec ./playground.exe"
+    "start": "npm run bundle && opam exec -- dune exec server/playground.exe"
   }
 }
