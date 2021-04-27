@@ -14,7 +14,7 @@ module Dream = Dream__pure.Inmost
 (* TODO NOTE Using Lwt_io because it has a nice "read the whole thing"
    function. *)
 
-let default_loader local_root path _ =
+let from_filesystem local_root path _ =
   let file = Filename.concat local_root path in
   Lwt.catch
     (fun () ->
@@ -60,7 +60,7 @@ let validate_path request =
     else
       None
 
-let static ?(loader = default_loader) local_root = fun request ->
+let static ?(loader = from_filesystem) local_root = fun request ->
 
   if not @@ Dream.methods_equal (Dream.method_ request) `GET then
     Dream.empty `Not_Found

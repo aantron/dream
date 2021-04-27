@@ -268,9 +268,7 @@ let () =
         Dream.empty `Not_Found
       else
         let%lwt response =
-          Dream__middleware.Static.default_loader
-            "static" "playground.html" request in
-        let response : Dream.response = Obj.magic response in
+          Dream.from_filesystem "static" "playground.html" request in
         Dream.with_header "Content-Type" "text/html; charset=utf-8" response
         |> Lwt.return);
 

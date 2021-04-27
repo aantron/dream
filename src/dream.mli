@@ -1204,6 +1204,10 @@ val any     : string -> handler -> route
 val not_found : handler
 (** Always responds with [404 Not Found]. *)
 
+
+
+(** {1 Static files} *)
+
 val static :
   ?loader:(string -> string -> handler) ->
     string -> handler
@@ -1232,9 +1236,7 @@ val static :
       {!Dream.static}.
     - [path] is what was substituted for [**].
 
-    The default loader joins [local_directory] and [path], and uses the result
-    to respond with a file from the file system. If such a file does not exist,
-    the default loader responds with [404 Not Found].
+    The default loader is {!Dream.from_filesystem}.
 
     See example
     {{:https://github.com/aantron/dream/tree/master/example/w-one-binary#files}
@@ -1250,6 +1252,18 @@ val static :
     {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag}
     [ETag]}. See {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching}
     MDN {i HTTP caching}}. *)
+
+val from_filesystem : string -> string -> handler
+(** [Dream.from_filesystem local_directory path request] responds with a file
+    from the file system found at [local_directory ^ "/" ^ path].
+    If such a file does not exist, it responds with [404 Not Found].
+
+    To serve single files like [sitemap.xml] from the file system, use routes
+    like
+
+    {[
+      Dream.get "/sitemap.xml" (Dream.from_filesystem "assets" "sitemap.xml")
+    ]} *)
 
 
 
