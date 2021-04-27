@@ -68,7 +68,7 @@ depends: [
   "multipart-form-data" {>= "0.3.0"}
   "ocaml" {>= "4.08.0"}
   "opam-installer" {build}
-  "uri"
+  "uri" {>= "4.2.0"}
   "yojson"  # ...
 
   # Currently vendored.
