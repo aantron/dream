@@ -174,7 +174,7 @@ let from_form_urlencoded string =
 
 
 
-let from_target string =
+let split_target string =
   let uri = Uri.of_string string in
   let query =
     match Uri.verbatim_query uri with
@@ -183,7 +183,7 @@ let from_target string =
   in
   Uri.path uri, query
 
-let from_target_path =
+let from_path =
   (* Not tail-recursive. *)
   let rec filter_components = function
     | [] -> []
@@ -216,6 +216,25 @@ let rec drop_trailing_slash = function
    function. *)
 let make_path path =
   "/" ^ (String.concat "/" path)
+
+let to_path ?(relative = false) ?(international = true) components =
+  let rec filter_empty_components = function
+    | ""::(_::_ as path) -> filter_empty_components path
+    | component::path -> component::(filter_empty_components path)
+    | [] -> []
+  in
+  let components = filter_empty_components components in
+
+  let components =
+    match relative, components with
+    | false, [] -> [""; ""]
+    | false, _ -> ""::components
+    | true, _ -> components
+  in
+
+  components
+  |> List.map (to_percent_encoded ~international)
+  |> String.concat "/"
 
 
 

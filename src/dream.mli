@@ -2052,10 +2052,10 @@ val to_set_cookie :
     Does not apply any encoding to names and values. Be sure to encode so that
     names and values cannot contain `=`, `;`, or newline characters. *)
 
-val from_target : string -> string * string
+val split_target : string -> string * string
 (** Splits a request target into a path and a query string. *)
 
-val from_target_path : string -> string list
+val from_path : string -> string list
 (** Splits the string into components on [/] and percent-decodes each component.
     Empty components are dropped, except for the last. This function does not
     distinguish between absolute and relative paths, and is only meant for
@@ -2069,9 +2069,17 @@ val from_target_path : string -> string list
     - [Dream.from_path "a%2Fb"] becomes [["a/b"]].
     - [Dream.from_path "a//b"] becomes [["a"; "b"]].
 
-    This function is not for use on targets, because it does not treat [?]
-    specially. See {!Dream.from_target} if the argument string is actually a
-    target, and may include a query string. *)
+    This function is not for use on full targets, because they may incldue query
+    strings ([?]), and {!Dream.from_path} does not treat them specially. Split
+    query strings off with {!Dream.split_target} first. *)
+
+val to_path : ?relative:bool -> ?international:bool -> string list -> string
+(** Percent-encodes a list of path components and joins them with [/] into a
+    path. Empty components, except for the last, are removed. The path is
+    absolute by default. Use [~relative:true] for a relative path.
+    {!Dream.to_path} uses an IRI-friendly percent encoder, which preserves UTF-8
+    bytes in unencoded form. Use [~international:false] to percent-encode those
+    bytes as well, for legacy protocols that require ASCII URLs. *)
 
 val drop_trailing_slash : string list -> string list
 (** Changes the representation of path [abc/] to the representation of [abc] by

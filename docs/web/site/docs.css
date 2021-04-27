@@ -371,7 +371,7 @@ p + .odoc-spec {
 #type-upload_event + .spec-doc li + li,
 #val-upload + .spec-doc li + li,
 #val-static + .spec-doc li + li,
-#val-from_target_path + .spec-doc li + li {
+#val-from_path + .spec-doc li + li {
   margin-top: 0;
 }
 

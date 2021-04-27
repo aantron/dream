@@ -7,7 +7,7 @@
 
 let decode string =
   string
-  |> Dream.from_target_path
+  |> Dream.from_path
   |> List.map (Printf.sprintf "%S")
   |> String.concat " "
   |> Printf.printf "[%s]\n"
@@ -66,3 +66,38 @@ let%expect_test _ =
     ["a"]
     ["a" "b"]
     ["a" "b"] |}]
+
+let encode ?relative ?international components =
+  Dream.to_path ?relative ?international components
+  |> Printf.printf "%S\n"
+
+let%expect_test _ =
+  encode [];
+  encode [""];
+  encode ["a"];
+  encode ["a"; "b"];
+  encode ["/"; "?"; "%AB"; "λ"];
+  encode ["a"; ""];
+  encode [""; "a"];
+  encode ["a"; ""; "b"];
+  encode ~relative:true [];
+  encode ~relative:true [""];
+  encode ~relative:true ["a"];
+  encode ~relative:true ["a"; ""];
+  encode ~relative:true [""; "a"];
+  encode ~international:false ["λ"];
+  [%expect {|
+    "/"
+    "/"
+    "/a"
+    "/a/b"
+    "/%2F/%3F/%25AB/\206\187"
+    "/a/"
+    "/a"
+    "/a/b"
+    ""
+    ""
+    "a"
+    "a/"
+    "a"
+    "/%CE%BB" |}]

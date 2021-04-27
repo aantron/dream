@@ -1410,6 +1410,19 @@ let to_set_cookie_replacement = {|
 </pre>
 |}
 
+let to_path_expected = {|<div class="spec value" id="val-to_path">
+ <a href="#val-to_path" class="anchor"></a><code><span><span class="keyword">val</span> to_path : <span>?relative:bool <span class="arrow">-&gt;</span></span> <span>?international:bool <span class="arrow">-&gt;</span></span> <span><span>string list</span> <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let to_path_replacement = {|
+<pre><span class="keyword">val</span> to_path :
+  ?relative:bool ->
+  ?international:bool ->
+    string list -> string
+</pre>
+|}
+
 let encrypt_expected = {|<div class="spec value" id="val-encrypt">
  <a href="#val-encrypt" class="anchor"></a><code><span><span class="keyword">val</span> encrypt : <span>?associated_data:string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> string</span></code>
 </div>
@@ -1759,6 +1772,7 @@ let pretty_print_signatures soup =
     to_percent_encoded_expected to_percent_encoded_replacement;
   multiline
     "#val-to_set_cookie" to_set_cookie_expected to_set_cookie_replacement;
+  multiline "#val-to_path" to_path_expected to_path_replacement;
   multiline "#val-encrypt" encrypt_expected encrypt_replacement;
   multiline "#val-decrypt" decrypt_expected decrypt_replacement;
 

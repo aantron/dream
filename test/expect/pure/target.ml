@@ -7,7 +7,7 @@
 
 let decode string =
   string
-  |> Dream.from_target
+  |> Dream.split_target
   |> fun (path, query) -> Printf.printf "%S %S\n" path query
 
 let%expect_test _ =

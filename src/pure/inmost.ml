@@ -374,7 +374,7 @@ let request_from_http
     ~version
     ~headers =
 
-  let path, query = Formats.from_target target in
+  let path, query = Formats.split_target target in
 
   let rec request = {
     specific = {
@@ -383,7 +383,7 @@ let request_from_http
       method_;
       target;
       prefix = [];
-      path = Formats.from_target_path path;
+      path = Formats.from_path path;
       query = Formats.from_form_urlencoded query;
       request_version = version;
       upload = initial_multipart_state ();
@@ -407,7 +407,7 @@ let request
 
   (* This function is used for debugging, so it's fine to allocate a fake body
      and then immediately replace it. *)
-  let path, query = Formats.from_target target in
+  let path, query = Formats.split_target target in
 
   let body =
     if String.length body = 0 then
@@ -423,7 +423,7 @@ let request
       method_;
       target;
       prefix = [];
-      path = Formats.from_target_path path;
+      path = Formats.from_path path;
       query = Formats.from_form_urlencoded query;
       request_version = version;
       upload = initial_multipart_state ();
