@@ -443,11 +443,13 @@ val redirect :
   ?status:status ->
   ?code:int ->
   ?headers:(string * string) list ->
-    string -> response promise
+    request -> string -> response promise
 (** Creates a new {!type-response}. Adds a [Location:] header with the given
     string. The default status code is [303 See Other], for a temporary
     redirection. Use [~status:`Moved_Permanently] or [~code:301] for a permanent
-    redirection. *)
+    redirection. The {!type-request} is used for retrieving the site prefix, if
+    the string is an absolute path. Most applications don't have a site
+    prefix. *)
 
 val empty :
   ?headers:(string * string) list ->

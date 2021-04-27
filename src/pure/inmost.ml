@@ -485,7 +485,8 @@ let json ?status ?code ?headers body =
   |> with_header "Content-Type" Formats.application_json
   |> Lwt.return
 
-let redirect ?status ?code ?headers location =
+(* TODO Actually use the request and extract the site prefix. *)
+let redirect ?status ?code ?headers _request location =
   let status =
     match status, code with
     | None, None -> Some (`See_Other)

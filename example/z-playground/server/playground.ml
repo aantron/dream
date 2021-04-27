@@ -248,11 +248,11 @@ let () =
   @@ Dream.router [
 
     (* Generate a fresh valid id for new visitors, and redirect. *)
-    Dream.get "/" (fun _ ->
+    Dream.get "/" (fun request ->
       Dream.random 9
       |> Dream.to_base64url
       |> (^) "/"
-      |> Dream.redirect);
+      |> Dream.redirect request);
 
     (* Apply function communicate to WebSocket connections. *)
     Dream.get "/socket" (fun _ ->

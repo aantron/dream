@@ -47,7 +47,7 @@ let () =
       match%lwt Dream.form request with
       | `Ok ["text", text] ->
         let%lwt () = Dream.sql (add_comment text) request in
-        Dream.redirect "/"
+        Dream.redirect request "/"
       | _ ->
         Dream.empty `Bad_Request);
 
