@@ -33,6 +33,7 @@ promote :
 .PHONY : docs
 docs :
 	make -C docs/web --no-print-directory
+	@echo See docs/web/build/index.html
 
 WATCH := \
 	docs/web/site/docs.css \

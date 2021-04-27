@@ -29,10 +29,12 @@ clean :
 .PHONY : deps
 deps :
 	opam install --deps-only . --locked
+	npm install
 
 .PHONY : refresh-deps
 refresh-deps :
 	opam install --deps-only .
+	npm install
 
 .PHONY : lock
 lock :
