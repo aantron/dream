@@ -58,7 +58,7 @@ let rec forward_messages response =
   |> List.map (Printf.sprintf "data: %s\n\n")
   |> String.concat ""
   |> fun text ->
-    let%lwt () = Dream.write text response in
+    let%lwt () = Dream.write response text in
     let%lwt () = Dream.flush response in
     forward_messages response
 

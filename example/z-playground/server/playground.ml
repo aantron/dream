@@ -149,12 +149,12 @@ let forward ?(add_newline = false) sandbox message =
   in
   `Assoc ["kind", `String "log"; "payload", `String message]
   |> Yojson.Basic.to_string
-  |> fun message -> Dream.send message sandbox.socket
+  |> fun message -> Dream.send sandbox.socket message
 
 let started sandbox port =
   `Assoc ["kind", `String "started"; "payload", `Int port]
   |> Yojson.Basic.to_string
-  |> fun message -> Dream.send message sandbox.socket
+  |> fun message -> Dream.send sandbox.socket message
 
 let run sandbox id =
   let%lwt port = allocate_port () in
@@ -219,7 +219,7 @@ let rec communicate sandbox =
           let%lwt () =
             `Assoc ["kind", `String "content"; "payload", `String content]
             |> Yojson.Basic.to_string
-            |> fun s -> Dream.send s sandbox.socket
+            |> fun s -> Dream.send sandbox.socket s
           in
           communicate sandbox
 

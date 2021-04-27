@@ -40,13 +40,13 @@ let () =
   @@ Dream.router [
 
     Dream.get "/" (fun request ->
-      let%lwt comments = Dream.sql list_comments request in
+      let%lwt comments = Dream.sql request list_comments in
       Dream.html (render comments request));
 
     Dream.post "/" (fun request ->
       match%lwt Dream.form request with
       | `Ok ["text", text] ->
-        let%lwt () = Dream.sql (add_comment text) request in
+        let%lwt () = Dream.sql request (add_comment text) in
         Dream.redirect request "/"
       | _ ->
         Dream.empty `Bad_Request);

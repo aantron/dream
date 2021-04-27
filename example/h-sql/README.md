@@ -27,12 +27,7 @@ let add_comment =
   fun text (module Db : DB) ->
     let%lwt unit_or_error = Db.exec query text in
     Caqti_lwt.or_fail unit_or_error
-```
 
-...then, a template for our CSRF-safe form, like in example
-[**`d-form`**](../d-form#files):
-
-```ocaml
 let render comments request =
   <html>
     <body>
@@ -46,11 +41,7 @@ let render comments request =
 
     </body>
   </html>
-```
 
-...and finally, the Web app itself, which connects to `db.sqlite`:
-
-```ocaml
 let () =
   Dream.run
   @@ Dream.logger
@@ -59,13 +50,13 @@ let () =
   @@ Dream.router [
 
     Dream.get "/" (fun request ->
-      let%lwt comments = Dream.sql list_comments request in
+      let%lwt comments = Dream.sql request list_comments in
       Dream.html (render comments request));
 
     Dream.post "/" (fun request ->
       match%lwt Dream.form request with
       | `Ok ["text", text] ->
-        let%lwt () = Dream.sql (add_comment text) request in
+        let%lwt () = Dream.sql request (add_comment text) in
         Dream.redirect request "/"
       | _ ->
         Dream.empty `Bad_Request);

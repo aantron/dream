@@ -41,7 +41,7 @@ let string_stream chunks =
       Dream.close_stream response
     | chunk::more ->
       chunks := more;
-      let%lwt () = Dream.write chunk response in
+      let%lwt () = Dream.write response chunk in
       push ()
   in
   Lwt.async push;
@@ -56,9 +56,7 @@ let bigstring_stream chunks =
       Dream.close_stream response
     | chunk::more ->
       chunks := more;
-      let%lwt () =
-        Dream.write_bigstring
-          (Lwt_bytes.of_string chunk) 0 (String.length chunk) response in
+      let%lwt () = Dream.write_bigstring response (Lwt_bytes.of_string chunk) in
       push ()
   in
   Lwt.async push;

@@ -145,7 +145,7 @@ let handle_over_websocket make_context schema subscriptions request websocket =
         close_and_clean subscriptions websocket ~code:4429
       end
       else begin
-        let%lwt () = Dream.send ack_message websocket in
+        let%lwt () = Dream.send websocket ack_message in
         loop true
       end
 
@@ -193,13 +193,13 @@ let handle_over_websocket make_context schema subscriptions request websocket =
               log.warning (fun log ->
                 log ~request
                   "subscribe: error %s" (Yojson.Basic.to_string json));
-              Dream.send (error_message id json) websocket
+              Dream.send websocket (error_message id json)
 
             (* It's not clear that this case ever occurs, because graphql-ws is
                only used for subscriptions, at the protocol level. *)
             | Ok (`Response json) ->
-              let%lwt () = Dream.send (data_message id json) websocket in
-              let%lwt () = Dream.send (complete_message id) websocket in
+              let%lwt () = Dream.send websocket (data_message id json) in
+              let%lwt () = Dream.send websocket (complete_message id) in
               Lwt.return_unit
 
             | Ok (`Stream (stream, close)) ->
@@ -216,15 +216,15 @@ let handle_over_websocket make_context schema subscriptions request websocket =
               let%lwt () =
                 stream |> Lwt_stream.iter_s (function
                   | Ok json ->
-                    Dream.send (data_message id json) websocket
+                    Dream.send websocket (data_message id json)
                   | Error json ->
                     log.warning (fun log ->
                       log ~request
                         "Subscription: error %s" (Yojson.Basic.to_string json));
-                    Dream.send (error_message id json) websocket)
+                    Dream.send websocket (error_message id json))
               in
 
-              let%lwt () = Dream.send (complete_message id) websocket in
+              let%lwt () = Dream.send websocket (complete_message id) in
               Hashtbl.remove subscriptions id;
               Lwt.return_unit
 
@@ -240,11 +240,11 @@ let handle_over_websocket make_context schema subscriptions request websocket =
             try%lwt
               let%lwt () =
                 Dream.send
-                  (error_message id (make_error "Internal Server Error"))
                   websocket
+                  (error_message id (make_error "Internal Server Error"))
               in
               if !subscribed then
-                Dream.send (complete_message id) websocket
+                Dream.send websocket (complete_message id)
               else
                 Lwt.return_unit
             with _ ->

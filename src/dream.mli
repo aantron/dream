@@ -470,7 +470,7 @@ val stream :
     {[
       fun request ->
         Dream.stream (fun response ->
-          let%lwt () = Dream.write "foo" response in
+          let%lwt () = Dream.write response "foo" in
           Dream.close_stream response)
     ]} *)
 
@@ -671,7 +671,7 @@ val with_stream : response -> response
     {!Dream.write} will be accepted before then. See {!Dream.stream} for a more
     convenient wrapper. *)
 
-val write : string -> response -> unit promise
+val write : response -> string -> unit promise
 (** Streams out the string. The promise is fulfilled when the response can
     accept more writes. *)
 
@@ -710,8 +710,10 @@ val next :
     - [~close] if close is requested, and
     - [~exn] to report an exception. *)
 
-val write_bigstring : bigstring -> int -> int -> response -> unit promise
-(** Streams out the {!bigstring} slice. *)
+val write_bigstring :
+  ?offset:int -> ?length:int -> response -> bigstring -> unit promise
+(** Streams out the {!bigstring} slice. [~offset] defaults to zero. [~length]
+    defaults to the length of the {!bigstring}, minus [~offset]. *)
 
 
 
@@ -965,8 +967,8 @@ val csrf_token : ?valid_for:float -> request -> string
     seconds. The default value is one hour ([3600.]). Dream uses signed tokens
     that are not stored server-side. *)
 
-val verify_csrf_token : string -> request -> csrf_result promise
-(** Checks that the CSRF token is valid for the request's session. *)
+val verify_csrf_token : request -> string -> csrf_result promise
+(** Checks that the CSRF token is valid for the {!type-request}'s session. *)
 
 
 
@@ -1352,11 +1354,11 @@ val websocket :
     {[
       let my_handler = fun request ->
         Dream.websocket (fun websocket ->
-          let%lwt () = Dream.send "Hello, world!" websocket in
+          let%lwt () = Dream.send websocket "Hello, world!" in
           Dream.close_websocket websocket);
     ]} *)
 
-val send : ?kind:[ `Text | `Binary ] -> string -> websocket -> unit promise
+val send : ?kind:[ `Text | `Binary ] -> websocket -> string -> unit promise
 (** Sends a single message. The WebSocket is ready another message when the
     promise resolves.
 
@@ -1481,7 +1483,7 @@ val graphiql : string -> handler
 val sql_pool : ?size:int -> string -> middleware
 (** Makes an SQL connection pool available to its inner handler. *)
 
-val sql : (Caqti_lwt.connection -> 'a promise) -> request -> 'a promise
+val sql : request -> (Caqti_lwt.connection -> 'a promise) -> 'a promise
 (** Runs the callback with a connection from the SQL pool. See example
     {{:https://github.com/aantron/dream/tree/master/example/h-sql#files}
     [h-sql]}.
@@ -1491,7 +1493,7 @@ val sql : (Caqti_lwt.connection -> 'a promise) -> request -> 'a promise
         Dream.run
         @@ Dream.sql_pool "sqlite3://db.sqlite"
         @@ fun request ->
-          request |> Dream.sql (fun db ->
+          Dream.sql request (fun db ->
             (* ... *) |> Dream.html)
     ]} *)
 

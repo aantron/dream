@@ -44,7 +44,7 @@ let sql_pool ?size uri inner_handler request =
       failwith message
   end
 
-let sql callback request =
+let sql request callback =
   match !(Dream.global pool request) with
   | None ->
     let message = "Dream.sql: no pool; did you apply Dream.sql_pool?" in

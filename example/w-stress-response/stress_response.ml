@@ -19,8 +19,8 @@ let stress ?(megabytes = 1024) ?(chunk = 64) response =
       let%lwt () = Dream.close_stream response in
       Lwt.return (Unix.gettimeofday () -. start)
     else
-      let%lwt () = Dream.write chunk_a response in
-      let%lwt () = Dream.write chunk_b response in
+      let%lwt () = Dream.write response chunk_a in
+      let%lwt () = Dream.write response chunk_b in
       let%lwt () = Lwt.pause () in
       loop (sent + chunk + chunk)
   in

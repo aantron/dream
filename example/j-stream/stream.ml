@@ -4,7 +4,7 @@ let echo request response =
     | None ->
       Dream.close_stream response
     | Some chunk ->
-      let%lwt () = Dream.write chunk response in
+      let%lwt () = Dream.write response chunk in
       let%lwt () = Dream.flush response in
       loop ()
   in

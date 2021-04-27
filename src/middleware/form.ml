@@ -32,7 +32,7 @@ let sort_and_check_form to_value form request =
 
   match csrf_token with
   | [_, value] ->
-    begin match%lwt Csrf.verify_csrf_token (to_value value) request with
+    begin match%lwt Csrf.verify_csrf_token request (to_value value) with
     | `Ok ->
       Lwt.return (`Ok form)
 

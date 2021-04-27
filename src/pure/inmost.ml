@@ -297,10 +297,17 @@ let with_body body message =
 let with_stream message =
   update {message with body = ref (`Stream (ref `Idle))}
 
-let write chunk message =
+(* TODO Can also change order of arguments on Body.write, though it's
+   internal. *)
+let write message chunk =
   Body.write chunk message.body
 
-let write_bigstring chunk offset length message =
+let write_bigstring ?(offset = 0) ?length message chunk =
+  let length =
+    match length with
+    | Some length -> length
+    | None -> Lwt_bytes.length chunk - offset
+  in
   Body.write_bigstring chunk offset length message.body
 
 let flush message =
@@ -519,7 +526,7 @@ let websocket ?headers handler =
   in
   Lwt.return response
 
-let send ?(kind = `Text) message websocket =
+let send ?(kind = `Text) websocket message =
   websocket.send kind message
 
 let receive websocket =

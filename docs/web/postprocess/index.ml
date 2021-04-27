@@ -694,13 +694,15 @@ let next_replacement = {|
 |}
 
 let write_bigstring_expected = {|<div class="spec value" id="val-write_bigstring">
- <a href="#val-write_bigstring" class="anchor"></a><code><span><span class="keyword">val</span> write_bigstring : <span><a href="#type-bigstring">bigstring</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+ <a href="#val-write_bigstring" class="anchor"></a><code><span><span class="keyword">val</span> write_bigstring : <span>?offset:int <span class="arrow">-&gt;</span></span> <span>?length:int <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-bigstring">bigstring</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let write_bigstring_replacement = {|
 <pre><span class="keyword">val</span> write_bigstring :
-  <a href="#type-bigstring">bigstring</a> -> int -> int -> <a href="#type-response">response</a> -> unit <a href="#type-promise">promise</a>
+  ?offset:int ->
+  ?length:int ->
+    <a href="#type-response">response</a> -> <a href="#type-bigstring">bigstring</a> -> unit <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -891,13 +893,13 @@ let csrf_result_replacement = {|
 |}
 
 let verify_csrf_token_expected = {|<div class="spec value" id="val-verify_csrf_token">
- <a href="#val-verify_csrf_token" class="anchor"></a><code><span><span class="keyword">val</span> verify_csrf_token : <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-csrf_result">csrf_result</a> <a href="#type-promise">promise</a></span></span></code>
+ <a href="#val-verify_csrf_token" class="anchor"></a><code><span><span class="keyword">val</span> verify_csrf_token : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-csrf_result">csrf_result</a> <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let verify_csrf_token_replacement = {|
 <pre><span class="keyword">val</span> verify_csrf_token :
-  string -> <a href="#type-request">request</a> -> <a href="#type-csrf_result">csrf_result</a> <a href="#type-promise">promise</a>
+  <a href="#type-request">request</a> -> string -> <a href="#type-csrf_result">csrf_result</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -1033,14 +1035,14 @@ let websocket_replacement = {|
 |}
 
 let send_expected = {|<div class="spec value" id="val-send">
- <a href="#val-send" class="anchor"></a><code><span><span class="keyword">val</span> send : <span>?kind:<span>[ `Text <span>| `Binary</span> ]</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-websocket">websocket</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+ <a href="#val-send" class="anchor"></a><code><span><span class="keyword">val</span> send : <span>?kind:<span>[ `Text <span>| `Binary</span> ]</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-websocket">websocket</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let send_replacement = {|
 <pre><span class="keyword">val</span> send :
   ?kind:[ `Text | `Binary ] ->
-    string -> <a href="#type-websocket">websocket</a> -> unit <a href="#type-promise">promise</a>
+    <a href="#type-websocket">websocket</a> -> string -> unit <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -1069,13 +1071,13 @@ let graphql_replacement = {|
 |}
 
 let sql_expected = {|<div class="spec value" id="val-sql">
- <a href="#val-sql" class="anchor"></a><code><span><span class="keyword">val</span> sql : <span><span>(<span><span class="xref-unresolved">Caqti_lwt</span>.connection <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> <a href="#type-promise">promise</a></span></span></code>
+ <a href="#val-sql" class="anchor"></a><code><span><span class="keyword">val</span> sql : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span>(<span><span class="xref-unresolved">Caqti_lwt</span>.connection <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let sql_replacement = {|
 <pre><span class="keyword">val</span> sql :
-  (Caqti_lwt.connection -> 'a <a href="#type-promise">promise</a>) -> <a href="#type-request">request</a> ->
+  <a href="#type-request">request</a> -> (Caqti_lwt.connection -> 'a <a href="#type-promise">promise</a>) ->
     'a <a href="#type-promise">promise</a>
 </pre>
 |}

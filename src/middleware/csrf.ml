@@ -34,7 +34,7 @@ type csrf_result = [
   | `Invalid
 ]
 
-let verify_csrf_token token request = Lwt.return @@
+let verify_csrf_token request token = Lwt.return @@
   match Dream__pure.Formats.from_base64url token with
   | None ->
     log.warning (fun log -> log ~request "CSRF token not Base64-encoded");

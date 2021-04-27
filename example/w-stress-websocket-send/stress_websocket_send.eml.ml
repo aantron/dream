@@ -39,8 +39,8 @@ let stress websocket =
       let%lwt () = Dream.close_websocket websocket in
       Lwt.return (Unix.gettimeofday () -. start)
     else
-      let%lwt () = Dream.send frame_a websocket ~kind:`Binary in
-      let%lwt () = Dream.send frame_b websocket ~kind:`Binary in
+      let%lwt () = Dream.send websocket frame_a ~kind:`Binary in
+      let%lwt () = Dream.send websocket frame_b ~kind:`Binary in
       let%lwt () = Lwt.pause () in
       loop (sent + frame + frame)
   in

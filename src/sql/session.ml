@@ -118,10 +118,10 @@ let put request (session : Session.session) name value =
   |> List.remove_assoc name
   |> fun dictionary -> (name, value)::dictionary
   |> fun dictionary -> session.payload <- dictionary;
-  request |> Sql.sql (fun db -> update db session)
+  Sql.sql request (fun db -> update db session)
 
 let invalidate request lifetime operations (session : Session.session ref) =
-  request |> Sql.sql begin fun db ->
+  Sql.sql request begin fun db ->
     let%lwt () = remove db !session.id in
     let%lwt new_session = create db (Unix.gettimeofday () +. lifetime) 1 in
     session := new_session;
@@ -138,7 +138,7 @@ let operations request lifetime (session : Session.session ref) dirty =
   operations
 
 let load lifetime request =
-  request |> Sql.sql begin fun db ->
+  Sql.sql request begin fun db ->
     let now = Unix.gettimeofday () in
 
     let%lwt valid_session =
