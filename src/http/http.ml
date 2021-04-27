@@ -627,137 +627,147 @@ let serve_with_maybe_https
     ~builtins
     user's_dream_handler =
 
-  begin match debug with
-  | Some debug -> Dream.set_debug debug app;
-  | None -> ()
-  end;
+  try%lwt
+    begin match debug with
+    | Some debug -> Dream.set_debug debug app
+    | None -> ()
+    end;
 
-  (* This check will at least catch secrets like "foo" when used on a public
-     interface. *)
-  if not (is_localhost interface) then
-    if String.length secret < 32 then begin
-      log.warning (fun log -> log "Using a short key on a public interface");
-      log.warning (fun log ->
-        log "Consider using Dream.to_base64url (Dream.random 32)");
-  end;
+    (* This check will at least catch secrets like "foo" when used on a public
+       interface. *)
+    if not (is_localhost interface) then
+      if String.length secret < 32 then begin
+        log.warning (fun log -> log "Using a short key on a public interface");
+        log.warning (fun log ->
+          log "Consider using Dream.to_base64url (Dream.random 32)");
+    end;
 
-  (* TODO The interface needs to allow not messing with the secret if an app is
-     passed. *)
-  Dream.set_secrets (secret::old_secrets) app;
+    (* TODO The interface needs to allow not messing with the secret if an app
+       is passed. *)
+    Dream.set_secrets (secret::old_secrets) app;
 
-  match https with
-  | `No ->
-    serve_with_details
-      caller_function_for_error_messages
-      no_tls
-      ~interface
-      ~port
-      ~stop
-      ~error_handler
-      ~prefix
-      ~app
-      ~certificate_file:""
-      ~key_file:""
-      ~builtins
-      user's_dream_handler
+    match https with
+    | `No ->
+      serve_with_details
+        caller_function_for_error_messages
+        no_tls
+        ~interface
+        ~port
+        ~stop
+        ~error_handler
+        ~prefix
+        ~app
+        ~certificate_file:""
+        ~key_file:""
+        ~builtins
+        user's_dream_handler
 
-  | `OpenSSL | `OCaml_TLS as tls_library ->
-    app.https <- true;
+    | `OpenSSL | `OCaml_TLS as tls_library ->
+      app.https <- true;
 
-    (* TODO Writing temporary files is extremely questionable for anything
-       except the fake localhost certificate. This needs loud warnings. IIRC the
-       SSL binding already supports in-memory certificates. Does TLS? In any
-       case, this would need upstream work. *)
-    let certificate_and_key =
-      match certificate_file, key_file, certificate_string, key_string with
-      | None, None, None, None ->
-        (* Use the built-in development certificate. However, if the interface
-           is not a loopback interface, write a warning. *)
-        if not (is_localhost interface) then begin
+      (* TODO Writing temporary files is extremely questionable for anything
+         except the fake localhost certificate. This needs loud warnings. IIRC
+         the SSL binding already supports in-memory certificates. Does TLS? In
+         any case, this would need upstream work. *)
+      let certificate_and_key =
+        match certificate_file, key_file, certificate_string, key_string with
+        | None, None, None, None ->
+          (* Use the built-in development certificate. However, if the interface
+            is not a loopback interface, write a warning. *)
+          if not (is_localhost interface) then begin
+            log.warning (fun log ->
+              log "Using a development SSL certificate on a public interface");
+            log.warning (fun log ->
+              log "See arguments ~certificate_file and ~key_file");
+          end;
+
+          `Memory (Dream__localhost.certificate, Dream__localhost.key, `Silent)
+
+        | Some certificate_file, Some key_file, None, None ->
+          `File (certificate_file, key_file)
+
+        | None, None, Some certificate_string, Some key_string ->
+          (* This is likely a non-development in-memory certificate, and it
+             seems reasonable to warn that we are going to write it to a
+             temporary file, with security implications. *)
           log.warning (fun log ->
-            log "Using a development SSL certificate on a public interface");
+            log "In-memory certificates will be written to temporary files");
+
+          (* Show where the certificate is written so that the user can get rid
+             of it, if necessary. In particular, the key file should be removed
+             using srm. This whole scheme is just completely insecure, because
+             the server itself does not use an equivalent of srm to get rid of
+             the temporary file. Updstream support is really necessary here. *)
+          `Memory (certificate_string, key_string, `Verbose)
+
+        | _ ->
+          raise (Invalid_argument
+            "Must specify exactly one pair of certificate and key")
+      in
+
+      let tls_library =
+        match tls_library with
+        | `OpenSSL -> openssl
+        | `OCaml_TLS -> ocaml_tls
+      in
+
+      match certificate_and_key with
+      | `File (certificate_file, key_file) ->
+        serve_with_details
+          caller_function_for_error_messages
+          tls_library
+          ~interface
+          ~port
+          ~stop
+          ~error_handler
+          ~prefix
+          ~app
+          ~certificate_file
+          ~key_file
+          ~builtins
+          user's_dream_handler
+
+      | `Memory (certificate_string, key_string, verbose_or_silent) ->
+        Lwt_io.with_temp_file begin fun (certificate_file, certificate_stream) ->
+        Lwt_io.with_temp_file begin fun (key_file, key_stream) ->
+
+        if verbose_or_silent <> `Silent then begin
           log.warning (fun log ->
-            log "See arguments ~certificate_file and ~key_file");
+            log "Writing certificate to %s" certificate_file);
+          log.warning (fun log ->
+            log "Writing key to %s" key_file);
         end;
 
-        `Memory (Dream__localhost.certificate, Dream__localhost.key, `Silent)
+        let%lwt () = Lwt_io.write certificate_stream certificate_string in
+        let%lwt () = Lwt_io.write key_stream key_string in
+        let%lwt () = Lwt_io.close certificate_stream in
+        let%lwt () = Lwt_io.close key_stream in
 
-      | Some certificate_file, Some key_file, None, None ->
-        `File (certificate_file, key_file)
+        serve_with_details
+          caller_function_for_error_messages
+          tls_library
+          ~interface
+          ~port
+          ~stop
+          ~error_handler
+          ~prefix
+          ~app
+          ~certificate_file
+          ~key_file
+          ~builtins
+          user's_dream_handler
 
-      | None, None, Some certificate_string, Some key_string ->
-        (* This is likely a non-development in-memory certificate, and it seems
-           reasonable to warn that we are going to write it to a temporary file,
-           with security implications. *)
-        log.warning (fun log ->
-          log "In-memory certificates will be written to temporary files");
+        end
+        end
 
-        (* Show where the certificate is written so that the user can get rid of
-           it, if necessary. In particular, the key file should be removed using
-           srm. This whole scheme is just completely insecure, because the
-           server itself does not use an equivalent of srm to get rid of the
-           temporary file. Updstream support is really necessary here. *)
-        `Memory (certificate_string, key_string, `Verbose)
-
-      | _ ->
-        raise (Invalid_argument
-          "Must specify exactly one pair of certificate and key")
-    in
-
-    let tls_library =
-      match tls_library with
-      | `OpenSSL -> openssl
-      | `OCaml_TLS -> ocaml_tls
-    in
-
-    match certificate_and_key with
-    | `File (certificate_file, key_file) ->
-      serve_with_details
-        caller_function_for_error_messages
-        tls_library
-        ~interface
-        ~port
-        ~stop
-        ~error_handler
-        ~prefix
-        ~app
-        ~certificate_file
-        ~key_file
-        ~builtins
-        user's_dream_handler
-
-    | `Memory (certificate_string, key_string, verbose_or_silent) ->
-      Lwt_io.with_temp_file begin fun (certificate_file, certificate_stream) ->
-      Lwt_io.with_temp_file begin fun (key_file, key_stream) ->
-
-      if verbose_or_silent <> `Silent then begin
-        log.warning (fun log ->
-          log "Writing certificate to %s" certificate_file);
-        log.warning (fun log ->
-          log "Writing key to %s" key_file);
-      end;
-
-      let%lwt () = Lwt_io.write certificate_stream certificate_string in
-      let%lwt () = Lwt_io.write key_stream key_string in
-      let%lwt () = Lwt_io.close certificate_stream in
-      let%lwt () = Lwt_io.close key_stream in
-
-      serve_with_details
-        caller_function_for_error_messages
-        tls_library
-        ~interface
-        ~port
-        ~stop
-        ~error_handler
-        ~prefix
-        ~app
-        ~certificate_file
-        ~key_file
-        ~builtins
-        user's_dream_handler
-
-      end
-      end
+  with exn ->
+    let backtrace = Printexc.get_backtrace () in
+    log.error (fun log ->
+      log "Dream.%s: exception %s"
+        caller_function_for_error_messages (Printexc.to_string exn));
+    backtrace |> Dream__middleware.Log.iter_backtrace (fun line ->
+      log.error (fun log -> log "%s" line));
+    raise exn
 
 
 
@@ -825,16 +835,24 @@ let run
   let adjust_terminal =
     adjust_terminal && Sys.os_type <> "Win32" && Unix.(isatty stderr) in
 
-  if adjust_terminal then begin
-    (* The mystery terminal escape sequence is $(tput rmam). Prefer this,
-       hopefully it is portable enough. Calling tput seems like a security
-       risk, and I am not aware of an API for doing this programmatically. *)
-    prerr_string "\x1b[?7l";
-    flush stderr;
-    let attributes = Unix.(tcgetattr stderr) in
-    attributes.c_echo <- false;
-    Unix.(tcsetattr stderr TCSANOW) attributes
-  end;
+  let restore_terminal =
+    if adjust_terminal then begin
+      (* The mystery terminal escape sequence is $(tput rmam). Prefer this,
+         hopefully it is portable enough. Calling tput seems like a security
+         risk, and I am not aware of an API for doing this programmatically. *)
+      prerr_string "\x1b[?7l";
+      flush stderr;
+      let attributes = Unix.(tcgetattr stderr) in
+      attributes.c_echo <- false;
+      Unix.(tcsetattr stderr TCSANOW) attributes;
+      fun () ->
+        (* The escape sequence is $(tput smam). *)
+        prerr_string "\x1b[?7h";
+        flush stderr
+    end
+    else
+      ignore
+  in
 
   let log = Dream__middleware.Log.convenience_log in
 
@@ -855,27 +873,27 @@ let run
     log "Type Ctrl+C to stop"
   end;
 
-  Lwt_main.run begin
-    serve_with_maybe_https
-      "run"
-      ~interface
-      ~port
-      ~stop
-      ?debug
-      ~error_handler
-      ?secret
-      ?old_secrets
-      ~prefix
-      ?app:None
-      ~https:(if https then `OpenSSL else `No)
-      ?certificate_file ?key_file
-      ?certificate_string:None ?key_string:None
-      ~builtins
-      user's_dream_handler
-  end;
+  try
+    Lwt_main.run begin
+      serve_with_maybe_https
+        "run"
+        ~interface
+        ~port
+        ~stop
+        ?debug
+        ~error_handler
+        ?secret
+        ?old_secrets
+        ~prefix
+        ?app:None
+        ~https:(if https then `OpenSSL else `No)
+        ?certificate_file ?key_file
+        ?certificate_string:None ?key_string:None
+        ~builtins
+        user's_dream_handler
+    end;
+    restore_terminal ()
 
-  if adjust_terminal then begin
-    (* The escape sequence is $(tput smam). See comment at start of function. *)
-    prerr_string "\x1b[?7h";
-    flush stderr
-  end
+  with exn ->
+    restore_terminal ();
+    raise exn
