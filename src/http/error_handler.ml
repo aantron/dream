@@ -42,9 +42,9 @@ let dump (error : Error.error) =
     p "%s\n" string
 
   | `Exn exn ->
+    let backtrace = Printexc.get_backtrace () in
     p "%s\n" (Printexc.to_string exn);
-    Printexc.get_backtrace ()
-    |> Dream__middleware.Log.iter_backtrace (p "%s\n")
+    backtrace |> Dream__middleware.Log.iter_backtrace (p "%s\n")
   end;
 
   p "\n";
@@ -140,7 +140,9 @@ let customize template (error : Error.error) =
     let description, backtrace =
       match condition with
       | `String string -> string, ""
-      | `Exn exn -> Printexc.to_string exn, Printexc.get_backtrace ()
+      | `Exn exn ->
+        let backtrace = Printexc.get_backtrace () in
+        Printexc.to_string exn, backtrace
     in
 
     let message = String.concat ": " (layer @ [description]) in
@@ -213,10 +215,12 @@ let default =
 
 let double_faults f default =
   Lwt.catch f begin fun exn ->
+    let backtrace = Printexc.get_backtrace () in
+
     log.error (fun log ->
       log "Error handler raised: %s" (Printexc.to_string exn));
 
-    Printexc.get_backtrace ()
+    backtrace
     |> Dream__middleware.Log.iter_backtrace (fun line ->
       log.error (fun log -> log "%s" line));
 

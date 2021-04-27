@@ -229,11 +229,12 @@ let handle_over_websocket make_context schema subscriptions request websocket =
               Lwt.return_unit
 
           with exn ->
+            let backtrace = Printexc.get_backtrace () in
             log.error (fun log ->
               log ~request "Exception while handling WebSocket message:");
             log.error (fun log ->
               log ~request "%s" (Printexc.to_string exn));
-            Printexc.get_backtrace ()
+            backtrace
             |> Dream__middleware.Log.iter_backtrace (fun line ->
               log.error (fun log -> log ~request "%s" line));
 

@@ -308,8 +308,9 @@ let set_up_exception_hook () =
   if !set_async_exception_hook then begin
     set_async_exception_hook := false;
     Lwt.async_exception_hook := fun exn ->
+      let backtrace = Printexc.get_backtrace () in
       log.error (fun log -> log "Async exception: %s" (Printexc.to_string exn));
-      Printexc.get_backtrace ()
+      backtrace
       |> iter_backtrace (fun line -> log.error (fun log -> log "%s" line))
   end
 
@@ -392,9 +393,16 @@ let logger next_handler request =
       Lwt.return response)
 
     (fun exn ->
-      (* In case of exception, log the exception and the backtrace. *)
+      let backtrace = Printexc.get_backtrace () in
+      (* In case of exception, log the exception. We alsp log the backtrace
+         here, even though it is likely to be redundant, because some OCaml
+         libraries install exception printers that will clobber the backtrace
+         right during Printexc.to_string! *)
       log.warning (fun log ->
         log ~request "Aborted by: %s" (Printexc.to_string exn));
+
+      backtrace
+      |> iter_backtrace (fun line -> log.warning (fun log -> log "%s" line));
 
       Lwt.fail exn)
 
