@@ -19,7 +19,7 @@ point your browser. Your terminal probably makes the link clickable.
 <pre><code><b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b>
 08.03.21 21:17:21.471                       Running on http://localhost:8080
-08.03.21 21:17:21.471                       Press ENTER to stop
+08.03.21 21:17:21.471                       Type Ctrl+C to stop
 </code></pre>
 
 If you go to [http://localhost:8080](http://localhost:8080), you will, of

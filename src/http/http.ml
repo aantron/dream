@@ -803,11 +803,6 @@ let serve
 
 
 
-let read_stop_from_stdin () =
-  match%lwt Lwt_io.(read_char stdin) with
-  | _ -> Lwt.return_unit
-  | exception End_of_file -> fst (Lwt.task ())
-
 let run
     ?(interface = default_interface)
     ?(port = default_port)
@@ -822,12 +817,9 @@ let run
     ?key_file
     ?(builtins = true)
     ?(greeting = true)
-    ?(stop_on_input = true)
-    ?(graceful_stop = true)
     ?(adjust_terminal = true)
     user's_dream_handler =
 
-  (* TODO Expose a flag for not suppressing SIGPIPE? *)
   Sys.(set_signal sigpipe Signal_ignore);
 
   let adjust_terminal =
@@ -861,43 +853,26 @@ let run
     in
 
     log "Running on %s://%s:%i" scheme hostname port;
-    if stop_on_input then
-      log "Press ENTER to stop"
+    log "Type Ctrl+C to stop"
   end;
 
-  let stop =
-    if stop_on_input then
-      Lwt.choose [stop; read_stop_from_stdin ()]
-    else
-      stop
-  in
-
   Lwt_main.run begin
-    let%lwt () =
-      serve_with_maybe_https
-        "run"
-        ~interface
-        ~port
-        ~stop
-        ?debug
-        ~error_handler
-        ?secret
-        ?old_secrets
-        ~prefix
-        ?app:None
-        ~https:(if https then `OpenSSL else `No)
-        ?certificate_file ?key_file
-        ?certificate_string:None ?key_string:None
-        ~builtins
-        user's_dream_handler
-    in
-
-    if not graceful_stop then
-      Lwt.return_unit
-    else begin
-      log "Stopping; allowing 1 second for requests to finish";
-      Lwt_unix.sleep 1.
-    end
+    serve_with_maybe_https
+      "run"
+      ~interface
+      ~port
+      ~stop
+      ?debug
+      ~error_handler
+      ?secret
+      ?old_secrets
+      ~prefix
+      ?app:None
+      ~https:(if https then `OpenSSL else `No)
+      ?certificate_file ?key_file
+      ?certificate_string:None ?key_string:None
+      ~builtins
+      user's_dream_handler
   end;
 
   if adjust_terminal then begin
@@ -905,9 +880,3 @@ let run
     prerr_string "\x1b[?7h";
     flush stderr
   end
-
-
-(* TODO LATER Can Dune's watcher kill the server? Just need SIGINT issued. *)
-(* TODO LATER Project homepage to greeting message. *)
-(* TODO LATER Terminal options docs, etc., log viewers, for line wrapping. *)
-(* TODO DOC Gradual replacement of run by serve. *)

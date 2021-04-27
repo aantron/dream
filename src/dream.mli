@@ -1834,8 +1834,6 @@ val run :
   ?key_file:string ->
   ?builtins:bool ->
   ?greeting:bool ->
-  ?stop_on_input:bool ->
-  ?graceful_stop:bool ->
   ?adjust_terminal:bool ->
     handler -> unit
 (** Runs the Web application represented by the {!handler}, by default at
@@ -1890,15 +1888,12 @@ val run :
       and [~interface] is not ["localhost"].
     - [~builtins:false] disables {!section-builtin}.
 
-    The remaining arguments, can be used to gradually disable convenience
-    features of [Dream.run]. Once all are disabled, you may want to switch to
+    The remaining arguments can be used to gradually disable convenience
+    features of [Dream.run]. Once both are disabled, you may want to switch to
     using {!Dream.serve}.
 
     - [~greeting:false] disables the start-up log message that prints a link to
       the Web application.
-    - [~stop_on_input:false] disables stopping the server on input on STDIN.
-    - [~graceful_stop:false] disables waiting for one second after stop, before
-      exiting from [Dream.run].
     - [~adjust_terminal:false] disables adjusting the terminal to disable echo
       and line wrapping. *)
 

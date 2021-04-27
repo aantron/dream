@@ -1331,8 +1331,7 @@ let run_expected = {|<div class="spec value" id="val-run">
  <a href="#val-run" class="anchor"></a><code><span><span class="keyword">val</span> run : <span>?interface:string <span class="arrow">-&gt;</span></span> <span>?port:int <span class="arrow">-&gt;</span></span> <span>?stop:<span>unit <a href="#type-promise">promise</a></span> <span class="arrow">-&gt;</span></span> <span>?debug:bool <span class="arrow">-&gt;</span></span>
 <span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span> <span>?secret:string <span class="arrow">-&gt;</span></span> <span>?old_secrets:<span>string list</span> <span class="arrow">-&gt;</span></span> <span>?prefix:string <span class="arrow">-&gt;</span></span>
 <span>?https:bool <span class="arrow">-&gt;</span></span> <span>?certificate_file:string <span class="arrow">-&gt;</span></span> <span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?builtins:bool <span class="arrow">-&gt;</span></span>
-<span>?greeting:bool <span class="arrow">-&gt;</span></span> <span>?stop_on_input:bool <span class="arrow">-&gt;</span></span> <span>?graceful_stop:bool <span class="arrow">-&gt;</span></span>
-<span>?adjust_terminal:bool <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> unit</span></code>
+<span>?greeting:bool <span class="arrow">-&gt;</span></span> <span>?adjust_terminal:bool <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
 |}
 
@@ -1351,8 +1350,6 @@ let run_replacement = {|
   ?key_file:string ->
   ?builtins:bool ->
   ?greeting:bool ->
-  ?stop_on_input:bool ->
-  ?graceful_stop:bool ->
   ?adjust_terminal:bool -></span>
     <a href="#type-handler">handler</a> -> unit
 </pre>|}

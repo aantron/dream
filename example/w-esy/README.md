@@ -25,7 +25,7 @@ and looks like this:
 <pre><code><b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b>
 19.04.21 08:57:33.450                       Running on http://localhost:8080
-19.04.21 08:57:33.450                       Press ENTER to stop
+19.04.21 08:57:33.450                       Type Ctrl+C to stop
 </code></pre>
 
 The first time you run `npx esy`, it will take a few minutes installing OCaml
