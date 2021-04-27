@@ -14,13 +14,21 @@ module Dream = Dream__pure.Inmost
 (* TODO NOTE Using Lwt_io because it has a nice "read the whole thing"
    function. *)
 
+let mime_lookup filename =
+  let content_type =
+    match Magic_mime.lookup filename with
+    | "text/html" -> Dream__pure.Formats.text_html
+    | content_type -> content_type
+  in
+  ["Content-Type", content_type]
+
 let from_filesystem local_root path _ =
   let file = Filename.concat local_root path in
   Lwt.catch
     (fun () ->
-      Lwt_io.(with_file ~mode:Input file)(fun channel ->
-        Lwt_io.read channel
-        |> Lwt.map Dream.response))
+      Lwt_io.(with_file ~mode:Input file) (fun channel ->
+        let%lwt content = Lwt_io.read channel in
+        Dream.respond ~headers:(mime_lookup path) content))
     (fun _exn -> Dream.empty `Not_Found)
 
 (* TODO Add ETag handling. *)

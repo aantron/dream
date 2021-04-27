@@ -1236,22 +1236,9 @@ val static :
       {!Dream.static}.
     - [path] is what was substituted for [**].
 
-    The default loader is {!Dream.from_filesystem}.
-
-    See example
+    The default loader is {!Dream.from_filesystem}. See example
     {{:https://github.com/aantron/dream/tree/master/example/w-one-binary#files}
-    [w-one-binary]} for a loader that serves files from memory instead.
-
-    {!Dream.static} uses {{:https://github.com/mirage/ocaml-magic-mime}
-    magic-mime} to set a [Content-Type:] header based on the requested file's
-    extension. To suppress the guess, [~loader] can set its own [Content-Type:]
-    header in the response that it returns.
-
-    [~loader] can set additional headers on the response. Of particular interest
-    are headers related to cache control, such as
-    {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag}
-    [ETag]}. See {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching}
-    MDN {i HTTP caching}}. *)
+    [w-one-binary]} for a loader that serves files from memory instead. *)
 
 val from_filesystem : string -> string -> handler
 (** [Dream.from_filesystem local_directory path request] responds with a file
@@ -1263,7 +1250,16 @@ val from_filesystem : string -> string -> handler
 
     {[
       Dream.get "/sitemap.xml" (Dream.from_filesystem "assets" "sitemap.xml")
-    ]} *)
+    ]}
+
+    {!Dream.from_filesystem} calls {!Dream.mime_lookup} to guess a
+    [Content-Type:] based on the file's extension. *)
+
+val mime_lookup : string -> (string * string) list
+(** Returns a [Content-Type:] header based on the given filename. This is mostly
+    a wrapper around {{:https://github.com/mirage/ocaml-magic-mime} magic-mime}.
+    However, if the result is [text/html], {!Dream.mime_lookup} replaces it with
+    [text/html; charset=utf-8], so as to match {!Dream.html}. *)
 
 
 
