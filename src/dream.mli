@@ -1225,9 +1225,10 @@ val static :
     ]}
 
     [Dream.static local_directory] validates the path substituted for [**] by
-    checking that it is (1) relative and (2) does not contain parent directory
-    references ([..]). If these checks fail, {!Dream.static} responds with [404
-    Not Found].
+    checking that it is (1) relative, (2) does not contain parent directory
+    references ([..]), and (3) does not contain separators ([/]) within
+    components. If these checks fail, {!Dream.static} responds with [404 Not
+    Found].
 
     If the checks succeed, {!Dream.static} calls [~loader local_directory path
     request], where

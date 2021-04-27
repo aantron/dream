@@ -32,33 +32,29 @@ let from_filesystem local_root path _ =
     (fun _exn -> Dream.empty `Not_Found)
 
 (* TODO Add ETag handling. *)
-(* TODO Add automatic Content-Type handling. *)
 (* TODO Add Content-Length handling? *)
 (* TODO Support HEAD requests? *)
 
-(* The path must:
-   - Not have any .. or . components.
-   - Not have any empty components. This should not be possible in Dream except
-     for the last component, which, if empty, indicates a directory. We still
-     check all components for robustness' sake.
-   - Not be empty.
-   - Not have the prefix /. Dream's path function generates a path with such a
-     prefix, with the meaning that it is the site root. We remove that. The
-     remaining path must not be an absolute path. *)
 (* TODO On Windows, should we also check for \ and drive letters? *)
 (* TODO Not an efficient implementation at the moment. *)
-(* TODO It may be better to convert Dream's string list to a path first and then
-   re-parse it, to avoid any potential issues with nested / due to any bugs that
-   may be introduced. *)
 let validate_path request =
   let path = Dream.path request in
 
+  let has_slash component = String.contains component '/' in
+  let has_backslash component = String.contains component '\\' in
+  let has_slash = List.exists has_slash path in
+  let has_backslash = List.exists has_backslash path in
   let has_dot = List.exists ((=) Filename.current_dir_name) path in
   let has_dotdot = List.exists ((=) Filename.parent_dir_name) path in
   let has_empty = List.exists ((=) "") path in
   let is_empty = path = [] in
 
-  if has_dot || has_dotdot || has_empty || is_empty then
+  if has_slash ||
+     has_backslash ||
+     has_dot ||
+     has_dotdot ||
+     has_empty ||
+     is_empty then
     None
 
   else
