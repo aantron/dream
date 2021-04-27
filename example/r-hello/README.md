@@ -12,7 +12,7 @@ let () =
 
 <pre><code><b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b>
-08.04.21 13:55:56.552                       Running on http://localhost:8080
+08.04.21 13:55:56.552                       Running at http://localhost:8080
 08.04.21 13:55:56.553                       Type Ctrl+C to stop
 </code></pre>
 

@@ -846,13 +846,12 @@ let run
         "http"
     in
 
-    let hostname =
-      match interface with
-      | "localhost" | "127.0.0.1" | "0.0.0.0" -> "localhost"
-      | interface -> interface
-    in
-
-    log "Running on %s://%s:%i" scheme hostname port;
+    begin match interface with
+    | "localhost" | "127.0.0.1" ->
+      log "Running at %s://localhost:%i" scheme port
+    | _ ->
+      log "Running on %s:%i (%s://localhost:%i)" interface port scheme port
+    end;
     log "Type Ctrl+C to stop"
   end;
 
