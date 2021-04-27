@@ -178,11 +178,19 @@ Highlight `@antron` to poke @aantron specifically.
 
 ## Contributing
 
-Dream uses several [submodules][vendor], so be sure to clone with
+All kinds of contributions are welcome, including examples, links to blogs,
+related libraries, and, of course, PRs! See [CONTRIBUTING.md][contributing.md].
+
+As an immediate note, if you'd like to clone the repo, be sure to use
 
 ```
 git clone https://github.com/aantron/dream.git --recursive
 ```
+
+The `--recursive` flag is necessary because Dream uses several git
+[submodules][vendor].
+
+[contributing.md]: https://github.com/aantron/dream/blob/master/docs/CONTRIBUTING.md
 
 <br>
 
