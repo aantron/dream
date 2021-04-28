@@ -61,9 +61,12 @@ let write_file id file content =
 
 let check_or_create id =
   let path = sandbox_root // id in
-  if%lwt Lwt_unix.file_exists path then
+  if%lwt Lwt_unix.file_exists path then begin
+    Dream.info (fun log -> log "Sandbox %s: exists" id);
     Lwt.return_unit
-  else
+  end
+  else begin
+    Dream.info (fun log -> log "Sandbox %s: creating" id);
     let%lwt () =
       match%lwt Lwt_unix.mkdir sandbox_root 0o755 with
       | () -> Lwt.return_unit
@@ -75,6 +78,7 @@ let check_or_create id =
     let%lwt () = write_file id "server.eml.ml" starter_server_eml_ml in
     let%lwt () = write_file id "Dockerfile" sandbox_dockerfile in
     Lwt.return_unit
+  end
 
 
 
@@ -168,20 +172,21 @@ let run sandbox id =
     |> Lwt_process.pread_lines
     |> Lwt_stream.iter_s (forward ~add_newline:true sandbox)
   end;
+  Dream.info (fun log -> log "Sandbox %s: started on port %i" id port);
   Lwt.return port
 
-let stop_container sandbox =
+let kill_container sandbox =
   match sandbox.id, sandbox.container with
   | Some id, Some container ->
+    Dream.info (fun log -> log "Sandbox %s: killing container" id);
     Printf.ksprintf Sys.command "docker kill s-%s" id |> ignore;
     Hashtbl.remove sandbox_by_port container.port;
     Hashtbl.remove sandbox_by_id id;
     Lwt.return_unit
   | _ -> Lwt.return_unit
 
-(* TODO Forcibly stop after one second. *)
 let stop sandbox =
-  let%lwt () = stop_container sandbox in
+  let%lwt () = kill_container sandbox in
   Dream.close_websocket sandbox.socket
 
 
@@ -207,13 +212,19 @@ let rec communicate sandbox =
         None
     in
     match values with
-    | None -> stop sandbox
+    | None ->
+      Dream.warning (fun log -> log "Unable to parse WebSocket message");
+      stop sandbox
     | Some (kind, payload) ->
       match kind, sandbox with
 
       | "attach", _ ->
+        Dream.info (fun log -> log "attach message");
         let payload = String.sub payload 1 (String.length payload - 1) in
-        if not (validate_id payload) then stop sandbox
+        if not (validate_id payload) then begin
+          Dream.warning (fun log -> log "attach: invalid payload");
+          stop sandbox
+        end
         else
           let id = payload in
           let%lwt () = check_or_create id in
@@ -224,22 +235,28 @@ let rec communicate sandbox =
             |> Yojson.Basic.to_string
             |> fun s -> Dream.send sandbox.socket s
           in
+          Dream.info (fun log -> log "Sandbox %s: content sent to client" id);
           communicate sandbox
 
       | "run", {id = Some id; _} ->
-        let%lwt () = stop_container sandbox in
+        Dream.info (fun log -> log "Sandbox %s: run message" id);
+        let%lwt () = kill_container sandbox in
         let%lwt () = write_file id "server.eml.ml" payload in
         let%lwt output = build id in
+        Dream.info (fun log -> log "Sandbox %s: sending build output" id);
         let%lwt () = forward sandbox output in
         let%lwt output = image id in
         (* let%lwt () = forward sandbox output in *)
         ignore output;
+        Dream.info (fun log -> log "Sandbox %s: built image" id);
         let%lwt port = run sandbox id in
         let%lwt () = Lwt_unix.sleep 0.25 in
         let%lwt () = started sandbox port in
         communicate sandbox
 
-      | _ -> stop sandbox
+      | _ ->
+        Dream.warning (fun log -> log "Unable to parse WebSocket message");
+        stop sandbox
 
 
 
@@ -276,13 +293,11 @@ let () =
       if not (validate_id (Dream.param "id" request)) then
         Dream.empty `Not_Found
       else
-        let%lwt response =
-          Dream.from_filesystem "static" "playground.html" request in
-        Dream.with_header "Content-Type" "text/html; charset=utf-8" response
-        |> Lwt.return);
+        Dream.from_filesystem "static" "playground.html" request);
 
   ]
   @@ Dream.not_found;
 
+  Dream.log "Exiting; killing all containers";
   Sys.command "docker kill $(docker ps -q) > /dev/null 2> /dev/null"
   |> ignore
