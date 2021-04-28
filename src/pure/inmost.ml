@@ -535,7 +535,7 @@ let receive websocket =
 let close_websocket ?code websocket =
   websocket.close code
 
-let identity handler request =
+let no_middleware handler request =
   handler request
 
 let rec pipeline middlewares handler =

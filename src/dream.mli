@@ -83,15 +83,20 @@ and route
           Dream.get "/logout" admin_logout_handler;
         ];
       ]
-    ]}
+    ]} *)
+
+(** {2 Algebra}
 
     The three handler-related types have a vaguely algebraic interpretation:
 
-    - Literal handlers are atoms.
+    - Each literal {!handler} is an atom.
     - {!type-middleware} is for sequential composition (product-like).
-    - {!type-route} is for alternative composition (sum-like).
+      {!Dream.no_middleware} is {b 1}.
+    - {!type-route} is for alternative composition (sum-like). {!Dream.no_route}
+      is {b 0}.
 
-    {!Dream.scope} implements a distributive law. *)
+    {!Dream.scope} implements a left distributive law, making Dream a ring-like
+    structure. *)
 
 (** {2 Helpers} *)
 
@@ -1095,8 +1100,16 @@ val form_tag :
     sections of these docs, according to where they are relevant. This section
     contains only generic middleware combinators. *)
 
-val identity : middleware
-(** Does nothing but call its inner handler. *)
+val no_middleware : middleware
+(** Does nothing but call its inner handler. Useful for disabling middleware
+    conditionally during application startup:
+
+    {[
+      if development then
+        my_middleware
+      else
+        Dream.no_middleware
+    ]} *)
 
 val pipeline : middleware list -> middleware
 (** Combines a sequence of middlewares into one, such that these two lines are
