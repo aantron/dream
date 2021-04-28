@@ -1,12 +1,10 @@
-PACKAGES := dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,hpack,h2,h2-lwt,h2-lwt-unix
-
 .PHONY : build
 build :
-	@dune build --no-print-directory -p $(PACKAGES) @install
+	@dune build --no-print-directory @install
 
 .PHONY : watch
 watch :
-	@dune build --no-print-directory -p $(PACKAGES) -w
+	@dune build --no-print-directory -w
 
 .PHONY : test
 test :
@@ -72,7 +70,7 @@ clean : clean-coverage
 
 .PHONY : utop
 utop :
-	dune utop -p $(PACKAGES)
+	dune utop
 
 .PHONY : todo
 todo :

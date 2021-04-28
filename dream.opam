@@ -67,7 +67,6 @@ depends: [
   "mirage-crypto-rng" {>= "0.8.0"}  # Signature of initialize.
   "multipart-form-data" {>= "0.3.0"}
   "ocaml" {>= "4.08.0"}
-  "opam-installer" {build}
   "uri" {>= "4.2.0"}
   "yojson"  # ...
 
@@ -78,6 +77,7 @@ depends: [
   # "httpaf-lwt-unix"
   # "h2"
   # "h2-lwt-unix"
+  # "hpack"
   # "websocketaf"
 
   # Dependencies of vendored packages.
@@ -95,30 +95,6 @@ depends: [
   "ppx_expect" {with-test}
 ]
 
-conflicts: [
-  "gluten"
-  "httpaf"
-  "h2"
-  "websocketaf"
-]
-
 build: [
-  ["dune" "build" "-p"
-    "dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,hpack,h2,h2-lwt,h2-lwt-unix"
-    "-j" jobs]
-]
-
-install: [
-  ["opam-installer" "--prefix" prefix "dream.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/gluten/gluten.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/gluten/gluten-lwt.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/gluten/gluten-lwt-unix.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/websocketaf/websocketaf.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/httpaf/httpaf.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/httpaf/httpaf-lwt.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/httpaf/httpaf-lwt-unix.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/h2/hpack.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/h2/h2.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/h2/h2-lwt.install"]
-  ["opam-installer" "--prefix" prefix "src/vendor/h2/h2-lwt-unix.install"]
+  ["dune" "build" "-p" name "-j" jobs]
 ]
