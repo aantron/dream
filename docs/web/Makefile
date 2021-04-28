@@ -1,11 +1,9 @@
 	ROOT := ../..
 ODOC := odoc/default/_doc/_html
-PACKAGES := dream,gluten,gluten-lwt,gluten-lwt-unix,websocketaf,httpaf,httpaf-lwt,httpaf-lwt-unix,hpack,h2,h2-lwt,h2-lwt-unix
 
 .PHONY : build
 build :
-	dune build @doc --root $(ROOT) --only-packages $(PACKAGES) \
-	  --no-print-directory --build-dir `pwd`/odoc
+	dune build @doc --root $(ROOT) --no-print-directory --build-dir `pwd`/odoc
 	rm -f site/index.html
 	dune exec -- postprocess/index.exe \
 	  $(ODOC)/dream/Dream/index.html site/index.html

@@ -59,6 +59,8 @@ There are several examples showing Dream with Reason syntax.
   templates and protects against XSS.
 - [**`r-template-stream`**](r-template-stream#files) &nbsp;&mdash;&nbsp; streams
   templates as response bodies.
+- [**`r-tyxml`**](r-tyxml#files) &nbsp;&mdash;&nbsp; type-checked server-side
+  JSX templates.
 
 <br>
 

@@ -139,6 +139,8 @@ and not supported by Dream.
 - [**`w-tyxml`**](../w-tyxml#files) shows how to use
   [TyXML](https://github.com/ocsigen/tyxml), a different templater that uses
   OCaml's type system to prevent emitting many kinds of invalid HTML.
+- [**`r-tyxml`**](../r-tyxml#files) if you are using Reason. You can use TyXML
+  with JSX syntax server-side!
 
 <br>
 

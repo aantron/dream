@@ -1,4 +1,4 @@
 (executable
  (name tyxml)
  (libraries dream tyxml)
- (preprocess (pps lwt_ppx)))
+ (preprocess (pps lwt_ppx tyxml-jsx)))

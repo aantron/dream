@@ -1,0 +1,90 @@
+# `w-tyxml`
+
+<br>
+
+[TyXML](https://github.com/ocsigen/tyxml) can be used together with Reason's
+built-in JSX syntax for generating HTML on the server:
+
+```reason
+open Tyxml
+
+let render = path_param =>
+  <html>
+    <head><title>"Home"</title></head>
+    <body>
+      <h1>{Html.txt(path_param)}</h1>
+    </body>
+  </html>
+
+let html_to_string = html =>
+  Format.asprintf("%a", Tyxml.Html.pp(), html);
+
+let () =
+  Dream.run
+  @@ Dream.logger
+  @@ Dream.router([
+
+    Dream.get("/:word",
+      (request =>
+        render(Dream.param("word", request))
+        |> html_to_string
+        |> Dream.html)),
+
+  ])
+  @@ Dream.not_found
+```
+
+<pre><code><b>$ npm install esy && npx esy</b>
+<b>$ npx esy start</b></code></pre>
+
+<br>
+
+To get this, we depend on package `tyxml-jsx` in
+[`esy.json`](https://github.com/aantron/dream/blob/master/example/r-tyxml/esy.json):
+
+<pre><code>{
+  "dependencies": {
+    "@opam/dream": "aantron/dream:dream.opam",
+    "@opam/dune": "^2.0",
+    "@opam/tyxml": "*",
+    <b>"@opam/tyxml-jsx": "*",</b>
+    "ocaml": "4.12.x"
+  },
+  "scripts": {
+    "start": "dune exec --root . ./tyxml.exe"
+  }
+}
+</code></pre>
+
+and add `tyxml-jsx` to our preprocessor list in
+[`dune`](https://github.com/aantron/dream/blob/master/example/r-tyxml/dune):
+
+<pre><code>(executable
+ (name tyxml)
+ (libraries dream tyxml)
+ (preprocess (pps lwt_ppx <b>tyxml-jsx</b>)))
+</code></pre>
+
+If you miss adding `tyxml-jsx` to `dune`, you may get a message like
+
+```
+File "Main.re", line 6, characters 2-7:
+6 |   <html>
+      ^^^^^
+Error: Unbound value html
+```
+
+<br>
+
+**See also:**
+
+- [**`w-tyxml`**](../w-tyxml#files) for an introduction to TyXML.
+- [**`7-template`**](../7-template#security) section *Security* on output
+  security. TyXML escapes strings by default, just as the built-in templater
+  does.
+- [*TyXML JSX Syntax*](https://ocsigen.org/tyxml/latest/manual/jsx) is the
+  reference for TyXML's JSX support.
+
+<br>
+
+[Up to the example index](../#reason)

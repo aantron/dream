@@ -42,23 +42,12 @@ let () =
 
 <br>
 
-TyXML offers two syntax extensions for making the templates look nicer. The
-[HTML syntax](https://ocsigen.org/tyxml/latest/manual/ppx) looks like this:
+## JSX
 
-```ocaml
-open Tyxml
-
-let%html render path_param = {|
-  <html>
-    <head><title>Home</title></head>
-    <body>
-      <h1>|} [Html.txt path_param] {|</h1>
-    </body>
-  </html>|}
-```
-
-The TyXML [JSX syntax](https://ocsigen.org/tyxml/latest/manual/jsx) looks like
-this, combined with Reason for the surrounding language:
+When using Reason, TyXML supports JSX, through package
+[`tyxml-jsx`](https://ocsigen.org/tyxml/latest/manual/jsx). See
+[**`r-tyxml`**](../r-tyxml#files) for a complete example, including Dune
+metadata.
 
 ```reason
 open Tyxml
@@ -74,6 +63,36 @@ let render = path_param =>
 
 <br>
 
+## HTML syntax
+
+Package [`tyxml-ppx`](https://ocsigen.org/tyxml/latest/manual/ppx) offers an
+HTML syntax, which can be used with either Reason or OCaml:
+
+```ocaml
+open Tyxml
+
+let%html render path_param = {|
+  <html>
+    <head><title>Home</title></head>
+    <body>
+      <h1>|} [Html.txt path_param] {|</h1>
+    </body>
+  </html>|}
+```
+
+To use `tyxml-ppx`, be sure to include it in the
+[`dune`](https://github.com/aantron/dream/blob/master/example/w-tyxml/dune)
+file:
+
+<pre><code>(executable
+ (name tyxml)
+ (libraries dream tyxml)
+ (preprocess (pps lwt_ppx <b>tyxml-ppx</b>)))
+</code></pre>
+
+<br>
+<br>
+
 Note: TyXML is able to serialize HTML straight into a response body stream,
 rather than into an intermediary string. However, Dream doesn't expose a
 convenient way for TyXML to do so at the present time. If you need support for
@@ -86,6 +105,8 @@ this, please [open an issue](https://github.com/aantron/dream/issues).
 - [**`7-template`**](../7-template#security) section *Security* on output
   security. TyXML escapes strings by default, just as the built-in templater
   does.
+- [**`r-tyxml`**](../r-tyxml#files) is the Reason and JSX version of this
+  example.
 
 <br>
 
