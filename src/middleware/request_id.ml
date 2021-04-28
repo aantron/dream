@@ -28,6 +28,8 @@ let id =
     ~name
     ~show_value:(fun id -> id)
 
+(* TODO Expose this in a more organized fashion? It is used in several
+   places. *)
 let lwt_key =
   Lwt.new_key ()
 

@@ -257,6 +257,17 @@ let wrap_handler
           let error_handler =
             Error_handler.websocket user's_error_handler request response in
 
+          (* TODO This needs to be done in a more disciplined fashion. *)
+          (* TODO This could be considerably simplified using just a mutable
+             request_id field in requests. *)
+          let user's_websocket_handler websocket =
+            Lwt.with_value
+              Dream__middleware.Request_id.lwt_key
+              (Dream__middleware.Request_id.get_option
+                ~request:(Dream.last request) ())
+              (fun () -> user's_websocket_handler websocket)
+          in
+
           let proceed () =
             Websocketaf.Server_connection.create_websocket
               ~error_handler (websocket_handler user's_websocket_handler)

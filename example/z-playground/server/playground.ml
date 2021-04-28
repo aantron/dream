@@ -193,7 +193,10 @@ let stop sandbox =
    issue. *)
 let rec communicate sandbox =
   match%lwt Dream.receive sandbox.socket with
-  | None -> stop sandbox
+  | None ->
+    Dream.info (fun log -> log "WebSocket closed by client");
+    stop sandbox
+
   | Some message ->
     let values =
       (* TODO Raises. *)
