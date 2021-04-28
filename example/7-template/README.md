@@ -141,6 +141,8 @@ and not supported by Dream.
   OCaml's type system to prevent emitting many kinds of invalid HTML.
 - [**`r-tyxml`**](../r-tyxml#files) if you are using Reason. You can use TyXML
   with JSX syntax server-side!
+- [**`w-template-stream`**](../w-template-stream#files) streams templates to
+  responses, instead of building up complete response strings.
 
 <br>
 

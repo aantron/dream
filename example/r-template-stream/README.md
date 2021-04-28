@@ -66,6 +66,8 @@ interactive, so we force writing of all output after generating each `<p>` tag.
   building up entire bodies as strings.
 - [**`7-template`**](../7-template#security) section *Security* for XSS
   prevention considerations.
+- [**`w-template-stream`**](../w-template-stream#files) is the OCaml version of
+  this example.
 
 <br>
 
