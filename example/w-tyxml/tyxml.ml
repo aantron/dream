@@ -1,10 +1,10 @@
-let render path_param =
+let greet who =
   let open Tyxml.Html in
   html
-    (head (title (txt "Home")) [])
+    (head (title (txt "Greeting")) [])
     (body [
       h1 [
-        txt path_param
+        txt "Good morning, "; txt who; txt "!";
       ]
     ])
 
@@ -16,11 +16,8 @@ let () =
   @@ Dream.logger
   @@ Dream.router [
 
-    Dream.get "/:word"
-      (fun request ->
-        render (Dream.param "word" request)
-        |> html_to_string
-        |> Dream.html);
+    Dream.get "/"
+      (fun _ -> Dream.html (html_to_string (greet "world")));
 
   ]
   @@ Dream.not_found

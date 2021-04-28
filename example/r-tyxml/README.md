@@ -1,4 +1,4 @@
-# `w-tyxml`
+# `r-tyxml`
 
 <br>
 
@@ -8,11 +8,11 @@ built-in JSX syntax for generating HTML on the server:
 ```reason
 open Tyxml
 
-let render = path_param =>
+let greet = who =>
   <html>
     <head><title>"Home"</title></head>
     <body>
-      <h1>{Html.txt(path_param)}</h1>
+      <h1>{Html.txt("Good morning, " ++ who ++ "!")}</h1>
     </body>
   </html>
 
@@ -24,11 +24,8 @@ let () =
   @@ Dream.logger
   @@ Dream.router([
 
-    Dream.get("/:word",
-      (request =>
-        render(Dream.param("word", request))
-        |> html_to_string
-        |> Dream.html)),
+    Dream.get("/",
+      (_ => Dream.html(html_to_string(greet("world"))))),
 
   ])
   @@ Dream.not_found
@@ -62,7 +59,7 @@ and add `tyxml-jsx` to our preprocessor list in
 <pre><code>(executable
  (name tyxml)
  (libraries dream tyxml)
- (preprocess (pps lwt_ppx <b>tyxml-jsx</b>)))
+ <b>(preprocess (pps lwt_ppx tyxml-jsx)))</b>
 </code></pre>
 
 If you miss adding `tyxml-jsx` to `dune`, you may get a message like

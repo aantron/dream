@@ -9,13 +9,13 @@ way that prevents many kinds of incorrect usage. For example, you cannot nest
 `body`.
 
 ```ocaml
-let render path_param =
+let greet who =
   let open Tyxml.Html in
   html
-    (head (title (txt "Home")) [])
+    (head (title (txt "Greeting")) [])
     (body [
       h1 [
-        txt path_param
+        txt "Good morning, "; txt who; txt "!";
       ]
     ])
 
@@ -27,11 +27,8 @@ let () =
   @@ Dream.logger
   @@ Dream.router [
 
-    Dream.get "/:word"
-      (fun request ->
-        render (Dream.param "word" request)
-        |> html_to_string
-        |> Dream.html);
+    Dream.get "/"
+      (fun _ -> Dream.html (html_to_string (greet "world")));
 
   ]
   @@ Dream.not_found
@@ -52,11 +49,11 @@ metadata.
 ```reason
 open Tyxml
 
-let render = path_param =>
+let greet = who =>
   <html>
     <head><title>"Home"</title></head>
     <body>
-      <h1>(Html.txt(path_param))</h1>
+      <h1>{Html.txt("Good morning, " ++ who ++ "!")}</h1>
     </body>
   </html>
 ```
@@ -71,11 +68,11 @@ HTML syntax, which can be used with either Reason or OCaml:
 ```ocaml
 open Tyxml
 
-let%html render path_param = {|
+let%html greet who = {|
   <html>
     <head><title>Home</title></head>
     <body>
-      <h1>|} [Html.txt path_param] {|</h1>
+      <h1>|}[Html.txt ("Good morning, " ^ who ^ "!")]{|</h1>
     </body>
   </html>|}
 ```
