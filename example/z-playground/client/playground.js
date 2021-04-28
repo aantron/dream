@@ -43,20 +43,17 @@ function colorizeLog(string) {
     ;
 };
 
-var socket = new WebSocket("ws://" + window.location.host + "/socket");
-
-socket.onopen = function () {
-  socket.send(JSON.stringify(
-    {"kind": "attach", "payload": window.location.pathname}));
-};
+var sandbox = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
+sandbox = sandbox || "ocaml";
+var socket =
+  new WebSocket("ws://" + window.location.host + "/socket?sandbox=" + sandbox);
 
 socket.onmessage = function (e) {
   var message = JSON.parse(e.data);
   switch (message.kind) {
     case "content":
       codemirror.setValue(message.payload);
-      socket.send(JSON.stringify(
-        {"kind": "run", "payload": codemirror.getValue()}));
+      socket.send(codemirror.getValue());
       break;
     case "log":
       pre.innerHTML += colorizeLog(message.payload);
@@ -67,17 +64,17 @@ socket.onmessage = function (e) {
       // update the port.
       var location =
         window.location.protocol + "//" +
-        window.location.hostname + ":" + message.payload;
+        window.location.hostname + ":" + message.port;
       iframe.src = location;
       address.value = location;
+      history.replaceState(null, "", message.sandbox);
       break;
     }
   }
 };
 
 run.onclick = function () {
-  socket.send(JSON.stringify(
-    {"kind": "run", "payload": codemirror.getValue()}));
+  socket.send(codemirror.getValue());
 };
 
 address.onkeyup = function (event) {
