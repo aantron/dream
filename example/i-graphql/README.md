@@ -79,6 +79,9 @@ If you'd like to do I/O or other asynchronous operations in your resolvers, use
 [`io_field`](https://github.com/andreas/ocaml-graphql-server#lwt-support)
 rather than `field`.
 
+Use [`Dream.no_route`](https://aantron.github.io/dream/#val-no_route) to serve
+GraphiQL conditionally, only during development.
+
 See example [**`w-graphql-subscription`**](../w-graphql-subscription#files) for
 an example with a GraphQL subscription.
 

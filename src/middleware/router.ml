@@ -136,6 +136,9 @@ let patch pattern handler =
 let any pattern handler =
   [parse pattern, Handler (`Any, handler)]
 
+let no_route =
+  []
+
 let rec apply middlewares routes =
   let rec compose handler = function
     | [] -> handler

@@ -1153,6 +1153,29 @@ val router : route list -> middleware
     because, in the future, it may be possible to query routes for site
     structure metadata. *)
 
+val get     : string -> handler -> route
+(** Forwards [`GET] requests for the given path to the handler.
+
+    {[
+      Dream.get "/home" home_template
+    ]} *)
+
+val post    : string -> handler -> route
+val put     : string -> handler -> route
+val delete  : string -> handler -> route
+val head    : string -> handler -> route
+val connect : string -> handler -> route
+val options : string -> handler -> route
+val trace   : string -> handler -> route
+val patch   : string -> handler -> route
+(** Like {!Dream.get}, but for each of the other {{!type-method_} methods}. *)
+
+val any     : string -> handler -> route
+(** Like {!Dream.get}, but does not check the method. *)
+
+val not_found : handler
+(** Always responds with [404 Not Found]. *)
+
 (* :((( *)
 val param : string -> request -> string
 (** Retrieves the path parameter. If it is missing, {!Dream.param} raises an
@@ -1187,28 +1210,18 @@ val scope : string -> middleware list -> route list -> route
 
     Scopes can be nested. *)
 
-val get     : string -> handler -> route
-(** Forwards [`GET] requests for the given path to the handler.
+val no_route : route
+(** A dummy value of type {!type-route} that is completely ignored by the
+    router. Useful for disabling routes conditionally during application start:
 
     {[
-      Dream.get "/home" home_template
+      Dream.router [
+        if development then
+          Dream.get "/graphiql" (Dream.graphiql "/graphql")
+        else
+          Dream.no_route;
+      ]
     ]} *)
-
-val post    : string -> handler -> route
-val put     : string -> handler -> route
-val delete  : string -> handler -> route
-val head    : string -> handler -> route
-val connect : string -> handler -> route
-val options : string -> handler -> route
-val trace   : string -> handler -> route
-val patch   : string -> handler -> route
-(** Like {!Dream.get}, but for each of the other {{!type-method_} methods}. *)
-
-val any     : string -> handler -> route
-(** Like {!Dream.get}, but does not check the method. *)
-
-val not_found : handler
-(** Always responds with [404 Not Found]. *)
 
 
 
@@ -1426,8 +1439,8 @@ val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
       let () =
         Dream.run
         @@ Dream.router [
-          Dream.post "/graphql"  (Dream.graphql Lwt.return schema);
-          Dream.get  "/graphiql" (Dream.graphiql "/graphql");
+          Dream.any "/graphql"  (Dream.graphql Lwt.return schema);
+          Dream.get "/graphiql" (Dream.graphiql "/graphql");
         ]
         @@ Dream.not_found
     ]}
@@ -1461,7 +1474,10 @@ val graphiql : string -> handler
     Dream's build of GraphiQL is found in the
     {{:https://github.com/aantron/dream/tree/master/src/graphiql} src/graphiql}
     directory. If you have the need, you can use it as the starting point for
-    your own customized GraphiQL. *)
+    your own customized GraphiQL.
+
+    Use {!Dream.no_route} to disable GraphiQL conditionally outside of
+    development. *)
 
 
 
