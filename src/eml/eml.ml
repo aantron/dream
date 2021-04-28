@@ -686,7 +686,7 @@ struct
     print;
 
     init = (fun () ->
-      print "let ___eml_write string = Dream.write response string in\n");
+      print "let ___eml_write string = Dream__pure.Inmost.write response string in\n");
 
     finish = (fun () ->
       print "Lwt.return_unit\n");
@@ -705,7 +705,7 @@ struct
     print;
 
     init = (fun () ->
-      print "let ___eml_write = string => Dream.write(response, string);\n");
+      print "let ___eml_write = string => Dream__pure.Inmost.write(response, string);\n");
 
     finish = (fun () ->
       print "Lwt.return_unit\n");
@@ -744,7 +744,7 @@ struct
 
         output.format ("%" ^ format);
         if needs_escape then
-          output.print "(Dream.html_escape ";
+          output.print "(Dream__pure.Formats.html_escape ";
         output.print "(\n";
 
         Printf.ksprintf output.print "#%i \"%s\"\n" (line + 1) location;

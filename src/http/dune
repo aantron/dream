@@ -5,6 +5,7 @@
   bigarray-compat
   bigstringaf
   digestif
+  dream.asset
   dream.cipher
   dream.localhost
   dream.middleware
@@ -19,7 +20,14 @@
   lwt.unix
   lwt_ssl
   ssl
-  dream.websocketaf
- )
- (preprocess (pps lwt_ppx))
- (instrumentation (backend bisect_ppx)))
+  dream.websocketaf)
+ (preprocess
+  (pps lwt_ppx))
+ (instrumentation
+  (backend bisect_ppx)))
+
+(rule
+ (targets fallback_template.ml)
+ (deps fallback_template.eml.ml)
+ (action
+  (run %{bin:dream_eml} %{deps} --workspace %{workspace_root})))
