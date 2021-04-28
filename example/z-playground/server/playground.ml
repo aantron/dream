@@ -208,6 +208,16 @@ let started session port =
   |> Dream.send session.socket
 
 let run session =
+  let alive, signal_alive = Lwt.wait () in
+  let signalled = ref false in
+  let signal_alive () =
+    if !signalled then
+      ()
+    else begin
+      signalled := true;
+      Lwt.wakeup_later signal_alive ()
+    end
+  in
   let%lwt port = allocate_port () in
   let container_id = Dream.random 9 |> Dream.to_base64url in
   session.container <- Some {container_id; port};
@@ -217,12 +227,14 @@ let run session =
       port container_id session.sandbox
     |> Lwt_process.shell
     |> Lwt_process.pread_lines
-    |> Lwt_stream.iter_s (client_log ~add_newline:true session)
+    |> Lwt_stream.iter_s (fun line ->
+      signal_alive ();
+      client_log ~add_newline:true session line)
   end;
-  Lwt_unix.sleep 0.25;%lwt
+  alive;%lwt
   started session port;%lwt
   Dream.info (fun log ->
-    log "Sandbox %s: started on port %i" session.sandbox port);
+    log "Sandbox %s: started %s on port %i" session.sandbox container_id port);
   Lwt.return_unit
 
 let kill session =
@@ -233,10 +245,15 @@ let kill session =
 
 (* Main loop for each connected client WebSocket. *)
 
+(* We are running on a 1-CPU machine for now anyway, so it's not such a big
+   deal to have a global (asynchronous) lock preventing concurrent builds and
+   GC. *)
+let global_lock =
+  Lwt_mutex.create ()
+
 (* TODO Mind concurrency issues with client messages coming during transitions.
    OTOH this code waits during those transitions anyway, so maybe it is not an
    issue. *)
-(* TODO Need to be able to lock sandboxes for building. *)
 let rec listen session =
   match%lwt Dream.receive session.socket with
   | None ->
@@ -247,25 +264,30 @@ let rec listen session =
   Dream.info (fun log -> log "Sandbox %s: code update" session.sandbox);
   kill_container session;%lwt
 
-  let%lwt current_code = read session.sandbox in
-  if code = current_code then
-    Lwt.return_unit
-  else begin
-    let%lwt sandbox = create code in
-    session.sandbox <- sandbox;
-    Lwt.return_unit
-  end;%lwt
-  write_file session.sandbox "dune-project" sandbox_dune_project;%lwt
-  write_file session.sandbox "dune" sandbox_dune;%lwt
-  write_file session.sandbox "Dockerfile" sandbox_dockerfile;%lwt
+  Lwt_mutex.with_lock global_lock begin fun () ->
 
-  match%lwt build session with
-  | false ->
-    listen session
-  | true ->
-    image session;%lwt
-    run session;%lwt
-    listen session
+    let%lwt current_code = read session.sandbox in
+    if code = current_code then
+      Lwt.return_unit
+    else begin
+      let%lwt sandbox = create code in
+      session.sandbox <- sandbox;
+      Lwt.return_unit
+    end;%lwt
+    write_file session.sandbox "dune-project" sandbox_dune_project;%lwt
+    write_file session.sandbox "dune" sandbox_dune;%lwt
+    write_file session.sandbox "Dockerfile" sandbox_dockerfile;%lwt
+
+    begin match%lwt build session with
+    | false -> Lwt.return_unit
+    | true ->
+      image session;%lwt
+      run session
+    end
+
+  end;%lwt
+
+  listen session
 
 
 
