@@ -51,42 +51,6 @@ let forward_body_general
 
   send ()
 
-  (* match !(response.body) with
-  | `Empty ->
-    close ()
-
-  | `String string ->
-    write_string string;
-    close ();
-
-  | `String_stream _ ->
-    let rec send () =
-      match%lwt Dream.read response with
-      | None ->
-        close ();
-        Lwt.return_unit
-      | Some string ->
-        write_string string;
-        flush ignore; (* TODO This needs to be exposed. *)
-        send ()
-    in
-
-    (* TODO Exception and rejection handling. Is it necessary? *)
-    ignore (send ())
-
-  (* TODO Is exception handling necessary here? Need integration testing. *)
-  | `Bigstring_stream _ ->
-    let rec send () =
-      Dream.body_stream_bigstring
-        (fun data offset length ->
-          write_bigstring ~off:offset ~len:length data;
-          send ())
-        (fun () ->
-          close ())
-        response
-    in
-    send () *)
-
 let forward_body
     (response : Dream.response)
     (body : [ `write ] Httpaf.Body.t) =
