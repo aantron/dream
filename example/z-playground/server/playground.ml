@@ -243,7 +243,13 @@ let rec communicate sandbox =
 (* The Web server proper. *)
 
 let () =
-  Dream.run ~interface:"0.0.0.0" ~port:80 ~adjust_terminal:false
+  (* Stop when systemd sends SIGTERM. *)
+  let stop, signal_stop = Lwt.wait () in
+  Lwt_unix.on_signal Sys.sigterm (fun _signal ->
+    Lwt.wakeup_later signal_stop ())
+  |> ignore;
+
+  Dream.run ~interface:"0.0.0.0" ~port:80 ~stop ~adjust_terminal:false
   @@ Dream.logger
   @@ Dream.router [
 
@@ -273,4 +279,7 @@ let () =
         |> Lwt.return);
 
   ]
-  @@ Dream.not_found
+  @@ Dream.not_found;
+
+  Sys.command "docker kill $(docker ps -q) > /dev/null 2> /dev/null"
+  |> ignore

@@ -19,6 +19,7 @@ installed: [
   "bigarray-compat.1.0.0"
   "bigstringaf.0.7.0"
   "biniou.1.2.1"
+  "bisect_ppx.2.6.0"
   "caqti.1.5.0"
   "caqti-lwt.1.3.0"
   "cmdliner.1.0.4"
@@ -69,6 +70,10 @@ installed: [
   "ocamlfind.1.9.1"
   "ocamlgraph.2.0.0"
   "ocplib-endian.1.1"
+  "opam-core.2.1.0~beta4"
+  "opam-file-format.2.1.2"
+  "opam-format.2.1.0~beta4"
+  "opam-installer.2.1.0~beta4"
   "ppx_derivers.1.2.1"
   "ppxlib.0.22.0"
   "psq.0.2.0"
@@ -82,6 +87,94 @@ installed: [
   "stdlib-shims.0.3.0"
   "stringext.1.6.0"
   "topkg.1.0.3"
-  "uri.4.1.0"
+  "uri.4.2.0"
   "yojson.1.7.0"
 ]
+pinned: "dream.1.0.0~alpha1"
+package "dream" {
+  opam-version: "2.0"
+  version: "1.0.0~alpha1"
+  synopsis: "Tidy, feature-complete Web framework"
+  description: """
+Dream is a feature-complete Web framework with a simple programming
+model and no boilerplate. It provides only two data types, request and
+response.
+
+Almost everything else is either a built-in OCaml type, or an
+abbreviation for a bare function. For example, a Web app, known in
+Dream as a handler, is just an ordinary function from requests to
+responses. And a middleware is then just a function from handlers to
+handlers.
+
+Within this model, Dream adds:
+
+- Session management with pluggable back ends.
+- A fully composable router.
+- Support for HTTP/1.1, HTTP/2, and HTTPS.
+- WebSockets.
+- GraphQL, including subscriptions and a built-in GraphiQL editor.
+- SQL connection pool helpers.
+- Server-side HTML templates.
+- Automatic secure handling of cookies and forms.
+- Unified, internationalization-friendly error handling.
+- A neat log, and OCaml runtime configuration.
+- Helpers for Web formats, such as Base64url, and a modern cipher.
+
+Because of the simple programming model, everything is optional and
+composable. It is trivailly possible to strip Dream down to just a
+bare driver of the various HTTP protocols.
+
+Dream is presented as a single module, whose API is documented on one
+page. In addition, Dream comes with a large number of examples.
+Security topics are introduced throughout, wherever they are
+applicable."""
+  maintainer: "Anton Bachin <antonbachin@yahoo.com>"
+  authors: "Anton Bachin <antonbachin@yahoo.com>"
+  license: "MIT"
+  tags: [
+    "http" "web" "framework" "websocket" "graphql" "server" "http2" "tls"
+  ]
+  homepage: "https://github.com/aantron/dream"
+  doc: "https://aantron.github.io/dream"
+  bug-reports: "https://github.com/aantron/dream/issues"
+  depends: [
+    "base-unix"
+    "base64" {>= "3.1.0"}
+    "bigarray-compat"
+    "caqti-lwt"
+    "conf-libev"
+    "cstruct"
+    "dune" {>= "2.7.0"}
+    "fmt" {>= "0.8.7"}
+    "graphql_parser"
+    "graphql-lwt"
+    "hmap"
+    "lwt"
+    "lwt_ppx"
+    "lwt_ssl"
+    "logs" {>= "0.5.0"}
+    "magic-mime"
+    "mirage-crypto" {>= "0.8.1"}
+    "mirage-crypto-rng" {>= "0.8.0"}
+    "multipart-form-data" {>= "0.3.0"}
+    "ocaml" {>= "4.08.0"}
+    "uri" {>= "4.2.0"}
+    "yojson"
+    "angstrom" {>= "0.14.0"}
+    "bigstringaf" {>= "0.4.0"}
+    "digestif" {>= "0.7"}
+    "faraday" {>= "0.6.1"}
+    "faraday-lwt-unix"
+    "psq"
+    "result"
+    "alcotest" {with-test}
+    "bisect_ppx" {dev & >= "2.5.0"}
+    "ppx_expect" {with-test}
+  ]
+  build: ["dune" "build" "-p" name "-j" jobs]
+  dev-repo: "git+https://github.com/aantron/dream.git"
+  url {
+    src:
+      "git+https://github.com/aantron/dream.git#42625d123fbe11c2fb3e2dc2dd5926be7cd4a182"
+  }
+}
