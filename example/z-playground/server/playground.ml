@@ -7,6 +7,8 @@
 
 (* Sandboxes. *)
 
+type syntax = [ `OCaml | `Reason ]
+
 let (//) = Filename.concat
 
 let sandbox_root = "sandbox"
@@ -49,6 +51,17 @@ let sandbox_dune = {|(executable
  (action (run dream_eml %{deps} --workspace %{workspace_root})))
 |}
 
+let sandbox_dune_re = {|(executable
+ (name server)
+ (libraries dream)
+ (preprocess (pps lwt_ppx)))
+
+(rule
+ (targets server.re)
+ (deps server.eml.re)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))
+|}
+
 let base_dockerfile = {|FROM ubuntu:focal-20210416
 RUN apt update && apt install -y openssl libev4
 |}
@@ -72,27 +85,40 @@ let write_file sandbox file content =
     ~mode:Output (sandbox_root // sandbox // file) (fun channel ->
       write channel content))
 
-let create_named sandbox code =
+let create_named sandbox syntax code =
   Dream.info (fun log -> log "Sandbox %s: creating" sandbox);
   begin match%lwt Lwt_unix.mkdir (sandbox_root // sandbox) 0o755 with
   | () -> Lwt.return_unit
   | exception Unix.(Unix_error (EEXIST, _, _)) -> Lwt.return_unit
   end;%lwt
-  write_file sandbox "server.eml.ml" code;%lwt
+  begin match syntax with
+  | `OCaml -> write_file sandbox "server.eml.ml" code
+  | `Reason -> write_file sandbox "server.eml.re" code
+  end;%lwt
   Lwt.return sandbox
 
-let rec create ?(attempts = 3) code =
+let rec create ?(attempts = 3) syntax code =
   match attempts with
   | 0 -> failwith "Unable to create sandbox directory"
   | attempts ->
     let sandbox = Dream.random 9 |> Dream.to_base64url in
     match%lwt exists sandbox with
-    | true -> create ~attempts:(attempts - 1) code
-    | false -> create_named sandbox code
+    | true -> create ~attempts:(attempts - 1) syntax code
+    | false -> create_named sandbox syntax code
 
 let read sandbox =
-  Lwt_io.(with_file
-    ~mode:Input (sandbox_root // sandbox // "server.eml.ml") read)
+  let ocaml_promise =
+    Lwt_io.(with_file
+      ~mode:Input (sandbox_root // sandbox // "server.eml.ml") read)
+  in
+  match%lwt ocaml_promise with
+  | content -> Lwt.return (content, `OCaml)
+  | exception _ ->
+    let%lwt content =
+      Lwt_io.(with_file
+        ~mode:Input (sandbox_root // sandbox // "server.eml.re") read)
+    in
+    Lwt.return (content, `Reason)
 
 let init_client socket content =
   `Assoc [
@@ -117,6 +143,7 @@ type container = {
 type session = {
   mutable container : container option;
   mutable sandbox : string;
+  syntax : syntax;
   socket : Dream.websocket;
 }
 
@@ -279,16 +306,19 @@ let rec listen session =
 
   Lwt_mutex.with_lock global_lock begin fun () ->
 
-    let%lwt current_code = read session.sandbox in
+    let%lwt current_code, _ = read session.sandbox in
     if code = current_code then
       Lwt.return_unit
     else begin
-      let%lwt sandbox = create code in
+      let%lwt sandbox = create session.syntax code in
       session.sandbox <- sandbox;
       Lwt.return_unit
     end;%lwt
     write_file session.sandbox "dune-project" sandbox_dune_project;%lwt
-    write_file session.sandbox "dune" sandbox_dune;%lwt
+    begin match session.syntax with
+    | `OCaml -> write_file session.sandbox "dune" sandbox_dune
+    | `Reason -> write_file session.sandbox "dune" sandbox_dune_re
+    end;%lwt
     write_file session.sandbox "Dockerfile" sandbox_dockerfile;%lwt
 
     begin match%lwt build session with
@@ -332,7 +362,7 @@ let () =
   Lwt_main.run (create_sandboxes_directory ());
 
   (* Create the default sandbox. *)
-  Lwt_main.run (create_named "ocaml" starter_server_eml_ml)
+  Lwt_main.run (create_named "ocaml" `OCaml starter_server_eml_ml)
   |> ignore;
 
   (* Stop when systemd sends SIGTERM. *)
@@ -374,12 +404,12 @@ let () =
       | true ->
       (* Read the sandbox. If the requested sandbox doesn't exist, this will
          raise an exception, causing a 500 reply to the JavaScript client. *)
-      let%lwt content = read sandbox in
+      let%lwt content, syntax = read sandbox in
       Dream.websocket (fun socket ->
         init_client socket content;%lwt
         Dream.info (fun log ->
           log "Sandbox %s: content sent to client" sandbox);
-        listen {container = None; sandbox; socket}));
+        listen {container = None; sandbox; syntax; socket}));
 
     (* For sandbox ids, respond with the sandbox page. *)
     Dream.get "/:id" (fun request ->

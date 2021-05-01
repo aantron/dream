@@ -4,4 +4,5 @@ depends: [
   "dream"
   "dune" {>= "2.0.0"}
   "ocaml"
+  "reason"
 ]

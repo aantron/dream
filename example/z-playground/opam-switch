@@ -41,6 +41,7 @@ installed: [
   "faraday.0.7.2"
   "faraday-lwt.0.7.2"
   "faraday-lwt-unix.0.7.2"
+  "fix.20201120"
   "fmt.0.8.9"
   "graphql.0.13.0"
   "graphql-lwt.0.13.0"
@@ -54,6 +55,7 @@ installed: [
   "menhir.20210419"
   "menhirLib.20210419"
   "menhirSdk.20210419"
+  "merlin-extend.0.6"
   "mirage-crypto.0.10.1"
   "mirage-crypto-rng.0.10.1"
   "mmap.1.1.0"
@@ -79,6 +81,7 @@ installed: [
   "psq.0.2.0"
   "ptime.0.8.5"
   "re.1.9.0"
+  "reason.3.7.0"
   "result.1.5"
   "rresult.0.6.0"
   "seq.base"
@@ -175,6 +178,6 @@ applicable."""
   dev-repo: "git+https://github.com/aantron/dream.git"
   url {
     src:
-      "git+https://github.com/aantron/dream.git#42625d123fbe11c2fb3e2dc2dd5926be7cd4a182"
+      "git+https://github.com/aantron/dream.git#fb17623cff18c86fb1817a1ffd49db5fc4960d26"
   }
 }

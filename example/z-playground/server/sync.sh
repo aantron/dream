@@ -21,9 +21,22 @@ example 1-hello
 example 2-middleware
 example 3-router
 
+function example_re {
+  EXAMPLE=$1
+  mkdir -p ./sync-temp/sandbox/$1
+  cat ../$1/*.re \
+    | sed 's/Dream\.run(/Dream\.run(~interface="0.0.0.0", /g' \
+    | sed 's/Dream\.run$/Dream\.run(~interface="0.0.0.0")/g' \
+    > ./sync-temp/sandbox/$1/server.eml.re
+  touch ./sync-temp/sandbox/$1/keep
+}
+example_re r-hello
+example_re r-template
+
 rsync -rlv ./sync-temp/sandbox $HOST:playground
 rm -rf sync-temp
 
+echo
 echo "If this is the first sync, run as playground@$HOST in ~/playground:"
 echo "  opam install --deps-only ."
 echo "  opam switch export opam-switch"
