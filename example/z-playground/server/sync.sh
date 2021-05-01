@@ -32,8 +32,10 @@ example c-cookie
 example d-form
 example e-json
 example g-upload
+example i-graphql
 example j-stream
 example k-websocket
+example w-graphql-subscription
 example w-long-polling
 example w-multipart-dump
 example w-query
@@ -52,6 +54,7 @@ function example_re {
 example_re r-hello
 example_re r-template
 example_re r-template-stream
+example_re r-graphql
 
 rsync -rlv ./sync-temp/sandbox $HOST:playground
 rm -rf sync-temp
