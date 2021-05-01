@@ -49,8 +49,11 @@ let sandbox_dune = {|(executable
  (action (run dream_eml %{deps} --workspace %{workspace_root})))
 |}
 
-let sandbox_dockerfile = {|FROM ubuntu:focal-20210416
+let base_dockerfile = {|FROM ubuntu:focal-20210416
 RUN apt update && apt install -y openssl libev4
+|}
+
+let sandbox_dockerfile = {|FROM base:base
 COPY _build/default/server.exe /server.exe
 USER 112:3000
 ENTRYPOINT /server.exe
@@ -186,7 +189,10 @@ let build session =
   client_log session output;%lwt
   match%lwt process#close with
   | Unix.WEXITED 0 -> Lwt.return_true
-  | _ -> Lwt.return_false
+  | _ ->
+    Printf.ksprintf Sys.command
+      "touch %s" (sandbox_root // session.sandbox // "failed") |> ignore;
+    Lwt.return_false
 
 let image session =
   let%lwt _status =
@@ -305,7 +311,21 @@ let listen session =
 
 
 
-(* The Web server proper. *)
+let rec gc () =
+  Lwt_mutex.with_lock global_lock begin fun () ->
+    Sys.command
+      ("docker rmi " ^
+        "$(docker images | grep -v base | grep -v ubuntu | " ^
+        "grep -v REPOSITORY | awk '{print $3}')") |> ignore;
+    Sys.command "rm -rf sandbox/*/_build" |> ignore;
+    Lwt.return_unit
+  end;%lwt
+  Lwt_unix.sleep 3600.;%lwt
+  gc ()
+
+
+
+(* Entry point. *)
 
 let () =
   (* Make sure ./sandbox directory exists. *)
@@ -321,6 +341,18 @@ let () =
     Lwt.wakeup_later signal_stop ())
   |> ignore;
 
+  (* Start the sandbox gc. *)
+  Lwt.async gc;
+
+  (* Build the base image. *)
+  Lwt_main.run begin
+    Lwt_io.(with_file ~mode:Output "Dockerfile" (fun channel ->
+      write channel base_dockerfile));%lwt
+    Sys.command "docker build -t base:base . 2>&1" |> ignore;
+    Lwt.return_unit
+  end;
+
+  (* Start the Web server. *)
   Dream.run ~interface:"0.0.0.0" ~port:80 ~stop ~adjust_terminal:false
   @@ Dream.logger
   @@ Dream.router [
