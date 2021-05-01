@@ -32,7 +32,8 @@ let () =
   @@ _ => Dream.stream(~headers=[("Content-Type", Dream.text_html)], render);
 ```
 
-<pre><code><b>$ npm install esy && npx esy</b>
+<pre><code><b>$ cd example/r-template-stream</b>
+<b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
 
 <br>

@@ -31,7 +31,8 @@ let () =
   @@ fun _ -> Dream.stream render
 ```
 
-<pre><code><b>$ npm install esy && npx esy</b>
+<pre><code><b>$ cd example/w-template-stream</b>
+<b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
 
 <br>

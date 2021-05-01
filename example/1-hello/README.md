@@ -16,7 +16,8 @@ It's the absolute minimum Dream server. It responds to all requests with the
 same text. At startup, Dream prints a message to the log, telling you where to
 point your browser. Your terminal probably makes the link clickable.
 
-<pre><code><b>$ npm install esy && npx esy</b>
+<pre><code><b>$ cd example/1-hello</b>
+<b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b>
 08.03.21 21:17:21.471                       Running at http://localhost:8080
 08.03.21 21:17:21.471                       Type Ctrl+C to stop

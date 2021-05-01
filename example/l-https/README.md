@@ -12,7 +12,8 @@ let () =
   @@ fun _ -> Dream.html "Good morning, world!"
 ```
 
-<pre><code><b>$ npm install esy && npx esy</b>
+<pre><code><b>$ cd example/l-https</b>
+<b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
 
 <br>

@@ -70,7 +70,8 @@ it by setting `Content-Type` yourself when calling
 
 To build the whole setup, just do
 
-<pre><code><b>$ npm install esy && npx esy</b>
+<pre><code><b>$ cd example/w-one-binary</b>
+<b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
 
 You can now visit

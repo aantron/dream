@@ -15,7 +15,9 @@ let () =
       Dream.html (Dream.html_escape message))
 ```
 
-<pre><code><b>$ dune exec --root . ./query.exe</b></code></pre>
+<pre><code><b>$ cd example/w-query</b>
+<b>$ npm install esy && npx esy</b>
+<b>$ npx esy start</b></code></pre>
 
 <br>
 

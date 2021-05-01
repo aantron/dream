@@ -4,7 +4,8 @@
 
 Run this example:
 
-<pre><code><b>$ npm install esy && npx esy</b>
+<pre><code><b>$ cd example/f-static</b>
+<b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
 
 ...and visit

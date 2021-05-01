@@ -48,7 +48,8 @@ let () =
   @@ Dream.not_found
 ```
 
-<pre><code><b>$ npm install esy && npx esy</b>
+<pre><code><b>$ cd example/w-graphql-subscriptions</b>
+<b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
 
 <br>

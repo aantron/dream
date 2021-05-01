@@ -22,7 +22,8 @@ and looks like this:
 
 <br>
 
-<pre><code><b>$ npm install esy && npx esy</b>
+<pre><code><b>$ cd example/w-esy</b>
+<b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b>
 19.04.21 08:57:33.450                       Running at http://localhost:8080
 19.04.21 08:57:33.450                       Type Ctrl+C to stop

@@ -14,7 +14,8 @@ fswatch -o hello.ml -l 2 | xargs -L1 bash -c \
   "killall hello.exe || true; (npx esy start || true) &"
 ```
 
-<pre><code><b>$ bash watch.sh</b></code></pre>
+<pre><code><b>$ cd example/w-fswatch</b>
+<b>$ bash watch.sh</b></code></pre>
 
 <br>
 
