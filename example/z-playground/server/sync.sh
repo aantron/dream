@@ -20,6 +20,25 @@ function example {
 example 1-hello
 example 2-middleware
 example 3-router
+example 4-counter
+example 5-promise
+example 6-echo
+example 7-template
+example 8-debug
+example 9-error
+example a-log
+example b-session
+example c-cookie
+example d-form
+example e-json
+example g-upload
+example j-stream
+example k-websocket
+example w-long-polling
+example w-multipart-dump
+example w-query
+example w-server-sent-events
+example w-template-stream
 
 function example_re {
   EXAMPLE=$1
@@ -32,6 +51,7 @@ function example_re {
 }
 example_re r-hello
 example_re r-template
+example_re r-template-stream
 
 rsync -rlv ./sync-temp/sandbox $HOST:playground
 rm -rf sync-temp

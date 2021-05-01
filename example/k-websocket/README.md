@@ -13,7 +13,7 @@ let home =
     <body>
       <script>
 
-      var socket = new WebSocket("ws://localhost:8080/websocket");
+      var socket = new WebSocket("ws://" + window.location.host + "/websocket");
 
       socket.onopen = function () {
         socket.send("Hello?");
@@ -21,7 +21,7 @@ let home =
 
       socket.onmessage = function (e) {
         alert(e.data);
-      }
+      };
 
       </script>
     </body>
