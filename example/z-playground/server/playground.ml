@@ -295,6 +295,13 @@ let rec listen session =
 
   listen session
 
+let listen session =
+  try%lwt
+    listen session
+  with exn ->
+    kill session;%lwt
+    raise exn
+
 
 
 (* The Web server proper. *)
