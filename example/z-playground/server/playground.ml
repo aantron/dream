@@ -52,6 +52,7 @@ let sandbox_dune = {|(executable
 let sandbox_dockerfile = {|FROM ubuntu:focal-20210416
 RUN apt update && apt install -y openssl libev4
 COPY _build/default/server.exe /server.exe
+USER 112:3000
 ENTRYPOINT /server.exe
 |}
 
