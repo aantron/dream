@@ -207,6 +207,12 @@ let started session port =
   |> Yojson.Basic.to_string
   |> Dream.send session.socket
 
+let rec make_container_id () =
+  let candidate = Dream.random 9 |> Dream.to_base64url in
+  match candidate.[0] with
+  | '_' | '-' -> make_container_id ()
+  | _ -> candidate
+
 let run session =
   let alive, signal_alive = Lwt.wait () in
   let signalled = ref false in
@@ -219,7 +225,7 @@ let run session =
     end
   in
   let%lwt port = allocate_port () in
-  let container_id = Dream.random 9 |> Dream.to_base64url in
+  let container_id = make_container_id () in
   session.container <- Some {container_id; port};
   Lwt.async begin fun () ->
     Printf.sprintf
