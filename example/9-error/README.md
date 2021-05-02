@@ -43,6 +43,8 @@ let () =
 <b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
 
+Try it in the [playground](http://dream.as/9-error).
+
 <br>
 
 We kept the error template simple for the sake of the example, but this is

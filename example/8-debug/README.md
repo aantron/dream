@@ -31,10 +31,10 @@ let () =
 
 The rest of the app just adds two routes for triggering two kinds of
 failures that the debugger will detail. Visit
-[http://localhost:8080/bad](http://localhost:8080/bad) to trigger a
-`400 Bad Request` response, and
-[http://localhost:8080/fail](http://localhost:8080/fail) to trigger an
-exception. The debugger will show reports like this:
+[http://localhost:8080/bad](http://localhost:8080/bad)
+[[playground](http://dream.as/8-debug)] to trigger a `400 Bad Request`
+response, and [http://localhost:8080/fail](http://localhost:8080/fail) to
+trigger an exception. The debugger will show reports like this:
 
 ```
 (Failure "The Web app failed!")

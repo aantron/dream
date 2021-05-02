@@ -4,7 +4,8 @@
 
 This example shows how easy it is to define a custom middleware,
 `count_requests`. It exposes the request count at
-[http://localhost:8080/](http://localhost:8080/) in a sort of dashboard:
+[http://localhost:8080/](http://localhost:8080/)
+[[playground](http://dream.as/4-counter)], in a sort of dashboard:
 
 ```ocaml
 let count = ref 0

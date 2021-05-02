@@ -24,11 +24,11 @@ body {
 }
 
 #textarea .CodeMirror {
-  height: calc(100% - 168px);
+  height: calc(100vh - 168px);
 }
 
 #client iframe {
-  height: calc(100% - 63px)
+  height: calc(100vh - 63px)
 }
 
 

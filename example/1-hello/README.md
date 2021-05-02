@@ -24,7 +24,8 @@ point your browser. Your terminal probably makes the link clickable.
 </code></pre>
 
 If you go to [http://localhost:8080](http://localhost:8080), you will, of
-course, see `Good morning, world!`.
+course, see `Good morning, world!`. You can also try it in the [Dream
+Playground](http://dream.as/1-hello).
 
 <br>
 

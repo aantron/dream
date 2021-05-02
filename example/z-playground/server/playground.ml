@@ -343,6 +343,7 @@ let listen session =
 
 let rec gc () =
   Lwt_mutex.with_lock global_lock begin fun () ->
+    Dream.log "Running playground GC";
     Sys.command
       ("docker rmi " ^
         "$(docker images | grep -v base | grep -v ubuntu | " ^

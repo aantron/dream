@@ -35,6 +35,8 @@ let () =
 <b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
 
+Try it in the [playground](http://dream.as/w-template-stream).
+
 <br>
 
 Most uses of streaming don't need

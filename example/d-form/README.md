@@ -49,6 +49,8 @@ let () =
 <b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
 
+Try it in the [playground](http://dream.as/d-form).
+
 <br>
 
 We didn't write a literal `<form>` tag in the template. Instead, we used

@@ -31,7 +31,8 @@ let () =
 
 <br>
 
-If you visit [http://localhost:8080](http://localhost:8080) and then
+If you visit [http://localhost:8080](http://localhost:8080)
+[[playground](http://dream.as/a-log)] and then
 [http://localhost:8080/fail](http://localhost:8080/fail), you will find these
 messages in the log, between the others:
 

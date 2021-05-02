@@ -37,6 +37,8 @@ let () =
 <b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
 
+Try running it in the [playground](http://dream.as/j-stream).
+
 <br>
 
 You can test it by running

@@ -34,7 +34,7 @@ let () =
 
     Dream.get "/" (fun _ ->
       Dream.html (Printf.sprintf
-        "%3i request(s) successful\n%3i request(s) failed"
+        "%3i request(s) successful<br>%3i request(s) failed"
         !successful !failed));
 
   ]
@@ -44,6 +44,8 @@ let () =
 <pre><code><b>$ cd example/5-promise</b>
 <b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
+
+Try it in the [playground](http://dream.as/5-promise).
 
 <br>
 

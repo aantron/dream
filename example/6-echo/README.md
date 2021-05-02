@@ -25,6 +25,8 @@ let () =
 <b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
 
+...or run it in the [playground](http://dream.as/6-echo).
+
 <br>
 
 You can test it with curl:

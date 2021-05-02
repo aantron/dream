@@ -33,7 +33,8 @@ let () =
 <br>
 
 When you run this server and visit
-[http://localhost:8080](http://localhost:8080), you get much more interesting
+[http://localhost:8080](http://localhost:8080)
+[[playground](http://dream.as/2-middleware)], you get much more interesting
 (and colorful!) output:
 
 ![Dream log example](https://raw.githubusercontent.com/aantron/dream/master/docs/asset/log-sanitized.png)

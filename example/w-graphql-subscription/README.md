@@ -54,7 +54,8 @@ let () =
 
 <br>
 
-Visit [http://localhost:8080/graphiql](http://localhost:8080/graphiql), and run
+Visit [http://localhost:8080/graphiql](http://localhost:8080/graphiql) or the
+[playground](http://dream.as/w-graphql-subscription), and run
 
 ```graphql
 subscription {

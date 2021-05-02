@@ -51,6 +51,8 @@ let () =
 <b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
 
+Try it in the [playground](http://dream.as/e-json).
+
 <br>
 
 This example expects JSON of the form `{"message": "some-message"}`, and echoes

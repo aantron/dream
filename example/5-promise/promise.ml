@@ -23,7 +23,7 @@ let () =
 
     Dream.get "/" (fun _ ->
       Dream.html (Printf.sprintf
-        "%3i request(s) successful\n%3i request(s) failed"
+        "%3i request(s) successful<br>%3i request(s) failed"
         !successful !failed));
 
   ]

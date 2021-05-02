@@ -28,9 +28,10 @@ let () =
 
 <br>
 
-The first time you access this app, it sets up a language preference, `ut-OP`.
-This string is sent to the client in a `ui.language` cookie. On the next
-request, the client sends it back. The app retrieves and displays it.
+The first time you access this app [[playground](http://dream.as/c-cookie)], it
+sets up a language preference, `ut-OP`. This string is sent to the client in a
+`ui.language` cookie. On the next request, the client sends it back. The app
+retrieves and displays it.
 
 <br>
 
