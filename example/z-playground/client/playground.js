@@ -14,7 +14,8 @@ var pre = document.querySelector("pre");
 
 var codemirror = CodeMirror(editor, {
   theme: "material dream",
-  lineNumbers: true
+  lineNumbers: true,
+  tabSize: 2
 });
 
 function colorizeLog(string) {
@@ -56,10 +57,12 @@ socket.onmessage = function (e) {
       pre.innerHTML += "Building container...\n";
       socket.send(codemirror.getValue());
       break;
+
     case "log":
       pre.innerHTML += colorizeLog(message.payload);
       pre.scrollTop = pre.scrollHeight;
       break;
+
     case "started": {
       // TODO Always set the location. If there already is one, just need to
       // update the port.

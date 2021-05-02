@@ -4,7 +4,6 @@ HOST=$1
 
 rsync -v $HOST:playground/package-lock.json $HOST:playground/opam-switch .
 rsync -rlv . $HOST:playground
-rsync -v ../../docs/web/site/iosevka-regular.woff2 $HOST:playground/client/
 rsync -v server/playground.service root@$HOST:/etc/systemd/system/
 ssh root@$HOST chmod a-x /etc/systemd/system/playground.service
 

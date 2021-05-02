@@ -5,20 +5,12 @@
 
 
 
-@font-face {
-  font-family: 'Iosevka';
-  font-style: normal;
-  font-weight: 400;
-  src: url('iosevka-regular.woff2') format('woff2');
-}
-
-
-
 body {
   margin: 0;
-  font-size: 15px;
-  line-height: 22px;
-  background-color: #131618;
+  font-size: 14px;
+  line-height: 21px;
+  color: #ddd;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
 }
 
 #editor {
@@ -31,56 +23,111 @@ body {
   width: 50%;
 }
 
-#textarea .CodeMirror, #client iframe {
-  height: calc(100% - 220px);
+#textarea .CodeMirror {
+  height: calc(100% - 168px);
+}
+
+#client iframe {
+  height: calc(100% - 63px)
 }
 
 
 
 /* Editor */
 
-#log {
-  clear: both;
+h1 {
   margin: 0;
-  height: 198px;
+  height: 21px;
+  padding: 21px 0;
+  padding-left: 32px;
+  display: inline-block;
+  font-weight: normal;
+}
+
+#log {
+  margin: 0;
+  height: 105px;
   overflow-x: hidden;
   padding-left: 34px;
 }
 
 .CodeMirror, #log {
-  font-family: Iosevka, SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  margin-left: 2em;
+  background-color: rgba(256, 256, 256, 0.2);
+  border: none;
+  font-weight: bold;
+}
+
+button:hover {
+  cursor: pointer;
+  background-color: rgba(256, 256, 256, 0.3);
 }
 
 
 
 /* Client */
 
+#client header {
+  height: 63px;
+}
+
 #client input {
   display: inline-block;
   width: 100%;
+  background: none;
+  color: inherit;
+  font: inherit;
+  border: none;
+  padding: 0;
+  padding-top: 28px;
+  padding-left: 10px;
+}
+
+#client input:focus {
+  outline: none;
 }
 
 #client iframe {
   border: 0;
   width: 100%;
-  background-color: #eee;
+  background-color: white;
 }
 
 
 
 /* Syntax */
 
-.cm-s-dream.CodeMirror {
-  background-color: #131618;
-  color: #ddd;
-  border-top: 1px solid #262626;
-  border-bottom: 1px solid #262626;
+.cm-s-dream.CodeMirror, body {
+  background-color: #181b1e;
+}
+
+.cm-s-dream.CodeMirror, #editor > header {
+  border-bottom: 1px solid #2a2a26;
   box-sizing: border-box;
+}
+
+.cm-s-dream.CodeMirror {
+  color: #ddd;
+  border-bottom: 1px solid #2a2a26;
+}
+
+#log {
+  color: #ddd;
 }
 
 .cm-s-dream .CodeMirror-gutters {
   background: none;
   border-right: 1px solid #262626;
+}
+
+.cm-s-dream .CodeMirror-linenumber {
+  color: #999;
 }
 
 .cm-s-dream .cm-keyword, .t-magenta {
@@ -96,19 +143,19 @@ body {
 }
 
 .cm-s-dream .cm-variable {
-  color: #eee;
+  color: #ddd;
 }
 
 .cm-s-dream .cm-variable-2, .t-green {
   color: #70df5c;
 }
 
-#log, .t-white {
-  color: #ddd;
-}
-
 .t-dim {
   color: #999;
+}
+
+.t-white {
+  color: #ddd;
 }
 
 .t-red {
