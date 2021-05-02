@@ -38,8 +38,7 @@ body {
 h1 {
   margin: 0;
   height: 21px;
-  padding: 21px 0;
-  padding-left: 32px;
+  padding: 21px 0 20px 32px;
   display: inline-block;
   font-weight: normal;
 }
@@ -59,14 +58,36 @@ button {
   font: inherit;
   color: inherit;
   margin-left: 2em;
-  background-color: rgba(256, 256, 256, 0.2);
+  background-color: rgba(255, 255, 255, 0.2);
   border: none;
   font-weight: bold;
 }
 
 button:hover {
   cursor: pointer;
-  background-color: rgba(256, 256, 256, 0.3);
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  opacity: 0.2;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 
