@@ -1,7 +1,7 @@
-let hotreload_script
+let livereload_script
     ?(retry_interval_ms = 500)
     ?(max_retry_ms = 5000)
-    ?(route = "/_hotreload")
+    ?(route = "/_livereload")
     ()
   =
   Printf.sprintf
@@ -47,8 +47,8 @@ s.onerror = function(event) {
     retry_interval_ms
     max_retry_ms
 
-let inject_hotreload_script
-    ?(reload_script = hotreload_script ())
+let inject_livereload_script
+    ?(reload_script = livereload_script ())
     ()
     (next_handler : Dream.request -> Dream.response Lwt.t)
     (request : Dream.request)
@@ -70,7 +70,7 @@ let inject_hotreload_script
   | _ ->
     Lwt.return response
 
-let hotreload_route ?(path = "/_hotreload") () =
+let livereload_route ?(path = "/_livereload") () =
   Dream.get path (fun _ ->
       Dream.websocket (fun socket ->
           Lwt.bind (Dream.receive socket) (fun _ ->
@@ -79,9 +79,9 @@ let hotreload_route ?(path = "/_hotreload") () =
 let () =
   Dream.run
   @@ Dream.logger
-  @@ inject_hotreload_script ()
+  @@ inject_livereload_script ()
   @@ Dream.router [
-    hotreload_route ();
+    livereload_route ();
     Dream.get "/"
       (fun _ ->
         Dream.html "Good morning, world!");

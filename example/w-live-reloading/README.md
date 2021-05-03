@@ -1,8 +1,8 @@
-# `w-stress-response`
+# `w-live-reload`
 
 <br>
 
-This example demonstrates how to setup hot reloading of the client HTML content.
+This example demonstrates how to setup live reloading of the client HTML content.
 
 It works by injecting a script in the HTML pages sent to clients that will initiate a WebSocket.
 

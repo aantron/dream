@@ -5,6 +5,6 @@
     "ocaml": "4.12.x"
   },
   "scripts": {
-    "start": "dune exec --root . ./hot_reloading.exe"
+    "start": "dune exec --root . ./live_reloading.exe"
   }
 }
