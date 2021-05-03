@@ -44,6 +44,11 @@ sudo cp .ssh/authorized_keys /home/playground/.ssh/
 sudo chown playground:playground /home/playground/.ssh/authorized_keys
 sudo adduser --system sandbox
 
-# Initialize opam and install a compiler/
+# Initialize opam and install a compiler.
 sudo -H -u playground opam init --no-setup --bare
 sudo -H -u playground opam switch create 4.12.0
+
+# Set up UFW.
+sudo ufw allow ssh
+sudo ufw allow http
+sudo ufw enable
