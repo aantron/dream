@@ -85,6 +85,7 @@ socket.onmessage = function (e) {
 
 run.onclick = function () {
   pre.innerHTML += "Building container...\n";
+  pre.scrollTop = pre.scrollHeight;
   socket.send(codemirror.getValue());
 };
 

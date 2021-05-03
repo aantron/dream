@@ -48,6 +48,9 @@ USER 112:3000
 ENTRYPOINT /server.exe
 |}
 
+let exec format =
+  Printf.ksprintf (fun command -> Lwt_process.(exec (shell command))) format
+
 let create_sandboxes_directory () =
   match%lwt Lwt_unix.mkdir sandbox_root 0o755 with
   | () -> Lwt.return_unit
@@ -107,6 +110,31 @@ let init_client socket content =
 let validate_id sandbox =
   String.length sandbox > 0 && Dream.from_base64url sandbox <> None
 
+let warm ?previous sandbox =
+  match%lwt Lwt_unix.file_exists (sandbox_root // sandbox // "_build") with
+  | true -> Lwt.return_unit
+  | false ->
+  let%lwt previous =
+    match previous with
+    | None -> Lwt.return_none
+    | Some previous ->
+      if%lwt Lwt_unix.file_exists (sandbox_root // previous // "_build") then
+        Lwt.return (Some previous)
+      else
+        Lwt.return_none
+  in
+  let copy_from =
+    match previous with
+    | Some previous -> previous
+    | None -> "ocaml"
+  in
+  let%lwt _status =
+    exec "cp -r %s %s"
+      (sandbox_root // copy_from // "_build") (sandbox_root // sandbox) in
+  let%lwt _status =
+    exec "find %s" (sandbox_root // sandbox) in
+  Lwt.return_unit
+
 
 
 (* Session state transitions. *)
@@ -125,9 +153,6 @@ type session = {
 
 let allocated_ports =
   Hashtbl.create 256
-
-let exec format =
-  Printf.ksprintf (fun command -> Lwt_process.(exec (shell command))) format
 
 let kill_container session =
   match session.container with
@@ -179,7 +204,15 @@ let client_log ?(add_newline = false) session message =
   |> Yojson.Basic.to_string
   |> Dream.send session.socket
 
+let build_sandbox sandbox =
+  write_file sandbox "dune-project" sandbox_dune_project;%lwt
+  let%lwt _status =
+    exec "cd %s && opam exec -- dune build --root . ./server.exe"
+      (sandbox_root // sandbox) in
+  Lwt.return_unit
+
 let build session =
+  write_file session.sandbox "dune-project" sandbox_dune_project;%lwt
   let process =
     Printf.sprintf
       "cd %s && opam exec %s -- dune build --root . ./server.exe 2>&1"
@@ -197,10 +230,15 @@ let build session =
       exec "touch %s" (sandbox_root // session.sandbox // "failed") in
     Lwt.return_false
 
-let image session =
+let image_sandbox sandbox =
+  write_file sandbox "Dockerfile" sandbox_dockerfile;%lwt
   let%lwt _status =
     exec "cd %s && docker build -t sandbox:%s . 2>&1"
-      (sandbox_root // session.sandbox) session.sandbox in
+      (sandbox_root // sandbox) sandbox in
+  Lwt.return_unit
+
+let image session =
+  image_sandbox session.sandbox;%lwt
   Dream.info (fun log -> log "Sandbox %s: built image" session.sandbox);
   Lwt.return_unit
 
@@ -274,24 +312,23 @@ let rec listen session =
   | Some code ->
 
   Dream.info (fun log -> log "Sandbox %s: code update" session.sandbox);
-  kill_container session;%lwt
+  ignore (kill_container session);
 
   Lwt_mutex.with_lock global_lock begin fun () ->
 
     let%lwt current_code, _ = read session.sandbox in
     if code = current_code then
-      Lwt.return_unit
+      warm session.sandbox
     else begin
       let%lwt sandbox = create session.syntax code in
+      warm ~previous:session.sandbox sandbox;%lwt
       session.sandbox <- sandbox;
       Lwt.return_unit
     end;%lwt
-    write_file session.sandbox "dune-project" sandbox_dune_project;%lwt
     begin match session.syntax with
     | `OCaml -> write_file session.sandbox "dune" sandbox_dune
     | `Reason -> write_file session.sandbox "dune" sandbox_dune_re
     end;%lwt
-    write_file session.sandbox "Dockerfile" sandbox_dockerfile;%lwt
 
     begin match%lwt build session with
     | false -> Lwt.return_unit
@@ -322,6 +359,11 @@ let rec gc () =
           "$(docker images | grep -v base | grep -v ubuntu | " ^
           "grep -v REPOSITORY | awk '{print $3}')") in
     let%lwt _status = exec "rm -rf sandbox/*/_build" in
+
+    Dream.log "Warming caches";
+    build_sandbox "ocaml";%lwt
+    image_sandbox "ocaml";%lwt
+
     Lwt.return_unit
   end;%lwt
   Lwt_unix.sleep 3600.;%lwt
@@ -392,5 +434,6 @@ let () =
   ]
   @@ Dream.not_found;
 
-  Dream.log "Exiting; killing all containers";
-  Sys.command "docker kill $(docker ps -q)" |> ignore
+  Dream.log "Killing all containers";
+  Sys.command "docker kill $(docker ps -q)" |> ignore;
+  Dream.log "Exiting"
