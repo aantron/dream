@@ -78,5 +78,3 @@ let log =
   Dream__middleware.Log.convenience_log
 
 include Dream__middleware.Tag
-
-let welcome _req = html Welcome_template.render

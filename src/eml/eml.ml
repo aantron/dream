@@ -686,7 +686,7 @@ struct
     print;
 
     init = (fun () ->
-      print "let ___eml_write string = Dream__pure.Inmost.write response string in\n");
+      print "let ___eml_write string = Dream.write response string in\n");
 
     finish = (fun () ->
       print "Lwt.return_unit\n");
@@ -705,7 +705,7 @@ struct
     print;
 
     init = (fun () ->
-      print "let ___eml_write = string => Dream__pure.Inmost.write(response, string);\n");
+      print "let ___eml_write = string => Dream.write(response, string);\n");
 
     finish = (fun () ->
       print "Lwt.return_unit\n");

@@ -3,7 +3,6 @@
  (wrapped false)
  (libraries
   caqti-lwt
-  dream.asset
   dream.cipher
   dream.graphql
   dream.http
@@ -14,10 +13,3 @@
   logs
   lwt
   lwt.unix))
-
-(rule
- (targets welcome_template.ml)
- (deps welcome_template.eml.ml)
- (action
-  (run %{bin:dream_eml} %{deps} --workspace %{workspace_root})))
-

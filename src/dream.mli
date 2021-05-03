@@ -1189,9 +1189,6 @@ val any     : string -> handler -> route
 val not_found : handler
 (** Always responds with [404 Not Found]. *)
 
-val welcome : handler
-(* ??? *)
-
 (* :((( *)
 val param : string -> request -> string
 (** Retrieves the path parameter. If it is missing, {!Dream.param} raises an

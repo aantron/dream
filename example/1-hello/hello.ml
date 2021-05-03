@@ -1,2 +1,3 @@
 let () =
-  Dream.run Dream.welcome
+  Dream.run (fun _ ->
+    Dream.html "Good morning, world!")

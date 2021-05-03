@@ -193,18 +193,17 @@ let default_template debug_dump response =
   let status = Dream.status response in
   let code = Dream.status_to_int status
   and reason = Dream.status_to_string status in
-  let body =
-    match debug_dump with
-    | Some s ->
+  match debug_dump with
+  | None -> Lwt.return response
+  | Some s ->
+    let body =
       let debug_dump = Dream__pure.Formats.html_escape s in
-      Fallback_template.render_debug ~debug_dump ~code ~reason
-    | None ->
-      Fallback_template.render ~code ~reason
-  in
-  response
-  |> Dream.with_header "Content-Type" Dream__pure.Formats.text_html
-  |> Dream.with_body body
-  |> Lwt.return
+      Fallback_template.render ~debug_dump ~code ~reason
+    in
+    response
+    |> Dream.with_header "Content-Type" Dream__pure.Formats.text_html
+    |> Dream.with_body body
+    |> Lwt.return
 
 
 

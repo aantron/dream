@@ -5,7 +5,6 @@
   bigarray-compat
   bigstringaf
   digestif
-  dream.asset
   dream.cipher
   dream.localhost
   dream.middleware
