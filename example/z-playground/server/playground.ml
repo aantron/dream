@@ -126,6 +126,9 @@ type session = {
 let allocated_ports =
   Hashtbl.create 256
 
+let exec format =
+  Printf.ksprintf (fun command -> Lwt_process.(exec (shell command))) format
+
 let kill_container session =
   match session.container with
   | None -> Lwt.return_unit
@@ -134,10 +137,7 @@ let kill_container session =
     Dream.info (fun log ->
       log "Sandbox %s: killing container %s" session.sandbox container_id);
     let%lwt _status =
-      Printf.sprintf "docker kill %s > /dev/null 2> /dev/null" container_id
-      |> Lwt_process.shell
-      |> Lwt_process.exec
-    in
+      exec "docker kill %s > /dev/null 2> /dev/null" container_id in
     Hashtbl.remove allocated_ports port;
     Lwt.return_unit
 
@@ -193,18 +193,14 @@ let build session =
   match%lwt process#close with
   | Unix.WEXITED 0 -> Lwt.return_true
   | _ ->
-    Printf.ksprintf Sys.command
-      "touch %s" (sandbox_root // session.sandbox // "failed") |> ignore;
+    let%lwt _status =
+      exec "touch %s" (sandbox_root // session.sandbox // "failed") in
     Lwt.return_false
 
 let image session =
   let%lwt _status =
-    Printf.sprintf
-      "cd %s && docker build -t sandbox:%s . 2>&1"
-      (sandbox_root // session.sandbox) session.sandbox
-    |> Lwt_process.shell
-    |> Lwt_process.exec
-  in
+    exec "cd %s && docker build -t sandbox:%s . 2>&1"
+      (sandbox_root // session.sandbox) session.sandbox in
   Dream.info (fun log -> log "Sandbox %s: built image" session.sandbox);
   Lwt.return_unit
 
@@ -320,11 +316,12 @@ let listen session =
 let rec gc () =
   Lwt_mutex.with_lock global_lock begin fun () ->
     Dream.log "Running playground GC";
-    Sys.command
-      ("docker rmi " ^
-        "$(docker images | grep -v base | grep -v ubuntu | " ^
-        "grep -v REPOSITORY | awk '{print $3}')") |> ignore;
-    Sys.command "rm -rf sandbox/*/_build" |> ignore;
+    let%lwt _status =
+      exec "%s"
+        ("docker rmi " ^
+          "$(docker images | grep -v base | grep -v ubuntu | " ^
+          "grep -v REPOSITORY | awk '{print $3}')") in
+    let%lwt _status = exec "rm -rf sandbox/*/_build" in
     Lwt.return_unit
   end;%lwt
   Lwt_unix.sleep 3600.;%lwt
@@ -348,7 +345,7 @@ let () =
   Lwt_main.run begin
     Lwt_io.(with_file ~mode:Output "Dockerfile" (fun channel ->
       write channel base_dockerfile));%lwt
-    Sys.command "docker build -t base:base . 2>&1" |> ignore;
+    let%lwt _status = exec "docker build -t base:base . 2>&1" in
     Lwt.return_unit
   end;
 
@@ -396,5 +393,4 @@ let () =
   @@ Dream.not_found;
 
   Dream.log "Exiting; killing all containers";
-  Sys.command "docker kill $(docker ps -q) > /dev/null 2> /dev/null"
-  |> ignore
+  Sys.command "docker kill $(docker ps -q)" |> ignore
