@@ -154,7 +154,7 @@ type session = {
 }
 
 let allocated_ports =
-  Hashtbl.create 256
+  Hashtbl.create 1024
 
 let kill_container session =
   match session.container with
@@ -303,15 +303,39 @@ let kill session =
 
 (* Main loop for each connected client WebSocket. *)
 
-(* We are running on a 1-CPU machine for now anyway, so it's not such a big
-   deal to have a global (asynchronous) lock preventing concurrent builds and
-   GC. *)
-let global_lock =
-  Lwt_mutex.create ()
+let gc_running =
+  ref None
 
-(* TODO Mind concurrency issues with client messages coming during transitions.
-   OTOH this code waits during those transitions anyway, so maybe it is not an
-   issue. *)
+let notify_gc =
+  ref ignore
+
+let sandbox_users =
+  ref 0
+
+let sandbox_locks =
+  Hashtbl.create 256
+
+let lock_sandbox sandbox f =
+  begin match !gc_running with
+  | None -> Lwt.return_unit
+  | Some finished -> finished
+  end;%lwt
+
+  incr sandbox_users;
+  let mutex =
+    match Hashtbl.find_opt sandbox_locks sandbox with
+    | Some mutex -> mutex
+    | None ->
+      let mutex = Lwt_mutex.create () in
+      Hashtbl.add sandbox_locks sandbox mutex;
+      mutex
+  in
+  let%lwt result = Lwt_mutex.with_lock mutex f in
+  decr sandbox_users;
+  if !sandbox_users = 0 then
+    !notify_gc ();
+  Lwt.return result
+
 let rec listen session =
   match%lwt Dream.receive session.socket with
   | None ->
@@ -322,7 +346,7 @@ let rec listen session =
   Dream.info (fun log -> log "Sandbox %s: code update" session.sandbox);
   ignore (kill_container session);
 
-  Lwt_mutex.with_lock global_lock begin fun () ->
+  lock_sandbox session.sandbox begin fun () ->
 
     let%lwt current_code, _ = read session.sandbox in
     if code = current_code then
@@ -367,45 +391,60 @@ let rec gc () =
     |> Lwt_process.pread_lines
     |> Lwt_stream.to_list in
 
-  Lwt_mutex.with_lock global_lock begin fun () ->
-    Dream.log "Running playground GC";
+  let can_start, signal_can_start = Lwt.wait () in
+  let finished, signal_finished = Lwt.wait () in
 
-    let%lwt images =
-      Lwt_process.shell "docker images | awk '{print $1, $2, $3}'"
-      |> Lwt_process.pread_lines
-      |> Lwt_stream.to_list
-    in
+  gc_running := Some finished;
 
-    let images =
-      images
-      |> List.tl
-      |> List.map (String.split_on_char ' ')
-      |> List.filter_map (function
-        | ["base"; _; _] -> None
-        | ["ubuntu"; _; ] -> None
-        | ["sandbox"; tag; _] when List.mem tag keep -> None
-        | [_; _; id] -> Some id
-        | _ -> None)
-    in
-
-    let%lwt _status = exec "docker rmi %s" (String.concat " " images) in
-
-    Lwt_unix.files_of_directory "sandbox"
-    |> Lwt_stream.iter_n ~max_concurrency:16 begin fun sandbox ->
-      if List.mem sandbox keep then
-        Lwt.return_unit
-      else
-        let%lwt _status = exec "rm -rf sandbox/%s/_build" sandbox in
-        Lwt.return_unit
-    end
+  if !sandbox_users = 0 then
+    Lwt.return_unit
+  else begin
+    notify_gc :=
+      (fun () -> Lwt.wakeup_later signal_can_start (); notify_gc := ignore);
+    can_start
   end;%lwt
+
+  Dream.log "Running playground GC";
+
+  let%lwt images =
+    Lwt_process.shell "docker images | awk '{print $1, $2, $3}'"
+    |> Lwt_process.pread_lines
+    |> Lwt_stream.to_list
+  in
+
+  let images =
+    images
+    |> List.tl
+    |> List.map (String.split_on_char ' ')
+    |> List.filter_map (function
+      | ["base"; _; _] -> None
+      | ["ubuntu"; _; ] -> None
+      | ["sandbox"; tag; _] when List.mem tag keep -> None
+      | [_; _; id] -> Some id
+      | _ -> None)
+  in
+
+  let%lwt _status = exec "docker rmi %s" (String.concat " " images) in
+
+  Lwt_unix.files_of_directory "sandbox"
+  |> Lwt_stream.iter_n ~max_concurrency:16 begin fun sandbox ->
+    if List.mem sandbox keep then
+      Lwt.return_unit
+    else
+      let%lwt _status = exec "rm -rf sandbox/%s/_build" sandbox in
+      Lwt.return_unit
+  end;%lwt
+
+  Hashtbl.reset sandbox_locks;
+
+  gc_running := None;
+  Lwt.wakeup_later signal_finished ();
 
   Dream.log "Warming caches";
 
   keep |> Lwt_list.iteri_s begin fun index sandbox ->
-    Lwt_unix.sleep 1.;%lwt
     Dream.log "Warming %s (%i/%i)" sandbox (index + 1) (List.length keep);
-    Lwt_mutex.with_lock global_lock (fun () ->
+    lock_sandbox sandbox (fun () ->
       if%lwt image_exists sandbox then
         Lwt.return_unit
       else begin
