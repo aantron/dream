@@ -83,9 +83,6 @@ rather than `field`.
 Use [`Dream.no_route`](https://aantron.github.io/dream/#val-no_route) to serve
 GraphiQL conditionally, only during development.
 
-See example [**`w-graphql-subscription`**](../w-graphql-subscription#files) for
-an example with a GraphQL subscription.
-
 <br>
 
 **Next steps:**
@@ -93,6 +90,15 @@ an example with a GraphQL subscription.
 - [**`j-stream`**](../j-stream#files) streams response bodies to clients.
 - [**`k-websocket`**](../k-websocket#files) sends and receives messages over a
   WebSocket.
+
+<br>
+
+**See also:**
+
+- [**`r-graphql`**](../r-graphql#files) is a version of this example in Reason
+  syntax.
+- [**`w-graphql-subscription`**](../w-graphql-subscription#files) for GraphQL
+  subscriptions.
 
 <br>
 

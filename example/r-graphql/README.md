@@ -15,7 +15,10 @@ type user = {
   name: string,
 };
 
-let hardcoded_users = [{id: 1, name: "alice"}, {id: 2, name: "bob"}];
+let hardcoded_users = [
+  {id: 1, name: "alice"},
+  {id: 2, name: "bob"},
+];
 
 let user =
   Graphql_lwt.Schema.(
@@ -53,14 +56,14 @@ let schema =
   );
 
 let () =
-  Dream.run @@
-  Dream.logger @@
-  Dream.origin_referer_check @@
-  Dream.router([
+  Dream.run
+  @@ Dream.logger
+  @@ Dream.origin_referer_check
+  @@ Dream.router([
     Dream.any("/graphql", Dream.graphql(Lwt.return, schema)),
     Dream.get("/graphiql", Dream.graphiql("/graphql")),
-  ]) @@
-  Dream.not_found;
+  ])
+  @@ Dream.not_found;
 ```
 
 <pre><code><b>$ cd example/r-graphql</b>
@@ -69,36 +72,20 @@ let () =
 
 <br>
 
-Visit [http://localhost:8080/graphiql](http://localhost:8080/graphiql), and you
-can interact with the schema:
+Visit [http://localhost:8080/graphiql](http://localhost:8080/graphiql)
+[[playground](http://dream.as/r-graphql)], and you can interact with the schema:
 
 ![GraphiQL](https://raw.githubusercontent.com/aantron/dream/master/docs/asset/graphiql.png)
 
 <br>
 
-Even though this toy schema does not define any
-[mutations](https://github.com/andreas/ocaml-graphql-server/blob/d615cbb164d4ddfdc2efeb246a198dfe114adf24/graphql/src/graphql_intf.ml#L66),
-the example uses
-[`Dream.origin_referer_check`](https://aantron.github.io/dream/#val-origin_referer_check)
-to protect future extensions of it
-[against CSRF](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#identifying-source-origin-via-originreferer-header). See example
-[**`e-json`**](../e-json#security) for more details on how this works.
+**See also:**
 
-If you'd like to do I/O or other asynchronous operations in your resolvers, use
-[`io_field`](https://github.com/andreas/ocaml-graphql-server#lwt-support)
-rather than `field`.
-
-See example [**`w-graphql-subscription`**](../w-graphql-subscription#files) for
-an example with a GraphQL subscription.
+- [**`i-graphql`**](../i-graphql#files), the OCaml version of this example, for
+  some more discussion.
+- [**`w-graphql-subscription`**](../w-graphql-subscription#files) for GraphQL
+  subscriptions.
 
 <br>
 
-**Next steps:**
-
-- [**`j-stream`**](../j-stream#files) streams response bodies to clients.
-- [**`k-websocket`**](../k-websocket#files) sends and receives messages over a
-  WebSocket.
-
-<br>
-
-[Up to the tutorial index](../#readme)
+[Up to the example index](../#reason)

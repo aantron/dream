@@ -3,7 +3,10 @@ type user = {
   name: string,
 };
 
-let hardcoded_users = [{id: 1, name: "alice"}, {id: 2, name: "bob"}];
+let hardcoded_users = [
+  {id: 1, name: "alice"},
+  {id: 2, name: "bob"},
+];
 
 let user =
   Graphql_lwt.Schema.(
@@ -41,11 +44,11 @@ let schema =
   );
 
 let () =
-  Dream.run @@
-  Dream.logger @@
-  Dream.origin_referer_check @@
-  Dream.router([
+  Dream.run
+  @@ Dream.logger
+  @@ Dream.origin_referer_check
+  @@ Dream.router([
     Dream.any("/graphql", Dream.graphql(Lwt.return, schema)),
     Dream.get("/graphiql", Dream.graphiql("/graphql")),
-  ]) @@
-  Dream.not_found;
+  ])
+  @@ Dream.not_found;

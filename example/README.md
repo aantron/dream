@@ -61,6 +61,8 @@ There are several examples showing Dream with Reason syntax.
   templates as response bodies.
 - [**`r-tyxml`**](r-tyxml#files) &nbsp;&mdash;&nbsp; type-checked server-side
   JSX templates.
+- [**`r-graphql`**](r-graphql#files) &nbsp;&mdash;&nbsp; serves a GraphQL
+  schema.
 
 <br>
 
