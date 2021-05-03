@@ -3,6 +3,7 @@
   "dependencies": {
     "@opam/dream": "aantron/dream:dream.opam",
     "@opam/dune": "^2.0",
+    "@opam/reason": "^3.7.0",
     "melange": "melange-re/melange",
     "ocaml": "4.12.x"
   },
