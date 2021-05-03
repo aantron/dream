@@ -6,6 +6,9 @@
     "@opam/js_of_ocaml-ppx": "*",
     "ocaml": "4.12.x"
   },
+  "resolutions": {
+    "@opam/conf-libev": "esy-packages/libev:package.json#0b5eb6685b688649045aceac55dc559f6f21b829"
+  },
   "esy": {
     "buildsInSource": "_build",
     "build": [

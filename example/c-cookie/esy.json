@@ -4,6 +4,9 @@
     "@opam/dune": "^2.0",
     "ocaml": "4.12.x"
   },
+  "resolutions": {
+    "@opam/conf-libev": "esy-packages/libev:package.json#0b5eb6685b688649045aceac55dc559f6f21b829"
+  },
   "scripts": {
     "start": "dune exec --root . ./cookie.exe"
   }
