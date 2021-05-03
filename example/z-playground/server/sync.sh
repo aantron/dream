@@ -7,8 +7,6 @@ rsync -rlv . $HOST:playground
 rsync -v server/playground.service root@$HOST:/etc/systemd/system/
 ssh root@$HOST chmod a-x /etc/systemd/system/playground.service
 
-shopt -s nullglob
-
 function example {
   EXAMPLE=$1
   mkdir -p ./sync-temp/sandbox/$1
