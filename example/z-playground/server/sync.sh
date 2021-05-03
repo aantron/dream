@@ -38,6 +38,10 @@ example w-multipart-dump
 example w-query
 example w-server-sent-events
 example w-template-stream
+example w-tyxml
+touch ./sync-temp/sandbox/w-tyxml/no-eml
+mv ./sync-temp/sandbox/w-tyxml/server.eml.ml \
+  ./sync-temp/sandbox/w-tyxml/server.ml
 
 function example_re {
   EXAMPLE=$1
@@ -52,6 +56,10 @@ example_re r-hello
 example_re r-template
 example_re r-template-stream
 example_re r-graphql
+example_re r-tyxml
+touch ./sync-temp/sandbox/r-tyxml/no-eml
+mv ./sync-temp/sandbox/r-tyxml/server.eml.re \
+  ./sync-temp/sandbox/r-tyxml/server.re
 
 rsync -rlv ./sync-temp/sandbox $HOST:playground
 rm -rf sync-temp

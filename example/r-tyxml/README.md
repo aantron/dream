@@ -2,8 +2,9 @@
 
 <br>
 
-[TyXML](https://github.com/ocsigen/tyxml) can be used together with Reason's
-built-in JSX syntax for generating HTML on the server:
+[TyXML](https://github.com/ocsigen/tyxml) can be used
+[[playground](http://dream.as/r-tyxml)] together with Reason's built-in JSX
+syntax for generating HTML on the server:
 
 ```reason
 open Tyxml
