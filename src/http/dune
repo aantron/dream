@@ -19,11 +19,10 @@
   lwt.unix
   lwt_ssl
   ssl
-  dream.websocketaf)
- (preprocess
-  (pps lwt_ppx))
- (instrumentation
-  (backend bisect_ppx)))
+  dream.websocketaf
+ )
+ (preprocess (pps lwt_ppx))
+ (instrumentation (backend bisect_ppx)))
 
 (rule
  (targets fallback_template.ml)
