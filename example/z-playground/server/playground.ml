@@ -481,6 +481,17 @@ let () =
   Lwt.async gc;
 
   (* Start the Web server. *)
+  let playground_handler request =
+    let sandbox = Dream.param "id" request in
+    match validate_id sandbox with
+    | false -> Dream.empty `Not_Found
+    | true ->
+    match%lwt exists sandbox with
+    | false -> Dream.empty `Not_Found
+    | true ->
+    Dream.from_filesystem "static" "playground.html" request
+  in
+
   Dream.run ~interface:"0.0.0.0" ~port:80 ~stop ~adjust_terminal:false
   @@ Dream.logger
   @@ Dream.router [
@@ -510,15 +521,8 @@ let () =
         listen {container = None; sandbox; syntax; socket}));
 
     (* For sandbox ids, respond with the sandbox page. *)
-    Dream.get "/:id" (fun request ->
-      let sandbox = Dream.param "id" request in
-      match validate_id sandbox with
-      | false -> Dream.empty `Not_Found
-      | true ->
-      match%lwt exists sandbox with
-      | false -> Dream.empty `Not_Found
-      | true ->
-      Dream.from_filesystem "static" "playground.html" request);
+    Dream.get "/:id" playground_handler;
+    Dream.get "/:id/**" playground_handler;
 
   ]
   @@ Dream.not_found;

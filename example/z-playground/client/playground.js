@@ -52,10 +52,15 @@ function colorizeLog(string) {
     ;
 };
 
-var sandbox = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
+var components = window.location.pathname.split("/");
+var sandbox = components[1];
 sandbox = sandbox || "ocaml";
 var socket =
   new WebSocket("ws://" + window.location.host + "/socket?sandbox=" + sandbox);
+
+var path = components.slice(2).join("/");
+if (path !== "")
+  path = "/" + path;
 
 socket.onmessage = function (e) {
   var message = JSON.parse(e.data);
@@ -72,12 +77,13 @@ socket.onmessage = function (e) {
       break;
 
     case "started": {
-      var location =
+      var frame_location =
         window.location.protocol + "//" +
-        window.location.hostname + ":" + message.port;
-      iframe.src = location;
-      address.value = location;
-      history.replaceState(null, "", message.sandbox);
+        window.location.hostname + ":" + message.port + path + location.search;
+      iframe.src = frame_location;
+      address.value = frame_location;
+      history.replaceState(
+        null, "", "/" + message.sandbox + path + location.search);
       break;
     }
   }
