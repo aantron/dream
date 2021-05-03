@@ -31,7 +31,7 @@ sudo chmod a+x /usr/local/bin/opam
 sudo apt install -y npm
 
 # Install system libraries that will be needed by Dream.
-sudo apt install -y libev-dev libssl-dev pkg-config
+sudo apt install -y libev-dev libsqlite3-dev libssl-dev pkg-config
 
 # Create users. User playground is used for building and running the playground.
 # The reason there isn't a separate user for buulding it is that the playground

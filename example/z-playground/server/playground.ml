@@ -18,7 +18,7 @@ let sandbox_dune_project = {|(lang dune 2.0)
 
 let sandbox_dune = {|(executable
  (name server)
- (libraries dream tyxml)
+ (libraries caqti caqti-driver-sqlite3 dream tyxml)
  (preprocess (pps lwt_ppx)))
 
 (rule
@@ -29,7 +29,7 @@ let sandbox_dune = {|(executable
 
 let sandbox_dune_re = {|(executable
  (name server)
- (libraries dream tyxml)
+ (libraries caqti caqti-driver-sqlite3 dream tyxml)
  (preprocess (pps lwt_ppx)))
 
 (rule
@@ -40,18 +40,24 @@ let sandbox_dune_re = {|(executable
 
 let sandbox_dune_no_eml = {|(executable
  (name server)
- (libraries dream tyxml)
+ (libraries caqti caqti-driver-sqlite3 dream tyxml)
  (preprocess (pps lwt_ppx tyxml-jsx tyxml-ppx)))
 |}
 
 let base_dockerfile = {|FROM ubuntu:focal-20210416
-RUN apt update && apt install -y openssl libev4
+RUN apt update && apt install -y openssl libev4 libsqlite3-0
+WORKDIR /www
+COPY db.sqlite db.sqlite
 |}
 
+let base_dockerignore = {|*
+!db.sqlite|}
+
 let sandbox_dockerfile = {|FROM base:base
-COPY _build/default/server.exe /server.exe
+COPY _build/default/server.exe server.exe
+RUN chmod -R 777 .
 USER 112:3000
-ENTRYPOINT /server.exe
+ENTRYPOINT /www/server.exe
 |}
 
 let sandbox_dockerignore = {|_build/
@@ -469,6 +475,7 @@ let rec gc () =
   Dream.log "Warming caches";
 
   keep |> Lwt_list.iteri_s begin fun index sandbox ->
+    Lwt_unix.sleep 1.;%lwt
     Dream.log "Warming %s (%i/%i)" sandbox (index + 1) (List.length keep);
     lock_sandbox sandbox (fun () ->
       if%lwt image_exists sandbox then
@@ -500,7 +507,9 @@ let () =
   Lwt_main.run begin
     Lwt_io.(with_file ~mode:Output "Dockerfile" (fun channel ->
       write channel base_dockerfile));%lwt
-    let%lwt _status = exec "docker build -t base:base - 2>&1 < Dockerfile" in
+    Lwt_io.(with_file ~mode:Output ".dockerignore" (fun channel ->
+      write channel base_dockerignore));%lwt
+    let%lwt _status = exec "docker build -t base:base . 2>&1" in
     Lwt.return_unit
   end;
 

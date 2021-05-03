@@ -29,6 +29,7 @@ example c-cookie
 example d-form
 example e-json
 example g-upload
+example h-sql
 example i-graphql
 example j-stream
 example k-websocket
@@ -61,7 +62,9 @@ touch ./sync-temp/sandbox/r-tyxml/no-eml
 mv ./sync-temp/sandbox/r-tyxml/server.eml.re \
   ./sync-temp/sandbox/r-tyxml/server.re
 
-rsync -rlv ./sync-temp/sandbox $HOST:playground
+cp ../h-sql/db.sqlite ./sync-temp/
+
+rsync -rlv ./sync-temp/* $HOST:playground
 rm -rf sync-temp
 
 echo
