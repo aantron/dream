@@ -15,7 +15,15 @@ var pre = document.querySelector("pre");
 var codemirror = CodeMirror(editor, {
   theme: "material dream",
   lineNumbers: true,
-  tabSize: 2
+  tabSize: 2,
+  extraKeys: {
+    "Tab": function (editor) {
+      if (editor.somethingSelected())
+        editor.execCommand("indentMore");
+      else
+        editor.execCommand("insertSoftTab");
+    }
+  }
 });
 
 function colorizeLog(string) {
@@ -64,8 +72,6 @@ socket.onmessage = function (e) {
       break;
 
     case "started": {
-      // TODO Always set the location. If there already is one, just need to
-      // update the port.
       var location =
         window.location.protocol + "//" +
         window.location.hostname + ":" + message.port;
