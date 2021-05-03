@@ -43,7 +43,7 @@ let () =
   @@ Dream.origin_referer_check
   @@ Dream.router [
     Dream.any "/graphql"  (Dream.graphql Lwt.return schema);
-    Dream.get "/graphiql" (Dream.graphiql "/graphql");
+    Dream.get "/" (Dream.graphiql "/graphql");
   ]
   @@ Dream.not_found
 ```
@@ -54,7 +54,7 @@ let () =
 
 <br>
 
-Visit [http://localhost:8080/graphiql](http://localhost:8080/graphiql) or the
+Visit [http://localhost:8080](http://localhost:8080) or the
 [playground](http://dream.as/w-graphql-subscription), and run
 
 ```graphql
