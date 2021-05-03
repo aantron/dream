@@ -131,8 +131,6 @@ let warm ?previous sandbox =
   let%lwt _status =
     exec "cp -r %s %s"
       (sandbox_root // copy_from // "_build") (sandbox_root // sandbox) in
-  let%lwt _status =
-    exec "find %s" (sandbox_root // sandbox) in
   Lwt.return_unit
 
 
@@ -351,22 +349,42 @@ let listen session =
 
 
 let rec gc () =
+  let next = Lwt_unix.sleep 3600. in
+
+  let%lwt keep =
+    Lwt_process.shell "ls sandbox/*/keep | awk -F / '{print $2}'"
+    |> Lwt_process.pread_lines
+    |> Lwt_stream.to_list in
+
   Lwt_mutex.with_lock global_lock begin fun () ->
     Dream.log "Running playground GC";
+
     let%lwt _status =
       exec "%s"
         ("docker rmi " ^
           "$(docker images | grep -v base | grep -v ubuntu | " ^
           "grep -v REPOSITORY | awk '{print $3}')") in
-    let%lwt _status = exec "rm -rf sandbox/*/_build" in
 
-    Dream.log "Warming caches";
-    build_sandbox "ocaml";%lwt
-    image_sandbox "ocaml";%lwt
-
-    Lwt.return_unit
+    Lwt_unix.files_of_directory "sandbox"
+    |> Lwt_stream.iter_n ~max_concurrency:16 begin fun sandbox ->
+      if List.mem sandbox keep then
+        Lwt.return_unit
+      else
+        let%lwt _status = exec "rm -rf sandbox/%s/_build" sandbox in
+        Lwt.return_unit
+    end
   end;%lwt
-  Lwt_unix.sleep 3600.;%lwt
+
+  Dream.log "Warming caches";
+  keep |> Lwt_list.iteri_s begin fun index sandbox ->
+    Lwt_unix.sleep 1.;%lwt
+    Dream.log "Warming %s (%i/%i)" sandbox (index + 1) (List.length keep);
+    Lwt_mutex.with_lock global_lock (fun () ->
+      build_sandbox sandbox;%lwt
+      image_sandbox sandbox)
+  end;%lwt
+
+  next;%lwt
   gc ()
 
 
@@ -380,9 +398,6 @@ let () =
     Lwt.wakeup_later signal_stop ())
   |> ignore;
 
-  (* Start the sandbox gc. *)
-  Lwt.async gc;
-
   (* Build the base image. *)
   Lwt_main.run begin
     Lwt_io.(with_file ~mode:Output "Dockerfile" (fun channel ->
@@ -390,6 +405,9 @@ let () =
     let%lwt _status = exec "docker build -t base:base . 2>&1" in
     Lwt.return_unit
   end;
+
+  (* Start the sandbox gc. *)
+  Lwt.async gc;
 
   (* Start the Web server. *)
   Dream.run ~interface:"0.0.0.0" ~port:80 ~stop ~adjust_terminal:false
