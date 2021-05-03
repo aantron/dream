@@ -48,6 +48,10 @@ USER 112:3000
 ENTRYPOINT /server.exe
 |}
 
+let sandbox_dockerignore = {|_build/
+!_build/default/server.exe
+|}
+
 let exec format =
   Printf.ksprintf (fun command -> Lwt_process.(exec (shell command))) format
 
@@ -228,8 +232,14 @@ let build session =
       exec "touch %s" (sandbox_root // session.sandbox // "failed") in
     Lwt.return_false
 
+let image_exists sandbox =
+  match%lwt exec "docker image inspect sandbox:%s > /dev/null" sandbox with
+  | Unix.WEXITED 0 -> Lwt.return_true
+  | _ -> Lwt.return_false
+
 let image_sandbox sandbox =
   write_file sandbox "Dockerfile" sandbox_dockerfile;%lwt
+  write_file sandbox ".dockerignore" sandbox_dockerignore;%lwt
   let%lwt _status =
     exec "cd %s && docker build -t sandbox:%s . 2>&1"
       (sandbox_root // sandbox) sandbox in
@@ -328,13 +338,14 @@ let rec listen session =
     | `Reason -> write_file session.sandbox "dune" sandbox_dune_re
     end;%lwt
 
-    begin match%lwt build session with
-    | false -> Lwt.return_unit
-    | true ->
-      image session;%lwt
-      run session
-    end
-
+    match%lwt image_exists session.sandbox with
+    | true -> run session
+    | false ->
+      match%lwt build session with
+      | false -> Lwt.return_unit
+      | true ->
+        image session;%lwt
+        run session
   end;%lwt
 
   listen session
@@ -359,11 +370,25 @@ let rec gc () =
   Lwt_mutex.with_lock global_lock begin fun () ->
     Dream.log "Running playground GC";
 
-    let%lwt _status =
-      exec "%s"
-        ("docker rmi " ^
-          "$(docker images | grep -v base | grep -v ubuntu | " ^
-          "grep -v REPOSITORY | awk '{print $3}')") in
+    let%lwt images =
+      Lwt_process.shell "docker images | awk '{print $1, $2, $3}'"
+      |> Lwt_process.pread_lines
+      |> Lwt_stream.to_list
+    in
+
+    let images =
+      images
+      |> List.tl
+      |> List.map (String.split_on_char ' ')
+      |> List.filter_map (function
+        | ["base"; _; _] -> None
+        | ["ubuntu"; _; ] -> None
+        | ["sandbox"; tag; _] when List.mem tag keep -> None
+        | [_; _; id] -> Some id
+        | _ -> None)
+    in
+
+    let%lwt _status = exec "docker rmi %s" (String.concat " " images) in
 
     Lwt_unix.files_of_directory "sandbox"
     |> Lwt_stream.iter_n ~max_concurrency:16 begin fun sandbox ->
@@ -376,12 +401,17 @@ let rec gc () =
   end;%lwt
 
   Dream.log "Warming caches";
+
   keep |> Lwt_list.iteri_s begin fun index sandbox ->
     Lwt_unix.sleep 1.;%lwt
     Dream.log "Warming %s (%i/%i)" sandbox (index + 1) (List.length keep);
     Lwt_mutex.with_lock global_lock (fun () ->
-      build_sandbox sandbox;%lwt
-      image_sandbox sandbox)
+      if%lwt image_exists sandbox then
+        Lwt.return_unit
+      else begin
+        build_sandbox sandbox;%lwt
+        image_sandbox sandbox
+      end)
   end;%lwt
 
   next;%lwt
@@ -392,6 +422,8 @@ let rec gc () =
 (* Entry point. *)
 
 let () =
+  Dream.log "Starting playground";
+
   (* Stop when systemd sends SIGTERM. *)
   let stop, signal_stop = Lwt.wait () in
   Lwt_unix.on_signal Sys.sigterm (fun _signal ->
@@ -402,7 +434,7 @@ let () =
   Lwt_main.run begin
     Lwt_io.(with_file ~mode:Output "Dockerfile" (fun channel ->
       write channel base_dockerfile));%lwt
-    let%lwt _status = exec "docker build -t base:base . 2>&1" in
+    let%lwt _status = exec "docker build -t base:base - 2>&1 < Dockerfile" in
     Lwt.return_unit
   end;
 

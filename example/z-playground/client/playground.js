@@ -62,7 +62,7 @@ socket.onmessage = function (e) {
   switch (message.kind) {
     case "content":
       codemirror.setValue(message.payload);
-      pre.innerHTML += "Building container...\n";
+      pre.innerHTML += "Building image...\n";
       socket.send(codemirror.getValue());
       break;
 
@@ -84,7 +84,7 @@ socket.onmessage = function (e) {
 };
 
 run.onclick = function () {
-  pre.innerHTML += "Building container...\n";
+  pre.innerHTML += "Building image...\n";
   pre.scrollTop = pre.scrollHeight;
   socket.send(codemirror.getValue());
 };
