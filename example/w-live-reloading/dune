@@ -1,0 +1,4 @@
+(executable
+ (name live_reloading)
+ (libraries dream lambdasoup)
+ (preprocess (pps lwt_ppx)))
