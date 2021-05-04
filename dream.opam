@@ -50,6 +50,7 @@ depends: [
   "base-unix"
   "base64" {>= "3.1.0"}  # Base64.encode_string.
   "bigarray-compat"
+  "caqti" {>= "1.4.0"}  # ~post_connect.
   "caqti-lwt"
   "conf-libev"
   "cstruct"
