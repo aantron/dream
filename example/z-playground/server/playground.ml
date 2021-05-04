@@ -366,11 +366,13 @@ let lock_sandbox sandbox f =
       Hashtbl.add sandbox_locks sandbox mutex;
       mutex
   in
-  let%lwt result = Lwt_mutex.with_lock mutex f in
-  decr sandbox_users;
-  if !sandbox_users = 0 then
-    !notify_gc ();
-  Lwt.return result
+  Lwt.finalize
+    (fun () -> Lwt_mutex.with_lock mutex f)
+    (fun () ->
+      decr sandbox_users;
+      if !sandbox_users = 0 then
+        !notify_gc ();
+      Lwt.return_unit)
 
 let rec listen session =
   match%lwt Dream.receive session.socket with
@@ -436,41 +438,46 @@ let rec gc () =
     can_start
   end;%lwt
 
-  Dream.log "Running playground GC";
+  Lwt.finalize begin fun () ->
+    Dream.log "Running playground GC";
 
-  let%lwt images =
-    Lwt_process.shell "docker images | awk '{print $1, $2, $3}'"
-    |> Lwt_process.pread_lines
-    |> Lwt_stream.to_list
-  in
+    let%lwt images =
+      Lwt_process.shell "docker images | awk '{print $1, $2, $3}'"
+      |> Lwt_process.pread_lines
+      |> Lwt_stream.to_list
+    in
 
-  let images =
-    images
-    |> List.tl
-    |> List.map (String.split_on_char ' ')
-    |> List.filter_map (function
-      | ["base"; _; _] -> None
-      | ["ubuntu"; _; ] -> None
-      | ["sandbox"; tag; _] when List.mem tag keep -> None
-      | [_; _; id] -> Some id
-      | _ -> None)
-  in
+    let images =
+      images
+      |> List.tl
+      |> List.map (String.split_on_char ' ')
+      |> List.filter_map (function
+        | ["base"; _; _] -> None
+        | ["ubuntu"; _; ] -> None
+        | ["sandbox"; tag; _] when List.mem tag keep -> None
+        | [_; _; id] -> Some id
+        | _ -> None)
+    in
 
-  let%lwt _status = exec "docker rmi %s" (String.concat " " images) in
+    let%lwt _status = exec "docker rmi %s" (String.concat " " images) in
 
-  Lwt_unix.files_of_directory "sandbox"
-  |> Lwt_stream.iter_n ~max_concurrency:16 begin fun sandbox ->
-    if List.mem sandbox keep then
-      Lwt.return_unit
-    else
-      let%lwt _status = exec "rm -rf sandbox/%s/_build" sandbox in
-      Lwt.return_unit
-  end;%lwt
+    Lwt_unix.files_of_directory "sandbox"
+    |> Lwt_stream.iter_n ~max_concurrency:16 begin fun sandbox ->
+      if List.mem sandbox keep then
+        Lwt.return_unit
+      else
+        let%lwt _status = exec "rm -rf sandbox/%s/_build" sandbox in
+        Lwt.return_unit
+    end;%lwt
 
-  Hashtbl.reset sandbox_locks;
+    Hashtbl.reset sandbox_locks;
 
-  gc_running := None;
-  Lwt.wakeup_later signal_finished ();
+    Lwt.return_unit
+  end
+    (fun () ->
+      gc_running := None;
+      Lwt.wakeup_later signal_finished ();
+      Lwt.return_unit);%lwt
 
   Dream.log "Warming caches";
 
