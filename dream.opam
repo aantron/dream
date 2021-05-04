@@ -96,7 +96,7 @@ depends: [
 ]
 
 pin-depends: [
-  [ "multipart_form" "git+https://github.com/dinosaure/multipart_form#8f5b6cb77af1a385155b0aeac40437dba6e56577" ]
+  ["multipart_form.git" "git+https://github.com/dinosaure/multipart_form#8f5b6cb77af1a385155b0aeac40437dba6e56577"]
 ]
 
 build: [
