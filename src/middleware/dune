@@ -5,13 +5,15 @@
   digestif
   dream.cipher
   dream.pure
+  multipart_form
+  multipart_form.lwt
+  unstrctrd
   fmt
   fmt.tty
   logs
   lwt
   lwt.unix
   magic-mime
-  multipart-form-data
   uri
   yojson
  )
