@@ -1,0 +1,3 @@
+(executable
+ (name app)
+ (libraries dream))

@@ -12,7 +12,6 @@ sudo init 6
 # Install the latest Docker. We use an APT repository for the absolute latest
 # release, including all the latest security features. The commands are based on
 # https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04
-sudo apt install apt-transport-https
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
 sudo apt update
