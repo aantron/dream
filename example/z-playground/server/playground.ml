@@ -18,7 +18,7 @@ let sandbox_dune_project = {|(lang dune 2.0)
 
 let sandbox_dune = {|(executable
  (name server)
- (libraries caqti caqti-driver-sqlite3 dream tyxml)
+ (libraries caqti caqti-driver-sqlite3 dream runtime tyxml)
  (preprocess (pps lwt_ppx)))
 
 (rule
@@ -29,7 +29,7 @@ let sandbox_dune = {|(executable
 
 let sandbox_dune_re = {|(executable
  (name server)
- (libraries caqti caqti-driver-sqlite3 dream tyxml)
+ (libraries caqti caqti-driver-sqlite3 dream runtime tyxml)
  (preprocess (pps lwt_ppx)))
 
 (rule
@@ -40,7 +40,7 @@ let sandbox_dune_re = {|(executable
 
 let sandbox_dune_no_eml = {|(executable
  (name server)
- (libraries caqti caqti-driver-sqlite3 dream tyxml)
+ (libraries caqti caqti-driver-sqlite3 dream runtime tyxml)
  (preprocess (pps lwt_ppx tyxml-jsx tyxml-ppx)))
 |}
 
@@ -417,7 +417,7 @@ let listen session =
 
 
 
-let rec gc () =
+let rec gc ?(initial = true) () =
   let next = Lwt_unix.sleep 3600. in
 
   let%lwt keep =
@@ -483,7 +483,8 @@ let rec gc () =
 
   keep |> Lwt_list.iteri_s begin fun index sandbox ->
     Lwt_unix.sleep 1.;%lwt
-    Dream.log "Warming %s (%i/%i)" sandbox (index + 1) (List.length keep);
+    if initial then
+      Dream.log "Warming %s (%i/%i)" sandbox (index + 1) (List.length keep);
     lock_sandbox sandbox (fun () ->
       if%lwt image_exists sandbox then
         Lwt.return_unit
@@ -495,7 +496,7 @@ let rec gc () =
   end;%lwt
 
   next;%lwt
-  gc ()
+  gc ~initial:false ()
 
 
 

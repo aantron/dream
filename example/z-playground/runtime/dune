@@ -1,0 +1,8 @@
+(library
+ (public_name runtime)
+ (wrapped false))
+
+(rule
+ (targets playground.ml)
+ (deps playground.eml.ml)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))
