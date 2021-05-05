@@ -145,9 +145,11 @@ dune exec --root . ./hello.exe
   version of *Hello, world!*
 - [**Reason syntax**][reason-examples] &mdash; Several of the examples are
   written in Reason. See [**`r-hello`**][r-hello].
-- [**Full-stack**][fullstack] &mdash; see skeleton projects
+- [**Full-stack**][fullstack] &mdash; See skeleton projects
   [**`r-fullstack-melange`**][melange], [**`w-fullstack-rescript`**][rescript],
   and [**`w-fullstack-jsoo`**][jsoo].
+- [**Deploying**][deploying] &mdash; Quick start instructions for
+  small-to-medium deployments.
 - [**Examples**][examples] &mdash; These cover various HTTP scenarios.
 - [**API reference**][api-main]
 
@@ -156,6 +158,7 @@ dune exec --root . ./hello.exe
 [1-hello]: https://github.com/aantron/dream/tree/master/example/1-hello#files
 [r-hello]: https://github.com/aantron/dream/tree/master/example/r-hello#files
 [reason-examples]: https://github.com/aantron/dream/tree/master/example#reason
+[deploying]: https://github.com/aantron/dream/tree/master/example#deploying
 [api-main]: https://aantron.github.io/dream/#types
 [fullstack]: https://github.com/aantron/dream/tree/master/example#full-stack
 

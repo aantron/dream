@@ -77,6 +77,13 @@ There are several examples showing Dream with Reason syntax.
 
 <br>
 
+# Deploying
+
+- [**`z-heroku`**](z-heroku#files) &nbsp;&mdash;&nbsp; to
+  [Heroku](https://www.heroku.com).
+
+<br>
+
 # Examples
 
 The rest of the examples cover additional topics in a more standalone fashion.
