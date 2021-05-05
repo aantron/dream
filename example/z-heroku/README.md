@@ -40,6 +40,10 @@ So, we build the Web server binary locally, as normal, and then send it to
 Heroku. This works fine if you and your developers are on an Ubuntu or similar
 systems. If you need to support something else, we suggest building an
 executable in either a container or in CI, using almost the same instructions.
+See the
+[GitHub Actions workflow](https://github.com/aantron/dream/blob/heroku-ci/.github/workflows/heroku.yml)
+that deploys this example. `heroku local`, mentioned later, probably runs
+cross-platform.
 
 Do a normal local build, or build in a container or in CI:
 
@@ -116,7 +120,8 @@ $ heroku plugins:install heroku-builds
 
 Replace `my-app` by something else; Heroku apps are in a global namespace!
 
-At this point, you may want to test the Heroku setup locally:
+At this point, you may want to test the Heroku setup
+[locally](https://devcenter.heroku.com/articles/heroku-local):
 
 ```
 $ heroku local

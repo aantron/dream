@@ -1,0 +1,44 @@
+name: heroku
+on:
+  push:
+    paths: 'example/z-heroku/**'
+
+# Set this key on GitHub in your repository's Settings, tab Secrets. The key is
+# obtained by running
+#
+#   heroku authorizations:create
+#
+# locally, after doing
+#
+#   heroku login -i
+env:
+  HEROKU_API_KEY: ${{secrets.HEROKU_API_KEY}}
+
+# Be sure to change or remove both cases of working-directory, and change the
+# app name from dream-example, to the name of your app.
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: example/z-heroku
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-node@v2
+      with:
+        node-version: 14
+    - run: npm install -g esy
+
+    - uses: esy/github-action@v1
+      with:
+        cache-key: 1-${{hashFiles('esy.json')}}
+        working-directory: example/z-heroku
+    - name: Copy out binary
+      run: |
+        mkdir -p deploy
+        esy cp '#{self.target_dir}/default/app.exe' deploy/
+
+    - run: curl https://cli-assets.heroku.com/install.sh | sh
+    - run: heroku plugins:install heroku-builds
+    - run: heroku builds:create --app dream-example
