@@ -155,7 +155,7 @@ The app should now be publicly accessible at the droplet's IP. Logs can be
 viewed with
 
 ```
-$ ssh root@127.0.0.1 "journalctl -f"
+$ ssh build@127.0.0.1 "journalctl -f"
 ```
 
 <br>
