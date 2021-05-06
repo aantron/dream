@@ -4,7 +4,7 @@
 
 This example turns a Dream app into a
 [systemd](https://en.wikipedia.org/wiki/Systemd) service (daemon). The app runs
-in the background, and starts on system startup.
+in the background, and starts on system startup:
 
 ```ini
 [Unit]
@@ -25,24 +25,30 @@ AmbientCapabilities=CAP_NET_BIND_SERVICE
 WantedBy=multi-user.target
 ```
 
-The application listens directly on port 80:
+The service listens directly on port 80:
 
 ```ocaml
 let () =
   Dream.run ~interface:"0.0.0.0" ~port:80
   @@ Dream.logger
   @@ Dream.router [
-    Dream.get "/" (fun _ -> Dream.html "Good morning, world!");
+    Dream.get "/" (fun _ -> Dream.html "Dream started by systemd!");
   ]
   @@ Dream.not_found
-
 ```
+
+It is live at [http://systemd.dream.as](http://systemd.dream.as).
 
 The service can be hosted on any server provider. We will use [Digital
 Ocean](https://www.digitalocean.com) in this example. We will run the build
-remotely. If you have an Ubuntu or compatible system, you can also build locally
-and send only binaries to the server. This will simplify the server setup
-slightly, as it won't need an OCaml/Reason build system.
+remotely, taking advantage of the remote filesystem as a build cache. If you
+have an Ubuntu or compatible system, you can also build locally and send only
+binaries to the server. This will simplify the server setup slightly, as it
+won't need an OCaml/Reason build system.
+
+To complete the setup, we [add a CD script](#automation) at the end. It deploys
+the example to [systemd.dream.as](http://systemd.dream.as) each time the code is
+pushed!
 
 <br>
 
@@ -50,34 +56,27 @@ slightly, as it won't need an OCaml/Reason build system.
 
 Go to [digitalocean.com](https://www.digitalocean.com) and sign up for an
 account. Create a droplet (virtual machine). The smallest and cheapest droplet
-type will do for the example. Be sure to set your public SSH key, and enable
+type will do for the example. Be sure to include your public SSH key, and enable
 monitoring.
 
-Once the droplet is ready, Digital Ocean will show its IP address. The example
-will use 127.0.0.1 as a stand-in. You can also give it a name in
-`~/.ssh/config`:
-
-```
-Host my-droplet
-    Hostname 127.0.0.1
-    User build
-```
+Once the droplet is ready, Digital Ocean will show its IP address. This text
+will use `my-droplet` as a stand-in.
 
 Log in to your dropet:
 
 ```
-$ ssh root@127.0.0.1
+$ ssh root@my-droplet
 ```
 
 Update packages on the droplet, as the image from which it was built may have
-been created quite a while ago. There will likely be a kernel update during this
-first update, so we also retart the droplet.
+been created quite a while ago. There will likely be a kernel update, so we
+also retart the droplet.
 
 ```
 $ apt update
 $ apt upgrade -y
 $ init 6
-$ ssh root@127.0.0.1
+$ ssh root@my-droplet
 ```
 
 Install system packages for building the app:
@@ -113,16 +112,16 @@ $ exit
 
 ## Deploy
 
-To deploy to the droplet, we send the sources, and then run `build.sh` and
-`deploy.sh` on it:
+To deploy our app, we send the sources, and then run `build.sh` and `deploy.sh`
+on the droplet:
 
 ```
-$ rsync -rlv . build@127.0.0.1:app --exclude _esy --exclude node_modules
-$ ssh build@127.0.0.1 "cd app && bash build.sh"
-$ ssh root@127.0.0.1 "bash /home/build/app/deploy.sh"
+$ rsync -rlv . build@my-droplet:app --exclude _esy --exclude node_modules
+$ ssh build@my-droplet "cd app && bash build.sh"
+$ ssh root@my-droplet "bash /home/build/app/deploy.sh"
 ```
 
-`build.sh`:
+[`build.sh`](https://github.com/aantron/dream/blob/master/example/z-systemd/build.sh):
 
 ```sh
 #!/bin/bash
@@ -136,7 +135,7 @@ npx esy
 npx esy cp '#{self.target_dir}/default/app.exe' .
 ```
 
-`deploy.sh`:
+[`deploy.sh`](https://github.com/aantron/dream/blob/master/example/z-systemd/deploy.sh):
 
 ```sh
 #!/bin/bash
@@ -154,8 +153,49 @@ The app should now be running at your droplet's IP address!
 To view logs, run
 
 ```
-$ ssh build@127.0.0.1 "journalctl -f"
+$ ssh build@my-droplet "journalctl -f"
 ```
+
+<br>
+
+## Automation
+
+The Dream repo deploys this example to
+[systemd.dream.as](http://systemd.dream.as) from a [GitHub
+action](https://github.com/aantron/dream/blob/master/.github/workflows/systemd.yml),
+which mainly just runs the [deploy steps](#deploy) above.
+
+The action needs SSH access to the droplet. Generate an SSH key pair, and upload
+the public key:
+
+```
+$ ssh-keygen -t rsa -b 4096 -f github-actions
+$ ssh build@my-droplet "cat - >> .ssh/authorized_keys" < github-actions.pub
+$ ssh root@my-droplet "cat - >> .ssh/authorized_keys" < github-actions.pub
+```
+
+Then, go to Secrets in your repository's settings, and add a secret called
+`DIGITALOCEAN_SSH_KEY`, with the content of file `github-actions` (the private
+key). After that, you can delete `github-actions` and `github-actions.pub`.
+
+Create another secret `DIGITALOCEAN_SYSTEMD_KNOWN_HOSTS`, and put the output of
+
+```
+$ ssh-keyscan my-droplet
+```
+
+into it. Note that this output is not a secret. However, GitHub secrets is a
+very convenient way of passing it to the action.
+
+<br>
+
+**See also:**
+
+- [**`z-docker-esy`**](../z-docker-esy#files) packages the app using [Docker
+  Compose](https://docs.docker.com/compose/), instead of running it directly
+  with systemd.
+- [**`z-heroku`**](../z-heroku#files) deploys the app to
+  [Heroku](https://heroku.com).
 
 <br>
 
