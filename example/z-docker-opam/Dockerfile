@@ -6,33 +6,25 @@ FROM ocaml/opam:alpine as build
 RUN sudo apk add --update \
     make libffi-dev linux-headers m4 ncurses-dev perl pkgconf postgresql-dev \
     musl-dev git pkgconfig gmp-dev libc-dev openblas-dev zlib-dev \
-    npm nodejs libev-dev 
-
-# Install Esy-specific dependencies
-RUN sudo apk add \
-    perl-utils
+    npm nodejs libev-dev
 
 WORKDIR /build
 
-RUN npm install esy
-
 # Install dependencies
-# We only copy the esy.json file and esy.lock directory to install dependencies only when they change,
+# We only copy the opam file to install dependencies only when they change,
 # and not every time a source file is modified.
-ADD esy.json esy.json
-ADD esy.lock esy.lock
-RUN node_modules/.bin/esy fetch
-RUN node_modules/.bin/esy build-dependencies
+ADD hello.opam hello.opam
+RUN eval $(opam env) && opam install . --deps-only
 
 # Build project
 ADD . .
 
-RUN node_modules/.bin/esy build
+RUN opam exec -- dune build
 
 FROM alpine:3.12 as run
 
 RUN apk add --update gmp libpq libev
 
-COPY --from=build /build/_esy/default/build/default/app.exe /bin/app
+COPY --from=build /build/_build/default/app.exe /bin/app
 
 CMD /bin/app

@@ -1,8 +1,5 @@
 # Esy build environment
-_esy/
-
-# Esy dependencies
-node_modules/
+_build/
 
 # Git
 .git/
