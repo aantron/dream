@@ -60,13 +60,13 @@ Host my-droplet
 
 SSH into your droplet:
 
-```bash
+```
 $ ssh root@127.0.0.1
 ```
 
 Then, install update the droplet:
 
-```bash
+```
 $ apt update
 $ apt upgrade -y
 ```
@@ -74,14 +74,14 @@ $ apt upgrade -y
 If you get messages about a kernel upgrade, and `uname -r` is still showing the
 older kernel, you may want to restart the droplet:
 
-```bash
+```
 $ init 6
 $ ssh root@127.0.0.1
 ```
 
 [Install Docker](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04):
 
-```bash
+```
 $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 $ add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
 $ apt update
@@ -92,14 +92,14 @@ $ apt install docker-ce -y
 Check [here](https://github.com/docker/compose/releases) for the latest
 available release.
 
-```bash
+```
 $ curl -L https://github.com/docker/compose/releases/download/1.29.1/docker-compose-Linux-x86_64 -o /usr/local/bin/docker-compose
 $ chmod +x /usr/local/bin/docker-compose
 ```
 
 Install npm, which we will later use for esy, and system dependencies:
 
-```bash
+```
 $ apt install m4 npm unzip -y
 ```
 
@@ -108,7 +108,7 @@ depending on the nature of your application, how much you trust dependencies,
 and other considerations. We add this user to the `docker` group, so that it can
 start Docker containers, and give it the same SSH public key:
 
-```bash
+```
 $ adduser build --disabled-password
 $ usermod build --append --groups docker
 $ usermod build --append --groups systemd-journal
@@ -119,7 +119,7 @@ $ chown -R build:build /home/build/.ssh
 
 Droplet setup is now complete:
 
-```bash
+```
 $ exit
 ```
 
@@ -130,7 +130,7 @@ $ exit
 To deploy to the droplet, we send the sources over, and trigger the commands
 in `deploy.sh` remotely:
 
-```bash
+```
 $ rsync -rlv . build@127.0.0.1:app --exclude _esy --exclude node_modules
 $ ssh build@127.0.0.1 "cd app && bash deploy.sh"
 ```
@@ -151,7 +151,7 @@ docker-compose up --detach
 The app should now be publicly accessible at the droplet's IP. Logs can be
 viewed with
 
-```bash
+```
 $ ssh build@127.0.0.1 "journalctl -f"
 ```
 
