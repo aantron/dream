@@ -1,8 +1,8 @@
-# Esy build environment
-_esy/
+# Opam local switch
+_opam/
 
-# Esy dependencies
-node_modules/
+# Dune build environment
+_build/
 
 # Git
 .git/

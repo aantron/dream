@@ -1,0 +1,22 @@
+opam-version: "2.0"
+synopsis: "Example of a docker deployment with Dream"
+description: "Example of a docker deployment with Dream."
+depends: [
+  "ocaml" {>= "4.08.0"}
+  "dune"
+  "dream"
+]
+build: [
+  ["dune" "subst"] {pinned}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]

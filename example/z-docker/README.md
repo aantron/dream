@@ -33,10 +33,11 @@ services:
 
 The setup can be run on any server provider. We will use a [Digital
 Ocean](https://digitalocean.com) "droplet" (virtual machine) running Ubuntu
-20.04, and build the app from source on the droplet. If you are using Ubuntu or
-a compatible operating system, you could also build locally, and send only
-assets and binaries. This will reduce the amount of setup needed on the
-droplet, since it won't need an OCaml or Reason build system.
+20.04. The server binary is built by Docker.
+
+The Dockerfile configures two stages: one for building our application, where we install
+all of the dependencies and copy our source files, and our for the runtime that only contains
+runtime dependencies and the produced binary.
 
 <br>
 
@@ -136,16 +137,12 @@ $ ssh build@127.0.0.1 "cd app && bash deploy.sh"
 
 `deploy.sh` looks like this:
 
-```sh
+```bash
 #!/bin/bash
 
 set -e
 set -x
 
-[ -f node_modules/.bin/esy ] || npm install esy
-rm -f app.exe
-npx esy
-npx esy cp '#{self.target_dir}/default/app.exe' .
 docker-compose build
 docker-compose down
 docker-compose up --detach

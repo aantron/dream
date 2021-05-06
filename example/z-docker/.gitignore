@@ -1,0 +1,2 @@
+# Exceptionnally, we commit the lock files as they are used in the Dockerfile.
+!esy.lock/
