@@ -1,0 +1,24 @@
+name: systemd
+on:
+  push:
+    paths:
+    - 'example/z-systemd/**'
+    - .github/workflows/systemd.yml
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: example/z-systemd
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: webfactory/ssh-agent@v0.5.2
+      with:
+        ssh-private-key: ${{secrets.DIGITALOCEAN_SSH_KEY}}
+    - run: echo "${{secrets.DIGITALOCEAN_SYSTEMD_KNOWN_HOSTS}}" >> /home/runner/.ssh/known_hosts
+
+    - run: rsync -rlv . build@systemd.dream.as:app --exclude _esy --exclude node_modules
+    - run: ssh build@systemd.dream.as "cd app && bash build.sh"
+    - run: ssh root@systemd.dream.as "bash /home/build/app/deploy.sh"
