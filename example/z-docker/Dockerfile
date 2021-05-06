@@ -23,4 +23,4 @@ RUN apk add --update libev
 
 COPY --from=build /build/_esy/default/build/default/app.exe /bin/app
 
-CMD /bin/app
+ENTRYPOINT /bin/app

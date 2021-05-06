@@ -7,7 +7,7 @@ WORKDIR /build
 
 # Install dependencies
 ADD hello.opam hello.opam
-RUN eval $(opam env) && opam install . --deps-only
+RUN opam install . --deps-only
 
 # Build project
 ADD . .
@@ -19,4 +19,4 @@ RUN apk add --update libev
 
 COPY --from=build /build/_build/default/app.exe /bin/app
 
-CMD /bin/app
+ENTRYPOINT /bin/app
