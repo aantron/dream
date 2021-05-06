@@ -81,9 +81,10 @@ There are several examples showing Dream with Reason syntax.
 
 - [**`z-heroku`**](z-heroku#files) &nbsp;&mdash;&nbsp; to
   [Heroku](https://www.heroku.com).
-- [**`z-docker`**](z-docker#files) &nbsp;&mdash;&nbsp; on a server, using
-  Docker.
-- [**`z-docker-opam`**](z-docker#files) &nbsp;&mdash;&nbsp; a variant of `z-docker` with opam as a package manager.
+- [**`z-docker-esy`**](z-docker#files) &nbsp;&mdash;&nbsp; on a server, using
+  Docker with Esy as the package manager.
+- [**`z-docker-opam`**](z-docker#files) &nbsp;&mdash;&nbsp; on a server, using
+  Docker with Opam as the package manager.
 - [**`z-systemd`**](z-systemd#files) &nbsp;&mdash;&nbsp; on a server, as a
   systemd daemon.
 

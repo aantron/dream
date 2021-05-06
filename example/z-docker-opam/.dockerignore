@@ -1,4 +1,7 @@
-# Esy build environment
+# Opam local switch
+_opam/
+
+# Dune build environment
 _build/
 
 # Git

@@ -1,15 +1,1 @@
 (lang dune 2.0)
-
-(name hello)
-
-(generate_opam_files true)
-
-(package
- (name hello)
- (synopsis "Example of a docker deployment with Dream")
- (description "Example of a docker deployment with Dream.")
- (depends
-  (ocaml
-   (>= 4.08.0))
-  dune
-  dream))
