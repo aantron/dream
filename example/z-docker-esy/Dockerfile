@@ -1,25 +1,28 @@
-FROM ocaml/opam:alpine as build
+FROM debian:stable-slim as build
 
-# Install Esy-specific dependencies
-RUN sudo apk add --update nodejs npm perl-utils m4 linux-headers
+RUN apt-get update
+RUN apt-get install -y curl git m4 npm unzip
 
 WORKDIR /build
 
 RUN npm install esy
 
-# Install dependencies
-ADD esy.json esy.json
-ADD esy.lock esy.lock
+# Install dependencies.
+ADD esy.* .
+RUN [ -f esy.lock ] || node_modules/.bin/esy solve
 RUN node_modules/.bin/esy fetch
 RUN node_modules/.bin/esy build-dependencies
 
-# Build project
+# Build project.
 ADD . .
 RUN node_modules/.bin/esy build
 
-FROM alpine:3.12 as run
 
-RUN apk add --update libev
+
+FROM debian:stable-slim as run
+
+RUN apt-get update
+RUN apt-get install -y libssl1.1 libev4
 
 COPY --from=build /build/_esy/default/build/default/app.exe /bin/app
 

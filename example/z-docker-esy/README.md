@@ -2,8 +2,9 @@
 
 <br>
 
-This example wraps a very simple Web app in a [Docker](https://www.docker.com/)
-container, and runs it persistently, as a daemon.
+This example wraps a very simple Web app in a
+[Docker](https://en.wikipedia.org/wiki/Docker_(software)) container, and runs
+it persistently, as a daemon.
 
 ```ocaml
 let () =
@@ -16,7 +17,7 @@ let () =
 ```
 
 It uses [Docker Compose](https://docs.docker.com/compose/), so that you can
-quickly expand it by adding databases and the like.
+quickly expand it by adding databases and other services.
 
 ```yaml
 version: "3"
@@ -28,16 +29,19 @@ services:
     - "80:8080"
     restart: always
     logging:
-      driver: journald
+      driver: ${LOGGING_DRIVER:-json-file}
 ```
 
-The setup can be run on any server provider. We will use a [Digital
-Ocean](https://digitalocean.com) "droplet" (virtual machine) running Ubuntu
-20.04. The server binary is built by Docker.
+The example app is running live at
+[http://docker-esy.dream.as](http://docker-esy.dream.as).
 
-The Dockerfile configures two stages: one for building our application, where we install
-all of the dependencies and copy our source files, and our for the runtime that only contains
-runtime dependencies and the produced binary.
+The setup can be run locally or on any server provider. We will use a [Digital
+Ocean](https://digitalocean.com) "droplet" (virtual machine). The server binary is built by Docker.
+
+The
+[`Dockerfile`](https://github.com/aantron/dream/blob/master/example/z-docker-esy/Dockerfile)
+has two stages: one for building our application, and one for the runtime that
+only contains the final binary and its run-time dependencies.
 
 <br>
 
@@ -49,34 +53,26 @@ droplets as of May 2021, but you may eventually need more memory. Be sure to
 enable monitoring and add your public SSH key.
 
 Once the droplet starts, Digital Ocean will display its IP. We will use
-`127.0.0.1` as a stand-in in the example. You can assign a name to it in
-`~/.ssh/config`:
-
-```
-Host my-droplet
-    Hostname 127.0.0.1
-    User build
-```
+`my-droplet` as a stand-in in the example.
 
 SSH into your droplet:
 
 ```
-$ ssh root@127.0.0.1
+$ ssh root@my-droplet
 ```
 
-Then, install update the droplet:
+Then, update the droplet:
 
 ```
 $ apt update
 $ apt upgrade -y
 ```
 
-If you get messages about a kernel upgrade, and `uname -r` is still showing the
-older kernel, you may want to restart the droplet:
+There was likely a kernel update, so restart the droplet:
 
 ```
 $ init 6
-$ ssh root@127.0.0.1
+$ ssh root@my-droplet
 ```
 
 [Install Docker](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04):
@@ -97,16 +93,9 @@ $ curl -L https://github.com/docker/compose/releases/download/1.29.1/docker-comp
 $ chmod +x /usr/local/bin/docker-compose
 ```
 
-Install npm, which we will later use for esy, and system dependencies:
-
-```
-$ apt install m4 npm unzip -y
-```
-
 At this point, you may want to create a non-root user for running your builds,
-depending on the nature of your application, how much you trust dependencies,
-and other considerations. We add this user to the `docker` group, so that it can
-start Docker containers, and give it the same SSH public key:
+We add this user to the `docker` group, so that it can build and start Docker
+containers, and give it the same SSH public key:
 
 ```
 $ adduser build --disabled-password
@@ -128,14 +117,17 @@ $ exit
 ## Deploy
 
 To deploy to the droplet, we send the sources over, and trigger the commands
-in `deploy.sh` remotely:
+in
+[`deploy.sh`](https://github.com/aantron/dream/blob/master/example/z-docker-esy/deploy.sh)
+remotely:
 
 ```
-$ rsync -rlv . build@127.0.0.1:app --exclude _esy --exclude node_modules
-$ ssh build@127.0.0.1 "cd app && bash deploy.sh"
+$ rsync -rlv . build@my-droplet:app --exclude _esy --exclude node_modules
+$ ssh build@my-droplet "cd app && bash deploy.sh"
 ```
 
-`deploy.sh` looks like this:
+[`deploy.sh`](https://github.com/aantron/dream/blob/master/example/z-docker-esy/deploy.sh)
+looks like this:
 
 ```bash
 #!/bin/bash
@@ -152,8 +144,41 @@ The app should now be publicly accessible at the droplet's IP. Logs can be
 viewed with
 
 ```
-$ ssh build@127.0.0.1 "journalctl -f"
+$ ssh build@my-droplet "journalctl -f"
 ```
+
+<br>
+
+## Automation
+
+The Dream repo has a
+[GitHub action](https://github.com/aantron/dream/blob/master/.github/workflows/docker-esy.yml)
+that deploys this example to [docker-esy.dream.as](http://docker-esy.dream.as)
+on every push. It runs the [two commands](#deploy) above.
+
+The action needs SSH access to the droplet. See
+[*Automation*](../z-systemd#automation) for discussion. The only difference is
+that we need don't need to upload the SSH key to user `root`, because we don't
+need to log in as `root` to start a daemon:
+
+```
+$ ssh-keygen -t rsa -b 4096 -f github-actions
+$ ssh build@my-droplet "cat - >> .ssh/authorized_keys" < github-actions.pub
+```
+
+And this example uses a `known_hosts` secret named
+`DIGITALOCEAN_DOCKER_ESY_KNOWN_HOSTS` rather than
+`DIGITALOCEAN_SYSTEMD_KNOWN_HOSTS`, but you can pick any name you like for your
+version of the deploy script.
+
+<br>
+
+**See also:**
+
+- [**`z-systemd`**](../z-systemd#files) packages the app as a systemd daemon,
+  outside of a Docker container.
+- [**`z-heroku`**](../z-heroku#files) deploys the app to
+  [Heroku](https://heroku.com).
 
 <br>
 

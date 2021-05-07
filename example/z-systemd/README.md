@@ -165,13 +165,13 @@ The Dream repo deploys this example to
 action](https://github.com/aantron/dream/blob/master/.github/workflows/systemd.yml),
 which mainly just runs the [deploy steps](#deploy) above.
 
-The action needs SSH access to the droplet. Generate an SSH key pair, and upload
-the public key:
+The action needs SSH access to the droplet. Generate an SSH key pair without a
+passphrase, and upload the public key:
 
 ```
 $ ssh-keygen -t rsa -b 4096 -f github-actions
-$ ssh build@my-droplet "cat - >> .ssh/authorized_keys" < github-actions.pub
-$ ssh root@my-droplet "cat - >> .ssh/authorized_keys" < github-actions.pub
+$ ssh-copy-id -i github-actions root@my-droplet
+$ ssh-copy-id -i github-actions build@my-droplet
 ```
 
 Then, go to Secrets in your repository's settings, and add a secret called
