@@ -1,0 +1,23 @@
+name: docker-opam
+on:
+  push:
+    paths:
+    - 'example/z-docker-opam/**'
+    - .github/workflows/docker-opam.yml
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: example/z-docker-opam
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: webfactory/ssh-agent@v0.5.2
+      with:
+        ssh-private-key: ${{secrets.DIGITALOCEAN_SSH_KEY}}
+    - run: echo "${{secrets.DIGITALOCEAN_DOCKER_OPAM_KNOWN_HOSTS}}" >> /home/runner/.ssh/known_hosts
+
+    - run: rsync -rlv . build@docker-opam.dream.as:app --exclude _build --exclude _opam
+    - run: ssh build@docker-opam.dream.as "cd app && bash deploy.sh"

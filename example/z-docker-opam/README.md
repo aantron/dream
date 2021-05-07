@@ -2,11 +2,21 @@
 
 <br>
 
-This example wraps a very simple Web app in a [Docker](https://www.docker.com/)
-container, and runs it persistently, as a daemon.
+This example runs a simple Web app inside a [Docker](https://www.docker.com/)
+container. It is a variant of [**`z-docker-esy`**](../z-docker-esy#files), but
+with [opam](https://opam.ocaml.org/) as the package manager.
 
-It is an variant of `z-docker` with Opam as a package manager instead of Esy.
-Please see `z-docker`'s README for an in-depth guide on how to configure a Digital Ocean droplet and the commands to deploy.
+All the instructions are the same as in
+[**`z-docker-esy`**](../z-docker-esy#files). The difference is in the
+[`Dockerfile`](https://github.com/aantron/dream/blob/master/example/z-docker-opam/Dockerfile),
+which, in this example, derives an image from one of the [opam base
+images](https://hub.docker.com/r/ocaml/opam), and installs dependencies using
+opam. The initial build requires at least 2 GB of memory.
+
+The example is live at
+[http://docker-opam.dream.as](http://docker-opam.dream.as), and is deployed
+there automatically, on push, by a
+[GitHub action](https://github.com/aantron/dream/blob/master/.github/workflows/docker-opam.yml).
 
 <br>
 
