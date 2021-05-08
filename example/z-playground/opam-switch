@@ -200,7 +200,7 @@ applicable."""
   ]
   url {
     src:
-      "git+https://github.com/aantron/dream.git#969a7fba1ee2b8eef4bc109ac9225f366dcee792"
+      "git+https://github.com/aantron/dream.git#018e8e273c5e01e24efefa8e2b2b5a9e4145c7a1"
   }
 }
 package "multipart_form" {
