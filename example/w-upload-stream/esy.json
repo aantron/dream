@@ -5,6 +5,6 @@
     "ocaml": "4.12.x"
   },
   "scripts": {
-    "start": "dune exec --root . ./upload.exe"
+    "start": "dune exec --root . ./upload_stream.exe"
   }
 }
