@@ -41,7 +41,7 @@ Heroku. This works fine if you and your developers are on an Ubuntu or similar
 systems. If you need to support something else, we suggest building an
 executable in either a container or in CI, using almost the same instructions.
 See the
-[GitHub Actions workflow](https://github.com/aantron/dream/blob/heroku-ci/.github/workflows/heroku.yml)
+[GitHub Actions workflow](https://github.com/aantron/dream/blob/master/.github/workflows/heroku.yml)
 that deploys this example. `heroku local`, mentioned later, probably runs
 cross-platform.
 
