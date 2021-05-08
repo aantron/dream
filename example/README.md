@@ -117,6 +117,8 @@ if something is missing!
   an older alternative to WebSockets.
 - [**`w-template-stream`**](w-template-stream#files) &nbsp;&mdash;&nbsp; sends
   templates asynchronously, one chunk at a time.
+- [**`w-upload-stream`**](w-upload-stream#files) &nbsp;&mdash;&nbsp; streams
+  uploaded files.
 - [**`w-stress-response`**](w-stress-response#files) &nbsp;&mdash;&nbsp;
   benchmarks streaming very large responses.
 - [**`w-stress-websocket-send`**](w-stress-websocket-send#files)
@@ -209,6 +211,5 @@ Techniques:
      sessions. For now, it is in h-login. -->
 <!-- TODO Also need an example that demonstrates typed sessions and how trivial
      they are. -->
-<!-- TODO Need an upload example. Make a hex-dumping server or something. -->
 <!-- TODO Lwt/promise example. -->
 <!-- TODO Recommend empty responses -->

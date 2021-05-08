@@ -923,28 +923,27 @@ val multipart : request -> multipart_form form_result promise
 
 (** {2 Streaming uploads} *)
 
-type upload_event = [
-  | `Part of string option * string option
-  | `Field of string * string
-  | `Done
-  | `Wrong_content_type
-]
-(** Upload stream events.
+type part = string option * string option * ((string * string) list)
+(** Upload form parts.
 
-    - [`Part (name, filename)] begins a part in the stream. The Web app
-      should call {!Dream.val-upload_part} until [None], then call
-      {!Dream.val-upload} again.
-    - [`Field (field_name, value)] is a complete field. The Web app should call
-      {!Dream.val-upload} next.
-    - [`Done] ends the stream.
-    - [`Wrong_content_type] occurs on the first call to {!Dream.val-upload} if
-      [Content-Type:] is not [multipart/form-data]. *)
+    A value [Some (name, filename, headers)] received by {!Dream.val-upload}
+    begins a {e part} in the stream. A part represents either a form field, or
+    a single, complete file.
 
-val upload : request -> upload_event promise
-(** Retrieves the next upload stream event.
+    Note that, in the general case, [filename] and [headers] are not reliable.
+    [name] is the form field name. *)
 
-    Does not verify a CSRF token. There are several ways to add CSRF protection
-    for an upload stream, including:
+val upload : request -> part option promise
+(** Retrieves the next upload part.
+
+    Upon getting [Some (name, filename, headers)] from this function, the user
+    should call {!Dream.upload_part} to stream chunks of the part's data, until
+    that function returns [None]. The user should then call {!Dream.val-upload}
+    again. [None] from {!Dream.val-upload} indicates that all parts have been
+    received.
+
+    {!Dream.upload} does not verify a CSRF token. There are several ways to add
+    CSRF protection for an upload stream, including:
 
     - Generate the form with {!Dream.form_tag}. Check for
       [`Field ("dream.csrf", token)] during upload and call
@@ -954,7 +953,7 @@ val upload : request -> upload_event promise
       include a custom header. *)
 
 val upload_part : request -> string option promise
-(** Retrieves a file chunk. *)
+(** Retrieves a part chunk. *)
 
 (** {2 CSRF tokens}
 

@@ -774,12 +774,12 @@ let form'_replacement = {|
 </pre>
 |}
 
-let part_expected = {|<div class="spec type" id="type-multipart_form">
+let multipart_form_expected = {|<div class="spec type" id="type-multipart_form">
  <a href="#type-multipart_form" class="anchor"></a><code><span><span class="keyword">type</span> multipart_form</span><span> = <span><span>(string * <span><span>(<span>string option</span> * string)</span> list</span>)</span> list</span></span></code>
 </div>
 |}
 
-let part_replacement = {|
+let multipart_form_replacement = {|
 <pre><span class="keyword">type</span> multipart_form =
   (string * ((string option * string) list)) list
 </pre>
@@ -793,6 +793,17 @@ let multipart_expected = {|<div class="spec value" id="val-multipart">
 let multipart_replacement = {|
 <pre><span class="keyword">val</span> multipart :
   <a href="#type-request">request</a> -> <a href="#type-multipart">multipart_form</a> <a href="#type-form_result">form_result</a> <a href="#type-promise">promise</a>
+</pre>
+|}
+
+let part_expected = {|<div class="spec type" id="type-part">
+ <a href="#type-part" class="anchor"></a><code><span><span class="keyword">type</span> part</span><span> = <span>string option</span> * <span>string option</span> * <span><span>(string * string)</span> list</span></span></code>
+</div>
+|}
+
+let part_replacement = {|
+<pre><span class="keyword">type</span> part =
+  string option * string option * ((string * string) list)
 </pre>
 |}
 
@@ -1635,10 +1646,10 @@ let pretty_print_signatures soup =
         Soup.add_class "multiline" element)
   in *)
 
-  multiline "#type-multipart_form" part_expected part_replacement;
+  multiline
+    "#type-multipart_form" multipart_form_expected multipart_form_replacement;
   multiline "#val-multipart" multipart_expected multipart_replacement;
-  (* type_table
-    "#type-upload_event" upload_event_expected upload_event_replacement; *)
+  multiline "#type-part" part_expected part_replacement;
 
   let csrf_result = soup $ "#type-csrf_result" in
   if_expected

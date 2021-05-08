@@ -2,27 +2,25 @@ let home request =
   <html>
     <body>
       <%s! Dream.form_tag ~action:"/" ~enctype:`Multipart_form_data request %>
-        <input name="as">
-        <input name="file" type="file">
+        <input name="files" type="file" multiple>
         <button>Submit!</button>
       </form>
     </body>
   </html>
 
-let report where size =
+let report files =
   <html>
     <body>
-        <p><%s where %>, <%Li size %> bytes</p>
+%     files |> List.iter begin fun (name, size) ->
+%       let name =
+%         match name with
+%         | None -> "None"
+%         | Some name -> name
+%       in
+        <p><%s name %>, <%i size %> bytes</p>
+%     end;
     </body>
   </html>
-
-let write fd str size =
-  let rec go fd str off max size =
-    let%lwt len = Lwt_unix.write_string fd str off max in
-    if len = max
-    then Lwt.return (Int64.add size (Int64.of_int (String.length str)))
-    else go fd str (off + len) (max - len) size in
-  go fd str 0 (String.length str) size
 
 let () =
   Dream.run
@@ -34,32 +32,18 @@ let () =
       Dream.html (home request));
 
     Dream.post "/" (fun request ->
-      let rec iter_parts dst size = match%lwt Dream.upload request with
-        | `Field _ -> iter_parts dst size
-        | `Part (Some "as", _) ->
-          let stream = Lwt_stream.from (fun () -> Dream.upload_part request) in
-          let%lwt value = Lwt_stream.to_list stream in
-          let value = String.concat "" value in
-          iter_parts (Some value) size
-        | `Part (Some "file", Some _) when dst <> None ->
-          let filename = Option.get dst in
-          let stream = Lwt_stream.from (fun () -> Dream.upload_part request) in
-          let%lwt fd = Lwt_unix.openfile filename
-            Unix.[ O_WRONLY; O_CREAT; O_TRUNC ] 0o644 in
-          let%lwt ln = Lwt_stream.fold_s (write fd) stream 0L in
-          let%lwt () = Lwt_unix.close fd in
-          iter_parts dst (Some ln)
-        | `Part _ ->
-          Dream.log "Serialize a part." ;
-          let stream = Lwt_stream.from (fun () -> Dream.upload_part request) in
-          let%lwt _ = Lwt_stream.to_list stream in
-          iter_parts dst size
-        | `Wrong_content_type as err -> Lwt.return_error err
-        | `Done -> Lwt.return_ok (dst, size) in
-      match%lwt iter_parts None None with
-      | Ok (Some filename, Some size) ->
-        Dream.html (report filename size)
-      | _ -> Dream.empty `Bad_Request);
+      let rec receive file_sizes =
+        match%lwt Dream.upload request with
+        | None -> Dream.html (report (List.rev file_sizes))
+        | Some (_, filename, _) ->
+          let rec count_size size =
+            match%lwt Dream.upload_part request with
+            | None -> receive ((filename, size)::file_sizes)
+            | Some chunk -> count_size (size + String.length chunk)
+          in
+          count_size 0
+      in
+      receive []);
 
   ]
   @@ Dream.not_found

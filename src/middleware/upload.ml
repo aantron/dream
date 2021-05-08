@@ -11,15 +11,15 @@ let field_to_string (request : Dream.request) field =
   let open Multipart_form in
   match field with
   | Field.Field (field_name, Field.Content_type, v) ->
-    Lwt.return (`Field ((field_name :> string), Content_type.to_string v))
+    (field_name :> string), Content_type.to_string v
   | Field.Field (field_name, Field.Content_disposition, v) ->
     request.specific.upload.filename <- Content_disposition.filename v ;
     request.specific.upload.name <- Content_disposition.name v ;
-    Lwt.return (`Field ((field_name :> string), Content_disposition.to_string v))
+    (field_name :> string), Content_disposition.to_string v
   | Field.Field (field_name, Field.Content_encoding, v) ->
-    Lwt.return (`Field ((field_name :> string), Content_encoding.to_string v))
+    (field_name :> string), Content_encoding.to_string v
   | Field.Field (field_name, Field.Field, v) ->
-    Lwt.return (`Field ((field_name :> string), Unstrctrd.to_utf_8_string v))
+    (field_name :> string), Unstrctrd.to_utf_8_string v
 
 let log = Log.sub_log "dream.upload"
 
@@ -37,89 +37,51 @@ let upload_part (request : Dream.request) =
 
 let identify _ = object end
 
-(* XXX(dinosaure): the state machine is such as:
+type part = string option * string option * ((string * string) list)
 
-                           .-->--[state]-->--.
-   [`Init] -[upload]-> [`Header]         [`Part]
-                           '--<--[state]--<--'
-
-   The first call to [upload] sets the state to [`Header] if we can extract a
-   [Content-Type]. Then, from the [`Header] state, we emit one by one fields of
-   the current decoding part. When all of these fields (including
-   [Content-Disposition]) are consumed, we set the state to [`Part]. The user
-   should call then [upload_part]. We re-loop into [state] with [`Header] to
-   emit:
-
-   - [`Done] if we don't have parts anymore
-   - fields of the new part.
-
-   By this way, the common use should be:
-   {[
-     # upload request ;;
-     - [> `Field of string * string ] = `Field ("content-type", ...)
-     # upload request ;;
-     - [> `Field of string * string ] = `Field ("content-disposition", ...)
-     # upload request ;;
-     - [> `Part of string option * string option ]
-     = `Part (Some "file", Some "image.png")
-     # upload_part request ;;
-     - string option = Some ...
-     # upload_part request ;;
-     - string option = None
-     # upload request ;;
-     - [> `Field of string * string ] = `Field ("content-type", ...)
-     ...
-     # upload request ;;
-     - [> `Done ]
-   ]}
-*)
-
-type state = [ `Header | `Part ]
-
-let rec state (request : Dream.request) v =
+let rec state (request : Dream.request) =
   let stream = request.specific.upload.stream in
   match%lwt Lwt_stream.peek stream with
-  | None -> let%lwt () = Lwt_stream.junk stream in Lwt.return `Done
-  | Some (_, header, _stream) -> match v with
-    | `Part ->
-      log.debug (fun m -> m "Start to upload a new part.") ;
-      (* XXX(dinosaure): new part. *)
-      request.specific.upload.state <- `Header ;
-      request.specific.upload.nth <- 0 ;
-      request.specific.upload.name <- None ;
-      request.specific.upload.filename <- None ;
-      state request `Header
-    | `Header ->
-      let header = Multipart_form.Header.to_list header in
-      let n = request.specific.upload.nth in
-      if n < List.length header
-      then ( log.debug (fun m -> m "Show the field %d." n)
-           ; request.specific.upload.nth <- n + 1
-           ; field_to_string request (List.nth header n) )
-      else
-        ( request.specific.upload.state <- `Part
-        ; Lwt.return (`Part (request.specific.upload.name, request.specific.upload.filename)) )
+  | None -> let%lwt () = Lwt_stream.junk stream in Lwt.return_none
+  | Some (_, headers, _stream) ->
+    let headers =
+      headers
+      |> Multipart_form.Header.to_list
+      |> List.map (field_to_string request)
+    in
+    let part =
+      request.specific.upload.name, request.specific.upload.filename, headers in
+    Lwt.return (Some part)
 
 and upload (request : Dream.request) =
-  match request.specific.upload.state with
-  | #state as v -> state request v
-  | `Init ->
+  match request.specific.upload.state_init with
+  | false ->
+    state request
+
+  | true ->
     let content_type = match Dream.header "content-type" request with
-      | Some content_type ->
-        Result.to_option (Multipart_form.Content_type.of_string (content_type ^ "\r\n"))
-      | None -> None in
+    | Some content_type ->
+      Result.to_option
+        (Multipart_form.Content_type.of_string (content_type ^ "\r\n"))
+    | None ->
+      None
+    in
+
     match content_type with
     | None ->
-      log.error (fun m -> m "The upload request does not contain a Content-Type.") ;
-      Lwt.return `Wrong_content_type
+      let message =
+        "The request does not have 'Content-Type: multipart/form_data; ...'" in
+      log.error (fun log -> log "%s" message);
+      failwith message
+
     | Some content_type ->
-      log.debug (fun m -> m "Start to analyze the upload request.") ;
       let body = Lwt_stream.from (fun () -> Dream.read request) in
-      let `Parse th, stream = Multipart_form_lwt.stream ~identify body content_type in
-      Lwt.async (fun () -> let%lwt _ = th in Lwt.return_unit) ;
-      request.specific.upload.stream <- stream ;
-      request.specific.upload.state <- `Header ;
-      state request `Header
+      let `Parse th, stream =
+        Multipart_form_lwt.stream ~identify body content_type in
+      Lwt.async (fun () -> let%lwt _ = th in Lwt.return_unit);
+      request.specific.upload.stream <- stream;
+      request.specific.upload.state_init <- false;
+      state request
 
 type multipart_form =
   (string * ((string option * string) list)) list

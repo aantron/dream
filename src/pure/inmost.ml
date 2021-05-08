@@ -10,35 +10,25 @@ include Status
 
 type bigstring = Body.bigstring
 
-type upload_event = [
-  | `Part of string option * string option
-  | `Field of string * string
-  | `Done
-  | `Wrong_content_type
-]
-
-(* Used for converting the stream interface of [multipart_form] into
-   the pull interface of stream.
+(* Used for converting the stream interface of [multipart_form] into the pull
+   interface of Dream.
 
    [state] permits to dissociate the initial state made by
-   [initial_multipart_state] and one which started to consume
-   the body stream (see the call of [Upload.upload]). *)
+   [initial_multipart_state] and one which started to consume the body stream
+   (see the call of [Upload.upload]). *)
 type multipart_state = {
-  mutable state : [ `Init | `Header | `Part ] ;
-  mutable nth : int;
+  mutable state_init : bool;
   mutable name : string option;
   mutable filename : string option;
   mutable stream : (< > * Multipart_form.Header.t * string Lwt_stream.t) Lwt_stream.t;
 }
 
-let initial_multipart_state () = 
-  {
-    state= `Init;
-    nth= 0;
-    name= None;
-    filename= None;
-    stream= Lwt_stream.of_list [];
-  }
+let initial_multipart_state () = {
+  state_init = true;
+  name = None;
+  filename = None;
+  stream = Lwt_stream.of_list [];
+}
 
 (* TODO Temporary; Ciphers should depend on the core, not the other way. *)
 module Cipher = Dream__cipher.Cipher

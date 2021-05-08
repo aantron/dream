@@ -100,16 +100,6 @@ the form in the template. The only difference is that we now pass it
 </form>
 ```
 
-By contrast with
-[`Dream.multipart`](https://aantron.github.io/dream/#val-multipart),
-[`Dream.upload`](https://aantron.github.io/dream/#val-upload) offers no
-built-in CSRF protection at all at present. You can, however, still use
-[`Dream.form_tag`](https://aantron.github.io/dream/#val-form_tag), and manually
-call
-[`Dream.verify_csrf_token`](https://aantron.github.io/dream/#val-verify_csrf_token)
-when you stream a `dream.csrf` field. You'll then have to decide what to do
-about files already received.
-
 See [OWASP File Upload Cheat
 Sheet](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html)
 for a checklist of additional security precautions.
@@ -122,6 +112,13 @@ for a checklist of additional security precautions.
 - [**`h-sql`**](../h-sql#files) runs SQL queries against a database.
 - [**`i-graphql`**](../i-graphql#files) handles GraphQL queries and serves
   GraphiQL.
+
+<br>
+
+**See also:**
+
+- [**`w-upload-stream`**](../w-upload-stream#files) shows the streaming
+  interface for receiving file uploads.
 
 <br>
 
