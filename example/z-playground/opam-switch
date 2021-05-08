@@ -8,7 +8,7 @@ compiler: [
   "ocaml-config.2"
   "ocaml-options-vanilla.1"
 ]
-roots: ["ocaml-base-compiler.4.12.0"]
+roots: ["multipart_form.git" "ocaml-base-compiler.4.12.0" "runtime.~dev"]
 installed: [
   "angstrom.0.15.0"
   "base-bigarray.base"
@@ -17,6 +17,7 @@ installed: [
   "base-unix.base"
   "base64.3.5.0"
   "bigarray-compat.1.0.0"
+  "bigarray-overlap.0.2.0"
   "bigstringaf.0.7.0"
   "biniou.1.2.1"
   "bisect_ppx.2.6.0"
@@ -49,6 +50,7 @@ installed: [
   "graphql-lwt.0.13.0"
   "graphql_parser.0.13.0"
   "hmap.0.8.1"
+  "ke.0.4"
   "logs.0.7.0"
   "lwt.5.4.0"
   "lwt_ppx.2.0.2"
@@ -64,6 +66,7 @@ installed: [
   "mmap.1.1.0"
   "mtime.1.2.0"
   "multipart-form-data.0.3.0"
+  "multipart_form.git"
   "ocaml.4.12.0"
   "ocaml-base-compiler.4.12.0"
   "ocaml-compiler-libs.v0.12.3"
@@ -79,14 +82,17 @@ installed: [
   "opam-file-format.2.1.2"
   "opam-format.2.1.0~beta4"
   "opam-installer.2.1.0~beta4"
+  "pecu.0.5"
   "ppx_derivers.1.2.1"
   "ppxlib.0.22.0"
+  "prettym.0.0.1"
   "psq.0.2.0"
   "ptime.0.8.5"
   "re.1.9.0"
   "reason.3.7.0"
   "result.1.5"
   "rresult.0.6.0"
+  "runtime.~dev"
   "seq.base"
   "sexplib0.v0.14.0"
   "sqlite3.5.0.3"
@@ -99,11 +105,12 @@ installed: [
   "tyxml-ppx.4.5.0"
   "tyxml-syntax.4.5.0"
   "uchar.0.0.2"
+  "unstrctrd.0.2"
   "uri.4.2.0"
   "uutf.1.0.2"
   "yojson.1.7.0"
 ]
-pinned: "dream.1.0.0~alpha1"
+pinned: ["dream.1.0.0~alpha1" "multipart_form.git" "runtime.~dev"]
 package "dream" {
   opam-version: "2.0"
   version: "1.0.0~alpha1"
@@ -154,6 +161,7 @@ applicable."""
     "base-unix"
     "base64" {>= "3.1.0"}
     "bigarray-compat"
+    "caqti" {>= "1.4.0"}
     "caqti-lwt"
     "conf-libev"
     "cstruct"
@@ -169,7 +177,7 @@ applicable."""
     "magic-mime"
     "mirage-crypto" {>= "0.8.1"}
     "mirage-crypto-rng" {>= "0.8.0"}
-    "multipart-form-data" {>= "0.3.0"}
+    "multipart_form"
     "ocaml" {>= "4.08.0"}
     "uri" {>= "4.2.0"}
     "yojson"
@@ -186,8 +194,70 @@ applicable."""
   ]
   build: ["dune" "build" "-p" name "-j" jobs]
   dev-repo: "git+https://github.com/aantron/dream.git"
+  pin-depends: [
+    "multipart_form.git"
+    "git+https://github.com/dinosaure/multipart_form#8f5b6cb77af1a385155b0aeac40437dba6e56577"
+  ]
   url {
     src:
-      "git+https://github.com/aantron/dream.git#fb17623cff18c86fb1817a1ffd49db5fc4960d26"
+      "git+https://github.com/aantron/dream.git#969a7fba1ee2b8eef4bc109ac9225f366dcee792"
+  }
+}
+package "multipart_form" {
+  opam-version: "2.0"
+  version: "git"
+  synopsis: "Multipart-form: RFC2183, RFC2388 & RFC7578"
+  description: """
+Implementation of RFC7578 in OCaml
+
+Returning values from forms: multipart/form-data"""
+  maintainer: "Romain Calascibetta <romain.calascibetta@gmail.com>"
+  authors: "Romain Calascibetta <romain.calascibetta@gmail.com>"
+  license: "MIT"
+  homepage: "https://github.com/dinosaure/multipart_form"
+  doc: "https://dinosaure.github.io/multipart_form/"
+  bug-reports: "https://github.com/dinosaure/multipart_form/issues"
+  depends: [
+    "ocaml" {>= "4.08.0"}
+    "dune" {>= "2.0.0"}
+    "angstrom" {>= "0.14.0"}
+    "base64"
+    "unstrctrd" {>= "0.2"}
+    "rresult"
+    "uutf"
+    "stdlib-shims"
+    "pecu" {>= "0.4"}
+    "lwt"
+    "prettym"
+    "fmt"
+    "logs"
+    "ke" {>= "0.4"}
+    "alcotest" {with-test}
+    "rosetta" {with-test}
+    "bigarray-compat" {>= "1.0.0"}
+    "bigstringaf" {>= "0.7.0"}
+    "result" {>= "1.5"}
+  ]
+  build: [
+    ["dune" "build" "-p" name "-j" jobs]
+    ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+  ]
+  dev-repo: "git+https://github.com/dinosaure/multipart_form.git"
+  url {
+    src:
+      "git+https://github.com/dinosaure/multipart_form#8f5b6cb77af1a385155b0aeac40437dba6e56577"
+  }
+}
+package "runtime" {
+  opam-version: "2.0"
+  version: "~dev"
+  depends: [
+    "dream"
+    "dune" {>= "2.0.0"}
+    "ocaml"
+  ]
+  build: ["dune" "build" "-p" name "-j" jobs]
+  url {
+    src: "file:///home/playground/playground/runtime"
   }
 }
