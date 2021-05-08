@@ -157,7 +157,10 @@ let multipart request =
       let parts =
         List.fold_left fold Map.empty tree
         |> Map.bindings
-        |> List.map (fun (name, values) -> name, List.rev values)
+        |> List.map (fun (name, values) ->
+          match values with
+          | [Some "", ""] -> name, []
+          | _ -> name, List.rev values)
       in
       Form.sort_and_check_form
         (function

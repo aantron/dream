@@ -22,7 +22,12 @@ let report files =
   <html>
     <body>
 %     files |> List.iter begin fun (name, content) ->
-        <p><%s name %>: <%i String.length content %> bytes</p>
+%       let name =
+%         match name with
+%         | None -> "None"
+%         | Some name -> name
+%       in
+        <p><%s name %>, <%i String.length content %> bytes</p>
 %     end;
     </body>
   </html>
@@ -38,7 +43,7 @@ let () =
 
     Dream.post "/" (fun request ->
       match%lwt Dream.multipart request with
-      | `Ok ["files", `Files files] -> Dream.html (report files)
+      | `Ok ["files", files] -> Dream.html (report files)
       | _ -> Dream.empty `Bad_Request);
 
   ]
