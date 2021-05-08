@@ -176,6 +176,8 @@ version of the deploy script.
 
 **See also:**
 
+- [**`z-docker-opam`**](../z-docker-opam#files) is a variant of this example
+  that uses opam instead of esy.
 - [**`z-systemd`**](../z-systemd#files) packages the app as a systemd daemon,
   outside of a Docker container.
 - [**`z-heroku`**](../z-heroku#files) deploys the app to
@@ -183,4 +185,4 @@ version of the deploy script.
 
 <br>
 
-[Return to the example index](../#deploying)
+[Up to the example index](../#deploying)

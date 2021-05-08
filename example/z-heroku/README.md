@@ -19,7 +19,7 @@ let () =
   Dream.run ~interface:"0.0.0.0" ~port:(int_of_string (Sys.getenv "PORT"))
   @@ Dream.logger
   @@ Dream.router [
-    Dream.get "/" (fun _ -> Dream.html "Good morning, world!");
+    Dream.get "/" (fun _ -> Dream.html "Dream running in Heroku!");
   ]
   @@ Dream.not_found
 ```
@@ -179,4 +179,13 @@ by Aleksandra Sikora.
 
 <br>
 
-[Return to the example index](../#deploying)
+**See also:**
+
+- [**`z-docker-esy`**](../z-docker-esy#files) deploys to a dedicated server,
+  with the Web application managed by Docker Compose.
+- [**`z-systemd`**](../z-systemd#files) deploys to a dedicated server, running
+  the Web application as a systemd daemon.
+
+<br>
+
+[Up to the example index](../#deploying)

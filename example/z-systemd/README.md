@@ -37,7 +37,9 @@ let () =
   @@ Dream.not_found
 ```
 
-It is live at [http://systemd.dream.as](http://systemd.dream.as).
+It is live at [http://systemd.dream.as](http://systemd.dream.as). As a second
+example, the [playground](http://dream.as) is deployed as a [systemd
+service](https://github.com/aantron/dream/blob/master/example/z-playground/server/playground.service).
 
 The service can be hosted on any server provider. We will use [Digital
 Ocean](https://www.digitalocean.com) in this example. We will run the build
@@ -199,4 +201,4 @@ very convenient way of passing it to the action.
 
 <br>
 
-[Return to the example index](../#deploying)
+[Up to the example index](../#deploying)

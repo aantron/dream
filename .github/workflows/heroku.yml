@@ -1,16 +1,15 @@
 name: heroku
 on:
   push:
-    paths: 'example/z-heroku/**'
+    paths:
+    - 'example/z-heroku/**'
+    - .github/workflows/heroku.yml
 
 # Set this key on GitHub in your repository's Settings, tab Secrets. The key is
-# obtained by running
-#
-#   heroku authorizations:create
-#
-# locally, after doing
+# obtained by running locally
 #
 #   heroku login -i
+#   heroku authorizations:create
 env:
   HEROKU_API_KEY: ${{secrets.HEROKU_API_KEY}}
 

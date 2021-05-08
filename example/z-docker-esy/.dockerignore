@@ -1,10 +1,10 @@
-# Esy build environment
+# esy build environment
 _esy/
 
-# Esy dependencies
+# esy dependencies
 node_modules/
 
-# Git
+# git
 .git/
 .gitignore
 

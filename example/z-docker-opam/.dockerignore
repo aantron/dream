@@ -1,4 +1,4 @@
-# Opam local switch
+# opam local switch
 _opam/
 
 # Dune build environment

@@ -20,4 +20,4 @@ there automatically, on push, by a
 
 <br>
 
-[Return to the example index](../#deploying)
+[Up to the example index](../#deploying)
