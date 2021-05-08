@@ -158,9 +158,10 @@ that deploys this example to [docker-esy.dream.as](http://docker-esy.dream.as)
 on every push. It runs the [two commands](#deploy) above.
 
 The action needs SSH access to the droplet. See
-[*Automation*](../z-systemd#automation) for discussion. The only difference is
-that we need don't need to upload the SSH key to user `root`, because we don't
-need to log in as `root` to start a daemon:
+[*Automation*](../z-systemd#automation) in
+[**`z-systemd`**](../z-systemd#automation) for discussion. The only difference
+is that we need don't need to upload the SSH key to user `root`, because we
+don't need to log in as `root` to start a daemon:
 
 ```
 $ ssh-keygen -t rsa -b 4096 -f github-actions
