@@ -774,42 +774,25 @@ let form'_replacement = {|
 </pre>
 |}
 
-let part_expected = {|<div class="spec type" id="type-part">
- <a href="#type-part" class="anchor"></a><code><span><span class="keyword">type</span> part</span><span> = </span><span>[ </span></code>
- <table>
-  <tbody>
-   <tr id="type-part.Files" class="anchored">
-    <td class="def constructor">
-     <a href="#type-part.Files" class="anchor"></a><code><span>| </span></code><code><span>`Files <span class="keyword">of</span> <span><span>(string * string)</span> list</span></span></code>
-    </td>
-   </tr>
-   <tr id="type-part.Value" class="anchored">
-    <td class="def constructor">
-     <a href="#type-part.Value" class="anchor"></a><code><span>| </span></code><code><span>`Value <span class="keyword">of</span> string</span></code>
-    </td>
-   </tr>
-  </tbody>
- </table>
- <code><span> ]</span></code>
+let part_expected = {|<div class="spec type" id="type-multipart_form">
+ <a href="#type-multipart_form" class="anchor"></a><code><span><span class="keyword">type</span> multipart_form</span><span> = <span><span>(string * <span><span>(<span>string option</span> * string)</span> list</span>)</span> list</span></span></code>
 </div>
 |}
 
 let part_replacement = {|
-<pre><span class="keyword">type</span> part = [
-  | `Files of (string * string) list
-  | `Value of string
-]
+<pre><span class="keyword">type</span> multipart_form =
+  (string * ((string option * string) list)) list
 </pre>
 |}
 
 let multipart_expected = {|<div class="spec value" id="val-multipart">
- <a href="#val-multipart" class="anchor"></a><code><span><span class="keyword">val</span> multipart : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span><span><span>(string * <a href="#type-part">part</a>)</span> list</span> <a href="#type-form_result">form_result</a></span> <a href="#type-promise">promise</a></span></span></code>
+ <a href="#val-multipart" class="anchor"></a><code><span><span class="keyword">val</span> multipart : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span><a href="#type-multipart_form">multipart_form</a> <a href="#type-form_result">form_result</a></span> <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let multipart_replacement = {|
 <pre><span class="keyword">val</span> multipart :
-  <a href="#type-request">request</a> -> (string * <a href="#type-part">part</a>) list <a href="#type-form_result">form_result</a> <a href="#type-promise">promise</a>
+  <a href="#type-request">request</a> -> <a href="#type-multipart">multipart_form</a> <a href="#type-form_result">form_result</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -1641,7 +1624,7 @@ let pretty_print_signatures soup =
 
   multiline "#val-form" form'_expected form'_replacement;
 
-  let type_table selector expected replacement =
+  (* let type_table selector expected replacement =
     let element = soup $ selector in
     if_expected
       expected
@@ -1650,12 +1633,12 @@ let pretty_print_signatures soup =
         element $$ "> code" |> Soup.iter Soup.delete;
         Soup.replace (element $ "> table") (Soup.parse replacement);
         Soup.add_class "multiline" element)
-  in
+  in *)
 
-  type_table "#type-part" part_expected part_replacement;
+  multiline "#type-multipart_form" part_expected part_replacement;
   multiline "#val-multipart" multipart_expected multipart_replacement;
-  type_table
-    "#type-upload_event" upload_event_expected upload_event_replacement;
+  (* type_table
+    "#type-upload_event" upload_event_expected upload_event_replacement; *)
 
   let csrf_result = soup $ "#type-csrf_result" in
   if_expected

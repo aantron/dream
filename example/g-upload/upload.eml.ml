@@ -12,6 +12,11 @@ let report files =
   <html>
     <body>
 %     files |> List.iter begin fun (name, content) ->
+%       let name =
+%         match name with
+%         | None -> "None"
+%         | Some name -> name
+%       in
         <p><%s name %>, <%i String.length content %> bytes</p>
 %     end;
     </body>
@@ -28,15 +33,7 @@ let () =
 
     Dream.post "/" (fun request ->
       match%lwt Dream.multipart request with
-      | `Ok parts ->
-        let fold acc = function
-          | "files", files ->
-            let fold = fun acc -> function
-              | { Dream.filename= Some filename; contents; _ } -> (filename, contents) :: acc
-              | _ -> acc in
-            List.fold_left fold acc files
-          | _ -> acc in
-        Dream.html (report (List.fold_left fold [] parts))
+      | `Ok ["files", files] -> Dream.html (report files)
       | _ -> Dream.empty `Bad_Request);
 
   ]

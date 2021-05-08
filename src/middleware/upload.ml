@@ -1,7 +1,7 @@
 (* This file is part of Dream, released under the MIT license. See
    LICENSE.md for details, or visit https://github.com/aantron/dream.
 
-   Copyright 2021 Anton Bachin *)
+   Copyright 2021 Calascibetta Romain *)
 
 
 
@@ -94,7 +94,7 @@ let rec state (request : Dream.request) v =
       let n = request.specific.upload.nth in
       if n < List.length header
       then ( log.debug (fun m -> m "Show the field %d." n)
-           ; request.specific.upload.nth <- n + 1 
+           ; request.specific.upload.nth <- n + 1
            ; field_to_string request (List.nth header n) )
       else
         ( request.specific.upload.state <- `Part
@@ -121,20 +121,9 @@ and upload (request : Dream.request) =
       request.specific.upload.state <- `Header ;
       state request `Header
 
-type part = { headers : (string * string) list; filename : string option; contents : string; }
+type multipart_form =
+  (string * ((string option * string) list)) list
 module Map = Map.Make (String)
-
-let field_to_string field =
-  let open Multipart_form in
-  match field with
-  | Field.Field (field_name, Field.Content_type, v) ->
-    (field_name :> string), Content_type.to_string v
-  | Field.Field (field_name, Field.Content_disposition, v) ->
-    (field_name :> string), Content_disposition.to_string v
-  | Field.Field (field_name, Field.Content_encoding, v) ->
-    (field_name :> string), Content_encoding.to_string v
-  | Field.Field (field_name, Field.Field, v) ->
-    (field_name :> string), Unstrctrd.to_utf_8_string v
 
 let multipart request =
   let content_type = match Dream.header "content-type" request with
@@ -155,11 +144,23 @@ let multipart request =
         let contents = List.assoc uid assoc in
         let content_disposition = Header.content_disposition header in
         let filename = Option.bind content_disposition Content_disposition.filename in
-        let headers = List.map field_to_string (Header.to_list header) in
         match Option.bind content_disposition Content_disposition.name with
         | None -> acc
         | Some name ->
-          try let vs = Map.find name acc in Map.add name ({ headers; filename; contents; } :: vs) acc
-          with Not_found -> Map.add name [ { headers; filename; contents; } ] acc in
-      let parts = List.fold_left fold Map.empty tree |> Map.bindings in
-      Form.sort_and_check_form (function { contents; _ } :: _ -> contents | _ -> "") parts request
+          let vs =
+            match Map.find_opt name acc with
+            | Some vs -> vs
+            | None -> []
+          in
+          Map.add name ((filename, contents)::vs) acc
+      in
+      let parts =
+        List.fold_left fold Map.empty tree
+        |> Map.bindings
+        |> List.map (fun (name, values) -> name, List.rev values)
+      in
+      Form.sort_and_check_form
+        (function
+        | [None, value] -> value
+        | _ -> "")
+        parts request

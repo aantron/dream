@@ -850,35 +850,57 @@ val form : request -> (string * string) list form_result promise
 
 (** {2 Upload} *)
 
-type part = { headers : (string * string) list; filename : string option; contents : string; }
-(** Field values of an upload form, [<form enctype="multipart/form-data">]. See
-    {!Dream.multipart} and example
-    {{:https://github.com/aantron/dream/tree/master/example/g-upload#files}
-    [g-upload]}.
+type multipart_form =
+  (string * ((string option * string) list)) list
+(** Submitted file upload forms, [<form enctype="multipart/form-data">]. For
+    example, if a form
 
-    An upload form is composed of a list of [part]s. A part can be a file or
-    a simple value. You can recognize a part as a file if [filename] is specified.
+    {v
+<input name="files" type="file" multiple>
+<input name="text">
+    v}
 
-    Parts are then paired with field names by {!Dream.multipart}, making a
-    [(string * part list) list].
-
-    For example, if the form has [<input name="foo" type="file" multiple>], and
-    the user selects multiple files, the received field name and {!type-part}
-    will be
+    is submitted with a text value and two files, it will be received by
+    {!Dream.multipart} as
 
     {[
-      ("foo", [
-        { headers= [ "content-type", ... ]; filename= Some "file1"; contents= "data1"; };
-        { headers= [ "content-type", ... ]; filename= Some "file2"; contents= "data2"; };
-      ])
+      [
+        "files", [
+          Some "file1.ext", "file1-content";
+          Some "file2.ext", "file2-content";
+        ];
+        "text", [
+          None, "text-value"
+        ];
+      ]
     ]}
+
+    See example
+    {{:https://github.com/aantron/dream/tree/master/example/w-multipart-dump#files}
+    [w-multipart-dump]} for just such a form, and to inspect the data that is
+    sent by it. Example
+    {{:https://github.com/aantron/dream/tree/master/example/g-upload#files}
+    [g-upload]} actually loads the data into a value of type
+    {!type-multipart_form}.
+
+    Note that clients such as curl can send files with no filename ([None]),
+    though most browsers seem to insert at least an empty filename ([Some ""]).
+    Don't use use the presence of a filename to determine if the field value is
+    a file. Use the field name and knowledge about the form instead.
+
+    If a file field has zero files when submitted, browsers send
+    ["field-name", [Some ""; ""]]. {!Dream.multipart} replaces this with
+    ["field-name", []]. Use the advanced interface {!Dream.upload} for the raw
+    behavior.
+
+    Non-file fields always have one value, which might be the empty string.
 
     See
     {{:https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html}
     OWASP {i File Upload Cheat Sheet}} for security precautions for upload
     forms. *)
 
-val multipart : request -> (string * part list) list form_result promise
+val multipart : request -> multipart_form form_result promise
 (** Like {!Dream.form}, but also reads files, and [Content-Type:] must be
     [multipart/form-data]. The [<form>] tag and CSRF token can be generated in a
     template with
@@ -892,11 +914,14 @@ val multipart : request -> (string * part list) list form_result promise
     {{:https://github.com/aantron/dream/tree/master/example/g-upload#files}
     [g-upload]}.
 
+    Note that, like {!Dream.form}, this function sorts form fields by field
+    name.
+
     {!Dream.multipart} reads entire files into memory, so it is only suitable
     for prototyping, or with yet-to-be-added file size and count limits. See
     {!Dream.val-upload} below for a streaming version. *)
 
-(** {2 Streaming upload} *)
+(** {2 Streaming uploads} *)
 
 type upload_event = [
   | `Part of string option * string option
