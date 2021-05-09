@@ -42,7 +42,8 @@
       ReactDOM.render(
         React.createElement(GraphiQL, {
           fetcher: fetcher,
-          defaultQuery: defaultQuery
+          defaultQuery: defaultQuery,
+          defaultSecondaryEditorOpen: true
         }),
         document.getElementById("graphiql"));
     </script>

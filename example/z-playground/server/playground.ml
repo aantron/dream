@@ -533,7 +533,17 @@ let () =
     match%lwt exists sandbox with
     | false -> Dream.empty `Not_Found
     | true ->
-    Dream.from_filesystem "static" "playground.html" request
+    let%lwt example =
+      match sandbox.[1] with
+      | '-' ->
+        if%lwt Lwt_unix.file_exists (sandbox_root // sandbox // "keep") then
+          Lwt.return (Some sandbox)
+        else
+          Lwt.return_none
+      | _ -> Lwt.return_none
+      | exception _ -> Lwt.return_none
+    in
+    Dream.html (Client.html example)
   in
 
   Dream.run ~interface:"0.0.0.0" ~port:80 ~stop ~adjust_terminal:false
@@ -541,8 +551,8 @@ let () =
   @@ Dream.router [
 
     (* The client will send a default sandbox id in this case. *)
-    Dream.get "/" (fun request ->
-      Dream.from_filesystem "static" "playground.html" request);
+    Dream.get "/" (fun _ ->
+      Dream.html (Client.html None));
 
     (* Upon request for /socket?sandbox=id, send the code in the sandbox to the
        client, and then enter the "REPL." Not bothering with nice replies or
@@ -563,6 +573,9 @@ let () =
         Dream.info (fun log ->
           log "Sandbox %s: content sent to client" sandbox);
         listen {container = None; sandbox; syntax; eml; socket}));
+
+    (* Serve scripts and CSS. *)
+    Dream.get "/static/**" (Dream.static "./static");
 
     (* For sandbox ids, respond with the sandbox page. *)
     Dream.get "/:id" playground_handler;

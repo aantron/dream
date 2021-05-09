@@ -1,0 +1,63 @@
+(* This file is part of Dream, released under the MIT license. See LICENSE.md
+   for details, or visit https://github.com/aantron/dream.
+
+   Copyright 2021 Anton Bachin *)
+
+
+
+let html example =
+  let title_fragment, backlink =
+    match example with
+    | None -> "", ""
+    | Some example ->
+      let example = Dream.html_escape example in
+      let url =
+        Printf.sprintf
+          "https://github.com/aantron/dream/tree/master/example/%s#files"
+          example in
+      " — " ^ example,
+      Printf.sprintf
+        "<a target=\"_blank\" href=\"%s\">Docs for this example</a>" url
+  in
+
+<html>
+<head>
+
+<title>Dream Playground<%s title_fragment %></title>
+
+<meta
+  name="description"
+  content="Online playground for Dream, the Web framework">
+
+<script src="/static/codemirror.js"></script>
+<link rel="stylesheet" href="/static/codemirror.css">
+<link rel="stylesheet" href="/static/material.css">
+<script src="/static/mllike.js"></script>
+
+<link rel="stylesheet" href="/static/playground.css">
+
+</head>
+<body>
+
+<div id="editor">
+  <header>
+    <h1>
+      Dream Playground
+    </h1>
+    <button id="run">Run</button>
+    <%s! backlink %>
+  </header>
+  <div id="textarea"></div>
+  <pre id="log"></pre>
+</div>
+<div id="client">
+  <header>
+    <input id="location"></input>
+  </header>
+  <iframe title="Client connecting to the playground server"></iframe>
+</div>
+
+<script src="/static/playground.js"></script>
+
+</body>
+</html>

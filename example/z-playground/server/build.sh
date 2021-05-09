@@ -3,12 +3,13 @@
 set -e
 set -x
 
-sudo systemctl daemon-reload
-sudo systemctl stop playground
-sudo -H -u playground bash -c "cd /home/playground/playground/runtime && opam pin add -yn runtime ."
-sudo -H -u playground bash -c "cd /home/playground/playground/runtime && opam reinstall -y runtime"
-sudo -H -u playground bash -c "cd /home/playground/playground && npm run bundle"
-sudo -H -u playground bash -c "cd /home/playground/playground && opam exec -- dune build server/playground.exe"
-sudo cp /home/playground/playground/_build/default/server/playground.exe /usr/local/bin/playground
-sudo chown root:root /usr/local/bin/playground
-sudo systemctl start playground
+(cd runtime && opam pin add -yn runtime .)
+(cd runtime && opam reinstall -y runtime)
+mkdir -p static
+cp node_modules/codemirror/lib/codemirror.js static/
+cp node_modules/codemirror/lib/codemirror.css static/
+cp node_modules/codemirror/theme/material.css static/
+cp node_modules/codemirror/mode/mllike/mllike.js static/
+cp client/playground.css static/
+cp client/playground.js static/
+opam exec -- dune build server/playground.exe

@@ -1,4 +1,4 @@
 (executable
  (name playground)
- (libraries dream)
+ (libraries client dream)
  (preprocess (pps lwt_ppx)))
