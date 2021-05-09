@@ -107,6 +107,8 @@ if something is missing!
   assets into a self-contained server binary.
 - [**`w-fswatch`**](w-fswatch#files) &nbsp;&mdash;&nbsp; sets up a development
   watcher using fswatch.
+- [**`w-live-reload`**](w-live-reload#files) &nbsp;&mdash;&nbsp; a simple
+  live-reloading setup.
 - [**`w-tyxml`**](w-tyxml#files) &nbsp;&mdash;&nbsp; uses TyXML for type-checked
   HTML templating.
 - [**`w-long-polling`**](w-long-polling#files) &nbsp;&mdash;&nbsp; old form of
