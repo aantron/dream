@@ -1499,11 +1499,16 @@ val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
           user.name);
     ]} *)
 
-val graphiql : string -> handler
+val graphiql : ?default_query:string -> string -> handler
 (** Serves
     {{:https://github.com/graphql/graphiql/tree/main/packages/graphiql#readme}
     GraphiQL}, a GraphQL query editor. The string gives the GraphQL endpoint
     that the editor will work with.
+
+    [~default_query] sets the query that appears upon the first visit to the
+    endpoint. It is empty by default. The string is pasted literally into the
+    content of a JavaScript string, between its quotes, so it must be escaped
+    manually.
 
     Dream's build of GraphiQL is found in the
     {{:https://github.com/aantron/dream/tree/master/src/graphiql} src/graphiql}

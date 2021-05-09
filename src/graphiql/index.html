@@ -37,8 +37,13 @@
         subscriptionUrl: wsEndpoint
       });
 
+      var defaultQuery = "%%DEFAULT_QUERY%%";
+
       ReactDOM.render(
-        React.createElement(GraphiQL, {fetcher: fetcher}),
+        React.createElement(GraphiQL, {
+          fetcher: fetcher,
+          defaultQuery: defaultQuery
+        }),
         document.getElementById("graphiql"));
     </script>
   </body>

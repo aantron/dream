@@ -37,13 +37,16 @@ let schema =
           Lwt.return (Ok (count until)))
     ]
 
+let default_query =
+  "subscription {\\n  count(until: 3)\\n}\\n"
+
 let () =
   Dream.run
   @@ Dream.logger
   @@ Dream.origin_referer_check
   @@ Dream.router [
-    Dream.any "/graphql"  (Dream.graphql Lwt.return schema);
-    Dream.get "/" (Dream.graphiql "/graphql");
+    Dream.any "/graphql" (Dream.graphql Lwt.return schema);
+    Dream.get "/" (Dream.graphiql ~default_query "/graphql");
   ]
   @@ Dream.not_found
 ```

@@ -320,7 +320,7 @@ let graphql make_context schema = fun request ->
 
 
 
-let graphiql graphql_endpoint =
+let graphiql ?(default_query = "") graphql_endpoint =
   begin match String.index_opt graphql_endpoint '"' with
   | None -> ()
   | Some _ ->
@@ -336,6 +336,7 @@ let graphiql graphql_endpoint =
     lazy begin
       Dream__graphiql.content
       |> Str.(global_replace (regexp (quote "%%ENDPOINT%%")) graphql_endpoint)
+      |> Str.(global_replace (regexp (quote "%%DEFAULT_QUERY%%")) default_query)
     end
   in
 

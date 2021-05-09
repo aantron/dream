@@ -44,13 +44,16 @@ let schema =
           | Some user -> [user]);
   ])
 
+let default_query =
+  "{\\n  users {\\n    name\\n    id\\n  }\\n}\\n"
+
 let () =
   Dream.run
   @@ Dream.logger
   @@ Dream.origin_referer_check
   @@ Dream.router [
-    Dream.any "/graphql"  (Dream.graphql Lwt.return schema);
-    Dream.get "/" (Dream.graphiql "/graphql");
+    Dream.any "/graphql" (Dream.graphql Lwt.return schema);
+    Dream.get "/" (Dream.graphiql ~default_query "/graphql");
   ]
   @@ Dream.not_found
 ```
