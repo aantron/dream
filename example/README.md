@@ -1,7 +1,5 @@
 # Tutorial
 
-<!-- Link to tutorial getting started instructions. -->
-
 Dream's first several examples make up a **tutorial**. Each example is a
 complete project with a helpful README, and plenty of links to next steps and
 documentation. You can begin at [**`1-hello`**](1-hello#files), or look in the
@@ -139,17 +137,10 @@ These examples will be trickled in during the alpha releases.
 
 Ideas:
 
-- `w-auto-reload`
-- [**`w-fullstack-rescript`**](w-fullstack-rescript#files) &nbsp;&mdash;&nbsp;
-  done.
 - `w-index-html`
-- `w-one-binary`
-- `w-ppx-deriving`
 - `w-react-spa`
 - `w-subcommand`
 - `w-template-directory`
-- `w-tyxml` &nbsp;&mdash;&nbsp; for
-  [TyXML](https://github.com/ocsigen/tyxml/) templates.
 - `w-chat`
 - `w-fullstack-brr`
 
@@ -168,11 +159,7 @@ Basics:
 Security:
 
 - `w-auth`
-- `w-cookie-session` &nbsp;&mdash;&nbsp; for
-  [`Dream.cookie_sessions`](https://aantron.github.io/dream/#val-cookie_sessions).
 - `w-cors`
-- `w-sql-session` &nbsp;&mdash;&nbsp; for
-  [`Dream.sql_sessions`](https://aantron.github.io/dream/#val-sql_sessions).
 - `w-file-session`
 - `w-form-expired` &nbsp;&mdash;&nbsp; for other cases of
   [`Dream.form`](https://aantron.github.io/dream/#val-form).
@@ -192,26 +179,9 @@ Techniques:
 - `w-etag`
 - `w-graphql-sql`
 - `w-graphql-mutation`
-- `w-graphql-subscriptions`
 - `w-https-redirect`
-- [**`w-long-polling`**](w-long-polling#files) &nbsp;&mdash;&nbsp; done.
 - `w-postgres-docker`
-- [**`w-server-sent-events`**](w-server-sent-events#files) &nbsp;&mdash;&nbsp;
-  done.
 - `w-sql-stream`
-- [**`w-template-stream`**](w-template-stream#files) &nbsp;&mdash;&nbsp; done.
 - `w-websocket-stream`
-- `r-graphql`
 
-
-<!-- TODO Note that each example is fully self-contained... But also show an
-     example that uses crunch to be truly 1-file even with static content. -->
 <!-- TODO Show self-contained example with ppx_blob. -->
-<!-- TODO HTTP2 example is unnecessary - HTTP2 is transparent. -->
-<!-- TODO Insert sessions example before cookies example. It should be 7,
-     actually, before form, because form is based on CSRF which is based on
-     sessions. For now, it is in h-login. -->
-<!-- TODO Also need an example that demonstrates typed sessions and how trivial
-     they are. -->
-<!-- TODO Lwt/promise example. -->
-<!-- TODO Recommend empty responses -->
