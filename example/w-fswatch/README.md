@@ -37,6 +37,8 @@ fswatch -o client server -l 2
 
 **See also:**
 
+- [**`w-live-reload`**](../w-live-reload#files) adds live reloading, so that
+  browsers reload when the server is restarted.
 - [**`w-esy`**](../w-esy#files) discusses [esy](https://esy.sh/) packaging.
 
 
