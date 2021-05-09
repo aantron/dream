@@ -13,9 +13,6 @@ let (//) = Filename.concat
 
 let sandbox_root = "sandbox"
 
-let sandbox_dune_project = {|(lang dune 2.0)
-|}
-
 let sandbox_dune = {|(executable
  (name server)
  (libraries caqti caqti-driver-sqlite3 dream runtime tyxml)
@@ -47,21 +44,17 @@ let sandbox_dune_no_eml = {|(executable
 let base_dockerfile = {|FROM ubuntu:focal-20210416
 RUN apt update && apt install -y openssl libev4 libsqlite3-0
 WORKDIR /www
+RUN chmod -R 777 .
+USER 112:3000
 COPY db.sqlite db.sqlite
+ENTRYPOINT /www/server.exe
 |}
 
 let base_dockerignore = {|*
 !db.sqlite|}
 
 let sandbox_dockerfile = {|FROM base:base
-COPY _build/default/server.exe server.exe
-RUN chmod -R 777 .
-USER 112:3000
-ENTRYPOINT /www/server.exe
-|}
-
-let sandbox_dockerignore = {|_build/
-!_build/default/server.exe
+COPY server.exe server.exe
 |}
 
 let exec format =
@@ -133,29 +126,6 @@ let init_client socket content =
 
 let validate_id sandbox =
   String.length sandbox > 0 && Dream.from_base64url sandbox <> None
-
-let warm ?previous sandbox =
-  match%lwt Lwt_unix.file_exists (sandbox_root // sandbox // "_build") with
-  | true -> Lwt.return_unit
-  | false ->
-  let%lwt previous =
-    match previous with
-    | None -> Lwt.return_none
-    | Some previous ->
-      if%lwt Lwt_unix.file_exists (sandbox_root // previous // "_build") then
-        Lwt.return (Some previous)
-      else
-        Lwt.return_none
-  in
-  let copy_from =
-    match previous with
-    | Some previous -> previous
-    | None -> "ocaml"
-  in
-  let%lwt _status =
-    exec "cp -r %s %s"
-      (sandbox_root // copy_from // "_build") (sandbox_root // sandbox) in
-  Lwt.return_unit
 
 
 
@@ -235,47 +205,48 @@ let build_sandbox sandbox syntax eml =
     | `Reason, true -> sandbox_dune_re
   in
   write_file sandbox "dune" dune;%lwt
-  write_file sandbox "dune-project" sandbox_dune_project;%lwt
   begin
     if eml then
       Lwt.return_unit
     else
       write_file sandbox "no-eml" ""
   end;%lwt
-  let%lwt _status =
-    exec "cd %s && opam exec -- dune build --root . ./server.exe"
-      (sandbox_root // sandbox) in
   let process =
     Printf.sprintf
-      "cd %s && opam exec %s -- dune build --root . ./server.exe 2>&1"
-      (sandbox_root // sandbox) "--color=always"
+      "cd %s && opam exec %s -- dune build %s ./server.exe 2>&1"
+      (sandbox_root // sandbox) "--color=always" "--no-print-directory"
     |> Lwt_process.shell
     |> new Lwt_process.process_in in
   let%lwt output = Lwt_io.read process#stdout in
-  let%lwt status = process#close in
-  Lwt.return (output, status)
+  match%lwt process#close with
+  | Unix.WEXITED 0 ->
+    let%lwt _status =
+      exec
+        "cp ../../_build/default/example/z-playground/%s/server.exe %s"
+        (sandbox_root // sandbox) (sandbox_root // sandbox)
+    in
+    Lwt.return None
+  | _ ->
+    Lwt.return (Some output)
 
 let build session =
-  let%lwt output, status =
-    build_sandbox session.sandbox session.syntax session.eml in
-  Dream.info (fun log ->
-    log "Sandbox %s: sending build output" session.sandbox);
-  client_log session output;%lwt
-  match status with
-  | Unix.WEXITED 0 -> Lwt.return_true
-  | _ ->
-    let%lwt _status =
-      exec "touch %s" (sandbox_root // session.sandbox // "failed") in
+  match%lwt build_sandbox session.sandbox session.syntax session.eml with
+  | None ->
+    Dream.info (fun log -> log "Sandbox %s: build succeeded" session.sandbox);
+    Lwt.return_true
+  | Some output ->
+    Dream.info (fun log ->
+      log "Sandbox %s: sending build output" session.sandbox);
+    client_log session output;%lwt
     Lwt.return_false
 
 let image_exists sandbox =
-  match%lwt exec "docker image inspect sandbox:%s > /dev/null" sandbox with
+  match%lwt exec "docker image inspect sandbox:%s 2>&1 > /dev/null" sandbox with
   | Unix.WEXITED 0 -> Lwt.return_true
   | _ -> Lwt.return_false
 
 let image_sandbox sandbox =
   write_file sandbox "Dockerfile" sandbox_dockerfile;%lwt
-  write_file sandbox ".dockerignore" sandbox_dockerignore;%lwt
   let%lwt _status =
     exec "cd %s && docker build -t sandbox:%s . 2>&1"
       (sandbox_root // sandbox) sandbox in
@@ -388,10 +359,9 @@ let rec listen session =
 
     let%lwt current_code, _, _ = read session.sandbox in
     if code = current_code then
-      warm session.sandbox
+      Lwt.return_unit
     else begin
       let%lwt sandbox = create session.syntax session.eml code in
-      warm ~previous:session.sandbox sandbox;%lwt
       session.sandbox <- sandbox;
       Lwt.return_unit
     end;%lwt

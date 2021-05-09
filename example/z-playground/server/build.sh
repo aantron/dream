@@ -3,8 +3,6 @@
 set -e
 set -x
 
-(cd runtime && opam pin add -yn runtime .)
-(cd runtime && opam reinstall -y runtime)
 mkdir -p static
 cp node_modules/codemirror/lib/codemirror.js static/
 cp node_modules/codemirror/lib/codemirror.css static/

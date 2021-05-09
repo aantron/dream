@@ -1,5 +1,5 @@
 (library
- (public_name runtime)
+ (name runtime)
  (wrapped false))
 
 (rule

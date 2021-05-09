@@ -1,11 +1,18 @@
 #!/bin/bash
 
-HOST=$1
+set -e
+set -x
 
-rsync -v $HOST:playground/package-lock.json $HOST:playground/opam-switch .
-rsync -rlv . $HOST:playground
-rsync -v server/playground.service root@$HOST:/etc/systemd/system/
-ssh root@$HOST chmod a-x /etc/systemd/system/playground.service
+HOST=$1
+DIR=playground/example/z-playground
+
+rsync -v $HOST:$DIR/package-lock.json $HOST:$DIR/opam-switch . || true
+rsync -rlv --exclude node_modules \
+  ../../dream.opam ../../dune-project ../../src $HOST:playground
+ssh $HOST "mkdir -p $DIR"
+rsync -rlv . $HOST:$DIR
+
+set +x
 
 function example {
   EXAMPLE=$1
@@ -65,8 +72,13 @@ mv ./sync-temp/sandbox/r-tyxml/server.eml.re \
 
 cp ../h-sql/db.sqlite ./sync-temp/
 
-rsync -rlv ./sync-temp/* $HOST:playground
+set -x
+
+rsync -rlv ./sync-temp/* $HOST:$DIR
 rm -rf sync-temp
+ssh $HOST "touch playground/dune-workspace"
+
+set +x
 
 echo
 echo "If this is the first sync, run as playground@$HOST in ~/playground:"
