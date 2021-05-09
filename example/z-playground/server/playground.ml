@@ -44,9 +44,9 @@ let sandbox_dune_no_eml = {|(executable
 let base_dockerfile = {|FROM ubuntu:focal-20210416
 RUN apt update && apt install -y openssl libev4 libsqlite3-0
 WORKDIR /www
+COPY db.sqlite db.sqlite
 RUN chmod -R 777 .
 USER 112:3000
-COPY db.sqlite db.sqlite
 ENTRYPOINT /www/server.exe
 |}
 
@@ -214,6 +214,7 @@ let build_sandbox sandbox syntax eml =
     else
       write_file sandbox "no-eml" ""
   end;%lwt
+  let%lwt _status = exec "rm -f %s/server.exe" (sandbox_root // sandbox) in
   let process =
     Printf.sprintf
       "cd %s && opam exec %s -- dune build %s ./server.exe 2>&1"
