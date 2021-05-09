@@ -94,9 +94,12 @@ let rec create ?(attempts = 3) syntax eml code =
   | 0 -> failwith "Unable to create sandbox directory"
   | attempts ->
     let sandbox = Dream.random 9 |> Dream.to_base64url in
-    match%lwt exists sandbox with
-    | true -> create ~attempts:(attempts - 1) syntax eml code
-    | false -> create_named sandbox syntax eml code
+    match sandbox.[0] with
+    | '_' | '-' -> create ~attempts syntax eml code
+    | _ ->
+      match%lwt exists sandbox with
+      | true -> create ~attempts:(attempts - 1) syntax eml code
+      | false -> create_named sandbox syntax eml code
 
 let read sandbox =
   let%lwt no_eml_exists =
