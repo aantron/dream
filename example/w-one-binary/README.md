@@ -87,7 +87,7 @@ gives the source link and license information for the image.
 
 Copy the binary out for deployment with
 
-<pre><code><b>npx esy cp '#{self.target_dir}/default/one_binary.exe' .
+<pre><code><b>$ npx esy cp '#{self.target_dir}/default/one_binary.exe' .
 </b></code></pre>
 
 It will continue to serve the camel no matter where it is moved to! The
@@ -97,7 +97,7 @@ It will continue to serve the camel no matter where it is moved to! The
 
 If you'd like to inspect the generated `assets.ml` yourself, run
 
-<pre><code><b>npx esy less '#{self.target_dir}/default/assets.ml'
+<pre><code><b>$ npx esy less '#{self.target_dir}/default/assets.ml'
 </b></code></pre>
 
 To add more files, just add them to the `assets/` directory and re-run

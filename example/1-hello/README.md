@@ -31,7 +31,7 @@ Playground](http://dream.as/1-hello).
 
 If you'd like to copy out the server binary, you can do it like this:
 
-<pre><code><b>npx esy cp '#{self.target_dir}/default/hello.exe' .
+<pre><code><b>$ npx esy cp '#{self.target_dir}/default/hello.exe' .
 </b></code></pre>
 
 The name will change as you go through the tutorial examples. It's always the
