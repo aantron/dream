@@ -4,22 +4,15 @@
 
 <!-- TODO Add ppx_deriving example. -->
 
-JSON handling is a bit awkward in OCaml at the present time, and Dream will look
-into improving it in its first few releases. The example below shows manual
-JSON handling with [Yojson](https://github.com/ocaml-community/yojson#readme).
-It can also be greatly simplified with
-[ppx_yojson_conv](https://github.com/janestreet/ppx_yojson_conv#readme).
+In this example, we use
+[ppx_yojson_conv](https://github.com/janestreet/ppx_yojson_conv) to generate a
+converter between JSON and an OCaml data type. We then create a little server
+that listens for JSON of the right shape, and echoes back its `message` field:
 
 ```ocaml
-let to_json request =
-  match Dream.header "Content-Type" request with
-  | Some "application/json" ->
-    let%lwt body = Dream.body request in
-    begin match Yojson.Basic.from_string body with
-    | exception _ -> Lwt.return None
-    | json -> Lwt.return (Some json)
-    end
-  | _ -> Lwt.return None
+type message_object = {
+  message : string;
+} [@@deriving yojson]
 
 let () =
   Dream.run
@@ -29,35 +22,55 @@ let () =
 
     Dream.post "/"
       (fun request ->
-        match%lwt to_json request with
-        | None -> Dream.empty `Bad_Request
-        | Some json ->
+        let%lwt body = Dream.body request in
 
-          let maybe_message =
-            Yojson.Basic.Util.(member "message" json |> to_string_option) in
-          match maybe_message with
-          | None -> Dream.empty `Bad_Request
-          | Some message ->
+        let message_object =
+          body
+          |> Yojson.Safe.from_string
+          |> message_object_of_yojson
+        in
 
-            `String message
-            |> Yojson.Basic.to_string
-            |> Dream.json);
+        `String message_object.message
+        |> Yojson.Safe.to_string
+        |> Dream.json);
 
   ]
   @@ Dream.not_found
 ```
 
+To get this working, we have to add `ppx_yojson_conv` to our
+[`dune`](https://github.com/aantron/dream/blob/master/example/e-json/dune) file:
+
+<pre><code>(executable
+ (name json)
+ (libraries dream)
+ <b>(preprocess (pps lwt_ppx ppx_yojson_conv)))</b>
+</code></pre>
+
+and to
+[`esy.json`](https://github.com/aantron/dream/blob/master/example/e-json/esy.json):
+
+<pre><code>{
+"dependencies": {
+  "@opam/dream": "aantron/dream:dream.opam",
+  "@opam/dune": "^2.0",
+  <b>"@opam/ppx_yojson_conv": "*",</b>
+  "ocaml": "4.12.x"
+}
+</code></pre>
+
+The build commands, as always, are:
+
 <pre><code><b>$ cd example/e-json</b>
 <b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
 
-Try it in the [playground](http://dream.as/e-json).
+You can try this example in the [playground](http://dream.as/e-json).
 
 <br>
 
-This example expects JSON of the form `{"message": "some-message"}`, and echoes
-the message as a JSON string. Let's test it immediately with both curl and
-[HTTPie](https://httpie.io/):
+This example expects JSON of the form `{"message": "some-message"}`. Let's test
+it with both curl and [HTTPie](https://httpie.io/):
 
 <pre><b>$ curl http://localhost:8080 \
     -H "Origin: http://localhost:8080" \

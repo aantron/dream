@@ -2,6 +2,7 @@
   "dependencies": {
     "@opam/dream": "aantron/dream:dream.opam",
     "@opam/dune": "^2.0",
+    "@opam/ppx_yojson_conv": "*",
     "ocaml": "4.12.x"
   },
   "resolutions": {

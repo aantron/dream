@@ -1,12 +1,6 @@
-let to_json request =
-  match Dream.header "Content-Type" request with
-  | Some "application/json" ->
-    let%lwt body = Dream.body request in
-    begin match Yojson.Basic.from_string body with
-    | exception _ -> Lwt.return None
-    | json -> Lwt.return (Some json)
-    end
-  | _ -> Lwt.return None
+type message_object = {
+  message : string;
+} [@@deriving yojson]
 
 let () =
   Dream.run
@@ -16,19 +10,17 @@ let () =
 
     Dream.post "/"
       (fun request ->
-        match%lwt to_json request with
-        | None -> Dream.empty `Bad_Request
-        | Some json ->
+        let%lwt body = Dream.body request in
 
-          let maybe_message =
-            Yojson.Basic.Util.(member "message" json |> to_string_option) in
-          match maybe_message with
-          | None -> Dream.empty `Bad_Request
-          | Some message ->
+        let message_object =
+          body
+          |> Yojson.Safe.from_string
+          |> message_object_of_yojson
+        in
 
-            `String message
-            |> Yojson.Basic.to_string
-            |> Dream.json);
+        `String message_object.message
+        |> Yojson.Safe.to_string
+        |> Dream.json);
 
   ]
   @@ Dream.not_found

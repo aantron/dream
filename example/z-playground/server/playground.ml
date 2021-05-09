@@ -16,7 +16,7 @@ let sandbox_root = "sandbox"
 let sandbox_dune = {|(executable
  (name server)
  (libraries caqti caqti-driver-sqlite3 dream runtime tyxml)
- (preprocess (pps lwt_ppx)))
+ (preprocess (pps lwt_ppx ppx_yojson_conv)))
 
 (rule
  (targets server.ml)
@@ -27,7 +27,7 @@ let sandbox_dune = {|(executable
 let sandbox_dune_re = {|(executable
  (name server)
  (libraries caqti caqti-driver-sqlite3 dream runtime tyxml)
- (preprocess (pps lwt_ppx)))
+ (preprocess (pps lwt_ppx ppx_yojson_conv)))
 
 (rule
  (targets server.re)
@@ -38,7 +38,7 @@ let sandbox_dune_re = {|(executable
 let sandbox_dune_no_eml = {|(executable
  (name server)
  (libraries caqti caqti-driver-sqlite3 dream runtime tyxml)
- (preprocess (pps lwt_ppx tyxml-jsx tyxml-ppx)))
+ (preprocess (pps lwt_ppx ppx_yojson_conv tyxml-jsx tyxml-ppx)))
 |}
 
 let base_dockerfile = {|FROM ubuntu:focal-20210416
