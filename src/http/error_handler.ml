@@ -198,7 +198,8 @@ let default_template debug_dump response =
     and reason = Dream.status_to_string status in
     response
     |> Dream.with_header "Content-Type" Dream__pure.Formats.text_html
-    |> Dream.with_body (Fallback_template.render ~debug_dump ~code ~reason)
+    |> Dream.with_body
+      (Dream__middleware.Error_template.render ~debug_dump ~code ~reason)
     |> Lwt.return
 
 
