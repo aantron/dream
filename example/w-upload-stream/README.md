@@ -10,26 +10,26 @@ the total size of each uploaded file:
 ```ocaml
 let home request =
   <html>
-    <body>
-      <%s! Dream.form_tag ~action:"/" ~enctype:`Multipart_form_data request %>
-        <input name="files" type="file" multiple>
-        <button>Submit!</button>
-      </form>
-    </body>
+  <body>
+    <%s! Dream.form_tag ~action:"/" ~enctype:`Multipart_form_data request %>
+      <input name="files" type="file" multiple>
+      <button>Submit!</button>
+    </form>
+  </body>
   </html>
 
 let report files =
   <html>
-    <body>
-%     files |> List.iter begin fun (name, size) ->
-%       let name =
-%         match name with
-%         | None -> "None"
-%         | Some name -> name
-%       in
-        <p><%s name %>, <%i size %> bytes</p>
-%     end;
-    </body>
+  <body>
+%   files |> List.iter begin fun (name, size) ->
+%     let name =
+%       match name with
+%       | None -> "None"
+%       | Some name -> name
+%     in
+      <p><%s name %>, <%i size %> bytes</p>
+%   end;
+  </body>
   </html>
 
 let () =

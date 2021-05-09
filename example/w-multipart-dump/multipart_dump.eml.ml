@@ -1,12 +1,12 @@
 let home request =
   <html>
-    <body>
-      <%s! Dream.form_tag ~action:"/" ~enctype:`Multipart_form_data request %>
-        <input name="text"><br>
-        <input name="files" type="file" multiple><br>
-        <button>Submit!</button>
-      </form>
-    </body>
+  <body>
+    <%s! Dream.form_tag ~action:"/" ~enctype:`Multipart_form_data request %>
+      <input name="text"><br>
+      <input name="files" type="file" multiple><br>
+      <button>Submit!</button>
+    </form>
+  </body>
   </html>
 
 let () =

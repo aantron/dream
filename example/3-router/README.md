@@ -34,8 +34,8 @@ let () =
 
 This is also our first dynamic site! A request to `/echo/foo` gets the response
 `foo`, and a request to `/echo/bar` gets `bar`! Try it in the
-[playground](http://dream.as/3-router) &mdash; once the server loads, edit the
-URL in the right pane to visit `/echo/bar`.
+[playground](http://dream.as/3-router/echo/foo) &mdash; once the server loads,
+edit the URL in the right pane to visit `/echo/bar`.
 
 The syntax `:word` in a route creates a path parameter, which can be read with
 [`Dream.param`](https://aantron.github.io/dream/#val-param).

@@ -22,9 +22,9 @@ and response = outgoing message
 and handler = request -> response promise
 (** Handlers are asynchronous functions from requests to responses. Example
     {{:https://github.com/aantron/dream/tree/master/example/1-hello#files}
-    [1-hello]} shows the simplest handler, an anonymous function which we pass
-    to {!Dream.run}. This creates a complete Web server! You can also see the
-    Reason version in example
+    [1-hello]} \[{{:http://dream.as/1-hello} playground}\] shows the simplest
+    handler, an anonymous function which we pass to {!Dream.run}. This creates a
+    complete Web server! You can also see the Reason version in example
     {{:https://github.com/aantron/dream/tree/master/example/r-hello#files}
     [r-hello]}.
 
@@ -49,7 +49,7 @@ and middleware = handler -> handler
 
     Examples
     {{:https://github.com/aantron/dream/tree/master/example/4-counter#files}
-    [4-counter]} and
+    [4-counter]} \[{{:http://dream.as/4-counter} playground}\] and
     {{:https://github.com/aantron/dream/tree/master/example/5-promise#files}
     [5-promise]} show user-defined middlewares:
 
@@ -73,8 +73,8 @@ and route
 (** Routes tell {!Dream.router} which handler to select for each request. See
     {!section-routing} and example
     {{:https://github.com/aantron/dream/tree/master/example/3-router#files}
-    [3-router]}. Routes are created by helpers such as {!Dream.get} and
-    {!Dream.scope}:
+    [3-router]} \[{{:http://dream.as/3-router/echo/foo} playground}\]. Routes
+    are created by helpers such as {!Dream.get} and {!Dream.scope}:
 
     {[
       Dream.router [
@@ -121,7 +121,7 @@ and 'a promise = 'a Lwt.t
 (** Dream uses {{:https://github.com/ocsigen/lwt} Lwt} for promises and
     asynchronous I/O. See example
     {{:https://github.com/aantron/dream/tree/master/example/5-promise#files}
-    [5-promise]}.
+    [5-promise]} \[{{:http://dream.as/5-promise} playground}\].
 
     Use [raise] to reject promises. If you are writing a library, you may prefer
     using
@@ -518,7 +518,7 @@ val with_header : string -> string -> 'a message -> 'a message
     secure cookies. The most secure settings applicable to the current server
     are inferred automatically. See example
     {{:https://github.com/aantron/dream/tree/master/example/c-cookie#files}
-    [c-cookie]}.
+    [c-cookie]} \[{{:http://dream.as/c-cookie} playground}\].
 
     {[
       Dream.set_cookie "my.cookie" "foo" request response
@@ -782,7 +782,7 @@ val origin_referer_check : middleware
 
     See example
     {{:https://github.com/aantron/dream/tree/master/example/d-form#files}
-    [d-form]}. *)
+    [d-form]} \[{{:http://dream.as/d-form} playground}\]. *)
 
 type 'a form_result = [
   | `Ok            of 'a
@@ -860,7 +860,7 @@ type multipart_form =
 <input name="text">
     v}
 
-    is submitted with a text value and two files, it will be received by
+    is submitted with two files and a text value, it will be received by
     {!Dream.multipart} as
 
     {[
@@ -876,12 +876,8 @@ type multipart_form =
     ]}
 
     See example
-    {{:https://github.com/aantron/dream/tree/master/example/w-multipart-dump#files}
-    [w-multipart-dump]} for just such a form, and to inspect the data that is
-    sent by it. Example
     {{:https://github.com/aantron/dream/tree/master/example/g-upload#files}
-    [g-upload]} actually loads the data into a value of type
-    {!type-multipart_form}.
+    [g-upload]} \[{{:http://dream.as/g-upload} playground}\].
 
     Note that clients such as curl can send files with no filename ([None]),
     though most browsers seem to insert at least an empty filename ([Some ""]).
@@ -1014,18 +1010,19 @@ let render message =
 
     See examples
     {{:https://github.com/aantron/dream/tree/master/example/7-template#files}
-    [7-template]} and
+    [7-template]} \[{{:http://dream.as/7-template} playground}\] and
     {{:https://github.com/aantron/dream/tree/master/example/r-template#files}
-    [r-template]}.
+    [r-template]} \[{{:http://dream.as/r-template} playground}\].
 
     There is also a typed alternative, provided by an external library,
     {{:https://github.com/ocsigen/tyxml} TyXML}. It is shown in example
     {{:https://github.com/aantron/dream/tree/master/example/w-tyxml#files}
-    [w-tyxml]}. If you are using Reason syntax, TyXML can be used with
+    [w-tyxml]} \[{{:http://dream.as/w-tyxml} playground}\]. If you are using
+    Reason syntax, TyXML can be used with
     {{:https://ocsigen.org/tyxml/latest/manual/jsx} server-side JSX}. See
     example
     {{:https://github.com/aantron/dream/tree/master/example/r-tyxml#files}
-    [r-tyxml]}.
+    [r-tyxml]} \[{{:http://dream.as/r-tyxml} playground}\].
 
     To use the built-in templates, add this to [dune]:
 
@@ -1080,14 +1077,7 @@ let render message =
     the result of [code] literally. {!Dream.html_escape} is only safe for use in
     HTML text and quoted attribute values. It does not offer XSS protection in
     unquoted attribute values, CSS in [<style>] tags, or literal JavaScript in
-    [<script>] tags.
-
-    The preprocessor will output Reason code if the template source file's
-    extension is [.re], for example [template.eml.re]. See examples
-    {{:https://github.com/aantron/dream/tree/master/example/r-template#files}
-    [r-template]} and
-    {{:https://github.com/aantron/dream/tree/master/example/r-template-stream#files}
-    [r-template-stream]}. *)
+    [<script>] tags. *)
 
 val form_tag :
   ?enctype:[ `Multipart_form_data ] ->
@@ -1153,7 +1143,7 @@ val router : route list -> middleware
     components starting with [:] are parameters, which can be retrieved with
     {!Dream.param}. See example
     {{:https://github.com/aantron/dream/tree/master/example/3-router#files}
-    [3-router]}.
+    [3-router]} \[{{:http://dream.as/3-router} playground}\].
 
     {[
       let () =
@@ -1346,7 +1336,7 @@ val mime_lookup : string -> (string * string) list
 
     See example
     {{:https://github.com/aantron/dream/tree/master/example/b-session#files}
-    [b-session]}. *)
+    [b-session]} \[{{:http://dream.as/b-session} playground}\]. *)
 
 val session : string -> request -> string option
 (** Value from the request's session. *)
@@ -1413,7 +1403,7 @@ val websocket :
     returned to Dream's HTTP layer, the callback is passed a new
     {!type-websocket}, and the application can begin using it. See example
     {{:https://github.com/aantron/dream/tree/master/example/k-websocket#files}
-    [k-websocket]}.
+    [k-websocket]} \[{{:http://dream.as/k-websocket} playground}\].
 
     {[
       let my_handler = fun request ->
@@ -1449,11 +1439,15 @@ val close_websocket : ?code:int -> websocket -> unit promise
 (** {1 GraphQL}
 
     Dream integrates {{:https://github.com/andreas/ocaml-graphql-server#readme}
-    ocaml-graphql-server}. See examples
-    {{:https://github.com/aantron/dream/tree/master/example/i-graphql#files}
-    [i-graphql]} and
-    {{:https://github.com/aantron/dream/tree/master/example/w-graphql-subscription#files}
-    [w-graphql-subscription]}.
+    ocaml-graphql-server}. See examples:
+
+    - {{:https://github.com/aantron/dream/tree/master/example/i-graphql#files}
+      [i-graphql]} \[{{:http://dream.as/i-graphql} playground}\]
+    - {{:https://github.com/aantron/dream/tree/master/example/r-graphql#files}
+      [r-graphql]} \[{{:http://dream.as/r-graphql} playground}\]
+    - {{:https://github.com/aantron/dream/tree/master/example/w-graphql-subscription#files}
+      [w-graphql-subscription]} \[{{:http://dream.as/w-graphql-subscription}
+      playground}\].
 
     If you are also
     {{:https://github.com/aantron/dream/tree/master/example#full-stack} writing
@@ -1526,7 +1520,7 @@ val graphiql : ?default_query:string -> string -> handler
     {{:https://github.com/paurkedal/ocaml-caqti/#readme} Caqti}, an SQL
     interface with several back ends. See example
     {{:https://github.com/aantron/dream/tree/master/example/h-sql#files}
-    [h-sql]}.
+    [h-sql]} \[{{:http://dream.as/h-sql} playground}\].
 
     Dream installs the core {{:https://opam.ocaml.org/packages/caqti/} [caqti]}
     package, but you should also install at least one of:
@@ -1588,7 +1582,7 @@ val sql : request -> (Caqti_lwt.connection -> 'a promise) -> 'a promise
 val logger : middleware
 (** Logs and times requests. Time spent logging is included. See example
     {{:https://github.com/aantron/dream/tree/master/example/2-middleware#files}
-    [2-middleware]}. *)
+    [2-middleware]} \[{{:http://dream.as/2-middleware} playground}\]. *)
 
 val log : ('a, Format.formatter, unit, unit) format4 -> 'a
 (** Formats a message and logs it. Disregard the obfuscated type: the first
@@ -1599,7 +1593,7 @@ val log : ('a, Format.formatter, unit, unit) format4 -> 'a
     [Format]}. The rest of the arguments are determined by the format string.
     See example
     {{:https://github.com/aantron/dream/tree/master/example/a-log#files}
-    [a-log]}.
+    [a-log]} \[{{:http://dream.as/a-log} playground}\].
 
     {[
       Dream.log "Counter is now: %i" counter;
@@ -1853,7 +1847,7 @@ val error_template :
   (string option -> response -> response promise) -> error_handler
 (** Builds an {!error_handler} from a template. See example
     {{:https://github.com/aantron/dream/tree/master/example/9-error#files}
-    [9-error]}.
+    [9-error]} \[{{:http://dream.as/9-error} playground}\].
 
     {[
       let my_error_handler =
@@ -1930,11 +1924,11 @@ val run :
       {!Dream.error_template}. The default is [false], to prevent accidental
       deployment with debug output turned on. See example
       {{:https://github.com/aantron/dream/tree/master/example/8-debug#files}
-      [8-debug]}.
+      [8-debug]} \[{{:http://dream.as/8-debug} playground}\].
     - [~error_handler] handles all errors, both from the application, and
       low-level errors. See {!section-errors} and example
       {{:https://github.com/aantron/dream/tree/master/example/9-error#files}
-      [9-error]}.
+      [9-error]} \[{{:http://dream.as/9-error} playground}\].
     - [~secret] is a key to be used for cryptographic operations, such as
       signing CSRF tokens. By default, a random secret is generated on each call
       to {!Dream.run}. For production, generate a 256-bit key with
