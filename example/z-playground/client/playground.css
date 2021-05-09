@@ -104,18 +104,22 @@ button:hover {
 
 #client header {
   height: 63px;
+  background-color: #eee;
+  box-sizing: border-box;
+  border-bottom: 1px solid #ccc;
 }
 
 #client input {
   display: inline-block;
-  width: 100%;
+  width: calc(100% - 10px);
   background: none;
-  color: inherit;
+  color: initial;
   font: inherit;
   border: none;
-  padding: 0;
-  padding-top: 28px;
-  padding-left: 10px;
+  padding: 0 5px;
+  margin-top: 28px;
+  margin-left: 5px;
+  border: 1px solid #aaa;
 }
 
 #client input:focus {

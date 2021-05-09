@@ -20,16 +20,16 @@ let add_comment =
 
 let render comments request =
   <html>
-    <body>
+  <body>
 
-%     comments |> List.iter (fun (_id, comment) ->
-        <p><%s comment %></p><% ); %>
+%   comments |> List.iter (fun (_id, comment) ->
+      <p><%s comment %></p><% ); %>
 
-      <%s! Dream.form_tag ~action:"/" request %>
-        <input name="text">
-      </form>
+    <%s! Dream.form_tag ~action:"/" request %>
+      <input name="text" autofocus>
+    </form>
 
-    </body>
+  </body>
   </html>
 
 let () =
