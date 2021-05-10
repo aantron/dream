@@ -10,9 +10,14 @@ Easy-to-use, feature-complete Web framework without boilerplate.
 <img src="https://raw.githubusercontent.com/aantron/dream/master/docs/asset/sample.png"></img>
 </p>
 
-<br>
-
-<pre align="center"><b>bash -c "$(curl -fsSL https://raw.githubusercontent.com/aantron/dream/master/example/quickstart.sh)"</b></pre>
+<p align="center">
+  <a href="#quick-start">Quick Start</a> |
+  <a href="http://dream.as">Playground</a> |
+  <a href="https://github.com/aantron/dream/tree/master/example#readme">
+    Tutorial</a> |
+  <a href="https://aantron.github.io/dream/">Reference</a>
+  &nbsp;&nbsp;
+</p>
 
 <br>
 <br>
@@ -29,7 +34,7 @@ Dream is **one flat module** in **one package**, documented on
   proxy.
 - Helpers for [**secure cookies**][cookies] and
   [**CSRF-safe forms**][forms].
-- **Full-stack ML** with clients by [**Melange**][melange],
+- **Full-stack ML** with clients compiled by [**Melange**][melange],
   [**ReScript**][rescript], or [**js_of_ocaml**][jsoo].
 
 <br>
@@ -42,6 +47,8 @@ Dream is **one flat module** in **one package**, documented on
 - [**Cryptography**][crypto] helpers, key rotation, and a chosen cipher.
 - A neat [**logger**][logging], and attention to configuring the OCaml runtime
   nicely.
+- [**Deployment**][deploy] instructions for **Digital Ocean** and **Heroku**,
+  with sample CI scripts.
 
 <br>
 
@@ -51,19 +58,25 @@ few [types][types] of its own &mdash; and some of those are just abbreviations
 for bare functions!
 
 The neat interface is not a limitation. Everything is still configurable by a
-large number of optional arguments. Where necessary, Dream exposes the
-lower-level machinery that it is composed from. For example, the basic body and
-WebSocket readers return strings, but you can also do [zero-copy
-streaming][streaming].
+large number of optional arguments, and very loose coupling. Where necessary,
+Dream exposes the lower-level machinery that it is composed from. For example,
+the basic body and WebSocket readers [return strings][basic-read], but you can
+also do [zero-copy streaming][streaming].
 
 You can even run Dream as a [quite bare abstraction][raw] over its [underlying
 set of HTTP libraries][vendor], where it acts only as minimal glue code between
-their slightly different interfaces, and takes care of horridness like
-[ALPN][alpn].
+their slightly different interfaces.
 
 And, even though Dream is presented as one package for ordinary usage, it is
 internally factored into [several sub-libraries][libs], according to the
 different dependencies of each, for fast porting to different environments.
+
+Dream is a low-level and unopinionated framework, and you can swap out its
+conveniences. For example, you can use TyXML with [server-side JSX][jsx]
+instead of Dream's built-in templates. You can bundle assets into a [single
+Dream binary][one-binary], or use Dream in a subcommand. Dream tries to be as
+functional as possible, touching global runtime state only lazily, when called
+into.
 
 [https]: https://github.com/aantron/dream/tree/master/example/l-https#files
 [websocket]: https://github.com/aantron/dream/tree/master/example/k-websocket#files
@@ -84,37 +97,37 @@ different dependencies of each, for fast porting to different environments.
 [rescript]: https://github.com/aantron/dream/tree/master/example/w-fullstack-rescript#files
 [jsoo]: https://github.com/aantron/dream/tree/master/example/w-fullstack-jsoo#files
 [types]: https://aantron.github.io/dream/#types
+[basic-read]: https://aantron.github.io/dream/#val-body
 [streaming]: https://aantron.github.io/dream/#streaming
 [raw]: https://aantron.github.io/dream/#builtin
 [alpn]: https://en.wikipedia.org/wiki/Application-Layer_Protocol_Negotiation
 [libs]: https://github.com/aantron/dream/tree/master/src
+[deploy]: https://github.com/aantron/dream/tree/master/example#deploying
+[jsx]: https://github.com/aantron/dream/tree/master/example/r-tyxml#files
+[one-binary]: https://github.com/aantron/dream/tree/master/example/w-one-binary#files
 
 <br>
 
 ## Quick start
 
-```
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/aantron/dream/master/example/quickstart.sh)"
-```
+<pre><b>bash -c "$(curl -fsSL https://raw.githubusercontent.com/aantron/dream/master/example/quickstart.sh)"</b></pre>
 
-This [script][quickstart.sh] does a sandboxed build of one of the first
-[tutorials][tutorial], [**`2-middleware`**][2-middleware], which you can then
-edit.
-
-It's mostly the same as:
+This downloads and runs [`quickstart.sh`][quickstart.sh], which does a
+sandboxed build of one of the first [tutorials][tutorial],
+[**`2-middleware`**][2-middleware]. It's mostly the same as:
 
 ```
-git clone https://github.com/aantron/dream.git
+git clone https://github.com/aantron/dream.git --recursive
 cd dream/example/2-middleware
 npm install esy && npx esy
 npx esy start
 ```
 
 Knowing that, you can start from any other [example][tutorial]. All of them
-include their own build commands. You can copy them out to start your own
-project directory. Especially consider starting with the
-[full-stack examples][fullstack], which build both a Dream server and a
-JavaScript client.
+include their own build commands. They don't have to be subdirectories of
+`dream` &mdash; you can copy them out to start your own project directory.
+Especially consider starting with the [full-stack examples][fullstack], which
+build both a Dream server and a JavaScript client.
 
 ### opam
 
@@ -130,10 +143,18 @@ cd example/1-hello
 dune exec --root . ./hello.exe
 ```
 
+### Playground
+
+Most of the examples are loaded into the [playground][playground]. For instance,
+[**`2-middleware`**][2-middleware] is at
+[http://dream.as/2-middleware][2-middleware-playground].
+
 [esy-example]: https://github.com/aantron/dream/tree/master/example/w-esy#files
 [quickstart.sh]: https://github.com/aantron/dream/blob/master/example/quickstart.sh
 [esy]: https://esy.sh/
 [2-middleware]: https://github.com/aantron/dream/tree/master/example/2-middleware#files
+[playground]: http://dream.as
+[2-middleware-playground]: http://dream.as/2-middleware
 
 <br>
 
@@ -152,6 +173,7 @@ dune exec --root . ./hello.exe
   small-to-medium deployments.
 - [**Examples**][examples] &mdash; These cover various HTTP scenarios.
 - [**API reference**][api-main]
+- [Watching][fswatch] and [live reloading][reload].
 
 [tutorial]: https://github.com/aantron/dream/tree/master/example#readme
 [examples]: https://github.com/aantron/dream/tree/master/example#examples
@@ -161,8 +183,8 @@ dune exec --root . ./hello.exe
 [deploying]: https://github.com/aantron/dream/tree/master/example#deploying
 [api-main]: https://aantron.github.io/dream/#types
 [fullstack]: https://github.com/aantron/dream/tree/master/example#full-stack
-
-<!-- TODO LATER CI badges, opam link badge, npm badge. -->
+[fswatch]: https://github.com/aantron/dream/tree/master/example/w-fswatch#files
+[reload]: https://github.com/aantron/dream/tree/master/example/w-live-reload#files
 
 <br>
 
@@ -171,7 +193,7 @@ dune exec --root . ./hello.exe
 Apart from the [issues](https://github.com/aantron/dream/issues), good places
 to discuss Dream are...
 
-- The [OCaml](https://discord.gg/DyhPFYGr) and/or
+- The [OCaml](https://discord.gg/DyhPFYGr) and
   [Reason](https://discord.gg/YCTDuzbg) Discord servers.
 - The [OCaml Discuss forum](https://discuss.ocaml.org/).
 
@@ -185,13 +207,11 @@ All kinds of contributions are welcome, including examples, links to blogs,
 related libraries, and, of course, PRs! See [CONTRIBUTING.md][contributing.md].
 
 As an immediate note, if you'd like to clone the repo, be sure to use
+`--recursive`, because Dream uses several git [submodules][vendor]:
 
 ```
 git clone https://github.com/aantron/dream.git --recursive
 ```
-
-The `--recursive` flag is necessary because Dream uses several git
-[submodules][vendor].
 
 [contributing.md]: https://github.com/aantron/dream/blob/master/docs/CONTRIBUTING.md
 
@@ -234,48 +254,3 @@ several influences that cannot be discovered directly:
 [seliopou]: https://github.com/seliopou
 [persianturtle]: https://github.com/persianturtle
 [foocraft]: https://github.com/foocraft
-
-<br>
-
-## Roadmap
-
-- [x] GraphQL subscriptions.
-- [ ] Optimizations: router, logger, microparsers (form data, etc.), fully
-      zero-allocation streaming.
-- [ ] WebSocket and stream backpressure.
-- [ ] HTTP3/QUIC.
-- [ ] Review JSON.
-- [ ] Review SQL prepared statements.
-- [ ] Switch to AEAD_AES_256_GCM_SIV for the cipher.
-- [ ] WebSocket streaming (frames).
-- [ ] Factor out internal sub-libraries to port Dream to MirageOS, etc.
-- [ ] Token rotation-based session management.
-- [ ] Lots of optionals for decoupling defaults, e.g. forms without CSRF
-      checking, SQL sessions with a different database.
-- [x] Bundle GraphiQL into a single HTML file that does not access any external
-      CDN.
-- [ ] Maybe a logo.
-- [ ] i18n helper, URL templates.
-- [ ] Auth library.
-- [ ] Maybe REST helpers.
-- [ ] Maybe Async support.
-- [ ] Multicore.
-- [ ] Effects.
-- [ ] Proxy headers support.
-- [ ] Introspection.
-- [ ] Dependency reduction, especially system dependencies.
-- [ ] And *lots*, *lots* more.
-
-
-
-<!-- Example install: how to install opam, how to install deps, add to Makefile
-     targets. -->
-<!-- hyperlink localhost in examples -->
-<!-- ld: /opt/local/libn ot found on mac -->
-<!-- Path parsing of # $ in targets -->
-<!-- update code in exampels -->
-<!-- Reason example -->
-<!-- Reason mode in docs -->
-<!-- examples: are exceptions isolated? yes -->
-<!-- Ctrl+C needed to get out of error page caues of no content-legnth -->
-<!-- esy workflow -->
