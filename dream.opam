@@ -66,7 +66,6 @@ depends: [
   "magic-mime"
   "mirage-crypto" {>= "0.8.1"}  # AES-256-GCM.
   "mirage-crypto-rng" {>= "0.8.0"}  # Signature of initialize.
-  "multipart_form"
   "ocaml" {>= "4.08.0"}
   "uri" {>= "4.2.0"}
   "yojson"  # ...
@@ -79,6 +78,7 @@ depends: [
   # "h2"
   # "h2-lwt-unix"
   # "hpack"
+  # "multipart_form"
   # "websocketaf"
 
   # Dependencies of vendored packages.
@@ -87,8 +87,15 @@ depends: [
   "digestif" {>= "0.7"}  # websocket/af, sha1.
   "faraday" {>= "0.6.1"}
   "faraday-lwt-unix"
+  "ke"  # multipart_form.
+  "pecu"  # multipart_form.
+  "prettym"  # multipart_form.
   "psq"  # h2.
-  "result"  # http/af, websocket/af.
+  "result"  # http/af, websocket/af, multipart_form
+  "rresult"  # multipart_form.
+  "stdlib-shims"  # multipart_form.
+  "unstrctrd"  # multipart_form.
+  "uutf"  # multipart_form.
 
   # Testing, development.
   "alcotest" {with-test}
@@ -102,10 +109,6 @@ depends: [
   "tyxml" {with-test & >= "4.5.0"}
   "tyxml-jsx" {with-test & >= "4.5.0"}
   "tyxml-ppx" {with-test & >= "4.5.0"}
-]
-
-pin-depends: [
-  ["multipart_form.git" "git+https://github.com/dinosaure/multipart_form#8f5b6cb77af1a385155b0aeac40437dba6e56577"]
 ]
 
 build: [
