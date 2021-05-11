@@ -383,12 +383,28 @@ let logger next_handler request =
         else ""
       in
 
-      let elapsed = Unix.gettimeofday () -. start in
+      let status = Dream.status response in
 
-      log.info (fun log -> log ~request "%i%s in %.0f μs"
-        (Dream.status_to_int (Dream.status response))
-        location
-        (elapsed *. 1e6));
+      let report :
+        (?request:Dream.request ->
+          ('a, Format.formatter, unit, 'b) format4 -> 'a) -> 'b =
+          fun log ->
+        let elapsed = Unix.gettimeofday () -. start in
+        log ~request "%i%s in %.0f μs"
+          (Dream.status_to_int status)
+          location
+          (elapsed *. 1e6)
+      in
+
+      begin
+        if Dream.is_server_error status then
+          log.error report
+        else
+          if Dream.is_client_error status then
+            log.warning report
+          else
+            log.info report
+      end;
 
       Lwt.return response)
 
