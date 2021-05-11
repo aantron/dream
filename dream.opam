@@ -98,8 +98,8 @@ depends: [
   "uutf"  # multipart_form.
 
   # https://github.com/ocaml-ppx/ppxlib/issues/221.
-  # Not using conflict with | because esy seems to ignore it.
-  "ppxlib" {< "0.21.0"}
+  # esy appears to ignore conflicts.
+  "ppxlib" {< "0.21.0" | > "0.22.0"}
 
   # Testing, development.
   "alcotest" {with-test}

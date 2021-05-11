@@ -3,8 +3,14 @@
 set -e
 
 EXAMPLE=2-middleware
-REF=master
 REPO=https://github.com/aantron/dream
+if [ "$1" == "" ]
+then
+  REF=master
+else
+  REF=$1
+  echo Using ref $REF
+fi
 
 echo
 echo -e "\e[0m✅ Creating example directory ./$EXAMPLE\e[0m 📁"
