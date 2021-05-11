@@ -192,6 +192,28 @@ Most of the examples are loaded into the [playground][playground]. For instance,
 
 <br>
 
+## Community projects
+
+Here are some community projects that you can use for your Dream applications:
+
+- [`dream-livereload`](https://github.com/tmattio/dream-livereload) - Live reloading for Dream applications.
+- [`dream-cli`](https://github.com/tmattio/dream-cli) - Command Line Interface for Dream applications.
+
+<br>
+
+## Contact
+
+Apart from the [issues](https://github.com/aantron/dream/issues), good places
+to discuss Dream are...
+
+- The [OCaml](https://discord.gg/DyhPFYGr) and
+  [Reason](https://discord.gg/YCTDuzbg) Discord servers.
+- The [OCaml Discuss forum](https://discuss.ocaml.org/).
+
+Highlight `@antron` to poke @aantron specifically.
+
+<br>
+
 ## Contributing
 
 All kinds of contributions are welcome, including examples, links to blogs,
