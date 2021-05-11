@@ -14,12 +14,21 @@ rsync -rlv . $HOST:$DIR
 
 set +x
 
+mkdir -p ./sync-temp/runtime
+echo "let list = [" > ./sync-temp/runtime/examples.ml
+
+function index_example {
+  EXAMPLE=$1
+  echo "  \"$EXAMPLE\";" >> ./sync-temp/runtime/examples.ml
+}
+
 function example {
   EXAMPLE=$1
   mkdir -p ./sync-temp/sandbox/$1
   cat ../$1/*.ml | sed 's/Dream\.run/Dream\.run ~interface:"0.0.0.0"/g' \
     > ./sync-temp/sandbox/$1/server.eml.ml
   touch ./sync-temp/sandbox/$1/keep
+  index_example $EXAMPLE
 }
 example 1-hello
 example 2-middleware
@@ -60,6 +69,7 @@ function example_re {
     | sed 's/Dream\.run$/Dream\.run(~interface="0.0.0.0")/g' \
     > ./sync-temp/sandbox/$1/server.eml.re
   touch ./sync-temp/sandbox/$1/keep
+  index_example $EXAMPLE
 }
 example_re r-hello
 example_re r-template
@@ -69,6 +79,8 @@ example_re r-tyxml
 touch ./sync-temp/sandbox/r-tyxml/no-eml
 mv ./sync-temp/sandbox/r-tyxml/server.eml.re \
   ./sync-temp/sandbox/r-tyxml/server.re
+
+echo "]" >> ./sync-temp/runtime/examples.ml
 
 cp ../h-sql/db.sqlite ./sync-temp/
 

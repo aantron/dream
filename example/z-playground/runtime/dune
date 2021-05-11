@@ -1,6 +1,7 @@
 (library
  (name runtime)
- (wrapped false))
+ (wrapped false)
+ (libraries dream))
 
 (rule
  (targets playground.ml)
