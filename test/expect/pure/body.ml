@@ -56,7 +56,7 @@ let bigstring_stream chunks =
       Dream.close_stream response
     | chunk::more ->
       chunks := more;
-      let%lwt () = Dream.write_bigstring response (Lwt_bytes.of_string chunk) in
+      let%lwt () = Dream.write_buffer response (Lwt_bytes.of_string chunk) in
       push ()
   in
   Lwt.async push;
@@ -151,7 +151,7 @@ let next message =
   let until_done, signal_done = Lwt.wait () in
   let rec next accumulator =
     Dream__pure.Inmost.next
-      ~bigstring:(fun data start length ->
+      ~buffer:(fun data start length ->
         next
           ((Lwt_bytes.to_string
             (Lwt_bytes.proxy data start length))::accumulator))

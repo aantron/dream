@@ -14,8 +14,8 @@ end
 include Dream__pure.Inmost
 
 (* Eliminate optional arguments from the public interface for now. *)
-let next ~bigstring ~close ~exn request =
-  next ~bigstring ~close ~exn request
+let next ~buffer ~close ~exn request =
+  next ~buffer ~close ~exn request
 
 include Dream__middleware.Log
 include Dream__middleware.Echo

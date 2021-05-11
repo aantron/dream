@@ -8,7 +8,7 @@
 include Method
 include Status
 
-type bigstring = Body.bigstring
+type buffer = Body.bigstring
 
 (* Used for converting the stream interface of [multipart_form] into the pull
    interface of Dream.
@@ -257,11 +257,8 @@ let body message =
 let read message =
   Body.read message.body
 
-let next ~bigstring ?string ?flush ~close ~exn message =
-  Body.next ~bigstring ?string ?flush ~close ~exn message.body
-
-(* let body_stream_bigstring data eof message =
-  Body.body_stream_bigstring data eof message.body *)
+let next ~buffer ?string ?flush ~close ~exn message =
+  Body.next ~bigstring:buffer ?string ?flush ~close ~exn message.body
 
 (* Create a fresh ref. The reason this field has a ref is because it might get
    replaced when a body is forced read. That's not what's happening here - we
@@ -285,7 +282,7 @@ let with_stream message =
 let write message chunk =
   Body.write chunk message.body
 
-let write_bigstring ?(offset = 0) ?length message chunk =
+let write_buffer ?(offset = 0) ?length message chunk =
   let length =
     match length with
     | Some length -> length
@@ -298,9 +295,6 @@ let flush message =
 
 let close_stream message =
   Body.close_stream message.body
-
-(* let with_body_stream_bigstring stream message =
-  update {message with body = ref (`Bigstring_stream stream)} *)
 
 let has_body message =
   Body.has_body message.body

@@ -23,21 +23,21 @@ let address_to_string : Unix.sockaddr -> string = function
 let forward_body_general
     (response : Dream.response)
     (write_string : ?off:int -> ?len:int -> string -> unit)
-    (write_bigstring : ?off:int -> ?len:int -> Dream.bigstring -> unit)
+    (write_buffer : ?off:int -> ?len:int -> Dream.buffer -> unit)
     http_flush
     close =
 
   let rec send () =
     response
     |> Dream.next
-      ~bigstring
+      ~buffer
       ~string
       ~flush
       ~close
       ~exn:ignore
 
-  and bigstring chunk off len =
-    write_bigstring ~off ~len chunk;
+  and buffer chunk off len =
+    write_buffer ~off ~len chunk;
     send ()
 
   and string chunk off len =

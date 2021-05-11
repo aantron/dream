@@ -665,27 +665,27 @@ let cookie_replacement = {|
 </pre>
 |}
 
-let bigstring_expected = {|<div class="spec type" id="type-bigstring">
- <a href="#type-bigstring" class="anchor"></a><code><span><span class="keyword">type</span> bigstring</span><span> = <span><span>(char,&nbsp;<span class="xref-unresolved">Stdlib</span>.Bigarray.int8_unsigned_elt,&nbsp;<span class="xref-unresolved">Stdlib</span>.Bigarray.c_layout)</span> <span class="xref-unresolved">Stdlib</span>.Bigarray.Array1.t</span></span></code>
+let bigstring_expected = {|<div class="spec type" id="type-buffer">
+ <a href="#type-buffer" class="anchor"></a><code><span><span class="keyword">type</span> buffer</span><span> = <span><span>(char,&nbsp;<span class="xref-unresolved">Stdlib</span>.Bigarray.int8_unsigned_elt,&nbsp;<span class="xref-unresolved">Stdlib</span>.Bigarray.c_layout)</span> <span class="xref-unresolved">Stdlib</span>.Bigarray.Array1.t</span></span></code>
 </div>
 |}
 
 let bigstring_replacement = {|
-<pre><span class="keyword">type</span> bigstring =
+<pre><span class="keyword">type</span> buffer =
   (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout)
     Bigarray.Array1.t
 </pre>
 |}
 
 let next_expected = {|<div class="spec value" id="val-next">
- <a href="#val-next" class="anchor"></a><code><span><span class="keyword">val</span> next : <span>bigstring:<span>(<span><a href="#type-bigstring">bigstring</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>close:<span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>exn:<span>(<span>exn <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span>
+ <a href="#val-next" class="anchor"></a><code><span><span class="keyword">val</span> next : <span>buffer:<span>(<span><a href="#type-buffer">buffer</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>close:<span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>exn:<span>(<span>exn <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span>
 <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
 |}
 
 let next_replacement = {|
 <pre><span class="keyword">val</span> next :
-  bigstring:(<a href="#type-bigstring">bigstring</a> -> int -> int -> unit) ->
+  buffer:(<a href="#type-buffer">buffer</a> -> int -> int -> unit) ->
   close:(unit -> unit) ->
   exn:(exn -> unit) ->
   <a href="#type-request">request</a> ->
@@ -693,16 +693,16 @@ let next_replacement = {|
 </pre>
 |}
 
-let write_bigstring_expected = {|<div class="spec value" id="val-write_bigstring">
- <a href="#val-write_bigstring" class="anchor"></a><code><span><span class="keyword">val</span> write_bigstring : <span>?offset:int <span class="arrow">-&gt;</span></span> <span>?length:int <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-bigstring">bigstring</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+let write_bigstring_expected = {|<div class="spec value" id="val-write_buffer">
+ <a href="#val-write_buffer" class="anchor"></a><code><span><span class="keyword">val</span> write_buffer : <span>?offset:int <span class="arrow">-&gt;</span></span> <span>?length:int <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-buffer">buffer</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let write_bigstring_replacement = {|
-<pre><span class="keyword">val</span> write_bigstring :
+<pre><span class="keyword">val</span> write_buffer :
   ?offset:int ->
   ?length:int ->
-    <a href="#type-response">response</a> -> <a href="#type-bigstring">bigstring</a> -> unit <a href="#type-promise">promise</a>
+    <a href="#type-response">response</a> -> <a href="#type-buffer">buffer</a> -> unit <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -1599,7 +1599,7 @@ let pretty_print_signatures soup =
 
   multiline "#val-cookie" cookie_expected cookie_replacement;
 
-  let bigstring = soup $ "#type-bigstring" in
+  let bigstring = soup $ "#type-buffer" in
   if_expected
     bigstring_expected
     (fun () -> pretty_print bigstring)
@@ -1615,7 +1615,7 @@ let pretty_print_signatures soup =
       Soup.replace (next $ "> code") (Soup.parse next_replacement);
       Soup.add_class "multiline" next);
 
-  let write_bigstring = soup $ "#val-write_bigstring" in
+  let write_bigstring = soup $ "#val-write_buffer" in
   if_expected
     write_bigstring_expected
     (fun () -> pretty_print write_bigstring)

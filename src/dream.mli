@@ -688,12 +688,12 @@ val close_stream : response -> unit promise
 
 (** {2 Low-level streaming} *)
 
-type bigstring =
+type buffer =
   (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
 (** Byte arrays in the C heap. See
     {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Bigarray.Array1.html}
     [Bigarray.Array1]}. This type is also found in several libraries installed
-    by Dream, so their functions can be used with {!Dream.bigstring}:
+    by Dream, so their functions can be used with {!Dream.buffer}:
 
     - {{:https://github.com/inhabitedtype/bigstringaf/blob/353cb283aef4c261597f68154eb27a138e7ef112/lib/bigstringaf.mli}
       [Bigstringaf.t]} in bigstringaf.
@@ -702,7 +702,7 @@ type bigstring =
       [Cstruct.buffer]} in Cstruct. *)
 
 val next :
-  bigstring:(bigstring -> int -> int -> unit) ->
+  buffer:(buffer -> int -> int -> unit) ->
   (* ?string:(string -> int -> int -> unit) ->
   ?flush:(unit -> unit) -> *)
   close:(unit -> unit) ->
@@ -711,14 +711,14 @@ val next :
     unit
 (** Waits for the next stream event, and calls:
 
-    - [~bigstring] with an offset and length, if a {!bigstring} is written,
+    - [~buffer] with an offset and length, if a {!type-buffer} is written,
     - [~close] if close is requested, and
     - [~exn] to report an exception. *)
 
-val write_bigstring :
-  ?offset:int -> ?length:int -> response -> bigstring -> unit promise
-(** Streams out the {!bigstring} slice. [~offset] defaults to zero. [~length]
-    defaults to the length of the {!bigstring}, minus [~offset]. *)
+val write_buffer :
+  ?offset:int -> ?length:int -> response -> buffer -> unit promise
+(** Streams out the {!buffer} slice. [~offset] defaults to zero. [~length]
+    defaults to the length of the {!buffer}, minus [~offset]. *)
 
 
 
