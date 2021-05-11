@@ -92,8 +92,16 @@ depends: [
 
   # Testing, development.
   "alcotest" {with-test}
-  "bisect_ppx" {dev & >= "2.5.0"}  # --instrument-with.
+  "bisect_ppx" {with-test & >= "2.5.0"}  # --instrument-with.
+  "caqti-driver-sqlite3" {with-test}
+  "crunch" {with-test}
+  "lambdasoup" {with-test}
   "ppx_expect" {with-test}
+  "ppx_yojson_conv" {with-test}
+  "reason" {with-test}
+  "tyxml" {with-test & >= "4.5.0"}
+  "tyxml-jsx" {with-test & >= "4.5.0"}
+  "tyxml-ppx" {with-test & >= "4.5.0"}
 ]
 
 pin-depends: [
