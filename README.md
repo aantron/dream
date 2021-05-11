@@ -197,7 +197,12 @@ Most of the examples are loaded into the [playground][playground]. For instance,
 Here are some community projects that you can use for your Dream applications:
 
 - [`dream-livereload`](https://github.com/tmattio/dream-livereload) - Live reloading for Dream applications.
+
+  This is essentially the [`w-livereload`](https://github.com/aantron/dream/tree/master/example/w-live-reload#files) example extracted in a library for convenience.
+
 - [`dream-cli`](https://github.com/tmattio/dream-cli) - Command Line Interface for Dream applications.
+
+  It is useful when working with different environments (e.g. local, production) where some configuration need to be set at runtime.
 
 <br>
 
