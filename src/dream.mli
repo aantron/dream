@@ -877,7 +877,8 @@ type multipart_form =
 
     See example
     {{:https://github.com/aantron/dream/tree/master/example/g-upload#files}
-    [g-upload]} \[{{:http://dream.as/g-upload} playground}\].
+    [g-upload]} \[{{:http://dream.as/g-upload} playground}\] and
+    {{:https://datatracker.ietf.org/doc/html/rfc7578} RFC 7578}.
 
     Note that clients such as curl can send files with no filename ([None]),
     though most browsers seem to insert at least an empty filename ([Some ""]).

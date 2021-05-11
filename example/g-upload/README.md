@@ -119,6 +119,9 @@ for a checklist of additional security precautions.
 
 - [**`w-upload-stream`**](../w-upload-stream#files) shows the streaming
   interface for receiving file uploads.
+- [**`w-multipart-dump`**](../w-multipart-dump#files) shows the request body
+  that is interpreted by
+  [`Dream.multipart`](https://aantron.github.io/dream/#val-multipart).
 
 <br>
 

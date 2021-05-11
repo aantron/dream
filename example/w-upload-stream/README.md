@@ -87,6 +87,9 @@ for a checklist of additional security precautions.
 
 - [**`g-upload`**](../g-upload#files) shows the simplified interface for
   receiving file uploads.
+- [**`w-multipart-dump`**](../w-multipart-dump#files) shows the request body
+  that is parsed by
+  [`Dream.upload`](https://aantron.github.io/dream/#val-upload).
 
 <br>
 

@@ -143,6 +143,7 @@ Ideas:
 - `w-template-directory`
 - `w-chat`
 - `w-fullstack-brr`
+- `w-fullstack-js`
 
 Basics:
 
