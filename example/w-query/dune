@@ -1,3 +1,5 @@
 (executable
  (name query)
  (libraries dream))
+
+(data_only_dirs _esy esy.lock)

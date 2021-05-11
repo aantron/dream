@@ -2,3 +2,5 @@
  (name graphql_subscription)
  (libraries dream)
  (preprocess (pps lwt_ppx)))
+
+(data_only_dirs _esy esy.lock)

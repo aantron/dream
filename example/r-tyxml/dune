@@ -2,3 +2,5 @@
  (name tyxml)
  (libraries dream tyxml)
  (preprocess (pps lwt_ppx tyxml-jsx)))
+
+(data_only_dirs _esy esy.lock)
