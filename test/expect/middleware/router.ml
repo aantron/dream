@@ -727,3 +727,29 @@ let%expect_test _ =
   [%expect {|
     Response: 200 OK
     matched |}]
+
+(* no_route. *)
+
+let%expect_test _ =
+  show "/" @@ Dream.router [
+    Dream.no_route;
+  ];
+  [%expect {| Response: 404 Not Found |}]
+
+let%expect_test _ =
+  show "/" @@ Dream.router [
+    Dream.no_route;
+    Dream.get "/" (fun _ -> Dream.respond "foo");
+  ];
+  [%expect {|
+    Response: 200 OK
+    foo |}]
+
+let%expect_test _ =
+  show "/" @@ Dream.router [
+    Dream.get "/" (fun _ -> Dream.respond "foo");
+    Dream.no_route;
+  ];
+  [%expect {|
+    Response: 200 OK
+    foo |}]
