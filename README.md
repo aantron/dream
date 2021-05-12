@@ -110,7 +110,11 @@ into.
 
 ## Quick start
 
+<br>
+
 <pre><b>bash -c "$(curl -fsSL https://raw.githubusercontent.com/aantron/dream/master/example/quickstart.sh)"</b></pre>
+
+<br>
 
 This downloads and runs [`quickstart.sh`][quickstart.sh], which does a
 sandboxed build of one of the first [tutorials][tutorial],
