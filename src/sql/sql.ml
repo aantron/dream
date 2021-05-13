@@ -52,9 +52,11 @@ let sql request callback =
     failwith message
   | Some pool ->
     let%lwt result =
-      Caqti_lwt.Pool.use (fun db ->
-        let%lwt result = callback db in
-        Lwt.return (Ok result))
-        pool
+      pool |> Caqti_lwt.Pool.use (fun db ->
+        (* The special exception handling is a workaround for
+           https://github.com/paurkedal/ocaml-caqti/issues/68. *)
+        match%lwt callback db with
+        | result -> Lwt.return (Ok result)
+        | exception exn -> raise exn)
     in
     Caqti_lwt.or_fail result
