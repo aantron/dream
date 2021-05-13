@@ -12,8 +12,9 @@ module Dream = Dream__pure.Inmost
 let log =
   Dream__middleware.Log.sub_log "dream.sql"
 
-let pool : (_, Caqti_error.t) Caqti_lwt.Pool.t option ref Dream.global =
-  Dream.new_global (fun () -> ref None)
+(* TODO Debug metadata for the pools. *)
+let pool_variable : (_, Caqti_error.t) Caqti_lwt.Pool.t Dream.local =
+  Dream.new_local ()
 
 let foreign_keys_on =
   Caqti_request.exec Caqti_type.unit "PRAGMA foreign_keys = ON"
@@ -23,17 +24,19 @@ let post_connect (module Db : Caqti_lwt.CONNECTION) =
   | `Sqlite -> Db.exec foreign_keys_on ()
   | _ -> Lwt.return (Ok ())
 
-let sql_pool ?size uri inner_handler request =
-  let pool_cell = Dream.global pool request in
+let sql_pool ?size uri =
+    let pool_cell = ref None in
+    fun inner_handler request ->
+
   begin match !pool_cell with
-  | Some _ -> inner_handler request
+  | Some pool -> inner_handler (Dream.with_local pool_variable pool request)
   | None ->
     let pool =
       Caqti_lwt.connect_pool ?max_size:size ~post_connect (Uri.of_string uri) in
     match pool with
     | Ok pool ->
       pool_cell := Some pool;
-      inner_handler request
+      inner_handler (Dream.with_local pool_variable pool request)
     | Error error ->
       (* Deliberately raise an exception so that it can be communicated to any
          debug handler. *)
@@ -45,7 +48,7 @@ let sql_pool ?size uri inner_handler request =
   end
 
 let sql request callback =
-  match !(Dream.global pool request) with
+  match Dream.local pool_variable request with
   | None ->
     let message = "Dream.sql: no pool; did you apply Dream.sql_pool?" in
     log.error (fun log -> log ~request "%s" message);
