@@ -5,8 +5,8 @@
   digestif
   dream.cipher
   dream.pure
-  dream.multipart_form
-  dream.multipart_form.lwt
+  multipart_form
+  multipart_form.lwt
   unstrctrd
   fmt
   fmt.tty

@@ -10,6 +10,3 @@
 [submodule "src/vendor/h2"]
 	path = src/vendor/h2
 	url = https://github.com/aantron/ocaml-h2.git
-[submodule "src/vendor/multipart_form"]
-	path = src/vendor/multipart_form
-	url = https://github.com/dinosaure/multipart_form.git

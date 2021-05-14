@@ -4,7 +4,7 @@
  (libraries
   base64
   dream.cipher
-  dream.multipart_form
+  multipart_form
   hmap
   lwt
   lwt.unix
