@@ -53,7 +53,7 @@ depends: [
   "caqti" {>= "1.4.0"}  # ~post_connect.
   "caqti-lwt"
   "conf-libev" {os != "win32"}
-  "cstruct"
+  "cstruct" {>= "6.0.0"}
   "dune" {>= "2.7.0"}  # --instrument-with.
   "fmt" {>= "0.8.7"}  # `Italic.
   "graphql_parser"
