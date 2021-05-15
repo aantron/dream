@@ -82,7 +82,7 @@ todo-all :
 
 VERSION := $(shell git describe --abbrev=0)
 RELEASE := dream-$(VERSION)
-FILES := src test dream.opam dune-project LICENSE.md README.md
+FILES := src dream.opam dune-project LICENSE.md README.md
 
 .PHONY : release
 release : clean
@@ -125,7 +125,7 @@ release : clean
 	(cd _release && tar xf $(RELEASE).tar.gz)
 	opam pin add -y --no-action dream _release/$(RELEASE) --kind=path
 	opam reinstall -y --verbose dream
-	cd example/1-hello && dune exec --root . ./hello.exe
+	cd example/1-hello && dune exec --root . ./hello.exe || true
 	opam remove -y dream
 	opam pin remove -y dream
 	md5sum $(RELEASE).tar.gz
