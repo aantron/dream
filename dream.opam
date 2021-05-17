@@ -60,7 +60,7 @@ depends: [
   "graphql-lwt"
   "hmap"
   "lwt"
-  "lwt_ppx"
+  "lwt_ppx" {>= "1.2.2"}
   "lwt_ssl"
   "logs" {>= "0.5.0"}
   "magic-mime"
@@ -68,6 +68,7 @@ depends: [
   "mirage-crypto-rng" {>= "0.8.0"}  # Signature of initialize.
   "multipart_form" {>= "0.3.0"}
   "ocaml" {>= "4.08.0"}
+  "ssl" {>= "0.5.8"}  # Ssl.get_negotiated_alpn_protocol.
   "uri" {>= "4.2.0"}
   "yojson"  # ...
 
@@ -83,7 +84,7 @@ depends: [
 
   # Dependencies of vendored packages.
   "angstrom" {>= "0.14.0"}
-  "bigstringaf" {>= "0.4.0"}
+  "bigstringaf" {>= "0.5.0"}  # h2.
   "digestif" {>= "0.7"}  # websocket/af, sha1.
   "faraday" {>= "0.6.1"}
   "faraday-lwt-unix"
