@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@opam/dream": "*",
+    "@opam/dream": "1.0.0~alpha2",
     "@opam/dune": "^2.0",
     "ocaml": "4.12.x"
   },
