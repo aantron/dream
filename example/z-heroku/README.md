@@ -130,7 +130,7 @@ $ heroku local
 If all is well, attach to the Heroku log in a different terminal window:
 
 ```
-$ heroku logs --app my-app
+$ heroku logs --tail --app my-app
 ```
 
 ...and send your binary over!

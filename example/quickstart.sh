@@ -13,7 +13,7 @@ else
 fi
 
 echo
-echo -e "\e[0m✅ Creating example directory ./$EXAMPLE\e[0m 📁"
+echo -e "\e[0m✅ Creating example directory ./$EXAMPLE\e[0m"
 echo
 echo 💲 mkdir $EXAMPLE
 mkdir $EXAMPLE
@@ -22,7 +22,7 @@ cd $EXAMPLE
 echo
 echo
 echo
-echo -e "\e[0m✅ Fetching example files with git\e[0m 🔻"
+echo -e "\e[0m✅ Fetching example files with git\e[0m"
 echo -e "\e[0m   Source: $REPO/tree/$REF/example/$EXAMPLE#files\e[0m"
 mkdir clone
 cd clone
@@ -38,7 +38,7 @@ rm -rf clone
 echo
 echo
 echo
-echo -e "\e[0m✅ Installing esy in ./$EXAMPLE\e[0m 🎁"
+echo -e "\e[0m✅ Installing esy in ./$EXAMPLE\e[0m"
 echo -e "\e[0m   esy (https://esy.sh/) is an npm-like package manager for native code\e[0m"
 echo
 echo 💲 npm install esy
@@ -46,7 +46,7 @@ npm --silent install esy
 
 echo
 echo
-echo -e "\e[0m✅ Building and installing native dependencies in ./$EXAMPLE\e[0m 🔨"
+echo -e "\e[0m✅ Building and installing native dependencies in ./$EXAMPLE\e[0m"
 echo -e "\e[0m   This can take a few minutes the first time\e[0m"
 echo
 echo 💲 npx esy
@@ -55,7 +55,7 @@ npx esy
 echo
 echo
 echo
-echo -e "\e[0m✅ Building and running example\e[0m 🎉"
+echo -e "\e[0m✅ Building and running example\e[0m"
 echo
 echo 💲 npx esy start
 echo
