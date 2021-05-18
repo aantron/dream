@@ -62,6 +62,8 @@ var path = components.slice(2).join("/");
 if (path !== "")
   path = "/" + path;
 
+var firstStart = true;
+
 socket.onmessage = function (e) {
   var message = JSON.parse(e.data);
   switch (message.kind) {
@@ -84,6 +86,10 @@ socket.onmessage = function (e) {
       address.value = frame_location;
       history.replaceState(
         null, "", "/" + message.sandbox + path + location.search);
+      if (firstStart)
+        firstStart = false;
+      else
+        pre.scrollIntoView();
       break;
     }
   }
