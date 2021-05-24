@@ -1387,7 +1387,12 @@ val session_label : request -> string
 val session_expires_at : request -> float
 (** Time at which the session will expire. *)
 
+(** {1 Flash Messages} *)
+val flash_messages : ?lifetime:float -> middleware
 
+val get_messages : request -> string list
+
+val add_message : string -> request -> unit promise
 
 (** {1 WebSockets} *)
 
