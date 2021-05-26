@@ -6,26 +6,39 @@
 
 module Dream = Dream__pure.Inmost
 
-
+(* module Session = Dream__middleware.Session *)
 
 let log =
   Log.sub_log "dream.flash"
+
+type level = Debug | Info | Success | Warning | Error
+let level_to_string l = match l with
+  | Debug -> "DEBUG"
+  | Info -> "INFO"
+  | Success -> "SUCCESS"
+  | Warning -> "WARNING"
+  | Error -> "ERROR"
+
+type flash_message = level * string
 
 type 'a back_end = {
   load : Dream.request -> 'a Lwt.t;
   send : 'a -> Dream.request -> Dream.response -> Dream.response Lwt.t;
 }
 
+(** This still doesn't completely capture what the middleware is supposed to do.
+
+    We need to:
+    1. Provide any messages that were stored _from the previous request_.
+    2. Store any messages that were queued _this request_.
+    3. On cleanup, throw away the messages from last time, replace them with those from
+       this request.
+ *)
+
 let middleware local back_end = fun inner_handler request ->
-
-  let%lwt session =
-    back_end.load request in
-  let request =
-    Dream.with_local local session request in
-
-  let%lwt response =
-    inner_handler request in
-
+  let%lwt session = back_end.load request in
+  let request = Dream.with_local local session request in
+  let%lwt response = inner_handler request in
   back_end.send session request response
 
 let getter local request =
@@ -33,7 +46,7 @@ let getter local request =
   | Some session ->
     session
   | None ->
-    let message = "Missing session middleware" in
+    let message = "Missing flash message middleware" in
     log.error (fun log -> log ~request "%s" message);
     failwith message
 
@@ -43,79 +56,42 @@ type 'a typed_middleware = {
 }
 
 let typed_middleware ?show_value () =
-  let local = Dream.new_local ~name:"dream.session" ?show_value () in
+  let local = Dream.new_local ~name:"dream.flash_message" ?show_value () in
   {
     middleware = middleware local;
     getter = getter local;
   }
 
-
-
 type session = {
   id : string;
   label : string;
   mutable expires_at : float;
-  mutable payload : string list;
+  mutable payload : flash_message list;
 }
 
 type operations = {
-  put : string -> unit Lwt.t;
+  put : level -> string -> unit Lwt.t;
   invalidate : unit -> unit Lwt.t;
   mutable dirty : bool;
 }
 
-let session_cookie =
-  "dream.session"
+let flash_message_cookie =
+  "dream.flash_message"
 
 let (|>?) =
   Option.bind
 
-(* Session id length is based on
-
-     https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#session-id-length
-
-   ...extended to the next multiple of 6 for a nice base64 encoding.
-
-   NIST recommends 64 bits:
-
-     https://pages.nist.gov/800-63-3/sp800-63b.html#sec7
-
-   ..and links to OWASP.
-
-   Some rough bounds give a maximal probability of 2^-70 for a collision between
-   two IDs among 100,000,000,000 concurrent sessions (5x the monthly traffic of
-   google.com in February 2021). *)
-let new_id () =
-  Dream__cipher.Random.random 18 |> Dream__pure.Formats.to_base64url
-
-let new_label () =
-  Dream__cipher.Random.random 9 |> Dream__pure.Formats.to_base64url
-
-let version_session_id id =
-  "0" ^ id
-
-let read_session_id id =
-  if String.length id < 1 then None
-  else
-    if id.[0] <> '0' then None
-    else Some (String.sub id 1 (String.length id - 1))
-
-let version_value =
-  version_session_id
-
-let read_value =
-  read_session_id
 
 module Memory =
 struct
   let rec create hash_table expires_at =
-    let id = new_id () in
+    let id = Session.new_id () in
     if Hashtbl.mem hash_table id then
       create hash_table expires_at
     else begin
       let session = {
         id;
-        label = new_label ();
+        label = Session.new_label ();
         expires_at;
         payload = [];
       } in
@@ -123,10 +99,10 @@ struct
       session
     end
 
-  let put session message =
+  let put session level message =
     session.payload
-    |> fun dictionary -> message::dictionary
-    |> fun dictionary -> session.payload <- dictionary;
+    |> fun messages -> (level, message)::messages
+    |> fun messages -> session.payload <- messages;
     Lwt.return_unit
 
   let invalidate hash_table lifetime operations session =
@@ -138,7 +114,7 @@ struct
   let operations hash_table lifetime session dirty =
     let rec operations = {
       put =
-        (fun message -> put !session message);
+        (fun level message -> put !session level message);
       invalidate =
         (fun () -> invalidate hash_table lifetime operations session);
       dirty;
@@ -149,8 +125,8 @@ struct
     let now = Unix.gettimeofday () in
 
     let valid_session =
-      Dream.cookie ~decrypt:false session_cookie request
-      |>? read_session_id
+      Dream.cookie ~decrypt:false flash_message_cookie request
+      |>? Session.read_session_id
       |>? Hashtbl.find_opt hash_table
       |>? fun session ->
         if session.expires_at > now then
@@ -181,11 +157,11 @@ struct
     if not operations.dirty then
       Lwt.return response
     else
-      let id = version_session_id !session.id in
+      let id = Session.version_session_id !session.id in
       let max_age = !session.expires_at -. Unix.gettimeofday () in
       Lwt.return
         (Dream.set_cookie
-          session_cookie id request response ~encrypt:false ~max_age)
+          flash_message_cookie id request response ~encrypt:false ~max_age)
 
   let back_end lifetime =
     let hash_table = Hashtbl.create 256 in
@@ -199,32 +175,20 @@ let {middleware; getter} =
   typed_middleware ()
     ~show_value:(fun (_, session) ->
       !session.payload
-      |> List.map (fun message -> Printf.sprintf "%S" message)
+      |> List.map (fun (l, m) -> Printf.sprintf "%S : %S" (level_to_string l) m)
       |> String.concat ", "
       |> Printf.sprintf "%s [%s]" !session.label)
 
-let two_weeks =
-  60. *. 60. *. 24. *. 7. *. 2.
+let one_hour = 60. *. 60.
 
-let flash_messages ?(lifetime = two_weeks) =
+let flash_messages ?(lifetime = one_hour) =
   middleware (Memory.back_end lifetime)
 
-let add_message message request =
-  (fst (getter request)).put message
+let add_message level message request =
+  (fst (getter request)).put level message
 
 let get_messages request =
   !(snd (getter request)).payload
 
 let clear_messages request =
   (fst (getter request)).invalidate ()
-
-(*
-let session_id request =
-  !(snd (getter request)).id
-
-let session_label request =
-  !(snd (getter request)).label
-
-let session_expires_at request =
-  !(snd (getter request)).expires_at
-*)

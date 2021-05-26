@@ -37,7 +37,7 @@ include Dream__middleware.Static
 include Dream__middleware.Session
 let sql_sessions = Dream__sql.Session.middleware
 
-include Dream__middleware.Flash
+include Dream__middleware.Flash_message
 
 include Dream__middleware.Origin_referer_check
 include Dream__middleware.Form
