@@ -26,15 +26,6 @@ type 'a back_end = {
   send : 'a -> Dream.request -> Dream.response -> Dream.response Lwt.t;
 }
 
-(** This still doesn't completely capture what the middleware is supposed to do.
-
-    We need to:
-    1. Provide any messages that were stored _from the previous request_.
-    2. Store any messages that were queued _this request_.
-    3. On cleanup, throw away the messages from last time, replace them with those from
-       this request.
- *)
-
 let middleware local back_end = fun inner_handler request ->
   let%lwt session = back_end.load request in
   let request = Dream.with_local local session request in
@@ -66,7 +57,7 @@ type session = {
   id : string;
   label : string;
   mutable expires_at : float;
-  mutable payload : flash_message list;
+  mutable payload: flash_message list;
 }
 
 type operations = {
@@ -153,6 +144,7 @@ struct
     let session = ref session in
     Lwt.return (operations hash_table lifetime session dirty, session)
 
+  (** I think I need to map payload to outbox here. *)
   let send (operations, session) request response =
     if not operations.dirty then
       Lwt.return response
@@ -184,11 +176,15 @@ let one_hour = 60. *. 60.
 let flash_messages ?(lifetime = one_hour) =
   middleware (Memory.back_end lifetime)
 
+let clear_messages request =
+  let session = snd (getter request) in
+  !session.payload <- []
+
 let add_message level message request =
   (fst (getter request)).put level message
 
 let get_messages request =
-  !(snd (getter request)).payload
-
-let clear_messages request =
-  (fst (getter request)).invalidate ()
+  let session = snd (getter request) in
+  let messages = !session.payload in
+  !session.payload <- [];
+  messages

@@ -1395,6 +1395,7 @@ type flash_message = level * string
 val flash_messages : ?lifetime:float -> middleware
 val get_messages : request -> flash_message list
 val add_message : level -> string -> request -> unit promise
+val clear_messages : request -> unit
 
 (** {1 WebSockets} *)
 

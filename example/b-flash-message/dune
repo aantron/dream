@@ -1,0 +1,11 @@
+(executable
+ (name flash_message)
+ (libraries dream)
+ (preprocess (pps lwt_ppx)))
+
+(rule
+ (targets flash_message.ml)
+ (deps flash_message.eml.ml)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))
+
+(data_only_dirs _esy esy.lock)
