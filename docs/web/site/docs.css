@@ -216,7 +216,7 @@ a[href^=http]::after {
   line-height: 18px;
   color: #5d7fcd;
   position: relative;
-  top: -0.5px;
+  top: -1px;
   margin-left: 2px;
   margin-right: 3px;
 }

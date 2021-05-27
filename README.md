@@ -136,7 +136,7 @@ build both a Dream server and a JavaScript client.
 ### opam
 
 ```
-opam install dream
+opam install dream.1.0.0~alpha2
 ```
 
 After that, go to one of the examples, such as [**`1-hello`**][1-hello], and
