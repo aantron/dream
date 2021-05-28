@@ -63,6 +63,7 @@ type session = {
 
 type operations = {
   put : string -> string -> unit Lwt.t;
+  remove: string -> unit Lwt.t;
   invalidate : unit -> unit Lwt.t;
   mutable dirty : bool;
 }
@@ -133,6 +134,12 @@ struct
     |> fun dictionary -> session.payload <- dictionary;
     Lwt.return_unit
 
+  let remove session name =
+    session.payload
+    |> List.remove_assoc name
+    |> fun dictionary -> session.payload <- dictionary;
+    Lwt.return_unit
+
   let invalidate hash_table lifetime operations session =
     Hashtbl.remove hash_table !session.id;
     session := create hash_table (Unix.gettimeofday () +. lifetime);
@@ -143,6 +150,8 @@ struct
     let rec operations = {
       put =
         (fun name value -> put !session name value);
+      remove =
+        (fun name -> remove !session name);
       invalidate =
         (fun () -> invalidate hash_table lifetime operations session);
       dirty;
@@ -223,6 +232,13 @@ struct
     operations.dirty <- true;
     Lwt.return_unit
 
+  let remove operations session name =
+    session.payload
+    |> List.remove_assoc name
+    |> fun dictionary -> session.payload <- dictionary;
+    operations.dirty <- true;
+    Lwt.return_unit
+
   let invalidate lifetime operations session =
     session := create (Unix.gettimeofday () +. lifetime);
     operations.dirty <- true;
@@ -231,6 +247,7 @@ struct
   let operations lifetime session dirty =
     let rec operations = {
       put = (fun name value -> put operations !session name value);
+      remove = (fun name -> remove operations !session name);
       invalidate = (fun () -> invalidate lifetime operations session);
       dirty;
     } in
@@ -355,3 +372,29 @@ let session_label request =
 
 let session_expires_at request =
   !(snd (getter request)).expires_at
+
+
+type level = Debug | Info | Success | Warning | Error
+
+let key_of_level l =
+  let suffix = match l with
+    | Debug -> "DEBUG"
+    | Info -> "INFO"
+    | Success -> "SUCCESS"
+    | Warning -> "WARNING"
+    | Error -> "ERROR" in
+  "FLASH_MESSAGE_" ^ suffix
+
+let clear_flash level request =
+  let k = key_of_level level in
+  (fst (getter request)).remove k
+
+let get_flash level request =
+  let k = key_of_level level in
+  let message = session k request in
+  let%lwt () = clear_flash level request in
+  Lwt.return message
+
+let put_flash level message request =
+  let k = key_of_level level in
+  put_session k message request

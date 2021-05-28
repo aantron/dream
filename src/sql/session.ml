@@ -120,6 +120,14 @@ let put request (session : Session.session) name value =
   |> fun dictionary -> session.payload <- dictionary;
   Sql.sql request (fun db -> update db session)
 
+
+let remove_key request (session : Session.session) name =
+  session.payload
+  |> List.remove_assoc name
+  |> fun dictionary -> session.payload <- dictionary;
+  Sql.sql request (fun db -> update db session)
+
+
 let invalidate request lifetime operations (session : Session.session ref) =
   Sql.sql request begin fun db ->
     let%lwt () = remove db !session.id in
@@ -133,6 +141,7 @@ let operations request lifetime (session : Session.session ref) dirty =
   let rec operations = {
     Session.put = (fun name value -> put request !session name value);
     invalidate = (fun () -> invalidate request lifetime operations session);
+    remove = (fun name -> remove_key request !session name);
     dirty;
   } in
   operations
