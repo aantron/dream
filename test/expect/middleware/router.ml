@@ -152,6 +152,15 @@ let%expect_test _ =
     Response: 200 OK
     bar |}]
 
+(* Router matches IRIs. *)
+let%expect_test _ =
+  show "/λ" @@ Dream.router [
+    Dream.get "/λ" (fun _ -> Dream.respond "foo");
+  ];
+  [%expect {|
+    Response: 200 OK
+    foo |}]
+
 (* Router matches long paths, does not match prefixes, etc. *)
 
 let%expect_test _ =
