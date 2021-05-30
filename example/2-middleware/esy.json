@@ -2,6 +2,9 @@
   "dependencies": {
     "@opam/dream": "1.0.0~alpha2",
     "@opam/dune": "^2.0",
+    // The OCaml Platform for VSCode require ocaml-lsp-server and ocamlfind-secondary to enable intellisense.
+    "@opam/ocaml-lsp-server": "*",
+    "@opam/ocamlfind-secondary": "*",
     "ocaml": "4.12.x"
   },
   "resolutions": {
