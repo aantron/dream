@@ -1335,6 +1335,9 @@ val mime_lookup : string -> (string * string) list
     All requests passing through session middleware are assigned a session,
     either an existing one, or a new empty session, known as a {e pre-session}.
 
+    When a session is at least half-expired, it is automatically refreshed by
+    the next request that it is assigned to.
+
     See example
     {{:https://github.com/aantron/dream/tree/master/example/b-session#files}
     [b-session]} \[{{:http://dream.as/b-session} playground}\]. *)
