@@ -6,6 +6,10 @@
     "@opam/js_of_ocaml-ppx": "*",
     "ocaml": "4.12.x"
   },
+  "devDependencies": {
+    "@opam/ocaml-lsp-server": "*",
+    "@opam/ocamlfind-secondary": "*"
+  },
   "resolutions": {
     "@opam/conf-libev": "esy-packages/libev:package.json#0b5eb6685b688649045aceac55dc559f6f21b829"
   },
