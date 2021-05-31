@@ -5,7 +5,6 @@
     "ocaml": "4.12.x"
   },
   "devDependencies": {
-    // The OCaml Platform for VSCode require ocaml-lsp-server and ocamlfind-secondary to enable intellisense.
     "@opam/ocaml-lsp-server": "*",
     "@opam/ocamlfind-secondary": "*"
   },
