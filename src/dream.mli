@@ -1389,12 +1389,16 @@ val session_expires_at : request -> float
 
 (** {1 Flash Messages} *)
 
-val flash_messages : ?lifetime:float -> middleware
-type level = Debug | Info | Success | Warning | Error
+val flash_messages : middleware
+type category = [
+    | `Debug
+    | `Info
+    | `Warning
+    | `Error
+]
 
-val clear_flash : level -> request -> unit
-val put_flash : level -> string -> request -> unit
-val get_flash : level -> request -> string option
+val put_flash : category -> string -> request -> unit
+val get_flash : category -> request -> string option
 
 (** {1 WebSockets} *)
 

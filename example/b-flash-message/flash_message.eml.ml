@@ -5,7 +5,6 @@ let input_form request =
       <%s! Dream.form_tag ~action:"/" request %>
         <input name="text" autofocus>
       </form>
-
     </body>
   </html>
 
@@ -34,7 +33,7 @@ let () =
       (fun request ->
         match%lwt Dream.form request with
         | `Ok ["text", text] ->
-          let () = Dream.put_flash Info "Text received!" request in
+          let () = Dream.put_flash `Info "Text received!" request in
           let%lwt () = Dream.put_session "text" text request in
           Dream.redirect request "/results"
         | _ ->
@@ -43,7 +42,7 @@ let () =
 
     Dream.get "/results"
       (fun request ->
-         let info = Dream.get_flash Info request in
+         let info = Dream.get_flash `Info request in
          let text = Dream.session "text" request in
          Dream.html (results_page info text));
   ]
