@@ -1,6 +1,6 @@
 (executable
  (name flash_message)
- (libraries dream)
+ (libraries dream tyxml)
  (preprocess (pps lwt_ppx)))
 
 (rule

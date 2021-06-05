@@ -5,26 +5,13 @@ let log =
   Log.sub_log "dream.flash_message"
 
 
-type category = [
-    | `Debug
-    | `Info
-    | `Warning
-    | `Error
-]
-
-let key_of_category l =
-  let suffix = match l with
-    | `Debug -> "debug"
-    | `Info -> "info"
-    | `Warning -> "warning"
-    | `Error -> "error" in
-  "dream.flash_message." ^ suffix
-
-let all_categories = [`Debug; `Info; `Warning; `Error]
-
 let five_minutes = 5. *. 60.
 
+
 let storage = Dream.new_local ~name:"dream.flash_message" ()
+
+
+let flash_cookie = "dream.flash_message"
 
 
 let flash_messages inner_handler request =
@@ -32,22 +19,31 @@ let flash_messages inner_handler request =
   let request = Dream.with_local storage outbox request in
   let%lwt response = inner_handler request in
   Lwt.return(
-    List.fold_left (fun resp category ->
-        let name = key_of_category category in
-        let value = List.assoc_opt category !outbox in
-        match value with
-        | Some message ->
-          Dream.set_cookie name message request resp ~max_age:five_minutes
-        | None ->
-          Dream.set_cookie name "" request resp ~expires:0.
-      )
-      response all_categories
+    let entries = List.rev !outbox in
+    let content = List.fold_right (fun (x,y) a -> `String x :: `String y :: a) entries [] in
+    let value = `List content |> Yojson.Basic.to_string in
+    Dream.set_cookie flash_cookie value request response ~max_age:five_minutes
   )
 
 
-let get_flash category request =
-  let k = key_of_category category in
-  Dream.cookie k request
+let (|>?) =
+  Option.bind
+
+
+let get_flash request =
+  let rec group x = match x with
+    | x1::x2::rest -> (x1, x2) :: group rest
+    | _ -> []
+  in
+  let unpack u = match u with
+      | `String x -> x
+      | _ -> failwith "Bad flash message content" in
+  let x = Dream.cookie flash_cookie request
+          |>? fun value ->
+          match Yojson.Basic.from_string value with
+          | `List y -> Some (group @@ List.map unpack y)
+          | _ -> None
+  in Option.value x ~default:[]
 
 
 let put_flash category message request =
@@ -57,6 +53,4 @@ let put_flash category message request =
     let message = "Missing flash message middleware" in
     log.error (fun log -> log ~request "%s" message);
     failwith message in
-  outbox := !outbox
-  |> List.remove_assoc category
-  |> fun dictionary -> (category, message) :: dictionary
+  outbox := (category, message) :: !outbox

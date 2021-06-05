@@ -1390,15 +1390,8 @@ val session_expires_at : request -> float
 (** {1 Flash Messages} *)
 
 val flash_messages : middleware
-type category = [
-    | `Debug
-    | `Info
-    | `Warning
-    | `Error
-]
-
-val put_flash : category -> string -> request -> unit
-val get_flash : category -> request -> string option
+val put_flash : string -> string -> request -> unit
+val get_flash : request -> (string * string) list
 
 (** {1 WebSockets} *)
 
