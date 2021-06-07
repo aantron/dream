@@ -434,7 +434,13 @@ val html :
   ?headers:(string * string) list ->
     string -> response promise
 (** Same as {!Dream.respond}, but adds [Content-Type: text/html; charset=utf-8].
-    See {!Dream.text_html}. *)
+    See {!Dream.text_html}.
+
+    As your Web app develops, consider adding [Content-Security-Policy] headers,
+    as described in example
+    {{:https://github.com/aantron/dream/tree/master/example/w-content-security-policy#files}
+    [w-content-security-policy]}. These headers are completely optional, but
+    they can provide an extra layer of defense for a mature app. *)
 
 val json :
   ?status:status ->
