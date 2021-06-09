@@ -1817,7 +1817,7 @@ let links_new_tabs soup =
   soup $$ "a[href^=http]"
   |> Soup.(iter (fun a ->
     set_attribute "target" "_blank" a;
-    set_attribute "rel" "noreferer noopener" a))
+    set_attribute "rel" "noreferrer noopener" a))
 
 let () =
   let source = Sys.argv.(1) in

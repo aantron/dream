@@ -739,7 +739,7 @@ val write_buffer :
     {{:https://github.com/aantron/dream/tree/master/example/e-json#files}
     [e-json]}. *)
 
-val origin_referer_check : middleware
+val origin_referrer_check : middleware
 (** CSRF protection for AJAX requests. Either the method must be [`GET] or
     [`HEAD], or:
 
@@ -755,7 +755,7 @@ val origin_referer_check : middleware
     OWASP {i Verifying Origin With Standard Headers}} CSRF defense-in-depth
     technique, which is good enough for basic usage. Do not allow [`GET] or
     [`HEAD] requests to trigger important side effects if relying only on
-    {!Dream.origin_referer_check}.
+    {!Dream.origin_referrer_check}.
 
     Future extensions to this function may use [X-Forwarded-Host] or host
     whitelists.
@@ -964,7 +964,7 @@ val upload_part : request -> string option promise
 
     - Form tag generator {!Dream.form_tag} generates and inserts a CSRF token
       that {!Dream.val-form} and {!Dream.val-multipart} transparently verify.
-    - AJAX can be protected from CSRF by {!Dream.origin_referer_check}.
+    - AJAX can be protected from CSRF by {!Dream.origin_referrer_check}.
 
     CSRF functions are exposed for creating custom schemes, and for
     defense-in-depth purposes. See
@@ -1217,7 +1217,7 @@ val scope : string -> middleware list -> route list -> route
     run only if a route matches.
 
     {[
-      Dream.scope "/api" [Dream.origin_referer_check] [
+      Dream.scope "/api" [Dream.origin_referrer_check] [
         Dream.get  "/widget" get_widget_handler;
         Dream.post "/widget" set_widget_handler;
       ]
@@ -1234,7 +1234,7 @@ val scope : string -> middleware list -> route list -> route
     To apply middleware without prefixing the routes, use ["/"]:
 
     {[
-      Dream.scope "/" [Dream.origin_referer_check] [
+      Dream.scope "/" [Dream.origin_referrer_check] [
         (* ...routes... *)
       ]
     ]}

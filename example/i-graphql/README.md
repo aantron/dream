@@ -50,7 +50,7 @@ let default_query =
 let () =
   Dream.run
   @@ Dream.logger
-  @@ Dream.origin_referer_check
+  @@ Dream.origin_referrer_check
   @@ Dream.router [
     Dream.any "/graphql" (Dream.graphql Lwt.return schema);
     Dream.get "/" (Dream.graphiql ~default_query "/graphql");
@@ -74,7 +74,7 @@ Visit [http://localhost:8080](http://localhost:8080)
 Even though this toy schema does not define any
 [mutations](https://github.com/andreas/ocaml-graphql-server/blob/d615cbb164d4ddfdc2efeb246a198dfe114adf24/graphql/src/graphql_intf.ml#L66),
 the example uses
-[`Dream.origin_referer_check`](https://aantron.github.io/dream/#val-origin_referer_check)
+[`Dream.origin_referrer_check`](https://aantron.github.io/dream/#val-origin_referrer_check)
 to protect future extensions of it
 [against CSRF](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#identifying-source-origin-via-originreferer-header). See example
 [**`e-json`**](../e-json#security) for more details on how this works.

@@ -365,7 +365,7 @@ p + .odoc-spec {
 }
 #type-bigstring + .spec-doc li + li,
 #val-next + .spec-doc li + li,
-#val-origin_referer_check + .spec-doc li + li,
+#val-origin_referrer_check + .spec-doc li + li,
 #val-form + .spec-doc li + li,
 #type-part + .spec-doc li + li,
 #type-upload_event + .spec-doc li + li,

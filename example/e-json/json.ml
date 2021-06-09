@@ -5,7 +5,7 @@ type message_object = {
 let () =
   Dream.run
   @@ Dream.logger
-  @@ Dream.origin_referer_check
+  @@ Dream.origin_referrer_check
   @@ Dream.router [
 
     Dream.post "/"

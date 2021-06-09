@@ -43,7 +43,7 @@ let default_query =
 let () =
   Dream.run
   @@ Dream.logger
-  @@ Dream.origin_referer_check
+  @@ Dream.origin_referrer_check
   @@ Dream.router [
     Dream.any "/graphql" (Dream.graphql Lwt.return schema);
     Dream.get "/" (Dream.graphiql ~default_query "/graphql");
