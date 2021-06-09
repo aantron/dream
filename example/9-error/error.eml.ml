@@ -7,16 +7,16 @@ let my_error_template debug_info suggested_response =
   |> Dream.with_header "Content-Type" Dream.text_html
   |> Dream.with_body begin
     <html>
-      <body>
-        <h1><%i code %> <%s reason %></h1>
+    <body>
+      <h1><%i code %> <%s reason %></h1>
 
-%       begin match debug_info with
-%       | None -> ()
-%       | Some debug_info ->
-          <pre><%s debug_info %></pre>
-%       end;
+%     begin match debug_info with
+%     | None -> ()
+%     | Some debug_info ->
+        <pre><%s debug_info %></pre>
+%     end;
 
-      </body>
+    </body>
     </html>
   end
   |> Lwt.return

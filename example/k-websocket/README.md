@@ -10,21 +10,21 @@ silly protocol: if the client sends `"Hello?"`, the server responds with
 ```ocaml
 let home =
   <html>
-    <body>
-      <script>
+  <body>
+    <script>
 
-      var socket = new WebSocket("ws://" + window.location.host + "/websocket");
+    var socket = new WebSocket("ws://" + window.location.host + "/websocket");
 
-      socket.onopen = function () {
-        socket.send("Hello?");
-      };
+    socket.onopen = function () {
+      socket.send("Hello?");
+    };
 
-      socket.onmessage = function (e) {
-        alert(e.data);
-      };
+    socket.onmessage = function (e) {
+      alert(e.data);
+    };
 
-      </script>
-    </body>
+    </script>
+  </body>
   </html>
 
 let () =
