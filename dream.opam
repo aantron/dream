@@ -91,14 +91,9 @@ depends: [
   "psq"  # h2.
   "result"  # http/af, websocket/af.
 
-  # https://github.com/ocaml-ppx/ppxlib/issues/221.
-  # esy appears to ignore conflicts.
-  "ppxlib" {< "0.21.0" | > "0.22.0"}
-
   # Testing, development.
   "alcotest" {with-test}
-  # Commented out because of https://github.com/ocaml-ppx/ppxlib/issues/221.
-  # "bisect_ppx" {with-test & >= "2.5.0"}  # --instrument-with.
+  "bisect_ppx" {with-test & >= "2.5.0"}  # --instrument-with.
   "caqti-driver-sqlite3" {with-test}
   "crunch" {with-test}
   "lambdasoup" {with-test}
