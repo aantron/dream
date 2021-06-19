@@ -1087,6 +1087,7 @@ let render message =
     [<script>] tags. *)
 
 val form_tag :
+  ?target:string ->
   ?enctype:[ `Multipart_form_data ] ->
     action:string -> request -> string
 (** Generates a [<form>] tag and an [<input>] tag with a CSRF token, suitable
@@ -1107,6 +1108,9 @@ val form_tag :
         <input name="my.field">
       </form>
     ]}
+
+    [~target] adds a [target] attribute. For example, [~target:"_blank"] causes
+    the browser to submit the form in a new tab or window.
 
     Pass [~enctype:`Multipart_form_data] for a file upload form. *)
 
