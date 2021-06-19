@@ -905,15 +905,17 @@ let verify_csrf_token_replacement = {|
 |}
 
 let form_tag_expected = {|<div class="spec value" id="val-form_tag">
- <a href="#val-form_tag" class="anchor"></a><code><span><span class="keyword">val</span> form_tag : <span>?target:string <span class="arrow">-&gt;</span></span> <span>?enctype:<span>[ `Multipart_form_data ]</span> <span class="arrow">-&gt;</span></span>
-<span>action:string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> string</span></code>
+ <a href="#val-form_tag" class="anchor"></a><code><span><span class="keyword">val</span> form_tag : <span>?method_:<a href="#type-method_">method_</a> <span class="arrow">-&gt;</span></span> <span>?target:string <span class="arrow">-&gt;</span></span> <span>?enctype:<span>[ `Multipart_form_data ]</span> <span class="arrow">-&gt;</span></span>
+<span>?csrf_token:bool <span class="arrow">-&gt;</span></span> <span>action:string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> string</span></code>
 </div>
 |}
 
 let form_tag_replacement = {|
 <pre><span class="keyword">val</span> form_tag :
+  ?method_:<a href="#type-method_">method_</a> ->
   ?target:string ->
   ?enctype:[ `Multipart_form_data ] ->
+  ?csrf_token:bool ->
     action:string -> <a href="#type-request">request</a> -> string
 </pre>
 |}

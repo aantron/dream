@@ -1087,8 +1087,10 @@ let render message =
     [<script>] tags. *)
 
 val form_tag :
+  ?method_:method_ ->
   ?target:string ->
   ?enctype:[ `Multipart_form_data ] ->
+  ?csrf_token:bool ->
     action:string -> request -> string
 (** Generates a [<form>] tag and an [<input>] tag with a CSRF token, suitable
     for use with {!Dream.val-form} and {!Dream.val-multipart}. For example, in
@@ -1109,10 +1111,14 @@ val form_tag :
       </form>
     ]}
 
+    [~method] sets the method used to submit the form. The default is [`POST].
+
     [~target] adds a [target] attribute. For example, [~target:"_blank"] causes
     the browser to submit the form in a new tab or window.
 
-    Pass [~enctype:`Multipart_form_data] for a file upload form. *)
+    Pass [~enctype:`Multipart_form_data] for a file upload form.
+
+    [~csrf_token:false] suppresses generation of the [dream.csrf] field. *)
 
 
 
