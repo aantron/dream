@@ -79,7 +79,7 @@ let home =
   </body>
   </html>
 
-module Channel = struct
+module UniqueChannel = struct
   let connections = Hashtbl.create 5
 
   let add key websocket =
@@ -99,11 +99,11 @@ let run_websockets websocket =
   let rec loop key websocket =
     match%lwt Dream.receive websocket with
     | Some message ->
-        Channel.add key websocket;
-        let%lwt () = Channel.send message in
+        UniqueChannel.add key websocket;
+        let%lwt () = UniqueChannel.send message in
         loop key websocket
     | _ ->
-        Channel.remove key;
+        UniqueChannel.remove key;
         Dream.close_websocket websocket
   in
   id_counter := !id_counter + 1;
