@@ -1,11 +1,9 @@
 let home =
-  <!DOCTYPE html>
   <html lang="en">
   <head>
   <title>Chat Example</title>
   <script type="text/javascript">
   window.onload = function () {
-      let myId = Math.random().toString();
       let conn = new WebSocket("ws://" + window.location.host + "/websocket");
 
       conn.onmessage = function (evt) {
@@ -27,7 +25,7 @@ let home =
           if (!msg.value) {
               return false;
           }
-          conn.send(myId + ":" + msg.value);
+          conn.send(msg.value);
           msg.value = "";
           return false;
       };
@@ -81,7 +79,7 @@ let home =
   </body>
   </html>
 
-module Socket = struct
+module Channel = struct
   let connections = Hashtbl.create 5
 
   let add key websocket =
@@ -95,26 +93,21 @@ module Socket = struct
     Hashtbl.remove connections key 
 end
 
-let rec sockets ?(key=None) websocket =
-  let close () =
-    let () = match key with
-    | None -> ()
-    | Some key -> Socket.remove key
-    in
-    Dream.close_websocket websocket
+let id_counter = ref 0
+
+let run_websockets websocket =
+  let rec loop key websocket =
+    match%lwt Dream.receive websocket with
+    | Some message ->
+        Channel.add key websocket;
+        let%lwt () = Channel.send message in
+        loop key websocket
+    | _ ->
+        Channel.remove key;
+        Dream.close_websocket websocket
   in
-  match%lwt Dream.receive websocket with
-  | Some text ->
-      begin
-      match String.split_on_char ':' text with 
-      | [key; msg] -> 
-          Socket.add key websocket;
-          let%lwt () = Socket.send msg in
-          sockets websocket ~key:(Some key)
-      | _ -> close ()
-      end
-  | _ ->
-      close ()
+  id_counter := !id_counter + 1;
+  loop !id_counter websocket
 
 let () =
   Dream.run
@@ -127,7 +120,7 @@ let () =
 
     Dream.get "/websocket"
       (fun _ ->
-        Dream.websocket sockets);
+        Dream.websocket run_websockets);
 
   ]
   @@ Dream.not_found
