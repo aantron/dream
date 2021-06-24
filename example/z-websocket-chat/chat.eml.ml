@@ -99,7 +99,6 @@ let run_websockets websocket =
   let rec loop key websocket =
     match%lwt Dream.receive websocket with
     | Some message ->
-        UniqueChannel.add key websocket;
         let%lwt () = UniqueChannel.send message in
         loop key websocket
     | _ ->
@@ -107,7 +106,9 @@ let run_websockets websocket =
         Dream.close_websocket websocket
   in
   id_counter := !id_counter + 1;
-  loop !id_counter websocket
+  let key = !id_counter in
+  UniqueChannel.add key websocket;
+  loop key websocket
 
 let () =
   Dream.run
