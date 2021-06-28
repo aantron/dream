@@ -1581,7 +1581,7 @@ val sql : request -> (Caqti_lwt.connection -> 'a promise) -> 'a promise
     {[
       let () =
         Dream.run
-        @@ Dream.sql_pool "sqlite3://db.sqlite"
+        @@ Dream.sql_pool "sqlite3:db.sqlite"
         @@ fun request ->
           Dream.sql request (fun db ->
             (* ... *) |> Dream.html)
