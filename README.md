@@ -133,6 +133,16 @@ include their own build commands. They don't have to be subdirectories of
 Especially consider starting with the [full-stack examples][fullstack], which
 build both a Dream server and a JavaScript client.
 
+### Project template
+
+To quickly start a new project with [Spin](https://github.com/tmattio/spin), you can use:
+
+```bash
+opam spin new https://github.com/ocaml-templates/spin-dream.git
+```
+
+The project contains a typical project structure for a real-world application, as well as optional configurations for TailwindCSS and Turbolink. You can read more about it [here](https://github.com/tmattio/spin-dream/#readme)
+
 ### opam
 
 ```
