@@ -210,19 +210,6 @@ Here are some community projects that you can use for your Dream applications:
 
 <br>
 
-## Contact
-
-Apart from the [issues](https://github.com/aantron/dream/issues), good places
-to discuss Dream are...
-
-- The [OCaml](https://discord.gg/DyhPFYGr) and
-  [Reason](https://discord.gg/YCTDuzbg) Discord servers.
-- The [OCaml Discuss forum](https://discuss.ocaml.org/).
-
-Highlight `@antron` to poke @aantron specifically.
-
-<br>
-
 ## Contributing
 
 All kinds of contributions are welcome, including examples, links to blogs,
