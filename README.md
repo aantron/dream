@@ -204,6 +204,10 @@ Here are some community projects that you can use for your Dream applications:
 
   It is useful when working with different environments (e.g. local, production) where some configuration need to be set at runtime.
 
+- [`dream-encoding`](https://github.com/tmattio/dream-encoding) - Encoding primitives for Dream applications
+
+  This allows, among other things, to compress responses according to the `Accept-Encoding` HTTP header.
+
 <br>
 
 ## Contact
