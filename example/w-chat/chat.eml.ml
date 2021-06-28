@@ -1,114 +1,65 @@
 let home =
-  <html lang="en">
-  <head>
-  <title>Chat Example</title>
-  <script type="text/javascript">
-  window.onload = function () {
-      let conn = new WebSocket("ws://" + window.location.host + "/websocket");
-
-      conn.onmessage = function (evt) {
-          let messages = evt.data.split('\n');
-          for (let i = 0; i < messages.length; i++) {
-              let item = document.createElement("div");
-              item.innerText = messages[i];
-              chat.appendChild(item);
-          }
-      };
-
-      let msg = document.getElementById("msg");
-      let chat = document.getElementById("chat");
-
-      document.getElementById("form").onsubmit = function () {
-          if (!conn) {
-              return false;
-          }
-          if (!msg.value) {
-              return false;
-          }
-          conn.send(msg.value);
-          msg.value = "";
-          return false;
-      };
-
-  };
-  </script>
-  <style type="text/css">
-  html {
-      overflow: hidden;
-  }
-
-  body {
-      overflow: hidden;
-      padding: 0;
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      background: gray;
-  }
-
-  #chat {
-      background: white;
-      margin: 0;
-      padding: 1em;
-      position: absolute;
-      top: 0.5em;
-      left: 0.5em;
-      right: 0.5em;
-      bottom: 3em;
-      overflow: auto;
-  }
-
-  #form {
-      padding: 0 0.5em 0 0.5em;
-      margin: 0;
-      position: absolute;
-      bottom: 1em;
-      left: 0px;
-      width: 100%;
-      overflow: hidden;
-  }
-
-  </style>
-  </head>
+  <html>
   <body>
-  <div id="chat"></div>
-  <form id="form">
-      <input type="submit" value="Send" />
-      <input type="text" id="msg" size="64" autofocus />
-  </form>
+    <form>
+      <input type="submit" value="Send">
+      <input type="text" id="message" size="64" autofocus>
+    </form>
+    <script>
+      let message = document.getElementById("message");
+      let chat = document.querySelector("body");
+      let socket = new WebSocket("ws://" + window.location.host + "/websocket");
+
+      socket.onmessage = function (event) {
+        let item = document.createElement("div");
+        item.innerText = event.data;
+        chat.appendChild(item);
+      };
+
+      document.querySelector("form").onsubmit = function () {
+        if (socket.readyState != WebSocket.OPEN)
+          return false;
+        if (!message.value)
+          return false;
+
+        socket.send(message.value);
+        message.value = "";
+        return false;
+      };
+    </script>
   </body>
   </html>
 
-module UniqueChannel = struct
-  let connections = Hashtbl.create 5
+let clients =
+  Hashtbl.create 5
 
-  let add key websocket =
-    Hashtbl.replace connections key websocket
+let connect =
+  let last_client_id = ref 0 in
+  fun websocket ->
+    last_client_id := !last_client_id + 1;
+    Hashtbl.replace clients !last_client_id websocket;
+    !last_client_id
 
-  let send msg =
-    let websockets = Hashtbl.to_seq_values connections |> List.of_seq in
-    Lwt_list.iter_p (fun w -> Dream.send w msg) websockets
+let disconnect client_id =
+  Hashtbl.remove clients client_id
 
-  let remove key =
-    Hashtbl.remove connections key 
-end
+let send message =
+  Hashtbl.to_seq_values clients
+  |> List.of_seq
+  |> Lwt_list.iter_p (fun client -> Dream.send client message)
 
-let id_counter = ref 0
-
-let run_websockets websocket =
-  let rec loop key websocket =
+let handle_client websocket =
+  let client_id = connect websocket in
+  let rec loop () =
     match%lwt Dream.receive websocket with
     | Some message ->
-        let%lwt () = UniqueChannel.send message in
-        loop key websocket
+      let%lwt () = send message in
+      loop ()
     | _ ->
-        UniqueChannel.remove key;
-        Dream.close_websocket websocket
+      disconnect client_id;
+      Dream.close_websocket websocket
   in
-  id_counter := !id_counter + 1;
-  let key = !id_counter in
-  UniqueChannel.add key websocket;
-  loop key websocket
+  loop ()
 
 let () =
   Dream.run
@@ -116,12 +67,10 @@ let () =
   @@ Dream.router [
 
     Dream.get "/"
-      (fun _ ->
-        Dream.html home);
+      (fun _ -> Dream.html home);
 
     Dream.get "/websocket"
-      (fun _ ->
-        Dream.websocket run_websockets);
+      (fun _ -> Dream.websocket handle_client);
 
   ]
   @@ Dream.not_found
