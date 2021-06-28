@@ -58,6 +58,7 @@ example w-server-sent-events
 example w-template-stream
 example w-tyxml
 example w-upload-stream
+example w-chat
 touch ./sync-temp/sandbox/w-tyxml/no-eml
 mv ./sync-temp/sandbox/w-tyxml/server.eml.ml \
   ./sync-temp/sandbox/w-tyxml/server.ml

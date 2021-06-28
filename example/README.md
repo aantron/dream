@@ -99,6 +99,8 @@ if something is missing!
 
 - [**`w-graphql-subscription`**](w-graphql-subscription#files)
   &nbsp;&mdash;&nbsp; GraphQL subscriptions.
+- [**`w-chat`**](w-chat#files) &nbsp;&mdash;&nbsp; a chat room based on
+  WebSockets.
 - [**`w-content-security-policy`**](w-content-security-policy#files)
   &nbsp;&mdash;&nbsp; sandboxes Web pages using `Content-Security-Policy`.
 - [**`w-esy`**](w-esy#files) &nbsp;&mdash;&nbsp; gives detail on packaging with

@@ -55,7 +55,7 @@ let handle_client websocket =
     | Some message ->
       let%lwt () = send message in
       loop ()
-    | _ ->
+    | None ->
       disconnect client_id;
       Dream.close_websocket websocket
   in

@@ -1,29 +1,55 @@
-# `z-websocket-chat`
+# `w-chat`
 
 <br>
 
-In this example, the client connects to the server by a
-[WebSocket](https://aantron.github.io/dream/#websockets). Then you can open the application in 2 tabs and have a chat.
+In this example, multiple clients connect to the server by
+[WebSockets](https://aantron.github.io/dream/#websockets), and the server
+forwards messages between them, creating a simple chat.
 
-<pre><code><b>$ cd example/z-websocket-chat</b>
+The core function is called on each new WebSocket. It puts the WebSocket into a
+hash table, listens for messages, and forwards them to all the other WebSockets
+in the hash table:
+
+```ocaml
+let handle_client websocket =
+  let client_id = connect websocket in
+  let rec loop () =
+    match%lwt Dream.receive websocket with
+    | Some message ->
+      let%lwt () = send message in
+      loop ()
+    | None ->
+      disconnect client_id;
+      Dream.close_websocket websocket
+  in
+  loop ()
+```
+
+The rest of the code hooks up the client's message form to the WebSocket.
+
+<pre><code><b>$ cd example/w-chat</b>
 <b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
 
 <br>
 
-Visit [http://localhost:8080](http://localhost:8080)
-[[playground](http://dream.as/z-websocket-chat)] to get the whole exchange started!
-
-![WebSocket alert](https://raw.githubusercontent.com/aantron/dream/master/docs/asset/websocket.png)
-
-<br>
-
-See [*WebSockets*](https://aantron.github.io/dream/#websockets) in the API docs.
-
-If you are running under HTTPS, be sure to use `wss://` for the protocol scheme,
-rather than `ws://`, on the client.
-
+Open [http://localhost:8080](http://localhost:8080) in two tabs to get the
+whole exchange started! You can also try it in the
+[playground](http://dream.as/w-chat). To connect a second tab, copy out the
+address from the playground's location bar, and paste it into a new tab in your
+browser.
 
 <br>
 
-[Up to the tutorial index](../#readme)
+If you run code like this under HTTPS, be sure to use `wss://` for the protocol
+scheme, rather than `ws://`, on the client.
+
+<br>
+
+**See also:**
+
+- [**k-websocket**](../k-websocket#files) for an introduction to WebSockets.
+
+<br>
+
+[Up to the example index](../#examples)
