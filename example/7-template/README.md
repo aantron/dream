@@ -5,8 +5,8 @@
 Dream [*templates*](https://aantron.github.io/dream/#templates) allow
 interleaving OCaml and HTML in a straightforward way, and help with
 [XSS protection](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html).
-After looking at the correct example, we will
-[weaken and then exploit it](#security).
+After looking at a secure example, we will [weaken and then exploit
+it](#security).
 
 ```ocaml
 let render param =
@@ -141,6 +141,8 @@ and not supported by Dream.
 
 **See also:**
 
+- [**`w-template-files`**](../w-template-files) moves the template into a
+  separate `.eml.html` to avoid problems with editor support.
 - [**`w-tyxml`**](../w-tyxml#files) shows how to use
   [TyXML](https://github.com/ocsigen/tyxml), a different templater that uses
   OCaml's type system to prevent emitting many kinds of invalid HTML.

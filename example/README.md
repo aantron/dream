@@ -97,6 +97,8 @@ if something is missing!
 
 <br>
 
+- [**`w-template-files`**](w-template-files#files) &nbsp;&mdash;&nbsp;
+  templates in separate `.html` files for better editor support.
 - [**`w-graphql-subscription`**](w-graphql-subscription#files)
   &nbsp;&mdash;&nbsp; GraphQL subscriptions.
 - [**`w-chat`**](w-chat#files) &nbsp;&mdash;&nbsp; a chat room based on
