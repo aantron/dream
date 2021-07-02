@@ -31,8 +31,12 @@ let sql_pool ?size uri =
   begin match !pool_cell with
   | Some pool -> inner_handler (Dream.with_local pool_variable pool request)
   | None ->
+    let parsed_uri = Uri.of_string uri in
+    if Uri.scheme parsed_uri = Some "sqlite" then
+      log.warning (fun log -> log ~request
+        "Dream.sql_pool: 'sqlite' is not a valid scheme; did you mean 'sqlite3'?");
     let pool =
-      Caqti_lwt.connect_pool ?max_size:size ~post_connect (Uri.of_string uri) in
+      Caqti_lwt.connect_pool ?max_size:size ~post_connect parsed_uri in
     match pool with
     | Ok pool ->
       pool_cell := Some pool;
