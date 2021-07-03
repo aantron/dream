@@ -53,24 +53,23 @@ let to_set_cookie
     ?expires ?max_age ?domain ?path ?secure ?http_only ?same_site name value =
 
   let expires =
-    match expires with
+    match Option.bind expires Ptime.of_float_s with
     | None -> ""
     | Some time ->
-      let time = Unix.gmtime time in
       let weekday =
-        match time.tm_wday with
-        | 0 -> "Sun" | 1 -> "Mon" | 2 -> "Tue" | 3 -> "Wed" | 4 -> "Thu"
-        | 5 -> "Fri" | 6 -> "Sat"
-        | _ -> assert false
+        match Ptime.weekday time with
+        | `Sun -> "Sun" | `Mon -> "Mon" | `Tue -> "Tue" | `Wed -> "Wed" | `Thu -> "Thu"
+        | `Fri -> "Fri" | `Sat -> "Sat"
       in
+      let ((y, m, d), ((hh, mm, ss), _tz_offset_s)) = Ptime.to_date_time time in
       let month =
-        match time.tm_mon with
+        match m with
         | 0 -> "Jan" | 1 -> "Feb" | 2 -> "Mar" | 3 -> "Apr" | 4 -> "May"
         | 5 -> "Jun" | 6 -> "Jul" | 7 -> "Aug" | 8 -> "Sep" | 9 -> "Oct"
         | 10 -> "Nov" | 11 -> "Dec"
         | _ -> assert false
       in
-      (* Unix.gmtime docs give range 0..60 for tm_sec, accounting for leap
+      (* [Ptime.to_date_time] docs give range 0..60 for [ss], accounting for leap
          seconds. However, RFC 6265 §5.1.1 states:
 
          5.  Abort these steps and fail to parse the cookie-date if:
@@ -81,18 +80,14 @@ let to_set_cookie
 
          See https://tools.ietf.org/html/rfc6265#section-5.1.1.
 
-         Even though Unix time does not account for leap seconds, in case I
+         Even though [Ptime] time does not account for leap seconds, in case I
          misunderstand the gmtime API, system differences, or future
          refactoring, make sure no leap seconds creep into the output. *)
       let seconds =
-        if time.tm_sec < 60 then
-          time.tm_sec
-        else
-          59
+        if ss < 60 then ss else 59
       in
       Printf.sprintf "; Expires=%s, %02i %s %i %02i:%02i:%02i GMT"
-        weekday time.tm_mday month (time.tm_year + 1900)
-        time.tm_hour time.tm_min seconds
+        weekday d month y hh mm seconds
   in
 
   let max_age =

@@ -71,6 +71,7 @@ depends: [
   "ssl" {>= "0.5.8"}  # Ssl.get_negotiated_alpn_protocol.
   "uri" {>= "4.2.0"}
   "yojson"  # ...
+  "ptime"  # time and date
 
   # Currently vendored.
   # "gluten"
