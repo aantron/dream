@@ -64,6 +64,7 @@ depends: [
   "lwt_ssl"
   "logs" {>= "0.5.0"}
   "magic-mime"
+  "mirage-clock"
   "mirage-crypto" {>= "0.8.1"}  # AES-256-GCM.
   "mirage-crypto-rng" {>= "0.8.0"}  # Signature of initialize.
   "multipart_form" {>= "0.3.0"}
@@ -72,7 +73,6 @@ depends: [
   "uri" {>= "4.2.0"}
   "yojson"  # ...
   "ptime" {>= "0.8.1"} # time and date
-  "mirage-clock"
 
   # Currently vendored.
   # "gluten"

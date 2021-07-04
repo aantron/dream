@@ -5,9 +5,9 @@
   digestif
   dream.cipher
   dream.pure
+  mirage-clock
   multipart_form
   multipart_form.lwt
-  mirage-clock
   ptime
   unstrctrd
   fmt
