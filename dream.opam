@@ -72,6 +72,7 @@ depends: [
   "uri" {>= "4.2.0"}
   "yojson"  # ...
   "ptime" {>= "0.8.1"} # time and date
+  "mirage-clock"
 
   # Currently vendored.
   # "gluten"

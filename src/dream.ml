@@ -18,10 +18,11 @@ let next ~buffer ~close ~exn request =
   next ~buffer ~close ~exn request
 
 include Dream__middleware.Log
-include Dream__middleware.Echo
+include Dream__middleware.Log.Make (Ptime_clock)
 
-let logger =
-  Dream__middleware.Log.logger
+let () = initialize ()
+
+include Dream__middleware.Echo
 
 let default_log =
   Dream__middleware.Log.sub_log (Logs.Src.name Logs.default)
@@ -35,6 +36,7 @@ include Dream__middleware.Router
 include Dream__middleware.Static
 
 include Dream__middleware.Session
+include Dream__middleware.Session.Make (Ptime_clock)
 let sql_sessions = Dream__sql.Session.middleware
 
 include Dream__middleware.Flash_message
@@ -80,3 +82,12 @@ let log =
   Dream__middleware.Log.convenience_log
 
 include Dream__middleware.Tag
+
+let ( <.> ) f g = fun x -> f (g x)
+let now = Ptime.to_float_s <.> Ptime.v <.> Ptime_clock.now_d_ps
+
+let form = form ~now
+let multipart = multipart ~now
+let csrf_token = csrf_token ~now
+let verify_csrf_token = verify_csrf_token ~now
+let form_tag = form_tag ~now

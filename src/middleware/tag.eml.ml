@@ -13,7 +13,7 @@ end
 
 (* TODO Include the path prefix. *)
 let form_tag
-    ?(method_ = `POST) ?target ?enctype ?(csrf_token = true) ~action request =
+    ~now ?(method_ = `POST) ?target ?enctype ?(csrf_token = true) ~action request =
 
   let target =
     match target with
@@ -29,6 +29,6 @@ let form_tag
     method="<%s! Dream.method_to_string method_ %>"
     action="<%s action %>"<%s! target %><%s! enctype %>>
 % if csrf_token then begin
-%   let token = Csrf.csrf_token request in
+%   let token = Csrf.csrf_token ~now request in
     <input name="<%s! Csrf.field_name %>" type="hidden" value="<%s! token %>">
 % end;

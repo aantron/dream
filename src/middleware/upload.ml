@@ -87,7 +87,7 @@ type multipart_form =
   (string * ((string option * string) list)) list
 module Map = Map.Make (String)
 
-let multipart request =
+let multipart ~now request =
   let content_type = match Dream.header "content-type" request with
     | Some content_type ->
       Result.to_option (Multipart_form.Content_type.of_string (content_type ^ "\r\n"))
@@ -124,7 +124,7 @@ let multipart request =
           | [Some "", ""] -> name, []
           | _ -> name, List.rev values)
       in
-      Form.sort_and_check_form
+      Form.sort_and_check_form ~now
         (function
         | [None, value] -> value
         | _ -> "")

@@ -25,14 +25,14 @@ type 'a form_result = [
   | `Wrong_content_type
 ]
 
-let sort_and_check_form to_value form request =
+let sort_and_check_form ~now to_value form request =
   let csrf_token, form =
     List.partition (fun (name, _) -> name = Csrf.field_name) form in
   let form = sort form in
 
   match csrf_token with
   | [_, value] ->
-    begin match%lwt Csrf.verify_csrf_token request (to_value value) with
+    begin match%lwt Csrf.verify_csrf_token ~now request (to_value value) with
     | `Ok ->
       Lwt.return (`Ok form)
 
@@ -54,12 +54,12 @@ let sort_and_check_form to_value form request =
     log.warning (fun log -> log ~request "CSRF token duplicated");
     Lwt.return (`Many_tokens form)
 
-let form request =
+let form ~now request =
   match Dream.header "Content-Type" request with
   | Some "application/x-www-form-urlencoded" ->
     let%lwt body = Dream.body request in
     let form = Dream__pure.Formats.from_form_urlencoded body in
-    sort_and_check_form (fun string -> string) form request
+    sort_and_check_form ~now (fun string -> string) form request
 
   | _ ->
     log.warning (fun log -> log ~request
