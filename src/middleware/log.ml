@@ -351,8 +351,7 @@ let initialize_log
   ()
 
 module Make (Pclock : Mirage_clock.PCLOCK) = struct
-  let ( <.> ) f g = fun x -> f (g x)
-  let now = Ptime.to_float_s <.> Ptime.v <.> Pclock.now_d_ps
+  let now () = Ptime.to_float_s (Ptime.v (Pclock.now_d_ps ()))
 
   let initializer_ = lazy begin
     if !enable then begin

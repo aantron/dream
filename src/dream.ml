@@ -83,8 +83,7 @@ let log =
 
 include Dream__middleware.Tag
 
-let ( <.> ) f g = fun x -> f (g x)
-let now = Ptime.to_float_s <.> Ptime.v <.> Ptime_clock.now_d_ps
+let now () = Ptime.to_float_s (Ptime.v (Ptime_clock.now_d_ps ()))
 
 let form = form ~now
 let multipart = multipart ~now

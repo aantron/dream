@@ -330,8 +330,7 @@ let two_weeks =
   60. *. 60. *. 24. *. 7. *. 2.
 
 module Make (Pclock : Mirage_clock.PCLOCK) = struct
-  let ( <.> ) f g = fun x -> f (g x)
-  let now = Ptime.to_float_s <.> Ptime.v <.> Pclock.now_d_ps
+  let now () = Ptime.to_float_s (Ptime.v (Pclock.now_d_ps ()))
 
   let memory_sessions ?(lifetime = two_weeks) =
     middleware (Memory.back_end ~now lifetime)
