@@ -193,12 +193,6 @@ let reporter ~now () =
 
   {Logs.report}
 
-type log_level = [
-  | `Error
-  | `Warning
-  | `Info
-  | `Debug
-]
 
 (* Lazy initialization upon first use or call to initialize. *)
 let enable =
@@ -214,6 +208,13 @@ let set_async_exception_hook =
   ref true
 
 let _initialized = ref None
+
+type log_level = [
+  | `Error
+  | `Warning
+  | `Info
+  | `Debug
+]
 
 exception Logs_are_not_initialized
 
@@ -376,83 +377,85 @@ module Make (Pclock : Mirage_clock.PCLOCK) = struct
       _initialized := Some initializer_
     end
 
-  (* The requst logging middleware. *)
-  let logger next_handler request =
-  
-    let start = now () in
-  
-    (* Turn on backtrace recording. *)
-    if !set_printexc then begin
-      Printexc.record_backtrace true;
-      set_printexc := false
-    end;
-  
-    (* Identify the request in the log. *)
-    let user_agent =
-      Dream.headers "User-Agent" request
-      |> String.concat " "
-    in
-  
-    log.info (fun log ->
-      log ~request "%s %s %s %s"
-        (Dream.method_to_string (Dream.method_ request))
-        (Dream.target request)
-        (Dream.client request)
-        user_agent);
-  
-    (* Call the rest of the app. *)
-    Lwt.try_bind
-      (fun () ->
-        next_handler request)
-      (fun response ->
-        (* Log the elapsed time. If the response is a redirection, log the
-           target. *)
-        let location =
-          if Dream.is_redirection (Dream.status response) then
-            match Dream.header "Location" response with
-            | Some location -> " " ^ location
-            | None -> ""
-          else ""
-        in
-  
-        let status = Dream.status response in
-  
-        let report :
-          (?request:Dream.request ->
-            ('a, Format.formatter, unit, 'b) format4 -> 'a) -> 'b =
-            fun log ->
-          let elapsed = now () -. start in
-          log ~request "%i%s in %.0f μs"
-            (Dream.status_to_int status)
-            location
-            (elapsed *. 1e6)
-        in
-  
-        begin
-          if Dream.is_server_error status then
-            log.error report
+(* The requst logging middleware. *)
+let logger next_handler request =
+
+  let start = now () in
+
+  (* Turn on backtrace recording. *)
+  if !set_printexc then begin
+    Printexc.record_backtrace true;
+    set_printexc := false
+  end;
+
+  (* Identify the request in the log. *)
+  let user_agent =
+    Dream.headers "User-Agent" request
+    |> String.concat " "
+  in
+
+  log.info (fun log ->
+    log ~request "%s %s %s %s"
+      (Dream.method_to_string (Dream.method_ request))
+      (Dream.target request)
+      (Dream.client request)
+      user_agent);
+
+  (* Call the rest of the app. *)
+  Lwt.try_bind
+    (fun () ->
+      next_handler request)
+    (fun response ->
+      (* Log the elapsed time. If the response is a redirection, log the
+         target. *)
+      let location =
+        if Dream.is_redirection (Dream.status response) then
+          match Dream.header "Location" response with
+          | Some location -> " " ^ location
+          | None -> ""
+        else ""
+      in
+
+      let status = Dream.status response in
+
+      let report :
+        (?request:Dream.request ->
+          ('a, Format.formatter, unit, 'b) format4 -> 'a) -> 'b =
+          fun log ->
+        let elapsed = now () -. start in
+        log ~request "%i%s in %.0f μs"
+          (Dream.status_to_int status)
+          location
+          (elapsed *. 1e6)
+      in
+
+      begin
+        if Dream.is_server_error status then
+          log.error report
+        else
+          if Dream.is_client_error status then
+            log.warning report
           else
-            if Dream.is_client_error status then
-              log.warning report
-            else
-              log.info report
-        end;
-  
-        Lwt.return response)
-  
-      (fun exn ->
-        let backtrace = Printexc.get_backtrace () in
-        (* In case of exception, log the exception. We alsp log the backtrace
-           here, even though it is likely to be redundant, because some OCaml
-           libraries install exception printers that will clobber the backtrace
-           right during Printexc.to_string! *)
-        log.warning (fun log ->
-          log ~request "Aborted by: %s" (Printexc.to_string exn));
-  
-        backtrace
-        |> iter_backtrace (fun line -> log.warning (fun log -> log "%s" line));
-  
-        Lwt.fail exn)
+            log.info report
+      end;
+
+      Lwt.return response)
+
+    (fun exn ->
+      let backtrace = Printexc.get_backtrace () in
+      (* In case of exception, log the exception. We alsp log the backtrace
+         here, even though it is likely to be redundant, because some OCaml
+         libraries install exception printers that will clobber the backtrace
+         right during Printexc.to_string! *)
+      log.warning (fun log ->
+        log ~request "Aborted by: %s" (Printexc.to_string exn));
+
+      backtrace
+      |> iter_backtrace (fun line -> log.warning (fun log -> log "%s" line));
+
+      Lwt.fail exn)
+
+
 end
 
 (* TODO DOC Include logging itself in the timing. Or? Isn't that pointless?

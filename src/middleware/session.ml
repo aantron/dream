@@ -334,7 +334,7 @@ module Make (Pclock : Mirage_clock.PCLOCK) = struct
 
   let memory_sessions ?(lifetime = two_weeks) =
     middleware (Memory.back_end ~now lifetime)
-  
+
   let cookie_sessions ?(lifetime = two_weeks) =
     middleware (Cookie.back_end ~now lifetime)
 end
