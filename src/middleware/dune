@@ -12,8 +12,9 @@
   fmt.tty
   logs
   lwt
-  lwt.unix
   magic-mime
+  mirage-clock
+  ptime
   uri
   yojson
  )

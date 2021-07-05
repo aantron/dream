@@ -133,24 +133,24 @@ struct
     |> fun dictionary -> session.payload <- dictionary;
     Lwt.return_unit
 
-  let invalidate hash_table lifetime operations session =
+  let invalidate hash_table ~now lifetime operations session =
     Hashtbl.remove hash_table !session.id;
-    session := create hash_table (Unix.gettimeofday () +. lifetime);
+    session := create hash_table (now () +. lifetime);
     operations.dirty <- true;
     Lwt.return_unit
 
-  let operations hash_table lifetime session dirty =
+  let operations ~now hash_table lifetime session dirty =
     let rec operations = {
       put =
         (fun name value -> put !session name value);
       invalidate =
-        (fun () -> invalidate hash_table lifetime operations session);
+        (fun () -> invalidate ~now hash_table lifetime operations session);
       dirty;
     } in
     operations
 
-  let load hash_table lifetime request =
-    let now = Unix.gettimeofday () in
+  let load ~now:gettimeofday hash_table lifetime request =
+    let now = gettimeofday () in
 
     let valid_session =
       Dream.cookie ~decrypt:false session_cookie request
@@ -179,23 +179,23 @@ struct
     in
 
     let session = ref session in
-    Lwt.return (operations hash_table lifetime session dirty, session)
+    Lwt.return (operations ~now:gettimeofday hash_table lifetime session dirty, session)
 
-  let send (operations, session) request response =
+  let send ~now (operations, session) request response =
     if not operations.dirty then
       Lwt.return response
     else
       let id = version_session_id !session.id in
-      let max_age = !session.expires_at -. Unix.gettimeofday () in
+      let max_age = !session.expires_at -. now () in
       Lwt.return
         (Dream.set_cookie
           session_cookie id request response ~encrypt:false ~max_age)
 
-  let back_end lifetime =
+  let back_end ~now lifetime =
     let hash_table = Hashtbl.create 256 in
     {
-      load = load hash_table lifetime;
-      send;
+      load = load ~now hash_table lifetime;
+      send = send ~now;
     }
 end
 
@@ -223,21 +223,21 @@ struct
     operations.dirty <- true;
     Lwt.return_unit
 
-  let invalidate lifetime operations session =
-    session := create (Unix.gettimeofday () +. lifetime);
+  let invalidate ~now lifetime operations session =
+    session := create (now () +. lifetime);
     operations.dirty <- true;
     Lwt.return_unit
 
-  let operations lifetime session dirty =
+  let operations ~now lifetime session dirty =
     let rec operations = {
       put = (fun name value -> put operations !session name value);
-      invalidate = (fun () -> invalidate lifetime operations session);
+      invalidate = (fun () -> invalidate ~now lifetime operations session);
       dirty;
     } in
     operations
 
-  let load lifetime request =
-    let now = Unix.gettimeofday () in
+  let load ~now:gettimeofday lifetime request =
+    let now = gettimeofday () in
 
     let valid_session =
       Dream.cookie session_cookie request
@@ -291,13 +291,13 @@ struct
     in
 
     let session = ref session in
-    Lwt.return (operations lifetime session dirty, session)
+    Lwt.return (operations ~now:gettimeofday lifetime session dirty, session)
 
-  let send (operations, session) request response =
+  let send ~now (operations, session) request response =
     if not operations.dirty then
       Lwt.return response
     else
-      let max_age = !session.expires_at -. Unix.gettimeofday () in
+      let max_age = !session.expires_at -. now () in
       let value =
         `Assoc [
           "id", `String !session.id;
@@ -312,9 +312,9 @@ struct
       Lwt.return
         (Dream.set_cookie session_cookie value request response ~max_age)
 
-  let back_end lifetime = {
-    load = load lifetime;
-    send;
+  let back_end ~now lifetime = {
+    load = load ~now lifetime;
+    send = send ~now;
   }
 end
 
@@ -329,11 +329,15 @@ let {middleware; getter} =
 let two_weeks =
   60. *. 60. *. 24. *. 7. *. 2.
 
+module Make (Pclock : Mirage_clock.PCLOCK) = struct
+let now () = Ptime.to_float_s (Ptime.v (Pclock.now_d_ps ()))
+
 let memory_sessions ?(lifetime = two_weeks) =
-  middleware (Memory.back_end lifetime)
+  middleware (Memory.back_end ~now lifetime)
 
 let cookie_sessions ?(lifetime = two_weeks) =
-  middleware (Cookie.back_end lifetime)
+  middleware (Cookie.back_end ~now lifetime)
+end
 
 let session name request =
   List.assoc_opt name (!(snd (getter request)).payload)
