@@ -5,7 +5,7 @@
 
 
 
-type bigstring = Lwt_bytes.t
+type bigstring = Bigstringaf.t
 
 (* The stream representation can be replaced by a record with mutable fields for
    0-allocation streaming. *)
@@ -110,10 +110,10 @@ let body : body_cell -> string Lwt.t = fun body_cell ->
     let promise, resolver = Lwt.wait () in
 
     let length = ref 0 in
-    let buffer = ref (Lwt_bytes.create 4096) in
+    let buffer = ref (Bigstringaf.create 4096) in
 
     let close () =
-      let result = Lwt_bytes.to_string (Lwt_bytes.proxy !buffer 0 !length) in
+      let result = Bigstringaf.to_string (Bigstringaf.sub !buffer ~off:0 ~len:!length) in
 
       if !length = 0 then
         body_cell := `Empty
@@ -134,13 +134,13 @@ let body : body_cell -> string Lwt.t = fun body_cell ->
     and bigstring chunk offset chunk_length =
       let new_length = !length + chunk_length in
 
-      if new_length > Lwt_bytes.length !buffer then begin
-        let new_buffer = Lwt_bytes.create (new_length * 2) in
-        Lwt_bytes.blit !buffer 0 new_buffer 0 !length;
+      if new_length > Bigstringaf.length !buffer then begin
+        let new_buffer = Bigstringaf.create (new_length * 2) in
+        Bigstringaf.blit !buffer 0 new_buffer 0 !length;
         buffer := new_buffer
       end;
 
-      Lwt_bytes.blit chunk offset !buffer !length chunk_length;
+      Bigstringaf.blit chunk offset !buffer !length chunk_length;
       length := new_length;
 
       loop ()
@@ -148,13 +148,13 @@ let body : body_cell -> string Lwt.t = fun body_cell ->
     and string chunk offset chunk_length =
       let new_length = !length + chunk_length in
 
-      if new_length > Lwt_bytes.length !buffer then begin
-        let new_buffer = Lwt_bytes.create (new_length * 2) in
-        Lwt_bytes.blit !buffer 0 new_buffer 0 !length;
+      if new_length > Bigstringaf.length !buffer then begin
+        let new_buffer = Bigstringaf.create (new_length * 2) in
+        Bigstringaf.blit !buffer 0 new_buffer 0 !length;
         buffer := new_buffer
       end;
 
-      Lwt_bytes.blit_from_bytes
+      Bigstringaf.blit_from_bytes
         (Bytes.unsafe_of_string chunk) offset !buffer !length chunk_length;
       length := new_length;
 
@@ -201,7 +201,7 @@ let read : body_cell -> string option Lwt.t = fun body_cell ->
 
     and bigstring chunk offset length =
       Lwt.wakeup_later resolver
-        (Some (Lwt_bytes.to_string (Lwt_bytes.proxy chunk offset length)))
+        (Some (Bigstringaf.to_string (Bigstringaf.sub chunk ~off:offset ~len:length)))
 
     and string chunk offset length =
       let chunk =
