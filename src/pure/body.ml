@@ -136,11 +136,11 @@ let body : body_cell -> string Lwt.t = fun body_cell ->
 
       if new_length > Bigstringaf.length !buffer then begin
         let new_buffer = Bigstringaf.create (new_length * 2) in
-        Bigstringaf.blit !buffer 0 new_buffer 0 !length;
+        Bigstringaf.blit !buffer ~src_off:0 new_buffer ~dst_off:0 ~len:!length;
         buffer := new_buffer
       end;
 
-      Bigstringaf.blit chunk offset !buffer !length chunk_length;
+      Bigstringaf.blit chunk ~src_off:offset !buffer ~dst_off:!length ~len:chunk_length;
       length := new_length;
 
       loop ()
@@ -150,12 +150,12 @@ let body : body_cell -> string Lwt.t = fun body_cell ->
 
       if new_length > Bigstringaf.length !buffer then begin
         let new_buffer = Bigstringaf.create (new_length * 2) in
-        Bigstringaf.blit !buffer 0 new_buffer 0 !length;
+        Bigstringaf.blit !buffer ~src_off:0 new_buffer ~dst_off:0 ~len:!length;
         buffer := new_buffer
       end;
 
       Bigstringaf.blit_from_bytes
-        (Bytes.unsafe_of_string chunk) offset !buffer !length chunk_length;
+        (Bytes.unsafe_of_string chunk) ~src_off:offset !buffer ~dst_off:!length ~len:chunk_length;
       length := new_length;
 
       loop ()
