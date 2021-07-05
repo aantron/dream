@@ -194,6 +194,7 @@ let reporter ~now () =
   {Logs.report}
 
 
+
 (* Lazy initialization upon first use or call to initialize. *)
 let enable =
   ref true
@@ -454,9 +455,9 @@ let logger next_handler request =
       |> iter_backtrace (fun line -> log.warning (fun log -> log "%s" line));
 
       Lwt.fail exn)
-
-
 end
+
+
 
 (* TODO DOC Include logging itself in the timing. Or? Isn't that pointless?
    End-to -end timing should include the HTTP parser as well. The logger

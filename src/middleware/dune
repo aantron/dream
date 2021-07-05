@@ -5,16 +5,16 @@
   digestif
   dream.cipher
   dream.pure
-  mirage-clock
   multipart_form
   multipart_form.lwt
-  ptime
   unstrctrd
   fmt
   fmt.tty
   logs
   lwt
   magic-mime
+  mirage-clock
+  ptime
   uri
   yojson
  )
