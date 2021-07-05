@@ -92,7 +92,7 @@ let reporter ~now () =
       (* Write the message. *)
       Lwt.async begin fun () ->
         Lwt.finalize
-          (fun () -> Lwt_io.(write stderr) message)
+          (fun () -> prerr_string message ; Lwt.return_unit)
           (fun () ->
             over ();
             Lwt.return_unit)
