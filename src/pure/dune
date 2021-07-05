@@ -3,6 +3,7 @@
  (name dream__pure)
  (libraries
   base64
+  bigstringaf
   dream.cipher
   multipart_form
   hmap
