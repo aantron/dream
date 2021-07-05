@@ -109,7 +109,7 @@ let reporter ~now () =
 
       (* Format the current local time. For the millisecond fraction, be careful
          of rounding 999.5+ to 1000 on output. *)
-      let time ~now =
+      let time =
         let unix_time =
           now () in
         let time = Option.get (Ptime.of_float_s unix_time) in
@@ -185,7 +185,7 @@ let reporter ~now () =
       (* The formatting proper. *)
       Format.kfprintf write formatter
         ("%a %a%s %a%a @[" ^^ format_and_arguments ^^ "@]@.")
-        Fmt.(styled `Faint string) (time ~now)
+        Fmt.(styled `Faint string) time
         Fmt.(styled `White string) source_prefix source
         Fmt.(styled level_style string) level
         Fmt.(styled request_style (styled `Italic string)) request_id
