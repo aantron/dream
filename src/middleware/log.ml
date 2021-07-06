@@ -90,14 +90,8 @@ let reporter ~now () =
       let message = flush () in
 
       (* Write the message. *)
-      Lwt.async begin fun () ->
-        Lwt.finalize
-          (fun () -> prerr_string message ; Lwt.return_unit)
-          (fun () ->
-            over ();
-            Lwt.return_unit)
-      end;
-
+      prerr_string message;
+      over ();
       k ()
     in
 
