@@ -1,0 +1,13 @@
+# esy build environment
+_esy/
+
+# esy dependencies
+node_modules/
+
+# git
+.git/
+.gitignore
+
+# Development
+Dockerfile
+docker-compose.yml
