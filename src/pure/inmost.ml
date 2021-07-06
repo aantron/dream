@@ -286,7 +286,7 @@ let write_buffer ?(offset = 0) ?length message chunk =
   let length =
     match length with
     | Some length -> length
-    | None -> Lwt_bytes.length chunk - offset
+    | None -> Bigstringaf.length chunk - offset
   in
   Body.write_bigstring chunk offset length message.body
 
