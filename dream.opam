@@ -50,7 +50,7 @@ depends: [
   "base-unix"
   "base64" {>= "3.1.0"}  # Base64.encode_string.
   "bigarray-compat"
-  "caqti" {>= "1.4.0"}  # ~post_connect.
+  "caqti" {>= "1.6.0"}  # https://github.com/aantron/dream/issues/44.
   "caqti-lwt"
   "conf-libev" {os != "win32"}
   "cstruct" {>= "6.0.0"}
@@ -64,6 +64,7 @@ depends: [
   "lwt_ssl"
   "logs" {>= "0.5.0"}
   "magic-mime"
+  "mirage-clock"
   "mirage-crypto" {>= "0.8.1"}  # AES-256-GCM.
   "mirage-crypto-rng" {>= "0.8.0"}  # Signature of initialize.
   "multipart_form" {>= "0.3.0"}
@@ -71,6 +72,7 @@ depends: [
   "ssl" {>= "0.5.8"}  # Ssl.get_negotiated_alpn_protocol.
   "uri" {>= "4.2.0"}
   "yojson"  # ...
+  "ptime" {>= "0.8.1"} # time and date
 
   # Currently vendored.
   # "gluten"
@@ -85,20 +87,15 @@ depends: [
   # Dependencies of vendored packages.
   "angstrom" {>= "0.14.0"}
   "bigstringaf" {>= "0.5.0"}  # h2.
-  "digestif" {>= "0.7"}  # websocket/af, sha1.
+  "digestif" {>= "0.7.2"}  # websocket/af, sha1, default implementation.
   "faraday" {>= "0.6.1"}
   "faraday-lwt-unix"
   "psq"  # h2.
   "result"  # http/af, websocket/af.
 
-  # https://github.com/ocaml-ppx/ppxlib/issues/221.
-  # esy appears to ignore conflicts.
-  "ppxlib" {< "0.21.0" | > "0.22.0"}
-
   # Testing, development.
   "alcotest" {with-test}
-  # Commented out because of https://github.com/ocaml-ppx/ppxlib/issues/221.
-  # "bisect_ppx" {with-test & >= "2.5.0"}  # --instrument-with.
+  "bisect_ppx" {with-test & >= "2.5.0"}  # --instrument-with.
   "caqti-driver-sqlite3" {with-test}
   "crunch" {with-test}
   "lambdasoup" {with-test}

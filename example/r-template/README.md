@@ -9,9 +9,9 @@ Reason and HTML, and offer some built-in
 ```reason
 let greet = who => {
   <html>
-    <body>
-      <h1>Good morning, <%s who %>!</h1>
-    </body>
+  <body>
+    <h1>Good morning, <%s who %>!</h1>
+  </body>
   </html>
 };
 

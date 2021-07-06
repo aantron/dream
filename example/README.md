@@ -97,8 +97,14 @@ if something is missing!
 
 <br>
 
+- [**`w-template-files`**](w-template-files#files) &nbsp;&mdash;&nbsp;
+  templates in separate `.html` files for better editor support.
 - [**`w-graphql-subscription`**](w-graphql-subscription#files)
   &nbsp;&mdash;&nbsp; GraphQL subscriptions.
+- [**`w-chat`**](w-chat#files) &nbsp;&mdash;&nbsp; a chat room based on
+  WebSockets.
+- [**`w-content-security-policy`**](w-content-security-policy#files)
+  &nbsp;&mdash;&nbsp; sandboxes Web pages using `Content-Security-Policy`.
 - [**`w-esy`**](w-esy#files) &nbsp;&mdash;&nbsp; gives detail on packaging with
   [esy](https://esy.sh/), an npm-like package manager.
 - [**`w-one-binary`**](w-one-binary#files) &nbsp;&mdash;&nbsp; bakes static

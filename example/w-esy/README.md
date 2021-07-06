@@ -14,6 +14,10 @@ and looks like this:
     "@opam/dune": "^2.0",
     "ocaml": "4.12.x"
   },
+  "devDependencies": {
+    "@opam/ocaml-lsp-server": "*",
+    "@opam/ocamlfind-secondary": "*"
+  },
   "resolutions": {
     "@opam/conf-libev": "esy-packages/libev:package.json#0b5eb6685b688649045aceac55dc559f6f21b829"
   },
@@ -71,6 +75,11 @@ Many of the packages you can obtain with esy are hosted in
 [opam](https://opam.ocaml.org/), the OCaml package repository. In esy, their
 names are prefixed with `@opam`, like `@opam/dream`. You can search the packages
 [here](https://opam.ocaml.org/packages/).
+
+The `devDependencies` field in this example lists packages needed to get
+autocompletion working with esy in Visual Studio Code. You must also open the
+example in its own workspace, i.e. the root of your Code workspace must be the
+example directory.
 
 <br>
 

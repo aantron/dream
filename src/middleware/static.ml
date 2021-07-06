@@ -76,12 +76,19 @@ let static ?(loader = from_filesystem) local_root = fun request ->
 
       let%lwt response = loader local_root path request in
 
-      (* TODO Can use a concise helper here. *)
       let response =
         if Dream.has_header "Content-Type" response then
           response
         else
-          Dream.add_header "Content-Type" (Magic_mime.lookup path) response
+          match Dream.status response with
+          | `OK
+          | `Non_Authoritative_Information
+          | `No_Content
+          | `Reset_Content
+          | `Partial_Content ->
+            Dream.add_header "Content-Type" (Magic_mime.lookup path) response
+          | _ ->
+            response
       in
 
       Lwt.return response

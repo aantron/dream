@@ -5,15 +5,30 @@
 
 
 
-module Dream = Dream__pure.Formats
+module Dream =
+struct
+  include Dream__pure.Formats
+  include Dream__pure.Method
+end
 
 (* TODO Include the path prefix. *)
-let form_tag ?enctype ~action request =
+let form_tag
+    ~now ?(method_ = `POST) ?target ?enctype ?(csrf_token = true) ~action request =
+
+  let target =
+    match target with
+    | Some target -> " target=\"" ^ Dream.html_escape target ^ "\""
+    | None -> ""
+  in
   let enctype =
     match enctype with
     | Some _ -> " enctype=\"multipart/form-data\""
     | None -> ""
   in
-  let token = Csrf.csrf_token request in
-  <form method="POST" action="<%s action %>"<%s! enctype %>>
-  <input name="<%s! Csrf.field_name %>" type="hidden" value="<%s! token %>">
+  <form
+    method="<%s! Dream.method_to_string method_ %>"
+    action="<%s action %>"<%s! target %><%s! enctype %>>
+% if csrf_token then begin
+%   let token = Csrf.csrf_token ~now request in
+    <input name="<%s! Csrf.field_name %>" type="hidden" value="<%s! token %>">
+% end;

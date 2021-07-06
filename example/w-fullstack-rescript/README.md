@@ -5,8 +5,8 @@
 This example shares a toy function between client and server using
 [ReScript](https://rescript-lang.org/). The function is in
 [common/common.ml](https://github.com/aantron/dream/blob/master/example/w-fullstack-rescript/common/common.ml).
-It's in OCaml syntax because the ReScript syntax is not available for the server
-side:
+It's in OCaml syntax because the ReScript syntax is not available when compiling
+to native code:
 
 ```ocaml
 let greet = function

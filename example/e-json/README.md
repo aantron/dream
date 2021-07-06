@@ -17,7 +17,7 @@ type message_object = {
 let () =
   Dream.run
   @@ Dream.logger
-  @@ Dream.origin_referer_check
+  @@ Dream.origin_referrer_check
   @@ Dream.router [
 
     Dream.post "/"
@@ -94,7 +94,7 @@ Content-Type: application/json
 
 ## Security
 
-[`Dream.origin_referer_check`](https://aantron.github.io/dream/#val-origin_referer_check)
+[`Dream.origin_referrer_check`](https://aantron.github.io/dream/#val-origin_referrer_check)
 implements the
 [OWASP Verifying Origin With Standard Headers](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#verifying-origin-with-standard-headers)
 CSRF protection technique. It doesn't protect `GET` requests, so they shouldn't

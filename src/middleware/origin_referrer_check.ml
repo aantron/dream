@@ -13,7 +13,7 @@ let log =
   Log.sub_log "dream.origin"
 
 (* TODO Rename all next_handler to inner_handler. *)
-let origin_referer_check inner_handler request =
+let origin_referrer_check inner_handler request =
 
   match Dream.method_ request with
   | `GET | `HEAD ->

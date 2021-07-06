@@ -8,19 +8,19 @@ we can build a [secure form](https://aantron.github.io/dream/#forms):
 ```ocaml
 let show_form ?message request =
   <html>
-    <body>
+  <body>
 
-%     begin match message with
-%     | None -> ()
-%     | Some message ->
-        <p>You entered: <b><%s message %>!</b></p>
-%     end;
+%   begin match message with
+%   | None -> ()
+%   | Some message ->
+      <p>You entered: <b><%s message %>!</b></p>
+%   end;
 
-      <%s! Dream.form_tag ~action:"/" request %>
-        <input name="message" autofocus>
-      </form>
+    <%s! Dream.form_tag ~action:"/" request %>
+      <input name="message" autofocus>
+    </form>
 
-    </body>
+  </body>
   </html>
 
 let () =

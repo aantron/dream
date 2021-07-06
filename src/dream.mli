@@ -434,7 +434,13 @@ val html :
   ?headers:(string * string) list ->
     string -> response promise
 (** Same as {!Dream.respond}, but adds [Content-Type: text/html; charset=utf-8].
-    See {!Dream.text_html}. *)
+    See {!Dream.text_html}.
+
+    As your Web app develops, consider adding [Content-Security-Policy] headers,
+    as described in example
+    {{:https://github.com/aantron/dream/tree/master/example/w-content-security-policy#files}
+    [w-content-security-policy]}. These headers are completely optional, but
+    they can provide an extra layer of defense for a mature app. *)
 
 val json :
   ?status:status ->
@@ -733,7 +739,7 @@ val write_buffer :
     {{:https://github.com/aantron/dream/tree/master/example/e-json#files}
     [e-json]}. *)
 
-val origin_referer_check : middleware
+val origin_referrer_check : middleware
 (** CSRF protection for AJAX requests. Either the method must be [`GET] or
     [`HEAD], or:
 
@@ -749,7 +755,7 @@ val origin_referer_check : middleware
     OWASP {i Verifying Origin With Standard Headers}} CSRF defense-in-depth
     technique, which is good enough for basic usage. Do not allow [`GET] or
     [`HEAD] requests to trigger important side effects if relying only on
-    {!Dream.origin_referer_check}.
+    {!Dream.origin_referrer_check}.
 
     Future extensions to this function may use [X-Forwarded-Host] or host
     whitelists.
@@ -958,7 +964,7 @@ val upload_part : request -> string option promise
 
     - Form tag generator {!Dream.form_tag} generates and inserts a CSRF token
       that {!Dream.val-form} and {!Dream.val-multipart} transparently verify.
-    - AJAX can be protected from CSRF by {!Dream.origin_referer_check}.
+    - AJAX can be protected from CSRF by {!Dream.origin_referrer_check}.
 
     CSRF functions are exposed for creating custom schemes, and for
     defense-in-depth purposes. See
@@ -1081,7 +1087,10 @@ let render message =
     [<script>] tags. *)
 
 val form_tag :
+  ?method_:method_ ->
+  ?target:string ->
   ?enctype:[ `Multipart_form_data ] ->
+  ?csrf_token:bool ->
     action:string -> request -> string
 (** Generates a [<form>] tag and an [<input>] tag with a CSRF token, suitable
     for use with {!Dream.val-form} and {!Dream.val-multipart}. For example, in
@@ -1102,7 +1111,14 @@ val form_tag :
       </form>
     ]}
 
-    Pass [~enctype:`Multipart_form_data] for a file upload form. *)
+    [~method] sets the method used to submit the form. The default is [`POST].
+
+    [~target] adds a [target] attribute. For example, [~target:"_blank"] causes
+    the browser to submit the form in a new tab or window.
+
+    Pass [~enctype:`Multipart_form_data] for a file upload form.
+
+    [~csrf_token:false] suppresses generation of the [dream.csrf] field. *)
 
 
 
@@ -1211,7 +1227,7 @@ val scope : string -> middleware list -> route list -> route
     run only if a route matches.
 
     {[
-      Dream.scope "/api" [Dream.origin_referer_check] [
+      Dream.scope "/api" [Dream.origin_referrer_check] [
         Dream.get  "/widget" get_widget_handler;
         Dream.post "/widget" set_widget_handler;
       ]
@@ -1228,7 +1244,7 @@ val scope : string -> middleware list -> route list -> route
     To apply middleware without prefixing the routes, use ["/"]:
 
     {[
-      Dream.scope "/" [Dream.origin_referer_check] [
+      Dream.scope "/" [Dream.origin_referrer_check] [
         (* ...routes... *)
       ]
     ]}
@@ -1335,6 +1351,9 @@ val mime_lookup : string -> (string * string) list
     All requests passing through session middleware are assigned a session,
     either an existing one, or a new empty session, known as a {e pre-session}.
 
+    When a session is at least half-expired, it is automatically refreshed by
+    the next request that it is assigned to.
+
     See example
     {{:https://github.com/aantron/dream/tree/master/example/b-session#files}
     [b-session]} \[{{:http://dream.as/b-session} playground}\]. *)
@@ -1387,7 +1406,11 @@ val session_label : request -> string
 val session_expires_at : request -> float
 (** Time at which the session will expire. *)
 
+(** {1 Flash Messages} *)
 
+val flash_messages : middleware
+val put_flash : string -> string -> request -> unit
+val get_flash : request -> (string * string) list
 
 (** {1 WebSockets} *)
 
@@ -1543,7 +1566,7 @@ val graphiql : ?default_query:string -> string -> handler
     - {{:https://mariadb.com/kb/en/sql-statements-structure/} MariaDB, {i SQL
       Statements & Structure}}
 
-    For a superficial overview of database security, see
+    For an introductory overview of database security, see
     {{:https://cheatsheetseries.owasp.org/cheatsheets/Database_Security_Cheat_Sheet.html}
     OWASP {i Database Security Cheat Sheet}}. *)
 
@@ -1558,7 +1581,7 @@ val sql : request -> (Caqti_lwt.connection -> 'a promise) -> 'a promise
     {[
       let () =
         Dream.run
-        @@ Dream.sql_pool "sqlite3://db.sqlite"
+        @@ Dream.sql_pool "sqlite3:db.sqlite"
         @@ fun request ->
           Dream.sql request (fun db ->
             (* ... *) |> Dream.html)

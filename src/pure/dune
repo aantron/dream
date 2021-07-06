@@ -3,12 +3,13 @@
  (name dream__pure)
  (libraries
   base64
+  bigstringaf
   dream.cipher
   multipart_form
   hmap
   lwt
-  lwt.unix
   uri
+  ptime
  )
  (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

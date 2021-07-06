@@ -13,4 +13,5 @@
   logs
   lwt
   lwt.unix
+  ptime.clock.os
  ))
