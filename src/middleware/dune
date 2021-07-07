@@ -6,7 +6,6 @@
   dream.cipher
   dream.pure
   fmt
-  fmt.tty
   logs
   lwt
   magic-mime

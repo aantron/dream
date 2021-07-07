@@ -354,7 +354,6 @@ struct
 
   let initializer_ = lazy begin
     if !enable then begin
-      Fmt_tty.setup_std_outputs ();
       Logs.set_level ~all:true (Some !level);
       Logs.set_reporter (reporter ~now ())
     end ;
