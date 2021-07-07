@@ -1,9 +1,6 @@
 (library
  (public_name dream.middleware)
  (name dream__middleware)
- (modules catch content_length csrf echo error error_template flash_message
-  form log lowercase_headers request_id router session site_prefix
-  origin_referrer_check tag upload)
  (libraries
   digestif
   dream.cipher
@@ -20,19 +17,6 @@
   unstrctrd
   uri
   yojson
- )
- (preprocess (pps lwt_ppx))
- (instrumentation (backend bisect_ppx)))
-
-(library
- (public_name dream.middleware.static)
- (name dream__static)
- (modules static)
- (libraries
-  digestif
-  dream.pure
-  lwt.unix
-  magic-mime
  )
  (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

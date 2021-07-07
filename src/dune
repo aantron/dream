@@ -7,7 +7,7 @@
   dream.graphql
   dream.http
   dream.middleware
-  dream.middleware.static
+  dream.unix
   dream.pure
   dream.sql
   graphql-lwt
