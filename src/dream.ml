@@ -64,6 +64,8 @@ include Dream__middleware.Site_prefix
 let error_template =
   Dream__http.Error_handler.customize
 
+let () = Mirage_crypto_rng_lwt.initialize ()
+
 let random =
   Dream__cipher.Random.random
 

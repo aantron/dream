@@ -8,11 +8,7 @@
 (* TODO LATER Is there something with lighter dependencies? Although perhaps
    these are not so bad... *)
 
-let initialize =
-  lazy (Mirage_crypto_rng_lwt.initialize ())
-
 let random_buffer n =
-  Lazy.force initialize;
   Mirage_crypto_rng.generate n
 
 let random n =
