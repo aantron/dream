@@ -23,8 +23,7 @@ include Dream__middleware.Log.Make (Ptime_clock)
    function is a part of [Dream__middleware.Log.Make], it's why it is not
    prepended by a module name. *)
 let () =
-  Fmt_tty.setup_std_outputs ();
-  initialize ()
+  initialize ~setup_outputs:Fmt_tty.setup_std_outputs
 include Dream__middleware.Echo
 
 let default_log =

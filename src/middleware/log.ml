@@ -352,8 +352,9 @@ struct
   let now () =
     Ptime.to_float_s (Ptime.v (Pclock.now_d_ps ()))
 
-  let initializer_ = lazy begin
+  let initializer_ ~setup_outputs = lazy begin
     if !enable then begin
+      setup_outputs () ;
       Logs.set_level ~all:true (Some !level);
       Logs.set_reporter (reporter ~now ())
     end ;
@@ -362,7 +363,7 @@ struct
 
   let set = ref false
 
-  let initialize () =
+  let initialize ~setup_outputs =
     if !set then Logs.debug (fun log -> log
       "Dream__log.initialize has already been called, ignoring this call.")
     else begin
@@ -374,7 +375,7 @@ struct
         with
           Logs_are_not_initialized -> ());
       set := true;
-      _initialized := Some initializer_
+      _initialized := Some (initializer_ ~setup_outputs)
     end
 
   (* The request logging middleware. *)
