@@ -34,7 +34,7 @@ let info = default_log.info
 let debug = default_log.debug
 
 include Dream__middleware.Router
-include Dream__middleware.Static
+include Dream__unix.Static
 
 include Dream__middleware.Session
 include Dream__middleware.Session.Make (Ptime_clock)
@@ -63,6 +63,8 @@ include Dream__middleware.Site_prefix
 
 let error_template =
   Dream__http.Error_handler.customize
+
+let () = Dream__cipher.Random.initialize Mirage_crypto_rng_lwt.initialize
 
 let random =
   Dream__cipher.Random.random
