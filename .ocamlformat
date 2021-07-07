@@ -10,3 +10,4 @@ break-before-in = auto
 break-infix = fit-or-vertical
 break-separators = after
 space-around-records = true
+break-cases = all
