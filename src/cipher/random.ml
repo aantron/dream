@@ -15,12 +15,7 @@ let initialized () =
   | None -> failwith "Entropy is not initialized."
   | Some v -> Lazy.force v
 
-let initialize f =
-  ( try
-      initialized () ;
-    with
-      Failure _ -> ());
-  _initialized := Some (Lazy.from_fun f)
+let initialize f = _initialized := Some (Lazy.from_fun f)
 
 let random_buffer n =
   initialized () ;
