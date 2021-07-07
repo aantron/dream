@@ -22,7 +22,8 @@ include Dream__middleware.Log.Make (Ptime_clock)
 (* Initalize logs with the default reporter which uses [Ptime_clock], this
    function is a part of [Dream__middleware.Log.Make], it's why it is not
    prepended by a module name. *)
-let () = initialize ()
+let () =
+  initialize ~setup_outputs:Fmt_tty.setup_std_outputs
 include Dream__middleware.Echo
 
 let default_log =

@@ -10,6 +10,7 @@
   dream.unix
   dream.pure
   dream.sql
+  fmt.tty
   graphql-lwt
   logs
   lwt
