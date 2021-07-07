@@ -105,8 +105,7 @@ let reporter ~now () =
       (* Format the current local time. For the millisecond fraction, be careful
          of rounding 999.5+ to 1000 on output. *)
       let time =
-        let unix_time =
-          now () in
+        let unix_time = now () in
         let time = Option.get (Ptime.of_float_s unix_time) in
         let fraction =
           fst (modf unix_time) *. 1000. in
@@ -114,7 +113,8 @@ let reporter ~now () =
           if fraction > 999. then 999.
           else fraction
         in
-        let ((y, m, d), ((hh, mm, ss), _tz_offset_s)) = Ptime.to_date_time time in
+        let ((y, m, d), ((hh, mm, ss), _tz_offset_s)) =
+          Ptime.to_date_time time in
         Printf.sprintf "%02i.%02i.%02i %02i:%02i:%02i.%03.0f"
           d m (y mod 100)
           hh mm ss clamped_fraction
@@ -215,9 +215,9 @@ type log_level = [
 exception Logs_are_not_initialized
 
 let setup_logs =
-  "\nTo initialize logs with a default reporter, and set up dream, \
+  "\nTo initialize logs with a default reporter, and set up Dream, \
    do the following:\
-   \n  If you are using MirageOS, use the dream device in config.ml
+   \n  If you are using MirageOS, use the Dream device in config.ml
    \n  If you are using Lwt/Unix, execute `Dream.log_initialize ()`
    \n"
 
@@ -347,8 +347,10 @@ let initialize_log
   let `Initialized = initialized () in
   ()
 
-module Make (Pclock : Mirage_clock.PCLOCK) = struct
-  let now () = Ptime.to_float_s (Ptime.v (Pclock.now_d_ps ()))
+module Make (Pclock : Mirage_clock.PCLOCK) =
+struct
+  let now () =
+    Ptime.to_float_s (Ptime.v (Pclock.now_d_ps ()))
 
   let initializer_ = lazy begin
     if !enable then begin
@@ -362,94 +364,97 @@ module Make (Pclock : Mirage_clock.PCLOCK) = struct
   let set = ref false
 
   let initialize () =
-    if !set then Logs.debug (fun m -> m "Dream__log.initialize has already been called, \
-                                         ignoring this call.")
+    if !set then Logs.debug (fun log -> log
+      "Dream__log.initialize has already been called, ignoring this call.")
     else begin
-      ( try let `Initialized = initialized () in
-            Format.eprintf "Dream__log.initialize has already been set, check that \
-                            this call is intentional" ;
-        with Logs_are_not_initialized -> () ) ;
-      set := true ;
+      (try
+        let `Initialized = initialized () in
+        Format.eprintf
+          "Dream__log.initialized has already been set, check that this call \
+          is intentional";
+        with
+          Logs_are_not_initialized -> ());
+      set := true;
       _initialized := Some initializer_
     end
 
-(* The requst logging middleware. *)
-let logger next_handler request =
+  (* The request logging middleware. *)
+  let logger next_handler request =
 
-  let start = now () in
+    let start = now () in
 
-  (* Turn on backtrace recording. *)
-  if !set_printexc then begin
-    Printexc.record_backtrace true;
-    set_printexc := false
-  end;
+    (* Turn on backtrace recording. *)
+    if !set_printexc then begin
+      Printexc.record_backtrace true;
+      set_printexc := false
+    end;
 
-  (* Identify the request in the log. *)
-  let user_agent =
-    Dream.headers "User-Agent" request
-    |> String.concat " "
-  in
+    (* Identify the request in the log. *)
+    let user_agent =
+      Dream.headers "User-Agent" request
+      |> String.concat " "
+    in
 
-  log.info (fun log ->
-    log ~request "%s %s %s %s"
-      (Dream.method_to_string (Dream.method_ request))
-      (Dream.target request)
-      (Dream.client request)
-      user_agent);
+    log.info (fun log ->
+      log ~request "%s %s %s %s"
+        (Dream.method_to_string (Dream.method_ request))
+        (Dream.target request)
+        (Dream.client request)
+        user_agent);
 
-  (* Call the rest of the app. *)
-  Lwt.try_bind
-    (fun () ->
-      next_handler request)
-    (fun response ->
-      (* Log the elapsed time. If the response is a redirection, log the
-         target. *)
-      let location =
-        if Dream.is_redirection (Dream.status response) then
-          match Dream.header "Location" response with
-          | Some location -> " " ^ location
-          | None -> ""
-        else ""
-      in
+    (* Call the rest of the app. *)
+    Lwt.try_bind
+      (fun () ->
+        next_handler request)
+      (fun response ->
+        (* Log the elapsed time. If the response is a redirection, log the
+           target. *)
+        let location =
+          if Dream.is_redirection (Dream.status response) then
+            match Dream.header "Location" response with
+            | Some location -> " " ^ location
+            | None -> ""
+          else ""
+        in
 
-      let status = Dream.status response in
+        let status = Dream.status response in
 
-      let report :
-        (?request:Dream.request ->
-          ('a, Format.formatter, unit, 'b) format4 -> 'a) -> 'b =
-          fun log ->
-        let elapsed = now () -. start in
-        log ~request "%i%s in %.0f μs"
-          (Dream.status_to_int status)
-          location
-          (elapsed *. 1e6)
-      in
+        let report :
+          (?request:Dream.request ->
+            ('a, Format.formatter, unit, 'b) format4 -> 'a) -> 'b =
+            fun log ->
+          let elapsed = now () -. start in
+          log ~request "%i%s in %.0f μs"
+            (Dream.status_to_int status)
+            location
+            (elapsed *. 1e6)
+        in
 
-      begin
-        if Dream.is_server_error status then
-          log.error report
-        else
-          if Dream.is_client_error status then
-            log.warning report
+        begin
+          if Dream.is_server_error status then
+            log.error report
           else
-            log.info report
-      end;
+            if Dream.is_client_error status then
+              log.warning report
+            else
+              log.info report
+        end;
 
-      Lwt.return response)
+        Lwt.return response)
 
-    (fun exn ->
-      let backtrace = Printexc.get_backtrace () in
-      (* In case of exception, log the exception. We alsp log the backtrace
-         here, even though it is likely to be redundant, because some OCaml
-         libraries install exception printers that will clobber the backtrace
-         right during Printexc.to_string! *)
-      log.warning (fun log ->
-        log ~request "Aborted by: %s" (Printexc.to_string exn));
+      (fun exn ->
+        let backtrace = Printexc.get_backtrace () in
+        (* In case of exception, log the exception. We alsp log the backtrace
+           here, even though it is likely to be redundant, because some OCaml
+           libraries install exception printers that will clobber the backtrace
+           right during Printexc.to_string! *)
+        log.warning (fun log ->
+          log ~request "Aborted by: %s" (Printexc.to_string exn));
 
-      backtrace
-      |> iter_backtrace (fun line -> log.warning (fun log -> log "%s" line));
+        backtrace
+        |> iter_backtrace (fun line -> log.warning (fun log -> log "%s" line));
 
-      Lwt.fail exn)
+        Lwt.fail exn)
 end
 
 
