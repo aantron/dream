@@ -91,6 +91,7 @@ let reporter ~now () =
 
       (* Write the message. *)
       prerr_string message;
+      Stdlib.flush stderr;
       over ();
       k ()
     in
