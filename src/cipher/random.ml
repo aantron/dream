@@ -8,7 +8,7 @@
 (* TODO LATER Is there something with lighter dependencies? Although perhaps
    these are not so bad... *)
 
-let _initialized = ref None
+let _initialized : unit lazy_t option ref = ref None
 
 let initialized () =
   match !_initialized with
