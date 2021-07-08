@@ -192,6 +192,24 @@ Most of the examples are loaded into the [playground][playground]. For instance,
 
 <br>
 
+## Community projects
+
+Here are some community projects that you can use for your Dream applications:
+
+- [`dream-livereload`](https://github.com/tmattio/dream-livereload) - Live reloading for Dream applications.
+
+  This is essentially the [`w-livereload`](https://github.com/aantron/dream/tree/master/example/w-live-reload#files) example extracted in a library for convenience.
+
+- [`dream-cli`](https://github.com/tmattio/dream-cli) - Command Line Interface for Dream applications.
+
+  It is useful when working with different environments (e.g. local, production) where some configuration need to be set at runtime.
+
+- [`dream-encoding`](https://github.com/tmattio/dream-encoding) - Encoding primitives for Dream applications
+
+  This allows, among other things, to compress responses according to the `Accept-Encoding` HTTP header.
+
+<br>
+
 ## Contact
 
 Apart from the [issues](https://github.com/aantron/dream/issues), good places
