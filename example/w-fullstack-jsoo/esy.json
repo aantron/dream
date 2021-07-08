@@ -14,7 +14,7 @@
     "@opam/conf-libev": "esy-packages/libev:package.json#0b5eb6685b688649045aceac55dc559f6f21b829"
   },
   "esy": {
-    "buildsInSource": "_build",
+    "buildsInSource": "unsafe",
     "build": [
       "dune build --root . client/client.bc.js",
       "mkdir -p static",

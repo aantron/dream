@@ -8,4 +8,4 @@
  (deps template_stream.eml.re)
  (action (run dream_eml %{deps} --workspace %{workspace_root})))
 
-(data_only_dirs _esy esy.lock)
+(data_only_dirs _esy esy.lock lib node_modules)

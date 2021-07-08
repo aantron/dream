@@ -28,6 +28,7 @@ jobs:
       with:
         ocaml-version: ${{matrix.ocaml}}
 
+    - run: opam depext --yes conf-postgresql
     - run: opam depext --yes conf-libev
     - run: opam install --yes --deps-only --with-test .
     - run: opam exec -- dune runtest

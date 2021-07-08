@@ -97,6 +97,8 @@ if something is missing!
 
 <br>
 
+- [**`w-template-files`**](w-template-files#files) &nbsp;&mdash;&nbsp;
+  templates in separate `.html` files for better editor support.
 - [**`w-graphql-subscription`**](w-graphql-subscription#files)
   &nbsp;&mdash;&nbsp; GraphQL subscriptions.
 - [**`w-chat`**](w-chat#files) &nbsp;&mdash;&nbsp; a chat room based on
@@ -129,6 +131,9 @@ if something is missing!
   &nbsp;&mdash;&nbsp; benchmarks sending WebSocket messages quickly.
 - [**`w-multipart-dump`**](w-multipart-dump#files) &nbsp;&mdash;&nbsp; echoes
   `multipart/form-data` bodies for debugging.
+- [**`w-docker-postgres`**](w-docker-postgres#files)
+  &nbsp;&mdash;&nbsp; illustrates how to run Dream and
+  PostgreSQL in Docker containers using Docker Compose.
 - [**`z-playground`**](z-playground#files) &nbsp;&mdash;&nbsp; source code of
   the Dream playground.
 
@@ -185,7 +190,6 @@ Techniques:
 - `w-graphql-sql`
 - `w-graphql-mutation`
 - `w-https-redirect`
-- `w-postgres-docker`
 - `w-sql-stream`
 - `w-websocket-stream`
 

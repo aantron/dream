@@ -7,10 +7,14 @@
   dream.graphql
   dream.http
   dream.middleware
+  dream.unix
   dream.pure
   dream.sql
+  fmt.tty
   graphql-lwt
   logs
   lwt
   lwt.unix
+  mirage-crypto-rng.lwt
+  ptime.clock.os
  ))

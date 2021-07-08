@@ -13,8 +13,8 @@ let field_name =
 let default_valid_for =
   60. *. 60.
 
-let csrf_token ?(valid_for = default_valid_for) request =
-  let now = Unix.gettimeofday () in
+let csrf_token ~now ?(valid_for = default_valid_for) request =
+  let now = now () in
 
   `Assoc [
     "session", `String (Session.session_label request);
@@ -34,7 +34,7 @@ type csrf_result = [
   | `Invalid
 ]
 
-let verify_csrf_token request token = Lwt.return @@
+let verify_csrf_token ~now request token = Lwt.return @@
   match Dream__pure.Formats.from_base64url token with
   | None ->
     log.warning (fun log -> log ~request "CSRF token not Base64-encoded");
@@ -67,7 +67,7 @@ let verify_csrf_token request token = Lwt.return @@
       `Wrong_session
     end
     else
-      let now = Unix.gettimeofday () in
+      let now = now () in
       if expires_at > now then
         `Ok
       else begin

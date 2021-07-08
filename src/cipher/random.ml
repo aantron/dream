@@ -8,11 +8,17 @@
 (* TODO LATER Is there something with lighter dependencies? Although perhaps
    these are not so bad... *)
 
-let initialize =
-  lazy (Mirage_crypto_rng_lwt.initialize ())
+let _initialized = ref None
+
+let initialized () =
+  match !_initialized with
+  | None -> failwith "Entropy is not initialized."
+  | Some v -> Lazy.force v
+
+let initialize f = _initialized := Some (Lazy.from_fun f)
 
 let random_buffer n =
-  Lazy.force initialize;
+  initialized () ;
   Mirage_crypto_rng.generate n
 
 let random n =

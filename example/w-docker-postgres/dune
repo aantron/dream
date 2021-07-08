@@ -1,0 +1,12 @@
+(executable
+ (name app)
+ (libraries caqti-driver-postgresql dream)
+ (preprocess (pps lwt_ppx))
+)
+
+(rule
+ (targets app.ml)
+ (deps app.eml.ml)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))
+
+(data_only_dirs _esy esy.lock)

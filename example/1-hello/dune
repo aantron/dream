@@ -2,4 +2,4 @@
  (name hello)
  (libraries dream))
 
-(data_only_dirs _esy esy.lock)
+(data_only_dirs _esy esy.lock lib node_modules)

@@ -1566,7 +1566,7 @@ val graphiql : ?default_query:string -> string -> handler
     - {{:https://mariadb.com/kb/en/sql-statements-structure/} MariaDB, {i SQL
       Statements & Structure}}
 
-    For a superficial overview of database security, see
+    For an introductory overview of database security, see
     {{:https://cheatsheetseries.owasp.org/cheatsheets/Database_Security_Cheat_Sheet.html}
     OWASP {i Database Security Cheat Sheet}}. *)
 
@@ -1581,7 +1581,7 @@ val sql : request -> (Caqti_lwt.connection -> 'a promise) -> 'a promise
     {[
       let () =
         Dream.run
-        @@ Dream.sql_pool "sqlite3://db.sqlite"
+        @@ Dream.sql_pool "sqlite3:db.sqlite"
         @@ fun request ->
           Dream.sql request (fun db ->
             (* ... *) |> Dream.html)

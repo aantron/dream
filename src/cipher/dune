@@ -5,7 +5,6 @@
   cstruct
   mirage-crypto
   mirage-crypto-rng
-  mirage-crypto-rng.lwt
  )
  (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

@@ -1,0 +1,13 @@
+version = 0.18.0
+profile = conventional
+
+leading-nested-match-parens = false 
+align-constructors-decl = true
+align-variants-decl = true
+space-around-variants = false
+space-around-arrays = false
+break-before-in = auto
+break-infix = fit-or-vertical
+break-separators = after
+space-around-records = true
+break-cases = all
