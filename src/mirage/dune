@@ -1,0 +1,20 @@
+(library
+ (public_name dream.mirage)
+ (name dream__mirage)
+ (libraries
+  bigarray-compat
+  bigstringaf
+  digestif
+  dream.cipher
+  dream.localhost
+  dream.middleware
+  dream.pure
+  dream.h2
+  dream.httpaf
+  lwt
+  dream.paf
+  dream.paf.alpn
+  dream.paf.mirage
+ )
+ (preprocess (pps lwt_ppx))
+ (instrumentation (backend bisect_ppx)))
