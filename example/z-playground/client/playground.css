@@ -15,11 +15,11 @@ body {
 }
 
 #editor {
-  width: 50%;
+  min-width: 50%;
 }
 
 #client {
-  width: 50%;
+  min-width: 50%;
 }
 
 #textarea .CodeMirror {

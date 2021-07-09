@@ -11,6 +11,7 @@ var refresh = document.querySelector("#refresh");
 var address = document.querySelector("input");
 var iframe = document.querySelector("iframe");
 var pre = document.querySelector("pre");
+var chview = document.querySelector("chview");
 
 var codemirror = CodeMirror(editor, {
   theme: "material dream",
@@ -100,6 +101,15 @@ run.onclick = function () {
   pre.scrollTop = pre.scrollHeight;
   socket.send(codemirror.getValue());
 };
+
+chview.onclick = function(){
+  var body = document.getElementByTagName("body")[0];
+  if(body.style.flexDirection == "" || body.style.flexDirection == "column"){
+    body.style.flexDirection = "row"
+  }else{
+    body.style.flexDirection = "column"
+  };
+}
 
 address.onkeyup = function (event) {
   if (event.keyCode === 13)
