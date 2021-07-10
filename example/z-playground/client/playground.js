@@ -103,7 +103,7 @@ run.onclick = function () {
 };
 
 chview.onclick = function(){
-  var body = document.getElementByTagName("body")[0];
+  var body = document.getElementsByTagName("body")[0];
   if(body.style.flexDirection == "" || body.style.flexDirection == "column"){
     body.style.flexDirection = "row"
   }else{
