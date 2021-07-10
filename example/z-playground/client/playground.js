@@ -103,12 +103,8 @@ run.onclick = function () {
 };
 
 chview.onclick = function(){
-  var body = document.getElementsByTagName("body")[0];
-  if(body.style.flexDirection == "" || body.style.flexDirection == "column"){
-    body.style.flexDirection = "row"
-  }else{
-    body.style.flexDirection = "column"
-  };
+  var body = document.body;
+  body.classList.toggle("full-editor")
 }
 
 address.onkeyup = function (event) {
