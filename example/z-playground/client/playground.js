@@ -11,7 +11,7 @@ var refresh = document.querySelector("#refresh");
 var address = document.querySelector("input");
 var iframe = document.querySelector("iframe");
 var pre = document.querySelector("pre");
-var chview = document.querySelector("chview");
+var chview = document.querySelector("#chview");
 
 var codemirror = CodeMirror(editor, {
   theme: "material dream",
