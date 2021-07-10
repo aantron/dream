@@ -1,7 +1,7 @@
 /* This file is part of Dream, released under the MIT license. See LICENSE.md
-   for details, or visit https://github.com/aantron/dream.
+  for details, or visit https://github.com/aantron/dream.
 
-   Copyright 2021 Anton Bachin */
+  Copyright 2021 Anton Bachin */
 
 
 
@@ -23,11 +23,11 @@ body {
 }
 
 #textarea .CodeMirror {
-  height: calc(100vh - 168px);
+  height: calc(100vh - 203px);
 }
 
 #client iframe {
-  height: calc(100vh - 63px)
+  height: calc(100vh - 66px)
 }
 
 @media (max-width: 1100px) {
@@ -57,7 +57,7 @@ h1 {
 
 #log {
   margin: 0;
-  height: 105px;
+  height: 125px;
   overflow-x: hidden;
   padding-left: 34px;
   padding-top: 14px;
