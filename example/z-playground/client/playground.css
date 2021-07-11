@@ -3,6 +3,75 @@
 
   Copyright 2021 Anton Bachin */
 
+
+/*
+
+Playground layout: 2 panels with normal element and fluid
+┌──────────────────────────────────────────────────┐
+│                                                  │
+│ body (desktop)                                   │
+│                                                  │
+│ ┌───────────────────────┐ ┌────────────────────┐ │
+│ │                       │ │                    │ │
+│ │ ┌───────────────────┐ │ │ ┌────────────────┐ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │ .panel-element    │ │ │ │ .panel-element │ │ │
+│ │ ├───────────────────┤ │ │ ├────────────────┤ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │ .panel-fluid      │ │ │ │ .panel-fluid   │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ └───────────────────┘ │ │ └────────────────┘ │ │
+│ │                       │ │                    │ │
+│ │                       │ │                    │ │
+│ └───────────────────────┘ └────────────────────┘ │
+│                                                  │
+└──────────────────────────────────────────────────┘
+
+This is on mobile or when pressing Change 
+┌──────────────────────────────────────────────────┐
+│                                                  │
+│ body (mobile/Change view actived)                │
+│ ┌──────────────────────────────────────────────┐ │
+│ │                                              │ │
+│ │ ┌──────────────────────────────────────────┐ │ │
+│ │ │ .panel-element                           │ │ │
+│ │ │                                          │ │ │
+│ │ ├──────────────────────────────────────────┤ │ │
+│ │ │ .panel-fluid                             │ │ │
+│ │ │                                          │ │ │
+│ │ │                                          │ │ │
+│ │ │                                          │ │ │
+│ │ │                                          │ │ │
+│ │ └──────────────────────────────────────────┘ │ │
+│ │                                              │ │
+│ ├──────────────────────────────────────────────┤ │
+│ │                                              │ │
+│ │ ┌──────────────────────────────────────────┐ │ │
+│ │ │ .panel-element                           │ │ │
+│ │ │                                          │ │ │
+│ │ ├──────────────────────────────────────────┤ │ │
+│ │ │ .panel-fluid                             │ │ │
+│ │ │                                          │ │ │
+│ │ │                                          │ │ │
+│ │ │                                          │ │ │
+│ │ └──────────────────────────────────────────┘ │ │
+│ │                                              │ │
+│ └──────────────────────────────────────────────┘ │
+│                                                  │
+└──────────────────────────────────────────────────┘
+ */
 body {
   margin: 0;
   font-size: 14px;
@@ -21,45 +90,53 @@ body {
   }
 }
 
-/* This is for when pressing Change View button */
-body.full-editor {
-  flex-direction: column;
-  overflow-y: auto;
-  height: auto;
-}
-.full-editor #editor, .full-editor #client {
-  flex: 1 1 100%;
-  width: 100%;
-}
-
-#editor, #client {
+.panel {
   flex: 0 0 50%;
   width: 50%;
   display: flex;
   flex-direction: column;
 }
+.panel-fluid {
+  flex: 1 0 auto;
+  min-height: 300px;
+}
+
+/* 
+ * Change view activation and mobile mode is the same
+ * Please ensure that they are in perfect sync
+ */
+body.full-editor {
+  flex-direction: column;
+  overflow-y: auto;
+  height: auto;
+}
+
+.full-editor .panel {
+  width: 100%;
+}
 
 @media (max-width: 1100px) {
-  #editor, #client {
-    width: 100%;
-  }
   body {
     flex-direction: column;
+    overflow-y: auto;
+    height: auto;
+  }
+  .panel {
+    width: 100%;
   }
 }
 
 #textarea {
-  flex: 1 0 auto;
+  position: relative;
 }
 #textarea .CodeMirror {
   height: 100%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
-
-#client iframe {
-  flex: 1 0 auto;
-}
-
-
 
 header {
   height: 64px;
@@ -140,8 +217,6 @@ h1 {
   background: #555;
 }
 
-
-
 /* Client */
 
 #client header {
@@ -169,7 +244,6 @@ h1 {
   width: 100%;
   background-color: white;
 }
-
 
 
 /* Syntax */
