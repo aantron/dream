@@ -451,7 +451,7 @@ val json :
     {!Dream.application_json}. *)
 
 val redirect :
-  ?status:status ->
+  ?status:redirection ->
   ?code:int ->
   ?headers:(string * string) list ->
     request -> string -> response promise
@@ -460,7 +460,9 @@ val redirect :
     redirection. Use [~status:`Moved_Permanently] or [~code:301] for a permanent
     redirection. The {!type-request} is used for retrieving the site prefix, if
     the string is an absolute path. Most applications don't have a site
-    prefix. *)
+    prefix.
+
+    Warning: Browsers don't redirect if status code isn't 30x. *)
 
 val empty :
   ?headers:(string * string) list ->

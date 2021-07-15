@@ -476,6 +476,7 @@ let redirect ?status ?code ?headers _request location =
     | None, None -> Some (`See_Other)
     | _ -> status
   in
+  let status = (status :> status option) in
   response ?status ?code ?headers location
   |> with_header "Location" location
   |> Lwt.return
