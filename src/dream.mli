@@ -451,7 +451,7 @@ val json :
     {!Dream.application_json}. *)
 
 val redirect :
-  ?status:redirection ->
+  ?status:(redirection :> status) ->
   ?code:int ->
   ?headers:(string * string) list ->
     request -> string -> response promise
