@@ -38,7 +38,7 @@ Playground layout: 2 panels with normal element and fluid
 │                                                  │
 └──────────────────────────────────────────────────┘
 
-This is on mobile or when pressing Change 
+This is on mobile or when pressing Change
 ┌──────────────────────────────────────────────────┐
 │                                                  │
 │ body (mobile/Change view actived)                │
@@ -100,7 +100,7 @@ body {
   min-height: 300px;
 }
 
-/* 
+/*
  * Change view activation and mobile mode is the same
  * Please ensure that they are in perfect sync
  */
@@ -152,7 +152,7 @@ h1 {
 }
 
 #log {
-  height: 125px;
+  height: 100px;
   margin: 0;
   overflow-x: hidden;
   padding-left: 34px;
