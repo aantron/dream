@@ -458,11 +458,13 @@ val redirect :
 (** Creates a new {!type-response}. Adds a [Location:] header with the given
     string. The default status code is [303 See Other], for a temporary
     redirection. Use [~status:`Moved_Permanently] or [~code:301] for a permanent
-    redirection. The {!type-request} is used for retrieving the site prefix, if
-    the string is an absolute path. Most applications don't have a site
-    prefix.
+    redirection.
 
-    Warning: Browsers don't redirect if status code isn't 30x. *)
+    If you use [~code], be sure the number follows the pattern [3xx], or most
+    browsers and other clients won't actually perform a redirect.
+
+    The {!type-request} is used for retrieving the site prefix, if the string is
+    an absolute path. Most applications don't have a site prefix. *)
 
 val empty :
   ?headers:(string * string) list ->
