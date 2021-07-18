@@ -1,82 +1,120 @@
-# `w-docker-postgres`
+# `w-postgres`
 
 <br>
 
-This example illustrates how to use
+This example shows how to use
 [Docker](https://en.wikipedia.org/wiki/Docker_(software)) and
-[docker-compose](https://docs.docker.com/compose/) to manage a simple
-web server with a Postgres database.
+[Docker Compose](https://docs.docker.com/compose/) to manage a simple
+Web server with a PostgreSQL database.
 
-Running a database under docker can simplify the process of setting up
-a development environment. This is especially true if your application
-uses several databases or services and you want a convenient way to
-manage them all with a single tool.
+The
+[code](https://github.com/aantron/dream/blob/master/example/w-postgres/postgres.eml.ml)
+is almost identical to [**h-sql**](../h-sql#files). The only differences are:
 
-The example app allows users to see a list of existing comments and
-post new comments. Take a look at this
-[example](https://github.com/aantron/dream/tree/master/example/h-sql#files)
-for more background information.
+- we now listen on `"0.0.0.0"`, since our client will definitely be outside the
+  Docker container, so not on `localhost`, and
+- we change the connection string from SQLite to PostgreSQL.
 
-## Getting Set Up
+```ocaml
+let () =
+  Dream.run ~interface:"0.0.0.0"
+  @@ Dream.logger
+  @@ Dream.sql_pool "postgresql://dream:password@postgres/dream"
+  @@ Dream.sql_sessions
+  @@ Dream.router [
 
-Start your docker containers by running `docker-compose up -d`. It
-will take some time to build the `web` container; subsequent rebuilds
-are faster.
+    Dream.get "/" (fun request ->
+      let%lwt comments = Dream.sql request list_comments in
+      Dream.html (render comments request));
 
-When both containers are available, you should see:
-```
-Creating network "w-docker-postgres_default" with the default driver
-Creating w-docker-postgres_postgres_1 ... done
-Creating w-docker-postgres_web_1      ... done
-```
+    Dream.post "/" (fun request ->
+      match%lwt Dream.form request with
+      | `Ok ["text", text] ->
+        let%lwt () = Dream.sql request (add_comment text) in
+        Dream.redirect request "/"
+      | _ ->
+        Dream.empty `Bad_Request);
 
-At this point the PostgreSQL database is ready but doesn't have any
-tables. Fix that by running:
-
-```
-docker-compose exec postgres psql -U dream -c "$(cat schema.sql)"
-```
-
-This will create the `comment` and `dream_session` tables described in
-`schema.sql`.
-
-Finally, open your browser to
-[`http://localhost:8080/`](http://localhost:8080/) to try the
-application.
-
-
-## Tips
-
-If you modify `app.eml.ml`, you will need to run
-```
-docker-compose build && docker-compose up web
-```
-to rebuild the `web` container and see your changes.
-
-To view the logs from the API container (rather than having them mixed
-in with the logs from the database) run:
-```
-docker-compose logs web -f
+  ]
+  @@ Dream.not_found
 ```
 
-The database container contains a copy of the `psql` client. Running
+In addition, we now link with `caqti-driver-postgres` instead of
+`caqti-driver-sqlite3` in
+[`dune`](https://github.com/aantron/dream/blob/master/example/w-postgres/dune):
 
-```
-docker-compose exec postgres psql -U dream
-```
+<pre><code>(executable
+ (name postgres)
+ <b>(libraries caqti-driver-postgresql dream)</b>
+ (preprocess (pps lwt_ppx)))</code></pre>
 
-will allow you to start the client and run queries interactively.
+and the
+[schema](https://github.com/aantron/dream/blob/master/example/w-postgres/schema.sql) is slightly different, due to differences in PostgreSQL syntax, compared to
+SQLite:
+
+<pre><code>CREATE TABLE comment (
+  <b>id SERIAL PRIMARY KEY,</b>
+  text TEXT NOT NULL
+);</code></pre>
+
+To build, run:
+
+<pre><code><b>$ cd example/w-postgres</b>
+<b>$ docker-compose build</b>
+<b>$ docker-compose up</b></code></pre>
+
+This will build and start the
+[two containers](https://github.com/aantron/dream/blob/master/example/w-postgres/docker-compose.yml),
+one for PostgreSQL and one for our Web server. The first build of the Web server
+will take several minutes. Later builds will be faster, due to caching.
+
+On the first start, the database does not have a
+[schema](https://github.com/aantron/dream/blob/master/example/w-postgres/schema.sql),
+so open another terminal session and run
+
+<pre><code><b>$ docker-compose exec postgres psql -U dream -c "$(cat schema.sql)"</b></code></pre>
+
+Finally, visit [`http://localhost:8080`](http:/localhost:8080) and try out the
+application!
+
+<br>
+
+Tips:
+
+- If you modify
+  [`postgres.eml.ml`](https://github.com/aantron/dream/blob/master/example/w-postgres/postgres.eml.ml),
+  run
+
+  ```
+  docker-compose build && docker-compose up web
+  ```
+
+- To view the logs from the Web server container only, without having them mixed
+  with the database logs, run
+
+  ```
+  docker-compose up -d
+  docker-compose logs web -f
+  ```
+
+- The database container includes the
+  [`psql`](https://tomcam.github.io/postgres/) command-line database client.
+  You can access its REPL with
+
+  ```
+  docker-compose exec postgres psql -U dream
+  ```
 
 <br>
 
 **See also:**
 
-- [**`h-sql`**](../h-sql#files) this example contains essentially the
-  same application, but uses sqlite.
-- [**`z-docker-esy`**](../z-docker-esy#files) describes how to deploy
-  with docker-compose and esy.
-- [**`z-docker-opam`**](../z-docker-opam#files) describes how to deploy
-  with docker-compose and opam.
+- [**`h-sql`**](../h-sql#files) is the SQLite, non-Docker version of this
+  example.
+- [**`z-docker-esy`**](../z-docker-esy#files) shows how to deploy
+  with Docker Compose with esy, including Docker installation.
+- [**`z-docker-opam`**](../z-docker-opam#files) shows how to deploy
+  with Docker Compose with opam.
 
 <br>
 
