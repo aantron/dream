@@ -71,11 +71,14 @@ let random =
 
 include Dream__pure.Formats
 
+(* TODO Restore the ability to test with a prefix and re-enable the
+   corresponding tests. *)
 let test ?(prefix = "") handler request =
+  ignore prefix;
   let app =
     content_length
     @@ assign_request_id
-    @@ chop_site_prefix prefix
+    @@ chop_site_prefix
     @@ handler
   in
 

@@ -492,13 +492,13 @@ let ocaml_tls = {
 
 
 
-let built_in_middleware prefix =
+let built_in_middleware =
   Dream.pipeline [
     Dream__middleware.Lowercase_headers.lowercase_headers;
     Dream__middleware.Content_length.content_length;
     Dream__middleware.Catch.catch;
     Dream__middleware.Request_id.assign_request_id;
-    Dream__middleware.Site_prefix.chop_site_prefix prefix;
+    Dream__middleware.Site_prefix.chop_site_prefix;
   ]
 
 
@@ -510,7 +510,6 @@ let serve_with_details
     ~port
     ~stop
     ~error_handler
-    ~prefix
     ~app
     ~certificate_file
     ~key_file
@@ -522,7 +521,7 @@ let serve_with_details
 
   let user's_dream_handler =
     if builtins then
-      built_in_middleware prefix user's_dream_handler
+      built_in_middleware user's_dream_handler
     else
       user's_dream_handler
   in
@@ -608,7 +607,12 @@ let serve_with_maybe_https
     ~builtins
     user's_dream_handler =
 
-  let app = Dream.new_app (Error_handler.app error_handler) in
+  let prefix =
+    prefix
+    |> Dream__pure.Formats.from_path
+    |> Dream__pure.Formats.drop_trailing_slash
+  in
+  let app = Dream.new_app (Error_handler.app error_handler) prefix in
 
   try%lwt
     begin match debug with
@@ -638,7 +642,6 @@ let serve_with_maybe_https
         ~port
         ~stop
         ~error_handler
-        ~prefix
         ~app
         ~certificate_file:""
         ~key_file:""
@@ -703,7 +706,6 @@ let serve_with_maybe_https
           ~port
           ~stop
           ~error_handler
-          ~prefix
           ~app
           ~certificate_file
           ~key_file
@@ -733,7 +735,6 @@ let serve_with_maybe_https
           ~port
           ~stop
           ~error_handler
-          ~prefix
           ~app
           ~certificate_file
           ~key_file

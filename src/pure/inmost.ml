@@ -81,6 +81,7 @@ and app = {
   mutable https : bool;
   mutable secrets : string list;
   error_handler : error -> response Lwt.t;
+  site_prefix : string list;
 }
 
 and error_handler = error -> response option Lwt.t
@@ -129,12 +130,13 @@ let secret app =
 let set_secrets secrets app =
   app.secrets <- secrets
 
-let new_app error_handler = {
+let new_app error_handler site_prefix = {
   globals = ref Scope.empty;
   app_debug = false;
   https = false;
   secrets = [];
   error_handler;
+  site_prefix;
 }
 
 type 'a promise = 'a Lwt.t
@@ -440,7 +442,7 @@ let request
     specific = {
       (* TODO Is there a better fake error handler? Maybe this function should
          come after the response constructors? *)
-      app = new_app (fun _ -> assert false);
+      app = new_app (fun _ -> assert false) [];
       request_client = client;
       method_;
       target;

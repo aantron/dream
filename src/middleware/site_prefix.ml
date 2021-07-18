@@ -24,20 +24,15 @@ let rec match_site_prefix prefix path =
 
 
 (* TODO The path and prefix representations and accessors need a cleanup. *)
-let chop_site_prefix prefix =
-  let prefix =
-    prefix
-    |> Dream__pure.Formats.from_path
-    |> Dream__pure.Formats.drop_trailing_slash
-  in
-
-  let prefix_reversed = List.rev prefix in
-
-  fun next_handler request ->
+let chop_site_prefix next_handler request =
+    let prefix = (Dream.app request).site_prefix in
     match match_site_prefix prefix (Dream.path request) with
     | None ->
       Dream.empty `Bad_Gateway
     | Some path ->
+      (* TODO This doesn't need to be recomputed on each request - can cache the
+         result in the app. *)
+      let prefix_reversed = List.rev prefix in
       request
       |> Dream.with_prefix prefix_reversed
       |> Dream.with_path path
