@@ -91,7 +91,7 @@ Both the comments and the sessions survive server restarts.
 ```sql
 CREATE TABLE comment (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  text NOT NULL
+  text TEXT NOT NULL
 );
 
 CREATE TABLE dream_session (
@@ -128,7 +128,7 @@ We also had to make an addition to our
 
 SQLite is good for small-to-medium sites and examples. For a larger site,
 microservices, or other needs, you can switch, for example, to PostgreSQL. See
-[example/w-postgres](../w-postgres#files).
+[**`w-postgres`**](../w-postgres#files).
 
 A good program for examining databases locally is
 [Beekeeper Studio](https://www.beekeeperstudio.io/). Dream might also integrate
