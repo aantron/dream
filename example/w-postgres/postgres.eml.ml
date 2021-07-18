@@ -38,7 +38,7 @@ let render comments request =
 let () =
   Dream.run ~interface:"0.0.0.0"
   @@ Dream.logger
-  @@ Dream.sql_pool "postgresql://dream@postgres/dream"
+  @@ Dream.sql_pool "postgresql://dream:password@postgres/dream"
   @@ Dream.sql_sessions
   @@ Dream.router [
 

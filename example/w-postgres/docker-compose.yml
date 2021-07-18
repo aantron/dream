@@ -6,6 +6,7 @@ services:
     environment:
       - POSTGRES_USER=dream
       - POSTGRES_DB=dream
+      - POSTGRES_PASSWORD=password
 
   web:
     build: .
