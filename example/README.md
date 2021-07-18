@@ -103,6 +103,8 @@ if something is missing!
   &nbsp;&mdash;&nbsp; GraphQL subscriptions.
 - [**`w-postgres`**](w-postgres#files) &nbsp;&mdash;&nbsp; connects to a
   PostgreSQL database.
+- [**`w-flash`**](w-flash#files) &nbsp;&mdash;&nbsp; using flash messages, which
+  are displayed on the next request.
 - [**`w-chat`**](w-chat#files) &nbsp;&mdash;&nbsp; a chat room based on
   WebSockets.
 - [**`w-content-security-policy`**](w-content-security-policy#files)

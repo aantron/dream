@@ -1412,11 +1412,22 @@ val session_expires_at : request -> float
 
 
 
-(** {1 Flash Messages} *)
+(** {1 Flash messages}
+
+    Flash messages are short strings which are stored in cookies during one
+    request, to be made available for the next request. The typical use case is
+    to provide form feedback across a redirect. See example
+    {{:https://github.com/aantron/dream/tree/master/example/w-flash#files}
+    [w-flash]} \[{{:http://dream.as/w-flash} playground}\]. *)
 
 val flash_messages : middleware
+(** Implements storing flash messages in cookies. *)
+
 val flash : request -> (string * string) list
+(** The request's flash messages. *)
+
 val put_flash : string -> string -> request -> unit
+(** Adds a flash message to the request. *)
 
 
 
