@@ -1415,7 +1415,7 @@ val session_expires_at : request -> float
 (** {1 Flash Messages} *)
 
 val flash_messages : middleware
-val get_flash : request -> (string * string) list
+val flash : request -> (string * string) list
 val put_flash : string -> string -> request -> unit
 
 

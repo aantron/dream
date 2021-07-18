@@ -37,7 +37,7 @@ let flash_messages inner_handler request =
 let (|>?) =
   Option.bind
 
-let get_flash request =
+let flash request =
   let rec group x =
     match x with
     | x1::x2::rest -> (x1, x2)::(group rest)
