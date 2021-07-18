@@ -1410,11 +1410,15 @@ val session_label : request -> string
 val session_expires_at : request -> float
 (** Time at which the session will expire. *)
 
+
+
 (** {1 Flash Messages} *)
 
 val flash_messages : middleware
-val put_flash : string -> string -> request -> unit
 val get_flash : request -> (string * string) list
+val put_flash : string -> string -> request -> unit
+
+
 
 (** {1 WebSockets} *)
 
