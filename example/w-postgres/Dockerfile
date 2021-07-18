@@ -1,24 +1,29 @@
-FROM ocaml/opam:alpine as build
+FROM debian:stable-slim as build
 
-# Install system dependencies
-RUN sudo apk add --update libev-dev openssl-dev libpq postgresql-dev
+RUN apt-get update
+RUN apt-get install -y curl git libpq-dev m4 npm unzip
 
-WORKDIR /home/opam
+WORKDIR /build
 
-# Install dependencies
-ADD app.opam app.opam
-RUN opam install . --deps-only
+RUN npm install esy
 
-# Build project
+# Install dependencies.
+ADD esy.* .
+RUN [ -f esy.lock ] || node_modules/.bin/esy solve
+RUN node_modules/.bin/esy fetch
+RUN node_modules/.bin/esy build-dependencies
+
+# Build project.
 ADD . .
-RUN opam exec -- dune build
+RUN node_modules/.bin/esy build
 
 
 
-FROM alpine:3.12 as run
+FROM debian:stable-slim as run
 
-RUN apk add --update libev libpq postgresql-dev
+RUN apt-get update
+RUN apt-get install -y libev4 libpq5 libssl1.1
 
-COPY --from=build /home/opam/_build/default/app.exe /bin/app
+COPY --from=build /build/_esy/default/build/default/postgres.exe /bin/postgres
 
-ENTRYPOINT /bin/app
+ENTRYPOINT /bin/postgres
