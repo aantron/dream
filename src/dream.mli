@@ -2052,7 +2052,7 @@ val serve :
       Dream.run ~builtins:false
       @@ Dream.lowercase_headers
       @@ Dream.content_length
-      @@ Dream.catch
+      @@ Dream.catch_errors
       @@ Dream.assign_request_id
       @@ Dream.chop_site_prefix
       @@ my_app
@@ -2077,7 +2077,7 @@ val content_length : middleware
     headers are necessary in HTTP/1, and forbidden or redundant and difficult to
     use in HTTP/2. *)
 
-val catch : middleware
+val catch_errors : middleware
 (** Forwards exceptions, rejections, and [4xx], [5xx] responses from the
     application to the error handler. See {!section-errors}. *)
 

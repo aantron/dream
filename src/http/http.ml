@@ -496,7 +496,7 @@ let built_in_middleware =
   Dream.pipeline [
     Dream__middleware.Lowercase_headers.lowercase_headers;
     Dream__middleware.Content_length.content_length;
-    Dream__middleware.Catch.catch;
+    Dream__middleware.Catch.catch_errors;
     Dream__middleware.Request_id.assign_request_id;
     Dream__middleware.Site_prefix.chop_site_prefix;
   ]

@@ -14,7 +14,7 @@ module Dream = Dream__pure.Inmost
    into the framework. *)
 
 (* TODO The option thing is pretty awkward. *)
-let catch next_handler request =
+let catch_errors next_handler request =
 
   Lwt.try_bind
 
