@@ -41,7 +41,7 @@ include Dream__middleware.Session
 include Dream__middleware.Session.Make (Ptime_clock)
 let sql_sessions = Dream__sql.Session.middleware
 
-include Dream__middleware.Flash_message
+include Dream__middleware.Flash
 
 include Dream__middleware.Origin_referrer_check
 include Dream__middleware.Form
