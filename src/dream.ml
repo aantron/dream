@@ -54,7 +54,6 @@ let content_length =
 include Dream__graphql.Graphql
 include Dream__sql.Sql
 
-include Dream__middleware.Error
 include Dream__http.Http
 
 include Dream__middleware.Lowercase_headers

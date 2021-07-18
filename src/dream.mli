@@ -2077,7 +2077,7 @@ val content_length : middleware
     headers are necessary in HTTP/1, and forbidden or redundant and difficult to
     use in HTTP/2. *)
 
-val catch : (error -> response promise) -> middleware
+val catch : middleware
 (** Forwards exceptions, rejections, and [4xx], [5xx] responses from the
     application to the error handler. See {!section-errors}. *)
 

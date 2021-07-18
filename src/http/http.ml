@@ -6,7 +6,6 @@
 
 
 module Dream = Dream__pure.Inmost
-module Error = Dream__middleware.Error
 
 
 
@@ -131,7 +130,7 @@ let websocket_handler user's_websocket_handler socket =
 (* TODO Rename conn like in the body branch. *)
 let wrap_handler
     app
-    (user's_error_handler : Error.error_handler)
+    (user's_error_handler : Dream.error_handler)
     (user's_dream_handler : Dream.handler) =
 
   let httpaf_request_handler = fun client_address (conn : _ Gluten.Reqd.t) ->
@@ -288,7 +287,7 @@ let wrap_handler
 (* TODO Factor out what is in common between the http/af and h2 handlers. *)
 let wrap_handler_h2
     app
-    (_user's_error_handler : Error.error_handler)
+    (_user's_error_handler : Dream.error_handler)
     (user's_dream_handler : Dream.handler) =
 
   let httpaf_request_handler = fun client_address (conn : H2.Reqd.t) ->
@@ -399,7 +398,7 @@ type tls_library = {
     key_file:string ->
     app:Dream.app ->
     handler:Dream.handler ->
-    error_handler:Error.error_handler ->
+    error_handler:Dream.error_handler ->
       Unix.sockaddr ->
       Lwt_unix.file_descr ->
         unit Lwt.t;
@@ -493,11 +492,11 @@ let ocaml_tls = {
 
 
 
-let built_in_middleware error_handler prefix =
+let built_in_middleware prefix =
   Dream.pipeline [
     Dream__middleware.Lowercase_headers.lowercase_headers;
     Dream__middleware.Content_length.content_length;
-    Dream__middleware.Catch.catch (Error_handler.app error_handler);
+    Dream__middleware.Catch.catch;
     Dream__middleware.Request_id.assign_request_id;
     Dream__middleware.Site_prefix.chop_site_prefix prefix;
   ]
@@ -523,7 +522,7 @@ let serve_with_details
 
   let user's_dream_handler =
     if builtins then
-      built_in_middleware error_handler prefix user's_dream_handler
+      built_in_middleware prefix user's_dream_handler
     else
       user's_dream_handler
   in
@@ -603,12 +602,13 @@ let serve_with_maybe_https
     ?(secret = Dream__cipher.Random.random 32)
     ?(old_secrets = [])
     ~prefix
-    ?(app = Dream.new_app ())
     ~https
     ?certificate_file ?key_file
     ?certificate_string ?key_string
     ~builtins
     user's_dream_handler =
+
+  let app = Dream.new_app (Error_handler.app error_handler) in
 
   try%lwt
     begin match debug with
@@ -785,7 +785,6 @@ let serve
     ?secret
     ?old_secrets
     ~prefix
-    ?app:None
     ~https:(if https then `OpenSSL else `No)
     ?certificate_file
     ?key_file
@@ -868,7 +867,6 @@ let run
         ?secret
         ?old_secrets
         ~prefix
-        ?app:None
         ~https:(if https then `OpenSSL else `No)
         ?certificate_file ?key_file
         ?certificate_string:None ?key_string:None
