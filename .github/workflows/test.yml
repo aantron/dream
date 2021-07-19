@@ -17,6 +17,12 @@ jobs:
         include:
         - os: ubuntu-latest
           ocaml: 4.08.x
+        - os: ubuntu-latest
+          ocaml: 4.09.x
+        - os: ubuntu-latest
+          ocaml: 4.10.x
+        - os: ubuntu-latest
+          ocaml: 4.11.x
 
     runs-on: ${{matrix.os}}
     steps:
