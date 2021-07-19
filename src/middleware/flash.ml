@@ -19,6 +19,8 @@ let storage =
 let flash_cookie =
   "dream.flash"
 
+
+
 let flash_messages inner_handler request =
   let outbox = ref [] in
   let request = Dream.with_local storage outbox request in
@@ -36,9 +38,9 @@ let flash_messages inner_handler request =
   in
   Lwt.return resp
 
+
 let (|>?) =
   Option.bind
-
 
 let flash request =
   let rec group x =
