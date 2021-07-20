@@ -31,10 +31,10 @@ let flash_messages inner_handler request =
   | None, [] -> response
   | Some _, [] -> Dream.set_cookie flash_cookie "" request response ~expires:0.
   | _, _ ->
-    let content =
-      List.fold_right (fun (x,y) a -> `String x :: `String y :: a) entries [] in
-    let value = `List content |> Yojson.Basic.to_string in
-    Dream.set_cookie flash_cookie value request response ~max_age:five_minutes
+  let content =
+    List.fold_right (fun (x,y) a -> `String x :: `String y :: a) entries [] in
+  let value = `List content |> Yojson.Basic.to_string in
+  Dream.set_cookie flash_cookie value request response ~max_age:five_minutes
   in
   Lwt.return resp
 
