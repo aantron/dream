@@ -44,14 +44,15 @@ let () =
     print_endline "foo";
     print_endline "bar"
 
-(* Failure: begin...end replaced by parentheses. *)
+(* Failure: begin...end indented strangely. *)
 let () =
   match true with
-  | true -> (
+  | true -> begin
     match () with
     | () ->
       print_endline "foo";
-      print_endline "bar")
+      print_endline "bar"
+  end
   | () ->
     print_endline "foo";
     print_endline "bar"

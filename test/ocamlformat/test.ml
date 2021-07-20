@@ -47,7 +47,7 @@ let () =
     print_endline "foo";
     print_endline "bar"
 
-(* Failure: begin...end replaced by parentheses. *)
+(* Failure: begin...end indented strangely. *)
 let () =
   match true with
   | true ->
