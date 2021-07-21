@@ -28,8 +28,8 @@ let dream =
   foreign "Unikernel.Make"
     ~packages:[ package "ca-certs-nss"
               ; package "dns-client.mirage"
-              ; package "dream.paf.le"
-              ; package "dream.mirage" ]
+              ; package "dream-mirage.paf.le"
+              ; package "dream-mirage" ]
     ~keys:Key.([ abstract port
                ; abstract hostname
                ; abstract production

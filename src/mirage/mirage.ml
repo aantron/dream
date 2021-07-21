@@ -1,3 +1,5 @@
+[@@@warning "-32"]
+
 module Dream = Dream__pure.Inmost
 module Error = Dream__middleware.Error
 

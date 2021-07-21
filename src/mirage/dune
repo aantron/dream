@@ -1,5 +1,5 @@
 (library
- (public_name dream.mirage)
+ (public_name dream-mirage)
  (name dream__mirage)
  (libraries
   bigarray-compat
@@ -12,9 +12,9 @@
   dream.h2
   dream.httpaf
   lwt
-  dream.paf
-  dream.paf.alpn
-  dream.paf.mirage
+  dream-mirage.paf
+  dream-mirage.paf.alpn
+  dream-mirage.paf.mirage
  )
  (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))
