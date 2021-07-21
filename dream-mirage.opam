@@ -51,7 +51,7 @@ depends: [
   "dune" {>= "2.7.0"}
   "dream"
   "bigarray-compat"
-  "bigarray"
+  "bigstringaf"
   "digestif" {>= "1.0.0"}
   "lwt"
   "lwt_ppx" {>= "1.2.2"}
