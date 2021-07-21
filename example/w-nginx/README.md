@@ -15,6 +15,7 @@ example, we allow nginx to handle requests for static assets before
 they reach the application server.
 
 <br>
+
 ```ocaml
 let body =
   <html>
@@ -33,6 +34,7 @@ let () =
   ]
   @@ Dream.not_found
 ```
+
 <br>
 
 
