@@ -83,29 +83,29 @@ type status = [
 let is_informational = function
   | #informational -> true
   | `Status code when code >= 100 && code <= 199 -> true
-  | _ -> false
+  | #status -> false
 
 let is_successful = function
   | #successful -> true
   | `Status code when code >= 200 && code <= 299 -> true
-  | _ -> false
+  | #status -> false
 
 let is_redirection = function
   | #redirection -> true
   | `Status code when code >= 300 && code <= 399 -> true
-  | _ -> false
+  | #status -> false
 
 let is_client_error = function
   | #client_error -> true
   | `Status code when code >= 400 && code <= 499 -> true
-  | _ -> false
+  | #status -> false
 
 let is_server_error = function
   | #server_error -> true
   | `Status code when code >= 500 && code <= 599 -> true
-  | _ -> false
+  | #status -> false
 
-let status_to_int : status -> int = function
+let status_to_int = function
   | `Continue -> 100
   | `Switching_Protocols -> 101
   | `OK -> 200
@@ -206,6 +206,7 @@ let int_to_status : int -> status = function
   | code -> `Status code
 
 let status_to_reason status =
+  let status = (status :> status) in
   let status =
     match status with
     | `Status code -> int_to_status code
@@ -278,6 +279,7 @@ let status_to_reason status =
   | `Status _ -> None
 
 let status_to_string status =
+  let status = (status :> status) in
   match status_to_reason status, status with
   | Some reason, _ -> reason
   | None, `Status code -> string_of_int code
@@ -285,7 +287,8 @@ let status_to_string status =
 
 (* TODO This could also be optimized to save one allocation for `Status. *)
 (* TODO Test specifically this function. *)
-let normalize_status = function
+let normalize_status status =
+  match (status :> status) with
   | `Status code -> int_to_status code
   | status -> status
 

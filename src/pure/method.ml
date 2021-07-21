@@ -52,7 +52,8 @@ let string_to_method = function
 (* TODO Technically, this does one allocation in case the string can't be
    converted to a variant, which can be saved by inlining string_to_method.
    However, this is probably extremely rare. *)
-let normalize_method = function
+let normalize_method method_ =
+  match (method_ :> method_) with
   | `Method method_ -> string_to_method method_
   | method_ -> method_
 

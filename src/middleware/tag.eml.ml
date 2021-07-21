@@ -13,8 +13,13 @@ end
 
 (* TODO Include the path prefix. *)
 let form_tag
-    ~now ?(method_ = `POST) ?target ?enctype ?(csrf_token = true) ~action request =
+    ~now ?method_ ?target ?enctype ?csrf_token ~action request =
 
+  let method_ =
+    match method_ with
+    | None -> Dream.method_to_string `POST
+    | Some method_ -> Dream.method_to_string method_
+  in
   let target =
     match target with
     | Some target -> " target=\"" ^ Dream.html_escape target ^ "\""
@@ -22,11 +27,16 @@ let form_tag
   in
   let enctype =
     match enctype with
-    | Some _ -> " enctype=\"multipart/form-data\""
+    | Some `Multipart_form_data -> " enctype=\"multipart/form-data\""
     | None -> ""
   in
+  let csrf_token =
+    match csrf_token with
+    | None -> true
+    | Some csrf_token -> csrf_token
+  in
   <form
-    method="<%s! Dream.method_to_string method_ %>"
+    method="<%s! method_ %>"
     action="<%s action %>"<%s! target %><%s! enctype %>>
 % if csrf_token then begin
 %   let token = Csrf.csrf_token ~now request in

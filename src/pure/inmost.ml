@@ -183,7 +183,8 @@ let with_client client request =
     {request with specific = {request.specific with request_client = client}}
 
 let with_method_ method_ request =
-  update {request with specific = {request.specific with method_}}
+  update {request with
+    specific = {request.specific with method_ = (method_ :> method_)}}
 
 let with_prefix prefix request =
   update {request with specific = {request.specific with prefix}}
@@ -421,11 +422,17 @@ let request_from_http
 
 let request
     ?(client = "127.0.0.1:12345")
-    ?(method_ = `GET)
+    ?method_
     ?(target = "/")
     ?(version = 1, 1)
     ?(headers = [])
     body =
+
+  let method_ =
+    match (method_ :> method_ option) with
+    | None -> `GET
+    | Some method_ -> method_
+  in
 
   (* This function is used for debugging, so it's fine to allocate a fake body
      and then immediately replace it. *)
@@ -470,7 +477,7 @@ let response
   let status =
     match status, code with
     | None, None -> `OK
-    | Some status, _ -> status
+    | Some status, _ -> (status :> status)
     | None, Some code -> int_to_status code
   in
 
@@ -511,12 +518,12 @@ let json ?status ?code ?headers body =
 
 (* TODO Actually use the request and extract the site prefix. *)
 let redirect ?status ?code ?headers _request location =
+  let status = (status :> redirection option) in
   let status =
     match status, code with
     | None, None -> Some (`See_Other)
     | _ -> status
   in
-  let status = (status :> status option) in
   response ?status ?code ?headers ""
   |> with_header "Location" location
   |> Lwt.return
@@ -544,7 +551,12 @@ let websocket ?headers handler =
   in
   Lwt.return response
 
-let send ?(kind = `Text) websocket message =
+let send ?kind websocket message =
+  let kind =
+    match kind with
+    | None | Some `Text -> `Text
+    | Some `Binary -> `Binary
+  in
   websocket.send kind message
 
 let receive websocket =
@@ -641,7 +653,7 @@ let set_cookie
     ?path
     ?secure
     ?(http_only = true)
-    ?(same_site = Some `Strict)
+    ?same_site
     name
     value
     request
@@ -661,6 +673,15 @@ let set_cookie
   in
 
   let cookie_prefix = infer_cookie_prefix cookie_prefix domain path secure in
+
+  let same_site =
+    match same_site with
+    | None -> Some `Strict
+    | Some None -> None
+    | Some (Some `Strict) -> Some `Strict
+    | Some (Some `Lax) -> Some `Lax
+    | Some (Some `None) -> Some `None
+  in
 
   let name = cookie_prefix ^ name in
 

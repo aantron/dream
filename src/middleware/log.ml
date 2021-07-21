@@ -322,7 +322,7 @@ let set_up_exception_hook () =
 let initialize_log
     ?(backtraces = true)
     ?(async_exception_hook = true)
-    ?level:(level_ = `Info)
+    ?level:level_
     ?enable:(enable_ = true)
     () =
 
@@ -336,10 +336,11 @@ let initialize_log
 
   let level_ =
     match level_ with
-    | `Error -> Logs.Error
-    | `Warning -> Logs.Warning
-    | `Info -> Logs.Info
-    | `Debug -> Logs.Debug
+    | None -> Logs.Info
+    | Some `Error -> Logs.Error
+    | Some `Warning -> Logs.Warning
+    | Some `Info -> Logs.Info
+    | Some `Debug -> Logs.Debug
   in
 
   enable := enable_;
