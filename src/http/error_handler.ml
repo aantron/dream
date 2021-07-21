@@ -6,7 +6,6 @@
 
 
 module Dream = Dream__pure.Inmost
-module Error = Dream__middleware.Error
 
 
 
@@ -26,7 +25,7 @@ let select_log = function
 
 
 
-let dump (error : Error.error) =
+let dump (error : Dream.error) =
   let buffer = Buffer.create 4096 in
   let p format = Printf.bprintf buffer format in
 
@@ -114,7 +113,7 @@ let dump (error : Error.error) =
 (* TODO LATER Some library is registering S-exp-based printers for expressions,
    which are calling functions that use exceptions during parsing, which are
    clobbering the backtrace. *)
-let customize template (error : Error.error) =
+let customize template (error : Dream.error) =
 
   (* First, log the error. *)
 
@@ -348,8 +347,8 @@ let httpaf
       `Server
   in
 
-  let error = Error.{
-    condition;
+  let error = {
+    Dream.condition;
     layer = `HTTP;
     caused_by;
     request = None;
@@ -407,8 +406,8 @@ let h2
       (* TODO LATER When does H2 raise `Internal_server_error? *)
   in
 
-  let error = Error.{
-    condition;
+  let error = {
+    Dream.condition;
     layer = `HTTP2;
     caused_by;
     request = None;
@@ -449,8 +448,8 @@ let h2
 let tls
     app user's_error_handler client_address error =
 
-  let error = Error.{
-    condition = `Exn error;
+  let error = {
+    Dream.condition = `Exn error;
     layer = `TLS;
     caused_by = `Client;
     request = None;
@@ -481,8 +480,8 @@ let websocket
      errors. Not sure if any I/O errors are possible here. *)
   let `Exn exn = error in
 
-  let error = Error.{
-    condition = `Exn exn;
+  let error = {
+    Dream.condition = `Exn exn;
     layer = `WebSocket;
     caused_by = `Server;
     request = Some request;
@@ -504,8 +503,8 @@ let websocket_handshake
     user's_error_handler =
     fun request response error_string ->
 
-  let error = Error.{
-    condition = `String error_string;
+  let error = {
+    Dream.condition = `String error_string;
     layer = `WebSocket;
     caused_by = `Client;
     request = Some request;

@@ -2,7 +2,6 @@ module type DB = Caqti_lwt.CONNECTION
 module R = Caqti_request
 module T = Caqti_type
 
-
 let list_comments =
   let query =
     R.collect T.unit T.(tup2 int string)
@@ -10,7 +9,6 @@ let list_comments =
   fun (module Db : DB) ->
     let%lwt comments_or_error = Db.collect_list query () in
     Caqti_lwt.or_fail comments_or_error
-
 
 let add_comment =
   let query =
@@ -20,10 +18,10 @@ let add_comment =
     let%lwt unit_or_error = Db.exec query text in
     Caqti_lwt.or_fail unit_or_error
 
-
 let render comments request =
   <html>
   <body>
+
 %   comments |> List.iter (fun (_id, comment) ->
       <p><%s comment %></p><% ); %>
 
@@ -34,11 +32,10 @@ let render comments request =
   </body>
   </html>
 
-
 let () =
   Dream.run ~interface:"0.0.0.0"
   @@ Dream.logger
-  @@ Dream.sql_pool "postgresql://dream@postgres/dream"
+  @@ Dream.sql_pool "postgresql://dream:password@postgres/dream"
   @@ Dream.sql_sessions
   @@ Dream.router [
 

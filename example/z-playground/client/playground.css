@@ -1,43 +1,141 @@
 /* This file is part of Dream, released under the MIT license. See LICENSE.md
-   for details, or visit https://github.com/aantron/dream.
+  for details, or visit https://github.com/aantron/dream.
 
-   Copyright 2021 Anton Bachin */
+  Copyright 2021 Anton Bachin */
 
+/*
 
+Playground layout: 2 panels with normal element and fluid
+┌──────────────────────────────────────────────────┐
+│                                                  │
+│ body (desktop)                                   │
+│                                                  │
+│ ┌───────────────────────┐ ┌────────────────────┐ │
+│ │                       │ │                    │ │
+│ │ ┌───────────────────┐ │ │ ┌────────────────┐ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │ .panel-element    │ │ │ │ .panel-element │ │ │
+│ │ ├───────────────────┤ │ │ ├────────────────┤ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │ .panel-fluid      │ │ │ │ .panel-fluid   │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ │                   │ │ │ │                │ │ │
+│ │ └───────────────────┘ │ │ └────────────────┘ │ │
+│ │                       │ │                    │ │
+│ │                       │ │                    │ │
+│ └───────────────────────┘ └────────────────────┘ │
+│                                                  │
+└──────────────────────────────────────────────────┘
 
+This is on mobile or when pressing Change
+┌──────────────────────────────────────────────────┐
+│                                                  │
+│ body (mobile/Change view actived)                │
+│ ┌──────────────────────────────────────────────┐ │
+│ │                                              │ │
+│ │ ┌──────────────────────────────────────────┐ │ │
+│ │ │ .panel-element                           │ │ │
+│ │ │                                          │ │ │
+│ │ ├──────────────────────────────────────────┤ │ │
+│ │ │ .panel-fluid                             │ │ │
+│ │ │                                          │ │ │
+│ │ │                                          │ │ │
+│ │ │                                          │ │ │
+│ │ │                                          │ │ │
+│ │ └──────────────────────────────────────────┘ │ │
+│ │                                              │ │
+│ ├──────────────────────────────────────────────┤ │
+│ │                                              │ │
+│ │ ┌──────────────────────────────────────────┐ │ │
+│ │ │ .panel-element                           │ │ │
+│ │ │                                          │ │ │
+│ │ ├──────────────────────────────────────────┤ │ │
+│ │ │ .panel-fluid                             │ │ │
+│ │ │                                          │ │ │
+│ │ │                                          │ │ │
+│ │ │                                          │ │ │
+│ │ └──────────────────────────────────────────┘ │ │
+│ │                                              │ │
+│ └──────────────────────────────────────────────┘ │
+│                                                  │
+└──────────────────────────────────────────────────┘
+ */
 body {
   margin: 0;
   font-size: 14px;
   line-height: 21px;
   color: #ddd;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
+  display: flex;
+  height: 100vh;
+  overflow-y: hidden;
 }
 
-#editor {
-  float: left;
-  width: 50%;
-}
-
-#client {
-  float: left;
-  width: 50%;
-}
-
-#textarea .CodeMirror {
-  height: calc(100vh - 168px);
-}
-
-#client iframe {
-  height: calc(100vh - 63px)
-}
-
-@media (max-width: 1100px) {
-  #editor, #client {
-    float: none;
-    width: initial;
+@supports (-webkit-touch-callout: none) {
+  body {
+    /* The hack for Safari Mobile hack */
+    height: -webkit-fill-available;
   }
 }
 
+.panel {
+  flex: 0 0 50%;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+}
+.panel-fluid {
+  flex: 1 0 auto;
+  min-height: 300px;
+}
+
+/*
+ * Change view activation and mobile mode is the same
+ * Please ensure that they are in perfect sync
+ */
+body.full-editor {
+  flex-direction: column;
+  overflow-y: auto;
+  height: auto;
+}
+
+.full-editor .panel {
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  body {
+    flex-direction: column;
+    overflow-y: auto;
+    height: auto;
+  }
+  .panel {
+    width: 100%;
+  }
+}
+
+#textarea {
+  position: relative;
+}
+#textarea .CodeMirror {
+  height: 100%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
 
 header {
   height: 64px;
@@ -54,10 +152,12 @@ h1 {
 }
 
 #log {
+  height: 100px;
   margin: 0;
-  height: 105px;
   overflow-x: hidden;
   padding-left: 34px;
+  padding-top: 14px;
+  overflow: auto;
 }
 
 .CodeMirror, #log {
@@ -116,8 +216,6 @@ h1 {
   background: #555;
 }
 
-
-
 /* Client */
 
 #client header {
@@ -145,7 +243,6 @@ h1 {
   width: 100%;
   background-color: white;
 }
-
 
 
 /* Syntax */

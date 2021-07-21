@@ -40,20 +40,21 @@ let html example =
 </head>
 <body>
 
-<div id="editor">
+<div id="editor" class="panel">
   <header>
     <h1>Dream Playground</h1>
     <button id="run">Run</button>
+    <button id="chview">Expand editor</button>
     <%s! backlink %>
   </header>
-  <div id="textarea"></div>
+  <div id="textarea" class="panel-fluid"></div>
   <pre id="log"></pre>
 </div>
-<div id="client">
+<div id="client" class="panel">
   <header>
     <input id="location"></input>
   </header>
-  <iframe title="Client connecting to the playground server"></iframe>
+  <iframe title="Client connecting to the playground server" class="panel-fluid"></iframe>
 </div>
 
 <script src="/static/playground.js"></script>

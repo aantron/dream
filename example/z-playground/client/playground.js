@@ -11,6 +11,7 @@ var refresh = document.querySelector("#refresh");
 var address = document.querySelector("input");
 var iframe = document.querySelector("iframe");
 var pre = document.querySelector("pre");
+var chview = document.querySelector("#chview");
 
 var codemirror = CodeMirror(editor, {
   theme: "material dream",
@@ -100,6 +101,11 @@ run.onclick = function () {
   pre.scrollTop = pre.scrollHeight;
   socket.send(codemirror.getValue());
 };
+
+chview.onclick = function(){
+  var body = document.body;
+  body.classList.toggle("full-editor")
+}
 
 address.onkeyup = function (event) {
   if (event.keyCode === 13)

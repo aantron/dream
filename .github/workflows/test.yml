@@ -13,10 +13,16 @@ jobs:
           # Blocked until we no longer require libev; Dream still works on
           # Windows, but testing it is awkward at the moment.
         ocaml:
-        - 4.12.0
+        - 4.12.x
         include:
         - os: ubuntu-latest
-          ocaml: 4.08.1
+          ocaml: 4.08.x
+        - os: ubuntu-latest
+          ocaml: 4.09.x
+        - os: ubuntu-latest
+          ocaml: 4.10.x
+        - os: ubuntu-latest
+          ocaml: 4.11.x
 
     runs-on: ${{matrix.os}}
     steps:
@@ -24,9 +30,9 @@ jobs:
       with:
         submodules: recursive
 
-    - uses: avsm/setup-ocaml@v1
+    - uses: avsm/setup-ocaml@v2
       with:
-        ocaml-version: ${{matrix.ocaml}}
+        ocaml-compiler: ${{matrix.ocaml}}
 
     - run: opam depext --yes conf-postgresql
     - run: opam depext --yes conf-libev

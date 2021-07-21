@@ -572,14 +572,14 @@ let json_replacement = {|
 |}
 
 let val_redirect_expected = {|<div class="spec value" id="val-redirect">
- <a href="#val-redirect" class="anchor"></a><code><span><span class="keyword">val</span> redirect : <span>?status:<a href="#type-status">status</a> <span class="arrow">-&gt;</span></span> <span>?code:int <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span>
+ <a href="#val-redirect" class="anchor"></a><code><span><span class="keyword">val</span> redirect : <span>?status:<a href="#type-redirection">redirection</a> <span class="arrow">-&gt;</span></span> <span>?code:int <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span>
 <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let val_redirect_replacement = {|
 <pre><span class="keyword">val</span> redirect :
-  <span class="optional">?status:<a href="#type-status">status</a> ->
+  <span class="optional">?status:<a href="#type-redirection">redirection</a> ->
   ?code:int ->
   ?headers:(string * string) list -></span>
     <a href="#type-request">request</a> -> string -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>

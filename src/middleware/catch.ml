@@ -14,7 +14,7 @@ module Dream = Dream__pure.Inmost
    into the framework. *)
 
 (* TODO The option thing is pretty awkward. *)
-let catch user's_error_handler = fun next_handler request ->
+let catch_errors next_handler request =
 
   Lwt.try_bind
 
@@ -32,8 +32,8 @@ let catch user's_error_handler = fun next_handler request ->
             `Server, `Error
         in
 
-        let error = Error.{
-          condition = `Response response;
+        let error = {
+          Dream.condition = `Response response;
           layer = `App;
           caused_by;
           request = Some request;
@@ -44,6 +44,7 @@ let catch user's_error_handler = fun next_handler request ->
           will_send_response = true;
         } in
 
+        let user's_error_handler = (Dream.app request).error_handler in
         user's_error_handler error
       end
       else
@@ -54,8 +55,8 @@ let catch user's_error_handler = fun next_handler request ->
        capture more relevant context. We leave the HTTP-level handlers for truly
        severe protocol-level errors and integration mistakes. *)
     (fun exn ->
-      let error = Error.{
-        condition = `Exn exn;
+      let error = {
+        Dream.condition = `Exn exn;
         layer = `App;
         caused_by = `Server;
         request = Some request;
@@ -66,4 +67,5 @@ let catch user's_error_handler = fun next_handler request ->
         will_send_response = true;
       } in
 
+      let user's_error_handler = (Dream.app request).error_handler in
       user's_error_handler error)

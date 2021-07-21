@@ -6,17 +6,16 @@
 
 
 module Dream = Dream__pure.Inmost
-module Error = Dream__middleware.Error
 
 
 
 (* User's error handlers and defaults. These actually generate error response
    templates and/or do logging. *)
 
-val default : Dream__middleware.Error.error_handler
+val default : Dream.error_handler
 val customize :
   (string option -> Dream.response -> Dream.response Lwt.t) ->
-    Error.error_handler
+    Dream.error_handler
 
 
 
@@ -32,32 +31,32 @@ val customize :
     Dream.middleware *)
 
 val app :
-  Error.error_handler ->
-    (Error.error -> Dream.response Lwt.t)
+  Dream.error_handler ->
+    (Dream.error -> Dream.response Lwt.t)
 
 val httpaf :
   Dream.app ->
-  Error.error_handler ->
+  Dream.error_handler ->
     (Unix.sockaddr -> Httpaf.Server_connection.error_handler)
 
 val h2 :
   Dream.app ->
-  Error.error_handler ->
+  Dream.error_handler ->
     (Unix.sockaddr -> H2.Server_connection.error_handler)
 
 val tls :
   Dream.app ->
-  Error.error_handler ->
+  Dream.error_handler ->
     (Unix.sockaddr -> exn -> unit)
 
 val websocket :
-  Error.error_handler ->
+  Dream.error_handler ->
   Dream.request ->
   Dream.response ->
     (Websocketaf.Wsd.t -> [ `Exn of exn ] -> unit)
 
 val websocket_handshake :
-  Error.error_handler ->
+  Dream.error_handler ->
     (Dream.request -> Dream.response -> string -> Dream.response Lwt.t)
 
 

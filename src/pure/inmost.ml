@@ -39,34 +39,16 @@ struct
 end
 module Scope = Hmap.Make (Scope_variable_metadata)
 
-type app = {
-  globals : Scope.t ref;
-  mutable debug : bool;
-  mutable https : bool;
-  mutable secrets : string list;
+type websocket = {
+  send : [ `Text | `Binary ] -> string -> unit Lwt.t;
+  receive : unit -> string option Lwt.t;
+  close : int option -> unit Lwt.t;
 }
 
-let debug app =
-  app.debug
+type request = incoming message
+and response = outgoing message
 
-let set_debug value app =
-  app.debug <- value
-
-(* TODO Delete; now using key. *)
-let secret app =
-  List.hd app.secrets
-
-let set_secrets secrets app =
-  app.secrets <- secrets
-
-let new_app () = {
-  globals = ref Scope.empty;
-  debug = false;
-  https = false;
-  secrets = [];
-}
-
-type 'a message = {
+and 'a message = {
   specific : 'a;
   headers : (string * string) list;
   body : Body.body_cell;
@@ -75,9 +57,9 @@ type 'a message = {
   last : 'a message ref;
 }
 
-type incoming = {
+and incoming = {
   app : app;
-  client : string;
+  request_client : string;
   method_ : method_;
   target : string;
   prefix : string list;
@@ -88,19 +70,74 @@ type incoming = {
 }
 (* Prefix is stored backwards. *)
 
-type websocket = {
-  send : [ `Text | `Binary ] -> string -> unit Lwt.t;
-  receive : unit -> string option Lwt.t;
-  close : int option -> unit Lwt.t;
-}
-
-type outgoing = {
+and outgoing = {
   status : status;
   websocket : (websocket -> unit Lwt.t) option;
 }
 
-type request = incoming message
-type response = outgoing message
+and app = {
+  globals : Scope.t ref;
+  mutable app_debug : bool;
+  mutable https : bool;
+  mutable secrets : string list;
+  error_handler : error -> response Lwt.t;
+  site_prefix : string list;
+}
+
+and error_handler = error -> response option Lwt.t
+
+and error = {
+  condition : [
+    | `Response of response
+    | `String of string
+    | `Exn of exn
+  ];
+  layer : [
+    | `TLS
+    | `HTTP
+    | `HTTP2
+    | `WebSocket
+    | `App
+  ];
+  (* TODO Any point in distinguishing HTTP and HTTP2 errors? *)
+  caused_by : [
+    | `Server
+    | `Client
+  ];
+  request : request option;
+  response : response option;
+  client : string option;
+  severity : [
+    | `Error
+    | `Warning
+    | `Info
+    | `Debug
+  ];
+  debug : bool;
+  will_send_response : bool;
+}
+
+let debug app =
+  app.app_debug
+
+let set_debug value app =
+  app.app_debug <- value
+
+(* TODO Delete; now using key. *)
+let secret app =
+  List.hd app.secrets
+
+let set_secrets secrets app =
+  app.secrets <- secrets
+
+let new_app error_handler site_prefix = {
+  globals = ref Scope.empty;
+  app_debug = false;
+  https = false;
+  secrets = [];
+  error_handler;
+  site_prefix;
+}
 
 type 'a promise = 'a Lwt.t
 
@@ -118,7 +155,7 @@ let update message =
   message
 
 let client request =
-  request.specific.client
+  request.specific.request_client
 
 let https request =
   request.specific.app.https
@@ -142,7 +179,8 @@ let version request =
   request.specific.request_version
 
 let with_client client request =
-  update {request with specific = {request.specific with client}}
+  update
+    {request with specific = {request.specific with request_client = client}}
 
 let with_method_ method_ request =
   update {request with specific = {request.specific with method_}}
@@ -363,7 +401,7 @@ let request_from_http
   let rec request = {
     specific = {
       app;
-      client;
+      request_client = client;
       method_;
       target;
       prefix = [];
@@ -402,8 +440,10 @@ let request
 
   let rec request = {
     specific = {
-      app = new_app ();
-      client;
+      (* TODO Is there a better fake error handler? Maybe this function should
+         come after the response constructors? *)
+      app = new_app (fun _ -> assert false) [];
+      request_client = client;
       method_;
       target;
       prefix = [];
@@ -476,7 +516,8 @@ let redirect ?status ?code ?headers _request location =
     | None, None -> Some (`See_Other)
     | _ -> status
   in
-  response ?status ?code ?headers location
+  let status = (status :> status option) in
+  response ?status ?code ?headers ""
   |> with_header "Location" location
   |> Lwt.return
 

@@ -41,7 +41,7 @@ include Dream__middleware.Session
 include Dream__middleware.Session.Make (Ptime_clock)
 let sql_sessions = Dream__sql.Session.middleware
 
-include Dream__middleware.Flash_message
+include Dream__middleware.Flash
 
 include Dream__middleware.Origin_referrer_check
 include Dream__middleware.Form
@@ -54,7 +54,6 @@ let content_length =
 include Dream__graphql.Graphql
 include Dream__sql.Sql
 
-include Dream__middleware.Error
 include Dream__http.Http
 
 include Dream__middleware.Lowercase_headers
@@ -72,11 +71,14 @@ let random =
 
 include Dream__pure.Formats
 
+(* TODO Restore the ability to test with a prefix and re-enable the
+   corresponding tests. *)
 let test ?(prefix = "") handler request =
+  ignore prefix;
   let app =
     content_length
     @@ assign_request_id
-    @@ chop_site_prefix prefix
+    @@ chop_site_prefix
     @@ handler
   in
 

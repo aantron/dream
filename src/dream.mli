@@ -451,16 +451,20 @@ val json :
     {!Dream.application_json}. *)
 
 val redirect :
-  ?status:status ->
+  ?status:redirection ->
   ?code:int ->
   ?headers:(string * string) list ->
     request -> string -> response promise
 (** Creates a new {!type-response}. Adds a [Location:] header with the given
     string. The default status code is [303 See Other], for a temporary
     redirection. Use [~status:`Moved_Permanently] or [~code:301] for a permanent
-    redirection. The {!type-request} is used for retrieving the site prefix, if
-    the string is an absolute path. Most applications don't have a site
-    prefix. *)
+    redirection.
+
+    If you use [~code], be sure the number follows the pattern [3xx], or most
+    browsers and other clients won't actually perform a redirect.
+
+    The {!type-request} is used for retrieving the site prefix, if the string is
+    an absolute path. Most applications don't have a site prefix. *)
 
 val empty :
   ?headers:(string * string) list ->
@@ -1406,11 +1410,26 @@ val session_label : request -> string
 val session_expires_at : request -> float
 (** Time at which the session will expire. *)
 
-(** {1 Flash Messages} *)
+
+
+(** {1 Flash messages}
+
+    Flash messages are short strings which are stored in cookies during one
+    request, to be made available for the next request. The typical use case is
+    to provide form feedback across a redirect. See example
+    {{:https://github.com/aantron/dream/tree/master/example/w-flash#files}
+    [w-flash]} \[{{:http://dream.as/w-flash} playground}\]. *)
 
 val flash_messages : middleware
+(** Implements storing flash messages in cookies. *)
+
+val flash : request -> (string * string) list
+(** The request's flash messages. *)
+
 val put_flash : string -> string -> request -> unit
-val get_flash : request -> (string * string) list
+(** Adds a flash message to the request. *)
+
+
 
 (** {1 WebSockets} *)
 
@@ -2033,7 +2052,7 @@ val serve :
       Dream.run ~builtins:false
       @@ Dream.lowercase_headers
       @@ Dream.content_length
-      @@ Dream.catch (* ... *)
+      @@ Dream.catch_errors
       @@ Dream.assign_request_id
       @@ Dream.chop_site_prefix
       @@ my_app
@@ -2058,14 +2077,14 @@ val content_length : middleware
     headers are necessary in HTTP/1, and forbidden or redundant and difficult to
     use in HTTP/2. *)
 
-val catch : (error -> response promise) -> middleware
+val catch_errors : middleware
 (** Forwards exceptions, rejections, and [4xx], [5xx] responses from the
     application to the error handler. See {!section-errors}. *)
 
 val assign_request_id : middleware
 (** Assigns an id to each request. *)
 
-val chop_site_prefix : string -> middleware
+val chop_site_prefix : middleware
 (** Removes {!Dream.run} [~prefix] from the path in each request, and adds it to
     the request prefix. Responds with [502 Bad Gateway] if the path does not
     have the expected prefix. *)

@@ -50,6 +50,7 @@ example i-graphql
 example j-stream
 example k-websocket
 example w-graphql-subscription
+example w-flash
 example w-content-security-policy
 example w-long-polling
 example w-multipart-dump

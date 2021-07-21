@@ -91,7 +91,7 @@ Both the comments and the sessions survive server restarts.
 ```sql
 CREATE TABLE comment (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  text NOT NULL
+  text TEXT NOT NULL
 );
 
 CREATE TABLE dream_session (
@@ -127,15 +127,8 @@ We also had to make an addition to our
 <br>
 
 SQLite is good for small-to-medium sites and examples. For a larger site,
-microservices, or other needs, you can switch, for example, to PostgreSQL by...
-
-- running PostgreSQL, typically in a [Docker
-  container](https://hub.docker.com/_/postgres/);
-- changing the connection URI to `postgres://user:password@host:port`;
-- using `caqti-driver-postgres`;
-- replacing `INTEGER PRIMARY KEY AUTOINCREMENT` by `SERIAL PRIMARY KEY`.
-
-<br>
+microservices, or other needs, you can switch, for example, to PostgreSQL. See
+[**`w-postgres`**](../w-postgres#files).
 
 A good program for examining databases locally is
 [Beekeeper Studio](https://www.beekeeperstudio.io/). Dream might also integrate

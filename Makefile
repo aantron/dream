@@ -68,6 +68,16 @@ clean : clean-coverage
 	make --no-print-directory -C docs/web clean
 	rm -rf src/graphiql/node_modules dream-* _release
 
+.PHONY : test-ocamlformat
+test-ocamlformat :
+	touch test/ocamlformat/test.expect.ml
+	ocamlformat test/ocamlformat/test.ml > test/ocamlformat/test.actual.ml
+	diff -u3 test/ocamlformat/test.expect.ml test/ocamlformat/test.actual.ml
+
+.PHONY : test-ocamlformat-promote
+test-ocamlformat-promote :
+	ocamlformat test/ocamlformat/test.ml > test/ocamlformat/test.expect.ml
+
 .PHONY : utop
 utop :
 	dune utop

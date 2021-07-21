@@ -31,6 +31,9 @@ let sql_pool ?size uri =
   begin match !pool_cell with
   | Some pool -> inner_handler (Dream.with_local pool_variable pool request)
   | None ->
+    (* The correctness of this code is subtle. There is no race condition with
+       two requests attempting to create a pool only because none of the code
+       between checking pool_cell and setting it calls into Lwt. *)
     let parsed_uri = Uri.of_string uri in
     if Uri.scheme parsed_uri = Some "sqlite" then
       log.warning (fun log -> log ~request
