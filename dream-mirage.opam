@@ -50,6 +50,12 @@ depends: [
   "dream"
   "dune" {>= "2.7.0"}
   "dream"
+  "bigarray-compat"
+  "bigarray"
+  "digestif" {>= "1.0.0"}
+  "lwt"
+  "lwt_ppx" {>= "1.2.2"}
+  "letsencrypt" {>= "0.3.0"}
 ]
 
 build: [
