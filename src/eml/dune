@@ -1,5 +1,6 @@
 (executable
  (public_name dream_eml)
+ (package dream)
  (name main)
  (modules main)
  (libraries eml)

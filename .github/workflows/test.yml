@@ -42,7 +42,7 @@ jobs:
         set -e
         set -x
 
-        EXAMPLES=$(find example -maxdepth 1 -type d | grep -v "^example/0" | grep -v "^example$" | sort)
+        EXAMPLES=$(find example -maxdepth 1 -type d -not -name "m-mirage*"| grep -v "^example/0" | grep -v "^example$" | sort)
         shopt -s nullglob
 
         for EXAMPLE in $EXAMPLES
