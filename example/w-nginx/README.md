@@ -37,7 +37,6 @@ let () =
 
 <br>
 
-
 These [nginx
 docs](https://docs.nginx.com/nginx/admin-guide/web-server/serving-static-content/)
 discuss serving static content in more detail. Here is the server
@@ -85,12 +84,13 @@ http {
 ```
 
 To summarize, this configuration says:
-<ul>
-	<li>The proxy server will listen on port 8081.</li>
-	<li>Given a request starting with `/static/`, the proxy server
-    will look for an appropriate file under `/www/data/static`.</li>
-	<li>Any other traffic gets forwarded to the `web` container on port 8080.</li>
-</ul>
+
+- The proxy server will listen on port 8081.
+- Given a request starting with `/static/`, the proxy server will look
+  for an appropriate file under `/www/data/static`.
+- Any other traffic gets forwarded to the `web` container on port
+  8080.
+
 
 Note that if you wanted to provide access to the application server
 behind another route (say `/app`), this can be accomplished with a
@@ -98,13 +98,12 @@ behind another route (say `/app`), this can be accomplished with a
 
 ```
   location / {
-	rewrite ^/app/(.*) /$1 break;
+    rewrite ^/app/(.*) /$1 break;
     proxy_pass http://web:8080;
     proxy_read_timeout 60s;
   }
 ```
 
-<br>
 <br>
 
 To build, run:
