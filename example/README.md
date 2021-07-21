@@ -117,8 +117,7 @@ if something is missing!
   watcher using fswatch.
 - [**`w-live-reload`**](w-live-reload#files) &nbsp;&mdash;&nbsp; a simple
   live-reloading setup.
-- [**`w-nginx`**](w-nginx#files) &nbsp;&mdash;&nbsp; a simple example
-  illustrating how to use nginx as a reverse proxy.
+- [**`w-nginx`**](w-nginx#files) &nbsp;&mdash;&nbsp; uses nginx as a reverse proxy.
 - [**`w-tyxml`**](w-tyxml#files) &nbsp;&mdash;&nbsp; uses TyXML for type-checked
   HTML templating.
 - [**`w-long-polling`**](w-long-polling#files) &nbsp;&mdash;&nbsp; old form of
