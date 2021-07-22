@@ -20,9 +20,13 @@ they reach the application server.
 let body =
   <html>
   <body>
-    <h1>Greetings from the Dream Server!</h1>
-    <image src="/static/ocaml.png" alt="The OCaml logo.">
-    </body>
+  <h1>Greetings from the Dream Server!</h1>
+  <a href="http://ocaml.org">
+  <img src="/static/ocaml.png"
+       alt="The OCaml logo."
+       style="border: none; width: 150px;" />
+  </a>
+  </body>
   </html>
 
 
