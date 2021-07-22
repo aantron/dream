@@ -96,7 +96,7 @@ Note that if you wanted to provide access to the application server
 behind another route (say `/app`), this can be accomplished with a
 `rewrite` rule, like this:
 
-```
+```nginx
   location / {
     rewrite ^/app/(.*) /$1 break;
     proxy_pass http://web:8080;
@@ -132,7 +132,7 @@ application server directly. The reason we can reach the application
 server on port 8080 is that this port is exposed in the
 `docker-compose.yml` file. Updating the `web` container to
 
-```
+```yml
   web:
     build: .
     restart: always
