@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  nginx:
+    image: nginx
+    expose:
+      - 8081
+    ports:
+      - "8081:8081"
+    links:
+      - web
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ocaml.png:/www/data/static/ocaml.png
+  web:
+    build: .
+    ports:
+      - "8080:8080"
+    restart: always
+    logging:
+      driver: ${LOGGING_DRIVER:-json-file}
