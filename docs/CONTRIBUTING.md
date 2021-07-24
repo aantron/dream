@@ -100,6 +100,29 @@ git pull --recurse-submodules
 ```
 
 <br>
+   
+If you need to link to the local version of Dream from a project that lives in a different directory, you will have use `esy`. First, add this line to your `esy.json` file:
+
+```
+{
+   ...
+   "resolutions": {
+     ...
+     "@opam/dream": "link:path/to/dream.opam"
+   },
+}
+```
+
+Then, run
+```
+npx esy install
+npx esy build
+npx esy start
+```
+
+Don't forget the `esy build` step, which is necessary to build the local dependency.
+
+<br>
 
 ## Docs
 
