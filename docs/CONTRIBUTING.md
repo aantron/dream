@@ -5,9 +5,11 @@ Contributions are very welcome. This includes not only code PRs, but also:
 - [Examples](https://github.com/aantron/dream/tree/master/example#readme)
 - [Docs fixes](https://aantron.github.io/dream/)
 - [Bug reports](https://github.com/aantron/dream/issues)
-- Links to blogs &mdash; different people benefit from different presentations!
-- Links to projects that use Dream &mdash; to serve as large examples.
-- Links to libraries to use with Dream.
+- Links to [blogs](https://github.com/aantron/dream#example-repositories)
+  &mdash; different people benefit from different presentations!
+- Links to projects that use Dream &mdash; to serve as large examples
+- Links to [libraries](https://github.com/aantron/dream#recommended-projects)
+  to use with Dream
 - And more!
 
 <br>
@@ -100,10 +102,11 @@ git pull --recurse-submodules
 ```
 
 <br>
-   
-If you need to link to the local version of Dream from a project that lives in a different directory, you will have use `esy`. First, add this line to your `esy.json` file:
 
-```
+If you need to link to the local version of Dream from a project that lives in
+a different directory, and you are using esy, add this line to your `esy.json`:
+
+```json
 {
    ...
    "resolutions": {
@@ -120,7 +123,8 @@ npx esy build
 npx esy start
 ```
 
-Don't forget the `esy build` step, which is necessary to build the local dependency.
+Don't forget the `esy build` step, which is necessary to build the local
+dependency.
 
 <br>
 
