@@ -192,16 +192,30 @@ Most of the examples are loaded into the [playground][playground]. For instance,
 
 <br>
 
-## Community projects
-
-A few related projects for your Dream application:
+## Recommended projects
 
 - [`dream-cli`](https://github.com/tmattio/dream-cli) &nbsp;&mdash;&nbsp;
   command-line interface for Dream applications.
 - [`dream-encoding`](https://github.com/tmattio/dream-encoding) &nbsp;&mdash;
-  &nbsp; compression middleware
+  &nbsp; compression middleware.
 - [`dream-livereload`](https://github.com/tmattio/dream-livereload)
   &nbsp;&mdash;&nbsp; live reloading.
+- [`emile`](https://github.com/dinosaure/emile) &nbsp;&mdash;&nbsp; email
+  address syntax validation.
+- [`letters`](https://github.com/oxidizing/letters) &nbsp;&mdash;&nbsp; SMTP
+  client.
+
+<br>
+
+## Example repositories
+
+- [`dream-mail-example`](https://github.com/jsthomas/dream-email-example)
+  &nbsp;&mdash;&nbsp; sends email using RabbitMQ and Mailgun
+  [[blog post](https://jsthomas.github.io/ocaml-email.html),
+  [discuss](https://discuss.ocaml.org/t/how-to-send-email-from-dream/8201)].
+- [`dream-melange-tea-tailwind`](https://github.com/tcoopman/dream-melange-tea-tailwind)
+  &nbsp;&mdash;&nbsp; The Elm Architecture with a Dream server, client compiled
+  by Melange.
 
 <br>
 
