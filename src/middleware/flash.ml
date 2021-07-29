@@ -27,16 +27,20 @@ let flash_messages inner_handler request =
   let%lwt response = inner_handler request in
   let entries = List.rev !outbox in
   let existing = Dream.cookie flash_cookie request in
-  let response = match existing, entries with
-  | None, [] -> response
-  | Some _, [] -> Dream.set_cookie flash_cookie "" request response ~expires:0.
-  | _, _ ->
-    let content =
-      List.fold_right (fun (x,y) a -> `String x :: `String y :: a) entries [] in
-    let value = `List content |> Yojson.Basic.to_string in
-    Dream.set_cookie flash_cookie value request response ~max_age:five_minutes
+  let response =
+    match existing, entries with
+    | None, [] -> response
+    | Some _, [] ->
+      Dream.set_cookie flash_cookie "" request response ~expires:0.
+    | _, _ ->
+      let content =
+        List.fold_right (fun (x,y) a -> `String x :: `String y :: a) entries []
+      in
+      let value = `List content |> Yojson.Basic.to_string in
+      Dream.set_cookie flash_cookie value request response ~max_age:five_minutes
   in
   Lwt.return response
+
 
 
 let (|>?) =
