@@ -3,11 +3,6 @@ type response
 
 type handler = request -> response Lwt.t
 
-module Error : sig
-  type error
-  type error_handler = error -> response option Lwt.t
-end
-
 module Make
   (Pclock : Mirage_clock.PCLOCK)
   (Time : Mirage_time.S)
@@ -182,12 +177,22 @@ module Make
   val error_template :
     (string option -> response -> response Lwt.t) -> error_handler
 
-  val run :
+  val https :
        ?stop:Lwt_switch.t
     -> port:int
     -> ?prefix:string
     -> Stack.t
     -> Tls.Config.server
+    -> ?error_handler:error_handler
+    -> handler
+    -> unit Lwt.t
+
+  val http :
+       ?stop:Lwt_switch.t
+    -> port:int
+    -> ?prefix:string
+    -> ?protocol:[ `H2 | `HTTP_1_1 ]
+    -> Stack.t
     -> ?error_handler:error_handler
     -> handler
     -> unit Lwt.t

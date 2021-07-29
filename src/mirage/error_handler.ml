@@ -1,5 +1,4 @@
 module Dream = Dream__pure.Inmost
-module Error = Dream__middleware.Error
 
 let log =
   Dream__middleware.Log.sub_log "dream.mirage"
@@ -10,7 +9,7 @@ let select_log = function
   | `Info -> log.info
   | `Debug -> log.debug
 
-let dump (error : Error.error) =
+let dump (error : Dream.error) =
   let buffer = Buffer.create 4096 in
   let p format = Printf.bprintf buffer format in
 
@@ -95,7 +94,7 @@ let dump (error : Error.error) =
 
   Buffer.contents buffer
 
-let customize template (error : Error.error) =
+let customize template (error : Dream.error) =
 
   (* First, log the error. *)
 
@@ -198,7 +197,7 @@ let double_faults f default =
     default ()
   end
 
-let httpaf app user's_error_handler = fun client ?request:_ error start_response ->
+let httpaf app user's_error_handler = fun client_address ?request:_ error start_response ->
   let condition, severity, caused_by = match error with
     | `Exn exn ->
       `Exn exn,
@@ -213,13 +212,13 @@ let httpaf app user's_error_handler = fun client ?request:_ error start_response
       `String "Content-Length missing or negative",
       `Error,
       `Server in
-  let error = Error.{
-    condition;
+  let error = {
+    Dream.condition;
     layer = `HTTP;
     caused_by;
     request = None;
     response = None;
-    client;
+    client= Some client_address;
     severity;
     debug = Dream.debug app;
     will_send_response = true;
