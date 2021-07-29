@@ -1,20 +1,17 @@
-let body =
+let home =
   <html>
   <body>
-  <h1>Greetings from the Dream Server!</h1>
-  <a href="http://ocaml.org">
-  <img src="/static/ocaml.png"
-       alt="The OCaml logo."
-       style="border: none; width: 150px;" />
-  </a>
+    <h1>Greetings from the Dream app!</h1>
+    <img
+      src="/assets/camel.jpeg"
+      alt="A silly camel.">
   </body>
   </html>
 
-
 let () =
-  Dream.run ~interface:"0.0.0.0"
+  Dream.run ~interface:"0.0.0.0" ~port:8081
   @@ Dream.logger
   @@ Dream.router [
-    Dream.get "/" (fun _request -> Dream.html body)
+    Dream.get "/" (fun _request -> Dream.html home)
   ]
   @@ Dream.not_found

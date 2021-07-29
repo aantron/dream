@@ -2,113 +2,99 @@
 
 <br>
 
-This example shows how to use [nginx](https://docs.nginx.com/) as a
-reverse proxy together with Dream. To simplify setup, the example runs
-both nginx and Dream in
-[Docker](https://en.wikipedia.org/wiki/Docker_(software)) containers
-with [Docker Compose](https://docs.docker.com/compose/).
+This example shows how to use [nginx](https://docs.nginx.com/) as a reverse
+proxy with Dream. Both nginx and our Dream app run inside
+[Docker](https://en.wikipedia.org/wiki/Docker_(software)) containers, using
+[Docker Compose](https://docs.docker.com/compose/).
 
-<br>
-
-There are several reasons to pair Dream with a reverse proxy. In this
-example, we allow nginx to handle requests for static assets before
-they reach the application server.
-
-<br>
-
-```ocaml
-let body =
-  <html>
-  <body>
-  <h1>Greetings from the Dream Server!</h1>
-  <a href="http://ocaml.org">
-  <img src="/static/ocaml.png"
-       alt="The OCaml logo."
-       style="border: none; width: 150px;" />
-  </a>
-  </body>
-  </html>
-
-
-let () =
-  Dream.run ~interface:"0.0.0.0"
-  @@ Dream.logger
-  @@ Dream.router [
-    Dream.get "/" (fun _request -> Dream.html body)
-  ]
-  @@ Dream.not_found
-```
-
-<br>
-
-These [nginx
-docs](https://docs.nginx.com/nginx/admin-guide/web-server/serving-static-content/)
-discuss serving static content in more detail. Here is the server
-configuration for `nginx`:
+There are several reasons to use Dream with a reverse proxy. For example, nginx
+can be used as a [load
+balancer](https://nginx.org/en/docs/http/load_balancing.html). However, in this
+example, we
+[offload](https://docs.nginx.com/nginx/admin-guide/web-server/serving-static-content/)
+static asset handling to nginx. When a request comes in for a file in
+`/assets/`, nginx responds with a file from `/www/assets/` inside its
+container, and does not forward the request to our Dream server at all:
 
 ```nginx
-user  nginx;
-worker_processes  1;
-
-error_log  /var/log/nginx/error.log notice;
-pid        /var/run/nginx.pid;
-
-
-events {
-    worker_connections  1024;
-}
-
-
 http {
-    include       /etc/nginx/mime.types;
-    default_type  application/octet-stream;
-
-    access_log  /dev/stdout;
-    error_log   /dev/stderr;
-
-    keepalive_timeout  65;
-
     server {
-        listen 8081 default_server;
+        listen 8080;
 
-        root /www/data;
-
-        location /static/ {
-            # Serve static assets from the folder /www/data/static on the
-            # nginx server.
+        root /www;
+        location /assets/ {
         }
 
         location / {
-            # Forward any other request to the dream server.
-            proxy_pass http://web:8080;
-            proxy_read_timeout 60s;
+            proxy_pass http://dream:8081;
         }
     }
+
+    include    /etc/nginx/mime.types;
+    access_log /dev/stdout;
+    error_log  /dev/stderr;
+}
+
+user      nginx;
+error_log /var/log/nginx/error.log notice;
+pid       /var/run/nginx.pid;
+
+events {
 }
 ```
 
-To summarize, this configuration says:
+The reference for
+[`nginx.conf`](https://github.com/aantron/dream/blob/master/example/w-nginx/nginx.conf)
+can be found [here](https://nginx.org/en/docs/).
 
-- The proxy server will listen on port 8081.
-- Given a request starting with `/static/`, the proxy server will look
-  for an appropriate file under `/www/data/static`.
-- Any other traffic gets forwarded to the `web` container on port
-  8080.
+Our
+[`docker-compose.yml`](https://github.com/aantron/dream/blob/master/example/w-nginx/docker-compose.yml)
+just declares our two containers, connects them together, and makes the right
+files visible to nginx:
 
+```yml
+version: "3"
 
-Note that if you wanted to provide access to the application server
-behind another route (say `/app`), this can be accomplished with a
-`rewrite` rule, like this:
+services:
+  nginx:
+    image: nginx
+    ports:
+      - "8080:8080"
+    links:
+      - dream
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./assets:/www/assets
 
-```nginx
-  location / {
-    rewrite ^/app/(.*) /$1 break;
-    proxy_pass http://web:8080;
-    proxy_read_timeout 60s;
-  }
+  dream:
+    build: .
+    restart: always
+    logging:
+      driver: ${LOGGING_DRIVER:-json-file}
 ```
 
-<br>
+...and our Dream app just serves a fixed Web page, which links to a static
+image, which will be served by nginx:
+
+```ocaml
+let home =
+  <html>
+  <body>
+    <h1>Greetings from the Dream app!</h1>
+    <img
+      src="/assets/camel.jpeg"
+      alt="A silly camel.">
+  </body>
+  </html>
+
+let () =
+  Dream.run ~interface:"0.0.0.0" ~port:8081
+  @@ Dream.logger
+  @@ Dream.router [
+    Dream.get "/" (fun _request -> Dream.html home)
+  ]
+  @@ Dream.not_found
+```
 
 To build, run:
 
@@ -116,60 +102,55 @@ To build, run:
 <b>$ docker-compose build</b>
 <b>$ docker-compose up</b></code></pre>
 
-This will build and start the [two
-containers](https://github.com/aantron/dream/blob/master/example/w-nginx/docker-compose.yml),
-one for nginx and one for the application server. The first build of
-will take several minutes. Later builds will be faster, due to
-caching.
-
-Visit [`http://localhost:8080`](http://localhost:8080) to reach the
-application server directly. Notice how an image (the static asset)
-fails to load and we just see the alt text, "The OCaml logo."
-
-Now, visit [`http://localhost:8081`](http://localhost:8081). This
-time, we get to see the lovely OCaml logo as part of the page because
-nginx passes the request for `/` through to the application server and
-handles the request for `/static/ocaml.png` on its own.
-
-In a production setup the user shouldn't be able to reach the
-application server directly. The reason we can reach the application
-server on port 8080 is that this port is exposed in the
-`docker-compose.yml` file. Updating the `web` container to
-
-```yml
-  web:
-    build: .
-    restart: always
-    logging:
-      driver: ${LOGGING_DRIVER:-json-file}
-```
-
-will prevent direct access to the application server.
+The first build will take several minutes. Once it is done, visit the
+application at [`http://localhost:8080`](http://localhost:8080)!
 
 <br>
 
-Tips:
+For debugging, you may sometimes want to bypass nginx and access the Dream app
+directly. To do so, add a `ports` directive to the `dream` container in
+[`docker-compose.yml`](https://github.com/aantron/dream/blob/master/example/w-nginx/docker-compose.yml):
 
-- If you modify
-  [`server.eml.ml`](https://github.com/aantron/dream/blob/master/example/w-nginx/server.eml.ml),
-  run
+```yml
+  dream:
+    ports:
+      - "8081:8081"
+```
 
-  ```
-  docker-compose build && docker-compose up web
-  ```
+You can then connect to the app server at
+[`http://localhost:8081`](http://localhost:8081). Note that if you do so, you
+will not see the static image, because this setup relies on nginx to serve it!
 
-- To view the logs from the Web server container only, without having them mixed
-  with the nginx logs, run
+<br>
 
-  ```
-  docker-compose up -d
-  docker-compose logs web -f
-  ```
+If you want to provide access to the app server behind another route (say,
+`/app/`), this can be accomplished with a
+[`rewrite`](https://nginx.org/en/docs/http/ngx_http_rewrite_module.html#rewrite)
+rule, like this:
+
+```nginx
+  location / {
+    rewrite ^/app/(.*) /$1 break;
+    proxy_pass http://dream:8080;
+  }
+```
+
+<br>
+
+To view logs from the Web server container only, without having them mixed with
+the nginx logs, run
+
+```
+docker-compose up -d
+docker-compose logs web -f
+```
 
 <br>
 
 **See also:**
-- [**`f-static`**](../f-static#files) shows how to use `Dream.static` to serve files from a directory.
+
+- [**`f-static`**](../f-static#files) has Dream serve static files on its own,
+  without a reverse proxy.
 - [**`z-docker-esy`**](../z-docker-esy#files) deploys to Digital Ocean with
   Docker Compose and esy, including Docker installation instructions.
 - [**`z-docker-opam`**](../z-docker-opam#files) deploys with Docker Compose and
