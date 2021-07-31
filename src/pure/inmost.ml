@@ -646,9 +646,6 @@ let cookie
 
 let set_cookie
     ?prefix:cookie_prefix
-    ?encrypt:(encrypt_cookie = true)
-    ?expires
-    ?max_age
     ?domain
     ?path
     ?secure
