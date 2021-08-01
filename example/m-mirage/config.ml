@@ -24,6 +24,10 @@ let email =
   let doc = Key.Arg.info ~doc:"Let's encrypt E-Mail." [ "email" ] in
   Key.(create "email" Arg.(opt (some string) None doc))
 
+let tls =
+  let doc = Key.Arg.info ~doc:"HTTP server with TLS." [ "tls" ] in
+  Key.(create "tls" Arg.(opt bool false doc))
+
 let dream =
   foreign "Unikernel.Make"
     ~packages:[ package "ca-certs-nss"
@@ -35,7 +39,8 @@ let dream =
                ; abstract production
                ; abstract cert_seed
                ; abstract account_seed
-               ; abstract email ])
+               ; abstract email
+               ; abstract tls ])
     (console @-> random @-> time @-> mclock @-> pclock @-> stackv4v6 @-> job)
 
 let random = default_random

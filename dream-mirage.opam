@@ -54,6 +54,7 @@ depends: [
   "bigstringaf"
   "digestif" {>= "1.0.0"}
   "lwt"
+  "tls-mirage"
   "lwt_ppx" {>= "1.2.2"}
   "letsencrypt" {>= "0.3.0"}
 ]

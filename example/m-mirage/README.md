@@ -36,7 +36,7 @@ address.
 
 ```sh
 $ opam install mirage
-$ mirage configure -t virtio --dhcp true --hostname <HOSTNAME>
+$ mirage configure -t virtio --dhcp true --hostname <HOSTNAME> --tls true
 $ make depends
 $ mirage build
 $ solo5-virtio-mkimage gs://dream-os
@@ -55,3 +55,20 @@ $ gcloud compute firewall-rules create http --allow tcp:443
 $ gcloud compute instances create dream-os --image dream-os --address <IP> \
   --zone europe-west1-b --machine-type f1-micro
 ```
+
+#### DreamOS locally
+
+MirageOS has several targets and so, several deployements. The most easy one is
+the `unix` target which compiles your MirageOS application into a simple
+executable:
+
+```sh
+$ mirage configure -t unix
+$ make depends
+$ mirage build
+$ ./dream --tls false --hostname localhost --port 8080
+```
+
+The TLS support is available only via a certificate given by let's encrypt. It
+requires so a domain-name and the ability to bind the server into `*:80` (and
+be able to do the let's encrypt challenge).
