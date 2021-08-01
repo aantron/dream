@@ -1,15 +1,3 @@
-[submodule "src/vendor/httpaf"]
-	path = src/vendor/httpaf
-	url = https://github.com/aantron/httpaf.git
-[submodule "src/vendor/gluten"]
-	path = src/vendor/gluten
-	url = https://github.com/aantron/gluten.git
-[submodule "src/vendor/websocketaf"]
-	path = src/vendor/websocketaf
-	url = https://github.com/aantron/websocketaf.git
-[submodule "src/vendor/h2"]
-	path = src/vendor/h2
-	url = https://github.com/aantron/ocaml-h2.git
 [submodule "src/vendor/paf"]
 	path = src/vendor/paf
 	url = https://github.com/dinosaure/paf-le-chien.git

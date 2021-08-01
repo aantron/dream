@@ -1,0 +1,33 @@
+{
+  "name": "dream",
+  "version": "0.0.1",
+  "source": "./dream.opam",
+  "override": {
+    "dependencies": {
+      "@opam/httpaf": "aantron/httpaf:httpaf.opam#fork",
+      "@opam/httpaf-lwt": "aantron/httpaf:httpaf-lwt.opam#fork",
+      "@opam/httpaf-lwt-unix": "aantron/httpaf:httpaf-lwt-unix.opam#fork",
+      "@opam/h2": "aantron/ocaml-h2:h2.opam#master",
+      "@opam/h2-lwt": "aantron/ocaml-h2:h2-lwt.opam#master",
+      "@opam/h2-lwt-unix": "aantron/ocaml-h2:h2-lwt-unix.opam#master",
+      "@opam/websocketaf": "aantron/websocketaf:websocketaf.opam#fork",
+      "@opam/gluten": "aantron/gluten:gluten.opam#master",
+      "@opam/gluten-lwt": "aantron/gluten:gluten-lwt.opam#master",
+      "@opam/gluten-lwt-unix": "aantron/gluten:gluten-lwt-unix.opam#master"
+    },
+    "resolutions": {
+      "@opam/conf-libev": "esy-packages/libev:package.json#0b5eb6685b688649045aceac55dc559f6f21b829",
+      "@opam/conf-postgresql": "ulrikstrid/postgresql:package.json#193d72af7f2132e30ad429401232da6359b248a2",
+      "@opam/httpaf": "aantron/httpaf:httpaf.opam#ee3e790669dedfae5210d1431ea7f3e1f346a95e",
+      "@opam/httpaf-lwt": "aantron/httpaf:httpaf-lwt.opam#ee3e790669dedfae5210d1431ea7f3e1f346a95e",
+      "@opam/httpaf-lwt-unix": "aantron/httpaf:httpaf-lwt-unix.opam#ee3e790669dedfae5210d1431ea7f3e1f346a95e",
+      "@opam/h2": "aantron/ocaml-h2:h2.opam#a696a1ce66f573c23041840322d0e1770d5ebc70",
+      "@opam/h2-lwt": "aantron/ocaml-h2:h2-lwt.opam#a696a1ce66f573c23041840322d0e1770d5ebc70",
+      "@opam/h2-lwt-unix": "aantron/ocaml-h2:h2-lwt-unix.opam#a696a1ce66f573c23041840322d0e1770d5ebc70",
+      "@opam/websocketaf": "aantron/websocketaf:websocketaf.opam#98d5f952f5fd25eecc78cd105f1d7a4013f4166a",
+      "@opam/gluten": "aantron/gluten:gluten.opam#56fbc168c0e88335315433625b58f54a429b096b",
+      "@opam/gluten-lwt": "aantron/gluten:gluten-lwt.opam#56fbc168c0e88335315433625b58f54a429b096b",
+      "@opam/gluten-lwt-unix": "aantron/gluten:gluten-lwt-unix.opam#56fbc168c0e88335315433625b58f54a429b096b"
+    }
+  }
+}
