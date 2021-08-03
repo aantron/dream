@@ -59,6 +59,7 @@ let () =
 [`dune` file](https://github.com/aantron/dream/blob/master/example/w-template-files/dune)
 and [security
 information](https://github.com/aantron/dream/tree/master/example/7-template#security).
+- [**r-template-files**](../r-template-files) for the Reason syntax version of this example.
 
 <br>
 
