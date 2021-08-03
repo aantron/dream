@@ -7,7 +7,7 @@
 
 module Command_line :
 sig
-  val parse : unit -> (string * string) list
+  val parse : unit -> (string * string * bool) list
 end =
 struct
   let usage = {|Usage:
@@ -21,10 +21,16 @@ struct
   let workspace_path =
     ref ""
 
+  let reason_syntax =
+    ref false
+
   let options = Arg.align [
     "--workspace",
     Arg.Set_string workspace_path,
     "PATH Relative path to the Dune workspace for better locations";
+    "--syntax-reason",
+    Arg.Set reason_syntax,
+    "Whether the templater should emit Reason syntax after preprocessing the template";
   ]
 
   let set_file file =
@@ -58,7 +64,7 @@ struct
     let prefix = build_prefix (Sys.getcwd ()) "" !workspace_path in
 
     input_files
-    |> List.map (fun file -> file, Filename.concat prefix file)
+    |> List.map (fun file -> file, Filename.concat prefix file, !reason_syntax)
 end
 
 let () =

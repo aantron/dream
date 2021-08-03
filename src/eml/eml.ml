@@ -782,13 +782,8 @@ end
 
 
 
-let process_file (input_file, location) =
-
-  let reason, extension =
-    match Filename.extension input_file with
-    | ".re" -> true, ".re"
-    | _ -> false, ".ml"
-  in
+let process_file (input_file, location, reason) =
+  let extension = if (reason) then ".re" else ".ml" in
 
   let output_file =
     let rec remove_extensions filename =
