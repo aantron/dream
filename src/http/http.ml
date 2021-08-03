@@ -837,6 +837,10 @@ let run
       ignore
   in
 
+  Sys.set_signal
+    Sys.sigint
+    (Sys.Signal_handle (fun _ -> restore_terminal (); exit 1));
+
   let log = Dream__middleware.Log.convenience_log in
 
   if greeting then begin
