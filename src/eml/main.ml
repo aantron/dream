@@ -28,9 +28,9 @@ struct
     "--workspace",
     Arg.Set_string workspace_path,
     "PATH Relative path to the Dune workspace for better locations";
-    "--syntax-reason",
+    "--emit-reason",
     Arg.Set reason_syntax,
-    "Whether the templater should emit Reason syntax after preprocessing the template";
+    "Emit Reason syntax after preprocessing the template";
   ]
 
   let set_file file =

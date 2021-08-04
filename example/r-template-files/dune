@@ -5,6 +5,6 @@
 (rule
  (targets template.re)
  (deps template.eml.html)
- (action (run dream_eml %{deps} --workspace %{workspace_root} --syntax-reason)))
+ (action (run dream_eml %{deps} --workspace %{workspace_root} --emit-reason)))
 
 (data_only_dirs _esy esy.lock lib node_modules)
