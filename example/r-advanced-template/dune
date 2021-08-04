@@ -1,0 +1,10 @@
+(executable
+ (name template)
+ (libraries dream))
+
+(rule
+ (targets template.re)
+ (deps template.eml.re)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))
+
+(data_only_dirs _esy esy.lock lib node_modules)
