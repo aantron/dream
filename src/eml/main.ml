@@ -30,7 +30,7 @@ struct
     "PATH Relative path to the Dune workspace for better locations";
     "--emit-reason",
     Arg.Set emit_reason,
-    "Emit Reason syntax after preprocessing the template";
+    " Emit Reason syntax after preprocessing the template";
   ]
 
   let set_file file =
