@@ -7,7 +7,7 @@
 
 module Command_line :
 sig
-  val parse : unit -> (string * string) list
+  val parse : unit -> (string * string * [ `OCaml | `Reason ]) list
 end =
 struct
   let usage = {|Usage:
@@ -21,10 +21,16 @@ struct
   let workspace_path =
     ref ""
 
+  let emit_reason =
+    ref false
+
   let options = Arg.align [
     "--workspace",
     Arg.Set_string workspace_path,
     "PATH Relative path to the Dune workspace for better locations";
+    "--emit-reason",
+    Arg.Set emit_reason,
+    " Emit Reason syntax after preprocessing the template";
   ]
 
   let set_file file =
@@ -58,7 +64,14 @@ struct
     let prefix = build_prefix (Sys.getcwd ()) "" !workspace_path in
 
     input_files
-    |> List.map (fun file -> file, Filename.concat prefix file)
+    |> List.map (fun file ->
+      let syntax = if !emit_reason then `Reason else
+        (* If there was no explicit command line argument, decide using file extension *)
+        match Filename.extension file with
+        | ".re" -> `Reason
+        | _ -> `OCaml
+      in
+      file, Filename.concat prefix file, syntax)
 end
 
 let () =

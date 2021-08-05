@@ -782,12 +782,10 @@ end
 
 
 
-let process_file (input_file, location) =
-
-  let reason, extension =
-    match Filename.extension input_file with
-    | ".re" -> true, ".re"
-    | _ -> false, ".ml"
+let process_file (input_file, location, syntax) =
+  let reason, extension = match syntax with
+  | `OCaml -> (false, ".ml")
+  | `Reason -> (true, ".re")
   in
 
   let output_file =
