@@ -839,13 +839,16 @@ let run
 
   let prev_signal_behavior = ref Sys.Signal_default in
 
-  prev_signal_behavior := Sys.signal Sys.sigint (Sys.Signal_handle (fun signal ->
+  let handler () = (Sys.Signal_handle (fun signal ->
     restore_terminal ();
     match !prev_signal_behavior with
       | Sys.Signal_default -> exit 1
       | Sys.Signal_handle f -> f signal
       | Sys.Signal_ignore -> ignore ()
-    ));
+  )) in
+
+  prev_signal_behavior := Sys.signal Sys.sigint @@ handler ();
+  prev_signal_behavior := Sys.signal Sys.sigterm @@ handler ();
 
   let log = Dream__middleware.Log.convenience_log in
 
