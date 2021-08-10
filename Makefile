@@ -1,10 +1,10 @@
 .PHONY : build
 build :
-	@dune build --no-print-directory @install
+	@dune build -p dream --no-print-directory @install
 
 .PHONY : watch
 watch :
-	@dune build --no-print-directory -w
+	@dune build -p dream --no-print-directory -w
 
 .PHONY : test
 test :

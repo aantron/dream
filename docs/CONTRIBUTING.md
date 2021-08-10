@@ -52,13 +52,13 @@ git remote add fork git@github.com/my-github-name/dream.git
 Install Dream's dependencies:
 
 ```
-opam install --deps-only . --with-test
+opam install --deps-only ./dream.opam --with-test
 ```
 
 If you don't have an opam switch ready, first create one with
 
 ```
-opam switch create . 4.12.0
+opam switch create . 4.12.0 --no-install
 ```
 
 You can now add some code that will exercise your change, so you can test it as
