@@ -837,6 +837,20 @@ let run
       ignore
   in
 
+  let create_handler signal =
+    let prev_signal_behavior = ref Sys.Signal_default in
+    prev_signal_behavior := Sys.signal signal @@ Sys.Signal_handle (fun signal ->
+      restore_terminal ();
+      match !prev_signal_behavior with
+        | Sys.Signal_default -> exit 1
+        | Sys.Signal_handle f -> f signal
+        | Sys.Signal_ignore -> ignore ()
+      )
+  in
+
+  create_handler Sys.sigint;
+  create_handler Sys.sigterm;
+
   let log = Dream__middleware.Log.convenience_log in
 
   if greeting then begin
