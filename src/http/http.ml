@@ -838,14 +838,14 @@ let run
   in
 
   let create_handler signal =
-    let prev_signal_behavior = ref Sys.Signal_default in
-    prev_signal_behavior := Sys.signal signal @@ Sys.Signal_handle (fun signal ->
-      restore_terminal ();
-      match !prev_signal_behavior with
+    let previous_signal_behavior = ref Sys.Signal_default in
+    previous_signal_behavior :=
+      Sys.signal signal @@ Sys.Signal_handle (fun signal ->
+        restore_terminal ();
+        match !previous_signal_behavior with
         | Sys.Signal_default -> exit 1
         | Sys.Signal_handle f -> f signal
-        | Sys.Signal_ignore -> ignore ()
-      )
+        | Sys.Signal_ignore -> ignore ())
   in
 
   create_handler Sys.sigint;
