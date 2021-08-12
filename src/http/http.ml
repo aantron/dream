@@ -843,9 +843,11 @@ let run
       Sys.signal signal @@ Sys.Signal_handle (fun signal ->
         restore_terminal ();
         match !previous_signal_behavior with
-        | Sys.Signal_default -> exit 1
         | Sys.Signal_handle f -> f signal
-        | Sys.Signal_ignore -> ignore ())
+        | Sys.Signal_ignore -> ignore ()
+        | Sys.Signal_default ->
+          Sys.set_signal signal Sys.Signal_default;
+          Unix.kill (Unix.getpid ()) signal)
   in
 
   create_handler Sys.sigint;
