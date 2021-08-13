@@ -6,7 +6,7 @@ let port =
 
 let hostname =
   let doc = Key.Arg.info ~doc:"Hostname." [ "hostname" ] in
-  Key.(create "hostname" Arg.(required string doc))
+  Key.(create "hostname" Arg.(opt string "localhost" doc))
 
 let production =
   let doc = Key.Arg.info ~doc:"Let's encrypt production environment." [ "production" ] in
@@ -28,6 +28,10 @@ let tls =
   let doc = Key.Arg.info ~doc:"HTTP server with TLS." [ "tls" ] in
   Key.(create "tls" Arg.(opt bool false doc))
 
+let letsencrypt =
+  let doc = Key.Arg.info ~doc:"Retrieve the TLS certificate from Let's encrypt." [ "letsencrypt" ] in
+  Key.(create "letsencrypt" Arg.(opt bool false doc))
+
 let dream =
   foreign "Unikernel.Make"
     ~packages:[ package "ca-certs-nss"
@@ -40,7 +44,8 @@ let dream =
                ; abstract cert_seed
                ; abstract account_seed
                ; abstract email
-               ; abstract tls ])
+               ; abstract tls
+               ; abstract letsencrypt ])
     (console @-> random @-> time @-> mclock @-> pclock @-> stackv4v6 @-> job)
 
 let random = default_random

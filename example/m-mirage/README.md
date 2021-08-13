@@ -36,7 +36,8 @@ address.
 
 ```sh
 $ opam install mirage
-$ mirage configure -t virtio --dhcp true --hostname <HOSTNAME> --tls true
+$ mirage configure -t virtio --dhcp true --hostname <HOSTNAME> --tls true \
+  --letsencrypt true --productive false
 $ make depends
 $ mirage build
 $ solo5-virtio-mkimage gs://dream-os
@@ -66,9 +67,7 @@ executable:
 $ mirage configure -t unix
 $ make depends
 $ mirage build
-$ ./dream --tls false --hostname localhost --port 8080
+$ ./dream --tls false --port 8080
+# or with you want the TLS support via a fake certificate
+$ ./dream --tls true --port 4343
 ```
-
-The TLS support is available only via a certificate given by let's encrypt. It
-requires so a domain-name and the ability to bind the server into `*:80` (and
-be able to do the let's encrypt challenge).

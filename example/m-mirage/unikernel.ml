@@ -47,7 +47,7 @@ module Make
     | ((), Ok certificates) -> Lwt.return certificates
     | ((), Error (`Msg err)) -> failwith err
 
-  let https stackv4v6 =
+  let https_with_letsencrypt stackv4v6 =
     let cfg =
       { LE.certificate_seed= Key_gen.cert_seed ()
       ; LE.email= Option.bind (Key_gen.email ()) (R.to_option <.> Emile.of_string)
@@ -55,12 +55,17 @@ module Make
       ; LE.hostname= Domain_name.(host_exn <.> of_string_exn) (Key_gen.hostname ()) } in
     get_certificates ~production:(Key_gen.production ()) cfg stackv4v6 >>= fun certificates -> 
     let tls = Tls.Config.server ~certificates () in
-    Dream.https ~port:(Key_gen.port ()) stackv4v6 tls dream
+    Dream.https ~port:(Key_gen.port ()) stackv4v6 ~cfg:tls dream
+
+  let https stackv4v6 =
+    Dream.https ~port:(Key_gen.port ()) stackv4v6 dream
 
   let http stackv4v6 =
     Dream.http ~port:(Key_gen.port ()) stackv4v6 dream
 
-  let start _console () () () () stackv4v6 = match Key_gen.tls () with
-    | true -> https stackv4v6
-    | false -> http stackv4v6
+  let start _console () () () () stackv4v6 =
+    match Key_gen.tls (), Key_gen.letsencrypt () with
+    | true, true -> https_with_letsencrypt stackv4v6
+    | true, false -> https stackv4v6
+    | false, _ -> http stackv4v6
 end
