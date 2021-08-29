@@ -813,7 +813,9 @@ let run
     ?(adjust_terminal = true)
     user's_dream_handler =
 
-  Sys.(set_signal sigpipe Signal_ignore);
+  let () = if Sys.unix then
+    Sys.(set_signal sigpipe Signal_ignore)
+  in
 
   let adjust_terminal =
     adjust_terminal && Sys.os_type <> "Win32" && Unix.(isatty stderr) in
