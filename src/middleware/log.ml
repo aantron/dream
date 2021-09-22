@@ -197,6 +197,12 @@ let enable =
 let level =
   ref Logs.Info
 
+let custom_log_levels : (string * Logs.level) list ref =
+  ref []
+
+let sources : (string * Logs.src) list ref =
+  ref []
+
 let set_printexc =
   ref true
 
@@ -270,8 +276,10 @@ let sub_log name =
 
   (* Create the actual Logs source, and then wrap all the interesting
      functions. *)
-  let (module Log) = Logs.src_log (Logs.Src.create name) in
+  let src = Logs.Src.create name in
+  let (module Log) = Logs.src_log src in
 
+  sources := (name, src) :: (List.remove_assoc name !sources);
   {
     error =   (fun k -> forward ~destination_log:Log.err   k);
     warning = (fun k -> forward ~destination_log:Log.warn  k);
@@ -323,6 +331,7 @@ let initialize_log
     ?(backtraces = true)
     ?(async_exception_hook = true)
     ?level:level_
+    ?(custom_levels=[])
     ?enable:(enable_ = true)
     () =
 
@@ -334,17 +343,21 @@ let initialize_log
     set_up_exception_hook ();
   set_async_exception_hook := false;
 
-  let level_ =
-    match level_ with
-    | None -> Logs.Info
-    | Some `Error -> Logs.Error
-    | Some `Warning -> Logs.Warning
-    | Some `Info -> Logs.Info
-    | Some `Debug -> Logs.Debug
+  let to_logs_level l =
+    match l with
+    | `Error -> Logs.Error
+    | `Warning -> Logs.Warning
+    | `Info -> Logs.Info
+    | `Debug -> Logs.Debug
   in
+
+  let level_ =
+    Option.map to_logs_level level_
+    |> Option.value ~default:Logs.Info in
 
   enable := enable_;
   level := level_;
+  custom_log_levels := List.map (fun (name, l) -> (name, to_logs_level l)) custom_levels;
   let `Initialized = initialized () in
   ()
 
@@ -356,7 +369,17 @@ struct
   let initializer_ ~setup_outputs = lazy begin
     if !enable then begin
       setup_outputs () ;
+
+      (* Set the default log level across all sources. *)
       Logs.set_level ~all:true (Some !level);
+
+      (* Now set custom log levels for specfic sources. *)
+      List.iter (fun (name, src) ->
+          match List.assoc_opt name !custom_log_levels with
+          | Some l -> Logs.Src.set_level src (Some l)
+          | None -> ()
+        ) !sources;
+
       Logs.set_reporter (reporter ~now ())
     end ;
     `Initialized

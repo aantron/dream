@@ -1710,6 +1710,7 @@ val initialize_log :
   ?backtraces:bool ->
   ?async_exception_hook:bool ->
   ?level:[< log_level ] ->
+  ?custom_levels: (string * [< log_level ]) list ->
   ?enable:bool ->
     unit -> unit
 (** Initializes Dream's log with the given settings.
