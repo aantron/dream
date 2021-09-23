@@ -182,7 +182,7 @@ module Make
     -> port:int
     -> ?prefix:string
     -> Stack.t
-    -> Tls.Config.server
+    -> ?cfg:Tls.Config.server
     -> ?error_handler:error_handler
     -> handler
     -> unit Lwt.t

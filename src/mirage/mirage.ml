@@ -219,7 +219,16 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Mirag
       Dream__middleware.Site_prefix.chop_site_prefix;
     ]
 
-  let https ?stop ~port ?(prefix= "") stack cfg ?error_handler:(user's_error_handler= Error_handler.default) user's_dream_handler =
+  let localhost_certificate =
+    let crts = Rresult.R.failwith_error_msg
+      (X509.Certificate.decode_pem_multiple (Cstruct.of_string Dream__localhost.certificate)) in
+    let key = Rresult.R.failwith_error_msg
+      (X509.Private_key.decode_pem (Cstruct.of_string Dream__localhost.key)) in
+    `Single (crts, key)
+
+  let https ?stop ~port ?(prefix= "") stack
+    ?(cfg= Tls.Config.server ~certificates:localhost_certificate ())
+    ?error_handler:(user's_error_handler= Error_handler.default) user's_dream_handler =
     let prefix = prefix
       |> Dream__pure.Formats.from_path
       |> Dream__pure.Formats.drop_trailing_slash in
