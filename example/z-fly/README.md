@@ -3,7 +3,7 @@
 This example deploys a very simple Dream
 [application](https://github.com/aantron/dream/blob/master/example/z-fly/app.ml)
 to [Fly](https://www.fly.io/), a hosting platform that scales and smartly moves your servers closer to your users. A low-usage app can be hosted for
-[free](https://fly.io/docs/about/pricing/#free-tier). Fly offers [Flyctl](https://fly.io/docs/getting-started/installing-flyctl/), their CLI, that makes [deployment](https://fly.io/docs/hands-on/start/) and  
+[free](https://fly.io/docs/about/pricing/#free-tier). Fly offers [flyctl](https://fly.io/docs/getting-started/installing-flyctl/), their CLI, that makes [deployment](https://fly.io/docs/hands-on/start/) and  
 [scaling](https://fly.io/docs/reference/scaling/) super simple.
 
 ```ocaml
@@ -11,8 +11,7 @@ let () =
   Dream.run ~interface:"0.0.0.0"
   @@ Dream.logger
   @@ Dream.router [
-    Dream.get "/" (fun _ ->
-      Dream.html "Dream started by Docker Compose, built with esy!");
+    Dream.get "/" (fun _ -> Dream.html "Dream deployed on Fly!");
   ]
   @@ Dream.not_found
 ```
@@ -27,17 +26,13 @@ services:
     web:
         build: .
         ports:
-            - "80:8080"
+            - "8080:8080"
         restart: always
         logging:
             driver: ${LOGGING_DRIVER:-json-file}
 ```
 
-The example app is running live at
-[http://docker-esy.dream.as](http://docker-esy.dream.as).
-
-The setup can be run locally or on any server provider. We will use a [Digital
-Ocean](https://digitalocean.com) "droplet" (virtual machine). The server binary is built by Docker.
+The setup can be run locally or on any server provider.
 
 The
 [`Dockerfile`](https://github.com/aantron/dream/blob/master/example/z-docker-esy/Dockerfile)
@@ -46,132 +41,35 @@ only contains the final binary and its run-time dependencies.
 
 <br>
 
-## Droplet setup
-
-Visit [Digital Ocean](https://digitalocean.com) and create an account, then
-create a droplet. Simple Dream apps can be built on the smallest and cheapest
-droplets as of May 2021, but you may eventually need more memory. Be sure to
-enable monitoring and add your public SSH key.
-
-Once the droplet starts, Digital Ocean will display its IP. We will use
-`my-droplet` as a stand-in in the example.
-
-SSH into your droplet:
-
-```
-$ ssh root@my-droplet
-```
-
-Then, update the droplet:
-
-```
-$ apt update
-$ apt upgrade -y
-```
-
-There was likely a kernel update, so restart the droplet:
-
-```
-$ init 6
-$ ssh root@my-droplet
-```
-
-[Install Docker](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04):
-
-```
-$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-$ add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
-$ apt update
-$ apt install docker-ce -y
-```
-
-[Install Docker Compose](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04).
-Check [here](https://github.com/docker/compose/releases) for the latest
-available release.
-
-```
-$ curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64 -o /usr/local/bin/docker-compose
-$ chmod +x /usr/local/bin/docker-compose
-```
-
-At this point, you may want to create a non-root user for running your builds,
-We add this user to the `docker` group, so that it can build and start Docker
-containers, and give it the same SSH public key:
-
-```
-$ adduser build --disabled-password
-$ usermod build --append --groups docker
-$ usermod build --append --groups systemd-journal
-$ mkdir /home/build/.ssh -m 700
-$ cp .ssh/authorized_keys /home/build/.ssh/
-$ chown -R build:build /home/build/.ssh
-```
-
-Droplet setup is now complete:
-
-```
-$ exit
-```
-
-<br>
-
 ## Deploy
 
-To deploy to the droplet, we send the sources over, and trigger the commands
-in
-[`deploy.sh`](https://github.com/aantron/dream/blob/master/example/z-docker-esy/deploy.sh)
-remotely:
+Fly has a really simple [setup guide](https://fly.io/docs/hands-on/start/) that we'll follow.
 
-```
-$ rsync -rlv . build@my-droplet:app --exclude _esy --exclude node_modules
-$ ssh build@my-droplet "cd app && bash deploy.sh"
-```
+1. Install `flyctl` with `brew install superfly/tap/flyctl`.
+2. Signup and login with `fly auth signup` and `fly auth login`.
+3. Initialize the Fly project with `fly init`.
+4. Deploy your image with `fly deploy`. Fly will use the `Dockerfile` at the root of our project.
 
-[`deploy.sh`](https://github.com/aantron/dream/blob/master/example/z-docker-esy/deploy.sh)
-looks like this:
-
-```bash
-#!/bin/bash
-
-set -e
-set -x
-
-docker-compose build
-docker-compose down
-docker-compose up --detach
-```
-
-The app should now be publicly accessible at the droplet's IP. Logs can be
-viewed with
-
-```
-$ ssh build@my-droplet "journalctl -f"
-```
+That should be it! Assuming no errors, the cli will share a link to your live app.
 
 <br>
 
-## Automation
+## Development
 
-The Dream repo has a
-[GitHub action](https://github.com/aantron/dream/blob/master/.github/workflows/docker-esy.yml)
-that deploys this example to [docker-esy.dream.as](http://docker-esy.dream.as)
-on every push. It runs the [two commands](#deploy) above.
+For local development you can run your app with or without Docker. Setting up the Docker build for the first time may take at least 4 minutes. Subsequent builds are cached.
 
-The action needs SSH access to the droplet. See
-[_Automation_](../z-systemd#automation) in
-[**`z-systemd`**](../z-systemd#automation) for discussion. The only difference
-is that we need don't need to upload the SSH key to user `root`, because we
-don't need to log in as `root` to start a daemon:
+<br>
 
-```
-$ ssh-keygen -t rsa -b 4096 -f github-actions
-$ ssh build@my-droplet "cat - >> .ssh/authorized_keys" < github-actions.pub
-```
+**With Docker**
 
-And this example uses a `known_hosts` secret named
-`DIGITALOCEAN_DOCKER_ESY_KNOWN_HOSTS` rather than
-`DIGITALOCEAN_SYSTEMD_KNOWN_HOSTS`, but you can pick any name you like for your
-version of the deploy script.
+1. [Install Docker](https://www.docker.com/get-started).
+2. Ensure Docker is running, then run `docker compose up`. Docker should build, cache, and serve your app at `localhost:8080`.
+
+**Without Docker**
+
+1. Make sure you have [esy](https://esy.sh) installed.
+2. Run `esy` to install all dependencies.
+3. To start your app, run `esy start`. This is an aliased command setup inside `esy.json`.
 
 <br>
 

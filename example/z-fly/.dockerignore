@@ -1,3 +1,5 @@
+# By ignoring _esy and _build, the final docker image size stays compact and uploaded quickly to Fly.
+
 # esy build environment
 _esy/
 

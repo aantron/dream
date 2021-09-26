@@ -1,7 +1,7 @@
 let () =
-  Dream.run ~interface:"0.0.0.0" ~port:8080
+  Dream.run ~interface:"0.0.0.0"
   @@ Dream.logger
   @@ Dream.router [
-    Dream.get "/" (fun _ -> Dream.html "Dream running in Heroku!");
+    Dream.get "/" (fun _ -> Dream.html "Dream deployed on Fly!");
   ]
   @@ Dream.not_found
