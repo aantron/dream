@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "start": "esy b dune exec ./src/app.exe",
-    "build": "esy b dune build"
+    "start": "./_esy/default/build/default/app.exe",
+    "build": "dune build"
   },
   "dependencies": {
     "@opam/dream": "1.0.0~alpha2",
