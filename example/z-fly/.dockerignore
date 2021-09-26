@@ -1,0 +1,13 @@
+# esy build environment
+_esy/
+
+# Dune build environment
+_build/
+
+# Git
+.git/
+.gitignore
+
+# Development
+Dockerfile
+docker-compose.yml
