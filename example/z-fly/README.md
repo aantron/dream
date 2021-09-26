@@ -46,9 +46,7 @@ only contains the final binary and its run-time dependencies.
 Fly has a really simple [setup guide](https://fly.io/docs/hands-on/start/) that we'll follow.
 
 1. Install `flyctl` with `brew install superfly/tap/flyctl`.
-2. Signup and login with `fly auth signup` and `fly auth login`.
-3. Initialize the Fly project with `fly init`.
-4. Deploy your image with `fly deploy`. Fly will use the `Dockerfile` at the root of our project.
+2. Run `fly launch` to initialize and deploy your project.
 
 That should be it! Assuming no errors, the cli will share a link to your live app.
 
