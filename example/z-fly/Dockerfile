@@ -23,6 +23,6 @@ FROM debian:stable-slim as run
 RUN apt-get update
 RUN apt-get install -y libev4 libpq5 libssl1.1
 
-COPY --from=build build/_esy/default/build/default/src/app.exe /bin/app
+COPY --from=build build/_esy/default/build/default/app.exe /bin/app
 
 ENTRYPOINT /bin/app

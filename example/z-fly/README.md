@@ -1,190 +1,188 @@
-# `z-heroku`
-
-<br>
+# `z-fly`
 
 This example deploys a very simple Dream
-[application](https://github.com/aantron/dream/blob/master/example/z-heroku/app.ml)
-to [Heroku](https://www.heroku.com/). A low-usage app can be hosted for
-[free](https://www.heroku.com/pricing). Heroku has an easy-to-use CLI and
-[scaling](https://devcenter.heroku.com/articles/scaling) options. The drawback
-is that it imposes some constraints on your app, such as no persistent local
-state. Many apps satisfy these constraints, however.
-
-The code is essentially example
-[**`2-middleware`**](../2-middleware#files), but Heroku will pass the desired
-port number in environment variable `PORT`, so we read it:
+[application](https://github.com/aantron/dream/blob/master/example/z-fly/app.ml)
+to [Fly](https://www.fly.io/), a hosting platform that scales and smartly moves your servers closer to your users. A low-usage app can be hosted for
+[free](https://fly.io/docs/about/pricing/#free-tier). Fly offers [Flyctl](https://fly.io/docs/getting-started/installing-flyctl/), their CLI, that makes [deployment](https://fly.io/docs/hands-on/start/) and  
+[scaling](https://fly.io/docs/reference/scaling/) super simple.
 
 ```ocaml
 let () =
-  Dream.run ~interface:"0.0.0.0" ~port:(int_of_string (Sys.getenv "PORT"))
+  Dream.run ~interface:"0.0.0.0"
   @@ Dream.logger
   @@ Dream.router [
-    Dream.get "/" (fun _ -> Dream.html "Dream running in Heroku!");
+    Dream.get "/" (fun _ ->
+      Dream.html "Dream started by Docker Compose, built with esy!");
   ]
   @@ Dream.not_found
 ```
 
-It is running at
-[https://dream-example.herokuapp.com/](https://dream-example.herokuapp.com/).
+It uses [Docker Compose](https://docs.docker.com/compose/), so that you can
+quickly expand it by adding databases and other services.
+
+```yaml
+version: "3"
+
+services:
+    web:
+        build: .
+        ports:
+            - "80:8080"
+        restart: always
+        logging:
+            driver: ${LOGGING_DRIVER:-json-file}
+```
+
+The example app is running live at
+[http://docker-esy.dream.as](http://docker-esy.dream.as).
+
+The setup can be run locally or on any server provider. We will use a [Digital
+Ocean](https://digitalocean.com) "droplet" (virtual machine). The server binary is built by Docker.
+
+The
+[`Dockerfile`](https://github.com/aantron/dream/blob/master/example/z-docker-esy/Dockerfile)
+has two stages: one for building our application, and one for the runtime that
+only contains the final binary and its run-time dependencies.
 
 <br>
 
-We suggest a deployment process that is out of the norm for Heroku. Heroku is
-designed to build apps from source on Heroku's servers. However, Heroku does
-not support OCaml. Also, a custom container that is capable of building even a
-simple OCaml app in Heroku is likely to be large, difficult to maintain, and
-may force a user into a higher pricing tier than is needed by the Web app
-itself.
+## Droplet setup
 
-So, we build the Web server binary locally, as normal, and then send it to
-Heroku. This works fine if you and your developers are on an Ubuntu or similar
-systems. If you need to support something else, we suggest building an
-executable in either a container or in CI, using almost the same instructions.
-See the
-[GitHub Actions workflow](https://github.com/aantron/dream/blob/master/.github/workflows/heroku.yml)
-that deploys this example. `heroku local`, mentioned later, probably runs
-cross-platform.
+Visit [Digital Ocean](https://digitalocean.com) and create an account, then
+create a droplet. Simple Dream apps can be built on the smallest and cheapest
+droplets as of May 2021, but you may eventually need more memory. Be sure to
+enable monitoring and add your public SSH key.
 
-Do a normal local build, or build in a container or in CI:
+Once the droplet starts, Digital Ocean will display its IP. We will use
+`my-droplet` as a stand-in in the example.
+
+SSH into your droplet:
 
 ```
-$ npm install esy
-$ npx esy
+$ ssh root@my-droplet
 ```
 
-and then
+Then, update the droplet:
 
 ```
-$ npx esy build
+$ apt update
+$ apt upgrade -y
 ```
 
-For opam,
+There was likely a kernel update, so restart the droplet:
 
 ```
-$ dune build --root . ./app.exe
+$ init 6
+$ ssh root@my-droplet
 ```
 
-<br>
-
-With Heroku, there are two new pieces of boilerplate to consider. The
-[`Procfile`](https://github.com/aantron/dream/blob/master/example/z-heroku/Procfile)
-tells Heroku what we would like to run. In this example, it's just one Web
-server:
+[Install Docker](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04):
 
 ```
-web: deploy/app.exe
+$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+$ add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+$ apt update
+$ apt install docker-ce -y
 ```
 
-[`.slugignore`](https://github.com/aantron/dream/blob/master/example/z-heroku/.slugignore) tells the `heroku` CLI not to upload all of our intermediate build
-artifacts, dependencies, etc., to Heroku, which saves a huge amount of time on
-deploy:
+[Install Docker Compose](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04).
+Check [here](https://github.com/docker/compose/releases) for the latest
+available release.
 
 ```
-_build/
-_esy/
-node_modules/
-esy.lock/
+$ curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64 -o /usr/local/bin/docker-compose
+$ chmod +x /usr/local/bin/docker-compose
 ```
 
-Instead, we copy only our final binary out of these directories, and put it in
-a separate, clean directory `./deploy/`. With esy:
+At this point, you may want to create a non-root user for running your builds,
+We add this user to the `docker` group, so that it can build and start Docker
+containers, and give it the same SSH public key:
 
 ```
-$ mkdir -p deploy
-$ npx esy cp '#{self.target_dir}/default/app.exe' deploy/
+$ adduser build --disabled-password
+$ usermod build --append --groups docker
+$ usermod build --append --groups systemd-journal
+$ mkdir /home/build/.ssh -m 700
+$ cp .ssh/authorized_keys /home/build/.ssh/
+$ chown -R build:build /home/build/.ssh
 ```
 
-with opam:
+Droplet setup is now complete:
 
 ```
-$ mkdir -p deploy
-$ cp _build/default/app.exe deploy/
-```
-
-If you have a large amount of code, it may be easier to move `Procfile` into
-`deploy` and run `heroku` from there, rather than using `.slugignore`.
-
-<br>
-
-Now the Heroku part. Go to [heroku.com](https://www.heroku.com/) and sign up
-for a free account. Then,
-[install](https://devcenter.heroku.com/articles/heroku-cli#download-and-install)
-the `heroku` CLI, and create your Heroku app:
-
-```
-$ heroku login -i
-$ heroku create my-app
-$ heroku buildpacks:set http://github.com/ryandotsmith/null-buildpack.git --app my-app
-$ heroku plugins:install heroku-builds
-```
-
-Replace `my-app` by something else; Heroku apps are in a global namespace!
-
-At this point, you may want to test the Heroku setup
-[locally](https://devcenter.heroku.com/articles/heroku-local):
-
-```
-$ heroku local
-```
-
-If all is well, attach to the Heroku log in a different terminal window:
-
-```
-$ heroku logs --tail --app my-app
-```
-
-...and send your binary over!
-
-```
-$ heroku builds:create --app my-app
-```
-
-Heroku will print a link to your running app, something similar to
-
-```
------> Building on the Heroku-20 stack
------> Deleting 3 files matching .slugignore patterns.
------> Using buildpack: http://github.com/ryandotsmith/null-buildpack.git
------> Null Buildpack app detected
------> Nothing to compile
------> Discovering process types
-       Procfile declares types -> web
-
------> Compressing...
-       Done: 3.8M
------> Launching...
-       Released v3
-       https://my-app.herokuapp.com/ deployed to Heroku
+$ exit
 ```
 
 <br>
 
-That's it! Just repeat your build command, `cp` to `deploy/`, and
-`heroku builds:create`. Continue to the
-[Heroku documentation](https://devcenter.heroku.com/categories/reference) for a
-full reference.
+## Deploy
+
+To deploy to the droplet, we send the sources over, and trigger the commands
+in
+[`deploy.sh`](https://github.com/aantron/dream/blob/master/example/z-docker-esy/deploy.sh)
+remotely:
+
+```
+$ rsync -rlv . build@my-droplet:app --exclude _esy --exclude node_modules
+$ ssh build@my-droplet "cd app && bash deploy.sh"
+```
+
+[`deploy.sh`](https://github.com/aantron/dream/blob/master/example/z-docker-esy/deploy.sh)
+looks like this:
+
+```bash
+#!/bin/bash
+
+set -e
+set -x
+
+docker-compose build
+docker-compose down
+docker-compose up --detach
+```
+
+The app should now be publicly accessible at the droplet's IP. Logs can be
+viewed with
+
+```
+$ ssh build@my-droplet "journalctl -f"
+```
 
 <br>
 
-These instructions are clearly not as convenient for users on macOS or Windows
-outside WSL. All suggestions and improvements are welcome. Also, fully usable
-logs and full cookie security in Heroku probably require
-[#10 *Add trust_proxy_headers middleware*](https://github.com/aantron/dream/issues/10).
+## Automation
 
-<br>
+The Dream repo has a
+[GitHub action](https://github.com/aantron/dream/blob/master/.github/workflows/docker-esy.yml)
+that deploys this example to [docker-esy.dream.as](http://docker-esy.dream.as)
+on every push. It runs the [two commands](#deploy) above.
 
-These instructions are substantially based on [*Deploying OCaml server on
-Heroku*](https://medium.com/@aleksandrasays/deploying-ocaml-server-on-heroku-f91dcac11f11)
-by Aleksandra Sikora.
+The action needs SSH access to the droplet. See
+[_Automation_](../z-systemd#automation) in
+[**`z-systemd`**](../z-systemd#automation) for discussion. The only difference
+is that we need don't need to upload the SSH key to user `root`, because we
+don't need to log in as `root` to start a daemon:
+
+```
+$ ssh-keygen -t rsa -b 4096 -f github-actions
+$ ssh build@my-droplet "cat - >> .ssh/authorized_keys" < github-actions.pub
+```
+
+And this example uses a `known_hosts` secret named
+`DIGITALOCEAN_DOCKER_ESY_KNOWN_HOSTS` rather than
+`DIGITALOCEAN_SYSTEMD_KNOWN_HOSTS`, but you can pick any name you like for your
+version of the deploy script.
 
 <br>
 
 **See also:**
 
-- [**`z-docker-esy`**](../z-docker-esy#files) deploys to a dedicated server,
-  with the Web application managed by Docker Compose.
-- [**`z-systemd`**](../z-systemd#files) deploys to a dedicated server, running
-  the Web application as a systemd daemon.
+-   [**`z-docker-opam`**](../z-docker-opam#files) is a variant of this example
+    that uses opam instead of esy.
+-   [**`z-systemd`**](../z-systemd#files) packages the app as a systemd daemon,
+    outside of a Docker container.
+-   [**`z-heroku`**](../z-heroku#files) deploys the app to
+    [Heroku](https://heroku.com).
 
 <br>
 
