@@ -10,19 +10,19 @@ and looks like this:
 ```json
 {
   "dependencies": {
-    "@opam/dream": "aantron/dream:dream.opam",
+    "@opam/dream": "1.0.0~alpha2",
     "@opam/dune": "^2.0",
     "ocaml": "4.12.x"
   },
   "devDependencies": {
-    "@opam/ocaml-lsp-server": "*",
-    "@opam/ocamlfind-secondary": "*"
+    "@opam/ocaml-lsp-server": "*"
   },
   "resolutions": {
-    "@opam/conf-libev": "esy-packages/libev:package.json#0b5eb6685b688649045aceac55dc559f6f21b829"
+    "@opam/conf-libev": "esy-packages/libev:package.json#0b5eb6685b688649045aceac55dc559f6f21b829",
+    "esy-openssl": "esy-packages/esy-openssl#619ae2d46ca981ec26ab3287487ad98b157a01d1"
   },
   "scripts": {
-    "run": "dune exec --root . ./hello.exe"
+    "start": "dune exec --root . ./hello.exe"
   }
 }
 ```
