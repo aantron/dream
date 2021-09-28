@@ -183,12 +183,12 @@ let customize template (error : Dream.error) =
        site of the error handler already has error handlers for catching double
        faults. *)
     response
-    |> template debug_dump
+    |> template error debug_dump
     |> Lwt.map (fun response -> Some response)
 
 
 
-let default_template debug_dump response =
+let default_template _error debug_dump response =
   match debug_dump with
   | None -> Lwt.return response
   | Some debug_dump ->

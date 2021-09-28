@@ -14,7 +14,7 @@ module Dream = Dream__pure.Inmost
 
 val default : Dream.error_handler
 val customize :
-  (string option -> Dream.response -> Dream.response Lwt.t) ->
+  (Dream.error -> string option -> Dream.response -> Dream.response Lwt.t) ->
     Dream.error_handler
 
 

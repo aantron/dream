@@ -1,4 +1,4 @@
-let my_error_template debug_info suggested_response =
+let my_error_template _error debug_info suggested_response =
   let status = Dream.status suggested_response in
   let code = Dream.status_to_int status
   and reason = Dream.status_to_string status in

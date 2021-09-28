@@ -1887,14 +1887,14 @@ type error_handler = error -> response option promise
     {!Dream.type-error}. *)
 
 val error_template :
-  (string option -> response -> response promise) -> error_handler
+  (error -> string option -> response -> response promise) -> error_handler
 (** Builds an {!error_handler} from a template. See example
     {{:https://github.com/aantron/dream/tree/master/example/9-error#files}
     [9-error]} \[{{:http://dream.as/9-error} playground}\].
 
     {[
       let my_error_handler =
-        Dream.error_template (fun ~debug_dump suggested_response ->
+        Dream.error_template (fun _error debug_dump suggested_response ->
           let body =
             match debug_dump with
             | Some string -> Dream.html_escape string

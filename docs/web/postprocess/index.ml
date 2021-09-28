@@ -1229,13 +1229,13 @@ let initialize_log_replacement = {|
 </pre>|}
 
 let error_template_expected = {|<div class="spec value" id="val-error_template">
- <a href="#val-error_template" class="anchor"></a><code><span><span class="keyword">val</span> error_template : <span><span>(<span><span>string option</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <a href="#type-error_handler">error_handler</a></span></code>
+ <a href="#val-error_template" class="anchor"></a><code><span><span class="keyword">val</span> error_template : <span><span>(<span><a href="#type-error">error</a> <span class="arrow">-&gt;</span></span> <span><span>string option</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <a href="#type-error_handler">error_handler</a></span></code>
 </div>
 |}
 
 let error_template_replacement = {|
 <pre><span class="keyword">val</span> error_template :
-  (string option -> <a href="#val-response">response</a> -> <a href="#val-response">response</a> <a href="#type-promise">promise</a>) ->
+  (<a href="#type-error">error</a> -> string option -> <a href="#val-response">response</a> -> <a href="#val-response">response</a> <a href="#type-promise">promise</a>) ->
     <a href="#type-error_handler">error_handler</a>
 </pre>
 |}
