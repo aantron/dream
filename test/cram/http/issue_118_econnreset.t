@@ -1,12 +1,13 @@
 Start a Dream server
 
-  $ ./econnreset.exe -s -p 9191 &> test.log &
+  $ export PORT=$(./econnreset.exe)
+  $ ./econnreset.exe -s -p "${PORT}" &> test.log &
   $ export PID=$!
   $ sleep 1
 
 Force a connection reset - will log a few errors
 
-  $ ./econnreset.exe -p 9191
+  $ ./econnreset.exe -p "${PORT}"
 
 Does the log contain an error line for the ECONNRESET? An error code of [1] is "good", meaning no line was found.
 
