@@ -101,6 +101,12 @@ If you want to work again later, be sure to use `--recurse-submodules` during
 git pull --recurse-submodules
 ```
 
+Please don't force-push into a PR &mdash; it makes incremental review very
+difficult, and we will squash-merge most PRs anyway!
+
+Also please don't resolve conversations in PRs. Reviewers use resolving
+conversations to keep track of what has been addressed.
+
 <br>
 
 If you need to link to the local version of Dream from a project that lives in
