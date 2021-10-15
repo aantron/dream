@@ -87,7 +87,7 @@ type multipart_form =
   (string * ((string option * string) list)) list
 module Map = Map.Make (String)
 
-let multipart ~now request =
+let multipart ?(csrf=true) ~now request =
   let content_type = match Dream.header "content-type" request with
     | Some content_type ->
       Result.to_option (Multipart_form.Content_type.of_string (content_type ^ "\r\n"))
@@ -124,8 +124,12 @@ let multipart ~now request =
           | [Some "", ""] -> name, []
           | _ -> name, List.rev values)
       in
+      if csrf then
       Form.sort_and_check_form ~now
         (function
         | [None, value] -> value
         | _ -> "")
         parts request
+      else
+      let form = Form.sort parts in
+      Lwt.return (`Ok form)

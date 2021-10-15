@@ -816,7 +816,7 @@ type 'a form_result = [
     activity, or tokens so old that decryption keys have since been rotated on
     the server. *)
 
-val form : request -> (string * string) list form_result promise
+val form : ?csrf:bool -> request -> (string * string) list form_result promise
 (** Parses the request body as a form. Performs CSRF checks. Use
     {!Dream.form_tag} in a template to transparently generate forms that will
     pass these checks. See {!section-templates} and example
@@ -907,7 +907,7 @@ type multipart_form =
     OWASP {i File Upload Cheat Sheet}} for security precautions for upload
     forms. *)
 
-val multipart : request -> multipart_form form_result promise
+val multipart : ?csrf:bool -> request -> multipart_form form_result promise
 (** Like {!Dream.form}, but also reads files, and [Content-Type:] must be
     [multipart/form-data]. The [<form>] tag and CSRF token can be generated in a
     template with
