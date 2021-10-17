@@ -54,12 +54,15 @@ let sort_and_check_form ~now to_value form request =
     log.warning (fun log -> log ~request "CSRF token duplicated");
     Lwt.return (`Many_tokens form)
 
-let form ~now request =
+let form ?(csrf = true) ~now request =
   match Dream.header "Content-Type" request with
   | Some "application/x-www-form-urlencoded" ->
     let%lwt body = Dream.body request in
     let form = Dream__pure.Formats.from_form_urlencoded body in
+    if csrf then
     sort_and_check_form ~now (fun string -> string) form request
+    else
+    Lwt.return (`Ok (sort form))
 
   | _ ->
     log.warning (fun log -> log ~request
