@@ -22,3 +22,6 @@ _coverage/
 
 # Humans
 scratch/
+
+# Editors
+.vscode/
