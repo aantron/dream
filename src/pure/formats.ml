@@ -80,11 +80,11 @@ let to_set_cookie
 
          See https://tools.ietf.org/html/rfc6265#section-5.1.1.
 
-         Even though [Ptime] time does not account for leap seconds, in case I
-         misunderstand the gmtime API, system differences, or future
+         Even though [Ptime.to_date_time] time does not return leap seconds, in
+         case I misunderstood the gmtime API, of system differences, or future
          refactoring, make sure no leap seconds creep into the output. *)
       let seconds =
-        if ss < 60 then ss else 59
+        if ss < 60 then ss else 59 [@coverage off]
       in
       Printf.sprintf "; Expires=%s, %02i %s %i %02i:%02i:%02i GMT"
         weekday d month y hh mm seconds
