@@ -19,29 +19,7 @@ let storage =
 let flash_cookie =
   "dream.flash"
 
-
-
-let flash_messages inner_handler request =
-  let outbox = ref [] in
-  let request = Dream.with_local storage outbox request in
-  let%lwt response = inner_handler request in
-  let entries = List.rev !outbox in
-  let existing = Dream.cookie flash_cookie request in
-  let response =
-    match existing, entries with
-    | None, [] -> response
-    | Some _, [] ->
-      Dream.set_cookie flash_cookie "" request response ~expires:0.
-    | _, _ ->
-      let content =
-        List.fold_right (fun (x,y) a -> `String x :: `String y :: a) entries []
-      in
-      let value = `List content |> Yojson.Basic.to_string in
-      Dream.set_cookie flash_cookie value request response ~max_age:five_minutes
-  in
-  Lwt.return response
-
-
+let content_byte_size_limit = 3000
 
 let (|>?) =
   Option.bind
@@ -67,6 +45,7 @@ let flash request =
   Option.value x ~default:[]
 
 let put_flash category message request =
+  log.info (fun log -> log "New put flash: %s %s" category message);
   let outbox =
     match Dream.local storage request with
     | Some outbox -> outbox
@@ -76,3 +55,36 @@ let put_flash category message request =
       failwith message
   in
   outbox := (category, message)::!outbox
+
+
+let flash_messages inner_handler request =
+  let outbox = ref [] in
+  let request = Dream.with_local storage outbox request in
+  let%lwt response = inner_handler request in
+  let entries = List.rev !outbox in
+  let existing = Dream.cookie flash_cookie request in
+  let current = flash request |> List.map (fun (p,q) -> p ^ ": " ^ q) |> String.concat ", " in
+  log.debug (fun log -> log ~request "Current flash messages: %s" current);
+  let response =
+    match existing, entries with
+    | None, [] -> response
+    | Some _, [] ->
+      Dream.set_cookie flash_cookie "" request response ~expires:0.
+    | _, _ ->
+      let content =
+        List.fold_right (fun (x,y) a -> `String x :: `String y :: a) entries []
+      in
+      let value = `List content |> Yojson.Basic.to_string in
+
+      if String.length value >= content_byte_size_limit then
+        let message =
+          Printf.sprintf
+            "Flash messages exceed the maximum size of a cookie (%d bytes)"
+            content_byte_size_limit
+        in
+        log.warning (fun log -> log ~request "%s" message);
+        response
+      else
+        Dream.set_cookie flash_cookie value request response ~max_age:five_minutes
+  in
+  Lwt.return response

@@ -218,6 +218,14 @@ type log_level = [
   | `Debug
 ]
 
+let to_logs_level l =
+  match l with
+  | `Error -> Logs.Error
+  | `Warning -> Logs.Warning
+  | `Info -> Logs.Info
+  | `Debug -> Logs.Debug
+
+
 exception Logs_are_not_initialized
 
 let setup_logs =
@@ -250,13 +258,14 @@ type sub_log = {
   debug : 'a. ('a, unit) conditional_log;
 }
 
-let sub_log name =
+let sub_log ?level:level_ name =
   (* This creates a wrapper, as described above. The wrapper forwards to a
      logger of the Logs library, but instead of passing the formatter m to the
      user's callback, it passes a formatter m', which is like m, but lacks a
      ?tags argument. It has a ?request argument instead. If ~request is given,
      m' immediately tries to retrieve the request id, put it into a Logs tag,
      and call Logs' m with the user's formatting arguments and the tag. *)
+
   let forward ~(destination_log : _ Logs.log) user's_k =
     let `Initialized = initialized () in
 
@@ -274,11 +283,18 @@ let sub_log name =
         log ~tags format_and_arguments))
   in
 
+  let level = List.find Option.is_some [
+      Option.map to_logs_level level_;
+      List.assoc_opt name !custom_log_levels;
+      Some !level
+    ] in
+
   (* Create the actual Logs source, and then wrap all the interesting
      functions. *)
   let src = Logs.Src.create name in
   let (module Log) = Logs.src_log src in
-
+  Logs.Src.set_level src level;
+  custom_log_levels := (name, Option.get level) :: List.remove_assoc name !custom_log_levels;
   sources := (name, src) :: (List.remove_assoc name !sources);
   {
     error =   (fun k -> forward ~destination_log:Log.err   k);
@@ -327,11 +343,11 @@ let set_up_exception_hook () =
       |> iter_backtrace (fun line -> log.error (fun log -> log "%s" line))
   end
 
+
 let initialize_log
     ?(backtraces = true)
     ?(async_exception_hook = true)
     ?level:level_
-    ?(custom_levels=[])
     ?enable:(enable_ = true)
     () =
 
@@ -343,23 +359,21 @@ let initialize_log
     set_up_exception_hook ();
   set_async_exception_hook := false;
 
-  let to_logs_level l =
-    match l with
-    | `Error -> Logs.Error
-    | `Warning -> Logs.Warning
-    | `Info -> Logs.Info
-    | `Debug -> Logs.Debug
-  in
-
   let level_ =
     Option.map to_logs_level level_
     |> Option.value ~default:Logs.Info in
 
   enable := enable_;
   level := level_;
-  custom_log_levels := List.map (fun (name, l) -> (name, to_logs_level l)) custom_levels;
   let `Initialized = initialized () in
   ()
+
+let set_log_level name level =
+  let level = to_logs_level level in
+  custom_log_levels := (name, level) :: (List.remove_assoc name !custom_log_levels);
+  let src = List.assoc_opt name !sources in
+  Option.iter (fun s -> Logs.Src.set_level s (Some level)) src
+
 
 module Make (Pclock : Mirage_clock.PCLOCK) =
 struct
@@ -369,17 +383,7 @@ struct
   let initializer_ ~setup_outputs = lazy begin
     if !enable then begin
       setup_outputs () ;
-
-      (* Set the default log level across all sources. *)
       Logs.set_level ~all:true (Some !level);
-
-      (* Now set custom log levels for specfic sources. *)
-      List.iter (fun (name, src) ->
-          match List.assoc_opt name !custom_log_levels with
-          | Some l -> Logs.Src.set_level src (Some l)
-          | None -> ()
-        ) !sources;
-
       Logs.set_reporter (reporter ~now ())
     end ;
     `Initialized
