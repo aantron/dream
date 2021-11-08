@@ -637,16 +637,15 @@ val set_cookie :
  *)
 
  val drop_cookie :
- ?prefix:[< `Host | `Secure ] option ->
- ?domain:string ->
- ?path:string option ->
- ?secure:bool ->
- ?http_only:bool ->
- ?same_site:[< `Lax | `None | `Strict > `Strict ] option ->
-   string -> request -> response -> response
-
-(** Appends an expired [Set-Cookie:] header to the {!type-response}. Infers the most
-    secure defaults from the {!type-request}.
+   ?prefix:[< `Host | `Secure ] option ->
+   ?domain:string ->
+   ?path:string option ->
+   ?secure:bool ->
+   ?http_only:bool ->
+   ?same_site:[< `Lax | `None | `Strict > `Strict ] option ->
+     string -> request -> response -> response
+(** Appends an expired [Set-Cookie:] header to the {!type-response}. Infers the
+    most secure defaults from the {!type-request}.
 
     {[
       Dream.drop_cookie "my.cookie" request response
