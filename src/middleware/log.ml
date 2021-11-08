@@ -197,6 +197,12 @@ let enable =
 let level =
   ref Logs.Info
 
+let custom_log_levels : (string * Logs.level) list ref =
+  ref []
+
+let sources : (string * Logs.src) list ref =
+  ref []
+
 let set_printexc =
   ref true
 
@@ -211,6 +217,13 @@ type log_level = [
   | `Info
   | `Debug
 ]
+
+let to_logs_level l =
+  match l with
+  | `Error -> Logs.Error
+  | `Warning -> Logs.Warning
+  | `Info -> Logs.Info
+  | `Debug -> Logs.Debug
 
 exception Logs_are_not_initialized
 
@@ -244,7 +257,7 @@ type sub_log = {
   debug : 'a. ('a, unit) conditional_log;
 }
 
-let sub_log name =
+let sub_log ?level:level_ name =
   (* This creates a wrapper, as described above. The wrapper forwards to a
      logger of the Logs library, but instead of passing the formatter m to the
      user's callback, it passes a formatter m', which is like m, but lacks a
@@ -268,9 +281,21 @@ let sub_log name =
         log ~tags format_and_arguments))
   in
 
+  let level =
+    List.find Option.is_some [
+      Option.map to_logs_level level_;
+      List.assoc_opt name !custom_log_levels;
+      Some !level
+    ] in
+
   (* Create the actual Logs source, and then wrap all the interesting
      functions. *)
-  let (module Log) = Logs.src_log (Logs.Src.create name) in
+  let src = Logs.Src.create name in
+  let (module Log) = Logs.src_log src in
+  Logs.Src.set_level src level;
+  custom_log_levels :=
+    (name, Option.get level)::(List.remove_assoc name !custom_log_levels);
+  sources := (name, src) :: (List.remove_assoc name !sources);
 
   {
     error =   (fun k -> forward ~destination_log:Log.err   k);
@@ -335,18 +360,20 @@ let initialize_log
   set_async_exception_hook := false;
 
   let level_ =
-    match level_ with
-    | None -> Logs.Info
-    | Some `Error -> Logs.Error
-    | Some `Warning -> Logs.Warning
-    | Some `Info -> Logs.Info
-    | Some `Debug -> Logs.Debug
-  in
+    Option.map to_logs_level level_
+    |> Option.value ~default:Logs.Info in
 
   enable := enable_;
   level := level_;
   let `Initialized = initialized () in
   ()
+
+let set_log_level name level =
+  let level = to_logs_level level in
+  custom_log_levels :=
+    (name, level)::(List.remove_assoc name !custom_log_levels);
+  let src = List.assoc_opt name !sources in
+  Option.iter (fun s -> Logs.Src.set_level s (Some level)) src
 
 module Make (Pclock : Mirage_clock.PCLOCK) =
 struct

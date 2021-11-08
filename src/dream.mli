@@ -1688,7 +1688,7 @@ type sub_log = {
 }
 (** Sub-logs. See {!Dream.val-sub_log} right below. *)
 
-val sub_log : string -> sub_log
+val sub_log : ?level:[< log_level] -> string -> sub_log
 (** Creates a new sub-log with the given name. For example,
 
     {[
@@ -1701,6 +1701,10 @@ val sub_log : string -> sub_log
     {[
       log.error (fun log -> log ~request "Validation failed")
     ]}
+
+    [?level] sets the log level threshold for this sub-log only. If not
+    provided, falls back to the global log level set by {!Dream.initialize_log},
+    unless {!Dream.set_log_level} is used.
 
     See [README] of example
     {{:https://github.com/aantron/dream/tree/master/example/a-log#files}
@@ -1730,11 +1734,14 @@ val initialize_log :
       [Lwt.async_exception_hook]} so as to forward all asynchronous exceptions
       to the logger, and not terminate the process.
 
-    - [~level] sets the log level threshould for the entire binary. The default
+    - [~level] sets the log level threshold for the entire binary. The default
       is [`Info].
 
     - [~enable:false] disables Dream logging completely. This can help sanitize
       output during testing. *)
+
+val set_log_level : string -> [< log_level ] -> unit
+(** Set the log level threshold of the given sub-log. *)
 
 
 
