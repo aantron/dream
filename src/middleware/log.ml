@@ -225,7 +225,6 @@ let to_logs_level l =
   | `Info -> Logs.Info
   | `Debug -> Logs.Debug
 
-
 exception Logs_are_not_initialized
 
 let setup_logs =
@@ -265,7 +264,6 @@ let sub_log ?level:level_ name =
      ?tags argument. It has a ?request argument instead. If ~request is given,
      m' immediately tries to retrieve the request id, put it into a Logs tag,
      and call Logs' m with the user's formatting arguments and the tag. *)
-
   let forward ~(destination_log : _ Logs.log) user's_k =
     let `Initialized = initialized () in
 
@@ -283,7 +281,8 @@ let sub_log ?level:level_ name =
         log ~tags format_and_arguments))
   in
 
-  let level = List.find Option.is_some [
+  let level =
+    List.find Option.is_some [
       Option.map to_logs_level level_;
       List.assoc_opt name !custom_log_levels;
       Some !level
@@ -294,8 +293,10 @@ let sub_log ?level:level_ name =
   let src = Logs.Src.create name in
   let (module Log) = Logs.src_log src in
   Logs.Src.set_level src level;
-  custom_log_levels := (name, Option.get level) :: List.remove_assoc name !custom_log_levels;
+  custom_log_levels :=
+    (name, Option.get level)::(List.remove_assoc name !custom_log_levels);
   sources := (name, src) :: (List.remove_assoc name !sources);
+
   {
     error =   (fun k -> forward ~destination_log:Log.err   k);
     warning = (fun k -> forward ~destination_log:Log.warn  k);
@@ -343,7 +344,6 @@ let set_up_exception_hook () =
       |> iter_backtrace (fun line -> log.error (fun log -> log "%s" line))
   end
 
-
 let initialize_log
     ?(backtraces = true)
     ?(async_exception_hook = true)
@@ -370,10 +370,10 @@ let initialize_log
 
 let set_log_level name level =
   let level = to_logs_level level in
-  custom_log_levels := (name, level) :: (List.remove_assoc name !custom_log_levels);
+  custom_log_levels :=
+    (name, level)::(List.remove_assoc name !custom_log_levels);
   let src = List.assoc_opt name !sources in
   Option.iter (fun s -> Logs.Src.set_level s (Some level)) src
-
 
 module Make (Pclock : Mirage_clock.PCLOCK) =
 struct
