@@ -8,21 +8,18 @@ jobs:
       matrix:
         os:
         - ubuntu-latest
-        - macos-latest
-          # - windows-latest
-          # Blocked until we no longer require libev; Dream still works on
-          # Windows, but testing it is awkward at the moment.
         ocaml:
+        - 4.13.x
         - 4.12.x
+        - 4.11.x
+        - 4.10.x
+        - 4.09.x
+        - 4.08.x
         include:
-        - os: ubuntu-latest
-          ocaml: 4.08.x
-        - os: ubuntu-latest
-          ocaml: 4.09.x
-        - os: ubuntu-latest
-          ocaml: 4.10.x
-        - os: ubuntu-latest
-          ocaml: 4.11.x
+        - os: macos-latest
+          ocaml: 4.12.x
+        # Windows is blocked until we no longer require libev; Dream still works
+        # on Windows, but testing it is awkward at the moment.
 
     runs-on: ${{matrix.os}}
     steps:
