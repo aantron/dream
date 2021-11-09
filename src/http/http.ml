@@ -79,7 +79,7 @@ let websocket_handler user's_websocket_handler socket =
 
   (* This function is called on each frame received. In this high-level handler.
      we automatically respond to all control opcodes. *)
-  let frame ~opcode ~is_fin buffer ~off ~len =
+  let frame ~opcode ~is_fin ~len:_ payload =
     match opcode with
     | `Connection_close ->
       Websocketaf.Wsd.close socket;
@@ -92,21 +92,24 @@ let websocket_handler user's_websocket_handler socket =
       ()
 
     | `Text
-    | `Binary ->
-      let fragment = Lwt_bytes.to_string (Lwt_bytes.proxy buffer off len) in
-      if is_fin then
-        push_message (Some fragment)
-      else
-        message_frames := [fragment]
-
+    | `Binary
     | `Continuation ->
-      let fragment = Lwt_bytes.to_string (Lwt_bytes.proxy buffer off len) in
-      message_frames := fragment::!message_frames;
-      if is_fin then begin
-        let message = String.concat "" (List.rev !message_frames) in
-        message_frames := [];
-        push_message (Some message)
-      end
+      let rec read () =
+        Websocketaf.Payload.schedule_read
+          payload
+          ~on_read:(fun buffer ~off ~len ->
+            let fragment =
+              Lwt_bytes.to_string (Lwt_bytes.proxy buffer off len) in
+            message_frames := fragment::!message_frames;
+            read ())
+        ~on_eof:(fun () ->
+          if is_fin then begin
+            let message = String.concat "" (List.rev !message_frames) in
+            message_frames := [];
+            push_message (Some message)
+          end)
+      in
+      read ()
   in
 
   let eof () =
@@ -170,7 +173,7 @@ let wrap_handler
       let on_eof () = Dream.close_stream request |> ignore in
 
       let rec loop () =
-        Httpaf.Body.schedule_read
+        Httpaf.Body.Reader.schedule_read
           body
           ~on_eof
           ~on_read:(fun buffer ~off ~len ->

@@ -53,14 +53,14 @@ let forward_body_general
 
 let forward_body
     (response : Dream.response)
-    (body : [ `write ] Httpaf.Body.t) =
+    (body : Httpaf.Body.Writer.t) =
 
   forward_body_general
     response
-    (Httpaf.Body.write_string body)
-    (Httpaf.Body.write_bigstring body)
-    (Httpaf.Body.flush body)
-    (fun () -> Httpaf.Body.close_writer body)
+    (Httpaf.Body.Writer.write_string body)
+    (Httpaf.Body.Writer.write_bigstring body)
+    (Httpaf.Body.Writer.flush body)
+    (fun () -> Httpaf.Body.Writer.close body)
 
 let forward_body_h2
     (response : Dream.response)
