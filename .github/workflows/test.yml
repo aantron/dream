@@ -33,6 +33,8 @@ jobs:
 
     - run: opam depext --yes conf-postgresql
     - run: opam depext --yes conf-libev
+    # Needed until https://github.com/reasonml/reason/pull/2660 is in opam.
+    - run: opam pin add reason --yes --no-action --dev-repo
     - run: opam install --yes --deps-only --with-test ./dream.opam
     - run: opam exec -- dune runtest
     - run: |
