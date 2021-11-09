@@ -632,9 +632,7 @@ val set_cookie :
       MDN}.
 
     {!Dream.to_set_cookie} is a “raw” version of this function that does not do
-    any inference.
-
- *)
+    any inference. *)
 
  val drop_cookie :
    ?prefix:[< `Host | `Secure ] option ->
@@ -642,65 +640,13 @@ val set_cookie :
    ?path:string option ->
    ?secure:bool ->
    ?http_only:bool ->
-   ?same_site:[< `Lax | `None | `Strict > `Strict ] option ->
+   ?same_site:[< `Strict | `Lax | `None ] option ->
      string -> request -> response -> response
-(** Appends an expired [Set-Cookie:] header to the {!type-response}. Infers the
-    most secure defaults from the {!type-request}.
+(** Deletes the given cookie.
 
-    {[
-      Dream.drop_cookie "my.cookie" request response
-    ]}
-
-    See example
-    {{:https://github.com/aantron/dream/tree/master/example/c-cookie#files}
-    [c-cookie]}.
-
-    Most of the optional arguments are for overriding inferred defaults.
-    Please use the same arguments provided when the cookie to be dropped was set.
-
-    - [~prefix] sets [__Host-], [__Secure-], or no prefix, from most secure to
-      least. A conforming client will refuse to accept the cookie if [~domain],
-      [~path], and [~secure] don't match the constraints implied by the prefix.
-      By default, {!Dream.set_cookie} chooses the most restrictive prefix based
-      on the other settings and the {!type-request}. See
-      {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.1.3}
-      RFC 6265bis §4.1.3} and
-      {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#Cookie_prefixes}
-      MDN}.
-    - [~domain] sets the [Domain=] attribute. See
-      {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.1.2.3}
-      RFC 6265bis §4.1.2.3} and
-      {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#Domain_attribute}
-      MDN}.
-    - [~path] sets the [Path=] attribute. By default, [Path=] set to the site
-      prefix in the {!type-request}, which is usually [/]. See
-      {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.1.2.4}
-      RFC 6265bis §4.1.2.4} and
-      {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#Path_attribute}
-      MDN}.
-    - [~secure] sets the [Secure] attribute. By default, [Secure] is set if
-      {!Dream.https} is [true] for the {!type-request}. See
-      {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.1.2.5}
-      RFC 6265bis §4.1.2.5} and
-      {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#restrict_access_to_cookies}
-      MDN}.
-    - [~http_only] sets the [HttpOnly] attribute. [HttpOnly] is set by default.
-      See
-      {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.1.2.6}
-      RFC 6265bis §4.1.2.6} and
-      {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#restrict_access_to_cookies}
-      MDN}.
-    - [~same_site] sets the [SameSite=] attribute. [SameSite] is set to [Strict]
-      by default. See
-      {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.1.2.7}
-      RFC 6265bis §4.1.2.7} and
-      {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#SameSite_attribute}
-      MDN}.
-
-    {!Dream.to_set_cookie} is a “raw” version of this function that does not do
-    any inference.
-
- *)
+    This function works by calling {!Dream.set_cookie}, and setting the cookie
+    to expire in the past. Pass all the same optional values that you would pass
+    to {!Dream.set_cookie}, to make sure that the same cookie is deleted. *)
 
 val cookie :
   ?prefix:[< `Host | `Secure ] option ->

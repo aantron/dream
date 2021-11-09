@@ -704,34 +704,7 @@ let set_cookie
   add_header "Set-Cookie" set_cookie response
 
 let drop_cookie
-    ?prefix:cookie_prefix
-    ?domain
-    ?path
-    ?secure
-    ?(http_only = true)
-    ?same_site
-    name
-    request
-    response =
-
-  let set_cookie = set_cookie ~http_only:http_only ~expires:0. ~encrypt:false in
-
-  let set_cookie = match cookie_prefix with
-    | Some p -> set_cookie ~prefix:p
-    | None -> set_cookie ~prefix:None in
-
-  let set_cookie = match path with
-    | Some p -> set_cookie ~path:p
-    | None -> set_cookie ~path:(Some (prefix request)) in
-
-  let set_cookie = match secure with
-    | Some sec -> set_cookie ~secure:sec
-    | None -> set_cookie ~secure:false in
-
-  let set_cookie = match same_site with
-    | Some s -> set_cookie ~same_site:s
-    | None -> set_cookie ~same_site:(Some `Strict) in
-
-  match domain with
-    | Some d -> set_cookie ~domain:d name "deleted" request response
-    | None -> set_cookie name "deleted" request response
+    ?prefix ?domain ?path ?secure ?http_only ?same_site name request response =
+  set_cookie
+    ?prefix ~encrypt:false ~expires:0. ?domain ?path ?secure ?http_only
+    ?same_site name "" request response
