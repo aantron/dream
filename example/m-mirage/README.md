@@ -15,11 +15,14 @@ encrypt challenge.
 
 ```sh
 $ gcloud init
+# Your name below must be __globally__ unique, dream-os will be taken by now
 $ gcloud projects create dream-os --name="dream-os"
-# Enable billing on the dream-os project
+# Enable billing for project
+# Go to https://cloud.google.com, log into Console, select project from
+#  dropdown, then click billing
 $ gcloud config set project dream-os
-$ gcloud compute address --region europe-west1
-# Set your zone file with the given IP address
+$ gcloud compute addresses create <HOSTNAME> --region europe-west1
+# Set your in your DNS zone file the IP address yielded above
 $ gsutil mb gs://dream-os
 ```
 
@@ -37,10 +40,10 @@ address.
 ```sh
 $ opam install mirage
 $ mirage configure -t virtio --dhcp true --hostname <HOSTNAME> --tls true \
-  --letsencrypt true --productive false
+  --letsencrypt true --production false
 $ make depends
 $ mirage build
-$ solo5-virtio-mkimage gs://dream-os
+$ solo5-virtio-mkimage -f tar -- dream.tar.gz dream.virtio
 ```
 
 #### Deployement
