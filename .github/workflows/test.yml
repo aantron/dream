@@ -33,7 +33,7 @@ jobs:
 
     - run: opam depext --yes conf-postgresql
     - run: opam depext --yes conf-libev
-    - run: opam install --yes --deps-only --with-test .
+    - run: opam install --yes --deps-only --with-test ./dream.opam
     - run: opam exec -- dune runtest
     - run: |
         set -e
