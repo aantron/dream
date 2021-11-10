@@ -68,7 +68,6 @@ let flash_messages inner_handler request =
         flash request
         |> List.map (fun (p,q) -> p ^ ": " ^ q)
         |> String.concat ", " in
-
       if String.length current > 0 then
         log ~request "Flash messages: %s" current
       else
