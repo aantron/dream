@@ -18,6 +18,8 @@ let result request =
   </html>
 
 let () =
+  Dream.initialize_log ~level:`Info ();
+  Dream.set_log_level "dream.flash" `Debug;
   Dream.run
   @@ Dream.logger
   @@ Dream.memory_sessions
@@ -31,8 +33,8 @@ let () =
     Dream.post "/"
       (fun request ->
         match%lwt Dream.form request with
-        | `Ok ["text", text] ->
-          let () = Dream.put_flash "Info" text request in
+          | `Ok ["text", text] ->
+            let () = Dream.put_flash "Info" text request in
           Dream.redirect request "/result"
         | _ ->
           Dream.redirect request "/");
