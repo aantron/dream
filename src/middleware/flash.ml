@@ -46,7 +46,6 @@ let flash request =
   in
   Option.value x ~default:[]
 
-
 let put_flash category message request =
   let outbox =
     match Dream.local storage request with
@@ -57,7 +56,6 @@ let put_flash category message request =
       failwith message
   in
   outbox := (category, message)::!outbox
-
 
 let flash_messages inner_handler request =
   let outbox = ref [] in
