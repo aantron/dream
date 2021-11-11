@@ -48,6 +48,7 @@ into cookies and reads them back out:
 
 ```ocaml
 let () =
+  Dream.set_log_level "dream.flash" `Debug;
   Dream.run
   @@ Dream.logger
   @@ Dream.memory_sessions
@@ -73,6 +74,16 @@ let () =
 
   ]
   @@ Dream.not_found
+```
+
+The example configures a custom log level for flash messages using
+`Dream.set_log_level`. Setting this to "debug" means the server logs
+will display a log point summarizing the flash messages on every
+request, like this:
+
+```
+10.11.21 01:48:21.629       dream.log  INFO REQ 3 GET /result ::1:39808 Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0
+10.11.21 01:48:21.629     dream.flash DEBUG REQ 3 Flash messages: Info: Some Message
 ```
 
 <pre><code><b>$ cd example/w-flash</b>
