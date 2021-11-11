@@ -60,8 +60,6 @@ let put_flash category message request =
 let flash_messages inner_handler request =
   let outbox = ref [] in
   let request = Dream.with_local storage outbox request in
-  let%lwt response = inner_handler request in
-  let entries = List.rev !outbox in
   let existing = Dream.cookie flash_cookie request in
   log.debug (fun log ->
       let current =
@@ -73,6 +71,8 @@ let flash_messages inner_handler request =
       else
         log ~request "%s" "No flash messages."
     );
+  let%lwt response = inner_handler request in
+  let entries = List.rev !outbox in
   let response =
     match existing, entries with
     | None, [] -> response
