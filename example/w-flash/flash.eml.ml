@@ -18,7 +18,6 @@ let result request =
   </html>
 
 let () =
-  Dream.initialize_log ~level:`Info ();
   Dream.set_log_level "dream.flash" `Debug;
   Dream.run
   @@ Dream.logger

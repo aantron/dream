@@ -48,7 +48,6 @@ into cookies and reads them back out:
 
 ```ocaml
 let () =
-  Dream.initialize_log ~level:`Info ();
   Dream.set_log_level "dream.flash" `Debug;
   Dream.run
   @@ Dream.logger

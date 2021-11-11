@@ -369,6 +369,9 @@ let initialize_log
   ()
 
 let set_log_level name level =
+  (* If logging hasn't been initialized, trigger this so that
+     configuration of log levels can proceed. *)
+  let `Initialized = initialized () in
   let level = to_logs_level level in
   custom_log_levels :=
     (name, level)::(List.remove_assoc name !custom_log_levels);
