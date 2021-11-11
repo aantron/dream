@@ -21,10 +21,13 @@ let flash_cookie =
 
 (* This is a soft limit. Encryption and base64 encoding increase the
    original size of the cookie text by ~4/3.*)
-let content_byte_size_limit = 3072
+let content_byte_size_limit =
+  3072
 
 let (|>?) =
   Option.bind
+
+
 
 let flash request =
   let rec group x =
@@ -57,20 +60,21 @@ let put_flash category message request =
   in
   outbox := (category, message)::!outbox
 
+
+
 let flash_messages inner_handler request =
+  log.debug (fun log ->
+    let current =
+      flash request
+      |> List.map (fun (p,q) -> p ^ ": " ^ q)
+      |> String.concat ", " in
+    if String.length current > 0 then
+      log ~request "Flash messages: %s" current
+    else
+      log ~request "%s" "No flash messages.");
   let outbox = ref [] in
   let request = Dream.with_local storage outbox request in
   let existing = Dream.cookie flash_cookie request in
-  log.debug (fun log ->
-      let current =
-        flash request
-        |> List.map (fun (p,q) -> p ^ ": " ^ q)
-        |> String.concat ", " in
-      if String.length current > 0 then
-        log ~request "Flash messages: %s" current
-      else
-        log ~request "%s" "No flash messages."
-    );
   let%lwt response = inner_handler request in
   let entries = List.rev !outbox in
   let response =
@@ -83,13 +87,15 @@ let flash_messages inner_handler request =
         List.fold_right (fun (x,y) a -> `String x :: `String y :: a) entries []
       in
       let value = `List content |> Yojson.Basic.to_string in
-      let () = if String.length value >= content_byte_size_limit
-        then
+      let () =
+        if String.length value >= content_byte_size_limit then
           log.warning (fun log ->
-              log ~request
-                "Flash messages exceed soft size limit (%d bytes)"
-                content_byte_size_limit)
-          else () in
+            log ~request
+              "Flash messages exceed soft size limit (%d bytes)"
+              content_byte_size_limit)
+        else
+          ()
+      in
       Dream.set_cookie flash_cookie value request response ~max_age:five_minutes
   in
   Lwt.return response
