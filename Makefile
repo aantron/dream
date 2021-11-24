@@ -6,18 +6,20 @@ build :
 watch :
 	@dune build -p dream --no-print-directory -w
 
+TEST ?= test
+
 .PHONY : test
 test :
 	@find . -name '*.coverage' | xargs rm -f
 	@dune build --no-print-directory \
-	  --instrument-with bisect_ppx --force @test/runtest
+	  --instrument-with bisect_ppx --force @$(TEST)/runtest
 	@bisect-ppx-report html
 	@bisect-ppx-report summary
 	@echo See _coverage/index.html
 
 .PHONY : test-watch
 test-watch :
-	@dune build --no-print-directory -w --root . @test/runtest
+	@dune build --no-print-directory -w --root . @$(TEST)/runtest
 
 .PHONY : coverage-serve
 coverage-serve :

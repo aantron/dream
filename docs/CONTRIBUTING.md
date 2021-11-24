@@ -65,8 +65,11 @@ You can now add some code that will exercise your change, so you can test it as
 you work. There are two main places for this:
 
 1. The tests in `test/`. They can be run with `make test`. View the generated
-   coverage report in `_coverage/index.html` to see how much the tests exercies
+   coverage report in `_coverage/index.html` to see how much the tests exercise
    your changes.
+
+   To run tests from a single directory, for example `test/expect/pure`, run
+   `make test TEST=test/expect/pure`.
 
 2. The examples in `example/`. I often test changes by modifying an example that
    is almost on topic for the code I'm changing, and then not committing the
