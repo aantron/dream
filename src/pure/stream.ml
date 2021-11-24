@@ -224,18 +224,21 @@ let pipe () =
     | `Writer_waiting ->
       internal.state <- `Idle;
       let write_done_callback = internal.write_done_callback in
-      clean_up_writer_fields internal;
       begin match internal.write_kind with
       | `Data ->
-        let buffer = internal.write_buffer in
-        internal.write_buffer <- dummy_buffer;
-        data buffer internal.write_offset internal.write_length;
+        let buffer = internal.write_buffer
+        and offset = internal.write_offset
+        and length = internal.write_length in
+        clean_up_writer_fields internal;
+        data buffer offset length;
         write_done_callback ();
       | `Flush ->
+        clean_up_writer_fields internal;
         flush ();
         write_done_callback ();
       | `Exn ->
         (* TODO Real exception. *)
+        clean_up_writer_fields internal;
         exn Exit;
         write_done_callback ();
       end
