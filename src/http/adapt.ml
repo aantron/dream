@@ -6,6 +6,7 @@
 
 
 module Dream = Dream__pure.Inmost
+module Stream = Dream__pure.Stream
 
 
 
@@ -19,29 +20,24 @@ let address_to_string : Unix.sockaddr -> string = function
 (* TODO Write a test simulating client exit during SSE; this was killing the
    server at some point. *)
 (* TODO LATER Will also need to monitor buffer accumulation and use flush. *)
-(* TODO Rewrite using Dream.next. *)
 let forward_body_general
     (response : Dream.response)
-    (write_string : ?off:int -> ?len:int -> string -> unit)
-    (write_buffer : ?off:int -> ?len:int -> Dream.buffer -> unit)
+    (_write_string : ?off:int -> ?len:int -> string -> unit)
+    (write_buffer : ?off:int -> ?len:int -> Stream.buffer -> unit)
     http_flush
     close =
 
   let rec send () =
-    response
-    |> Dream.next
-      ~buffer
-      ~string
-      ~flush
+    Dream.body_stream response
+    |> fun stream -> Stream.next
+      stream
+      ~data
       ~close
+      ~flush
       ~exn:ignore
 
-  and buffer chunk off len =
+  and data chunk off len =
     write_buffer ~off ~len chunk;
-    send ()
-
-  and string chunk off len =
-    write_string ~off ~len chunk;
     send ()
 
   and flush () =

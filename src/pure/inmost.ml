@@ -8,8 +8,6 @@
 include Method
 include Status
 
-type buffer = Body.bigstring
-
 (* Used for converting the stream interface of [multipart_form] into the pull
    interface of Dream.
 
@@ -51,7 +49,7 @@ and response = outgoing message
 and 'a message = {
   specific : 'a;
   headers : (string * string) list;
-  body : Body.body_cell;
+  body : Stream.stream;
   locals : Scope.t;
   first : 'a message;
   last : 'a message ref;
@@ -291,13 +289,13 @@ let cookie name request =
   with Not_found -> None *)
 
 let body message =
-  Body.body message.body
+  Stream.body message.body
 
 let read message =
-  Body.read message.body
+  Stream.read message.body
 
-let next ~buffer ?string ?flush ~close ~exn message =
-  Body.next ~bigstring:buffer ?string ?flush ~close ~exn message.body
+let body_stream message =
+  message.body
 
 (* Create a fresh ref. The reason this field has a ref is because it might get
    replaced when a body is forced read. That's not what's happening here - we
@@ -307,36 +305,57 @@ let next ~buffer ?string ?flush ~close ~exn message =
 let with_body body message =
   let body =
     if String.length body = 0 then
-      `Empty
+      Stream.empty
     else
-      `String body
+      Stream.string body
   in
-  update {message with body = ref body}
+  update {message with body}
 
 let with_stream message =
-  update {message with body = ref (`Stream (ref `Idle))}
+  update {message with body = Stream.pipe ()}
 
-(* TODO Can also change order of arguments on Body.write, though it's
-   internal. *)
 let write message chunk =
-  Body.write chunk message.body
+  let promise, resolver = Lwt.wait () in
+  let length = String.length chunk in
+  let buffer = Bigstringaf.of_string ~off:0 ~len:length chunk in
+  (* TODO Better handling of close? But it can't even occur with http/af. *)
+  Stream.write
+    buffer 0 length
+    (Lwt.wakeup_later resolver)
+    (fun () -> Lwt.wakeup_later_exn resolver End_of_file)
+    (Lwt.wakeup_later_exn resolver)
+    message.body;
+  promise
 
 let write_buffer ?(offset = 0) ?length message chunk =
+  let promise, resolver = Lwt.wait () in
   let length =
     match length with
     | Some length -> length
     | None -> Bigstringaf.length chunk - offset
   in
-  Body.write_bigstring chunk offset length message.body
+  (* TODO Proper handling of close. *)
+  Stream.write
+    chunk offset length
+    (Lwt.wakeup_later resolver)
+    (Lwt.wakeup_later resolver)
+    (Lwt.wakeup_later_exn resolver)
+    message.body;
+  promise
 
+(* TODO How are remote closes actually handled? There is no way for http/af to
+   report them to the user application through the writer. *)
 let flush message =
-  Body.flush message.body
+  let promise, resolver = Lwt.wait () in
+  Stream.flush
+    (Lwt.wakeup_later resolver)
+    (fun () -> Lwt.wakeup_later_exn resolver End_of_file)
+    (Lwt.wakeup_later_exn resolver)
+    message.body;
+  promise
 
 let close_stream message =
-  Body.close_stream message.body
-
-let has_body message =
-  Body.has_body message.body
+  Stream.close message.body
 
 (* TODO Rename. *)
 let is_websocket response =
@@ -395,7 +414,8 @@ let request_from_http
     ~method_
     ~target
     ~version
-    ~headers =
+    ~headers
+    body =
 
   let path, query = Formats.split_target target in
 
@@ -412,7 +432,7 @@ let request_from_http
       upload = initial_multipart_state ();
     };
     headers;
-    body = ref (`Stream (ref `Idle));
+    body;
     locals = Scope.empty;
     first = request; (* TODO LATER What OCaml version is required for this? *)
     last = ref request;
@@ -438,13 +458,6 @@ let request
      and then immediately replace it. *)
   let path, query = Formats.split_target target in
 
-  let body =
-    if String.length body = 0 then
-      `Empty
-    else
-      `String body
-  in
-
   let rec request = {
     specific = {
       (* TODO Is there a better fake error handler? Maybe this function should
@@ -460,7 +473,7 @@ let request
       upload = initial_multipart_state ();
     };
     headers;
-    body = ref body;
+    body = Stream.string body;
     locals = Scope.empty;
     first = request;
     last = ref request;
@@ -481,20 +494,13 @@ let response
     | None, Some code -> int_to_status code
   in
 
-  let body =
-    if String.length body = 0 then
-      `Empty
-    else
-      `String body
-  in
-
   let rec response = {
     specific = {
       status;
       websocket = None;
     };
     headers;
-    body = ref body;
+    body = Stream.string body;
     locals = Scope.empty;
     first = response;
     last = ref response;

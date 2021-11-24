@@ -6,6 +6,7 @@
 
 
 module Dream = Dream__pure.Inmost
+module Stream = Dream__pure.Stream
 
 
 
@@ -158,32 +159,21 @@ let wrap_handler
 
     let body =
       Httpaf.Reqd.request_body conn in
-
-    let request : Dream.request =
-      Dream.request_from_http ~app ~client ~method_ ~target ~version ~headers in
-
-    (* TODO Could use a private variant of flush that causes no app-observable
-       side-effects. *)
-    (* TODO It would still help to have a fully pull-based writing API. *)
-    (* TODO The whole body-reading model seems to be broken. How does one detect
-       an exception? *)
-    (* The request body stream. *)
-    Lwt.async begin fun () ->
-      let%lwt () = Dream.flush request in
-      let on_eof () = Dream.close_stream request |> ignore in
-
-      let rec loop () =
+    (* TODO Review per-chunk allocations. *)
+    (* TODO Should the stream be auto-closed? It doesn't even have a closed
+       state. The whole thing is just a wrapper for whatever the http/af
+       behavior is. *)
+    let body =
+      Stream.read_only (fun ~data ~close ~flush:_ ~exn:_ ->
         Httpaf.Body.Reader.schedule_read
           body
-          ~on_eof
-          ~on_read:(fun buffer ~off ~len ->
-            Lwt.on_success
-              (Dream__pure.Body.write_bigstring buffer off len request.body)
-              loop)
-      in
-      loop ();
-      Lwt.return_unit
-    end;
+          ~on_eof:close
+          ~on_read:(fun buffer ~off ~len -> data buffer off len))
+    in
+
+    let request : Dream.request =
+      Dream.request_from_http
+        ~app ~client ~method_ ~target ~version ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -313,26 +303,17 @@ let wrap_handler_h2
 
     let body =
       H2.Reqd.request_body conn in
-
-    let request : Dream.request =
-      Dream.request_from_http ~app ~client ~method_ ~target ~version ~headers in
-
-    Lwt.async begin fun () ->
-      let%lwt () = Dream.flush request in
-      let on_eof () = Dream.close_stream request |> ignore in
-
-      let rec loop () =
+    let body =
+      Stream.read_only (fun ~data ~close ~flush:_ ~exn:_ ->
         H2.Body.schedule_read
           body
-          ~on_eof
-          ~on_read:(fun buffer ~off ~len ->
-            Dream__pure.Body.write_bigstring buffer off len request.body
-            |> ignore;
-            loop ())
-      in
-      loop ();
-      Lwt.return_unit
-    end;
+          ~on_eof:close
+          ~on_read:(fun buffer ~off ~len -> data buffer off len))
+    in
+
+    let request : Dream.request =
+      Dream.request_from_http
+        ~app ~client ~method_ ~target ~version ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This

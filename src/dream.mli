@@ -676,8 +676,7 @@ val all_cookies : request -> (string * string) list
 (** {1 Bodies} *)
 
 val body : 'a message -> string promise
-(** Retrieves the entire body. Retains a reference to the body, so {!Dream.body}
-    can be used multiple times. See example
+(** Retrieves the entire body. See example
     {{:https://github.com/aantron/dream/tree/master/example/6-echo#files}
     [6-echo]}. *)
 
@@ -723,13 +722,20 @@ type buffer =
     - {{:https://github.com/mirage/ocaml-cstruct/blob/9a8b9a79bdfa2a1b8455bc26689e0228cc6fac8e/lib/cstruct.mli#L139}
       [Cstruct.buffer]} in Cstruct. *)
 
+(* TODO What should the body stream retrieval function be called? *)
+(* TODO Remove old functions from signature. *)
+type stream
+
+val body_stream : 'a message -> stream
+
+(* TODO Probably even close can be made optional. exn can be made optional. *)
+(* TODO Argument order? *)
 val next :
-  buffer:(buffer -> int -> int -> unit) ->
-  (* ?string:(string -> int -> int -> unit) ->
-  ?flush:(unit -> unit) -> *)
+  stream ->
+  data:(buffer -> int -> int -> unit) ->
   close:(unit -> unit) ->
+  flush:(unit -> unit) ->
   exn:(exn -> unit) ->
-  request ->
     unit
 (** Waits for the next stream event, and calls:
 

@@ -11,11 +11,8 @@ struct
   include Dream__pure.Status
 end
 
+include Dream__pure.Stream
 include Dream__pure.Inmost
-
-(* Eliminate optional arguments from the public interface for now. *)
-let next ~buffer ~close ~exn request =
-  next ~buffer ~close ~exn request
 
 include Dream__middleware.Log
 include Dream__middleware.Log.Make (Ptime_clock)
