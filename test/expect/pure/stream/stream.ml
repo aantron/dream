@@ -185,9 +185,26 @@ let%expect_test _ =
 
 
 
-(* TODO: Test:
+(* Pipe: interactions between flush and close. *)
 
-- Interactions between writers (including flush) and close. This will benefit
-  from clarifying the writers' callbacks.
-- The higher-level reading helpers.
-*)
+let%expect_test _ =
+  let stream = Stream.pipe () in
+  flush_and_dump stream;
+  Stream.close stream;
+  flush_and_dump stream;
+  [%expect {|
+    flush: close
+    flush: close |}]
+
+
+
+(* Pipe: interactions between write and close. *)
+
+let%expect_test _ =
+  let stream = Stream.pipe () in
+  write_and_dump stream buffer 0 3;
+  Stream.close stream;
+  write_and_dump stream buffer 0 3;
+  [%expect {|
+    write: close
+    write: close |}]

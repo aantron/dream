@@ -176,7 +176,7 @@ let dummy_buffer =
   Bigstringaf.create 0
 
 let dummy_read_data_callback _buffer _offset _length =
-  ()
+  () [@coverage off]
 
 let clean_up_reader_fields pipe =
   pipe.read_data_callback <- dummy_read_data_callback;
