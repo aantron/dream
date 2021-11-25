@@ -34,12 +34,15 @@ type stream = {
   close : unit -> unit;
 }
 
-(* TODO Raise some exception when writes are attempted. *)
 let read_only ~read ~close =
   {
     read;
-    write = (fun _buffer _offset _length ~ok:_ ~close:_ -> ());
-    flush = (fun ~ok:_ ~close:_ -> ());
+    write =
+      (fun _buffer _offset _length ~ok:_ ~close:_ ->
+        raise (Failure "write to a read-only stream"));
+    flush =
+      (fun ~ok:_ ~close:_ ->
+        raise (Failure "flush of a read-only stream"));
     close;
   }
 
@@ -209,7 +212,7 @@ let pipe () =
       internal.read_close_callback <- close;
       internal.read_flush_callback <- flush
     | `Reader_waiting ->
-      raise (Failure "Stream read: the previous read has not completed")
+      raise (Failure "stream read: the previous read has not completed")
     | `Writer_waiting ->
       internal.state <- `Idle;
       let write_ok_callback = internal.write_ok_callback in
@@ -247,7 +250,7 @@ let pipe () =
       read_data_callback buffer offset length;
       ok ()
     | `Writer_waiting ->
-      raise (Failure "Stream write: the previous write has not completed")
+      raise (Failure "stream write: the previous write has not completed")
     | `Closed ->
       close ()
   in
@@ -284,7 +287,7 @@ let pipe () =
       read_flush_callback ();
       ok ()
     | `Writer_waiting ->
-      raise (Failure "Stream flush: the previous write has not completed")
+      raise (Failure "stream flush: the previous write has not completed")
     | `Closed ->
       close ()
   in
