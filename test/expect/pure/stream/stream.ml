@@ -22,9 +22,6 @@ let read_and_dump stream =
     ~flush:(fun () ->
       print_endline "flush")
 
-    ~exn:(fun _ ->
-      print_endline "exn")
-
 
 
 (* Read-only streams. *)
@@ -123,12 +120,12 @@ let%expect_test _ =
   read_and_dump stream;
   print_endline "checkpoint 1";
   (* TODO Check the callbacks are called. *)
-  Stream.flush ignore ignore ignore stream;
-  Stream.flush ignore ignore ignore stream;
+  Stream.flush ignore ignore stream;
+  Stream.flush ignore ignore stream;
   print_endline "checkpoint 2";
   read_and_dump stream;
-  Stream.flush ignore ignore ignore stream;
-  try Stream.flush ignore ignore ignore stream
+  Stream.flush ignore ignore stream;
+  try Stream.flush ignore ignore stream
   with Failure _ as exn -> print_endline (Printexc.to_string exn);
   [%expect {|
     checkpoint 1
@@ -149,12 +146,12 @@ let%expect_test _ =
   read_and_dump stream;
   print_endline "checkpoint 1";
   (* TODO Check the callbacks are called. *)
-  Stream.write buffer 0 3 ignore ignore ignore stream;
-  Stream.write buffer 1 1 ignore ignore ignore stream;
+  Stream.write buffer 0 3 ignore ignore stream;
+  Stream.write buffer 1 1 ignore ignore stream;
   print_endline "checkpoint 2";
   read_and_dump stream;
-  Stream.write buffer 0 3 ignore ignore ignore stream;
-  try Stream.write buffer 0 3 ignore ignore ignore stream;
+  Stream.write buffer 0 3 ignore ignore stream;
+  try Stream.write buffer 0 3 ignore ignore stream;
   with Failure _ as exn -> print_endline (Printexc.to_string exn);
   [%expect {|
     checkpoint 1

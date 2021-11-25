@@ -163,7 +163,7 @@ let wrap_handler
     (* TODO Should the stream be auto-closed? It doesn't even have a closed
        state. The whole thing is just a wrapper for whatever the http/af
        behavior is. *)
-    let read ~data ~close ~flush:_ ~exn:_ =
+    let read ~data ~close ~flush:_ =
       Httpaf.Body.Reader.schedule_read
         body
         ~on_eof:close
@@ -306,7 +306,7 @@ let wrap_handler_h2
 
     let body =
       H2.Reqd.request_body conn in
-    let read ~data ~close ~flush:_ ~exn:_ =
+    let read ~data ~close ~flush:_ =
       H2.Body.schedule_read
         body
         ~on_eof:close

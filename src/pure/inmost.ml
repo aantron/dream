@@ -328,7 +328,6 @@ let write message chunk =
     buffer 0 length
     (Lwt.wakeup_later resolver)
     (fun () -> Lwt.wakeup_later_exn resolver End_of_file)
-    (Lwt.wakeup_later_exn resolver)
     message.body;
   promise
 
@@ -344,7 +343,6 @@ let write_buffer ?(offset = 0) ?length message chunk =
     chunk offset length
     (Lwt.wakeup_later resolver)
     (Lwt.wakeup_later resolver)
-    (Lwt.wakeup_later_exn resolver)
     message.body;
   promise
 
@@ -355,7 +353,6 @@ let flush message =
   Stream.flush
     (Lwt.wakeup_later resolver)
     (fun () -> Lwt.wakeup_later_exn resolver End_of_file)
-    (Lwt.wakeup_later_exn resolver)
     message.body;
   promise
 

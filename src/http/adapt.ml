@@ -34,7 +34,6 @@ let forward_body_general
       ~data
       ~close
       ~flush
-      ~exn:ignore
 
   and data chunk off len =
     write_buffer ~off ~len chunk;

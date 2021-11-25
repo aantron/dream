@@ -15,7 +15,6 @@ type read =
   data:(buffer -> int -> int -> unit) ->
   close:(unit -> unit) ->
   flush:(unit -> unit) ->
-  exn:(exn -> unit) ->
     unit
 
 type stream = {
@@ -23,18 +22,14 @@ type stream = {
     data:(buffer -> int -> int -> unit) ->
     close:(unit -> unit) ->
     flush:(unit -> unit) ->
-    exn:(exn -> unit) ->
       unit;
 
   (* TODO Needs continuation arguments. Writer feedback is ok, exception,
      closed. Ok should probably carry an int. *)
   (* TODO Continuation labels? *)
   (* TODO Really review these continuations. *)
-  write :
-    buffer -> int -> int ->
-    (unit -> unit) -> (unit -> unit) -> (exn -> unit) ->
-      unit;
-  flush : (unit -> unit) -> (unit -> unit) -> (exn -> unit) -> unit;
+  write : buffer -> int -> int -> (unit -> unit) -> (unit -> unit) -> unit;
+  flush : (unit -> unit) -> (unit -> unit) -> unit;
 
   close : unit -> unit;
 }
@@ -43,14 +38,14 @@ type stream = {
 let read_only ~read ~close =
   {
     read;
-    write = (fun _buffer _offset _length _done _close _exn -> ());
-    flush = (fun _done _close _exn -> ());
+    write = (fun _buffer _offset _length _done _close -> ());
+    flush = (fun _done _close -> ());
     close;
   }
 
 let empty =
   read_only
-    ~read:(fun ~data:_ ~close ~flush:_ ~exn:_ -> close ())
+    ~read:(fun ~data:_ ~close ~flush:_ -> close ())
     ~close:ignore
 
 (* TODO This shows the awkwardness in string-to-string body reading. *)
@@ -62,7 +57,7 @@ let string the_string =
        the stream is closed, making the memory available to the GC. *)
     let string_ref = ref (Some the_string) in
 
-    let read ~data ~close ~flush:_ ~exn:_ =
+    let read ~data ~close ~flush:_ =
       match !string_ref with
       | Some stored_string ->
         string_ref := None;
@@ -79,8 +74,8 @@ let string the_string =
     read_only ~read ~close
   end
 
-let read stream ~data ~close ~flush ~exn =
-  stream.read ~data ~close ~flush ~exn
+let read stream ~data ~close ~flush =
+  stream.read ~data ~close ~flush
 
 (* TODO Can probably save promise allocation if create a separate looping
    function. *)
@@ -104,8 +99,6 @@ let rec read_convenience stream =
           next_promise
           (Lwt.wakeup_later resolver)
           (Lwt.wakeup_later_exn resolver))
-
-      ~exn:(Lwt.wakeup_later_exn resolver)
   end;
 
   promise
@@ -139,9 +132,6 @@ let read_until_close stream =
         |> Lwt.wakeup_later resolver)
 
       ~flush:loop
-
-      (* TODO Make an effort to eagerly release the buffer? *)
-      ~exn:(Lwt.wakeup_later_exn resolver)
   in
   loop ();
 
@@ -150,11 +140,11 @@ let read_until_close stream =
 let close stream =
   stream.close ()
 
-let write buffer offset length done_ close exn stream =
-  stream.write buffer offset length done_ close exn
+let write buffer offset length done_ close stream =
+  stream.write buffer offset length done_ close
 
-let flush done_ close exn stream =
-  stream.flush done_ close exn
+let flush done_ close stream =
+  stream.flush done_ close
 
 type pipe = {
   mutable state : [
@@ -167,19 +157,16 @@ type pipe = {
   mutable read_data_callback : buffer -> int -> int -> unit;
   mutable read_close_callback : unit -> unit;
   mutable read_flush_callback : unit -> unit;
-  mutable read_exn_callback : exn -> unit;
 
   mutable write_kind : [
     | `Data
     | `Flush
-    | `Exn
   ];
   mutable write_buffer : buffer;
   mutable write_offset : int;
   mutable write_length : int;
   mutable write_done_callback : unit -> unit;
   mutable write_close_callback : unit -> unit;
-  mutable write_exn_callback : exn -> unit;
 }
 
 let dummy_buffer =
@@ -191,14 +178,12 @@ let dummy_read_data_callback _buffer _offset _length =
 let clean_up_reader_fields pipe =
   pipe.read_data_callback <- dummy_read_data_callback;
   pipe.read_close_callback <- ignore;
-  pipe.read_flush_callback <- ignore;
-  pipe.read_exn_callback <- ignore
+  pipe.read_flush_callback <- ignore
 
 let clean_up_writer_fields pipe =
   pipe.write_buffer <- dummy_buffer;
   pipe.write_done_callback <- ignore;
-  pipe.write_close_callback <- ignore;
-  pipe.write_exn_callback <- ignore
+  pipe.write_close_callback <- ignore
 
 let pipe () =
   let internal = {
@@ -207,7 +192,6 @@ let pipe () =
     read_data_callback = dummy_read_data_callback;
     read_close_callback = ignore;
     read_flush_callback = ignore;
-    read_exn_callback = ignore;
 
     write_kind = `Data;
     write_buffer = dummy_buffer;
@@ -215,17 +199,15 @@ let pipe () =
     write_length = 0;
     write_done_callback = ignore;
     write_close_callback = ignore;
-    write_exn_callback = ignore;
   } in
 
-  let read ~data ~close ~flush ~exn =
+  let read ~data ~close ~flush =
     match internal.state with
     | `Idle ->
       internal.state <- `Reader_waiting;
       internal.read_data_callback <- data;
       internal.read_close_callback <- close;
-      internal.read_flush_callback <- flush;
-      internal.read_exn_callback <- exn
+      internal.read_flush_callback <- flush
     | `Reader_waiting ->
       raise (Failure "Stream read: the previous read has not completed")
     | `Writer_waiting ->
@@ -238,23 +220,18 @@ let pipe () =
         and length = internal.write_length in
         clean_up_writer_fields internal;
         data buffer offset length;
-        write_done_callback ();
+        write_done_callback ()
       | `Flush ->
         clean_up_writer_fields internal;
         flush ();
-        write_done_callback ();
-      | `Exn ->
-        (* TODO Real exception. *)
-        clean_up_writer_fields internal;
-        exn Exit;
-        write_done_callback ();
+        write_done_callback ()
       end
     | `Closed ->
       close ()
   in
 
   (* TODO Callbacks could definitely use labels, based on usage. *)
-  let write buffer offset length done_ close exn =
+  let write buffer offset length done_ close =
     match internal.state with
     | `Idle ->
       internal.state <- `Writer_waiting;
@@ -263,8 +240,7 @@ let pipe () =
       internal.write_offset <- offset;
       internal.write_length <- length;
       internal.write_done_callback <- done_;
-      internal.write_close_callback <- close;
-      internal.write_exn_callback <- exn
+      internal.write_close_callback <- close
     | `Reader_waiting ->
       internal.state <- `Idle;
       let read_data_callback = internal.read_data_callback in
@@ -295,14 +271,13 @@ let pipe () =
       ()
   in
 
-  let flush done_ close exn =
+  let flush done_ close =
     match internal.state with
     | `Idle ->
       internal.state <- `Writer_waiting;
       internal.write_kind <- `Flush;
       internal.write_done_callback <- done_;
-      internal.write_close_callback <- close;
-      internal.write_exn_callback <- exn
+      internal.write_close_callback <- close
     | `Reader_waiting ->
       internal.state <- `Idle;
       let read_flush_callback = internal.read_flush_callback in

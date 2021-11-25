@@ -735,7 +735,6 @@ val next :
   data:(buffer -> int -> int -> unit) ->
   close:(unit -> unit) ->
   flush:(unit -> unit) ->
-  exn:(exn -> unit) ->
     unit
 (** Waits for the next stream event, and calls:
 

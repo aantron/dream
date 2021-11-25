@@ -17,7 +17,6 @@ type read =
   data:(buffer -> int -> int -> unit) ->
   close:(unit -> unit) ->
   flush:(unit -> unit) ->
-  exn:(exn -> unit) ->
     unit
 
 val read_only : read:read -> close:(unit -> unit) -> stream
@@ -33,7 +32,5 @@ val read_until_close : stream -> string promise
 
 (* TODO Clarify these signatures. *)
 val write :
-  buffer -> int -> int ->
-  (unit -> unit) -> (unit -> unit) -> (exn -> unit) -> stream ->
-    unit
-val flush : (unit -> unit) -> (unit -> unit) -> (exn -> unit) -> stream -> unit
+  buffer -> int -> int -> (unit -> unit) -> (unit -> unit) -> stream -> unit
+val flush : (unit -> unit) -> (unit -> unit) -> stream -> unit
