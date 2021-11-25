@@ -13,22 +13,21 @@ type 'a promise =
 
 type stream
 
-type reader =
+type read =
   data:(buffer -> int -> int -> unit) ->
   close:(unit -> unit) ->
   flush:(unit -> unit) ->
   exn:(exn -> unit) ->
     unit
 
-val read_only : reader -> stream
+val read_only : read -> stream
 val empty : stream
 val string : string -> stream
 val pipe : unit -> stream
 
-(* TODO Rename. *)
-val next : stream -> reader
-val read : stream -> string option promise
-val body : stream -> string promise
+val read : stream -> read
+val read_convenience : stream -> string option promise
+val read_until_close : stream -> string promise
 
 (* TODO Wrong signature. *)
 val close : stream -> unit promise

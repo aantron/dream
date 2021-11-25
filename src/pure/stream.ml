@@ -11,7 +11,7 @@ type buffer =
 type 'a promise =
   'a Lwt.t
 
-type reader =
+type read =
   data:(buffer -> int -> int -> unit) ->
   close:(unit -> unit) ->
   flush:(unit -> unit) ->
@@ -19,7 +19,7 @@ type reader =
     unit
 
 type stream = {
-  next :
+  read :
     data:(buffer -> int -> int -> unit) ->
     close:(unit -> unit) ->
     flush:(unit -> unit) ->
@@ -39,11 +39,10 @@ type stream = {
   close : (unit -> unit) -> unit;
 }
 
-(* TODO Probably rename next throughout. *)
 (* TODO Raise some exception when writes are attempted. *)
-let read_only next =
+let read_only read =
   {
-    next;
+    read;
     write = (fun _buffer _offset _length _done _close _exn -> ());
     flush = (fun _done _close _exn -> ());
     close = (fun _done -> ());
@@ -70,16 +69,16 @@ let string s =
     end
   end
 
-let next stream ~data ~close ~flush ~exn =
-  stream.next ~data ~close ~flush ~exn
+let read stream ~data ~close ~flush ~exn =
+  stream.read ~data ~close ~flush ~exn
 
 (* TODO Can probably save promise allocation if create a separate looping
    function. *)
-let rec read stream =
+let rec read_convenience stream =
   let promise, resolver = Lwt.wait () in
 
   begin
-    stream.next
+    stream.read
       ~data:(fun buffer offset length ->
         Bigstringaf.sub buffer ~off:offset ~len:length
         |> Bigstringaf.to_string
@@ -90,7 +89,7 @@ let rec read stream =
         Lwt.wakeup_later resolver None)
 
       ~flush:(fun () ->
-        let next_promise = read stream in
+        let next_promise = read_convenience stream in
         Lwt.on_any
           next_promise
           (Lwt.wakeup_later resolver)
@@ -101,13 +100,13 @@ let rec read stream =
 
   promise
 
-let body stream =
+let read_until_close stream =
   let promise, resolver = Lwt.wait () in
   let length = ref 0 in
   let buffer = ref (Bigstringaf.create 4096) in
 
   let rec loop () =
-    stream.next
+    stream.read
       ~data:(fun chunk offset chunk_length ->
         let new_length = !length + chunk_length in
 
@@ -211,7 +210,7 @@ let pipe () =
     write_exn_callback = ignore;
   } in
 
-  let next ~data ~close ~flush ~exn =
+  let read ~data ~close ~flush ~exn =
     match internal.state with
     | `Idle ->
       internal.state <- `Reader_waiting;
@@ -311,4 +310,4 @@ let pipe () =
       close ()
   in
 
-  {next; write; flush; close}
+  {read; write; flush; close}

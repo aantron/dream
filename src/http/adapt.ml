@@ -29,7 +29,7 @@ let forward_body_general
 
   let rec send () =
     Dream.body_stream response
-    |> fun stream -> Stream.next
+    |> fun stream -> Stream.read
       stream
       ~data
       ~close

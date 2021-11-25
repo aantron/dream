@@ -289,13 +289,18 @@ let cookie name request =
   with Not_found -> None *)
 
 let body message =
-  Stream.body message.body
+  Stream.read_until_close message.body
 
 let read message =
-  Stream.read message.body
+  Stream.read_convenience message.body
 
 let body_stream message =
   message.body
+
+(* TODO Pending the dream.mli interface reorganization for the new stream
+   API. *)
+let next =
+  Stream.read
 
 (* Create a fresh ref. The reason this field has a ref is because it might get
    replaced when a body is forced read. That's not what's happening here - we

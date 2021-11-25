@@ -10,7 +10,7 @@ module Stream = Dream__pure.Stream
 
 
 let read_and_dump stream =
-  Stream.next stream
+  Stream.read stream
     ~data:(fun buffer offset length ->
       print_string "data: ";
       Bigstringaf.substring buffer ~off:offset ~len:length
