@@ -12,21 +12,33 @@ type 'a promise =
   'a Lwt.t
 
 type read =
-  data:(buffer -> int -> int -> unit) ->
+  data:(buffer -> int -> int -> bool -> unit) ->
   close:(unit -> unit) ->
   flush:(unit -> unit) ->
+  ping:(unit -> unit) ->
+  pong:(unit -> unit) ->
     unit
 
 type stream = {
   read : read;
 
   write :
-    buffer -> int -> int ->
+    buffer -> int -> int -> bool ->
     ok:(unit -> unit) ->
     close:(unit -> unit) ->
       unit;
 
   flush :
+    ok:(unit -> unit) ->
+    close:(unit -> unit) ->
+      unit;
+
+  ping :
+    ok:(unit -> unit) ->
+    close:(unit -> unit) ->
+      unit;
+
+  pong :
     ok:(unit -> unit) ->
     close:(unit -> unit) ->
       unit;
@@ -38,17 +50,23 @@ let read_only ~read ~close =
   {
     read;
     write =
-      (fun _buffer _offset _length ~ok:_ ~close:_ ->
+      (fun _buffer _offset _length _fin ~ok:_ ~close:_ ->
         raise (Failure "write to a read-only stream"));
     flush =
       (fun ~ok:_ ~close:_ ->
         raise (Failure "flush of a read-only stream"));
+    ping =
+      (fun ~ok:_ ~close:_ ->
+        raise (Failure "ping on a read-only stream"));
+    pong =
+      (fun ~ok:_ ~close:_ ->
+        raise (Failure "pong on a read-only stream"));
     close;
   }
 
 let empty =
   read_only
-    ~read:(fun ~data:_ ~close ~flush:_ -> close ())
+    ~read:(fun ~data:_ ~close ~flush:_ ~ping:_ ~pong:_ -> close ())
     ~close:ignore
 
 (* TODO This shows the awkwardness in string-to-string body reading. *)
@@ -60,12 +78,14 @@ let string the_string =
        the stream is closed, making the memory available to the GC. *)
     let string_ref = ref (Some the_string) in
 
-    let read ~data ~close ~flush:_ =
+    let read ~data ~close ~flush:_ ~ping:_ ~pong:_ =
       match !string_ref with
       | Some stored_string ->
         string_ref := None;
         let length = String.length stored_string in
-        data (Bigstringaf.of_string ~off:0 ~len:length stored_string) 0 length
+        data
+          (Bigstringaf.of_string ~off:0 ~len:length stored_string)
+          0 length true
       | None ->
         close ()
     in
@@ -80,14 +100,12 @@ let string the_string =
 let read stream ~data ~close ~flush =
   stream.read ~data ~close ~flush
 
-(* TODO Can probably save promise allocation if create a separate looping
-   function. *)
-let rec read_convenience stream =
+let read_convenience stream =
   let promise, resolver = Lwt.wait () in
 
-  begin
+  let rec loop () =
     stream.read
-      ~data:(fun buffer offset length ->
+      ~data:(fun buffer offset length _fin ->
         Bigstringaf.sub buffer ~off:offset ~len:length
         |> Bigstringaf.to_string
         |> Option.some
@@ -96,13 +114,17 @@ let rec read_convenience stream =
       ~close:(fun () ->
         Lwt.wakeup_later resolver None)
 
-      ~flush:(fun () ->
-        let next_promise = read_convenience stream in
-        Lwt.on_any
-          next_promise
-          (Lwt.wakeup_later resolver)
-          (Lwt.wakeup_later_exn resolver))
-  end;
+      ~flush:loop
+
+      (* TODO This requires reordering the implementations and taking a harder
+         look at all these functions.
+         Upon a ping event, assume that we are on a read-write, duplex WebSocket
+         stream, and send a pong. *)
+      ~ping:loop
+
+      ~pong:loop
+  in
+  loop ();
 
   promise
 
@@ -113,7 +135,7 @@ let read_until_close stream =
 
   let rec loop () =
     stream.read
-      ~data:(fun chunk offset chunk_length ->
+      ~data:(fun chunk offset chunk_length _fin ->
         let new_length = !length + chunk_length in
 
         if new_length > Bigstringaf.length !buffer then begin
@@ -135,6 +157,12 @@ let read_until_close stream =
         |> Lwt.wakeup_later resolver)
 
       ~flush:loop
+
+      (* TODO As with the previous function, should respond to a ping with a
+         pong. *)
+      ~ping:loop
+
+      ~pong:loop
   in
   loop ();
 
@@ -143,11 +171,17 @@ let read_until_close stream =
 let close stream =
   stream.close ()
 
-let write stream buffer offset length ~ok ~close =
-  stream.write buffer offset length ~ok ~close
+let write stream buffer offset length fin ~ok ~close =
+  stream.write buffer offset length fin ~ok ~close
 
 let flush stream ~ok ~close =
   stream.flush ~ok ~close
+
+let ping stream ~ok ~close =
+  stream.ping ~ok ~close
+
+let pong stream ~ok ~close =
+  stream.pong ~ok ~close
 
 type pipe = {
   mutable state : [
@@ -157,17 +191,22 @@ type pipe = {
     | `Closed
   ];
 
-  mutable read_data_callback : buffer -> int -> int -> unit;
+  mutable read_data_callback : buffer -> int -> int -> bool -> unit;
   mutable read_close_callback : unit -> unit;
   mutable read_flush_callback : unit -> unit;
+  mutable read_ping_callback : unit -> unit;
+  mutable read_pong_callback : unit -> unit;
 
   mutable write_kind : [
     | `Data
     | `Flush
+    | `Ping
+    | `Pong
   ];
   mutable write_buffer : buffer;
   mutable write_offset : int;
   mutable write_length : int;
+  mutable write_fin : bool;
   mutable write_ok_callback : unit -> unit;
   mutable write_close_callback : unit -> unit;
 }
@@ -175,13 +214,15 @@ type pipe = {
 let dummy_buffer =
   Bigstringaf.create 0
 
-let dummy_read_data_callback _buffer _offset _length =
+let dummy_read_data_callback _buffer _offset _length _fin =
   () [@coverage off]
 
 let clean_up_reader_fields pipe =
   pipe.read_data_callback <- dummy_read_data_callback;
   pipe.read_close_callback <- ignore;
-  pipe.read_flush_callback <- ignore
+  pipe.read_flush_callback <- ignore;
+  pipe.read_ping_callback <- ignore;
+  pipe.read_pong_callback <- ignore
 
 let clean_up_writer_fields pipe =
   pipe.write_buffer <- dummy_buffer;
@@ -195,45 +236,48 @@ let pipe () =
     read_data_callback = dummy_read_data_callback;
     read_close_callback = ignore;
     read_flush_callback = ignore;
+    read_ping_callback = ignore;
+    read_pong_callback = ignore;
 
     write_kind = `Data;
     write_buffer = dummy_buffer;
     write_offset = 0;
     write_length = 0;
+    write_fin = false;
     write_ok_callback = ignore;
     write_close_callback = ignore;
   } in
 
-  let read ~data ~close ~flush =
+  let read ~data ~close ~flush ~ping ~pong =
     match internal.state with
     | `Idle ->
       internal.state <- `Reader_waiting;
       internal.read_data_callback <- data;
       internal.read_close_callback <- close;
-      internal.read_flush_callback <- flush
+      internal.read_flush_callback <- flush;
+      internal.read_ping_callback <- ping;
+      internal.read_pong_callback <- pong;
     | `Reader_waiting ->
       raise (Failure "stream read: the previous read has not completed")
     | `Writer_waiting ->
       internal.state <- `Idle;
       let write_ok_callback = internal.write_ok_callback in
+      let buffer = internal.write_buffer in
+      clean_up_writer_fields internal;
       begin match internal.write_kind with
       | `Data ->
-        let buffer = internal.write_buffer
-        and offset = internal.write_offset
-        and length = internal.write_length in
-        clean_up_writer_fields internal;
-        data buffer offset length;
-        write_ok_callback ()
-      | `Flush ->
-        clean_up_writer_fields internal;
-        flush ();
-        write_ok_callback ()
-      end
+        data
+          buffer internal.write_offset internal.write_length internal.write_fin
+      | `Flush -> flush ()
+      | `Ping -> ping ()
+      | `Pong -> pong ()
+      end;
+      write_ok_callback ()
     | `Closed ->
       close ()
   in
 
-  let write buffer offset length ~ok ~close =
+  let write buffer offset length fin ~ok ~close =
     match internal.state with
     | `Idle ->
       internal.state <- `Writer_waiting;
@@ -241,13 +285,14 @@ let pipe () =
       internal.write_buffer <- buffer;
       internal.write_offset <- offset;
       internal.write_length <- length;
+      internal.write_fin <- fin;
       internal.write_ok_callback <- ok;
       internal.write_close_callback <- close
     | `Reader_waiting ->
       internal.state <- `Idle;
       let read_data_callback = internal.read_data_callback in
       clean_up_reader_fields internal;
-      read_data_callback buffer offset length;
+      read_data_callback buffer offset length fin;
       ok ()
     | `Writer_waiting ->
       raise (Failure "stream write: the previous write has not completed")
@@ -292,4 +337,42 @@ let pipe () =
       close ()
   in
 
-  {read; write; flush; close}
+  let ping ~ok ~close =
+    match internal.state with
+    | `Idle ->
+      internal.state <- `Writer_waiting;
+      internal.write_kind <- `Ping;
+      internal.write_ok_callback <- ok;
+      internal.write_close_callback <- close
+    | `Reader_waiting ->
+      internal.state <- `Idle;
+      let read_ping_callback = internal.read_ping_callback in
+      clean_up_reader_fields internal;
+      read_ping_callback ();
+      ok ()
+    | `Writer_waiting ->
+      raise (Failure "stream ping: the previous write has not completed")
+    | `Closed ->
+      close ()
+  in
+
+  let pong ~ok ~close =
+    match internal.state with
+    | `Idle ->
+      internal.state <- `Writer_waiting;
+      internal.write_kind <- `Pong;
+      internal.write_ok_callback <- ok;
+      internal.write_close_callback <- close
+    | `Reader_waiting ->
+      internal.state <- `Idle;
+      let read_pong_callback = internal.read_pong_callback in
+      clean_up_reader_fields internal;
+      read_pong_callback ();
+      ok ()
+    | `Writer_waiting ->
+      raise (Failure "stream pong: the previous write has not completed")
+    | `Closed ->
+      close ()
+  in
+
+  {read; write; flush; close; ping; pong}

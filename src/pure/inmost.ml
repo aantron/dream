@@ -319,6 +319,9 @@ let with_body body message =
 let with_stream message =
   update {message with body = Stream.pipe ()}
 
+(* TODO Need to expose FIN. However, it can't have any effect even on
+   WebSockets, because websocket/af does not offer the ability to pass FIN. It
+   is hardcoded to true. *)
 let write message chunk =
   let promise, resolver = Lwt.wait () in
   let length = String.length chunk in
@@ -326,7 +329,7 @@ let write message chunk =
   (* TODO Better handling of close? But it can't even occur with http/af. *)
   Stream.write
     message.body
-    buffer 0 length
+    buffer 0 length false
     ~ok:(Lwt.wakeup_later resolver)
     ~close:(fun () -> Lwt.wakeup_later_exn resolver End_of_file);
   promise
@@ -339,9 +342,10 @@ let write_buffer ?(offset = 0) ?length message chunk =
     | None -> Bigstringaf.length chunk - offset
   in
   (* TODO Proper handling of close. *)
+  (* TODO As above, properly expose FIN. *)
   Stream.write
     message.body
-    chunk offset length
+    chunk offset length false
     ~ok:(Lwt.wakeup_later resolver)
     ~close:(Lwt.wakeup_later resolver);
   promise

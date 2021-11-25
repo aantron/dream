@@ -29,18 +29,27 @@ let forward_body_general
 
   let rec send () =
     Dream.body_stream response
-    |> fun stream -> Stream.read
-      stream
-      ~data
-      ~close
-      ~flush
+    |> fun stream ->
+      Stream.read
+        stream
+        ~data
+        ~close
+        ~flush
+        ~ping
+        ~pong
 
-  and data chunk off len =
+  and data chunk off len _fin =
     write_buffer ~off ~len chunk;
     send ()
 
   and flush () =
     http_flush send
+
+  and ping () =
+    send ()
+
+  and pong () =
+    send ()
 
   in
 

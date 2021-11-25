@@ -47,9 +47,11 @@ type stream
     The entire interface is pull-based for flow control. *)
 
 type read =
-  data:(buffer -> int -> int -> unit) ->
+  data:(buffer -> int -> int -> bool -> unit) ->
   close:(unit -> unit) ->
   flush:(unit -> unit) ->
+  ping:(unit -> unit) ->
+  pong:(unit -> unit) ->
     unit
 (** A reading function. Awaits the next event on the stream. For each call of a
     reading function, one of the callbacks will eventually be called, according
@@ -91,16 +93,24 @@ val read_until_close : stream -> string promise
 
 val write :
   stream ->
-  buffer -> int -> int ->
+  buffer -> int -> int -> bool ->
   ok:(unit -> unit) ->
   close:(unit -> unit) ->
     unit
 (** A writing function that sends a data buffer on the given stream. No more
     writing functions should be called on the stream until this function calls
-    [~ok]. *)
+    [~ok]. The [bool] argument is the [FIN] flag that indicates the end of a
+    WebSocket message. It is ignored by non-WebSocket streams. *)
 
-val flush :
-  stream -> ok:(unit -> unit) -> close:(unit -> unit) -> unit
+val flush : stream -> ok:(unit -> unit) -> close:(unit -> unit) -> unit
 (** A writing function that asks for the given stream to be flushed. The meaning
     of flushing depends on the implementation of the stream. No more writing
     functions should be called on the stream until this function calls [~ok]. *)
+
+val ping : stream -> ok:(unit -> unit) -> close:(unit -> unit) -> unit
+(** A writing function that sends a ping event on the given stream. This is only
+    meaningful for WebSockets. *)
+
+val pong : stream -> ok:(unit -> unit) -> close:(unit -> unit) -> unit
+(** A writing function that sends a pong event on the given stream. This is only
+    meaningful for WebSockets. *)
