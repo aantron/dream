@@ -325,10 +325,10 @@ let write message chunk =
   let buffer = Bigstringaf.of_string ~off:0 ~len:length chunk in
   (* TODO Better handling of close? But it can't even occur with http/af. *)
   Stream.write
+    message.body
     buffer 0 length
-    (Lwt.wakeup_later resolver)
-    (fun () -> Lwt.wakeup_later_exn resolver End_of_file)
-    message.body;
+    ~ok:(Lwt.wakeup_later resolver)
+    ~close:(fun () -> Lwt.wakeup_later_exn resolver End_of_file);
   promise
 
 let write_buffer ?(offset = 0) ?length message chunk =
@@ -340,10 +340,10 @@ let write_buffer ?(offset = 0) ?length message chunk =
   in
   (* TODO Proper handling of close. *)
   Stream.write
+    message.body
     chunk offset length
-    (Lwt.wakeup_later resolver)
-    (Lwt.wakeup_later resolver)
-    message.body;
+    ~ok:(Lwt.wakeup_later resolver)
+    ~close:(Lwt.wakeup_later resolver);
   promise
 
 (* TODO How are remote closes actually handled? There is no way for http/af to
@@ -351,9 +351,9 @@ let write_buffer ?(offset = 0) ?length message chunk =
 let flush message =
   let promise, resolver = Lwt.wait () in
   Stream.flush
-    (Lwt.wakeup_later resolver)
-    (fun () -> Lwt.wakeup_later_exn resolver End_of_file)
-    message.body;
+    message.body
+    ~ok:(Lwt.wakeup_later resolver)
+    ~close:(fun () -> Lwt.wakeup_later_exn resolver End_of_file);
   promise
 
 let close_stream message =

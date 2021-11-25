@@ -12,15 +12,27 @@ module Stream = Dream__pure.Stream
 let read_and_dump stream =
   Stream.read stream
     ~data:(fun buffer offset length ->
-      print_string "data: ";
+      print_string "read: data: ";
       Bigstringaf.substring buffer ~off:offset ~len:length
       |> print_endline)
-
     ~close:(fun () ->
-      print_endline "close")
-
+      print_endline "read: close")
     ~flush:(fun () ->
-      print_endline "flush")
+      print_endline "read: flush")
+
+let flush_and_dump stream =
+  Stream.flush stream
+    ~ok:(fun () ->
+      print_endline "flush: ok")
+    ~close:(fun () ->
+      print_endline "flush: close")
+
+let write_and_dump stream buffer offset length =
+  Stream.write stream buffer offset length
+    ~ok:(fun () ->
+      print_endline "write: ok")
+    ~close:(fun () ->
+      print_endline "write: close")
 
 
 
@@ -33,15 +45,15 @@ let%expect_test _ =
   Stream.close stream;
   read_and_dump stream;
   [%expect {|
-    close
-    close
-    close |}]
+    read: close
+    read: close
+    read: close |}]
 
 let%expect_test _ =
   let stream = Stream.empty in
   Stream.close stream;
   read_and_dump stream;
-  [%expect {| close |}]
+  [%expect {| read: close |}]
 
 let%expect_test _ =
   let stream = Stream.string "foo" in
@@ -51,24 +63,24 @@ let%expect_test _ =
   Stream.close stream;
   read_and_dump stream;
   [%expect {|
-    data: foo
-    close
-    close
-    close |}]
+    read: data: foo
+    read: close
+    read: close
+    read: close |}]
 
 let%expect_test _ =
   let stream = Stream.string "" in
   read_and_dump stream;
   read_and_dump stream;
   [%expect {|
-    close
-    close |}]
+    read: close
+    read: close |}]
 
 let%expect_test _ =
   let stream = Stream.string "foo" in
   Stream.close stream;
   read_and_dump stream;
-  [%expect {| close |}]
+  [%expect {| read: close |}]
 
 
 
@@ -89,7 +101,6 @@ let%expect_test _ =
   let stream = Stream.pipe () in
   read_and_dump stream;
   print_endline "checkpoint 1";
-  (* TODO Check that the callback is called. *)
   Stream.close stream;
   print_endline "checkpoint 2";
   read_and_dump stream;
@@ -97,9 +108,9 @@ let%expect_test _ =
   Stream.close stream;
   [%expect {|
     checkpoint 1
-    close
+    read: close
     checkpoint 2
-    close
+    read: close
     checkpoint 3 |}]
 
 let%expect_test _ =
@@ -108,8 +119,8 @@ let%expect_test _ =
   read_and_dump stream;
   read_and_dump stream;
   [%expect {|
-    close
-    close |}]
+    read: close
+    read: close |}]
 
 
 
@@ -119,19 +130,20 @@ let%expect_test _ =
   let stream = Stream.pipe () in
   read_and_dump stream;
   print_endline "checkpoint 1";
-  (* TODO Check the callbacks are called. *)
-  Stream.flush ignore ignore stream;
-  Stream.flush ignore ignore stream;
+  flush_and_dump stream;
+  flush_and_dump stream;
   print_endline "checkpoint 2";
   read_and_dump stream;
-  Stream.flush ignore ignore stream;
-  try Stream.flush ignore ignore stream
+  flush_and_dump stream;
+  try flush_and_dump stream
   with Failure _ as exn -> print_endline (Printexc.to_string exn);
   [%expect {|
     checkpoint 1
-    flush
+    read: flush
+    flush: ok
     checkpoint 2
-    flush
+    read: flush
+    flush: ok
     (Failure "Stream flush: the previous write has not completed") |}]
 
 
@@ -145,19 +157,20 @@ let%expect_test _ =
   let stream = Stream.pipe () in
   read_and_dump stream;
   print_endline "checkpoint 1";
-  (* TODO Check the callbacks are called. *)
-  Stream.write buffer 0 3 ignore ignore stream;
-  Stream.write buffer 1 1 ignore ignore stream;
+  write_and_dump stream buffer 0 3;
+  write_and_dump stream buffer 1 1;
   print_endline "checkpoint 2";
   read_and_dump stream;
-  Stream.write buffer 0 3 ignore ignore stream;
-  try Stream.write buffer 0 3 ignore ignore stream;
+  write_and_dump stream buffer 0 3;
+  try write_and_dump stream buffer 0 3
   with Failure _ as exn -> print_endline (Printexc.to_string exn);
   [%expect {|
     checkpoint 1
-    data: foo
+    read: data: foo
+    write: ok
     checkpoint 2
-    data: o
+    read: data: o
+    write: ok
     (Failure "Stream write: the previous write has not completed") |}]
 
 
@@ -165,12 +178,6 @@ let%expect_test _ =
 (* TODO: Test:
 
 - Writing to a read-only stream. Flushing, etc.
-- Early close of read-only streams or any other streams by the reader.
-- The generic read_only needs to take a close callback in addition to the
-  reader.
-- Stream.string needs to be able to abort the string by providing an appropriate
-  such callback.
-- Have the string stream release the string eagerly after it is read.
 - Interactions between writers (including flush) and close. This will benefit
   from clarifying the writers' callbacks.
 - The higher-level reading helpers.

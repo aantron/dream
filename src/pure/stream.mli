@@ -30,7 +30,12 @@ val read : stream -> read
 val read_convenience : stream -> string option promise
 val read_until_close : stream -> string promise
 
-(* TODO Clarify these signatures. *)
 val write :
-  buffer -> int -> int -> (unit -> unit) -> (unit -> unit) -> stream -> unit
-val flush : (unit -> unit) -> (unit -> unit) -> stream -> unit
+  stream ->
+  buffer -> int -> int ->
+  ok:(unit -> unit) ->
+  close:(unit -> unit) ->
+    unit
+
+val flush :
+  stream -> ok:(unit -> unit) -> close:(unit -> unit) -> unit

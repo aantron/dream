@@ -18,18 +18,18 @@ type read =
     unit
 
 type stream = {
-  read :
-    data:(buffer -> int -> int -> unit) ->
+  read : read;
+
+  write :
+    buffer -> int -> int ->
+    ok:(unit -> unit) ->
     close:(unit -> unit) ->
-    flush:(unit -> unit) ->
       unit;
 
-  (* TODO Needs continuation arguments. Writer feedback is ok, exception,
-     closed. Ok should probably carry an int. *)
-  (* TODO Continuation labels? *)
-  (* TODO Really review these continuations. *)
-  write : buffer -> int -> int -> (unit -> unit) -> (unit -> unit) -> unit;
-  flush : (unit -> unit) -> (unit -> unit) -> unit;
+  flush :
+    ok:(unit -> unit) ->
+    close:(unit -> unit) ->
+      unit;
 
   close : unit -> unit;
 }
@@ -38,8 +38,8 @@ type stream = {
 let read_only ~read ~close =
   {
     read;
-    write = (fun _buffer _offset _length _done _close -> ());
-    flush = (fun _done _close -> ());
+    write = (fun _buffer _offset _length ~ok:_ ~close:_ -> ());
+    flush = (fun ~ok:_ ~close:_ -> ());
     close;
   }
 
@@ -140,11 +140,11 @@ let read_until_close stream =
 let close stream =
   stream.close ()
 
-let write buffer offset length done_ close stream =
-  stream.write buffer offset length done_ close
+let write stream buffer offset length ~ok ~close =
+  stream.write buffer offset length ~ok ~close
 
-let flush done_ close stream =
-  stream.flush done_ close
+let flush stream ~ok ~close =
+  stream.flush ~ok ~close
 
 type pipe = {
   mutable state : [
@@ -165,7 +165,7 @@ type pipe = {
   mutable write_buffer : buffer;
   mutable write_offset : int;
   mutable write_length : int;
-  mutable write_done_callback : unit -> unit;
+  mutable write_ok_callback : unit -> unit;
   mutable write_close_callback : unit -> unit;
 }
 
@@ -182,7 +182,7 @@ let clean_up_reader_fields pipe =
 
 let clean_up_writer_fields pipe =
   pipe.write_buffer <- dummy_buffer;
-  pipe.write_done_callback <- ignore;
+  pipe.write_ok_callback <- ignore;
   pipe.write_close_callback <- ignore
 
 let pipe () =
@@ -197,7 +197,7 @@ let pipe () =
     write_buffer = dummy_buffer;
     write_offset = 0;
     write_length = 0;
-    write_done_callback = ignore;
+    write_ok_callback = ignore;
     write_close_callback = ignore;
   } in
 
@@ -212,7 +212,7 @@ let pipe () =
       raise (Failure "Stream read: the previous read has not completed")
     | `Writer_waiting ->
       internal.state <- `Idle;
-      let write_done_callback = internal.write_done_callback in
+      let write_ok_callback = internal.write_ok_callback in
       begin match internal.write_kind with
       | `Data ->
         let buffer = internal.write_buffer
@@ -220,18 +220,17 @@ let pipe () =
         and length = internal.write_length in
         clean_up_writer_fields internal;
         data buffer offset length;
-        write_done_callback ()
+        write_ok_callback ()
       | `Flush ->
         clean_up_writer_fields internal;
         flush ();
-        write_done_callback ()
+        write_ok_callback ()
       end
     | `Closed ->
       close ()
   in
 
-  (* TODO Callbacks could definitely use labels, based on usage. *)
-  let write buffer offset length done_ close =
+  let write buffer offset length ~ok ~close =
     match internal.state with
     | `Idle ->
       internal.state <- `Writer_waiting;
@@ -239,14 +238,14 @@ let pipe () =
       internal.write_buffer <- buffer;
       internal.write_offset <- offset;
       internal.write_length <- length;
-      internal.write_done_callback <- done_;
+      internal.write_ok_callback <- ok;
       internal.write_close_callback <- close
     | `Reader_waiting ->
       internal.state <- `Idle;
       let read_data_callback = internal.read_data_callback in
       clean_up_reader_fields internal;
       read_data_callback buffer offset length;
-      done_ ()
+      ok ()
     | `Writer_waiting ->
       raise (Failure "Stream write: the previous write has not completed")
     | `Closed ->
@@ -271,19 +270,19 @@ let pipe () =
       ()
   in
 
-  let flush done_ close =
+  let flush ~ok ~close =
     match internal.state with
     | `Idle ->
       internal.state <- `Writer_waiting;
       internal.write_kind <- `Flush;
-      internal.write_done_callback <- done_;
+      internal.write_ok_callback <- ok;
       internal.write_close_callback <- close
     | `Reader_waiting ->
       internal.state <- `Idle;
       let read_flush_callback = internal.read_flush_callback in
       clean_up_reader_fields internal;
       read_flush_callback ();
-      done_ ()
+      ok ()
     | `Writer_waiting ->
       raise (Failure "Stream flush: the previous write has not completed")
     | `Closed ->
