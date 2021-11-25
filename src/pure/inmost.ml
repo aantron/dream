@@ -360,7 +360,8 @@ let flush message =
   promise
 
 let close_stream message =
-  Stream.close message.body
+  Stream.close message.body;
+  Lwt.return_unit
 
 (* TODO Rename. *)
 let is_websocket response =

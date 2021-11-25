@@ -33,7 +33,7 @@ let%expect_test _ =
   let stream = Stream.empty in
   read_and_dump stream;
   read_and_dump stream;
-  Stream.close stream |> ignore;
+  Stream.close stream;
   read_and_dump stream;
   [%expect {|
     close
@@ -42,7 +42,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   let stream = Stream.empty in
-  Stream.close stream |> ignore;
+  Stream.close stream;
   read_and_dump stream;
   [%expect {| close |}]
 
@@ -51,7 +51,7 @@ let%expect_test _ =
   read_and_dump stream;
   read_and_dump stream;
   read_and_dump stream;
-  Stream.close stream |> ignore;
+  Stream.close stream;
   read_and_dump stream;
   [%expect {|
     data: foo
@@ -69,7 +69,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   let stream = Stream.string "foo" in
-  Stream.close stream |> ignore;
+  Stream.close stream;
   read_and_dump stream;
   [%expect {| close |}]
 
@@ -93,11 +93,11 @@ let%expect_test _ =
   read_and_dump stream;
   print_endline "checkpoint 1";
   (* TODO Check that the callback is called. *)
-  Stream.close stream |> ignore;
+  Stream.close stream;
   print_endline "checkpoint 2";
   read_and_dump stream;
   print_endline "checkpoint 3";
-  Stream.close stream |> ignore;
+  Stream.close stream;
   [%expect {|
     checkpoint 1
     close
@@ -107,7 +107,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   let stream = Stream.pipe () in
-  Stream.close stream |> ignore;
+  Stream.close stream;
   read_and_dump stream;
   read_and_dump stream;
   [%expect {|

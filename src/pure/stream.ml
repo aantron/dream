@@ -147,10 +147,8 @@ let read_until_close stream =
 
   promise
 
-(* TODO Fix. This shouldn't return a promise. *)
 let close stream =
-  stream.close ();
-  Lwt.return_unit
+  stream.close ()
 
 let write buffer offset length done_ close exn stream =
   stream.write buffer offset length done_ close exn

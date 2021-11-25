@@ -25,12 +25,12 @@ val empty : stream
 val string : string -> stream
 val pipe : unit -> stream
 
+val close : stream -> unit
+
 val read : stream -> read
 val read_convenience : stream -> string option promise
 val read_until_close : stream -> string promise
 
-(* TODO Wrong signature. *)
-val close : stream -> unit promise
 (* TODO Clarify these signatures. *)
 val write :
   buffer -> int -> int ->
