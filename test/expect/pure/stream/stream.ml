@@ -33,17 +33,29 @@ let%expect_test _ =
   let stream = Stream.empty in
   read_and_dump stream;
   read_and_dump stream;
+  Stream.close stream |> ignore;
+  read_and_dump stream;
   [%expect {|
     close
+    close
     close |}]
+
+let%expect_test _ =
+  let stream = Stream.empty in
+  Stream.close stream |> ignore;
+  read_and_dump stream;
+  [%expect {| close |}]
 
 let%expect_test _ =
   let stream = Stream.string "foo" in
   read_and_dump stream;
   read_and_dump stream;
   read_and_dump stream;
+  Stream.close stream |> ignore;
+  read_and_dump stream;
   [%expect {|
     data: foo
+    close
     close
     close |}]
 
@@ -54,6 +66,12 @@ let%expect_test _ =
   [%expect {|
     close
     close |}]
+
+let%expect_test _ =
+  let stream = Stream.string "foo" in
+  Stream.close stream |> ignore;
+  read_and_dump stream;
+  [%expect {| close |}]
 
 
 

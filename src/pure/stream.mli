@@ -20,7 +20,7 @@ type read =
   exn:(exn -> unit) ->
     unit
 
-val read_only : read -> stream
+val read_only : read:read -> close:(unit -> unit) -> stream
 val empty : stream
 val string : string -> stream
 val pipe : unit -> stream

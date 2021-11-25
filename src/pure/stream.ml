@@ -36,37 +36,47 @@ type stream = {
       unit;
   flush : (unit -> unit) -> (unit -> unit) -> (exn -> unit) -> unit;
 
-  close : (unit -> unit) -> unit;
+  close : unit -> unit;
 }
 
 (* TODO Raise some exception when writes are attempted. *)
-let read_only read =
+let read_only ~read ~close =
   {
     read;
     write = (fun _buffer _offset _length _done _close _exn -> ());
     flush = (fun _done _close _exn -> ());
-    close = (fun _done -> ());
+    close;
   }
 
 let empty =
-  read_only (fun ~data:_ ~close ~flush:_ ~exn:_ -> close ())
+  read_only
+    ~read:(fun ~data:_ ~close ~flush:_ ~exn:_ -> close ())
+    ~close:ignore
 
 (* TODO This shows the awkwardness in string-to-string body reading. *)
-let string s =
-  if String.length s = 0 then
+let string the_string =
+  if String.length the_string = 0 then
     empty
-
   else begin
-    let already_read = ref false in
-    read_only begin fun ~data ~close ~flush:_ ~exn:_ ->
-      if not !already_read then begin
-        already_read := true;
-        let length = String.length s in
-        data (Bigstringaf.of_string ~off:0 ~len:length s) 0 length
-      end
-      else
+    (* Storing the string in a ref here so that we can "lose" it eagerly once
+       the stream is closed, making the memory available to the GC. *)
+    let string_ref = ref (Some the_string) in
+
+    let read ~data ~close ~flush:_ ~exn:_ =
+      match !string_ref with
+      | Some stored_string ->
+        string_ref := None;
+        let length = String.length stored_string in
+        data (Bigstringaf.of_string ~off:0 ~len:length stored_string) 0 length
+      | None ->
         close ()
-    end
+    in
+
+    let close () =
+      string_ref := None;
+    in
+
+    read_only ~read ~close
   end
 
 let read stream ~data ~close ~flush ~exn =
@@ -139,7 +149,7 @@ let read_until_close stream =
 
 (* TODO Fix. This shouldn't return a promise. *)
 let close stream =
-  stream.close ignore;
+  stream.close ();
   Lwt.return_unit
 
 let write buffer offset length done_ close exn stream =
@@ -269,25 +279,22 @@ let pipe () =
       close ()
   in
 
-  let close done_ =
+  let close () =
     match internal.state with
     | `Idle ->
-      internal.state <- `Closed;
-      done_ ()
+      internal.state <- `Closed
     | `Reader_waiting ->
       internal.state <- `Closed;
       let read_close_callback = internal.read_close_callback in
       clean_up_reader_fields internal;
-      read_close_callback ();
-      done_ ()
+      read_close_callback ()
     | `Writer_waiting ->
       internal.state <- `Closed;
       let write_close_callback = internal.write_close_callback in
       clean_up_writer_fields internal;
-      write_close_callback ();
-      done_ ()
+      write_close_callback ()
     | `Closed ->
-      done_ ()
+      ()
   in
 
   let flush done_ close exn =
