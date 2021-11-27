@@ -1,8 +1,8 @@
-(* TODO Once concurrent writing is supported, send N concurrent streams and test
-   for fairness. *)
-(* TODO There seems to be some GC thrashing and even page thrashing or similar
-   with very large streams, probably due to buffer growth from a lack of
-   server-side flow control. *)
+let show_heap_size () =
+  Gc.((quick_stat ()).heap_words) * 8
+  |> float_of_int
+  |> fun bytes -> bytes /. 1024. /. 1024.
+  |> Dream.log "Heap size: %.0f MB"
 
 let stress ?(megabytes = 1024) ?(chunk = 64) response =
   let limit = megabytes * 1024 * 1024 in
@@ -28,6 +28,7 @@ let stress ?(megabytes = 1024) ?(chunk = 64) response =
 
   Dream.log "%.0f MB/s over %.1f s"
     ((float_of_int megabytes) /. elapsed) elapsed;
+  show_heap_size ();
 
   Lwt.return_unit
 
@@ -35,6 +36,8 @@ let query_int name request =
   Dream.query name request |> Option.map int_of_string
 
 let () =
+  show_heap_size ();
+
   Dream.run
   @@ Dream.logger
   @@ Dream.router [

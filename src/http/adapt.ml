@@ -19,13 +19,14 @@ let address_to_string : Unix.sockaddr -> string = function
 
 (* TODO Write a test simulating client exit during SSE; this was killing the
    server at some point. *)
-(* TODO LATER Will also need to monitor buffer accumulation and use flush. *)
 let forward_body_general
     (response : Dream.response)
     (_write_string : ?off:int -> ?len:int -> string -> unit)
     (write_buffer : ?off:int -> ?len:int -> Stream.buffer -> unit)
     http_flush
     close =
+
+  let bytes_since_flush = ref 0 in
 
   let rec send () =
     Dream.body_stream response
@@ -40,9 +41,16 @@ let forward_body_general
 
   and data chunk off len _binary _fin =
     write_buffer ~off ~len chunk;
-    send ()
+    bytes_since_flush := !bytes_since_flush + len;
+    if !bytes_since_flush >= 4096 then begin
+      bytes_since_flush := 0;
+      http_flush send
+    end
+    else
+      send ()
 
   and flush () =
+    bytes_since_flush := 0;
     http_flush send
 
   and ping () =
