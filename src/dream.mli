@@ -733,7 +733,7 @@ val body_stream : 'a message -> stream
 val next :
   stream ->
   data:(buffer -> int -> int -> bool -> bool -> unit) ->
-  close:(unit -> unit) ->
+  close:(int -> unit) ->
   flush:(unit -> unit) ->
   ping:(unit -> unit) ->
   pong:(unit -> unit) ->

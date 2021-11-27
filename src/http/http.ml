@@ -80,14 +80,14 @@ let websocket_handler user's_websocket_handler socket =
      cause a call to eof above? *)
   let rec read ~data ~close ~flush ~ping ~pong =
     if !closed then
-      close ()
+      close 1000
     else
       match !current_payload with
       | None ->
         Lwt.on_success (Lwt_stream.get frames) begin function
         | None ->
           closed := true;
-          close ()
+          close 1000
         | Some `Ping ->
           ping ()
         | Some `Pong ->
@@ -120,7 +120,7 @@ let websocket_handler user's_websocket_handler socket =
   let write buffer offset length binary _fin ~ok ~close =
     let kind = if binary then `Binary else `Text in
     if !closed then
-      close ()
+      close 1000
     else begin
       Websocketaf.Wsd.schedule socket ~kind buffer ~off:offset ~len:length;
       ok ()
@@ -129,14 +129,14 @@ let websocket_handler user's_websocket_handler socket =
 
   let flush ~ok ~close =
     if !closed then
-      close ()
+      close 1000
     else
       Websocketaf.Wsd.flushed socket ok
   in
 
   let ping ~ok ~close =
     if !closed then
-      close ()
+      close 1000
     else begin
       Websocketaf.Wsd.send_ping socket;
       ok ()
@@ -145,17 +145,16 @@ let websocket_handler user's_websocket_handler socket =
 
   let pong ~ok ~close =
     if !closed then
-      close ()
+      close 1000
     else begin
       Websocketaf.Wsd.send_pong socket;
       ok ()
     end
   in
 
-  (* TODO Re-expose close code. *)
-  let close () =
+  let close code =
     closed := true;
-    Websocketaf.Wsd.close socket
+    Websocketaf.Wsd.close ~code:(`Other code) socket
   in
 
   let websocket =
@@ -214,10 +213,10 @@ let wrap_handler
     let read ~data ~close ~flush:_ ~ping:_ ~pong:_ =
       Httpaf.Body.Reader.schedule_read
         body
-        ~on_eof:close
+        ~on_eof:(fun () -> close 1000)
         ~on_read:(fun buffer ~off ~len -> data buffer off len true false)
     in
-    let close () =
+    let close _code =
       Httpaf.Body.Reader.close body in
     let body =
       Stream.read_only ~read ~close in
@@ -357,10 +356,10 @@ let wrap_handler_h2
     let read ~data ~close ~flush:_ ~ping:_ ~pong:_ =
       H2.Body.schedule_read
         body
-        ~on_eof:close
+        ~on_eof:(fun () -> close 1000)
         ~on_read:(fun buffer ~off ~len -> data buffer off len true false)
     in
-    let close () =
+    let close _code =
       H2.Body.close_reader body in
     let body =
       Stream.read_only ~read ~close in

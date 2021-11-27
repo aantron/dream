@@ -64,7 +64,7 @@ let forward_body
     (Httpaf.Body.Writer.write_string body)
     (Httpaf.Body.Writer.write_bigstring body)
     (Httpaf.Body.Writer.flush body)
-    (fun () -> Httpaf.Body.Writer.close body)
+    (fun _code -> Httpaf.Body.Writer.close body)
 
 let forward_body_h2
     (response : Dream.response)
@@ -75,4 +75,4 @@ let forward_body_h2
     (H2.Body.write_string body)
     (H2.Body.write_bigstring body)
     (H2.Body.flush body)
-    (fun () -> H2.Body.close_writer body)
+    (fun _code -> H2.Body.close_writer body)

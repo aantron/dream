@@ -13,7 +13,7 @@ type 'a promise =
 
 type read =
   data:(buffer -> int -> int -> bool -> bool -> unit) ->
-  close:(unit -> unit) ->
+  close:(int -> unit) ->
   flush:(unit -> unit) ->
   ping:(unit -> unit) ->
   pong:(unit -> unit) ->
@@ -21,34 +21,16 @@ type read =
 
 type write =
   ok:(unit -> unit) ->
-  close:(unit -> unit) ->
+  close:(int -> unit) ->
     unit
 
 type stream = {
   read : read;
-
-  write :
-    buffer -> int -> int -> bool -> bool ->
-    ok:(unit -> unit) ->
-    close:(unit -> unit) ->
-      unit;
-
-  flush :
-    ok:(unit -> unit) ->
-    close:(unit -> unit) ->
-      unit;
-
-  ping :
-    ok:(unit -> unit) ->
-    close:(unit -> unit) ->
-      unit;
-
-  pong :
-    ok:(unit -> unit) ->
-    close:(unit -> unit) ->
-      unit;
-
-  close : unit -> unit;
+  write : buffer -> int -> int -> bool -> bool -> write;
+  flush : write;
+  ping : write;
+  pong : write;
+  close : int -> unit;
 }
 
 let stream ~read ~write ~flush ~ping ~pong ~close =
@@ -81,7 +63,7 @@ let read_only ~read ~close =
 
 let empty =
   read_only
-    ~read:(fun ~data:_ ~close ~flush:_ ~ping:_ ~pong:_ -> close ())
+    ~read:(fun ~data:_ ~close ~flush:_ ~ping:_ ~pong:_ -> close 1000)
     ~close:ignore
 
 (* TODO This shows the awkwardness in string-to-string body reading. *)
@@ -102,10 +84,10 @@ let string the_string =
           (Bigstringaf.of_string ~off:0 ~len:length stored_string)
           0 length true true
       | None ->
-        close ()
+        close 1000
     in
 
-    let close () =
+    let close _ =
       string_ref := None;
     in
 
@@ -125,8 +107,8 @@ let duplex ~read ~write ~close =
 let read stream ~data ~close ~flush =
   stream.read ~data ~close ~flush
 
-let close stream =
-  stream.close ()
+let close stream code =
+  stream.close code
 
 let write stream buffer offset length binary fin ~ok ~close =
   stream.write buffer offset length binary fin ~ok ~close
@@ -145,11 +127,11 @@ type pipe = {
     | `Idle
     | `Reader_waiting
     | `Writer_waiting
-    | `Closed
+    | `Closed of int
   ];
 
   mutable read_data_callback : buffer -> int -> int -> bool -> bool -> unit;
-  mutable read_close_callback : unit -> unit;
+  mutable read_close_callback : int -> unit;
   mutable read_flush_callback : unit -> unit;
   mutable read_ping_callback : unit -> unit;
   mutable read_pong_callback : unit -> unit;
@@ -166,7 +148,7 @@ type pipe = {
   mutable write_binary : bool;
   mutable write_fin : bool;
   mutable write_ok_callback : unit -> unit;
-  mutable write_close_callback : unit -> unit;
+  mutable write_close_callback : int -> unit;
 }
 
 let dummy_buffer =
@@ -236,8 +218,8 @@ let pipe () =
       | `Pong -> pong ()
       end;
       write_ok_callback ()
-    | `Closed ->
-      close ()
+    | `Closed code ->
+      close code
   in
 
   let write buffer offset length binary fin ~ok ~close =
@@ -260,25 +242,25 @@ let pipe () =
       ok ()
     | `Writer_waiting ->
       raise (Failure "stream write: the previous write has not completed")
-    | `Closed ->
-      close ()
+    | `Closed code ->
+      close code
   in
 
-  let close () =
+  let close code =
     match internal.state with
     | `Idle ->
-      internal.state <- `Closed
+      internal.state <- `Closed code
     | `Reader_waiting ->
-      internal.state <- `Closed;
+      internal.state <- `Closed code;
       let read_close_callback = internal.read_close_callback in
       clean_up_reader_fields internal;
-      read_close_callback ()
+      read_close_callback code
     | `Writer_waiting ->
-      internal.state <- `Closed;
+      internal.state <- `Closed code;
       let write_close_callback = internal.write_close_callback in
       clean_up_writer_fields internal;
-      write_close_callback ()
-    | `Closed ->
+      write_close_callback code
+    | `Closed _code ->
       ()
   in
 
@@ -297,8 +279,8 @@ let pipe () =
       ok ()
     | `Writer_waiting ->
       raise (Failure "stream flush: the previous write has not completed")
-    | `Closed ->
-      close ()
+    | `Closed code ->
+      close code
   in
 
   let ping ~ok ~close =
@@ -316,8 +298,8 @@ let pipe () =
       ok ()
     | `Writer_waiting ->
       raise (Failure "stream ping: the previous write has not completed")
-    | `Closed ->
-      close ()
+    | `Closed code ->
+      close code
   in
 
   let pong ~ok ~close =
@@ -335,8 +317,8 @@ let pipe () =
       ok ()
     | `Writer_waiting ->
       raise (Failure "stream pong: the previous write has not completed")
-    | `Closed ->
-      close ()
+    | `Closed code ->
+      close code
   in
 
   {read; write; flush; close; ping; pong}
@@ -352,7 +334,7 @@ let read_convenience stream =
         |> Option.some
         |> Lwt.wakeup_later resolver)
 
-      ~close:(fun () ->
+      ~close:(fun _code ->
         Lwt.wakeup_later resolver None)
 
       ~flush:loop
@@ -360,7 +342,7 @@ let read_convenience stream =
       ~ping:(fun () ->
         stream.pong
           ~ok:loop
-          ~close:(fun () ->
+          ~close:(fun _code ->
             Lwt.wakeup_later resolver None))
 
       ~pong:loop
@@ -373,7 +355,7 @@ let read_until_close stream =
   let promise, resolver = Lwt.wait () in
   let length = ref 0 in
   let buffer = ref (Bigstringaf.create 4096) in
-  let close () =
+  let close _code =
     Bigstringaf.sub !buffer ~off:0 ~len:!length
     |> Bigstringaf.to_string
     |> Lwt.wakeup_later resolver

@@ -48,7 +48,7 @@ type stream
 
 type read =
   data:(buffer -> int -> int -> bool -> bool -> unit) ->
-  close:(unit -> unit) ->
+  close:(int -> unit) ->
   flush:(unit -> unit) ->
   ping:(unit -> unit) ->
   pong:(unit -> unit) ->
@@ -59,12 +59,12 @@ type read =
 
 type write =
   ok:(unit -> unit) ->
-  close:(unit -> unit) ->
+  close:(int -> unit) ->
     unit
 (** A writing function. Pushes an event into a stream. May take additional
     arguments before [~ok]. *)
 
-val read_only : read:read -> close:(unit -> unit) -> stream
+val read_only : read:read -> close:(int -> unit) -> stream
 (** Creates a read-only stream from the given reader. [~close] is called in
     response to {!Stream.close}. It doesn't need to call {!Stream.close} again
     on the stream. It should be used to free any underlying resources. *)
@@ -82,7 +82,7 @@ val pipe : unit -> stream
     writing functions. For example, calling {!Stream.flush} on a pipe will cause
     the reader to call its [~flush] callback. *)
 
-val duplex : read:stream -> write:stream -> close:(unit -> unit) -> stream
+val duplex : read:stream -> write:stream -> close:(int -> unit) -> stream
 (** A stream whose reading functions behave like [~read], and whose writing
     functions behave like [~write]. *)
 
@@ -92,11 +92,11 @@ val stream :
   flush:write ->
   ping:write ->
   pong:write ->
-  close:(unit -> unit) ->
+  close:(int -> unit) ->
     stream
 (** A general stream. *)
 
-val close : stream -> unit
+val close : stream -> int -> unit
 (** Closes the given stream. Causes a pending reader or writer to call its
     [~close] callback. *)
 

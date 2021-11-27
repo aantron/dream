@@ -328,7 +328,7 @@ let write message chunk =
     message.body
     buffer 0 length true false
     ~ok:(Lwt.wakeup_later resolver)
-    ~close:(fun () -> Lwt.wakeup_later_exn resolver End_of_file);
+    ~close:(fun _code -> Lwt.wakeup_later_exn resolver End_of_file);
   promise
 
 let write_buffer ?(offset = 0) ?length message chunk =
@@ -345,7 +345,7 @@ let write_buffer ?(offset = 0) ?length message chunk =
     message.body
     chunk offset length true false
     ~ok:(Lwt.wakeup_later resolver)
-    ~close:(Lwt.wakeup_later resolver);
+    ~close:(fun _code -> Lwt.wakeup_later_exn resolver End_of_file);
   promise
 
 (* TODO How are remote closes actually handled? There is no way for http/af to
@@ -355,11 +355,11 @@ let flush message =
   Stream.flush
     message.body
     ~ok:(Lwt.wakeup_later resolver)
-    ~close:(fun () -> Lwt.wakeup_later_exn resolver End_of_file);
+    ~close:(fun _code -> Lwt.wakeup_later_exn resolver End_of_file);
   promise
 
 let close_stream message =
-  Stream.close message.body;
+  Stream.close message.body 1000;
   Lwt.return_unit
 
 (* TODO Rename. *)
@@ -575,15 +575,15 @@ let send ?kind websocket message =
     (Bigstringaf.of_string ~off:0 ~len:length message) 0 length
     binary true
     ~ok:(Lwt.wakeup_later resolver)
-    ~close:(Lwt.wakeup_later resolver);
+    ~close:(fun _code -> Lwt.wakeup_later_exn resolver End_of_file);
   (* TODO The API will likely have to change to report closing. *)
   promise
 
 let receive websocket =
   Stream.read_convenience websocket
 
-let close_websocket ?code:_ websocket =
-  Stream.close websocket;
+let close_websocket ?(code = 1000) websocket =
+  Stream.close websocket code;
   Lwt.return_unit
 
 let no_middleware handler request =

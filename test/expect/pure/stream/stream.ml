@@ -14,8 +14,8 @@ let read_and_dump stream =
     ~data:(fun buffer offset length binary fin ->
       Printf.printf "read: data: BINARY=%b FIN=%b %s\n"
         binary fin (Bigstringaf.substring buffer ~off:offset ~len:length))
-    ~close:(fun () ->
-      print_endline "read: close")
+    ~close:(fun code ->
+      Printf.printf "read: close: CODE=%i\n" code)
     ~flush:(fun () ->
       print_endline "read: flush")
     ~ping:(fun () ->
@@ -27,29 +27,29 @@ let flush_and_dump stream =
   Stream.flush stream
     ~ok:(fun () ->
       print_endline "flush: ok")
-    ~close:(fun () ->
-      print_endline "flush: close")
+    ~close:(fun code ->
+      Printf.printf "flush: close: CODE=%i\n" code)
 
 let write_and_dump stream buffer offset length binary fin =
   Stream.write stream buffer offset length binary fin
     ~ok:(fun () ->
       print_endline "write: ok")
-    ~close:(fun () ->
-      print_endline "write: close")
+    ~close:(fun code ->
+      Printf.printf "write: close: CODE=%i\n" code)
 
 let ping_and_dump stream =
   Stream.ping stream
     ~ok:(fun () ->
       print_endline "ping: ok")
-    ~close:(fun () ->
-      print_endline "ping: close")
+    ~close:(fun code ->
+      Printf.printf "ping: close: CODE=%i\n" code)
 
 let pong_and_dump stream =
   Stream.pong stream
     ~ok:(fun () ->
       print_endline "pong: ok")
-    ~close:(fun () ->
-      print_endline "pong: close")
+    ~close:(fun code ->
+      Printf.printf "pong: close: CODE=%i\n" code)
 
 
 
@@ -59,45 +59,45 @@ let%expect_test _ =
   let stream = Stream.empty in
   read_and_dump stream;
   read_and_dump stream;
-  Stream.close stream;
+  Stream.close stream 1005;
   read_and_dump stream;
   [%expect {|
-    read: close
-    read: close
-    read: close |}]
+    read: close: CODE=1000
+    read: close: CODE=1000
+    read: close: CODE=1000 |}]
 
 let%expect_test _ =
   let stream = Stream.empty in
-  Stream.close stream;
+  Stream.close stream 1005;
   read_and_dump stream;
-  [%expect {| read: close |}]
+  [%expect {| read: close: CODE=1000 |}]
 
 let%expect_test _ =
   let stream = Stream.string "foo" in
   read_and_dump stream;
   read_and_dump stream;
   read_and_dump stream;
-  Stream.close stream;
+  Stream.close stream 1005;
   read_and_dump stream;
   [%expect {|
     read: data: BINARY=true FIN=true foo
-    read: close
-    read: close
-    read: close |}]
+    read: close: CODE=1000
+    read: close: CODE=1000
+    read: close: CODE=1000 |}]
 
 let%expect_test _ =
   let stream = Stream.string "" in
   read_and_dump stream;
   read_and_dump stream;
   [%expect {|
-    read: close
-    read: close |}]
+    read: close: CODE=1000
+    read: close: CODE=1000 |}]
 
 let%expect_test _ =
   let stream = Stream.string "foo" in
-  Stream.close stream;
+  Stream.close stream 1005;
   read_and_dump stream;
-  [%expect {| read: close |}]
+  [%expect {| read: close: CODE=1000 |}]
 
 let%expect_test _ =
   let stream = Stream.empty in
@@ -134,26 +134,26 @@ let%expect_test _ =
   let stream = Stream.pipe () in
   read_and_dump stream;
   print_endline "checkpoint 1";
-  Stream.close stream;
+  Stream.close stream 1005;
   print_endline "checkpoint 2";
   read_and_dump stream;
   print_endline "checkpoint 3";
-  Stream.close stream;
+  Stream.close stream 1000;
   [%expect {|
     checkpoint 1
-    read: close
+    read: close: CODE=1005
     checkpoint 2
-    read: close
+    read: close: CODE=1005
     checkpoint 3 |}]
 
 let%expect_test _ =
   let stream = Stream.pipe () in
-  Stream.close stream;
+  Stream.close stream 1005;
   read_and_dump stream;
   read_and_dump stream;
   [%expect {|
-    read: close
-    read: close |}]
+    read: close: CODE=1005
+    read: close: CODE=1005 |}]
 
 
 
@@ -261,11 +261,11 @@ let%expect_test _ =
 let%expect_test _ =
   let stream = Stream.pipe () in
   flush_and_dump stream;
-  Stream.close stream;
+  Stream.close stream 1005;
   flush_and_dump stream;
   [%expect {|
-    flush: close
-    flush: close |}]
+    flush: close: CODE=1005
+    flush: close: CODE=1005 |}]
 
 
 
@@ -274,11 +274,11 @@ let%expect_test _ =
 let%expect_test _ =
   let stream = Stream.pipe () in
   write_and_dump stream buffer 0 3 true true;
-  Stream.close stream;
+  Stream.close stream 1005;
   write_and_dump stream buffer 0 3 true false;
   [%expect {|
-    write: close
-    write: close |}]
+    write: close: CODE=1005
+    write: close: CODE=1005 |}]
 
 
 
@@ -287,11 +287,11 @@ let%expect_test _ =
 let%expect_test _ =
   let stream = Stream.pipe () in
   ping_and_dump stream;
-  Stream.close stream;
+  Stream.close stream 1005;
   ping_and_dump stream;
   [%expect {|
-    ping: close
-    ping: close |}]
+    ping: close: CODE=1005
+    ping: close: CODE=1005 |}]
 
 
 
@@ -300,8 +300,8 @@ let%expect_test _ =
 let%expect_test _ =
   let stream = Stream.pipe () in
   pong_and_dump stream;
-  Stream.close stream;
+  Stream.close stream 1005;
   pong_and_dump stream;
   [%expect {|
-    pong: close
-    pong: close |}]
+    pong: close: CODE=1005
+    pong: close: CODE=1005 |}]
