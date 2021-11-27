@@ -46,6 +46,16 @@ type stream = {
   close : unit -> unit;
 }
 
+let stream ~read ~write ~flush ~ping ~pong ~close =
+  {
+    read;
+    write;
+    flush;
+    ping;
+    pong;
+    close;
+  }
+
 let read_only ~read ~close =
   {
     read;
@@ -97,76 +107,18 @@ let string the_string =
     read_only ~read ~close
   end
 
+let duplex ~read ~write ~close =
+  {
+    read = read.read;
+    write = write.write;
+    flush = write.flush;
+    ping = write.ping;
+    pong = write.pong;
+    close;
+  }
+
 let read stream ~data ~close ~flush =
   stream.read ~data ~close ~flush
-
-let read_convenience stream =
-  let promise, resolver = Lwt.wait () in
-
-  let rec loop () =
-    stream.read
-      ~data:(fun buffer offset length _fin ->
-        Bigstringaf.sub buffer ~off:offset ~len:length
-        |> Bigstringaf.to_string
-        |> Option.some
-        |> Lwt.wakeup_later resolver)
-
-      ~close:(fun () ->
-        Lwt.wakeup_later resolver None)
-
-      ~flush:loop
-
-      (* TODO This requires reordering the implementations and taking a harder
-         look at all these functions.
-         Upon a ping event, assume that we are on a read-write, duplex WebSocket
-         stream, and send a pong. *)
-      ~ping:loop
-
-      ~pong:loop
-  in
-  loop ();
-
-  promise
-
-let read_until_close stream =
-  let promise, resolver = Lwt.wait () in
-  let length = ref 0 in
-  let buffer = ref (Bigstringaf.create 4096) in
-
-  let rec loop () =
-    stream.read
-      ~data:(fun chunk offset chunk_length _fin ->
-        let new_length = !length + chunk_length in
-
-        if new_length > Bigstringaf.length !buffer then begin
-          let new_buffer = Bigstringaf.create (new_length * 2) in
-          Bigstringaf.blit
-            !buffer ~src_off:0 new_buffer ~dst_off:0 ~len:!length;
-          buffer := new_buffer
-        end;
-
-        Bigstringaf.blit
-          chunk ~src_off:offset !buffer ~dst_off:!length ~len:chunk_length;
-        length := new_length;
-
-        loop ())
-
-      ~close:(fun () ->
-        Bigstringaf.sub !buffer ~off:0 ~len:!length
-        |> Bigstringaf.to_string
-        |> Lwt.wakeup_later resolver)
-
-      ~flush:loop
-
-      (* TODO As with the previous function, should respond to a ping with a
-         pong. *)
-      ~ping:loop
-
-      ~pong:loop
-  in
-  loop ();
-
-  promise
 
 let close stream =
   stream.close ()
@@ -377,22 +329,70 @@ let pipe () =
 
   {read; write; flush; close; ping; pong}
 
-let duplex ~read ~write ~close =
-  {
-    read = read.read;
-    write = write.write;
-    flush = write.flush;
-    ping = write.ping;
-    pong = write.pong;
-    close;
-  }
+let read_convenience stream =
+  let promise, resolver = Lwt.wait () in
 
-let stream ~read ~write ~flush ~ping ~pong ~close =
-  {
-    read;
-    write;
-    flush;
-    ping;
-    pong;
-    close;
-  }
+  let rec loop () =
+    stream.read
+      ~data:(fun buffer offset length _fin ->
+        Bigstringaf.sub buffer ~off:offset ~len:length
+        |> Bigstringaf.to_string
+        |> Option.some
+        |> Lwt.wakeup_later resolver)
+
+      ~close:(fun () ->
+        Lwt.wakeup_later resolver None)
+
+      ~flush:loop
+
+      (* TODO This requires reordering the implementations and taking a harder
+         look at all these functions.
+         Upon a ping event, assume that we are on a read-write, duplex WebSocket
+         stream, and send a pong. *)
+      ~ping:loop
+
+      ~pong:loop
+  in
+  loop ();
+
+  promise
+
+let read_until_close stream =
+  let promise, resolver = Lwt.wait () in
+  let length = ref 0 in
+  let buffer = ref (Bigstringaf.create 4096) in
+
+  let rec loop () =
+    stream.read
+      ~data:(fun chunk offset chunk_length _fin ->
+        let new_length = !length + chunk_length in
+
+        if new_length > Bigstringaf.length !buffer then begin
+          let new_buffer = Bigstringaf.create (new_length * 2) in
+          Bigstringaf.blit
+            !buffer ~src_off:0 new_buffer ~dst_off:0 ~len:!length;
+          buffer := new_buffer
+        end;
+
+        Bigstringaf.blit
+          chunk ~src_off:offset !buffer ~dst_off:!length ~len:chunk_length;
+        length := new_length;
+
+        loop ())
+
+      ~close:(fun () ->
+        Bigstringaf.sub !buffer ~off:0 ~len:!length
+        |> Bigstringaf.to_string
+        |> Lwt.wakeup_later resolver)
+
+      ~flush:loop
+
+      (* TODO As with the previous function, should respond to a ping with a
+         pong. *)
+      ~ping:loop
+
+      ~pong:loop
+  in
+  loop ();
+
+  promise
