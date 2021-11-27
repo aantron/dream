@@ -42,7 +42,7 @@ let websocket_handler user's_websocket_handler socket =
   (* Frame reader called by websocket/af on each frame received. There is no
      good way to truly throttle this, hence this frame reader pushes frame
      objects into the above frame queue for the reader to take from later. *)
-  let frame ~opcode ~is_fin:_ ~len:_ payload =
+  let frame ~opcode ~is_fin ~len:_ payload =
     match opcode with
     | `Connection_close ->
       Websocketaf.Wsd.close socket;
@@ -56,7 +56,7 @@ let websocket_handler user's_websocket_handler socket =
     | `Text
     | `Binary
     | `Continuation ->
-      push_frame (Some (`Data payload))
+      push_frame (Some (`Data (payload, is_fin)))
   in
 
   let eof () =
@@ -67,11 +67,9 @@ let websocket_handler user's_websocket_handler socket =
   (* The reader retrieves the next frame. If it is a data frame, it keeps a
      reference to the payload across multiple reader calls, until the payload is
      exhausted. *)
-  (* TODO What's the best way to signal FIN? As a property of the last chunk, or
-     after the last chunk? WebSockets use the former, but the current
-     websocket/af API suggests the latter. *)
   let closed = ref false in
   let current_payload = ref None in
+  let last_chunk = ref None in
 
   (* TODO Can this be canceled by a user's close? i.e. will that eventually
      cause a call to eof above? *)
@@ -93,15 +91,25 @@ let websocket_handler user's_websocket_handler socket =
           current_payload := Some payload;
           read ~data ~close ~flush ~ping ~pong
         end
-      | Some payload ->
+      | Some (payload, fin) ->
         Websocketaf.Payload.schedule_read
           payload
           ~on_read:(fun buffer ~off ~len ->
-            (* TODO Implement FIN. *)
-            data buffer off len true)
+            match !last_chunk with
+            | None ->
+              last_chunk := Some (buffer, off, len);
+              read ~data ~close ~flush ~ping ~pong
+            | Some (last_buffer, last_offset, last_length) ->
+              last_chunk := Some (buffer, off, len);
+              data last_buffer last_offset last_length false)
           ~on_eof:(fun () ->
             current_payload := None;
-            read ~data ~close ~flush ~ping ~pong)
+            match !last_chunk with
+            | None ->
+              read ~data ~close ~flush ~ping ~pong
+            | Some (last_buffer, last_offset, last_length) ->
+              last_chunk := None;
+              data last_buffer last_offset last_length fin)
   in
 
   (* TODO Re-expose kind. *)
