@@ -376,3 +376,23 @@ let pipe () =
   in
 
   {read; write; flush; close; ping; pong}
+
+let duplex ~read ~write ~close =
+  {
+    read = read.read;
+    write = write.write;
+    flush = write.flush;
+    ping = write.ping;
+    pong = write.pong;
+    close;
+  }
+
+let stream ~read ~write ~flush ~ping ~pong ~close =
+  {
+    read;
+    write;
+    flush;
+    ping;
+    pong;
+    close;
+  }

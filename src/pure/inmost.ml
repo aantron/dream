@@ -37,11 +37,7 @@ struct
 end
 module Scope = Hmap.Make (Scope_variable_metadata)
 
-type websocket = {
-  send : [ `Text | `Binary ] -> string -> unit Lwt.t;
-  receive : unit -> string option Lwt.t;
-  close : int option -> unit Lwt.t;
-}
+type websocket = Stream.stream
 
 type request = incoming message
 and response = outgoing message
@@ -564,19 +560,27 @@ let websocket ?headers handler =
   in
   Lwt.return response
 
-let send ?kind websocket message =
-  let kind =
+let send ?kind:_ websocket message =
+  (* let kind =
     match kind with
     | None | Some `Text -> `Text
     | Some `Binary -> `Binary
-  in
-  websocket.send kind message
+  in *)
+  let promise, resolver = Lwt.wait () in
+  let length = String.length message in
+  Stream.write
+    websocket (Bigstringaf.of_string ~off:0 ~len:length message) 0 length true
+    ~ok:(Lwt.wakeup_later resolver)
+    ~close:(Lwt.wakeup_later resolver);
+  (* TODO The API will likely have to change to report closing. *)
+  promise
 
 let receive websocket =
-  websocket.receive ()
+  Stream.read_convenience websocket
 
-let close_websocket ?code websocket =
-  websocket.close code
+let close_websocket ?code:_ websocket =
+  Stream.close websocket;
+  Lwt.return_unit
 
 let no_middleware handler request =
   handler request

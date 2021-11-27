@@ -44,31 +44,44 @@ let websocket_handler user's_websocket_handler socket =
      higher-level reader. *)
   let messages, push_message = Lwt_stream.create () in
 
-  let send kind message =
-    let kind = (kind :> [ `Text | `Binary | `Continuation ]) in
-    Websocketaf.Wsd.send_bytes
-      socket
-      ~kind
-      (Bytes.unsafe_of_string message)
-      ~off:0
-      ~len:(String.length message);
-    Lwt.return_unit
+  (* TODO Approximate pull behavior by delaying the payload reader, and
+     implement passing of ping and pong to the caller. *)
+  (* TODO Currently, there is a double conversion from bigstring to string and
+     then back (and then probably again), but this should go away once there is
+     a lower-level pull reader, and messages are assembled elsewhere in the
+     stack. *)
+  let read ~data ~close ~flush:_ ~ping:_ ~pong:_ =
+    Lwt.on_success (Lwt_stream.get messages) @@ function
+    | Some message ->
+      let length = String.length message in
+      data (Bigstringaf.of_string ~off:0 ~len:length message) 0 length true
+    | None ->
+      close ()
   in
 
-  let receive () =
-    Lwt_stream.get messages in
-
-  let close code =
-    let code = Option.map (fun code -> `Other code) code in
-    Websocketaf.Wsd.close ?code socket;
-    Lwt.return_unit
+  (* TODO Re-expose kind. *)
+  let write buffer offset length _fin ~ok ~close:_ =
+    Websocketaf.Wsd.schedule
+      socket ~kind:`Text buffer ~off:offset ~len:length;
+    ok ()
   in
 
-  let websocket = {
-    Dream.send;
-    receive;
-    close;
-  } in
+  (* TODO Implement (for the first time). *)
+  let flush ~ok ~close:_ =
+    ok () in
+
+  let ping ~ok ~close:_ =
+    ok () in
+
+  let pong ~ok ~close:_ =
+    ok () in
+
+  (* TODO Re-expose close code. *)
+  let close () =
+    Websocketaf.Wsd.close socket in
+
+  let websocket =
+    Stream.stream ~read ~write ~flush ~ping ~pong ~close in
 
   (* TODO Needs error handling like the top-level app has! *)
   Lwt.async (fun () ->

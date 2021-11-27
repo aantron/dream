@@ -75,6 +75,21 @@ val pipe : unit -> stream
     writing functions. For example, calling {!Stream.flush} on a pipe will cause
     the reader to call its [~flush] callback. *)
 
+val duplex : read:stream -> write:stream -> close:(unit -> unit) -> stream
+(** A stream whose reading functions behave like [~read], and whose writing
+    functions behave like [~write]. *)
+
+(* TODO Seriously fix this signature. *)
+val stream :
+  read:read ->
+  write:(buffer -> int -> int -> bool -> ok:(unit -> unit) -> close:(unit -> unit) -> unit) ->
+  flush:(ok:(unit -> unit) -> close:(unit -> unit) -> unit) ->
+  ping:(ok:(unit -> unit) -> close:(unit -> unit) -> unit) ->
+  pong:(ok:(unit -> unit) -> close:(unit -> unit) -> unit) ->
+  close:(unit -> unit) ->
+    stream
+(** A general stream. *)
+
 val close : stream -> unit
 (** Closes the given stream. Causes a pending reader or writer to call its
     [~close] callback. *)
