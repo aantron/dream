@@ -19,6 +19,11 @@ type read =
   pong:(unit -> unit) ->
     unit
 
+type write =
+  ok:(unit -> unit) ->
+  close:(unit -> unit) ->
+    unit
+
 type stream = {
   read : read;
 

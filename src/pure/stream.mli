@@ -57,6 +57,13 @@ type read =
     reading function, one of the callbacks will eventually be called, according
     to which event occurs next on the stream. *)
 
+type write =
+  ok:(unit -> unit) ->
+  close:(unit -> unit) ->
+    unit
+(** A writing function. Pushes an event into a stream. May take additional
+    arguments before [~ok]. *)
+
 val read_only : read:read -> close:(unit -> unit) -> stream
 (** Creates a read-only stream from the given reader. [~close] is called in
     response to {!Stream.close}. It doesn't need to call {!Stream.close} again
@@ -79,13 +86,12 @@ val duplex : read:stream -> write:stream -> close:(unit -> unit) -> stream
 (** A stream whose reading functions behave like [~read], and whose writing
     functions behave like [~write]. *)
 
-(* TODO Seriously fix this signature. *)
 val stream :
   read:read ->
-  write:(buffer -> int -> int -> bool -> ok:(unit -> unit) -> close:(unit -> unit) -> unit) ->
-  flush:(ok:(unit -> unit) -> close:(unit -> unit) -> unit) ->
-  ping:(ok:(unit -> unit) -> close:(unit -> unit) -> unit) ->
-  pong:(ok:(unit -> unit) -> close:(unit -> unit) -> unit) ->
+  write:(buffer -> int -> int -> bool -> write) ->
+  flush:write ->
+  ping:write ->
+  pong:write ->
   close:(unit -> unit) ->
     stream
 (** A general stream. *)
@@ -106,26 +112,21 @@ val read_until_close : stream -> string promise
 (** Reads a stream completely until [~close], and accumulates the data into a
     string. *)
 
-val write :
-  stream ->
-  buffer -> int -> int -> bool ->
-  ok:(unit -> unit) ->
-  close:(unit -> unit) ->
-    unit
+val write : stream -> buffer -> int -> int -> bool -> write
 (** A writing function that sends a data buffer on the given stream. No more
     writing functions should be called on the stream until this function calls
     [~ok]. The [bool] argument is the [FIN] flag that indicates the end of a
     WebSocket message. It is ignored by non-WebSocket streams. *)
 
-val flush : stream -> ok:(unit -> unit) -> close:(unit -> unit) -> unit
+val flush : stream -> write
 (** A writing function that asks for the given stream to be flushed. The meaning
     of flushing depends on the implementation of the stream. No more writing
     functions should be called on the stream until this function calls [~ok]. *)
 
-val ping : stream -> ok:(unit -> unit) -> close:(unit -> unit) -> unit
+val ping : stream -> write
 (** A writing function that sends a ping event on the given stream. This is only
     meaningful for WebSockets. *)
 
-val pong : stream -> ok:(unit -> unit) -> close:(unit -> unit) -> unit
+val pong : stream -> write
 (** A writing function that sends a pong event on the given stream. This is only
     meaningful for WebSockets. *)
