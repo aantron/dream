@@ -345,11 +345,11 @@ let read_convenience stream =
 
       ~flush:loop
 
-      (* TODO This requires reordering the implementations and taking a harder
-         look at all these functions.
-         Upon a ping event, assume that we are on a read-write, duplex WebSocket
-         stream, and send a pong. *)
-      ~ping:loop
+      ~ping:(fun () ->
+        stream.pong
+          ~ok:loop
+          ~close:(fun () ->
+            Lwt.wakeup_later resolver None))
 
       ~pong:loop
   in
@@ -361,6 +361,11 @@ let read_until_close stream =
   let promise, resolver = Lwt.wait () in
   let length = ref 0 in
   let buffer = ref (Bigstringaf.create 4096) in
+  let close () =
+    Bigstringaf.sub !buffer ~off:0 ~len:!length
+    |> Bigstringaf.to_string
+    |> Lwt.wakeup_later resolver
+  in
 
   let rec loop () =
     stream.read
@@ -380,16 +385,12 @@ let read_until_close stream =
 
         loop ())
 
-      ~close:(fun () ->
-        Bigstringaf.sub !buffer ~off:0 ~len:!length
-        |> Bigstringaf.to_string
-        |> Lwt.wakeup_later resolver)
+      ~close
 
       ~flush:loop
 
-      (* TODO As with the previous function, should respond to a ping with a
-         pong. *)
-      ~ping:loop
+      ~ping:(fun () ->
+        stream.pong ~ok:loop ~close)
 
       ~pong:loop
   in
