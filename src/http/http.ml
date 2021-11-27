@@ -38,6 +38,7 @@ let websocket_handler user's_websocket_handler socket =
      backpressure with the current API of websocket/af, so that will have to be
      added later. The user-facing API of Dream does support backpressure. *)
   let frames, push_frame = Lwt_stream.create () in
+  let message_is_binary = ref true in
 
   (* Frame reader called by websocket/af on each frame received. There is no
      good way to truly throttle this, hence this frame reader pushes frame
@@ -53,10 +54,14 @@ let websocket_handler user's_websocket_handler socket =
       push_frame (Some `Pong)
     | `Other _ ->
       () (* TODO Log? *)
-    | `Text
-    | `Binary
+    | `Text ->
+      message_is_binary := false;
+      push_frame (Some (`Data (payload, false, is_fin)))
+    | `Binary ->
+      message_is_binary := true;
+      push_frame (Some (`Data (payload, true, is_fin)))
     | `Continuation ->
-      push_frame (Some (`Data (payload, is_fin)))
+      push_frame (Some (`Data (payload, !message_is_binary, is_fin)))
   in
 
   let eof () =
@@ -91,7 +96,7 @@ let websocket_handler user's_websocket_handler socket =
           current_payload := Some payload;
           read ~data ~close ~flush ~ping ~pong
         end
-      | Some (payload, fin) ->
+      | Some (payload, binary, fin) ->
         Websocketaf.Payload.schedule_read
           payload
           ~on_read:(fun buffer ~off ~len ->
@@ -101,7 +106,7 @@ let websocket_handler user's_websocket_handler socket =
               read ~data ~close ~flush ~ping ~pong
             | Some (last_buffer, last_offset, last_length) ->
               last_chunk := Some (buffer, off, len);
-              data last_buffer last_offset last_length false)
+              data last_buffer last_offset last_length binary false)
           ~on_eof:(fun () ->
             current_payload := None;
             match !last_chunk with
@@ -109,16 +114,15 @@ let websocket_handler user's_websocket_handler socket =
               read ~data ~close ~flush ~ping ~pong
             | Some (last_buffer, last_offset, last_length) ->
               last_chunk := None;
-              data last_buffer last_offset last_length fin)
+              data last_buffer last_offset last_length binary fin)
   in
 
-  (* TODO Re-expose kind. *)
-  let write buffer offset length _fin ~ok ~close =
+  let write buffer offset length binary _fin ~ok ~close =
+    let kind = if binary then `Binary else `Text in
     if !closed then
       close ()
     else begin
-      Websocketaf.Wsd.schedule
-        socket ~kind:`Text buffer ~off:offset ~len:length;
+      Websocketaf.Wsd.schedule socket ~kind buffer ~off:offset ~len:length;
       ok ()
     end
   in
@@ -211,7 +215,7 @@ let wrap_handler
       Httpaf.Body.Reader.schedule_read
         body
         ~on_eof:close
-        ~on_read:(fun buffer ~off ~len -> data buffer off len false)
+        ~on_read:(fun buffer ~off ~len -> data buffer off len true false)
     in
     let close () =
       Httpaf.Body.Reader.close body in
@@ -354,7 +358,7 @@ let wrap_handler_h2
       H2.Body.schedule_read
         body
         ~on_eof:close
-        ~on_read:(fun buffer ~off ~len -> data buffer off len false)
+        ~on_read:(fun buffer ~off ~len -> data buffer off len true false)
     in
     let close () =
       H2.Body.close_reader body in

@@ -38,7 +38,7 @@ let forward_body_general
         ~ping
         ~pong
 
-  and data chunk off len _fin =
+  and data chunk off len _binary _fin =
     write_buffer ~off ~len chunk;
     send ()
 

@@ -47,7 +47,7 @@ type stream
     The entire interface is pull-based for flow control. *)
 
 type read =
-  data:(buffer -> int -> int -> bool -> unit) ->
+  data:(buffer -> int -> int -> bool -> bool -> unit) ->
   close:(unit -> unit) ->
   flush:(unit -> unit) ->
   ping:(unit -> unit) ->
@@ -88,7 +88,7 @@ val duplex : read:stream -> write:stream -> close:(unit -> unit) -> stream
 
 val stream :
   read:read ->
-  write:(buffer -> int -> int -> bool -> write) ->
+  write:(buffer -> int -> int -> bool -> bool -> write) ->
   flush:write ->
   ping:write ->
   pong:write ->
@@ -112,11 +112,11 @@ val read_until_close : stream -> string promise
 (** Reads a stream completely until [~close], and accumulates the data into a
     string. *)
 
-val write : stream -> buffer -> int -> int -> bool -> write
+val write : stream -> buffer -> int -> int -> bool -> bool -> write
 (** A writing function that sends a data buffer on the given stream. No more
     writing functions should be called on the stream until this function calls
-    [~ok]. The [bool] argument is the [FIN] flag that indicates the end of a
-    WebSocket message. It is ignored by non-WebSocket streams. *)
+    [~ok]. The [bool] arguments are whether the message is binary and whether
+    the [FIN] flag should be set. They are ignored by non-WebSocket streams. *)
 
 val flush : stream -> write
 (** A writing function that asks for the given stream to be flushed. The meaning

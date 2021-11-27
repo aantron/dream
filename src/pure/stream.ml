@@ -12,7 +12,7 @@ type 'a promise =
   'a Lwt.t
 
 type read =
-  data:(buffer -> int -> int -> bool -> unit) ->
+  data:(buffer -> int -> int -> bool -> bool -> unit) ->
   close:(unit -> unit) ->
   flush:(unit -> unit) ->
   ping:(unit -> unit) ->
@@ -28,7 +28,7 @@ type stream = {
   read : read;
 
   write :
-    buffer -> int -> int -> bool ->
+    buffer -> int -> int -> bool -> bool ->
     ok:(unit -> unit) ->
     close:(unit -> unit) ->
       unit;
@@ -65,7 +65,7 @@ let read_only ~read ~close =
   {
     read;
     write =
-      (fun _buffer _offset _length _fin ~ok:_ ~close:_ ->
+      (fun _buffer _offset _length _binary _fin ~ok:_ ~close:_ ->
         raise (Failure "write to a read-only stream"));
     flush =
       (fun ~ok:_ ~close:_ ->
@@ -100,7 +100,7 @@ let string the_string =
         let length = String.length stored_string in
         data
           (Bigstringaf.of_string ~off:0 ~len:length stored_string)
-          0 length true
+          0 length true true
       | None ->
         close ()
     in
@@ -128,8 +128,8 @@ let read stream ~data ~close ~flush =
 let close stream =
   stream.close ()
 
-let write stream buffer offset length fin ~ok ~close =
-  stream.write buffer offset length fin ~ok ~close
+let write stream buffer offset length binary fin ~ok ~close =
+  stream.write buffer offset length binary fin ~ok ~close
 
 let flush stream ~ok ~close =
   stream.flush ~ok ~close
@@ -148,7 +148,7 @@ type pipe = {
     | `Closed
   ];
 
-  mutable read_data_callback : buffer -> int -> int -> bool -> unit;
+  mutable read_data_callback : buffer -> int -> int -> bool -> bool -> unit;
   mutable read_close_callback : unit -> unit;
   mutable read_flush_callback : unit -> unit;
   mutable read_ping_callback : unit -> unit;
@@ -163,6 +163,7 @@ type pipe = {
   mutable write_buffer : buffer;
   mutable write_offset : int;
   mutable write_length : int;
+  mutable write_binary : bool;
   mutable write_fin : bool;
   mutable write_ok_callback : unit -> unit;
   mutable write_close_callback : unit -> unit;
@@ -171,7 +172,7 @@ type pipe = {
 let dummy_buffer =
   Bigstringaf.create 0
 
-let dummy_read_data_callback _buffer _offset _length _fin =
+let dummy_read_data_callback _buffer _offset _length _binary _fin =
   () [@coverage off]
 
 let clean_up_reader_fields pipe =
@@ -200,6 +201,7 @@ let pipe () =
     write_buffer = dummy_buffer;
     write_offset = 0;
     write_length = 0;
+    write_binary = true;
     write_fin = false;
     write_ok_callback = ignore;
     write_close_callback = ignore;
@@ -224,7 +226,11 @@ let pipe () =
       begin match internal.write_kind with
       | `Data ->
         data
-          buffer internal.write_offset internal.write_length internal.write_fin
+          buffer
+          internal.write_offset
+          internal.write_length
+          internal.write_binary
+          internal.write_fin
       | `Flush -> flush ()
       | `Ping -> ping ()
       | `Pong -> pong ()
@@ -234,7 +240,7 @@ let pipe () =
       close ()
   in
 
-  let write buffer offset length fin ~ok ~close =
+  let write buffer offset length binary fin ~ok ~close =
     match internal.state with
     | `Idle ->
       internal.state <- `Writer_waiting;
@@ -242,6 +248,7 @@ let pipe () =
       internal.write_buffer <- buffer;
       internal.write_offset <- offset;
       internal.write_length <- length;
+      internal.write_binary <- binary;
       internal.write_fin <- fin;
       internal.write_ok_callback <- ok;
       internal.write_close_callback <- close
@@ -249,7 +256,7 @@ let pipe () =
       internal.state <- `Idle;
       let read_data_callback = internal.read_data_callback in
       clean_up_reader_fields internal;
-      read_data_callback buffer offset length fin;
+      read_data_callback buffer offset length binary fin;
       ok ()
     | `Writer_waiting ->
       raise (Failure "stream write: the previous write has not completed")
@@ -339,7 +346,7 @@ let read_convenience stream =
 
   let rec loop () =
     stream.read
-      ~data:(fun buffer offset length _fin ->
+      ~data:(fun buffer offset length _binary _fin ->
         Bigstringaf.sub buffer ~off:offset ~len:length
         |> Bigstringaf.to_string
         |> Option.some
@@ -374,7 +381,7 @@ let read_until_close stream =
 
   let rec loop () =
     stream.read
-      ~data:(fun chunk offset chunk_length _fin ->
+      ~data:(fun chunk offset chunk_length _binary _fin ->
         let new_length = !length + chunk_length in
 
         if new_length > Bigstringaf.length !buffer then begin

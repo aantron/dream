@@ -11,9 +11,9 @@ module Stream = Dream__pure.Stream
 
 let read_and_dump stream =
   Stream.read stream
-    ~data:(fun buffer offset length fin ->
-      Printf.printf "read: data: FIN=%b %s\n"
-        fin (Bigstringaf.substring buffer ~off:offset ~len:length))
+    ~data:(fun buffer offset length binary fin ->
+      Printf.printf "read: data: BINARY=%b FIN=%b %s\n"
+        binary fin (Bigstringaf.substring buffer ~off:offset ~len:length))
     ~close:(fun () ->
       print_endline "read: close")
     ~flush:(fun () ->
@@ -30,8 +30,8 @@ let flush_and_dump stream =
     ~close:(fun () ->
       print_endline "flush: close")
 
-let write_and_dump stream buffer offset length fin =
-  Stream.write stream buffer offset length fin
+let write_and_dump stream buffer offset length binary fin =
+  Stream.write stream buffer offset length binary fin
     ~ok:(fun () ->
       print_endline "write: ok")
     ~close:(fun () ->
@@ -80,7 +80,7 @@ let%expect_test _ =
   Stream.close stream;
   read_and_dump stream;
   [%expect {|
-    read: data: FIN=true foo
+    read: data: BINARY=true FIN=true foo
     read: close
     read: close
     read: close |}]
@@ -101,7 +101,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   let stream = Stream.empty in
-  (try write_and_dump stream Bigstringaf.empty 0 0 false
+  (try write_and_dump stream Bigstringaf.empty 0 0 false false
   with Failure _ as exn -> print_endline (Printexc.to_string exn));
   (try flush_and_dump stream
   with Failure _ as exn -> print_endline (Printexc.to_string exn));
@@ -190,19 +190,19 @@ let%expect_test _ =
   let stream = Stream.pipe () in
   read_and_dump stream;
   print_endline "checkpoint 1";
-  write_and_dump stream buffer 0 3 true;
-  write_and_dump stream buffer 1 1 false;
+  write_and_dump stream buffer 0 3 false true;
+  write_and_dump stream buffer 1 1 true false;
   print_endline "checkpoint 2";
   read_and_dump stream;
-  write_and_dump stream buffer 0 3 true;
-  try write_and_dump stream buffer 0 3 false
+  write_and_dump stream buffer 0 3 true true;
+  try write_and_dump stream buffer 0 3 false false
   with Failure _ as exn -> print_endline (Printexc.to_string exn);
   [%expect {|
     checkpoint 1
-    read: data: FIN=true foo
+    read: data: BINARY=false FIN=true foo
     write: ok
     checkpoint 2
-    read: data: FIN=false o
+    read: data: BINARY=true FIN=false o
     write: ok
     (Failure "stream write: the previous write has not completed") |}]
 
@@ -273,9 +273,9 @@ let%expect_test _ =
 
 let%expect_test _ =
   let stream = Stream.pipe () in
-  write_and_dump stream buffer 0 3 true;
+  write_and_dump stream buffer 0 3 true true;
   Stream.close stream;
-  write_and_dump stream buffer 0 3 false;
+  write_and_dump stream buffer 0 3 true false;
   [%expect {|
     write: close
     write: close |}]
