@@ -117,21 +117,28 @@ let websocket_handler user's_websocket_handler socket =
               data last_buffer last_offset last_length binary fin)
   in
 
+  let bytes_since_flush = ref 0 in
+
+  let flush ~ok ~close =
+    bytes_since_flush := 0;
+    if !closed then
+      close 1000
+    else
+      Websocketaf.Wsd.flushed socket ok
+  in
+
   let write buffer offset length binary _fin ~ok ~close =
     let kind = if binary then `Binary else `Text in
     if !closed then
       close 1000
     else begin
       Websocketaf.Wsd.schedule socket ~kind buffer ~off:offset ~len:length;
-      ok ()
+      bytes_since_flush := !bytes_since_flush + length;
+      if !bytes_since_flush >= 4096 then
+        flush ~ok ~close
+      else
+        ok ()
     end
-  in
-
-  let flush ~ok ~close =
-    if !closed then
-      close 1000
-    else
-      Websocketaf.Wsd.flushed socket ok
   in
 
   let ping ~ok ~close =

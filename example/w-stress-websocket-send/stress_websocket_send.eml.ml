@@ -26,6 +26,12 @@ let home =
     </body>
   </html>
 
+let show_heap_size () =
+  Gc.((quick_stat ()).heap_words) * 8
+  |> float_of_int
+  |> fun bytes -> bytes /. 1024. /. 1024.
+  |> Dream.log "Heap size: %.0f MB"
+
 let frame = 64 * 1024
 
 let frame_a = String.make frame 'a'
@@ -48,10 +54,13 @@ let stress websocket =
 
   Dream.log "%.0f MB/s over %.1f s"
     ((float_of_int limit) /. elapsed /. 1024. /. 1024.) elapsed;
+  show_heap_size ();
 
   Lwt.return_unit
 
 let () =
+  show_heap_size ();
+
   Dream.run
   @@ Dream.logger
   @@ Dream.router [
