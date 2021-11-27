@@ -34,51 +34,117 @@ let sha1 s =
    implementation... *)
 let websocket_handler user's_websocket_handler socket =
 
-  (* Frames of the current partial message, in reverse order. *)
-  let message_frames = ref [] in
+  (* Queue of received frames. There doesn't appear to be a nice way to achieve
+     backpressure with the current API of websocket/af, so that will have to be
+     added later. The user-facing API of Dream does support backpressure. *)
+  let frames, push_frame = Lwt_stream.create () in
 
-  (* Queue of received messages. There doesn't appear to be a nice way to
-     achieve backpressure with the current API of websocketaf, so that will have
-     to be added later. The user-facing API of Dream does support backpressure.
-     It's just that this code here reads no matter whether there is a
-     higher-level reader. *)
-  let messages, push_message = Lwt_stream.create () in
+  (* Frame reader called by websocket/af on each frame received. There is no
+     good way to truly throttle this, hence this frame reader pushes frame
+     objects into the above frame queue for the reader to take from later. *)
+  let frame ~opcode ~is_fin:_ ~len:_ payload =
+    match opcode with
+    | `Connection_close ->
+      Websocketaf.Wsd.close socket;
+      push_frame None;
+    | `Ping ->
+      push_frame (Some `Ping)
+    | `Pong ->
+      push_frame (Some `Pong)
+    | `Other _ ->
+      () (* TODO Log? *)
+    | `Text
+    | `Binary
+    | `Continuation ->
+      push_frame (Some (`Data payload))
+  in
 
-  (* TODO Approximate pull behavior by delaying the payload reader, and
-     implement passing of ping and pong to the caller. *)
-  (* TODO Currently, there is a double conversion from bigstring to string and
-     then back (and then probably again), but this should go away once there is
-     a lower-level pull reader, and messages are assembled elsewhere in the
-     stack. *)
-  let read ~data ~close ~flush:_ ~ping:_ ~pong:_ =
-    Lwt.on_success (Lwt_stream.get messages) @@ function
-    | Some message ->
-      let length = String.length message in
-      data (Bigstringaf.of_string ~off:0 ~len:length message) 0 length true
-    | None ->
+  let eof () =
+    Websocketaf.Wsd.close socket;
+    push_frame None
+  in
+
+  (* The reader retrieves the next frame. If it is a data frame, it keeps a
+     reference to the payload across multiple reader calls, until the payload is
+     exhausted. *)
+  (* TODO What's the best way to signal FIN? As a property of the last chunk, or
+     after the last chunk? WebSockets use the former, but the current
+     websocket/af API suggests the latter. *)
+  let closed = ref false in
+  let current_payload = ref None in
+
+  (* TODO Can this be canceled by a user's close? i.e. will that eventually
+     cause a call to eof above? *)
+  let rec read ~data ~close ~flush ~ping ~pong =
+    if !closed then
       close ()
+    else
+      match !current_payload with
+      | None ->
+        Lwt.on_success (Lwt_stream.get frames) begin function
+        | None ->
+          closed := true;
+          close ()
+        | Some `Ping ->
+          ping ()
+        | Some `Pong ->
+          pong ()
+        | Some (`Data payload) ->
+          current_payload := Some payload;
+          read ~data ~close ~flush ~ping ~pong
+        end
+      | Some payload ->
+        Websocketaf.Payload.schedule_read
+          payload
+          ~on_read:(fun buffer ~off ~len ->
+            (* TODO Implement FIN. *)
+            data buffer off len true)
+          ~on_eof:(fun () ->
+            current_payload := None;
+            read ~data ~close ~flush ~ping ~pong)
   in
 
   (* TODO Re-expose kind. *)
-  let write buffer offset length _fin ~ok ~close:_ =
-    Websocketaf.Wsd.schedule
-      socket ~kind:`Text buffer ~off:offset ~len:length;
-    ok ()
+  let write buffer offset length _fin ~ok ~close =
+    if !closed then
+      close ()
+    else begin
+      Websocketaf.Wsd.schedule
+        socket ~kind:`Text buffer ~off:offset ~len:length;
+      ok ()
+    end
   in
 
-  (* TODO Implement (for the first time). *)
-  let flush ~ok ~close:_ =
-    ok () in
+  let flush ~ok ~close =
+    if !closed then
+      close ()
+    else
+      Websocketaf.Wsd.flushed socket ok
+  in
 
-  let ping ~ok ~close:_ =
-    ok () in
+  let ping ~ok ~close =
+    if !closed then
+      close ()
+    else begin
+      Websocketaf.Wsd.send_ping socket;
+      ok ()
+    end
+  in
 
-  let pong ~ok ~close:_ =
-    ok () in
+  let pong ~ok ~close =
+    if !closed then
+      close ()
+    else begin
+      Websocketaf.Wsd.send_pong socket;
+      ok ()
+    end
+  in
 
   (* TODO Re-expose close code. *)
   let close () =
-    Websocketaf.Wsd.close socket in
+    closed := true;
+    Websocketaf.Wsd.close socket
+  in
 
   let websocket =
     Stream.stream ~read ~write ~flush ~ping ~pong ~close in
@@ -86,50 +152,6 @@ let websocket_handler user's_websocket_handler socket =
   (* TODO Needs error handling like the top-level app has! *)
   Lwt.async (fun () ->
     user's_websocket_handler websocket);
-
-  (* The code isn't very efficient at the moment, doing multiple copies while
-     assembling a message. However, multi-fragment messages should be relatively
-     rare. *)
-
-  (* This function is called on each frame received. In this high-level handler.
-     we automatically respond to all control opcodes. *)
-  let frame ~opcode ~is_fin ~len:_ payload =
-    match opcode with
-    | `Connection_close ->
-      Websocketaf.Wsd.close socket;
-      push_message None;
-    | `Ping ->
-      Websocketaf.Wsd.send_pong socket
-    | `Pong ->
-      ()
-    | `Other _ ->
-      ()
-
-    | `Text
-    | `Binary
-    | `Continuation ->
-      let rec read () =
-        Websocketaf.Payload.schedule_read
-          payload
-          ~on_read:(fun buffer ~off ~len ->
-            let fragment =
-              Lwt_bytes.to_string (Lwt_bytes.proxy buffer off len) in
-            message_frames := fragment::!message_frames;
-            read ())
-        ~on_eof:(fun () ->
-          if is_fin then begin
-            let message = String.concat "" (List.rev !message_frames) in
-            message_frames := [];
-            push_message (Some message)
-          end)
-      in
-      read ()
-  in
-
-  let eof () =
-    push_message None;
-    Websocketaf.Wsd.close socket
-  in
 
   Websocketaf.Server_connection.{frame; eof}
 
