@@ -47,21 +47,22 @@ let websocket_handler user's_websocket_handler socket =
     match opcode with
     | `Connection_close ->
       Websocketaf.Wsd.close socket;
-      push_frame None;
+      push_frame (Some (`Close, payload))
     | `Ping ->
-      push_frame (Some `Ping)
+      push_frame (Some (`Ping, payload))
     | `Pong ->
-      push_frame (Some `Pong)
+      push_frame (Some (`Pong, payload))
     | `Other _ ->
-      () (* TODO Log? *)
+      (* TODO Log? *)
+      push_frame (Some (`Other, payload))
     | `Text ->
       message_is_binary := `Text;
-      push_frame (Some (`Data (payload, `Text, is_fin)))
+      push_frame (Some (`Data (`Text, is_fin), payload))
     | `Binary ->
       message_is_binary := `Binary;
-      push_frame (Some (`Data (payload, `Binary, is_fin)))
+      push_frame (Some (`Data (`Binary, is_fin), payload))
     | `Continuation ->
-      push_frame (Some (`Data (payload, !message_is_binary, is_fin)))
+      push_frame (Some (`Data (!message_is_binary, is_fin), payload))
   in
 
   let eof () =
@@ -75,6 +76,37 @@ let websocket_handler user's_websocket_handler socket =
   let closed = ref false in
   let current_payload = ref None in
   let last_chunk = ref None in
+  (* TODO Review per-chunk allocations, including current_payload contents. *)
+
+  (* For control frames, the payload can be at most 125 bytes long. We assume
+     that the first chunk will contain the whole payload, and discard any other
+     chunks that may be reported by websocket/af. *)
+  let first_chunk_received = ref false in
+  let first_chunk = ref Bigstringaf.empty in
+  let first_chunk_offset = ref 0 in
+  let first_chunk_length = ref 0 in
+  let rec drain_payload payload continuation =
+    Websocketaf.Payload.schedule_read
+      payload
+      ~on_read:(fun buffer ~off ~len ->
+        if not !first_chunk_received then begin
+          first_chunk := buffer;
+          first_chunk_offset := off;
+          first_chunk_length := len;
+          first_chunk_received := true
+        end;
+        (* TODO Warn about receiving additional chunks. *)
+        drain_payload payload continuation)
+      ~on_eof:(fun () ->
+        let payload = !first_chunk in
+        let offset = !first_chunk_offset in
+        let length = !first_chunk_length in
+        first_chunk_received := false;
+        first_chunk := Bigstringaf.empty;
+        first_chunk_offset := 0;
+        first_chunk_length := 0;
+        continuation payload offset length)
+  in
 
   (* TODO Can this be canceled by a user's close? i.e. will that eventually
      cause a call to eof above? *)
@@ -88,15 +120,23 @@ let websocket_handler user's_websocket_handler socket =
         | None ->
           closed := true;
           close 1000
-        | Some `Ping ->
+        | Some (`Close, payload) ->
+          drain_payload payload @@ fun _buffer _offset _length ->
+          close 1000
+        | Some (`Ping, payload) ->
+          drain_payload payload @@ fun _buffer _offset _length ->
           ping ()
-        | Some `Pong ->
+        | Some (`Pong, payload) ->
+          drain_payload payload @@ fun _buffer _offset _length ->
           pong ()
-        | Some (`Data payload) ->
-          current_payload := Some payload;
+        | Some (`Other, payload) ->
+          drain_payload payload @@ fun _buffer _offset _length ->
+          read ~data ~close ~flush ~ping ~pong
+        | Some (`Data properties, payload) ->
+          current_payload := Some (properties, payload);
           read ~data ~close ~flush ~ping ~pong
         end
-      | Some (payload, binary, fin) ->
+      | Some ((binary, fin), payload) ->
         Websocketaf.Payload.schedule_read
           payload
           ~on_read:(fun buffer ~off ~len ->
