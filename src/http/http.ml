@@ -38,7 +38,7 @@ let websocket_handler user's_websocket_handler socket =
      backpressure with the current API of websocket/af, so that will have to be
      added later. The user-facing API of Dream does support backpressure. *)
   let frames, push_frame = Lwt_stream.create () in
-  let message_is_binary = ref true in
+  let message_is_binary = ref `Binary in
 
   (* Frame reader called by websocket/af on each frame received. There is no
      good way to truly throttle this, hence this frame reader pushes frame
@@ -55,11 +55,11 @@ let websocket_handler user's_websocket_handler socket =
     | `Other _ ->
       () (* TODO Log? *)
     | `Text ->
-      message_is_binary := false;
-      push_frame (Some (`Data (payload, false, is_fin)))
+      message_is_binary := `Text;
+      push_frame (Some (`Data (payload, `Text, is_fin)))
     | `Binary ->
-      message_is_binary := true;
-      push_frame (Some (`Data (payload, true, is_fin)))
+      message_is_binary := `Binary;
+      push_frame (Some (`Data (payload, `Binary, is_fin)))
     | `Continuation ->
       push_frame (Some (`Data (payload, !message_is_binary, is_fin)))
   in
@@ -106,6 +106,7 @@ let websocket_handler user's_websocket_handler socket =
               read ~data ~close ~flush ~ping ~pong
             | Some (last_buffer, last_offset, last_length) ->
               last_chunk := Some (buffer, off, len);
+              let binary = binary = `Binary in
               data last_buffer last_offset last_length binary false)
           ~on_eof:(fun () ->
             current_payload := None;
@@ -114,6 +115,7 @@ let websocket_handler user's_websocket_handler socket =
               read ~data ~close ~flush ~ping ~pong
             | Some (last_buffer, last_offset, last_length) ->
               last_chunk := None;
+              let binary = binary = `Binary in
               data last_buffer last_offset last_length binary fin)
   in
 
