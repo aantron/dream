@@ -119,10 +119,15 @@ let websocket_handler user's_websocket_handler socket =
         Lwt.on_success (Lwt_stream.get frames) begin function
         | None ->
           closed := true;
-          close 1000
+          close 1005
         | Some (`Close, payload) ->
-          drain_payload payload @@ fun _buffer _offset _length ->
-          close 1000
+          drain_payload payload @@ fun buffer offset length ->
+          if length < 2 then
+            close 1005
+          else
+            let high_byte = Char.code buffer.{offset}
+            and low_byte = Char.code buffer.{offset + 1} in
+            close (high_byte lsl 8 lor low_byte)
         | Some (`Ping, payload) ->
           drain_payload payload @@ fun _buffer _offset _length ->
           ping ()
