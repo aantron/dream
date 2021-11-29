@@ -1,14 +1,19 @@
-type request
-type response
+type incoming
+type outgoing
+
+type 'a message
+
+type request = incoming message
+type response = outgoing message
 
 type handler = request -> response Lwt.t
+type middleware = handler -> handler
 
 module Make
   (Pclock : Mirage_clock.PCLOCK)
   (Time : Mirage_time.S)
   (Stack : Mirage_stack.V4V6) : sig
-  type middleware = handler -> handler
-  
+
   type route
 
   type method_ =
@@ -105,7 +110,7 @@ module Make
   val error     : ('a, unit) conditional_log
   val warning   : ('a, unit) conditional_log
   val info      : ('a, unit) conditional_log
-  val debug     : ('a, unit) conditional_log
+  (* val debug     : ('a, unit) conditional_log *)
 
   val html : ?status:status -> ?code:int -> ?headers:(string * string) list -> string -> response Lwt.t
 
@@ -132,8 +137,8 @@ module Make
   type multipart_form =
     (string * ((string option * string) list)) list
 
-  val form : request -> (string * string) list form_result Lwt.t
-  val multipart : request -> multipart_form form_result Lwt.t
+  val form : ?csrf:bool -> request -> (string * string) list form_result Lwt.t
+  val multipart : ?csrf:bool -> request -> multipart_form form_result Lwt.t
 
   val form_tag :
     ?method_:method_ ->
@@ -181,7 +186,7 @@ module Make
        ?stop:Lwt_switch.t
     -> port:int
     -> ?prefix:string
-    -> Stack.t
+    -> Stack.TCP.t
     -> ?cfg:Tls.Config.server
     -> ?error_handler:error_handler
     -> handler
@@ -192,7 +197,7 @@ module Make
     -> port:int
     -> ?prefix:string
     -> ?protocol:[ `H2 | `HTTP_1_1 ]
-    -> Stack.t
+    -> Stack.TCP.t
     -> ?error_handler:error_handler
     -> handler
     -> unit Lwt.t

@@ -7,6 +7,7 @@
    depends on [Unix]. *)
 
 module Dream = Dream__pure.Inmost
+module Stream = Dream__pure.Stream
 
 (* TODO Write a test simulating client exit during SSE; this was killing the
    server at some point. *)
@@ -14,30 +15,42 @@ module Dream = Dream__pure.Inmost
 (* TODO Rewrite using Dream.next. *)
 let forward_body_general
     (response : Dream.response)
-    (write_string : ?off:int -> ?len:int -> string -> unit)
-    (write_buffer : ?off:int -> ?len:int -> Dream.buffer -> unit)
+    (_write_string : ?off:int -> ?len:int -> string -> unit)
+    (write_buffer : ?off:int -> ?len:int -> Stream.buffer -> unit)
     http_flush
     close =
+  let bytes_since_flush = ref 0 in
 
   let rec send () =
-    response
-    |> Dream.next
-      ~buffer
-      ~string
-      ~flush
-      ~close
-      ~exn:ignore
+    Dream.body_stream response
+    |> fun stream ->
+      Stream.read
+        stream
+        ~data
+        ~close
+        ~flush
+        ~ping
+        ~pong
 
-  and buffer chunk off len =
+  and data chunk off len _binary _fin =
     write_buffer ~off ~len chunk;
-    send ()
-
-  and string chunk off len =
-    write_string ~off ~len chunk;
-    send ()
+    bytes_since_flush := !bytes_since_flush + len;
+    if !bytes_since_flush >= 4096 then begin
+      bytes_since_flush := 0;
+      http_flush send
+    end
+    else
+      send ()
 
   and flush () =
+    bytes_since_flush := 0;
     http_flush send
+
+  and ping _buffer _offset _length =
+    send ()
+
+  and pong _buffer _offset _length =
+    send ()
 
   in
 
@@ -45,14 +58,14 @@ let forward_body_general
 
 let forward_body
     (response : Dream.response)
-    (body : [ `write ] Httpaf.Body.t) =
+    (body : Httpaf.Body.Writer.t) =
 
   forward_body_general
     response
-    (Httpaf.Body.write_string body)
-    (Httpaf.Body.write_bigstring body)
-    (Httpaf.Body.flush body)
-    (fun () -> Httpaf.Body.close_writer body)
+    (Httpaf.Body.Writer.write_string body)
+    (Httpaf.Body.Writer.write_bigstring body)
+    (Httpaf.Body.Writer.flush body)
+    (fun _code -> Httpaf.Body.Writer.close body)
 
 let forward_body_h2
     (response : Dream.response)
@@ -63,4 +76,4 @@ let forward_body_h2
     (H2.Body.write_string body)
     (H2.Body.write_bigstring body)
     (H2.Body.flush body)
-    (fun () -> H2.Body.close_writer body)
+    (fun _code -> H2.Body.close_writer body)
