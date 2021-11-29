@@ -735,8 +735,8 @@ val next :
   data:(buffer -> int -> int -> bool -> bool -> unit) ->
   close:(int -> unit) ->
   flush:(unit -> unit) ->
-  ping:(unit -> unit) ->
-  pong:(unit -> unit) ->
+  ping:(buffer -> int -> int -> unit) ->
+  pong:(buffer -> int -> int -> unit) ->
     unit
 (** Waits for the next stream event, and calls:
 

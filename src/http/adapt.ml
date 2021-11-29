@@ -53,10 +53,10 @@ let forward_body_general
     bytes_since_flush := 0;
     http_flush send
 
-  and ping () =
+  and ping _buffer _offset _length =
     send ()
 
-  and pong () =
+  and pong _buffer _offset _length =
     send ()
 
   in

@@ -129,11 +129,11 @@ let websocket_handler user's_websocket_handler socket =
             and low_byte = Char.code buffer.{offset + 1} in
             close (high_byte lsl 8 lor low_byte)
         | Some (`Ping, payload) ->
-          drain_payload payload @@ fun _buffer _offset _length ->
-          ping ()
+          drain_payload payload @@
+          ping
         | Some (`Pong, payload) ->
-          drain_payload payload @@ fun _buffer _offset _length ->
-          pong ()
+          drain_payload payload @@
+          pong
         | Some (`Other, payload) ->
           drain_payload payload @@ fun _buffer _offset _length ->
           read ~data ~close ~flush ~ping ~pong
@@ -188,7 +188,9 @@ let websocket_handler user's_websocket_handler socket =
     end
   in
 
-  let ping ~ok ~close =
+  (* TODO Log if the length is non-zero, as current websocket/af offers no way
+     to send the user data. Also log if the length is greater than 125. *)
+  let ping _buffer _offset _length ~ok ~close =
     if !closed then
       close 1000
     else begin
@@ -197,7 +199,7 @@ let websocket_handler user's_websocket_handler socket =
     end
   in
 
-  let pong ~ok ~close =
+  let pong _buffer _offset _length ~ok ~close =
     if !closed then
       close 1000
     else begin

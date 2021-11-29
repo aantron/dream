@@ -15,8 +15,8 @@ type read =
   data:(buffer -> int -> int -> bool -> bool -> unit) ->
   close:(int -> unit) ->
   flush:(unit -> unit) ->
-  ping:(unit -> unit) ->
-  pong:(unit -> unit) ->
+  ping:(buffer -> int -> int -> unit) ->
+  pong:(buffer -> int -> int -> unit) ->
     unit
 
 type write =
@@ -28,8 +28,8 @@ type stream = {
   read : read;
   write : buffer -> int -> int -> bool -> bool -> write;
   flush : write;
-  ping : write;
-  pong : write;
+  ping : buffer -> int -> int -> write;
+  pong : buffer -> int -> int -> write;
   close : int -> unit;
 }
 
@@ -53,10 +53,10 @@ let read_only ~read ~close =
       (fun ~ok:_ ~close:_ ->
         raise (Failure "flush of a read-only stream"));
     ping =
-      (fun ~ok:_ ~close:_ ->
+      (fun _buffer _offset _length ~ok:_ ~close:_ ->
         raise (Failure "ping on a read-only stream"));
     pong =
-      (fun ~ok:_ ~close:_ ->
+      (fun _buffer _offset _length ~ok:_ ~close:_ ->
         raise (Failure "pong on a read-only stream"));
     close;
   }
@@ -87,7 +87,7 @@ let string the_string =
         close 1000
     in
 
-    let close _ =
+    let close _code =
       string_ref := None;
     in
 
@@ -116,11 +116,11 @@ let write stream buffer offset length binary fin ~ok ~close =
 let flush stream ~ok ~close =
   stream.flush ~ok ~close
 
-let ping stream ~ok ~close =
-  stream.ping ~ok ~close
+let ping stream buffer offset length ~ok ~close =
+  stream.ping buffer offset length ~ok ~close
 
-let pong stream ~ok ~close =
-  stream.pong ~ok ~close
+let pong stream buffer offset length ~ok ~close =
+  stream.pong buffer offset length ~ok ~close
 
 type pipe = {
   mutable state : [
@@ -133,8 +133,8 @@ type pipe = {
   mutable read_data_callback : buffer -> int -> int -> bool -> bool -> unit;
   mutable read_close_callback : int -> unit;
   mutable read_flush_callback : unit -> unit;
-  mutable read_ping_callback : unit -> unit;
-  mutable read_pong_callback : unit -> unit;
+  mutable read_ping_callback : buffer -> int -> int -> unit;
+  mutable read_pong_callback : buffer -> int -> int -> unit;
 
   mutable write_kind : [
     | `Data
@@ -157,12 +157,15 @@ let dummy_buffer =
 let dummy_read_data_callback _buffer _offset _length _binary _fin =
   () [@coverage off]
 
+let dummy_ping_pong_callback _buffer _offset _length =
+  () [@coverage off]
+
 let clean_up_reader_fields pipe =
   pipe.read_data_callback <- dummy_read_data_callback;
   pipe.read_close_callback <- ignore;
   pipe.read_flush_callback <- ignore;
-  pipe.read_ping_callback <- ignore;
-  pipe.read_pong_callback <- ignore
+  pipe.read_ping_callback <- dummy_ping_pong_callback;
+  pipe.read_pong_callback <- dummy_ping_pong_callback
 
 let clean_up_writer_fields pipe =
   pipe.write_buffer <- dummy_buffer;
@@ -176,8 +179,8 @@ let pipe () =
     read_data_callback = dummy_read_data_callback;
     read_close_callback = ignore;
     read_flush_callback = ignore;
-    read_ping_callback = ignore;
-    read_pong_callback = ignore;
+    read_ping_callback = dummy_ping_pong_callback;
+    read_pong_callback = dummy_ping_pong_callback;
 
     write_kind = `Data;
     write_buffer = dummy_buffer;
@@ -214,8 +217,8 @@ let pipe () =
           internal.write_binary
           internal.write_fin
       | `Flush -> flush ()
-      | `Ping -> ping ()
-      | `Pong -> pong ()
+      | `Ping -> ping buffer internal.write_offset internal.write_length
+      | `Pong -> pong buffer internal.write_offset internal.write_length
       end;
       write_ok_callback ()
     | `Closed code ->
@@ -283,18 +286,21 @@ let pipe () =
       close code
   in
 
-  let ping ~ok ~close =
+  let ping buffer offset length ~ok ~close =
     match internal.state with
     | `Idle ->
       internal.state <- `Writer_waiting;
       internal.write_kind <- `Ping;
+      internal.write_buffer <- buffer;
+      internal.write_offset <- offset;
+      internal.write_length <- length;
       internal.write_ok_callback <- ok;
       internal.write_close_callback <- close
     | `Reader_waiting ->
       internal.state <- `Idle;
       let read_ping_callback = internal.read_ping_callback in
       clean_up_reader_fields internal;
-      read_ping_callback ();
+      read_ping_callback buffer offset length;
       ok ()
     | `Writer_waiting ->
       raise (Failure "stream ping: the previous write has not completed")
@@ -302,18 +308,21 @@ let pipe () =
       close code
   in
 
-  let pong ~ok ~close =
+  let pong buffer offset length ~ok ~close =
     match internal.state with
     | `Idle ->
       internal.state <- `Writer_waiting;
       internal.write_kind <- `Pong;
+      internal.write_buffer <- buffer;
+      internal.write_offset <- offset;
+      internal.write_length <- length;
       internal.write_ok_callback <- ok;
       internal.write_close_callback <- close
     | `Reader_waiting ->
       internal.state <- `Idle;
       let read_pong_callback = internal.read_pong_callback in
       clean_up_reader_fields internal;
-      read_pong_callback ();
+      read_pong_callback buffer offset length;
       ok ()
     | `Writer_waiting ->
       raise (Failure "stream pong: the previous write has not completed")
@@ -339,13 +348,15 @@ let read_convenience stream =
 
       ~flush:loop
 
-      ~ping:(fun () ->
+      ~ping:(fun buffer offset length ->
         stream.pong
+          buffer offset length
           ~ok:loop
           ~close:(fun _code ->
             Lwt.wakeup_later resolver None))
 
-      ~pong:loop
+      ~pong:(fun _buffer _offset _length ->
+        ())
   in
   loop ();
 
@@ -383,10 +394,11 @@ let read_until_close stream =
 
       ~flush:loop
 
-      ~ping:(fun () ->
-        stream.pong ~ok:loop ~close)
+      ~ping:(fun buffer offset length ->
+        stream.pong buffer offset length ~ok:loop ~close)
 
-      ~pong:loop
+      ~pong:(fun _buffer _offset _length ->
+        ())
   in
   loop ();
 

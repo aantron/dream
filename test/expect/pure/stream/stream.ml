@@ -18,10 +18,12 @@ let read_and_dump stream =
       Printf.printf "read: close: CODE=%i\n" code)
     ~flush:(fun () ->
       print_endline "read: flush")
-    ~ping:(fun () ->
-      print_endline "read: ping")
-    ~pong:(fun () ->
-      print_endline "read: pong")
+    ~ping:(fun buffer offset length ->
+      Printf.printf "read: ping: %s\n"
+        (Bigstringaf.substring buffer ~off:offset ~len:length))
+    ~pong:(fun buffer offset length ->
+      Printf.printf "read: pong: %s\n"
+        (Bigstringaf.substring buffer ~off:offset ~len:length))
 
 let flush_and_dump stream =
   Stream.flush stream
@@ -37,15 +39,17 @@ let write_and_dump stream buffer offset length binary fin =
     ~close:(fun code ->
       Printf.printf "write: close: CODE=%i\n" code)
 
-let ping_and_dump stream =
-  Stream.ping stream
+let ping_and_dump payload stream =
+  let length = String.length payload in
+  Stream.ping stream (Bigstringaf.of_string ~off:0 ~len:length payload) 0 length
     ~ok:(fun () ->
       print_endline "ping: ok")
     ~close:(fun code ->
       Printf.printf "ping: close: CODE=%i\n" code)
 
-let pong_and_dump stream =
-  Stream.pong stream
+let pong_and_dump payload stream =
+  let length = String.length payload in
+  Stream.pong stream (Bigstringaf.of_string ~off:0 ~len:length payload) 0 length
     ~ok:(fun () ->
       print_endline "pong: ok")
     ~close:(fun code ->
@@ -105,9 +109,9 @@ let%expect_test _ =
   with Failure _ as exn -> print_endline (Printexc.to_string exn));
   (try flush_and_dump stream
   with Failure _ as exn -> print_endline (Printexc.to_string exn));
-  (try ping_and_dump stream
+  (try ping_and_dump "foo" stream
   with Failure _ as exn -> print_endline (Printexc.to_string exn));
-  (try pong_and_dump stream
+  (try pong_and_dump "bar" stream
   with Failure _ as exn -> print_endline (Printexc.to_string exn));
   [%expect {|
     (Failure "write to a read-only stream")
@@ -214,19 +218,19 @@ let%expect_test _ =
   let stream = Stream.pipe () in
   read_and_dump stream;
   print_endline "checkpoint 1";
-  ping_and_dump stream;
-  ping_and_dump stream;
+  ping_and_dump "foo" stream;
+  ping_and_dump "bar" stream;
   print_endline "checkpoint 2";
   read_and_dump stream;
-  ping_and_dump stream;
-  try ping_and_dump stream
+  ping_and_dump "baz" stream;
+  try ping_and_dump "quux" stream
   with Failure _ as exn -> print_endline (Printexc.to_string exn);
   [%expect {|
     checkpoint 1
-    read: ping
+    read: ping: foo
     ping: ok
     checkpoint 2
-    read: ping
+    read: ping: bar
     ping: ok
     (Failure "stream ping: the previous write has not completed") |}]
 
@@ -238,19 +242,19 @@ let%expect_test _ =
   let stream = Stream.pipe () in
   read_and_dump stream;
   print_endline "checkpoint 1";
-  pong_and_dump stream;
-  pong_and_dump stream;
+  pong_and_dump "foo" stream;
+  pong_and_dump "bar" stream;
   print_endline "checkpoint 2";
   read_and_dump stream;
-  pong_and_dump stream;
-  try pong_and_dump stream
+  pong_and_dump "baz" stream;
+  try pong_and_dump "quux" stream
   with Failure _ as exn -> print_endline (Printexc.to_string exn);
   [%expect {|
     checkpoint 1
-    read: pong
+    read: pong: foo
     pong: ok
     checkpoint 2
-    read: pong
+    read: pong: bar
     pong: ok
     (Failure "stream pong: the previous write has not completed") |}]
 
@@ -286,9 +290,9 @@ let%expect_test _ =
 
 let%expect_test _ =
   let stream = Stream.pipe () in
-  ping_and_dump stream;
+  ping_and_dump "foo" stream;
   Stream.close stream 1005;
-  ping_and_dump stream;
+  ping_and_dump "bar" stream;
   [%expect {|
     ping: close: CODE=1005
     ping: close: CODE=1005 |}]
@@ -299,9 +303,9 @@ let%expect_test _ =
 
 let%expect_test _ =
   let stream = Stream.pipe () in
-  pong_and_dump stream;
+  pong_and_dump "foo" stream;
   Stream.close stream 1005;
-  pong_and_dump stream;
+  pong_and_dump "bar" stream;
   [%expect {|
     pong: close: CODE=1005
     pong: close: CODE=1005 |}]

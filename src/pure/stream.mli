@@ -50,8 +50,8 @@ type read =
   data:(buffer -> int -> int -> bool -> bool -> unit) ->
   close:(int -> unit) ->
   flush:(unit -> unit) ->
-  ping:(unit -> unit) ->
-  pong:(unit -> unit) ->
+  ping:(buffer -> int -> int -> unit) ->
+  pong:(buffer -> int -> int -> unit) ->
     unit
 (** A reading function. Awaits the next event on the stream. For each call of a
     reading function, one of the callbacks will eventually be called, according
@@ -90,8 +90,8 @@ val stream :
   read:read ->
   write:(buffer -> int -> int -> bool -> bool -> write) ->
   flush:write ->
-  ping:write ->
-  pong:write ->
+  ping:(buffer -> int -> int -> write) ->
+  pong:(buffer -> int -> int -> write) ->
   close:(int -> unit) ->
     stream
 (** A general stream. *)
@@ -134,10 +134,10 @@ val flush : stream -> write
     of flushing depends on the implementation of the stream. No more writing
     functions should be called on the stream until this function calls [~ok]. *)
 
-val ping : stream -> write
+val ping : stream -> buffer -> int -> int -> write
 (** A writing function that sends a ping event on the given stream. This is only
     meaningful for WebSockets. *)
 
-val pong : stream -> write
+val pong : stream -> buffer -> int -> int -> write
 (** A writing function that sends a pong event on the given stream. This is only
     meaningful for WebSockets. *)
