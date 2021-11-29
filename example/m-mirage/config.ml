@@ -37,6 +37,7 @@ let dream =
     ~packages:[ package "ca-certs-nss"
               ; package "dns-client" ~sublibs:[ "mirage" ]
               ; package "dream-mirage" ~sublibs:[ "paf.le" ]
+              ; package "checkseum" ~sublibs:[ "c" ]
               ; package "dream-mirage" ]
     ~keys:Key.([ abstract port
                ; abstract hostname
