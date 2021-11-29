@@ -46,7 +46,6 @@ let websocket_handler user's_websocket_handler socket =
   let frame ~opcode ~is_fin ~len:_ payload =
     match opcode with
     | `Connection_close ->
-      Websocketaf.Wsd.close socket;
       push_frame (Some (`Close, payload))
     | `Ping ->
       push_frame (Some (`Ping, payload))
@@ -66,14 +65,13 @@ let websocket_handler user's_websocket_handler socket =
   in
 
   let eof () =
-    Websocketaf.Wsd.close socket;
-    push_frame None
-  in
+    push_frame None in
 
   (* The reader retrieves the next frame. If it is a data frame, it keeps a
      reference to the payload across multiple reader calls, until the payload is
      exhausted. *)
   let closed = ref false in
+  let close_code = ref 1005 in
   let current_payload = ref None in
   let last_chunk = ref None in
   (* TODO Review per-chunk allocations, including current_payload contents. *)
@@ -112,22 +110,31 @@ let websocket_handler user's_websocket_handler socket =
      cause a call to eof above? *)
   let rec read ~data ~close ~flush ~ping ~pong =
     if !closed then
-      close 1000
+      close !close_code
     else
       match !current_payload with
       | None ->
         Lwt.on_success (Lwt_stream.get frames) begin function
         | None ->
-          closed := true;
-          close 1005
+          if not !closed then begin
+            closed := true;
+            close_code := 1005
+          end;
+          Websocketaf.Wsd.close socket;
+          close !close_code
         | Some (`Close, payload) ->
           drain_payload payload @@ fun buffer offset length ->
-          if length < 2 then
-            close 1005
-          else
-            let high_byte = Char.code buffer.{offset}
-            and low_byte = Char.code buffer.{offset + 1} in
-            close (high_byte lsl 8 lor low_byte)
+          let code =
+            if length < 2 then
+              1005
+            else
+              let high_byte = Char.code buffer.{offset}
+              and low_byte = Char.code buffer.{offset + 1} in
+              high_byte lsl 8 lor low_byte
+          in
+          if not !closed then
+            close_code := code;
+          close !close_code
         | Some (`Ping, payload) ->
           drain_payload payload @@
           ping
@@ -169,7 +176,7 @@ let websocket_handler user's_websocket_handler socket =
   let flush ~ok ~close =
     bytes_since_flush := 0;
     if !closed then
-      close 1000
+      close !close_code
     else
       Websocketaf.Wsd.flushed socket ok
   in
@@ -177,7 +184,7 @@ let websocket_handler user's_websocket_handler socket =
   let write buffer offset length binary _fin ~ok ~close =
     let kind = if binary then `Binary else `Text in
     if !closed then
-      close 1000
+      close !close_code
     else begin
       Websocketaf.Wsd.schedule socket ~kind buffer ~off:offset ~len:length;
       bytes_since_flush := !bytes_since_flush + length;
@@ -192,7 +199,7 @@ let websocket_handler user's_websocket_handler socket =
      to send the user data. Also log if the length is greater than 125. *)
   let ping _buffer _offset _length ~ok ~close =
     if !closed then
-      close 1000
+      close !close_code
     else begin
       Websocketaf.Wsd.send_ping socket;
       ok ()
@@ -201,7 +208,7 @@ let websocket_handler user's_websocket_handler socket =
 
   let pong _buffer _offset _length ~ok ~close =
     if !closed then
-      close 1000
+      close !close_code
     else begin
       Websocketaf.Wsd.send_pong socket;
       ok ()
@@ -209,8 +216,10 @@ let websocket_handler user's_websocket_handler socket =
   in
 
   let close code =
-    closed := true;
-    Websocketaf.Wsd.close ~code:(`Other code) socket
+    if not !closed then begin
+      closed := true;
+      Websocketaf.Wsd.close ~code:(`Other code) socket
+    end
   in
 
   let websocket =
