@@ -23,15 +23,14 @@ let to_httpaf_status status =
 let to_h2_status status =
   Dream.status_to_int status |> H2.Status.of_code
 
-(* TODO Contact upstream: this is from websocketaf/lwt/websocketaf_lwt.ml, but
-   it is not exposed. *)
 let sha1 s =
   s
   |> Digestif.SHA1.digest_string
   |> Digestif.SHA1.to_raw_string
 
-(* TODO It appears that backpressure is impossible in the underlying
-   implementation... *)
+let websocket_log =
+  Dream__middleware.Log.sub_log "dream.websocket"
+
 let websocket_handler user's_websocket_handler socket =
 
   (* Queue of received frames. There doesn't appear to be a nice way to achieve
@@ -42,7 +41,8 @@ let websocket_handler user's_websocket_handler socket =
 
   (* Frame reader called by websocket/af on each frame received. There is no
      good way to truly throttle this, hence this frame reader pushes frame
-     objects into the above frame queue for the reader to take from later. *)
+     objects into the above frame queue for the reader to take from later. See
+     https://github.com/anmonteiro/websocketaf/issues/34. *)
   let frame ~opcode ~is_fin ~len:_ payload =
     match opcode with
     | `Connection_close ->
@@ -52,7 +52,6 @@ let websocket_handler user's_websocket_handler socket =
     | `Pong ->
       push_frame (Some (`Pong, payload))
     | `Other _ ->
-      (* TODO Log? *)
       push_frame (Some (`Other, payload))
     | `Text ->
       message_is_binary := `Text;
@@ -73,6 +72,10 @@ let websocket_handler user's_websocket_handler socket =
   let closed = ref false in
   let close_code = ref 1005 in
   let current_payload = ref None in
+
+  (* Used to convert the separate on_eof payload reading callback into a FIN bit
+     on the last chunk read. See
+     https://github.com/anmonteiro/websocketaf/issues/35. *)
   let last_chunk = ref None in
   (* TODO Review per-chunk allocations, including current_payload contents. *)
 
@@ -92,8 +95,10 @@ let websocket_handler user's_websocket_handler socket =
           first_chunk_offset := off;
           first_chunk_length := len;
           first_chunk_received := true
-        end;
-        (* TODO Warn about receiving additional chunks. *)
+        end
+        else
+          websocket_log.warning (fun log ->
+            log "Received fragmented control frame");
         drain_payload payload continuation)
       ~on_eof:(fun () ->
         let payload = !first_chunk in
@@ -142,7 +147,9 @@ let websocket_handler user's_websocket_handler socket =
           drain_payload payload @@
           pong
         | Some (`Other, payload) ->
-          drain_payload payload @@ fun _buffer _offset _length ->
+          drain_payload payload @@ fun _buffer _offset length ->
+          websocket_log.warning (fun log ->
+            log "Unknown frame type with length %i" length);
           read ~data ~close ~flush ~ping ~pong
         | Some (`Data properties, payload) ->
           current_payload := Some (properties, payload);
@@ -181,7 +188,11 @@ let websocket_handler user's_websocket_handler socket =
       Websocketaf.Wsd.flushed socket ok
   in
 
-  let write buffer offset length binary _fin ~ok ~close =
+  let write buffer offset length binary fin ~ok ~close =
+    (* Until https://github.com/anmonteiro/websocketaf/issues/33. *)
+    if not fin then
+      websocket_log.error (fun log ->
+        log "Non-FIN frames not yet supported");
     let kind = if binary then `Binary else `Text in
     if !closed then
       close !close_code
@@ -195,9 +206,13 @@ let websocket_handler user's_websocket_handler socket =
     end
   in
 
-  (* TODO Log if the length is non-zero, as current websocket/af offers no way
-     to send the user data. Also log if the length is greater than 125. *)
-  let ping _buffer _offset _length ~ok ~close =
+  let ping _buffer _offset length ~ok ~close =
+    if length > 125 then
+      raise (Failure "Ping payload cannot exceed 125 bytes");
+    (* See https://github.com/anmonteiro/websocketaf/issues/36. *)
+    if length > 0 then
+      websocket_log.warning (fun log ->
+        log "Ping with non-empty payload not yet supported");
     if !closed then
       close !close_code
     else begin
@@ -206,7 +221,15 @@ let websocket_handler user's_websocket_handler socket =
     end
   in
 
-  let pong _buffer _offset _length ~ok ~close =
+  let pong _buffer _offset length ~ok ~close =
+    (* TODO Is there any way for the peer to send a ping payload with more than
+       125 bytes, forcing a too-large pong and an exception? *)
+    if length > 125 then
+      raise (Failure "Pong payload cannot exceed 125 bytes");
+    (* See https://github.com/anmonteiro/websocketaf/issues/36. *)
+    if length > 0 then
+      websocket_log.warning (fun log ->
+        log "Pong with non-empty payload not yet supported");
     if !closed then
       close !close_code
     else begin
