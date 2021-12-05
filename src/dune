@@ -1,6 +1,7 @@
 (library
  (public_name dream)
  (wrapped false)
+ (modules dream)
  (libraries
   caqti-lwt
   dream.cipher
@@ -18,3 +19,12 @@
   mirage-crypto-rng.lwt
   ptime.clock.os
  ))
+
+(library
+ (public_name hyper)
+ (wrapped false)
+ (modules hyper)
+ (libraries
+  dream
+ )
+ (preprocess (pps lwt_ppx)))
