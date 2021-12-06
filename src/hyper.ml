@@ -4,11 +4,65 @@ type 'a promise = 'a Lwt.t
 
 type method_ = Dream.method_
 
+type connection = Httpaf_lwt_unix.Client.t
+type host = string * string * int
+(* TODO But what should a host be? An unresolved hostname:port, or a resolved
+   hostname:port? Hosts probably also need a comparison function or
+   something. And probably a pretty-printing function. These things are entirely
+   abstract. But, because they are abstract, it's possible to change the
+   implementation, in particular to switch from unresolved to resolved hosts.
+   Using unresolved hosts implies doing DNS before deciding whether each request
+   can reuse a connection from the pool. Though that can be avoided by using a
+   DNS cache, it seems like the pool should short-circuit that entire process.
+   So, this becomes some kind of scheme-host-port triplet. *)
+(* TODO Also, how should this work with HTTP/2 and multiplexing? Need to address
+   that next. *)
+
+type connection_pool = {
+  obtain : host -> request -> connection option promise;
+  return :
+    host -> request -> response -> connection -> (connection -> unit promise) ->
+      unit promise;
+}
+(* TODO Return needs to provide a function for destroying a connection. *)
+
+let connection_pool ~obtain ~return =
+  {obtain; return}
+
+let _no_pooling =
+  connection_pool
+    ~obtain:(fun _host _request ->
+      Lwt.return_none)
+    ~return:(fun _host _request _response connection destroy ->
+      destroy connection)
+
+(* TODO Non-trivial pools should always be generated, i.e. this should be a
+   function of at least (). However, we are just doing proof-of-concept code
+   here, to work out the protocol details, rather than a great connection
+   pool. Most connection pool should also examine the Connection: header, and
+   perhaps other headers. *)
+let indefinite_keepalive =
+  let pool = Hashtbl.create 32 in
+  connection_pool
+    ~obtain:(fun host _request ->
+      match Hashtbl.find_opt pool host with
+      | Some connection ->
+        Hashtbl.remove pool host;
+        Lwt.return (Some connection)
+      | None ->
+        Lwt.return_none)
+    ~return:(fun host _request _response connection _destroy ->
+      Hashtbl.add pool host connection;
+      Lwt.return_unit)
+
 (* TODO How should the host and port be represented? *)
 (* TODO Good error handling. *)
-let send hyper_request =
+(* TODO Probably change the default to one per-process pool with some
+   configuration. *)
+let send ?(connection_pool = indefinite_keepalive) hyper_request =
   let uri = Uri.of_string (Dream.target hyper_request) in
-  let host = Uri.host uri |> Option.get
+  let scheme = Uri.scheme uri |> Option.get
+  and host = Uri.host uri |> Option.get
   and port = Uri.port uri |> Option.value ~default:80
   and method_ = Dream.method_ hyper_request
   and path_and_query = Uri.path_and_query uri
@@ -18,14 +72,23 @@ let send hyper_request =
      "neat" way - just a debuggable way. The port can be inferred from the
      scheme if it is missing. We are assuming http:// for now. *)
 
-  let%lwt addresses =
-    Lwt_unix.getaddrinfo host (string_of_int port) [Unix.(AI_FAMILY PF_INET)] in
-  let address = (List.hd addresses).Unix.ai_addr in
-  (* TODO Note: this can raise. *)
+  let host_key = (scheme, host, port) in
 
-  let socket = Lwt_unix.socket Unix.PF_INET Unix.SOCK_STREAM 0 in
-  let%lwt () = Lwt_unix.connect socket address in
-  let%lwt connection = Httpaf_lwt_unix.Client.create_connection socket in
+  let%lwt connection =
+    match%lwt connection_pool.obtain host_key hyper_request with
+    | Some connection ->
+      Lwt.return connection
+    | None ->
+      let%lwt addresses =
+        Lwt_unix.getaddrinfo
+          host (string_of_int port) [Unix.(AI_FAMILY PF_INET)] in
+      let address = (List.hd addresses).Unix.ai_addr in
+      (* TODO Note: this can raise. *)
+
+      let socket = Lwt_unix.socket Unix.PF_INET Unix.SOCK_STREAM 0 in
+      let%lwt () = Lwt_unix.connect socket address in
+      Httpaf_lwt_unix.Client.create_connection socket
+  in
 
   let response_promise, received_response = Lwt.wait () in
 
@@ -56,7 +119,9 @@ let send hyper_request =
           ~on_eof:(fun () ->
             Lwt.async (fun () ->
               let%lwt () = Dream.close_stream hyper_response in
-              Httpaf_lwt_unix.Client.shutdown connection))
+              connection_pool.return
+                host_key hyper_request hyper_response connection
+                Httpaf_lwt_unix.Client.shutdown))
               (* TODO Make sure there is a way for the reader to abort reading
                  the stream and yet still get the socket closed. *)
           ~on_read:(fun buffer ~off ~len ->
