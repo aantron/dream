@@ -2,7 +2,7 @@ type request = Dream.request
 type response = Dream.response
 type 'a promise = 'a Lwt.t
 
-type method_ = Dream.method_
+
 
 (* TODO Is this the right representation? *)
 type connection =
@@ -10,7 +10,7 @@ type connection =
   | SSL of Httpaf_lwt_unix.Client.SSL.t
   | H2 of H2_lwt_unix.Client.SSL.t (* TODO No h2c support. *)
 
-type host = string * string * int
+type endpoint = string * string * int
 (* TODO But what should a host be? An unresolved hostname:port, or a resolved
    hostname:port? Hosts probably also need a comparison function or
    something. And probably a pretty-printing function. These things are entirely
@@ -26,48 +26,131 @@ type host = string * string * int
    protocol, as an https connection might have been upgraded to HTTP/2 or not at
    the server's discretion during ALPN. *)
 
+(* TODO Implementation of pipelining might make it worthwhile to be able to tell
+   the client when a request has completed sending (only). However, given
+   pipelining is buggy and there is HTTP/2, maybe it's not worth complicating
+   the API for this. *)
+
+type create_result = {
+  connection : connection;
+  destroy : connection -> unit promise;
+  concurrency : [ `Sequence | `Pipeline | `Multiplex ];
+}
+type create = endpoint -> create_result promise
+
 type connection_pool = {
-  obtain : host -> request -> connection option promise;
-  return :
-    host -> request -> response -> connection -> (connection -> unit promise) ->
-      unit promise;
+  obtain : endpoint -> request -> create -> (connection * int64) promise;
+  write_done : int64 -> unit;
+  all_done : int64 -> response -> unit;
+  error : int64 -> unit;
 }
 (* TODO Return needs to provide a function for destroying a connection. *)
 
-let connection_pool ~obtain ~return =
-  {obtain; return}
+let connection_pool ~obtain ~write_done ~all_done ~error =
+  {obtain; write_done; all_done; error}
 
-let _no_pooling =
-  connection_pool
-    ~obtain:(fun _host _request ->
-      Lwt.return_none)
-    ~return:(fun _host _request _response connection destroy ->
-      destroy connection)
 
-(* TODO Non-trivial pools should always be generated, i.e. this should be a
-   function of at least (). However, we are just doing proof-of-concept code
-   here, to work out the protocol details, rather than a great connection
-   pool. Most connection pool should also examine the Connection: header, and
-   perhaps other headers. *)
-let indefinite_keepalive =
-  let pool = Hashtbl.create 32 in
-  connection_pool
-    ~obtain:(fun host _request ->
-      match Hashtbl.find_opt pool host with
-      | Some connection ->
-        Hashtbl.remove pool host;
-        Lwt.return (Some connection)
-      | None ->
-        Lwt.return_none)
-    ~return:(fun host _request _response connection _destroy ->
-      Hashtbl.add pool host connection;
-      Lwt.return_unit)
+
+type pooled_connection = {
+  create_result : create_result;
+  id : int64;
+  created_at : float;
+  mutable state : [
+    | `Writing_request
+    | `Reading_response_only
+    | `Idle
+  ];
+  mutable ref_count : int;
+  mutable idle_since : float;
+  mutable closing : bool;
+}
+
+(* TODO Add various interesting limits. *)
+let general_connection_pool () =
+  let connections_by_id = Hashtbl.create 32
+  and connections_by_endpoint = Hashtbl.create 32
+  and next_id = ref 0L in
+
+  let obtain endpoint _request create =
+    (* TODO There are, in general, multiple connections for each endpoit, so,
+       properly, the pool would have to either iterate over a list, or have an
+       acceleration data structure for accessing ready connections by endpoint
+       directly. *)
+    (* TODO Must also check whether the connection is closing. However, the
+       current pool never closes connections (!!!). *)
+    (* TODO Also should respect connection concurrency. Sequential connections
+       require the state to be `Idle. Pipeline connections require the state to
+       be not `Writing_request. Multiplexing connections can be in any state to
+       be reused. This code is currently hardcoded to do pipelining, which will
+       conservatively work on HTTP/2 multiplexing, it just won't take advantage
+       of the full concurrency available. *)
+    match Hashtbl.find_opt connections_by_endpoint endpoint with
+    | Some pooled_connection
+        when pooled_connection.state <> `Writing_request ->
+      pooled_connection.state <- `Writing_request;
+      pooled_connection.ref_count <- pooled_connection.ref_count + 1;
+      let connection = pooled_connection.create_result.connection
+      and id = pooled_connection.id in
+      Lwt.return (connection, id)
+    | _ ->
+      let%lwt create_result = create endpoint in
+      let id = !next_id in
+      next_id := Int64.succ !next_id;
+      let pooled_connection = {
+        create_result;
+        id;
+        created_at = Unix.time ();
+        state = `Writing_request;
+        ref_count = 1;
+        idle_since = 0.;
+        closing = false;
+      } in
+      Hashtbl.replace connections_by_id pooled_connection.id pooled_connection;
+      Hashtbl.add connections_by_endpoint endpoint pooled_connection;
+      Lwt.return (create_result.connection, pooled_connection.id)
+
+  and write_done id =
+    match Hashtbl.find_opt connections_by_id id with
+    | None ->
+      ()
+    | Some pooled_connection ->
+      pooled_connection.state <- `Reading_response_only
+      (* TODO In a future version where other writers may be queued, this should
+         wake up the head writer in the queue. *)
+
+  and all_done id _response =
+    match Hashtbl.find_opt connections_by_id id with
+    | None ->
+      ()
+    | Some pooled_connection ->
+      pooled_connection.ref_count <- pooled_connection.ref_count - 1;
+      if pooled_connection.ref_count = 0 then begin
+        pooled_connection.state <- `Idle;
+        pooled_connection.idle_since <- Unix.time ()
+      end
+
+  and error =
+    ignore
+    (* TODO Definitely not correct - this should put the connection into the
+       closing state and decrement its ref count. If the connection becomes idle
+       because of that, it can be closed right away. *)
+
+  in
+
+  connection_pool ~obtain ~write_done ~all_done ~error
+
+
+
+let default_connection_pool =
+  lazy (general_connection_pool ())
+
+
 
 (* TODO How should the host and port be represented? *)
 (* TODO Good error handling. *)
 (* TODO Probably change the default to one per-process pool with some
    configuration. *)
-let send ?(connection_pool = indefinite_keepalive) hyper_request =
+let send ?(connection_pool = Lazy.force default_connection_pool) hyper_request =
   let uri = Uri.of_string (Dream.target hyper_request) in
   let scheme = Uri.scheme uri |> Option.get
   and host = Uri.host uri |> Option.get
@@ -80,54 +163,6 @@ let send ?(connection_pool = indefinite_keepalive) hyper_request =
      "neat" way - just a debuggable way. The port can be inferred from the
      scheme if it is missing. We are assuming http:// for now. *)
 
-  let host_key = (scheme, host, port) in
-
-  let%lwt connection =
-    match%lwt connection_pool.obtain host_key hyper_request with
-    | Some connection ->
-      Lwt.return connection
-    | None ->
-      let%lwt addresses =
-        Lwt_unix.getaddrinfo
-          host (string_of_int port) [Unix.(AI_FAMILY PF_INET)] in
-      let address = (List.hd addresses).Unix.ai_addr in
-      (* TODO Note: this can raise. *)
-
-      let socket = Lwt_unix.socket Unix.PF_INET Unix.SOCK_STREAM 0 in
-      let%lwt () = Lwt_unix.connect socket address in
-
-      match scheme with
-      | "https" ->
-        (* TODO The context needs to be created once per process, or a cache
-           should be used. *)
-        let context = Ssl.(create_context TLSv1_2 Client_context) in
-        (* TODO For WebSockets (wss://), the client should probably do SSL
-           without offering h2 by ALPN. Do any servers implement WebSockets over
-           HTTP/2? *)
-        Ssl.set_context_alpn_protos context ["h2"; "http/1.1"];
-        let%lwt ssl_socket = Lwt_ssl.ssl_connect socket context in
-        (* TODO Next line is pretty suspicious. *)
-        let underlying = Lwt_ssl.ssl_socket ssl_socket |> Option.get in
-        begin match Ssl.get_negotiated_alpn_protocol underlying with
-        | Some "h2" ->
-          (* TODO What about the error handler? *)
-          let%lwt connection =
-            H2_lwt_unix.Client.SSL.create_connection
-              ~error_handler:ignore
-              ssl_socket
-          in
-          Lwt.return (H2 connection)
-        | _ ->
-          let%lwt connection =
-            Httpaf_lwt_unix.Client.SSL.create_connection ssl_socket in
-          Lwt.return (SSL connection)
-        end
-        (* TODO Need to do server certificate validation here, etc. *)
-      | _ -> (* TODO Should be a check for http specifically. *)
-        let%lwt connection = Httpaf_lwt_unix.Client.create_connection socket in
-        Lwt.return (Cleartext connection)
-  in
-
   (* TODO These sorts of things can probably be done by passing the client
      modules in as first-class modules. The code might be not so clear to read,
      though. *)
@@ -137,6 +172,65 @@ let send ?(connection_pool = indefinite_keepalive) hyper_request =
     | SSL connection -> Httpaf_lwt_unix.Client.SSL.shutdown connection
     | H2 connection -> H2_lwt_unix.Client.SSL.shutdown connection
   in
+
+  let create (scheme, host, port) =
+    let%lwt addresses =
+      Lwt_unix.getaddrinfo
+        host (string_of_int port) [Unix.(AI_FAMILY PF_INET)] in
+    let address = (List.hd addresses).Unix.ai_addr in
+    (* TODO Note: this can raise. *)
+
+    let socket = Lwt_unix.socket Unix.PF_INET Unix.SOCK_STREAM 0 in
+    let%lwt () = Lwt_unix.connect socket address in
+
+    match scheme with
+    | "https" ->
+      (* TODO The context needs to be created once per process, or a cache
+          should be used. *)
+      let context = Ssl.(create_context TLSv1_2 Client_context) in
+      (* TODO For WebSockets (wss://), the client should probably do SSL
+          without offering h2 by ALPN. Do any servers implement WebSockets over
+          HTTP/2? *)
+      Ssl.set_context_alpn_protos context ["h2"; "http/1.1"];
+      let%lwt ssl_socket = Lwt_ssl.ssl_connect socket context in
+      (* TODO Next line is pretty suspicious. *)
+      let underlying = Lwt_ssl.ssl_socket ssl_socket |> Option.get in
+      begin match Ssl.get_negotiated_alpn_protocol underlying with
+      | Some "h2" ->
+        (* TODO What about the error handler? *)
+        let%lwt connection =
+          H2_lwt_unix.Client.SSL.create_connection
+            ~error_handler:ignore
+            ssl_socket
+        in
+        Lwt.return {
+          connection = H2 connection;
+          destroy;
+          concurrency = `Multiplex;
+        }
+      | _ ->
+        let%lwt connection =
+          Httpaf_lwt_unix.Client.SSL.create_connection ssl_socket in
+        Lwt.return {
+          connection = SSL connection;
+          destroy;
+          concurrency = `Pipeline;
+        }
+      end
+      (* TODO Need to do server certificate validation here, etc. *)
+    | _ -> (* TODO Should be a check for http specifically. *)
+      let%lwt connection = Httpaf_lwt_unix.Client.create_connection socket in
+      Lwt.return {
+        connection = Cleartext connection;
+        destroy;
+        concurrency = `Pipeline;
+      }
+  in
+
+  let endpoint = (scheme, host, port) in
+
+  let%lwt (connection, id) =
+    connection_pool.obtain endpoint hyper_request create in
 
   let request connection =
     match connection with
@@ -180,9 +274,8 @@ let send ?(connection_pool = indefinite_keepalive) hyper_request =
           ~on_eof:(fun () ->
             Lwt.async (fun () ->
               let%lwt () = Dream.close_stream hyper_response in
-              connection_pool.return
-                host_key hyper_request hyper_response connection
-                destroy))
+              connection_pool.all_done id hyper_response;
+              Lwt.return_unit))
               (* TODO Make sure there is a way for the reader to abort reading
                  the stream and yet still get the socket closed. *)
           ~on_read:(fun buffer ~off ~len ->
@@ -224,7 +317,11 @@ let send ?(connection_pool = indefinite_keepalive) hyper_request =
       buffer;
     send ()
 
-  and close _code = Httpaf.Body.Writer.close httpaf_request_body
+  and close _code =
+    Httpaf.Body.Writer.close httpaf_request_body;
+    (* TODO This should only be called if reading is not yet done. *)
+    connection_pool.write_done id
+
   and flush () = send ()
   and ping _buffer _offset _length = send ()
   and pong _buffer _offset _length = send ()
@@ -253,9 +350,8 @@ let send ?(connection_pool = indefinite_keepalive) hyper_request =
             ~on_eof:(fun () ->
               Lwt.async (fun () ->
                 let%lwt () = Dream.close_stream hyper_response in
-                connection_pool.return
-                  host_key hyper_request hyper_response connection
-                  destroy))
+                connection_pool.all_done id hyper_response;
+                Lwt.return_unit))
             ~on_read:(fun buffer ~off ~len ->
               Lwt.async (fun () ->
                 let%lwt () =

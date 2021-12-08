@@ -5,9 +5,9 @@ let send () =
   (* TODO This example is meant for running concurrently with example/w-echo. *)
   let request =
     Dream.request
-      ~method_:`GET
-      ~target:"https://127.0.0.1:8080" ""
-      (* ~headers:["Transfer-Encoding", "chunked"] *)
+      ~method_:`POST
+      ~target:"http://127.0.0.1:8080/echo" "Good morning, world!"
+      ~headers:["Transfer-Encoding", "chunked"]
   in
 
   (* TODO Note that this wrapper is not necessary if using, for example,
@@ -18,6 +18,10 @@ let send () =
   (* TODO Add some kind of primitive error handling, both for network errors
      and for error responses. *)
   let%lwt response = Hyper.send request in
+
+  (* TODO Janky delay to give time for pipelining to intervene. *)
+  let%lwt () = Lwt_unix.sleep 5. in
+
   let rec read () =
     (* TODO Use a higher-level reader once available. *)
     Dream.next
@@ -40,8 +44,13 @@ let () =
   Printexc.record_backtrace true;
 
   Lwt_main.run begin
-    let%lwt () = send () in
-    let%lwt () = send () in
+    let first = send () in
+    let second =
+      let%lwt () = Lwt_unix.sleep 1. in
+      send ()
+    in
+    let%lwt () = first in
+    let%lwt () = second in
     Lwt.return ()
   end
 
