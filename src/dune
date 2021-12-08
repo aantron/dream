@@ -26,5 +26,7 @@
  (modules hyper)
  (libraries
   dream
+  lwt_ssl
+  ssl
  )
  (preprocess (pps lwt_ppx)))

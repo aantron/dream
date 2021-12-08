@@ -4,7 +4,11 @@ type 'a promise = 'a Lwt.t
 
 type method_ = Dream.method_
 
-type connection = Httpaf_lwt_unix.Client.t
+(* TODO Is this the right representation? *)
+type connection =
+  | Cleartext of Httpaf_lwt_unix.Client.t
+  | SSL of Httpaf_lwt_unix.Client.SSL.t
+
 type host = string * string * int
 (* TODO But what should a host be? An unresolved hostname:port, or a resolved
    hostname:port? Hosts probably also need a comparison function or
@@ -87,7 +91,35 @@ let send ?(connection_pool = indefinite_keepalive) hyper_request =
 
       let socket = Lwt_unix.socket Unix.PF_INET Unix.SOCK_STREAM 0 in
       let%lwt () = Lwt_unix.connect socket address in
-      Httpaf_lwt_unix.Client.create_connection socket
+
+      match scheme with
+      | "https" ->
+        (* TODO The context needs to be created once per process, or a cache
+           should be used. *)
+        let context = Ssl.(create_context TLSv1_2 Client_context) in
+        let%lwt ssl_socket = Lwt_ssl.ssl_connect socket context in
+        let%lwt connection =
+          Httpaf_lwt_unix.Client.SSL.create_connection ssl_socket in
+        Lwt.return (SSL connection)
+        (* TODO Need to do server certificate validation here, etc. *)
+      | _ -> (* TODO Should be a check for http specifically. *)
+        let%lwt connection = Httpaf_lwt_unix.Client.create_connection socket in
+        Lwt.return (Cleartext connection)
+  in
+
+  (* TODO These sorts of things can probably be done by passing the client
+     modules in as first-class modules. The code might be not so clear to read,
+     though. *)
+  let destroy connection =
+    match connection with
+    | Cleartext connection -> Httpaf_lwt_unix.Client.shutdown connection
+    | SSL connection -> Httpaf_lwt_unix.Client.SSL.shutdown connection
+  in
+
+  let request connection =
+    match connection with
+    | Cleartext connection -> Httpaf_lwt_unix.Client.request connection
+    | SSL connection -> Httpaf_lwt_unix.Client.SSL.request connection
   in
 
   let response_promise, received_response = Lwt.wait () in
@@ -121,7 +153,7 @@ let send ?(connection_pool = indefinite_keepalive) hyper_request =
               let%lwt () = Dream.close_stream hyper_response in
               connection_pool.return
                 host_key hyper_request hyper_response connection
-                Httpaf_lwt_unix.Client.shutdown))
+                destroy))
               (* TODO Make sure there is a way for the reader to abort reading
                  the stream and yet still get the socket closed. *)
           ~on_read:(fun buffer ~off ~len ->
@@ -143,7 +175,7 @@ let send ?(connection_pool = indefinite_keepalive) hyper_request =
       (Httpaf.Method.of_string (Dream.method_to_string method_))
       path_and_query in
   let httpaf_request_body =
-    Httpaf_lwt_unix.Client.request
+    request
       connection
       ~error_handler:(fun _ -> failwith "Protocol error") (* TODO *)
       ~response_handler

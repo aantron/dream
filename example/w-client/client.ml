@@ -5,9 +5,9 @@ let send () =
   (* TODO This example is meant for running concurrently with example/w-echo. *)
   let request =
     Dream.request
-      ~method_:`POST
-      ~target:"http://127.0.0.1:8080/echo" "Good morning, world!"
-      ~headers:["Transfer-Encoding", "chunked"]
+      ~method_:`GET
+      ~target:"https://127.0.0.1:8080" ""
+      (* ~headers:["Transfer-Encoding", "chunked"] *)
   in
 
   (* TODO Note that this wrapper is not necessary if using, for example,
@@ -44,3 +44,5 @@ let () =
     let%lwt () = send () in
     Lwt.return ()
   end
+
+(* TODO Run the server in the same process. *)
