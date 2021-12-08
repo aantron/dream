@@ -8,6 +8,7 @@ type method_ = Dream.method_
 type connection =
   | Cleartext of Httpaf_lwt_unix.Client.t
   | SSL of Httpaf_lwt_unix.Client.SSL.t
+  | H2 of H2_lwt_unix.Client.SSL.t (* TODO No h2c support. *)
 
 type host = string * string * int
 (* TODO But what should a host be? An unresolved hostname:port, or a resolved
@@ -21,6 +22,9 @@ type host = string * string * int
    So, this becomes some kind of scheme-host-port triplet. *)
 (* TODO Also, how should this work with HTTP/2 and multiplexing? Need to address
    that next. *)
+(* TODO The scheme is probably not sufficient. Will also need the negotiated
+   protocol, as an https connection might have been upgraded to HTTP/2 or not at
+   the server's discretion during ALPN. *)
 
 type connection_pool = {
   obtain : host -> request -> connection option promise;
@@ -97,10 +101,27 @@ let send ?(connection_pool = indefinite_keepalive) hyper_request =
         (* TODO The context needs to be created once per process, or a cache
            should be used. *)
         let context = Ssl.(create_context TLSv1_2 Client_context) in
+        (* TODO For WebSockets (wss://), the client should probably do SSL
+           without offering h2 by ALPN. Do any servers implement WebSockets over
+           HTTP/2? *)
+        Ssl.set_context_alpn_protos context ["h2"; "http/1.1"];
         let%lwt ssl_socket = Lwt_ssl.ssl_connect socket context in
-        let%lwt connection =
-          Httpaf_lwt_unix.Client.SSL.create_connection ssl_socket in
-        Lwt.return (SSL connection)
+        (* TODO Next line is pretty suspicious. *)
+        let underlying = Lwt_ssl.ssl_socket ssl_socket |> Option.get in
+        begin match Ssl.get_negotiated_alpn_protocol underlying with
+        | Some "h2" ->
+          (* TODO What about the error handler? *)
+          let%lwt connection =
+            H2_lwt_unix.Client.SSL.create_connection
+              ~error_handler:ignore
+              ssl_socket
+          in
+          Lwt.return (H2 connection)
+        | _ ->
+          let%lwt connection =
+            Httpaf_lwt_unix.Client.SSL.create_connection ssl_socket in
+          Lwt.return (SSL connection)
+        end
         (* TODO Need to do server certificate validation here, etc. *)
       | _ -> (* TODO Should be a check for http specifically. *)
         let%lwt connection = Httpaf_lwt_unix.Client.create_connection socket in
@@ -114,15 +135,23 @@ let send ?(connection_pool = indefinite_keepalive) hyper_request =
     match connection with
     | Cleartext connection -> Httpaf_lwt_unix.Client.shutdown connection
     | SSL connection -> Httpaf_lwt_unix.Client.SSL.shutdown connection
+    | H2 connection -> H2_lwt_unix.Client.SSL.shutdown connection
   in
 
   let request connection =
     match connection with
     | Cleartext connection -> Httpaf_lwt_unix.Client.request connection
     | SSL connection -> Httpaf_lwt_unix.Client.SSL.request connection
+    | H2 _connection -> assert false
+      (* TODO H2 is just a separate CF branch for now. *)
   in
 
   let response_promise, received_response = Lwt.wait () in
+
+  begin match connection with
+  | Cleartext _ | SSL _ ->
+  (* TODO Did not indent the case body; quick and dirty "get it working"
+     version. *)
 
   (* TODO Do we now want to store the verson? *)
   let response_handler
@@ -202,7 +231,79 @@ let send ?(connection_pool = indefinite_keepalive) hyper_request =
 
   in
 
-  send ();
+  send ()
+
+  | H2 connection' ->
+    (* TODO This is a nasty duplicate of the above case, specialized for H2. See
+       comments above. *)
+    let response_handler (h2_response : H2.Response.t) h2_response_body =
+
+      Lwt.async begin fun () ->
+        let%lwt hyper_response =
+          Dream.stream
+            ~code:(H2.Status.to_code h2_response.status)
+            ~headers:(H2.Headers.to_list h2_response.headers)
+            (fun _response -> Lwt.return ())
+        in
+        Lwt.wakeup_later received_response hyper_response;
+
+        let rec receive () =
+          H2.Body.schedule_read
+            h2_response_body
+            ~on_eof:(fun () ->
+              Lwt.async (fun () ->
+                let%lwt () = Dream.close_stream hyper_response in
+                connection_pool.return
+                  host_key hyper_request hyper_response connection
+                  destroy))
+            ~on_read:(fun buffer ~off ~len ->
+              Lwt.async (fun () ->
+                let%lwt () =
+                  Dream.write_buffer
+                    ~offset:off ~length:len hyper_response buffer in
+                Lwt.return (receive ())))
+        in
+        receive ();
+
+        Lwt.return ()
+      end
+    in
+
+    let h2_request =
+      H2.Request.create
+        ~headers:(H2.Headers.of_list (Dream.all_headers hyper_request))
+        ~scheme
+        (H2.Method.of_string (Dream.method_to_string method_))
+        path_and_query in
+    let h2_request_body =
+      H2_lwt_unix.Client.SSL.request
+        connection'
+        h2_request
+        ~error_handler:(fun _ -> failwith "Protocol error")
+        ~response_handler in
+
+    let rec send () =
+      Dream.body_stream hyper_request
+      |> fun stream ->
+        Dream.next stream ~data ~close ~flush ~ping ~pong
+
+    and data buffer offset length _binary _fin =
+      H2.Body.write_bigstring
+        h2_request_body
+        ~off:offset
+        ~len:length
+        buffer;
+      send ()
+
+    and close _code = H2.Body.close_writer h2_request_body
+    and flush () = send ()
+    and ping _buffer _offset _length = send ()
+    and pong _buffer _offset _length = send ()
+
+    in
+
+    send ()
+  end;
 
   response_promise
 
