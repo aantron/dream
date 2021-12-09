@@ -6,7 +6,7 @@ let send () =
   let request =
     Dream.request
       ~method_:`GET
-      ~target:"http://127.0.0.1:8080/abc" ""
+      ~target:"ws://127.0.0.1:8080/websocket" ""
       (* ~headers:["Transfer-Encoding", "chunked"] *)
   in
 
@@ -22,6 +22,8 @@ let send () =
   (* TODO Janky delay to give time for pipelining to intervene. *)
   (* let%lwt () = Lwt_unix.sleep 5. in *)
 
+  let%lwt () = Dream.write response "Hello?" in
+
   let rec read () =
     (* TODO Use a higher-level reader once available. *)
     Dream.next
@@ -29,6 +31,7 @@ let send () =
       ~data:(fun buffer offset length _binary _fin ->
         Bigstringaf.substring buffer ~off:offset ~len:length
         |> print_string;
+        flush stdout;
         read ())
       ~close:(fun _code -> Lwt.wakeup_later notify_done ())
       ~flush:read
@@ -45,12 +48,12 @@ let () =
 
   Lwt_main.run begin
     let first = send () in
-    let second =
+    (* let second =
       (* let%lwt () = Lwt_unix.sleep 1. in *)
       send ()
-    in
+    in *)
     let%lwt () = first in
-    let%lwt () = second in
+    (* let%lwt () = second in *)
     Lwt.return ()
   end
 

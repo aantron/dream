@@ -9,6 +9,13 @@ type connection =
   | Cleartext of Httpaf_lwt_unix.Client.t
   | SSL of Httpaf_lwt_unix.Client.SSL.t
   | H2 of H2_lwt_unix.Client.SSL.t (* TODO No h2c support. *)
+  | WebSocket of Dream__pure.Stream.stream
+    (* TODO NOTE WebSocket connections over HTTP/1.1 are currently
+       single-use. We still go through the pool so as to give it the chance to
+       refuse the connection based on the number of other connections to the
+       same endpoint or host. The actual closing of WebSocket connections by the
+       pool is not yet implemented, so it might try to multiplex them. *)
+    (* TODO WebSockets over https and WebSockets over HTTP/2. *)
 
 type endpoint = string * string * int
 (* TODO But what should a host be? An unresolved hostname:port, or a resolved
@@ -34,7 +41,7 @@ type endpoint = string * string * int
 type create_result = {
   connection : connection;
   destroy : connection -> unit promise;
-  concurrency : [ `Sequence | `Pipeline | `Multiplex ];
+  concurrency : [ `Single_use | `Sequence | `Pipeline | `Multiplex ];
 }
 type create = endpoint -> create_result promise
 
@@ -171,6 +178,7 @@ let send_one_request connection_pool hyper_request =
     | Cleartext connection -> Httpaf_lwt_unix.Client.shutdown connection
     | SSL connection -> Httpaf_lwt_unix.Client.SSL.shutdown connection
     | H2 connection -> H2_lwt_unix.Client.SSL.shutdown connection
+    | WebSocket stream -> Dream__pure.Stream.close stream 1000; Lwt.return_unit
   in
 
   let create (scheme, host, port) =
@@ -218,13 +226,53 @@ let send_one_request connection_pool hyper_request =
         }
       end
       (* TODO Need to do server certificate validation here, etc. *)
-    | _ -> (* TODO Should be a check for http specifically. *)
+
+    | "http" ->
       let%lwt connection = Httpaf_lwt_unix.Client.create_connection socket in
       Lwt.return {
         connection = Cleartext connection;
         destroy;
         concurrency = `Pipeline;
       }
+
+    | "ws" ->
+      (* TODO The weboscket/af client interface seems pretty awkward to use in
+         this kind of control flow, since the input handlers need to be defined
+         immediately. However, the input handlers themselves are ill-conceinved,
+         since they are a partially push API (i.e. they lack full read flow
+         control). So hack something together, and await a better API. *)
+      let stream = ref None in
+      (* TODO The equality between server and client input handlers is not
+         exposed in the websocketaf API. *)
+      let websocket_handler =
+        Dream__http.Http.websocket_handler (fun the_stream ->
+          stream := Some the_stream;
+          Lwt.return_unit)
+      in
+      (* TODO Generate random nonces. *)
+      let%lwt connection =
+        Websocketaf_lwt_unix.Client.connect
+          ~nonce:"abcdefghijklmnop"
+          ~host
+          ~port
+          ~resource:path_and_query
+          ~error_handler:ignore
+          ~websocket_handler:(Obj.magic websocket_handler)
+          socket
+      in
+      ignore connection;
+      (* TODO Extremely questionable! The connection should just carry a stream
+         promise instead, that the handler can wait on later. *)
+      let%lwt () = Lwt_unix.sleep 1. in
+      Lwt.return {
+        connection = WebSocket (Option.get !stream);
+        destroy;
+        concurrency = `Single_use;
+      }
+
+    | _ ->
+      assert false
+      (* TODO Need a log and a more intelligent error here. *)
   in
 
   let endpoint = (scheme, host, port) in
@@ -238,6 +286,8 @@ let send_one_request connection_pool hyper_request =
     | SSL connection -> Httpaf_lwt_unix.Client.SSL.request connection
     | H2 _connection -> assert false
       (* TODO H2 is just a separate CF branch for now. *)
+    | WebSocket _stream -> assert false
+      (* TODO Ditto. *)
   in
 
   let response_promise, received_response = Lwt.wait () in
@@ -399,6 +449,16 @@ let send_one_request connection_pool hyper_request =
     in
 
     send ()
+
+  | WebSocket websocket ->
+    let hyper_response = Dream.response "" in
+
+    let hyper_response : Dream__pure.Inmost.response =
+      Obj.magic (hyper_response : Dream.response) in
+    let hyper_response = {hyper_response with body = websocket} in
+    let hyper_response : Dream.response = Obj.magic hyper_response in
+
+    Lwt.wakeup_later received_response hyper_response
   end;
 
   response_promise

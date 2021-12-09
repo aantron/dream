@@ -240,7 +240,9 @@ let websocket_handler user's_websocket_handler socket =
 
   let close code =
     if not !closed then begin
-      closed := true;
+      (* TODO Really need to work out the "close handshake" and how it is
+         exposed in the Stream API. *)
+      (* closed := true; *)
       Websocketaf.Wsd.close ~code:(`Other code) socket
     end
   in

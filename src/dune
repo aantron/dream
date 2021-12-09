@@ -34,5 +34,6 @@
   lwt.unix
   lwt_ssl
   ssl
+  dream.websocketaf-lwt-unix
  )
  (preprocess (pps lwt_ppx)))

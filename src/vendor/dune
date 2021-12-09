@@ -81,6 +81,27 @@
    httpaf
    result)))
 
+(subdir websocketaf/lwt
+ (library
+  (name websocketaf_lwt)
+  (public_name dream.websocketaf-lwt)
+  (libraries
+   base64
+   digestif.ocaml
+   dream.gluten-lwt
+   lwt
+   dream.websocketaf)))
+
+(subdir websocketaf/lwt-unix
+ (library
+  (name websocketaf_lwt_unix)
+  (public_name dream.websocketaf-lwt-unix)
+  (libraries
+   faraday-lwt-unix
+   dream.gluten-lwt-unix
+   lwt.unix
+   dream.websocketaf-lwt)))
+
 
 
 (subdir httpaf/lib

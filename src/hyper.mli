@@ -17,7 +17,7 @@ type endpoint
 type create_result = {
   connection : connection;
   destroy : connection -> unit promise;
-  concurrency : [ `Sequence | `Pipeline | `Multiplex ];
+  concurrency : [ `Single_use | `Sequence | `Pipeline | `Multiplex ];
 }
 type create = endpoint -> create_result promise
 
