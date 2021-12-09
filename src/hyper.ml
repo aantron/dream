@@ -150,7 +150,7 @@ let default_connection_pool =
 (* TODO Good error handling. *)
 (* TODO Probably change the default to one per-process pool with some
    configuration. *)
-let send ?(connection_pool = Lazy.force default_connection_pool) hyper_request =
+let send_one_request connection_pool hyper_request =
   let uri = Uri.of_string (Dream.target hyper_request) in
   let scheme = Uri.scheme uri |> Option.get
   and host = Uri.host uri |> Option.get
@@ -402,6 +402,67 @@ let send ?(connection_pool = Lazy.force default_connection_pool) hyper_request =
   end;
 
   response_promise
+
+
+
+(* TODO Add an option to redirect only to the same host? Or is this better
+   addressed by just letting the user do redirects manually, if needed? It's
+   probably best to expose some kind of filter function, because redirect
+   handling is slightly tricky (with body streams), and the user can benefit by
+   not having to write code themselves for this. *)
+(* TODO Expose a redirect cache callback for permanent redirects. *)
+let send ?(connection_pool = Lazy.force default_connection_pool) request =
+  let rec redirect_loop remaining request =
+    (* TODO Can save an allocation by binding the promise. *)
+    let%lwt response = send_one_request connection_pool request in
+    if remaining <= 0 then
+      (* TODO Log a warning here if the original redirect limit was not zero. *)
+      Lwt.return response
+    else
+      match Dream.status response with
+      | `Moved_Permanently
+      | `Found
+      | `See_Other
+      | `Temporary_Redirect
+      | `Permanent_Redirect ->
+        begin match Dream.header "Location" response with
+        | None ->
+          (* TODO Log a warning here. *)
+          Lwt.return response
+        | Some target ->
+          (* TODO For Moved Permanently, Temporary Redirect, Permanent Redirect,
+             warn if the server has read the request body, because we won't
+             easily be able to resend it. *)
+          (* TODO If requests become mutable, probably a new request should be
+             explicitly allocated. *)
+          (* TODO The URI in Location: might be absolute or not. *)
+          let request : Dream__pure.Inmost.request =
+            Obj.magic (request : Dream.request) in
+          let request =
+            {request with specific = {request.specific with target}} in
+          let request : Dream.request =
+            Obj.magic request in
+
+          let request =
+            match Dream.status response with
+            | `Found
+            | `See_Other ->
+              Dream.with_method_ `GET request
+              (* TODO Note that doing this for 302 is not correct, but is done
+                 to match established behavior on the Web. *)
+              (* TODO Should also substitute the body with an empty one here,
+                 and warn if the previous body is not closed (and close it). *)
+            | _ ->
+              request
+          in
+
+          redirect_loop (remaining - 1) request
+        end
+      | _ ->
+        Lwt.return response
+  in
+
+  redirect_loop 5 request
 
 
 
