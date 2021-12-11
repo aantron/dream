@@ -733,6 +733,8 @@ val server_stream : 'a message -> stream
 val client_stream : 'a message -> stream
 (* TODO Document that this is for middlewares that are transforming a response
    stream or a WebSocket. *)
+val with_client_stream : stream -> 'a message -> 'a message
+(* TODO Normalize with with_stream, or add a separate with_server_stream. *)
 
 (* TODO Probably even close can be made optional. exn can be made optional. *)
 (* TODO Argument order? *)

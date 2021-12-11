@@ -298,6 +298,9 @@ let client_stream message =
 let server_stream message =
   message.server_stream
 
+let with_client_stream client_stream message =
+  update {message with client_stream}
+
 (* TODO Pending the dream.mli interface reorganization for the new stream
    API. *)
 let next =
@@ -499,8 +502,8 @@ let request
       upload = initial_multipart_state ();
     };
     headers;
-    client_stream = Stream.(stream (string body) no_writer);
-    server_stream = Stream.(stream no_reader no_writer);
+    client_stream = Stream.(stream no_reader no_writer);
+    server_stream = Stream.(stream (string body) no_writer);
     locals = Scope.empty;
     first = request;
     last = ref request;
