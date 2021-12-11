@@ -62,8 +62,8 @@ type read =
     to which event occurs next on the stream. *)
 
 type write =
-  ok:(unit -> unit) ->
   close:(int -> unit) ->
+  (unit -> unit) ->
     unit
 (** A writing function. Pushes an event into a stream. May take additional
     arguments before [~ok]. *)

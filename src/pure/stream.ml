@@ -20,8 +20,8 @@ type read =
     unit
 
 type write =
-  ok:(unit -> unit) ->
   close:(int -> unit) ->
+  (unit -> unit) ->
     unit
 
 type reader = {
@@ -56,19 +56,19 @@ let no_reader = {
 
 let no_writer = {
   ready =
-    (fun ~ok:_ ~close:_ ->
+    (fun ~close:_ _ok ->
       raise (Failure "ready called on a read-only stream"));
   write =
-    (fun _buffer _offset _length _binary _fin ~ok:_ ~close:_ ->
+    (fun _buffer _offset _length _binary _fin ~close:_ _ok ->
       raise (Failure "write to a read-only stream"));
   flush =
-    (fun ~ok:_ ~close:_ ->
+    (fun ~close:_ _ok ->
       raise (Failure "flush of a read-only stream"));
   ping =
-    (fun _buffer _offset _length ~ok:_ ~close:_ ->
+    (fun _buffer _offset _length ~close:_ _ok ->
       raise (Failure "ping on a read-only stream"));
   pong =
-    (fun _buffer _offset _length ~ok:_ ~close:_ ->
+    (fun _buffer _offset _length ~close:_ _ok ->
       raise (Failure "pong on a read-only stream"));
   close =
     ignore;
@@ -121,20 +121,20 @@ let close stream code =
   stream.writer.close code
 
 (* TODO Test this somehow with guards for early writing on a pipe. *)
-let ready stream ~ok ~close =
-  stream.writer.ready ~ok ~close
+let ready stream ~close ok =
+  stream.writer.ready ~close ok
 
-let write stream buffer offset length binary fin ~ok ~close =
-  stream.writer.write buffer offset length binary fin ~ok ~close
+let write stream buffer offset length binary fin ~close ok =
+  stream.writer.write buffer offset length binary fin ~close ok
 
-let flush stream ~ok ~close =
-  stream.writer.flush ~ok ~close
+let flush stream ~close ok =
+  stream.writer.flush ~close ok
 
-let ping stream buffer offset length ~ok ~close =
-  stream.writer.ping buffer offset length ~ok ~close
+let ping stream buffer offset length ~close ok =
+  stream.writer.ping buffer offset length ~close ok
 
-let pong stream buffer offset length ~ok ~close =
-  stream.writer.pong buffer offset length ~ok ~close
+let pong stream buffer offset length ~close ok =
+  stream.writer.pong buffer offset length ~close ok
 
 type pipe = {
   mutable state : [
@@ -202,7 +202,7 @@ let pipe () =
       close code
   in
 
-  let ready ~ok ~close =
+  let ready ~close ok =
     match internal.state with
     | `Idle ->
       internal.write_ok_callback <- ok;
@@ -213,7 +213,7 @@ let pipe () =
       close code
   in
 
-  let write buffer offset length binary fin ~ok ~close =
+  let write buffer offset length binary fin ~close ok =
     match internal.state with
     | `Idle ->
       raise (Failure "stream write: the stream is not ready")
@@ -244,7 +244,7 @@ let pipe () =
       ()
   in
 
-  let flush ~ok ~close =
+  let flush ~close ok =
     match internal.state with
     | `Idle ->
       raise (Failure "stream flush: the previous write has not completed")
@@ -259,7 +259,7 @@ let pipe () =
       close code
   in
 
-  let ping buffer offset length ~ok ~close =
+  let ping buffer offset length ~close ok =
     match internal.state with
     | `Idle ->
       raise (Failure "stream ping: the previous write has not completed")
@@ -274,7 +274,7 @@ let pipe () =
       close code
   in
 
-  let pong buffer offset length ~ok ~close =
+  let pong buffer offset length ~close ok =
     match internal.state with
     | `Idle ->
       raise (Failure "stream pong: the previous write has not completed")
@@ -321,7 +321,7 @@ let read_convenience stream =
       ~flush:loop
 
       ~ping:(fun buffer offset length ->
-        stream.writer.pong ~close buffer offset length ~ok:loop)
+        stream.writer.pong buffer offset length ~close loop)
 
       ~pong:(fun _buffer _offset _length ->
         ())
@@ -363,7 +363,7 @@ let read_until_close stream =
       ~flush:loop
 
       ~ping:(fun buffer offset length ->
-        stream.writer.pong buffer offset length ~close ~ok:loop)
+        stream.writer.pong buffer offset length ~close loop)
 
       ~pong:(fun _buffer _offset _length ->
         ())

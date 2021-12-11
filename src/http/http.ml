@@ -187,14 +187,15 @@ let websocket_handler user's_websocket_handler socket =
      commit, since that will change which streams do what in responses. It will
      probably force usage of pipes anyway, so that will make piggy-backing on
      pipes the natural solution. *)
-  let ready ~ok ~close =
+  (* TODO Can probably also remove val Stream.writer at that point. *)
+  let ready ~close ok =
     if !closed then
       close !close_code
     else
       ok ()
   in
 
-  let flush ~ok ~close =
+  let flush ~close ok =
     bytes_since_flush := 0;
     if !closed then
       close !close_code
@@ -202,7 +203,7 @@ let websocket_handler user's_websocket_handler socket =
       Websocketaf.Wsd.flushed socket ok
   in
 
-  let write buffer offset length binary fin ~ok ~close =
+  let write buffer offset length binary fin ~close ok =
     (* Until https://github.com/anmonteiro/websocketaf/issues/33. *)
     if not fin then
       websocket_log.error (fun log ->
@@ -214,13 +215,13 @@ let websocket_handler user's_websocket_handler socket =
       Websocketaf.Wsd.schedule socket ~kind buffer ~off:offset ~len:length;
       bytes_since_flush := !bytes_since_flush + length;
       if !bytes_since_flush >= 4096 then
-        flush ~ok ~close
+        flush ~close ok
       else
         ok ()
     end
   in
 
-  let ping _buffer _offset length ~ok ~close =
+  let ping _buffer _offset length ~close ok =
     if length > 125 then
       raise (Failure "Ping payload cannot exceed 125 bytes");
     (* See https://github.com/anmonteiro/websocketaf/issues/36. *)
@@ -235,7 +236,7 @@ let websocket_handler user's_websocket_handler socket =
     end
   in
 
-  let pong _buffer _offset length ~ok ~close =
+  let pong _buffer _offset length ~close ok =
     (* TODO Is there any way for the peer to send a ping payload with more than
        125 bytes, forcing a too-large pong and an exception? *)
     if length > 125 then

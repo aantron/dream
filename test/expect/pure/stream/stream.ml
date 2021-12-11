@@ -27,33 +27,33 @@ let read_and_dump stream =
 
 let flush_and_dump stream =
   Stream.flush stream
-    ~ok:(fun () ->
-      print_endline "flush: ok")
     ~close:(fun code ->
       Printf.printf "flush: close: CODE=%i\n" code)
+    (fun () ->
+      print_endline "flush: ok")
 
 let write_and_dump stream buffer offset length binary fin =
   Stream.write stream buffer offset length binary fin
-    ~ok:(fun () ->
-      print_endline "write: ok")
     ~close:(fun code ->
       Printf.printf "write: close: CODE=%i\n" code)
+    (fun () ->
+      print_endline "write: ok")
 
 let ping_and_dump payload stream =
   let length = String.length payload in
   Stream.ping stream (Bigstringaf.of_string ~off:0 ~len:length payload) 0 length
-    ~ok:(fun () ->
-      print_endline "ping: ok")
     ~close:(fun code ->
       Printf.printf "ping: close: CODE=%i\n" code)
+    (fun () ->
+      print_endline "ping: ok")
 
 let pong_and_dump payload stream =
   let length = String.length payload in
   Stream.pong stream (Bigstringaf.of_string ~off:0 ~len:length payload) 0 length
-    ~ok:(fun () ->
-      print_endline "pong: ok")
     ~close:(fun code ->
       Printf.printf "pong: close: CODE=%i\n" code)
+    (fun () ->
+      print_endline "pong: ok")
 
 
 
