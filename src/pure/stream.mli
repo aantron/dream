@@ -87,6 +87,7 @@ val pipe : unit -> reader * writer
     the reader to call its [~flush] callback. *)
 
 val writer :
+  ready:write ->
   write:(buffer -> int -> int -> bool -> bool -> write) ->
   flush:write ->
   ping:(buffer -> int -> int -> write) ->
@@ -117,6 +118,8 @@ val read_convenience : stream -> string option promise
 val read_until_close : stream -> string promise
 (** Reads a stream completely until [~close], and accumulates the data into a
     string. *)
+
+val ready : stream -> write
 
 val write : stream -> buffer -> int -> int -> bool -> bool -> write
 (** A writing function that sends a data buffer on the given stream. No more

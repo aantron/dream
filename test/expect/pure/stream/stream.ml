@@ -172,20 +172,16 @@ let%expect_test _ =
   read_and_dump stream;
   print_endline "checkpoint 1";
   flush_and_dump stream;
-  flush_and_dump stream;
-  print_endline "checkpoint 2";
+  (try flush_and_dump stream
+  with Failure _ as exn -> print_endline (Printexc.to_string exn));
   read_and_dump stream;
   flush_and_dump stream;
-  try flush_and_dump stream
-  with Failure _ as exn -> print_endline (Printexc.to_string exn);
   [%expect {|
     checkpoint 1
     read: flush
+    (Failure "stream flush: the previous write has not completed")
     flush: ok
-    checkpoint 2
-    read: flush
-    flush: ok
-    (Failure "stream flush: the previous write has not completed") |}]
+    read: flush |}]
 
 
 
@@ -200,20 +196,16 @@ let%expect_test _ =
   read_and_dump stream;
   print_endline "checkpoint 1";
   write_and_dump stream buffer 0 3 false true;
-  write_and_dump stream buffer 1 1 true false;
-  print_endline "checkpoint 2";
+  (try write_and_dump stream buffer 1 1 true false
+  with Failure _ as exn -> print_endline (Printexc.to_string exn));
   read_and_dump stream;
   write_and_dump stream buffer 0 3 true true;
-  try write_and_dump stream buffer 0 3 false false
-  with Failure _ as exn -> print_endline (Printexc.to_string exn);
   [%expect {|
     checkpoint 1
     read: data: BINARY=false FIN=true foo
+    (Failure "stream write: the stream is not ready")
     write: ok
-    checkpoint 2
-    read: data: BINARY=true FIN=false o
-    write: ok
-    (Failure "stream write: the previous write has not completed") |}]
+    read: data: BINARY=true FIN=true foo |}]
 
 
 
@@ -225,20 +217,16 @@ let%expect_test _ =
   read_and_dump stream;
   print_endline "checkpoint 1";
   ping_and_dump "foo" stream;
-  ping_and_dump "bar" stream;
-  print_endline "checkpoint 2";
+  (try ping_and_dump "bar" stream
+  with Failure _ as exn -> print_endline (Printexc.to_string exn));
   read_and_dump stream;
   ping_and_dump "baz" stream;
-  try ping_and_dump "quux" stream
-  with Failure _ as exn -> print_endline (Printexc.to_string exn);
   [%expect {|
     checkpoint 1
     read: ping: foo
+    (Failure "stream ping: the previous write has not completed")
     ping: ok
-    checkpoint 2
-    read: ping: bar
-    ping: ok
-    (Failure "stream ping: the previous write has not completed") |}]
+    read: ping: baz |}]
 
 
 
@@ -250,20 +238,16 @@ let%expect_test _ =
   read_and_dump stream;
   print_endline "checkpoint 1";
   pong_and_dump "foo" stream;
-  pong_and_dump "bar" stream;
-  print_endline "checkpoint 2";
+  (try pong_and_dump "bar" stream
+  with Failure _ as exn -> print_endline (Printexc.to_string exn));
   read_and_dump stream;
   pong_and_dump "baz" stream;
-  try pong_and_dump "quux" stream
-  with Failure _ as exn -> print_endline (Printexc.to_string exn);
   [%expect {|
     checkpoint 1
     read: pong: foo
+    (Failure "stream pong: the previous write has not completed")
     pong: ok
-    checkpoint 2
-    read: pong: bar
-    pong: ok
-    (Failure "stream pong: the previous write has not completed") |}]
+    read: pong: baz |}]
 
 
 
@@ -272,11 +256,9 @@ let%expect_test _ =
 let%expect_test _ =
   let reader, writer = Stream.pipe () in
   let stream = Stream.stream reader writer in
-  flush_and_dump stream;
   Stream.close stream 1005;
   flush_and_dump stream;
   [%expect {|
-    flush: close: CODE=1005
     flush: close: CODE=1005 |}]
 
 
@@ -286,11 +268,9 @@ let%expect_test _ =
 let%expect_test _ =
   let reader, writer = Stream.pipe () in
   let stream = Stream.stream reader writer in
-  write_and_dump stream buffer 0 3 true true;
   Stream.close stream 1005;
   write_and_dump stream buffer 0 3 true false;
   [%expect {|
-    write: close: CODE=1005
     write: close: CODE=1005 |}]
 
 
@@ -300,11 +280,9 @@ let%expect_test _ =
 let%expect_test _ =
   let reader, writer = Stream.pipe () in
   let stream = Stream.stream reader writer in
-  ping_and_dump "foo" stream;
   Stream.close stream 1005;
   ping_and_dump "bar" stream;
   [%expect {|
-    ping: close: CODE=1005
     ping: close: CODE=1005 |}]
 
 
@@ -314,9 +292,7 @@ let%expect_test _ =
 let%expect_test _ =
   let reader, writer = Stream.pipe () in
   let stream = Stream.stream reader writer in
-  pong_and_dump "foo" stream;
   Stream.close stream 1005;
   pong_and_dump "bar" stream;
   [%expect {|
-    pong: close: CODE=1005
     pong: close: CODE=1005 |}]

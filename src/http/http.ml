@@ -180,6 +180,20 @@ let websocket_handler user's_websocket_handler socket =
 
   let bytes_since_flush = ref 0 in
 
+  (* TODO Not a correct implementation. Need to test moving the flush logic
+     from [write] to [ready], essentially. Alternatively, can use a pipe and its
+     logic for turning a writer into a reader. The memory impact is probably the
+     same. However, this is best done after the duplex stream clarification
+     commit, since that will change which streams do what in responses. It will
+     probably force usage of pipes anyway, so that will make piggy-backing on
+     pipes the natural solution. *)
+  let ready ~ok ~close =
+    if !closed then
+      close !close_code
+    else
+      ok ()
+  in
+
   let flush ~ok ~close =
     bytes_since_flush := 0;
     if !closed then
@@ -248,7 +262,7 @@ let websocket_handler user's_websocket_handler socket =
   in
 
   let reader = Stream.reader ~read ~close
-  and writer = Stream.writer ~write ~flush ~ping ~pong ~close in
+  and writer = Stream.writer ~ready ~write ~flush ~ping ~pong ~close in
   let websocket = Stream.stream reader writer in
 
   (* TODO Needs error handling like the top-level app has! *)
