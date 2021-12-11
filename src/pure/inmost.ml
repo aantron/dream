@@ -39,8 +39,8 @@ module Scope = Hmap.Make (Scope_variable_metadata)
 
 type websocket = Stream.stream
 
-type request = incoming message
-and response = outgoing message
+type request = client message
+and response = server message
 
 and 'a message = {
   specific : 'a;
@@ -52,7 +52,7 @@ and 'a message = {
   last : 'a message ref;
 }
 
-and incoming = {
+and client = {
   app : app;
   request_client : string;
   method_ : method_;
@@ -65,7 +65,7 @@ and incoming = {
 }
 (* Prefix is stored backwards. *)
 
-and outgoing = {
+and server = {
   status : status;
   websocket : (websocket -> unit Lwt.t) option;
 }

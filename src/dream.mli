@@ -10,11 +10,11 @@
     Dream is built on just five types. The first two are the data types of
     Dream. Both are abstract, even though they appear to have definitions: *)
 
-type request = incoming message
+type request = client message
 (** HTTP requests, such as [GET /something HTTP/1.1]. See
     {!section-requests}. *)
 
-and response = outgoing message
+and response = server message
 (** HTTP responses, such as [200 OK]. See {!section-responses}. *)
 
 (** The remaining three types are for building up Web apps. *)
@@ -109,13 +109,14 @@ and 'a message
       val Dream.header : string -> 'a message -> string option
     ]} *)
 
-and incoming
-and outgoing
+and client
+and server
 (** Type parameters for {!message} for {!type-request} and {!type-response},
     respectively. These are “phantom” types. They have no meaning other than
-    they are different from each other. Dream only ever creates [incoming
-    message] and [outgoing message]. [incoming] and [outgoing] are never
-    mentioned again in the docs. *)
+    they are different from each other. Dream only ever creates [client message]
+    and [server message]. [client] and [server] are never mentioned again in the
+    docs. *)
+(* TODO These docs need to be clarified. *)
 
 and 'a promise = 'a Lwt.t
 (** Dream uses {{:https://github.com/ocsigen/lwt} Lwt} for promises and
