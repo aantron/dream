@@ -306,14 +306,16 @@ let next =
 let with_body body message =
   let body =
     if String.length body = 0 then
-      Stream.empty
+      (* TODO Should probably preallocate this as a stream. *)
+      Stream.(stream empty no_writer)
     else
-      Stream.string body
+      Stream.(stream (string body) no_writer)
   in
   update {message with body}
 
 let with_stream message =
-  update {message with body = Stream.pipe ()}
+  let reader, writer = Stream.pipe () in
+  update {message with body = Stream.stream reader writer}
 
 (* TODO Need to expose FIN. However, it can't have any effect even on
    WebSockets, because websocket/af does not offer the ability to pass FIN. It
@@ -478,7 +480,7 @@ let request
       upload = initial_multipart_state ();
     };
     headers;
-    body = Stream.string body;
+    body = Stream.(stream (string body) no_writer);
     locals = Scope.empty;
     first = request;
     last = ref request;
@@ -505,7 +507,7 @@ let response
       websocket = None;
     };
     headers;
-    body = Stream.string body;
+    body = Stream.(stream (string body) no_writer);
     locals = Scope.empty;
     first = response;
     last = ref response;

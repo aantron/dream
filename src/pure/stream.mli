@@ -13,6 +13,10 @@ type 'a promise =
   'a Lwt.t
 (** Type abbreviation for promises. *)
 
+type reader
+
+type writer
+
 type stream
 (** This module's principal type, the {e stream}.
 
@@ -64,37 +68,39 @@ type write =
 (** A writing function. Pushes an event into a stream. May take additional
     arguments before [~ok]. *)
 
-val read_only : read:read -> close:(int -> unit) -> stream
+val reader : read:read -> close:(int -> unit) -> reader
 (** Creates a read-only stream from the given reader. [~close] is called in
     response to {!Stream.close}. It doesn't need to call {!Stream.close} again
     on the stream. It should be used to free any underlying resources. *)
 
-val empty : stream
+val empty : reader
 (** A read-only stream whose reading function always calls its [~close]
     callback. *)
 
-val string : string -> stream
+val string : string -> reader
 (** A read-only stream which calls its [~data] callback once with the contents
     of the given string, and then always calls [~close]. *)
 
-val pipe : unit -> stream
+val pipe : unit -> reader * writer
 (** A stream which matches each call of the reading function to one call of its
     writing functions. For example, calling {!Stream.flush} on a pipe will cause
     the reader to call its [~flush] callback. *)
 
-val duplex : read:stream -> write:stream -> close:(int -> unit) -> stream
-(** A stream whose reading functions behave like [~read], and whose writing
-    functions behave like [~write]. *)
-
-val stream :
-  read:read ->
+val writer :
   write:(buffer -> int -> int -> bool -> bool -> write) ->
   flush:write ->
   ping:(buffer -> int -> int -> write) ->
   pong:(buffer -> int -> int -> write) ->
   close:(int -> unit) ->
-    stream
-(** A general stream. *)
+    writer
+
+val no_reader : reader
+
+val no_writer : writer
+
+val stream : reader -> writer -> stream
+(* TODO Consider tupling the arguments, as that will make it easier to pass the
+   result of Stream.pipe. *)
 
 val close : stream -> int -> unit
 (** Closes the given stream. Causes a pending reader or writer to call its

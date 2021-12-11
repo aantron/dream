@@ -60,7 +60,7 @@ let pong_and_dump payload stream =
 (* Read-only streams. *)
 
 let%expect_test _ =
-  let stream = Stream.empty in
+  let stream = Stream.(stream empty no_writer) in
   read_and_dump stream;
   read_and_dump stream;
   Stream.close stream 1005;
@@ -71,13 +71,13 @@ let%expect_test _ =
     read: close: CODE=1000 |}]
 
 let%expect_test _ =
-  let stream = Stream.empty in
+  let stream = Stream.(stream empty no_writer) in
   Stream.close stream 1005;
   read_and_dump stream;
   [%expect {| read: close: CODE=1000 |}]
 
 let%expect_test _ =
-  let stream = Stream.string "foo" in
+  let stream = Stream.(stream (string "foo") no_writer) in
   read_and_dump stream;
   read_and_dump stream;
   read_and_dump stream;
@@ -90,7 +90,7 @@ let%expect_test _ =
     read: close: CODE=1000 |}]
 
 let%expect_test _ =
-  let stream = Stream.string "" in
+  let stream = Stream.(stream (string "") no_writer) in
   read_and_dump stream;
   read_and_dump stream;
   [%expect {|
@@ -98,13 +98,13 @@ let%expect_test _ =
     read: close: CODE=1000 |}]
 
 let%expect_test _ =
-  let stream = Stream.string "foo" in
+  let stream = Stream.(stream (string "foo") no_writer) in
   Stream.close stream 1005;
   read_and_dump stream;
   [%expect {| read: close: CODE=1000 |}]
 
 let%expect_test _ =
-  let stream = Stream.empty in
+  let stream = Stream.(stream empty no_writer) in
   (try write_and_dump stream Bigstringaf.empty 0 0 false false
   with Failure _ as exn -> print_endline (Printexc.to_string exn));
   (try flush_and_dump stream
@@ -124,7 +124,8 @@ let%expect_test _ =
 (* Pipe: double read. *)
 
 let%expect_test _ =
-  let stream = Stream.pipe () in
+  let reader, writer = Stream.pipe () in
+  let stream = Stream.stream reader writer in
   read_and_dump stream;
   try read_and_dump stream
   with Failure _ as exn -> print_endline (Printexc.to_string exn);
@@ -135,7 +136,8 @@ let%expect_test _ =
 (* Pipe: interactions between read and close. *)
 
 let%expect_test _ =
-  let stream = Stream.pipe () in
+  let reader, writer = Stream.pipe () in
+  let stream = Stream.stream reader writer in
   read_and_dump stream;
   print_endline "checkpoint 1";
   Stream.close stream 1005;
@@ -151,7 +153,8 @@ let%expect_test _ =
     checkpoint 3 |}]
 
 let%expect_test _ =
-  let stream = Stream.pipe () in
+  let reader, writer = Stream.pipe () in
+  let stream = Stream.stream reader writer in
   Stream.close stream 1005;
   read_and_dump stream;
   read_and_dump stream;
@@ -164,7 +167,8 @@ let%expect_test _ =
 (* Pipe: interactions between read and flush. *)
 
 let%expect_test _ =
-  let stream = Stream.pipe () in
+  let reader, writer = Stream.pipe () in
+  let stream = Stream.stream reader writer in
   read_and_dump stream;
   print_endline "checkpoint 1";
   flush_and_dump stream;
@@ -191,7 +195,8 @@ let buffer =
   Bigstringaf.of_string ~off:0 ~len:3 "foo"
 
 let%expect_test _ =
-  let stream = Stream.pipe () in
+  let reader, writer = Stream.pipe () in
+  let stream = Stream.stream reader writer in
   read_and_dump stream;
   print_endline "checkpoint 1";
   write_and_dump stream buffer 0 3 false true;
@@ -215,7 +220,8 @@ let%expect_test _ =
 (* Pipe: interactions between read and ping. *)
 
 let%expect_test _ =
-  let stream = Stream.pipe () in
+  let reader, writer = Stream.pipe () in
+  let stream = Stream.stream reader writer in
   read_and_dump stream;
   print_endline "checkpoint 1";
   ping_and_dump "foo" stream;
@@ -239,7 +245,8 @@ let%expect_test _ =
 (* Pipe: interactions between read and pong. *)
 
 let%expect_test _ =
-  let stream = Stream.pipe () in
+  let reader, writer = Stream.pipe () in
+  let stream = Stream.stream reader writer in
   read_and_dump stream;
   print_endline "checkpoint 1";
   pong_and_dump "foo" stream;
@@ -263,7 +270,8 @@ let%expect_test _ =
 (* Pipe: interactions between flush and close. *)
 
 let%expect_test _ =
-  let stream = Stream.pipe () in
+  let reader, writer = Stream.pipe () in
+  let stream = Stream.stream reader writer in
   flush_and_dump stream;
   Stream.close stream 1005;
   flush_and_dump stream;
@@ -276,7 +284,8 @@ let%expect_test _ =
 (* Pipe: interactions between write and close. *)
 
 let%expect_test _ =
-  let stream = Stream.pipe () in
+  let reader, writer = Stream.pipe () in
+  let stream = Stream.stream reader writer in
   write_and_dump stream buffer 0 3 true true;
   Stream.close stream 1005;
   write_and_dump stream buffer 0 3 true false;
@@ -289,7 +298,8 @@ let%expect_test _ =
 (* Pipe: interactions between ping and close. *)
 
 let%expect_test _ =
-  let stream = Stream.pipe () in
+  let reader, writer = Stream.pipe () in
+  let stream = Stream.stream reader writer in
   ping_and_dump "foo" stream;
   Stream.close stream 1005;
   ping_and_dump "bar" stream;
@@ -302,7 +312,8 @@ let%expect_test _ =
 (* Pipe: interactions between pong and close. *)
 
 let%expect_test _ =
-  let stream = Stream.pipe () in
+  let reader, writer = Stream.pipe () in
+  let stream = Stream.stream reader writer in
   pong_and_dump "foo" stream;
   Stream.close stream 1005;
   pong_and_dump "bar" stream;

@@ -24,8 +24,12 @@ type write =
   close:(int -> unit) ->
     unit
 
-type stream = {
+type reader = {
   read : read;
+  close : int -> unit;
+}
+
+type writer = {
   write : buffer -> int -> int -> bool -> bool -> write;
   flush : write;
   ping : buffer -> int -> int -> write;
@@ -33,36 +37,47 @@ type stream = {
   close : int -> unit;
 }
 
-let stream ~read ~write ~flush ~ping ~pong ~close =
-  {
-    read;
-    write;
-    flush;
-    ping;
-    pong;
-    close;
-  }
+type stream = {
+  reader : reader;
+  writer : writer;
+}
 
-let read_only ~read ~close =
-  {
-    read;
-    write =
-      (fun _buffer _offset _length _binary _fin ~ok:_ ~close:_ ->
-        raise (Failure "write to a read-only stream"));
-    flush =
-      (fun ~ok:_ ~close:_ ->
-        raise (Failure "flush of a read-only stream"));
-    ping =
-      (fun _buffer _offset _length ~ok:_ ~close:_ ->
-        raise (Failure "ping on a read-only stream"));
-    pong =
-      (fun _buffer _offset _length ~ok:_ ~close:_ ->
-        raise (Failure "pong on a read-only stream"));
-    close;
-  }
+let stream reader writer =
+  {reader; writer}
+
+let no_reader = {
+  read =
+    (fun ~data:_ ~close:_ ~flush:_ ~ping:_ ~pong:_ ->
+      raise (Failure "read from a non-readable stream"));
+  close =
+    ignore;
+}
+
+let no_writer = {
+  write =
+    (fun _buffer _offset _length _binary _fin ~ok:_ ~close:_ ->
+      raise (Failure "write to a read-only stream"));
+  flush =
+    (fun ~ok:_ ~close:_ ->
+      raise (Failure "flush of a read-only stream"));
+  ping =
+    (fun _buffer _offset _length ~ok:_ ~close:_ ->
+      raise (Failure "ping on a read-only stream"));
+  pong =
+    (fun _buffer _offset _length ~ok:_ ~close:_ ->
+      raise (Failure "pong on a read-only stream"));
+  close =
+    ignore;
+}
+
+let reader ~read ~close =
+  {read; close}
+
+let writer ~write ~flush ~ping ~pong ~close =
+  {write; flush; ping; pong; close}
 
 let empty =
-  read_only
+  reader
     ~read:(fun ~data:_ ~close ~flush:_ ~ping:_ ~pong:_ -> close 1000)
     ~close:ignore
 
@@ -91,36 +106,27 @@ let string the_string =
       string_ref := None;
     in
 
-    read_only ~read ~close
+    reader ~read ~close
   end
 
-let duplex ~read ~write ~close =
-  {
-    read = read.read;
-    write = write.write;
-    flush = write.flush;
-    ping = write.ping;
-    pong = write.pong;
-    close;
-  }
-
 let read stream ~data ~close ~flush =
-  stream.read ~data ~close ~flush
+  stream.reader.read ~data ~close ~flush
 
 let close stream code =
-  stream.close code
+  stream.reader.close code;
+  stream.writer.close code
 
 let write stream buffer offset length binary fin ~ok ~close =
-  stream.write buffer offset length binary fin ~ok ~close
+  stream.writer.write buffer offset length binary fin ~ok ~close
 
 let flush stream ~ok ~close =
-  stream.flush ~ok ~close
+  stream.writer.flush ~ok ~close
 
 let ping stream buffer offset length ~ok ~close =
-  stream.ping buffer offset length ~ok ~close
+  stream.writer.ping buffer offset length ~ok ~close
 
 let pong stream buffer offset length ~ok ~close =
-  stream.pong buffer offset length ~ok ~close
+  stream.writer.pong buffer offset length ~ok ~close
 
 type pipe = {
   mutable state : [
@@ -330,13 +336,25 @@ let pipe () =
       close code
   in
 
-  {read; write; flush; close; ping; pong}
+  let reader = {
+    read;
+    close;
+  }
+  and writer = {
+    write;
+    flush;
+    ping;
+    pong;
+    close;
+  } in
+
+  (reader, writer)
 
 let read_convenience stream =
   let promise, resolver = Lwt.wait () in
 
   let rec loop () =
-    stream.read
+    stream.reader.read
       ~data:(fun buffer offset length _binary _fin ->
         Bigstringaf.sub buffer ~off:offset ~len:length
         |> Bigstringaf.to_string
@@ -349,7 +367,7 @@ let read_convenience stream =
       ~flush:loop
 
       ~ping:(fun buffer offset length ->
-        stream.pong
+        stream.writer.pong
           buffer offset length
           ~ok:loop
           ~close:(fun _code ->
@@ -373,7 +391,7 @@ let read_until_close stream =
   in
 
   let rec loop () =
-    stream.read
+    stream.reader.read
       ~data:(fun chunk offset chunk_length _binary _fin ->
         let new_length = !length + chunk_length in
 
@@ -395,7 +413,7 @@ let read_until_close stream =
       ~flush:loop
 
       ~ping:(fun buffer offset length ->
-        stream.pong buffer offset length ~ok:loop ~close)
+        stream.writer.pong buffer offset length ~ok:loop ~close)
 
       ~pong:(fun _buffer _offset _length ->
         ())

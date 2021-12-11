@@ -247,8 +247,9 @@ let websocket_handler user's_websocket_handler socket =
     end
   in
 
-  let websocket =
-    Stream.stream ~read ~write ~flush ~ping ~pong ~close in
+  let reader = Stream.reader ~read ~close
+  and writer = Stream.writer ~write ~flush ~ping ~pong ~close in
+  let websocket = Stream.stream reader writer in
 
   (* TODO Needs error handling like the top-level app has! *)
   Lwt.async (fun () ->
@@ -309,7 +310,9 @@ let wrap_handler
     let close _code =
       Httpaf.Body.Reader.close body in
     let body =
-      Stream.read_only ~read ~close in
+      Stream.reader ~read ~close in
+    let body =
+      Stream.stream body Stream.no_writer in
 
     let request : Dream.request =
       Dream.request_from_http
@@ -452,7 +455,9 @@ let wrap_handler_h2
     let close _code =
       H2.Body.close_reader body in
     let body =
-      Stream.read_only ~read ~close in
+      Stream.reader ~read ~close in
+    let body =
+      Stream.stream body Stream.no_writer in
 
     let request : Dream.request =
       Dream.request_from_http
