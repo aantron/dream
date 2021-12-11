@@ -86,9 +86,14 @@ let show ?(prefix = "/") ?(method_ = `GET) target router =
     |> Dream.test ~prefix
       (router @@ fun _ -> Dream.respond ~status:`Not_Found "")
     |> fun response ->
-      let status = Dream.status response
-      and body = Lwt_main.run (Dream.body response)
+      let body =
+        Dream.client_stream response
+        |> Obj.magic (* TODO Needs to be replaced by exposing read_until_close
+                             as a function on abstract streams. *)
+        |> Dream__pure.Stream.read_until_close
+        |> Lwt_main.run
       in
+      let status = Dream.status response in
       Printf.printf "Response: %i %s\n"
         (Dream.status_to_int status) (Dream.status_to_string status);
       if body <> "" then

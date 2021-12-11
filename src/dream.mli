@@ -725,9 +725,14 @@ type buffer =
 
 (* TODO What should the body stream retrieval function be called? *)
 (* TODO Remove old functions from signature. *)
+(* TODO Should there be a section for this somewhere? Probably "low-level
+   streaming" should be promoted to a top-level section, Streaming. *)
 type stream
 
-val body_stream : 'a message -> stream
+val server_stream : 'a message -> stream
+val client_stream : 'a message -> stream
+(* TODO Document that this is for middlewares that are transforming a response
+   stream or a WebSocket. *)
 
 (* TODO Probably even close can be made optional. exn can be made optional. *)
 (* TODO Argument order? *)

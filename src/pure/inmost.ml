@@ -292,13 +292,11 @@ let body message =
 let read message =
   Stream.read_convenience message.server_stream
 
-let body_stream message =
-  message.server_stream
-
-(* TODO Temporary internal function so that the HTTP layer can read response
-   streams. *)
 let client_stream message =
   message.client_stream
+
+let server_stream message =
+  message.server_stream
 
 (* TODO Pending the dream.mli interface reorganization for the new stream
    API. *)
