@@ -1,6 +1,0 @@
-(executable
- (name client)
- (libraries hyper)
- (preprocess (pps lwt_ppx)))
-
-(data_only_dirs _esy esy.lock lib node_modules)

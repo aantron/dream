@@ -19,21 +19,3 @@
   mirage-crypto-rng.lwt
   ptime.clock.os
  ))
-
-(library
- (public_name hyper)
- (wrapped false)
- (modules hyper)
- (libraries
-  dream
-  dream.h2
-  dream.h2-lwt-unix
-  dream.httpaf
-  dream.httpaf-lwt-unix
-  lwt
-  lwt.unix
-  lwt_ssl
-  ssl
-  dream.websocketaf-lwt-unix
- )
- (preprocess (pps lwt_ppx)))
