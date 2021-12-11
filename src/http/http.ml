@@ -265,6 +265,13 @@ let websocket_handler user's_websocket_handler socket =
   let reader = Stream.reader ~read ~close
   and writer = Stream.writer ~ready ~write ~flush ~ping ~pong ~close in
   let websocket = Stream.stream reader writer in
+  (* TODO Change WebSockets to use two pipes in the response body, rather than
+     a weird stream hanging out in the heap. That way, a client and server can
+     immediately communicate with each other if they are in process, without the
+     need to interpet the WebSocket response with an HTTP layer. This will also
+     simplify the WebSocket writing code, as this HTTP adapter code will read
+     from a pipe rather than implement a writer from scratch. At that point,
+     Stream.writer can be removed from stream.mli. *)
 
   (* TODO Needs error handling like the top-level app has! *)
   Lwt.async (fun () ->

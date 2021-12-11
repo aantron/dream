@@ -29,7 +29,7 @@ let forward_body_general
   let bytes_since_flush = ref 0 in
 
   let rec send () =
-    Dream.body_stream response
+    Dream.client_stream response
     |> fun stream ->
       Stream.read
         stream
