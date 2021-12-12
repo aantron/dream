@@ -6,6 +6,7 @@
 
 
 module Dream = Dream__pure.Inmost
+module Cookie = Dream__middleware.Cookie
 module Session = Dream__middleware.Session
 
 
@@ -142,7 +143,7 @@ let load lifetime request =
     let now = Unix.gettimeofday () in
 
     let%lwt valid_session =
-      match Dream.cookie ~decrypt:false Session.session_cookie request with
+      match Cookie.cookie ~decrypt:false Session.session_cookie request with
       | None -> Lwt.return_none
       | Some id ->
         match Session.read_session_id id with
@@ -185,7 +186,7 @@ let send (operations, session) request response =
     let id = Session.version_session_id !session.Session.id in
     let max_age = !session.Session.expires_at -. Unix.gettimeofday () in
     Lwt.return
-      (Dream.set_cookie
+      (Cookie.set_cookie
         Session.session_cookie
         id
         request

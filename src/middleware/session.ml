@@ -153,7 +153,7 @@ struct
     let now = gettimeofday () in
 
     let valid_session =
-      Dream.cookie ~decrypt:false session_cookie request
+      Cookie.cookie ~decrypt:false session_cookie request
       |>? read_session_id
       |>? Hashtbl.find_opt hash_table
       |>? fun session ->
@@ -188,7 +188,7 @@ struct
       let id = version_session_id !session.id in
       let max_age = !session.expires_at -. now () in
       Lwt.return
-        (Dream.set_cookie
+        (Cookie.set_cookie
           session_cookie id request response ~encrypt:false ~max_age)
 
   let back_end ~now lifetime =
@@ -240,7 +240,7 @@ struct
     let now = gettimeofday () in
 
     let valid_session =
-      Dream.cookie session_cookie request
+      Cookie.cookie session_cookie request
       |>? read_value
       |>? fun value ->
         (* TODO Is there a non-raising version of this? *)
@@ -310,7 +310,7 @@ struct
         |> version_value
       in
       Lwt.return
-        (Dream.set_cookie session_cookie value request response ~max_age)
+        (Cookie.set_cookie session_cookie value request response ~max_age)
 
   let back_end ~now lifetime = {
     load = load ~now lifetime;

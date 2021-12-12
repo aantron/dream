@@ -28,6 +28,9 @@ let debug = default_log.debug
 include Dream__middleware.Router
 include Dream__unix.Static
 
+include Dream__cipher.Cipher
+include Dream__middleware.Cookie
+
 include Dream__middleware.Session
 include Dream__middleware.Session.Make (Ptime_clock)
 let sql_sessions = Dream__sql.Session.middleware

@@ -6,6 +6,9 @@
 
 
 module Dream = Dream__pure.Inmost
+module Cipher = Dream__cipher.Cipher
+
+
 
 let field_name =
   "dream.csrf"
@@ -21,7 +24,7 @@ let csrf_token ~now ?(valid_for = default_valid_for) request =
     "expires_at", `Float (floor (now +. valid_for));
   ]
   |> Yojson.Basic.to_string
-  |> Dream.encrypt ~associated_data:field_name request
+  |> Cipher.encrypt ~associated_data:field_name request
   |> Dream__pure.Formats.to_base64url
 
 let log =
@@ -41,7 +44,7 @@ let verify_csrf_token ~now request token = Lwt.return @@
     `Invalid
   | Some token ->
 
-  match Dream.decrypt ~associated_data:field_name request token with
+  match Cipher.decrypt ~associated_data:field_name request token with
   | None ->
     log.warning (fun log -> log ~request "CSRF token could not be verified");
     `Invalid

@@ -7,6 +7,8 @@
 
 module Dream = Dream__pure.Inmost
 
+
+
 let log =
   Log.sub_log "dream.flash"
 
@@ -41,7 +43,7 @@ let flash request =
     | _ -> failwith "Bad flash message content"
   in
   let x =
-    Dream.cookie flash_cookie request
+    Cookie.cookie flash_cookie request
     |>? fun value ->
     match Yojson.Basic.from_string value with
     | `List y -> Some (group @@ List.map unpack y)
@@ -74,14 +76,14 @@ let flash_messages inner_handler request =
       log ~request "%s" "No flash messages.");
   let outbox = ref [] in
   let request = Dream.with_local storage outbox request in
-  let existing = Dream.cookie flash_cookie request in
+  let existing = Cookie.cookie flash_cookie request in
   let%lwt response = inner_handler request in
   let entries = List.rev !outbox in
   let response =
     match existing, entries with
     | None, [] -> response
     | Some _, [] ->
-      Dream.set_cookie flash_cookie "" request response ~expires:0.
+      Cookie.set_cookie flash_cookie "" request response ~expires:0.
     | _, _ ->
       let content =
         List.fold_right (fun (x,y) a -> `String x :: `String y :: a) entries []
@@ -96,6 +98,6 @@ let flash_messages inner_handler request =
         else
           ()
       in
-      Dream.set_cookie flash_cookie value request response ~max_age:five_minutes
+      Cookie.set_cookie flash_cookie value request response ~max_age:five_minutes
   in
   Lwt.return response
