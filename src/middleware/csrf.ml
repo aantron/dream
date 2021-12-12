@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream__pure.Inmost
+module Dream = Dream_pure.Inmost
 module Cipher = Dream__cipher.Cipher
 
 
@@ -25,7 +25,7 @@ let csrf_token ~now ?(valid_for = default_valid_for) request =
   ]
   |> Yojson.Basic.to_string
   |> Cipher.encrypt ~associated_data:field_name request
-  |> Dream__pure.Formats.to_base64url
+  |> Dream_pure.Formats.to_base64url
 
 let log =
   Log.sub_log field_name
@@ -38,7 +38,7 @@ type csrf_result = [
 ]
 
 let verify_csrf_token ~now request token = Lwt.return @@
-  match Dream__pure.Formats.from_base64url token with
+  match Dream_pure.Formats.from_base64url token with
   | None ->
     log.warning (fun log -> log ~request "CSRF token not Base64-encoded");
     `Invalid

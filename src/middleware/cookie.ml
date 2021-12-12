@@ -5,8 +5,8 @@
 
 
 
-module Formats = Dream__pure.Formats
-module Dream = Dream__pure.Inmost
+module Formats = Dream_pure.Formats
+module Dream = Dream_pure.Inmost
 module Cipher = Dream__cipher.Cipher
 
 

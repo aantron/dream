@@ -7,7 +7,7 @@
 
 (* https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html *)
 
-module Dream = Dream__pure.Inmost
+module Dream = Dream_pure.Inmost
 
 
 
@@ -89,10 +89,10 @@ let (|>?) =
    two IDs among 100,000,000,000 concurrent sessions (5x the monthly traffic of
    google.com in February 2021). *)
 let new_id () =
-  Dream__cipher.Random.random 18 |> Dream__pure.Formats.to_base64url
+  Dream__cipher.Random.random 18 |> Dream_pure.Formats.to_base64url
 
 let new_label () =
-  Dream__cipher.Random.random 9 |> Dream__pure.Formats.to_base64url
+  Dream__cipher.Random.random 9 |> Dream_pure.Formats.to_base64url
 
 let version_session_id id =
   "0" ^ id

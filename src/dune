@@ -9,7 +9,7 @@
   dream.http
   dream.middleware
   dream.unix
-  dream.pure
+  dream-pure
   dream.sql
   fmt.tty
   graphql-lwt

@@ -29,7 +29,7 @@
 
 module Dream =
 struct
-  include Dream__pure.Inmost
+  include Dream_pure.Inmost
   module Request_id = Request_id
 end
 

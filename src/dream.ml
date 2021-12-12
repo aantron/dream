@@ -5,8 +5,8 @@
 
 
 
-include Dream__pure.Stream
-include Dream__pure.Inmost
+include Dream_pure.Stream
+include Dream_pure.Inmost
 
 include Dream__middleware.Log
 include Dream__middleware.Log.Make (Ptime_clock)
@@ -63,7 +63,7 @@ let () = Dream__cipher.Random.initialize Mirage_crypto_rng_lwt.initialize
 let random =
   Dream__cipher.Random.random
 
-include Dream__pure.Formats
+include Dream_pure.Formats
 
 (* TODO Restore the ability to test with a prefix and re-enable the
    corresponding tests. *)

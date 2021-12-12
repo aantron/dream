@@ -3,7 +3,7 @@
  (name dream__unix)
  (libraries
   digestif
-  dream.pure
+  dream-pure
   lwt.unix
   magic-mime
  )

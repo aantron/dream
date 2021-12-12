@@ -8,7 +8,7 @@
   dream.cipher
   dream.localhost
   dream.middleware
-  dream.pure
+  dream-pure
   dream.h2
   dream.httpaf
   lwt

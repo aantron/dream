@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream__pure.Inmost
+module Dream = Dream_pure.Inmost
 module Cookie = Dream__middleware.Cookie
 module Session = Dream__middleware.Session
 

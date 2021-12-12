@@ -113,7 +113,7 @@ struct
 end
 
 (* TODO Ideally, get rid of this open. *)
-open Dream__pure.Inmost
+open Dream_pure.Inmost
 
 let encryption_secret request =
   List.hd request.specific.app.secrets

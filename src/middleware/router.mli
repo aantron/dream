@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream__pure.Inmost
+module Dream = Dream_pure.Inmost
 
 type route
 

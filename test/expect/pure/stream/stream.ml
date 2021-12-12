@@ -5,7 +5,7 @@
 
 
 
-module Stream = Dream__pure.Stream
+module Stream = Dream_pure.Stream
 
 
 

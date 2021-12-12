@@ -7,8 +7,8 @@
 
 module Dream =
 struct
-  include Dream__pure.Formats
-  include Dream__pure.Method
+  include Dream_pure.Formats
+  include Dream_pure.Method
 end
 
 (* TODO Include the path prefix. *)

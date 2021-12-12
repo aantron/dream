@@ -4,7 +4,7 @@
  (libraries
   digestif
   dream.cipher
-  dream.pure
+  dream-pure
   fmt
   logs
   lwt

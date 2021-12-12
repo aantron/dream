@@ -4,7 +4,7 @@
  (libraries
   dream.graphiql
   dream.middleware
-  dream.pure
+  dream-pure
   graphql_parser
   graphql-lwt
   lwt

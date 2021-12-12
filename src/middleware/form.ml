@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream__pure.Inmost
+module Dream = Dream_pure.Inmost
 
 
 
@@ -58,7 +58,7 @@ let form ?(csrf = true) ~now request =
   match Dream.header "Content-Type" request with
   | Some "application/x-www-form-urlencoded" ->
     let%lwt body = Dream.body request in
-    let form = Dream__pure.Formats.from_form_urlencoded body in
+    let form = Dream_pure.Formats.from_form_urlencoded body in
     if csrf then
     sort_and_check_form ~now (fun string -> string) form request
     else

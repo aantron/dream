@@ -8,7 +8,7 @@
   dream.cipher
   dream.localhost
   dream.middleware
-  dream.pure
+  dream-pure
   dream.gluten
   dream.gluten-lwt-unix
   dream.h2

@@ -5,7 +5,7 @@
   dream
   dream.cipher
   dream.middleware
-  dream.pure
+  dream-pure
   lwt
   lwt.unix
   ppx_expect.common

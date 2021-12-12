@@ -7,8 +7,8 @@
 
 module Dream =
 struct
-  include Dream__pure.Inmost
-  include Dream__pure.Formats
+  include Dream_pure.Inmost
+  include Dream_pure.Formats
 end
 
 let render ~debug_dump ~code ~reason =

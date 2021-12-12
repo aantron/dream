@@ -5,8 +5,8 @@
 
 
 
-module Dream = Dream__pure.Inmost
-module Stream = Dream__pure.Stream
+module Dream = Dream_pure.Inmost
+module Stream = Dream_pure.Stream
 
 
 
@@ -763,8 +763,8 @@ let serve_with_maybe_https
 
   let prefix =
     prefix
-    |> Dream__pure.Formats.from_path
-    |> Dream__pure.Formats.drop_trailing_slash
+    |> Dream_pure.Formats.from_path
+    |> Dream_pure.Formats.drop_trailing_slash
   in
   let app = Dream.new_app (Error_handler.app error_handler) prefix in
 

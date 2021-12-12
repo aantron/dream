@@ -10,7 +10,7 @@ let () =
 
 let path request =
   Dream.path request
-  |> Dream__pure.Formats.make_path
+  |> Dream_pure.Formats.make_path
 
 
 
@@ -90,7 +90,7 @@ let show ?(prefix = "/") ?(method_ = `GET) target router =
         Dream.client_stream response
         |> Obj.magic (* TODO Needs to be replaced by exposing read_until_close
                              as a function on abstract streams. *)
-        |> Dream__pure.Stream.read_until_close
+        |> Dream_pure.Stream.read_until_close
         |> Lwt_main.run
       in
       let status = Dream.status response in

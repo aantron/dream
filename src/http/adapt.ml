@@ -5,8 +5,8 @@
 
 
 
-module Dream = Dream__pure.Inmost
-module Stream = Dream__pure.Stream
+module Dream = Dream_pure.Inmost
+module Stream = Dream_pure.Stream
 
 
 

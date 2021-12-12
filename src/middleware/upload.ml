@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream__pure.Inmost
+module Dream = Dream_pure.Inmost
 
 let field_to_string (request : Dream.request) field =
   let open Multipart_form in

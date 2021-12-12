@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream__pure.Inmost
+module Dream = Dream_pure.Inmost
 
 
 
@@ -17,7 +17,7 @@ module Dream = Dream__pure.Inmost
 let mime_lookup filename =
   let content_type =
     match Magic_mime.lookup filename with
-    | "text/html" -> Dream__pure.Formats.text_html
+    | "text/html" -> Dream_pure.Formats.text_html
     | content_type -> content_type
   in
   ["Content-Type", content_type]
