@@ -132,6 +132,16 @@ val normalize_status : [< status ] -> status
 
 
 
+val request :
+  ?client:string ->
+  ?method_:[< method_ ] ->
+  ?target:string ->
+  ?version:int * int ->
+  ?headers:(string * string) list ->
+  stream ->
+  stream ->
+    request
+
 val client : request -> string
 val https : request -> bool
 val method_ : request -> method_
@@ -447,15 +457,6 @@ val fold_locals : (string -> string -> 'a -> 'a) -> 'a -> 'b message -> 'a
 
 
 (* TODO Delete once requests are mutable. *)
-val request :
-  ?client:string ->
-  ?method_:[< method_ ] ->
-  ?target:string ->
-  ?version:int * int ->
-  ?headers:(string * string) list ->
-  stream ->
-  stream ->
-    request
 val first : 'a message -> 'a message
 val last : 'a message -> 'a message
 val sort_headers : (string * string) list -> (string * string) list
