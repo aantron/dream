@@ -52,7 +52,6 @@ include Dream__http.Http
 
 include Dream__middleware.Lowercase_headers
 include Dream__middleware.Catch
-include Dream__middleware.Request_id
 include Dream__middleware.Site_prefix
 
 let error_template =
@@ -71,7 +70,6 @@ let test ?(prefix = "") handler request =
   ignore prefix;
   let app =
     content_length
-    @@ assign_request_id
     @@ chop_site_prefix
     @@ handler
   in

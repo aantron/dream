@@ -31,10 +31,59 @@ module Dream = Dream_pure
 
 
 
+(* The logging middleware assigns request ids to requests, and tries to show
+   them in the logs. The scheme works as follows:
+
+   - Request ids are strings stored in request-local variables.
+   - The automatically assigned request ids are taken from a simple global
+     sequence.
+   - The user can override the automatic request id by assigning a request id
+     in a middleware that runs before the logger. User-provided request ids can
+     be per-thread, can come from a proxy header, etc.
+   - The logger makes a best effort to forward the request id to all logging
+     statements that are being formatted. If the ~request argument is provided
+     during a logging call, that request's id is shown. To handle all other
+     cases, the logger puts the request's id into an Lwt sequence-associated
+     storage key, and the log message formatter tries to get it from there. *)
+(* TODO Necessary helpers for the user setting the request id are not yet
+   exposed in the API, pending some other refactoring (request mutability). *)
+
+let request_id_label = "dream.request_id"
+
+(* Logs library tag uesd to pass an id from a request provided through
+   ~request. *)
 let logs_lib_tag : string Logs.Tag.def =
   Logs.Tag.def
-    "dream.request_id"
+    request_id_label
     Format.pp_print_string
+
+(* Lwt sequence-associated storage key used to pass request ids for use when
+   ~request is not provided. *)
+let lwt_key : string Lwt.key =
+  Lwt.new_key ()
+
+(* The actual request id "field" associated with each request by the logger. If
+   this field is missing, the logger assigns the request a fresh id. *)
+let id =
+  Dream.new_local
+    ~name:request_id_label
+    ~show_value:(fun id -> id)
+    ()
+
+(* Makes a best-effort attempt to retrieve the request id. *)
+let get_request_id ?request () =
+  let request_id =
+    match request with
+    | None -> None
+    | Some request -> Dream.local id request
+  in
+  match request_id with
+  | Some _ -> request_id
+  | None -> Lwt.get lwt_key
+
+(* The current state of the request id sequence. *)
+let last_id =
+  ref 0
 
 
 
@@ -152,8 +201,7 @@ let reporter ~now () =
       let request_id =
         match request_id_from_tags with
         | Some _ -> request_id_from_tags
-        | None ->
-          Request_id.get_option ()
+        | None -> get_request_id ()
       in
 
       let request_id, request_style =
@@ -262,7 +310,7 @@ let sub_log ?level:level_ name =
           match request with
           | None -> Logs.Tag.empty
           | Some request ->
-            match Request_id.get_option ~request () with
+            match get_request_id ~request () with
             | None -> Logs.Tag.empty
             | Some request_id ->
               Logs.Tag.add logs_lib_tag request_id Logs.Tag.empty
@@ -409,6 +457,16 @@ struct
       set_printexc := false
     end;
 
+    (* Get the requwst's id or assign a new one. *)
+    let request, id =
+      match Dream.local id request with
+      | Some id -> request, id
+      | None ->
+        last_id := !last_id + 1;
+        let new_id = string_of_int !last_id in
+        Dream.with_local id new_id request, new_id
+    in
+
     (* Identify the request in the log. *)
     let user_agent =
       Dream.headers "User-Agent" request
@@ -425,7 +483,8 @@ struct
     (* Call the rest of the app. *)
     Lwt.try_bind
       (fun () ->
-        next_handler request)
+        Lwt.with_value lwt_key (Some id) (fun () ->
+          next_handler request))
       (fun response ->
         (* Log the elapsed time. If the response is a redirection, log the
            target. *)

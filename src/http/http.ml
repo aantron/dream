@@ -403,8 +403,8 @@ let wrap_handler
              request_id field in requests. *)
           let user's_websocket_handler websocket =
             Lwt.with_value
-              Dream__middleware.Request_id.lwt_key
-              (Dream__middleware.Request_id.get_option
+              Dream__middleware.Log.lwt_key
+              (Dream__middleware.Log.get_request_id
                 ~request:(Dream.last request) ())
               (fun () -> user's_websocket_handler websocket)
           in
@@ -651,7 +651,6 @@ let built_in_middleware =
     Dream__middleware.Lowercase_headers.lowercase_headers;
     Dream__middleware.Content_length.content_length;
     Dream__middleware.Catch.catch_errors;
-    Dream__middleware.Request_id.assign_request_id;
     Dream__middleware.Site_prefix.chop_site_prefix;
   ]
 

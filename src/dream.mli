@@ -2087,7 +2087,6 @@ val serve :
       @@ Dream.lowercase_headers
       @@ Dream.content_length
       @@ Dream.catch_errors
-      @@ Dream.assign_request_id
       @@ Dream.chop_site_prefix
       @@ my_app
     ]}
@@ -2114,9 +2113,6 @@ val content_length : middleware
 val catch_errors : middleware
 (** Forwards exceptions, rejections, and [4xx], [5xx] responses from the
     application to the error handler. See {!section-errors}. *)
-
-val assign_request_id : middleware
-(** Assigns an id to each request. *)
 
 val chop_site_prefix : middleware
 (** Removes {!Dream.run} [~prefix] from the path in each request, and adds it to
