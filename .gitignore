@@ -15,7 +15,8 @@ _esy/
 esy.lock
 
 # Release script
-dream-*
+dream-*.gz
+dream-*/
 
 # Bisect_ppx
 _coverage/
