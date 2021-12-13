@@ -72,7 +72,6 @@ and server = {
 and app = {
   mutable app_debug : bool;
   mutable https : bool;
-  mutable secrets : string list;
   error_handler : error -> response Lwt.t;
   site_prefix : string list;
 }
@@ -127,13 +126,6 @@ let set_debug value app =
 let app_error_handler app =
   app.error_handler
 
-(* TODO Delete; now using key. *)
-let secret app =
-  List.hd app.secrets
-
-let set_secrets secrets app =
-  app.secrets <- secrets
-
 let set_https https app =
   app.https <- https
 
@@ -143,7 +135,6 @@ let site_prefix request =
 let new_app error_handler site_prefix = {
   app_debug = false;
   https = false;
-  secrets = [];
   error_handler;
   site_prefix;
 }
@@ -594,12 +585,6 @@ let rec pipeline middlewares handler =
 
 let sort_headers headers =
   List.stable_sort (fun (name, _) (name', _) -> compare name name') headers
-
-let encryption_secret request =
-  List.hd request.specific.app.secrets
-
-let decryption_secrets request =
-  request.specific.app.secrets
 
 (* TODO Remove to server-side code. *)
 let multipart_state request =

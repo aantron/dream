@@ -140,11 +140,6 @@ val prefix : request -> string
 val internal_prefix : request -> string list
 val path : request -> string list
 val version : request -> int * int
-val encryption_secret : request -> string
-val decryption_secrets : request -> string list
-(* TODO Get the encryption secrets out of here and into the server only.
-   Also try to move the whole "app" mechanism to the server only. However, how
-   will that interact with in-process testing? *)
 val site_prefix : request -> string list
 (* TODO This will be moved out of dream-pure and become just a server-side
    middleware.. *)
@@ -404,7 +399,6 @@ val app : request -> app
 val debug : app -> bool
 val set_debug : bool -> app -> unit
 val app_error_handler : app -> (error -> response promise)
-val set_secrets : string list -> app -> unit
 val set_https : bool -> app -> unit
 val request_from_http :
   app:app ->

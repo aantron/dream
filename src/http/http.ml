@@ -751,8 +751,6 @@ let serve_with_maybe_https
     ~stop
     ?debug
     ~error_handler
-    ?(secret = Dream__cipher.Random.random 32)
-    ?(old_secrets = [])
     ~prefix
     ~https
     ?certificate_file ?key_file
@@ -775,16 +773,13 @@ let serve_with_maybe_https
 
     (* This check will at least catch secrets like "foo" when used on a public
        interface. *)
-    if not (is_localhost interface) then
+    (* if not (is_localhost interface) then
       if String.length secret < 32 then begin
         log.warning (fun log -> log "Using a short key on a public interface");
         log.warning (fun log ->
           log "Consider using Dream.to_base64url (Dream.random 32)");
-    end;
-
-    (* TODO The interface needs to allow not messing with the secret if an app
-       is passed. *)
-    Dream.set_secrets (secret::old_secrets) app;
+    end; *)
+    (* TODO Make sure there is a similar check in cipher.ml now.Hpack *)
 
     match https with
     | `No ->
@@ -920,8 +915,6 @@ let serve
     ?(stop = never)
     ?debug
     ?(error_handler = Error_handler.default)
-    ?secret
-    ?old_secrets
     ?(prefix = "")
     ?(https = false)
     ?certificate_file
@@ -936,8 +929,6 @@ let serve
     ~stop
     ?debug
     ~error_handler
-    ?secret
-    ?old_secrets
     ~prefix
     ~https:(if https then `OpenSSL else `No)
     ?certificate_file
@@ -955,8 +946,6 @@ let run
     ?(stop = never)
     ?debug
     ?(error_handler = Error_handler.default)
-    ?secret
-    ?old_secrets
     ?(prefix = "")
     ?(https = false)
     ?certificate_file
@@ -1036,8 +1025,6 @@ let run
         ~stop
         ?debug
         ~error_handler
-        ?secret
-        ?old_secrets
         ~prefix
         ~https:(if https then `OpenSSL else `No)
         ?certificate_file ?key_file

@@ -11,6 +11,12 @@
 (* TODO LATER Switch to AEAD_AES_256_GCM_SIV. See
    https://github.com/mirage/mirage-crypto/issues/111. *)
 
+
+
+module Dream = Dream_pure
+
+
+
 module type Cipher =
 sig
   val prefix : char
@@ -112,16 +118,46 @@ struct
         | Some plaintext -> Some (Cstruct.to_string plaintext)
 end
 
+let secrets =
+  Dream.new_local
+    ~name:"dream.secret"
+    ~show_value:(fun _secrets -> "[redacted]")
+    ()
+
+(* TODO Add warnings about secret length and such. *)
+(* TODO Also add warnings about implicit secret generation. However, these
+   warnings might be pretty spammy. *)
+(* TODO Update examples and docs. *)
+let with_secret ?(old_secrets = []) secret =
+  let value = secret::old_secrets in
+  fun next_handler request ->
+    request
+    |> Dream.with_local secrets value
+    |> next_handler
+
+let fallback_secrets =
+  lazy [Random.random 32]
+
+let encryption_secret request =
+  match Dream.local secrets request with
+  | Some secrets -> List.hd secrets
+  | None -> List.hd (Lazy.force fallback_secrets)
+
+let decryption_secrets request =
+  match Dream.local secrets request with
+  | Some secrets -> secrets
+  | None -> Lazy.force fallback_secrets
+
 let encrypt ?associated_data request plaintext =
   encrypt
     (module AEAD_AES_256_GCM)
     ?associated_data
-    (Dream_pure.encryption_secret request)
+    (encryption_secret request)
     plaintext
 
 let decrypt ?associated_data request ciphertext =
   decrypt
     (module AEAD_AES_256_GCM)
     ?associated_data
-    (Dream_pure.decryption_secrets request)
+    (decryption_secrets request)
     ciphertext
