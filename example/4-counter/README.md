@@ -42,14 +42,6 @@ promise with [Lwt](https://github.com/ocsigen/lwt#readme), the promise library
 used by Dream. The next example, [**`5-promise`**](../5-promise#files), does
 exactly that!
 
-<!-- TODO
-<br>
-
-Advanced example [**`w-globals`**](../w-globals/#files) shows how to replace
-global state like `count` by state scoped to the application. This is useful if
-you are writing middleware to publish in a library. It's fine to use a global
-`ref` in private code!
--->
 <br>
 
 **Next steps:**

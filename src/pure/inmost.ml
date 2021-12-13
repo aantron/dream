@@ -70,7 +70,6 @@ and server = {
 }
 
 and app = {
-  globals : Scope.t ref;
   mutable app_debug : bool;
   mutable https : bool;
   mutable secrets : string list;
@@ -142,7 +141,6 @@ let site_prefix request =
   request.specific.app.site_prefix
 
 let new_app error_handler site_prefix = {
-  globals = ref Scope.empty;
   app_debug = false;
   https = false;
   secrets = [];
@@ -426,28 +424,6 @@ let with_local key value message =
 
 let fold_locals f initial message =
   fold_scope f initial message.locals
-
-type 'a global = {
-  key : 'a Scope.key;
-  initializer_ : unit -> 'a;
-}
-
-let new_global ?name ?show_value initializer_ = {
-  key = Scope.Key.create (name, show_value);
-  initializer_;
-}
-
-let global {key; initializer_} request =
-  match Scope.find key !(request.specific.app.globals) with
-  | Some value -> value
-  | None ->
-    let value = initializer_ () in
-    request.specific.app.globals :=
-      Scope.add key value !(request.specific.app.globals);
-    value
-
-let fold_globals f initial request =
-  fold_scope f initial !(request.specific.app.globals)
 
 let app request =
   request.specific.app

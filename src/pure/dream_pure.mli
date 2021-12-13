@@ -453,14 +453,6 @@ val local : 'a local -> 'b message -> 'a option
 val with_local : 'a local -> 'a -> 'b message -> 'b message
 val fold_locals : (string -> string -> 'a -> 'a) -> 'a -> 'b message -> 'a
 
-type 'a global
-val new_global :
-  ?name:string -> ?show_value:('a -> string) -> (unit -> 'a) -> 'a global
-val global : 'a global -> request -> 'a
-(* TODO Get rid of globals completely as a concept, once the site_prefix
-   middleware is clarified. *)
-val fold_globals : (string -> string -> 'a -> 'a) -> 'a -> request -> 'a
-
 
 
 (* TODO Delete once requests are mutable. *)

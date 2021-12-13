@@ -94,18 +94,14 @@ let dump (error : Dream.error) =
     Dream.all_headers last
     |> List.iter (fun (name, value) -> p "\n%s: %s" name value);
 
-    let show_variables kind =
-      kind (fun name value first ->
-        if first then
-          p "\n";
-        p "\n%s: %s" name value;
-        false)
-        true
-        request
-      |> ignore
-    in
-    show_variables Dream.fold_locals;
-    show_variables Dream.fold_globals
+    Dream.fold_locals (fun name value first ->
+      if first then
+        p "\n";
+      p "\n%s: %s" name value;
+      false)
+      true
+      request
+    |> ignore
   end;
 
   Buffer.contents buffer

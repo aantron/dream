@@ -2290,13 +2290,10 @@ val decrypt :
 
 (** {1 Variables}
 
-    Dream provides two variable scopes for use by middlewares. *)
+    Dream supports user-defined per-message variables for use by middlewares. *)
 
 type 'a local
 (** Per-message variable. *)
-
-type 'a global
-(** Per-server variable. *)
 
 val new_local : ?name:string -> ?show_value:('a -> string) -> unit -> 'a local
 (** Declares a variable of type ['a] in all messages. The variable is initially
@@ -2308,16 +2305,6 @@ val local : 'a local -> 'b message -> 'a option
 
 val with_local : 'a local -> 'a -> 'b message -> 'b message
 (** Sets the per-message variable to the value. *)
-
-val new_global :
-  ?name:string -> ?show_value:('a -> string) -> (unit -> 'a) -> 'a global
-(** Declares a variable of type ['a] in all servers. The first time the variable
-    is accessed, the given initializer function is called to get its value.
-    Global variables cannot be changed. So, they are typically refs or other
-    mutable data structures, such as hash tables. *)
-
-val global : 'a global -> request -> 'a
-(** Retrieves the value of the per-server variable. *)
 
 
 
