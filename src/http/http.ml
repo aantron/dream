@@ -651,7 +651,6 @@ let built_in_middleware =
     Dream__middleware.Lowercase_headers.lowercase_headers;
     Dream__middleware.Content_length.content_length;
     Dream__middleware.Catch.catch_errors;
-    Dream__middleware.Site_prefix.chop_site_prefix;
   ]
 
 
@@ -743,7 +742,6 @@ let serve_with_details
 let is_localhost interface =
   interface = "localhost" || interface = "127.0.0.1"
 
-(* TODO Validate the prefix here. *)
 let serve_with_maybe_https
     caller_function_for_error_messages
     ~interface
@@ -751,19 +749,13 @@ let serve_with_maybe_https
     ~stop
     ?debug
     ~error_handler
-    ~prefix
     ~https
     ?certificate_file ?key_file
     ?certificate_string ?key_string
     ~builtins
     user's_dream_handler =
 
-  let prefix =
-    prefix
-    |> Dream_pure.Formats.from_path
-    |> Dream_pure.Formats.drop_trailing_slash
-  in
-  let app = Dream.new_app (Error_handler.app error_handler) prefix in
+  let app = Dream.new_app (Error_handler.app error_handler) in
 
   try%lwt
     begin match debug with
@@ -915,7 +907,6 @@ let serve
     ?(stop = never)
     ?debug
     ?(error_handler = Error_handler.default)
-    ?(prefix = "")
     ?(https = false)
     ?certificate_file
     ?key_file
@@ -929,7 +920,6 @@ let serve
     ~stop
     ?debug
     ~error_handler
-    ~prefix
     ~https:(if https then `OpenSSL else `No)
     ?certificate_file
     ?key_file
@@ -946,7 +936,6 @@ let run
     ?(stop = never)
     ?debug
     ?(error_handler = Error_handler.default)
-    ?(prefix = "")
     ?(https = false)
     ?certificate_file
     ?key_file
@@ -1025,7 +1014,6 @@ let run
         ~stop
         ?debug
         ~error_handler
-        ~prefix
         ~https:(if https then `OpenSSL else `No)
         ?certificate_file ?key_file
         ?certificate_string:None ?key_string:None

@@ -67,10 +67,9 @@ include Dream_pure.Formats
 (* TODO Restore the ability to test with a prefix and re-enable the
    corresponding tests. *)
 let test ?(prefix = "") handler request =
-  ignore prefix;
   let app =
     content_length
-    @@ chop_site_prefix
+    @@ with_site_prefix prefix
     @@ handler
   in
 

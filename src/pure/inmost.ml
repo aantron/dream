@@ -73,7 +73,6 @@ and app = {
   mutable app_debug : bool;
   mutable https : bool;
   error_handler : error -> response Lwt.t;
-  site_prefix : string list;
 }
 
 and error_handler = error -> response option Lwt.t
@@ -129,14 +128,10 @@ let app_error_handler app =
 let set_https https app =
   app.https <- https
 
-let site_prefix request =
-  request.specific.app.site_prefix
-
-let new_app error_handler site_prefix = {
+let new_app error_handler = {
   app_debug = false;
   https = false;
   error_handler;
-  site_prefix;
 }
 
 type 'a promise = 'a Lwt.t
@@ -475,7 +470,7 @@ let request
     specific = {
       (* TODO Is there a better fake error handler? Maybe this function should
          come after the response constructors? *)
-      app = new_app (fun _ -> assert false) [];
+      app = new_app (fun _ -> assert false);
       request_client = client;
       method_;
       target;

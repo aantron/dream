@@ -1973,7 +1973,6 @@ val run :
   ?stop:unit promise ->
   ?debug:bool ->
   ?error_handler:error_handler ->
-  ?prefix:string ->
   ?https:bool ->
   ?certificate_file:string ->
   ?key_file:string ->
@@ -2004,8 +2003,6 @@ val run :
       low-level errors. See {!section-errors} and example
       {{:https://github.com/aantron/dream/tree/master/example/9-error#files}
       [9-error]} \[{{:http://dream.as/9-error} playground}\].
-    - [~prefix] is a site prefix for applications that are not running at the
-      root ([/]) of their domain. The default is ["/"], for no prefix.
     - [~https:true] enables HTTPS. You should also specify [~certificate_file]
       and [~key_file]. However, for development, Dream includes an insecure
       compiled-in
@@ -2036,7 +2033,6 @@ val serve :
   ?stop:unit promise ->
   ?debug:bool ->
   ?error_handler:error_handler ->
-  ?prefix:string ->
   ?https:bool ->
   ?certificate_file:string ->
   ?key_file:string ->
@@ -2071,7 +2067,6 @@ val serve :
       @@ Dream.lowercase_headers
       @@ Dream.content_length
       @@ Dream.catch_errors
-      @@ Dream.chop_site_prefix
       @@ my_app
     ]}
 
@@ -2098,10 +2093,15 @@ val catch_errors : middleware
 (** Forwards exceptions, rejections, and [4xx], [5xx] responses from the
     application to the error handler. See {!section-errors}. *)
 
-val chop_site_prefix : middleware
-(** Removes {!Dream.run} [~prefix] from the path in each request, and adds it to
-    the request prefix. Responds with [502 Bad Gateway] if the path does not
-    have the expected prefix. *)
+val with_site_prefix : string -> middleware
+(** Removes the given prefix from the path in each request, and adds it to the
+    request prefix. Responds with [502 Bad Gateway] if the path does not have
+    the expected prefix.
+
+    This is for applications that are not running at the root ([/]) of their
+    domain. The default is ["/"], for no prefix. After [with_site_prefix],
+    routing is done relative to the prefix, and the prefix is also necessary for
+    emitting secure cookies. *)
 
 
 

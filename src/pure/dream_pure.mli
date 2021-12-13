@@ -140,9 +140,6 @@ val prefix : request -> string
 val internal_prefix : request -> string list
 val path : request -> string list
 val version : request -> int * int
-val site_prefix : request -> string list
-(* TODO This will be moved out of dream-pure and become just a server-side
-   middleware.. *)
 val with_client : string -> request -> request
 val with_method_ : [< method_ ] -> request -> request
 val with_prefix : string list -> request -> request
@@ -394,7 +391,7 @@ type error = {
 
 type error_handler = error -> response option promise
 
-val new_app : (error -> response Lwt.t) -> string list -> app
+val new_app : (error -> response Lwt.t) -> app
 val app : request -> app
 val debug : app -> bool
 val set_debug : bool -> app -> unit

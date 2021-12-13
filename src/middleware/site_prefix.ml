@@ -24,8 +24,13 @@ let rec match_site_prefix prefix path =
 
 
 (* TODO The path and prefix representations and accessors need a cleanup. *)
-let chop_site_prefix next_handler request =
-    let prefix = Dream.site_prefix request in
+let with_site_prefix prefix =
+  let prefix =
+    prefix
+    |> Dream_pure.Formats.from_path
+    |> Dream_pure.Formats.drop_trailing_slash
+  in
+  fun next_handler request ->
     match match_site_prefix prefix (Dream.path request) with
     | None ->
       (* TODO Streams. *)
