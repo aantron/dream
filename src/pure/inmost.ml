@@ -59,6 +59,7 @@ and client = {
   prefix : string list;
   path : string list;
   query : (string * string) list;
+  https : bool;
   request_version : int * int;
   upload : multipart_state;
 }
@@ -71,7 +72,6 @@ and server = {
 
 and app = {
   mutable app_debug : bool;
-  mutable https : bool;
   error_handler : error -> response Lwt.t;
 }
 
@@ -125,12 +125,8 @@ let set_debug value app =
 let app_error_handler app =
   app.error_handler
 
-let set_https https app =
-  app.https <- https
-
 let new_app error_handler = {
   app_debug = false;
-  https = false;
   error_handler;
 }
 
@@ -153,7 +149,7 @@ let client request =
   request.specific.request_client
 
 let https request =
-  request.specific.app.https
+  request.specific.https
 
 let method_ request =
   request.specific.method_
@@ -419,6 +415,7 @@ let request_from_http
     ~client
     ~method_
     ~target
+    ~https
     ~version
     ~headers
     body =
@@ -434,6 +431,7 @@ let request_from_http
       prefix = [];
       path = Formats.from_path path;
       query = Formats.from_form_urlencoded query;
+      https;
       request_version = version;
       upload = initial_multipart_state ();
     };
@@ -477,6 +475,7 @@ let request
       prefix = [];
       path = Formats.from_path path;
       query = Formats.from_form_urlencoded query;
+      https = false;
       request_version = version;
       upload = initial_multipart_state ();
     };

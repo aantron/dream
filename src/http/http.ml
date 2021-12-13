@@ -294,6 +294,7 @@ let websocket_handler user's_websocket_handler socket =
 (* TODO Rename conn like in the body branch. *)
 let wrap_handler
     app
+    https
     (user's_error_handler : Dream.error_handler)
     (user's_dream_handler : Dream.handler) =
 
@@ -338,7 +339,7 @@ let wrap_handler
 
     let request : Dream.request =
       Dream.request_from_http
-        ~app ~client ~method_ ~target ~version ~headers body in
+        ~app ~client ~method_ ~target ~https ~version ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -445,6 +446,7 @@ let wrap_handler
 (* TODO Factor out what is in common between the http/af and h2 handlers. *)
 let wrap_handler_h2
     app
+    https
     (_user's_error_handler : Dream.error_handler)
     (user's_dream_handler : Dream.handler) =
 
@@ -483,7 +485,7 @@ let wrap_handler_h2
 
     let request : Dream.request =
       Dream.request_from_http
-        ~app ~client ~method_ ~target ~version ~headers body in
+        ~app ~client ~method_ ~target ~https ~version ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -566,7 +568,7 @@ let no_tls = {
       ~error_handler ->
     Httpaf_lwt_unix.Server.create_connection_handler
       ?config:None
-      ~request_handler:(wrap_handler app error_handler handler)
+      ~request_handler:(wrap_handler app false error_handler handler)
       ~error_handler:(Error_handler.httpaf app error_handler)
   end;
 }
@@ -581,14 +583,14 @@ let openssl = {
     let httpaf_handler =
       Httpaf_lwt_unix.Server.SSL.create_connection_handler
         ?config:None
-      ~request_handler:(wrap_handler app error_handler handler)
+      ~request_handler:(wrap_handler app true error_handler handler)
       ~error_handler:(Error_handler.httpaf app error_handler)
     in
 
     let h2_handler =
       H2_lwt_unix.Server.SSL.create_connection_handler
         ?config:None
-      ~request_handler:(wrap_handler_h2 app error_handler handler)
+      ~request_handler:(wrap_handler_h2 app true error_handler handler)
       ~error_handler:(Error_handler.h2 app error_handler)
     in
 
@@ -640,7 +642,7 @@ let ocaml_tls = {
     Httpaf_lwt_unix.Server.TLS.create_connection_handler_with_default
       ~certfile:certificate_file ~keyfile:key_file
       ?config:None
-      ~request_handler:(wrap_handler app error_handler handler)
+      ~request_handler:(wrap_handler app true error_handler handler)
       ~error_handler:(Error_handler.httpaf app error_handler)
 }
 
@@ -789,8 +791,6 @@ let serve_with_maybe_https
         user's_dream_handler
 
     | `OpenSSL | `OCaml_TLS as tls_library ->
-      Dream.set_https true app;
-
       (* TODO Writing temporary files is extremely questionable for anything
          except the fake localhost certificate. This needs loud warnings. IIRC
          the SSL binding already supports in-memory certificates. Does TLS? In

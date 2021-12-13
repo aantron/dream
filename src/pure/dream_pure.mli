@@ -406,12 +406,12 @@ val app : request -> app
 val debug : app -> bool
 val set_debug : bool -> app -> unit
 val app_error_handler : app -> (error -> response promise)
-val set_https : bool -> app -> unit
 val request_from_http :
   app:app ->
   client:string ->
   method_:method_ ->
   target:string ->
+  https:bool ->
   version:int * int ->
   headers:(string * string) list ->
   stream ->
