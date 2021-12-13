@@ -27,11 +27,7 @@
    This is sufficient for attaching a request id to most log messages, in
    practice. *)
 
-module Dream =
-struct
-  include Dream_pure.Inmost
-  module Request_id = Request_id
-end
+module Dream = Dream_pure
 
 
 
@@ -157,7 +153,7 @@ let reporter ~now () =
         match request_id_from_tags with
         | Some _ -> request_id_from_tags
         | None ->
-          Dream.Request_id.get_option ()
+          Request_id.get_option ()
       in
 
       let request_id, request_style =
@@ -210,13 +206,6 @@ let set_async_exception_hook =
   ref true
 
 let _initialized = ref None
-
-type log_level = [
-  | `Error
-  | `Warning
-  | `Info
-  | `Debug
-]
 
 let to_logs_level l =
   match l with
@@ -273,7 +262,7 @@ let sub_log ?level:level_ name =
           match request with
           | None -> Logs.Tag.empty
           | Some request ->
-            match Dream.Request_id.get_option ~request () with
+            match Request_id.get_option ~request () with
             | None -> Logs.Tag.empty
             | Some request_id ->
               Logs.Tag.add logs_lib_tag request_id Logs.Tag.empty

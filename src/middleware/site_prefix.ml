@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Dream = Dream_pure
 
 
 
@@ -25,10 +25,14 @@ let rec match_site_prefix prefix path =
 
 (* TODO The path and prefix representations and accessors need a cleanup. *)
 let chop_site_prefix next_handler request =
-    let prefix = (Dream.app request).site_prefix in
+    let prefix = Dream.site_prefix request in
     match match_site_prefix prefix (Dream.path request) with
     | None ->
-      Dream.empty `Bad_Gateway
+      (* TODO Streams. *)
+      let client_stream = Dream.Stream.(stream empty no_writer)
+      and server_stream = Dream.Stream.(stream no_reader no_writer) in
+      Dream.response ~status:`Bad_Gateway client_stream server_stream
+      |> Lwt.return
     | Some path ->
       (* TODO This doesn't need to be recomputed on each request - can cache the
          result in the app. *)

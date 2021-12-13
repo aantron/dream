@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Dream = Dream_pure
 
 
 
@@ -282,7 +282,11 @@ let graphql make_context schema = fun request ->
         (handle_over_websocket make_context schema (Hashtbl.create 16) request)
     | _ ->
       log.warning (fun log -> log ~request "Upgrade: websocket header missing");
-      Dream.empty `Not_Found
+      (* TODO Simplify stream creation. *)
+      let client_stream = Dream.Stream.(stream empty no_writer)
+      and server_stream = Dream.Stream.(stream no_reader no_writer) in
+      Dream.response ~status:`Not_Found client_stream server_stream
+      |> Lwt.return
     end
 
   | `POST ->
@@ -310,13 +314,19 @@ let graphql make_context schema = fun request ->
     | _ ->
       log.warning (fun log -> log ~request
         "Content-Type not 'application/json'");
-      Dream.empty `Bad_Request
+      let client_stream = Dream.Stream.(stream empty no_writer)
+      and server_stream = Dream.Stream.(stream no_reader no_writer) in
+      Dream.response ~status:`Bad_Request client_stream server_stream
+      |> Lwt.return
     end
 
   | method_ ->
     log.error (fun log -> log ~request
       "Method %s; must be GET or POST" (Dream.method_to_string method_));
-    Dream.empty `Not_Found
+    let client_stream = Dream.Stream.(stream empty no_writer)
+    and server_stream = Dream.Stream.(stream no_reader no_writer) in
+    Dream.response ~status:`Not_Found client_stream server_stream
+    |> Lwt.return
 
 
 

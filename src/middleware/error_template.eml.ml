@@ -7,9 +7,14 @@
 
 module Dream =
 struct
-  include Dream_pure.Inmost
+  include Dream_pure
   include Dream_pure.Formats
 end
+(* This slightly awkward simulation of the overall Dream module using a
+   composition of internal modules is necessary to get all the helpers at the
+   right positions expected by the EML templater. *)
+
+
 
 let render ~debug_dump ~code ~reason =
   <!DOCTYPE html>

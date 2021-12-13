@@ -7,7 +7,7 @@
 
 (* https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html *)
 
-module Dream = Dream_pure.Inmost
+module Dream = Dream_pure
 
 
 

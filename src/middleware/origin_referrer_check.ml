@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Dream = Dream_pure
 
 
 
@@ -30,7 +30,11 @@ let origin_referrer_check inner_handler request =
     | None ->
       log.warning (fun log -> log ~request
         "Origin and Referer headers both missing");
-      Dream.empty `Bad_Request
+      (* TODO Simplify. *)
+      let client_stream = Dream.Stream.(stream empty no_writer)
+      and server_stream = Dream.Stream.(stream no_reader no_writer) in
+      Dream.response ~status:`Bad_Request client_stream server_stream
+      |> Lwt.return
 
     (* TODO Also recommend Uri to users. *)
     | Some origin ->
@@ -38,7 +42,12 @@ let origin_referrer_check inner_handler request =
       match Dream.header "Host" request with
       | None ->
         log.warning (fun log -> log ~request "Host header missing");
-        Dream.empty `Bad_Request
+        (* TODO Simplify. *)
+        let client_stream = Dream.Stream.(stream empty no_writer)
+        and server_stream = Dream.Stream.(stream no_reader no_writer) in
+        Dream.response ~status:`Bad_Request client_stream server_stream
+        |> Lwt.return
+
       | Some host ->
 
         let origin_uri = Uri.of_string origin in
@@ -71,5 +80,9 @@ let origin_referrer_check inner_handler request =
         else begin
           log.warning (fun log -> log ~request
             "Origin-Host mismatch: '%s' vs. '%s'" origin host);
-          Dream.empty `Bad_Request
+          (* TODO Simplify. *)
+          let client_stream = Dream.Stream.(stream empty no_writer)
+          and server_stream = Dream.Stream.(stream no_reader no_writer) in
+          Dream.response ~status:`Bad_Request client_stream server_stream
+          |> Lwt.return
         end

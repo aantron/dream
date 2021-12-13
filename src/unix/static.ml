@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Dream = Dream_pure
 
 
 
@@ -28,8 +28,17 @@ let from_filesystem local_root path _ =
     (fun () ->
       Lwt_io.(with_file ~mode:Input file) (fun channel ->
         let%lwt content = Lwt_io.read channel in
-        Dream.respond ~headers:(mime_lookup path) content))
-    (fun _exn -> Dream.empty `Not_Found)
+        (* TODO Can use some pre-allocated streams or helpers here and below. *)
+        let client_stream = Dream.Stream.(stream (string content) no_writer)
+        and server_stream = Dream.Stream.(stream no_reader no_writer) in
+        Dream.response ~headers:(mime_lookup path) client_stream server_stream
+        |> Lwt.return))
+    (fun _exn ->
+      (* TODO Improve the two-stream code using some helper. *)
+      let client_stream = Dream.Stream.(stream empty no_writer)
+      and server_stream = Dream.Stream.(stream no_reader no_writer) in
+      Dream.response ~status:`Not_Found client_stream server_stream
+      |> Lwt.return)
 
 (* TODO Add ETag handling. *)
 (* TODO Add Content-Length handling? *)
@@ -67,11 +76,21 @@ let validate_path request =
 let static ?(loader = from_filesystem) local_root = fun request ->
 
   if not @@ Dream.methods_equal (Dream.method_ request) `GET then
-    Dream.empty `Not_Found
+    (* TODO Simplify this code and reduce allocations. *)
+    let client_stream = Dream.Stream.(stream empty no_writer)
+    and server_stream = Dream.Stream.(stream no_reader no_writer) in
+    Dream.response ~status:`Not_Found client_stream server_stream
+    |> Lwt.return
 
   else
     match validate_path request with
-    | None -> Dream.empty `Not_Found
+    | None ->
+      (* TODO Improve with helpers. *)
+      let client_stream = Dream.Stream.(stream empty no_writer)
+      and server_stream = Dream.Stream.(stream no_reader no_writer) in
+      Dream.response ~status:`Not_Found client_stream server_stream
+      |> Lwt.return
+
     | Some path ->
 
       let%lwt response = loader local_root path request in

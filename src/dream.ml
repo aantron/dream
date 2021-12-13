@@ -6,7 +6,7 @@
 
 
 include Dream_pure.Stream
-include Dream_pure.Inmost
+include Dream_pure
 
 include Dream__middleware.Log
 include Dream__middleware.Log.Make (Ptime_clock)
@@ -83,6 +83,45 @@ let log =
 
 include Dream__middleware.Tag
 
+let respond ?status ?code ?headers body =
+  let client_stream = stream (string body) no_writer
+  and server_stream = stream no_reader no_writer in
+  response ?status ?code ?headers client_stream server_stream
+  |> Lwt.return
+
+(* TODO Actually use the request and extract the site prefix. *)
+let redirect ?status ?code ?headers _request location =
+  let status = (status :> redirection option) in
+  let status =
+    match status, code with
+    | None, None -> Some (`See_Other)
+    | _ -> status
+  in
+  (* TODO The streams. *)
+  let client_stream = stream empty no_writer
+  and server_stream = stream no_reader no_writer in
+  response ?status ?code ?headers client_stream server_stream
+  |> with_header "Location" location
+  |> Lwt.return
+
+let stream ?status ?code ?headers f =
+  (* TODO Streams. *)
+  let client_stream = stream empty no_writer
+  and server_stream = stream no_reader no_writer in
+  let response =
+    response ?status ?code ?headers client_stream server_stream
+    |> with_stream
+  in
+  (* TODO Should set up an error handler for this. *)
+  Lwt.async (fun () -> f response);
+  Lwt.return response
+
+let empty ?headers status =
+  respond ?headers ~status ""
+
+let not_found _ =
+  respond ~status:`Not_Found ""
+
 let now () = Ptime.to_float_s (Ptime.v (Ptime_clock.now_d_ps ()))
 
 let form = form ~now
@@ -91,3 +130,15 @@ let csrf_token = csrf_token ~now
 let verify_csrf_token = verify_csrf_token ~now
 let form_tag ?method_ ?target ?enctype ?csrf_token ~action request =
   form_tag ~now ?method_ ?target ?enctype ?csrf_token ~action request
+
+let request ?client ?method_ ?target ?version ?headers body =
+  (* TODO Streams. *)
+  let client_stream = Dream_pure.Stream.stream no_reader no_writer
+  and server_stream = Dream_pure.Stream.stream (string body) no_writer in
+  request ?client ?method_ ?target ?version ?headers client_stream server_stream
+
+let response ?status ?code ?headers body =
+  (* TODO Streams. *)
+  let client_stream = Dream_pure.Stream.stream (string body) no_writer
+  and server_stream = Dream_pure.Stream.stream no_reader no_writer in
+  response ?status ?code ?headers client_stream server_stream

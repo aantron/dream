@@ -5,7 +5,9 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Dream = Dream_pure
+
+
 
 let field_to_string (request : Dream.request) field =
   let open Multipart_form in
@@ -13,8 +15,9 @@ let field_to_string (request : Dream.request) field =
   | Field.Field (field_name, Field.Content_type, v) ->
     (field_name :> string), Content_type.to_string v
   | Field.Field (field_name, Field.Content_disposition, v) ->
-    request.specific.upload.filename <- Content_disposition.filename v ;
-    request.specific.upload.name <- Content_disposition.name v ;
+    let state = Dream.multipart_state request in
+    state.filename <- Content_disposition.filename v ;
+    state.name <- Content_disposition.name v ;
     (field_name :> string), Content_disposition.to_string v
   | Field.Field (field_name, Field.Content_encoding, v) ->
     (field_name :> string), Content_encoding.to_string v
@@ -24,14 +27,15 @@ let field_to_string (request : Dream.request) field =
 let log = Log.sub_log "dream.upload"
 
 let upload_part (request : Dream.request) =
-  match%lwt Lwt_stream.peek request.specific.upload.stream with
+  let state = Dream.multipart_state request in
+  match%lwt Lwt_stream.peek state.stream with
   | None -> Lwt.return_none
   | Some (_uid, _header, stream) ->
     match%lwt Lwt_stream.get stream with
     | Some _ as v -> Lwt.return v
     | None ->
       log.debug (fun m -> m "End of the part.") ;
-      let%lwt () = Lwt_stream.junk request.specific.upload.stream in
+      let%lwt () = Lwt_stream.junk state.stream in
       (* XXX(dinosaure): delete the current part from the [stream]. *)
       Lwt.return_none
 
@@ -40,7 +44,8 @@ let identify _ = object end
 type part = string option * string option * ((string * string) list)
 
 let rec state (request : Dream.request) =
-  let stream = request.specific.upload.stream in
+  let state' = Dream.multipart_state request in
+  let stream = state'.stream in
   match%lwt Lwt_stream.peek stream with
   | None -> let%lwt () = Lwt_stream.junk stream in Lwt.return_none
   | Some (_, headers, _stream) ->
@@ -50,11 +55,12 @@ let rec state (request : Dream.request) =
       |> List.map (field_to_string request)
     in
     let part =
-      request.specific.upload.name, request.specific.upload.filename, headers in
+      state'.name, state'.filename, headers in
     Lwt.return (Some part)
 
 and upload (request : Dream.request) =
-  match request.specific.upload.state_init with
+  let state' = Dream.multipart_state request in
+  match state'.state_init with
   | false ->
     state request
 
@@ -79,8 +85,8 @@ and upload (request : Dream.request) =
       let `Parse th, stream =
         Multipart_form_lwt.stream ~identify body content_type in
       Lwt.async (fun () -> let%lwt _ = th in Lwt.return_unit);
-      request.specific.upload.stream <- stream;
-      request.specific.upload.state_init <- false;
+      state'.stream <- stream;
+      state'.state_init <- false;
       state request
 
 type multipart_form =

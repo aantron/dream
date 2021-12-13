@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Dream = Dream_pure
 module Stream = Dream_pure.Stream
 
 
@@ -803,7 +803,7 @@ let serve_with_maybe_https
         user's_dream_handler
 
     | `OpenSSL | `OCaml_TLS as tls_library ->
-      app.https <- true;
+      Dream.set_https true app;
 
       (* TODO Writing temporary files is extremely questionable for anything
          except the fake localhost certificate. This needs loud warnings. IIRC

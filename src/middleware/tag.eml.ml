@@ -7,9 +7,14 @@
 
 module Dream =
 struct
+  include Dream_pure
   include Dream_pure.Formats
-  include Dream_pure.Method
 end
+(* This slightly awkward simulation of the overall Dream module using a
+   composition of internal modules is necessary to get all the helpers at the
+   right positions expected by the EML templater. *)
+
+
 
 (* TODO Include the path prefix. *)
 let form_tag

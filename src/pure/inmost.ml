@@ -8,6 +8,8 @@
 include Method
 include Status
 
+
+
 (* Used for converting the stream interface of [multipart_form] into the pull
    interface of Dream.
 
@@ -78,6 +80,13 @@ and app = {
 
 and error_handler = error -> response option Lwt.t
 
+and log_level = [
+  | `Error
+  | `Warning
+  | `Info
+  | `Debug
+]
+
 and error = {
   condition : [
     | `Response of response
@@ -115,12 +124,22 @@ let debug app =
 let set_debug value app =
   app.app_debug <- value
 
+(* TODO Remove. *)
+let app_error_handler app =
+  app.error_handler
+
 (* TODO Delete; now using key. *)
 let secret app =
   List.hd app.secrets
 
 let set_secrets secrets app =
   app.secrets <- secrets
+
+let set_https https app =
+  app.https <- https
+
+let site_prefix request =
+  request.specific.app.site_prefix
 
 let new_app error_handler site_prefix = {
   globals = ref Scope.empty;
@@ -472,7 +491,8 @@ let request
     ?(target = "/")
     ?(version = 1, 1)
     ?(headers = [])
-    body =
+    client_stream
+    server_stream =
 
   let method_ =
     match (method_ :> method_ option) with
@@ -499,8 +519,8 @@ let request
       upload = initial_multipart_state ();
     };
     headers;
-    client_stream = Stream.(stream no_reader no_writer);
-    server_stream = Stream.(stream (string body) no_writer);
+    client_stream;
+    server_stream;
     locals = Scope.empty;
     first = request;
     last = ref request;
@@ -509,10 +529,7 @@ let request
   request
 
 let response
-    ?status
-    ?code
-    ?(headers = [])
-    body =
+    ?status ?code ?(headers = []) client_stream server_stream =
 
   let status =
     match status, code with
@@ -527,8 +544,8 @@ let response
       websocket = None;
     };
     headers;
-    client_stream = Stream.(stream (string body) no_writer);
-    server_stream = Stream.(stream no_reader no_writer);
+    client_stream;
+    server_stream;
     (* TODO This fully dead stream should be preallocated. *)
     locals = Scope.empty;
     first = response;
@@ -537,49 +554,29 @@ let response
 
   response
 
-let respond ?status ?code ?headers body =
-  response ?status ?code ?headers body
-  |> Lwt.return
-
 let html ?status ?code ?headers body =
-  response ?status ?code ?headers body
+  (* TODO The streams. *)
+  let client_stream = Stream.(stream (string body) no_writer)
+  and server_stream = Stream.(stream no_reader no_writer) in
+  response ?status ?code ?headers client_stream server_stream
   |> with_header "Content-Type" Formats.text_html
   |> Lwt.return
 
 let json ?status ?code ?headers body =
-  response ?status ?code ?headers body
+  (* TODO The streams. *)
+  let client_stream = Stream.(stream (string body) no_writer)
+  and server_stream = Stream.(stream no_reader no_writer) in
+  response ?status ?code ?headers client_stream server_stream
   |> with_header "Content-Type" Formats.application_json
   |> Lwt.return
 
-(* TODO Actually use the request and extract the site prefix. *)
-let redirect ?status ?code ?headers _request location =
-  let status = (status :> redirection option) in
-  let status =
-    match status, code with
-    | None, None -> Some (`See_Other)
-    | _ -> status
-  in
-  response ?status ?code ?headers ""
-  |> with_header "Location" location
-  |> Lwt.return
-
-let stream ?status ?code ?headers f =
-  let response =
-    response ?status ?code ?headers ""
-    |> with_stream
-  in
-  (* TODO Should set up an error handler for this. *)
-  Lwt.async (fun () -> f response);
-  Lwt.return response
-
-let empty ?headers status =
-  respond ?headers ~status ""
-
-let not_found _ =
-  respond ~status:`Not_Found ""
-
 let websocket ?headers handler =
-  let response = response ?headers ~status:`Switching_Protocols "" in
+  (* TODO Simplify stream creation. *)
+  let client_stream = Stream.(stream empty no_writer)
+  and server_stream = Stream.(stream no_reader no_writer) in
+  let response =
+    response
+      ?headers ~status:`Switching_Protocols client_stream server_stream in
   let response =
     {response with specific =
       {response.specific with websocket = Some handler}}
@@ -621,3 +618,13 @@ let rec pipeline middlewares handler =
 
 let sort_headers headers =
   List.stable_sort (fun (name, _) (name', _) -> compare name name') headers
+
+let encryption_secret request =
+  List.hd request.specific.app.secrets
+
+let decryption_secrets request =
+  request.specific.app.secrets
+
+(* TODO Remove to server-side code. *)
+let multipart_state request =
+  request.specific.upload

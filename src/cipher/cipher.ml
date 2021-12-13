@@ -112,25 +112,16 @@ struct
         | Some plaintext -> Some (Cstruct.to_string plaintext)
 end
 
-(* TODO Ideally, get rid of this open. *)
-open Dream_pure.Inmost
-
-let encryption_secret request =
-  List.hd request.specific.app.secrets
-
-let decryption_secrets request =
-  request.specific.app.secrets
-
 let encrypt ?associated_data request plaintext =
   encrypt
     (module AEAD_AES_256_GCM)
     ?associated_data
-    (encryption_secret request)
+    (Dream_pure.encryption_secret request)
     plaintext
 
 let decrypt ?associated_data request ciphertext =
   decrypt
     (module AEAD_AES_256_GCM)
     ?associated_data
-    (decryption_secrets request)
+    (Dream_pure.decryption_secrets request)
     ciphertext

@@ -5,10 +5,15 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Dream = Dream_pure
 
 
 
 (* TODO Convert to streaming later. *)
 let echo request =
-  Lwt.map Dream.response (Dream.body request)
+  (* TODO Simplfy this code. Can in fact just pass the request's server stream
+     as the response's client stream. *)
+  let client_stream = Dream.server_stream request in
+  let server_stream = Dream.Stream.(stream no_reader no_writer) in
+  Dream.response client_stream server_stream
+  |> Lwt.return

@@ -9,7 +9,7 @@
    be built-in code. So it's probably best to look into building in request_id,
    and getting rid of the concept of built-in middleware. *)
 
-module Dream = Dream_pure.Inmost
+module Dream = Dream_pure
 
 
 

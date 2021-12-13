@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Dream = Dream_pure
 
 
 
@@ -176,7 +176,10 @@ let customize template (error : Dream.error) =
           | `Server -> `Internal_Server_Error
           | `Client -> `Bad_Request
         in
-        Dream.response ~status ""
+        (* TODO Simplify the streams creation. *)
+        let client_stream = Dream.Stream.(stream empty no_writer)
+        and server_stream = Dream.Stream.(stream no_reader no_writer) in
+        Dream.response ~status client_stream server_stream
     in
 
     (* No need to catch errors when calling the template, because every call
@@ -238,9 +241,19 @@ let respond_with_option f =
       f ()
       |> Lwt.map (function
         | Some response -> response
-        | None -> Dream.response ~status:`Internal_Server_Error ""))
+        | None ->
+          (* TODO Simplify streams. *)
+          let client_stream = Dream.Stream.(stream empty no_writer)
+          and server_stream = Dream.Stream.(stream no_reader no_writer) in
+          Dream.response
+            ~status:`Internal_Server_Error client_stream server_stream))
     (fun () ->
-      Dream.empty `Internal_Server_Error)
+      (* TODO Simplify streams. *)
+      let client_stream = Dream.Stream.(stream empty no_writer)
+      and server_stream = Dream.Stream.(stream no_reader no_writer) in
+      Dream.response
+        ~status:`Internal_Server_Error client_stream server_stream
+      |> Lwt.return)
 
 
 
@@ -316,9 +329,16 @@ let app
 
 
 
+(* TODO Simplify streams. *)
 let default_response = function
-  | `Server -> Dream.response ~status:`Internal_Server_Error ""
-  | `Client -> Dream.response ~status:`Bad_Request ""
+  | `Server ->
+    let client_stream = Dream.Stream.(stream empty no_writer)
+    and server_stream = Dream.Stream.(stream no_reader no_writer) in
+    Dream.response ~status:`Internal_Server_Error client_stream server_stream
+  | `Client ->
+    let client_stream = Dream.Stream.(stream empty no_writer)
+    and server_stream = Dream.Stream.(stream no_reader no_writer) in
+    Dream.response ~status:`Bad_Request client_stream server_stream
 
 let httpaf
     app user's_error_handler =

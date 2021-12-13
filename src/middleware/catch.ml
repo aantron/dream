@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Dream = Dream_pure
 
 
 
@@ -44,7 +44,8 @@ let catch_errors next_handler request =
           will_send_response = true;
         } in
 
-        let user's_error_handler = (Dream.app request).error_handler in
+        let user's_error_handler =
+          Dream.app_error_handler (Dream.app request) in
         user's_error_handler error
       end
       else
@@ -67,5 +68,5 @@ let catch_errors next_handler request =
         will_send_response = true;
       } in
 
-      let user's_error_handler = (Dream.app request).error_handler in
+      let user's_error_handler = Dream.app_error_handler (Dream.app request) in
       user's_error_handler error)
