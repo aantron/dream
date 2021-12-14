@@ -293,7 +293,6 @@ let websocket_handler user's_websocket_handler socket =
    chance to tell the user that something is wrong with their app. *)
 (* TODO Rename conn like in the body branch. *)
 let wrap_handler
-    app
     https
     (user's_error_handler : Dream.error_handler)
     (user's_dream_handler : Dream.handler) =
@@ -339,7 +338,7 @@ let wrap_handler
 
     let request : Dream.request =
       Dream.request_from_http
-        ~app ~client ~method_ ~target ~https ~version ~headers body in
+        ~client ~method_ ~target ~https ~version ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -445,7 +444,6 @@ let wrap_handler
 
 (* TODO Factor out what is in common between the http/af and h2 handlers. *)
 let wrap_handler_h2
-    app
     https
     (_user's_error_handler : Dream.error_handler)
     (user's_dream_handler : Dream.handler) =
@@ -485,7 +483,7 @@ let wrap_handler_h2
 
     let request : Dream.request =
       Dream.request_from_http
-        ~app ~client ~method_ ~target ~https ~version ~headers body in
+        ~client ~method_ ~target ~https ~version ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -552,7 +550,6 @@ type tls_library = {
   create_handler :
     certificate_file:string ->
     key_file:string ->
-    app:Dream.app ->
     handler:Dream.handler ->
     error_handler:Dream.error_handler ->
       Unix.sockaddr ->
@@ -563,35 +560,33 @@ type tls_library = {
 let no_tls = {
   create_handler = begin fun
       ~certificate_file:_ ~key_file:_
-      ~app
       ~handler
       ~error_handler ->
     Httpaf_lwt_unix.Server.create_connection_handler
       ?config:None
-      ~request_handler:(wrap_handler app false error_handler handler)
-      ~error_handler:(Error_handler.httpaf app error_handler)
+      ~request_handler:(wrap_handler false error_handler handler)
+      ~error_handler:(Error_handler.httpaf error_handler)
   end;
 }
 
 let openssl = {
   create_handler = begin fun
       ~certificate_file ~key_file
-      ~app
       ~handler
       ~error_handler ->
 
     let httpaf_handler =
       Httpaf_lwt_unix.Server.SSL.create_connection_handler
         ?config:None
-      ~request_handler:(wrap_handler app true error_handler handler)
-      ~error_handler:(Error_handler.httpaf app error_handler)
+      ~request_handler:(wrap_handler true error_handler handler)
+      ~error_handler:(Error_handler.httpaf error_handler)
     in
 
     let h2_handler =
       H2_lwt_unix.Server.SSL.create_connection_handler
         ?config:None
-      ~request_handler:(wrap_handler_h2 app true error_handler handler)
-      ~error_handler:(Error_handler.h2 app error_handler)
+      ~request_handler:(wrap_handler_h2 true error_handler handler)
+      ~error_handler:(Error_handler.h2 error_handler)
     in
 
     let perform_tls_handshake =
@@ -636,14 +631,13 @@ let openssl = {
 let ocaml_tls = {
   create_handler = fun
       ~certificate_file ~key_file
-      ~app
       ~handler
       ~error_handler ->
     Httpaf_lwt_unix.Server.TLS.create_connection_handler_with_default
       ~certfile:certificate_file ~keyfile:key_file
       ?config:None
-      ~request_handler:(wrap_handler app true error_handler handler)
-      ~error_handler:(Error_handler.httpaf app error_handler)
+      ~request_handler:(wrap_handler true error_handler handler)
+      ~error_handler:(Error_handler.httpaf error_handler)
 }
 
 
@@ -664,7 +658,6 @@ let serve_with_details
     ~port
     ~stop
     ~error_handler
-    ~app
     ~certificate_file
     ~key_file
     ~builtins
@@ -685,13 +678,12 @@ let serve_with_details
     tls_library.create_handler
       ~certificate_file
       ~key_file
-      ~app
       ~handler:user's_dream_handler
       ~error_handler
   in
 
   (* TODO Should probably move out to the TLS library options. *)
-  let tls_error_handler = Error_handler.tls app error_handler in
+  let tls_error_handler = Error_handler.tls error_handler in
 
   (* Some parts of the various HTTP servers that are under heavy development
      ( *cough* Gluten SSL/TLS at the moment) leak exceptions out of the
@@ -756,8 +748,6 @@ let serve_with_maybe_https
     ~builtins
     user's_dream_handler =
 
-  let app = Dream.new_app (Error_handler.app error_handler) in
-
   try%lwt
     (* This check will at least catch secrets like "foo" when used on a public
        interface. *)
@@ -778,7 +768,6 @@ let serve_with_maybe_https
         ~port
         ~stop
         ~error_handler
-        ~app
         ~certificate_file:""
         ~key_file:""
         ~builtins
@@ -840,7 +829,6 @@ let serve_with_maybe_https
           ~port
           ~stop
           ~error_handler
-          ~app
           ~certificate_file
           ~key_file
           ~builtins
@@ -869,7 +857,6 @@ let serve_with_maybe_https
           ~port
           ~stop
           ~error_handler
-          ~app
           ~certificate_file
           ~key_file
           ~builtins

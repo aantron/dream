@@ -52,7 +52,6 @@ and 'a message = {
 }
 
 and client = {
-  app : app;
   request_client : string;
   method_ : method_;
   target : string;
@@ -68,10 +67,6 @@ and client = {
 and server = {
   status : status;
   websocket : (websocket -> unit Lwt.t) option;
-}
-
-and app = {
-  error_handler : error -> response Lwt.t;
 }
 
 and error_handler = error -> response option Lwt.t
@@ -111,14 +106,6 @@ and error = {
     | `Debug
   ];
   will_send_response : bool;
-}
-
-(* TODO Remove. *)
-let app_error_handler app =
-  app.error_handler
-
-let new_app error_handler = {
-  error_handler;
 }
 
 type 'a promise = 'a Lwt.t
@@ -398,11 +385,7 @@ let with_local key value message =
 let fold_locals f initial message =
   fold_scope f initial message.locals
 
-let app request =
-  request.specific.app
-
 let request_from_http
-    ~app
     ~client
     ~method_
     ~target
@@ -415,7 +398,6 @@ let request_from_http
 
   let rec request = {
     specific = {
-      app;
       request_client = client;
       method_;
       target;
@@ -459,7 +441,6 @@ let request
     specific = {
       (* TODO Is there a better fake error handler? Maybe this function should
          come after the response constructors? *)
-      app = new_app (fun _ -> assert false);
       request_client = client;
       method_;
       target;

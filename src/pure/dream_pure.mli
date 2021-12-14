@@ -363,10 +363,6 @@ val is_websocket : response -> (websocket -> unit promise) option
 
 
 
-(* TODO All of this should become server-side-only once the error handling
-   middleware is clarified. *)
-type app
-
 type log_level = [
   | `Error
   | `Warning
@@ -400,11 +396,7 @@ type error = {
 
 type error_handler = error -> response option promise
 
-val new_app : (error -> response Lwt.t) -> app
-val app : request -> app
-val app_error_handler : app -> (error -> response promise)
 val request_from_http :
-  app:app ->
   client:string ->
   method_:method_ ->
   target:string ->

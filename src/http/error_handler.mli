@@ -36,17 +36,14 @@ val app :
     (Dream.error -> Dream.response Lwt.t)
 
 val httpaf :
-  Dream.app ->
   Dream.error_handler ->
     (Unix.sockaddr -> Httpaf.Server_connection.error_handler)
 
 val h2 :
-  Dream.app ->
   Dream.error_handler ->
     (Unix.sockaddr -> H2.Server_connection.error_handler)
 
 val tls :
-  Dream.app ->
   Dream.error_handler ->
     (Unix.sockaddr -> exn -> unit)
 

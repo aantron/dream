@@ -264,62 +264,6 @@ let app
 
   respond_with_option (fun () -> user's_error_handler error)
 
-(* let app
-    app user's_error_handler =
-    fun next_handler request ->
-
-  Lwt.try_bind
-
-    (fun () ->
-      next_handler request)
-
-    (fun response ->
-      let status = Dream.status response in
-
-      if Dream.is_client_error status || Dream.is_server_error status then begin
-        let caused_by, severity =
-          if Dream.is_client_error status then
-            `Client, `Warning
-          else
-            `Server, `Error
-        in
-
-        let error = Error.{
-          condition = `Response response;
-          layer = `App;
-          caused_by;
-          request = Some request;
-          response = Some response;
-          client = Some (Dream.client request);
-          severity = severity;
-          debug = Dream.debug app;
-          will_send_response = true;
-        } in
-
-        respond_with_option (fun () -> user's_error_handler error)
-      end
-      else
-        Lwt.return response)
-
-    (* This exception handler is partially redundant, in that the HTTP-level
-       handlers will also catch exceptions. However, this handler is able to
-       capture more relevant context. We leave the HTTP-level handlers for truly
-       severe protocol-level errors and integration mistakes. *)
-    (fun exn ->
-      let error = Error.{
-        condition = `Exn exn;
-        layer = `App;
-        caused_by = `Server;
-        request = Some request;
-        response = None;
-        client = Some (Dream.client request);
-        severity = `Error;
-        debug = Dream.debug app;
-        will_send_response = true;
-      } in
-
-      respond_with_option (fun () -> user's_error_handler error)) *)
-
 
 
 (* TODO Simplify streams. *)
@@ -334,7 +278,7 @@ let default_response = function
     Dream.response ~status:`Bad_Request client_stream server_stream
 
 let httpaf
-    app user's_error_handler =
+    user's_error_handler =
     fun client_address ?request error start_response ->
 
   ignore (request : Httpaf.Request.t option);
@@ -394,7 +338,7 @@ let httpaf
 
 
 let h2
-    app user's_error_handler =
+    user's_error_handler =
     fun client_address ?request error start_response ->
 
   ignore request; (* TODO Recover something from the request. *)
@@ -457,7 +401,7 @@ let h2
    However, SSL protocol errors are not wrapped in any of these, so we add an
    edditional top-level handler to catch them. *)
 let tls
-    app user's_error_handler client_address error =
+    user's_error_handler client_address error =
 
   let error = {
     Dream.condition = `Exn error;
