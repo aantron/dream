@@ -423,22 +423,6 @@ let response
 
   response
 
-let html ?status ?code ?headers body =
-  (* TODO The streams. *)
-  let client_stream = Stream.(stream (string body) no_writer)
-  and server_stream = Stream.(stream no_reader no_writer) in
-  response ?status ?code ?headers client_stream server_stream
-  |> with_header "Content-Type" Formats.text_html
-  |> Lwt.return
-
-let json ?status ?code ?headers body =
-  (* TODO The streams. *)
-  let client_stream = Stream.(stream (string body) no_writer)
-  and server_stream = Stream.(stream no_reader no_writer) in
-  response ?status ?code ?headers client_stream server_stream
-  |> with_header "Content-Type" Formats.application_json
-  |> Lwt.return
-
 let websocket ?headers handler =
   (* TODO Simplify stream creation. *)
   let client_stream = Stream.(stream empty no_writer)

@@ -136,6 +136,10 @@ let with_client =
   Dream__middleware.Server.with_client
 let https =
   Dream__middleware.Server.https
+let html =
+  Dream__middleware.Server.html
+let json =
+  Dream__middleware.Server.json
 
 include Dream__middleware.Query
 

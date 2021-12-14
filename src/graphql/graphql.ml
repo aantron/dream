@@ -6,6 +6,7 @@
 
 
 module Dream = Dream_pure
+module Server = Dream__middleware.Server
 
 
 
@@ -299,16 +300,16 @@ let graphql make_context schema = fun request ->
       begin match%lwt run_query make_context schema request json with
       | Error json ->
         Yojson.Basic.to_string json
-        |> Dream.json
+        |> Server.json
 
       | Ok (`Response json) ->
         Yojson.Basic.to_string json
-        |> Dream.json
+        |> Server.json
 
       | Ok (`Stream _) ->
         make_error "Subscriptions and streaming should use WebSocket transport"
         |> Yojson.Basic.to_string
-        |> Dream.json
+        |> Server.json
       end
 
     | _ ->
@@ -351,4 +352,4 @@ let graphiql ?(default_query = "") graphql_endpoint =
   in
 
   fun _request ->
-    Dream.html (Lazy.force html)
+    Server.html (Lazy.force html)

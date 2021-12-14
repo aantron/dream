@@ -157,19 +157,6 @@ val response :
   stream ->
     response
 
-val html :
-  ?status:[< status ] ->
-  ?code:int ->
-  ?headers:(string * string) list ->
-    string -> response promise
-(* TODO Remove these. *)
-
-val json :
-  ?status:[< status ] ->
-  ?code:int ->
-  ?headers:(string * string) list ->
-    string -> response promise
-
 val status : response -> status
 
 

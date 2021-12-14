@@ -49,3 +49,21 @@ let request ~client ~method_ ~target ~https ~version ~headers server_stream =
   Dream.request_from_http ~method_ ~target ~version ~headers server_stream
   |> with_client client
   |> with_https https
+
+
+
+let html ?status ?code ?headers body =
+  (* TODO The streams. *)
+  let client_stream = Dream.Stream.(stream (string body) no_writer)
+  and server_stream = Dream.Stream.(stream no_reader no_writer) in
+  Dream.response ?status ?code ?headers client_stream server_stream
+  |> Dream.with_header "Content-Type" Dream.Formats.text_html
+  |> Lwt.return
+
+let json ?status ?code ?headers body =
+  (* TODO The streams. *)
+  let client_stream = Dream.Stream.(stream (string body) no_writer)
+  and server_stream = Dream.Stream.(stream no_reader no_writer) in
+  Dream.response ?status ?code ?headers client_stream server_stream
+  |> Dream.with_header "Content-Type" Dream.Formats.application_json
+  |> Lwt.return
