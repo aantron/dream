@@ -57,7 +57,6 @@ and client = {
   prefix : string list;
   path : string list;
   query : (string * string) list;
-  https : bool;
   request_version : int * int;
   upload : multipart_state;
 }
@@ -121,9 +120,6 @@ let last message =
 let update message =
   message.last := message;
   message
-
-let https request =
-  request.specific.https
 
 let method_ request =
   request.specific.method_
@@ -380,7 +376,6 @@ let fold_locals f initial message =
 let request_from_http
     ~method_
     ~target
-    ~https
     ~version
     ~headers
     body =
@@ -394,7 +389,6 @@ let request_from_http
       prefix = [];
       path = Formats.from_path path;
       query = Formats.from_form_urlencoded query;
-      https;
       request_version = version;
       upload = initial_multipart_state ();
     };
@@ -435,7 +429,6 @@ let request
       prefix = [];
       path = Formats.from_path path;
       query = Formats.from_form_urlencoded query;
-      https = false;
       request_version = version;
       upload = initial_multipart_state ();
     };

@@ -39,7 +39,7 @@ let cookie
   let secure =
     match secure with
     | Some secure -> secure
-    | None -> Dream.https request
+    | None -> Server.https request
   in
 
   let cookie_prefix = infer_cookie_prefix cookie_prefix domain path secure in
@@ -83,7 +83,7 @@ let set_cookie
   let secure =
     match secure with
     | Some secure -> secure
-    | None -> Dream.https request
+    | None -> Server.https request
   in
 
   let cookie_prefix = infer_cookie_prefix cookie_prefix domain path secure in

@@ -134,6 +134,8 @@ let client =
   Dream__middleware.Server.client
 let with_client =
   Dream__middleware.Server.with_client
+let https =
+  Dream__middleware.Server.https
 
 let request ?method_ ?target ?version ?headers body =
   (* TODO Streams. *)

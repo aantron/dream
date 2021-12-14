@@ -141,7 +141,6 @@ val request :
   stream ->
     request
 
-val https : request -> bool
 val method_ : request -> method_
 val target : request -> string
 val prefix : request -> string
@@ -396,7 +395,6 @@ type error_handler = error -> response option promise
 val request_from_http :
   method_:method_ ->
   target:string ->
-  https:bool ->
   version:int * int ->
   headers:(string * string) list ->
   stream ->

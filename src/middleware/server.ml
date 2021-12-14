@@ -27,9 +27,25 @@ let with_client client request =
 
 
 
+let https_variable =
+  Dream.new_local
+    ~name:"dream.https"
+    ~show_value:string_of_bool
+    ()
+
+let https request =
+  match Dream.local https_variable request with
+  | Some true -> true
+  | _ -> false
+
+let with_https https request =
+  Dream.with_local https_variable https request
+
+
+
 (* TODO Eventually remove Dream.request_from_http as all of its functionality
    is moved here. *)
 let request ~client ~method_ ~target ~https ~version ~headers server_stream =
-  Dream.request_from_http
-    ~method_ ~target ~https ~version ~headers server_stream
+  Dream.request_from_http ~method_ ~target ~version ~headers server_stream
   |> with_client client
+  |> with_https https
