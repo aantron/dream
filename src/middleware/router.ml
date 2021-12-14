@@ -163,9 +163,53 @@ let scope prefix middlewares routes =
 
 
 
-(* TODO LATER Pretty-print for the debugger. *)
-let params : (string * string) list Dream.local =
-  Dream.new_local ()
+let path_variable : string list Dream.local =
+  Dream.new_local
+    ~name:"dream.path"
+    ~show_value:(fun path -> String.concat "/" path)
+    ()
+
+(* TODO It would be nice not to repeat the work of splitting the path and query
+   string. *)
+(* TODO Remove this from the API. *)
+let path the_request =
+  match Dream.local path_variable the_request with
+  | Some path -> path
+  | None ->
+    Dream.(Formats.(the_request |> target |> split_target |> fst |> from_path))
+
+(* TODO Move site_prefix into this file and remove with_path from the API. *)
+let with_path path request =
+  Dream.with_local path_variable path request
+
+(* Prefix is stored backwards. *)
+let prefix_variable : string list Dream.local =
+  Dream.new_local
+    ~name:"dream.prefix"
+    ~show_value:(fun prefix -> String.concat "/" (List.rev prefix))
+    ()
+
+let internal_prefix request =
+  match Dream.local prefix_variable request with
+  | Some prefix -> prefix
+  | None -> []
+
+let prefix request =
+  Dream.Formats.make_path (List.rev (internal_prefix request))
+
+let with_prefix prefix request =
+  Dream.with_local prefix_variable prefix request
+
+let params_variable : (string * string) list Dream.local =
+  Dream.new_local
+    ~name:"dream.params"
+    ~show_value:(fun params ->
+      params
+      |> List.map (fun (param, value) -> Printf.sprintf "%s=%s" param value)
+      |> String.concat ", ")
+    ()
+
+
 
 let log =
   Log.sub_log "dream.router"
@@ -176,7 +220,7 @@ let missing_param name request =
   failwith message
 
 let param name request =
-  match Dream.local params request with
+  match Dream.local params_variable request with
   | None -> missing_param name request
   | Some params ->
     try List.assoc name params
@@ -215,11 +259,11 @@ let router routes =
       match node with
       | Handler (method_, handler)
           when method_matches method_ (Dream.method_ request) ->
-        let request = Dream.with_local params bindings request in
+        let request = Dream.with_local params_variable bindings request in
         if is_wildcard then
           request
-          |> Dream.with_prefix prefix
-          |> Dream.with_path path
+          |> with_prefix prefix
+          |> with_path path
           |> ok handler
         else
           if path = [] then
@@ -233,14 +277,14 @@ let router routes =
     in
 
     let params =
-      match Dream.local params request with
+      match Dream.local params_variable request with
       | Some params -> params
       | None -> []
     in
 
     (* let next_prefix = Dream.next_prefix request *)
-    let prefix = Dream.internal_prefix request in
-    let path = Dream.path request in
+    let prefix = internal_prefix request in
+    let path = path request in
 
     (* match match_site_prefix next_prefix path with
     | None -> next_handler request

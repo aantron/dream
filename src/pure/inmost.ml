@@ -54,13 +54,10 @@ and 'a message = {
 and client = {
   method_ : method_;
   target : string;
-  prefix : string list;
-  path : string list;
   query : (string * string) list;
   request_version : int * int;
   upload : multipart_state;
 }
-(* Prefix is stored backwards. *)
 
 and server = {
   status : status;
@@ -127,27 +124,12 @@ let method_ request =
 let target request =
   request.specific.target
 
-let internal_prefix request =
-  request.specific.prefix
-
-let prefix request =
-  Formats.make_path (List.rev request.specific.prefix)
-
-let path request =
-  request.specific.path
-
 let version request =
   request.specific.request_version
 
 let with_method_ method_ request =
   update {request with
     specific = {request.specific with method_ = (method_ :> method_)}}
-
-let with_prefix prefix request =
-  update {request with specific = {request.specific with prefix}}
-
-let with_path path request =
-  update {request with specific = {request.specific with path}}
 
 let with_version version request =
   update {request with
@@ -386,8 +368,6 @@ let request_from_http
     specific = {
       method_;
       target;
-      prefix = [];
-      path = Formats.from_path path;
       query = Formats.from_form_urlencoded query;
       request_version = version;
       upload = initial_multipart_state ();
@@ -426,8 +406,6 @@ let request
          come after the response constructors? *)
       method_;
       target;
-      prefix = [];
-      path = Formats.from_path path;
       query = Formats.from_form_urlencoded query;
       request_version = version;
       upload = initial_multipart_state ();

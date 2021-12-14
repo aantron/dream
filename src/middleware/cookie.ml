@@ -33,7 +33,7 @@ let cookie
   let path =
     match path with
     | Some path -> path
-    | None -> Some (Dream.prefix request)
+    | None -> Some (Router.prefix request)
   in
 
   let secure =
@@ -77,7 +77,7 @@ let set_cookie
   let path =
     match path with
     | Some path -> path
-    | None -> Some (Dream.prefix request)
+    | None -> Some (Router.prefix request)
   in
 
   let secure =

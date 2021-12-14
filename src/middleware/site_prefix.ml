@@ -31,7 +31,7 @@ let with_site_prefix prefix =
     |> Dream_pure.Formats.drop_trailing_slash
   in
   fun next_handler request ->
-    match match_site_prefix prefix (Dream.path request) with
+    match match_site_prefix prefix (Router.path request) with
     | None ->
       (* TODO Streams. *)
       let client_stream = Dream.Stream.(stream empty no_writer)
@@ -43,6 +43,6 @@ let with_site_prefix prefix =
          result in the app. *)
       let prefix_reversed = List.rev prefix in
       request
-      |> Dream.with_prefix prefix_reversed
-      |> Dream.with_path path
+      |> Router.with_prefix prefix_reversed
+      |> Router.with_path path
       |> next_handler

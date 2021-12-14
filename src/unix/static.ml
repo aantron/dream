@@ -47,7 +47,7 @@ let from_filesystem local_root path _ =
 (* TODO On Windows, should we also check for \ and drive letters? *)
 (* TODO Not an efficient implementation at the moment. *)
 let validate_path request =
-  let path = Dream.path request in
+  let path = Dream__middleware.Router.path request in
 
   let has_slash component = String.contains component '/' in
   let has_backslash component = String.contains component '\\' in

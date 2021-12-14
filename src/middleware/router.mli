@@ -31,6 +31,12 @@ val scope : string -> Dream.middleware list -> route list -> route
 val router : route list -> Dream.middleware
 val param : string -> Dream.request -> string
 
+(* Variables used by the router. *)
+val path : Dream.request -> string list
+val prefix : Dream.request -> string
+val with_path : string list -> Dream.request -> Dream.request
+val with_prefix : string list -> Dream.request -> Dream.request
+
 (**/**)
 
 type token =

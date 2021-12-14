@@ -143,13 +143,8 @@ val request :
 
 val method_ : request -> method_
 val target : request -> string
-val prefix : request -> string
-val internal_prefix : request -> string list
-val path : request -> string list
 val version : request -> int * int
 val with_method_ : [< method_ ] -> request -> request
-val with_prefix : string list -> request -> request
-val with_path : string list -> request -> request
 val with_version : int * int -> request -> request
 (* TODO Path handling should also be done by server-side-only helpers. *)
 val query : string -> request -> string option
@@ -425,6 +420,7 @@ sig
   val from_path : string -> string list
   val to_path : ?relative:bool -> ?international:bool -> string list -> string
   val drop_trailing_slash : string list -> string list
+  val make_path : string list -> string
   val text_html : string
   val application_json : string
 end
