@@ -172,11 +172,6 @@ val with_all_headers : (string * string) list -> 'a message -> 'a message
 
 
 
-val all_cookies : request -> (string * string) list
-(* TODO Should become server-side-only. *)
-
-
-
 val body : 'a message -> string promise
 val with_body : string -> response -> response
 val read : request -> string option promise
