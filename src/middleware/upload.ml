@@ -9,13 +9,44 @@ module Dream = Dream_pure
 
 
 
+(* Used for converting the stream interface of [multipart_form] into the pull
+   interface of Dream.
+
+   [state] permits to dissociate the initial state made by
+   [initial_multipart_state] and one which started to consume the body stream
+   (see the call of [Upload.upload]). *)
+type multipart_state = {
+  mutable state_init : bool;
+  mutable name : string option;
+  mutable filename : string option;
+  mutable stream : (< > * Multipart_form.Header.t * string Lwt_stream.t) Lwt_stream.t;
+}
+
+let initial_multipart_state () = {
+  state_init = true;
+  name = None;
+  filename = None;
+  stream = Lwt_stream.of_list [];
+}
+
+(* TODO Dump the value of the multipart state somehow? *)
+let multipart_state_variable : multipart_state Dream.local =
+  Dream.new_local
+    ~name:"dream.multipart"
+    ()
+
+(* TODO This would be MUCH easier if requests were mutable. It's probably best
+   to just break multipart until then, and have the branch be "unstable." *)
+let multipart_state request =
+  assert false
+
 let field_to_string (request : Dream.request) field =
   let open Multipart_form in
   match field with
   | Field.Field (field_name, Field.Content_type, v) ->
     (field_name :> string), Content_type.to_string v
   | Field.Field (field_name, Field.Content_disposition, v) ->
-    let state = Dream.multipart_state request in
+    let state = multipart_state request in
     state.filename <- Content_disposition.filename v ;
     state.name <- Content_disposition.name v ;
     (field_name :> string), Content_disposition.to_string v
@@ -27,7 +58,7 @@ let field_to_string (request : Dream.request) field =
 let log = Log.sub_log "dream.upload"
 
 let upload_part (request : Dream.request) =
-  let state = Dream.multipart_state request in
+  let state = multipart_state request in
   match%lwt Lwt_stream.peek state.stream with
   | None -> Lwt.return_none
   | Some (_uid, _header, stream) ->
@@ -44,7 +75,7 @@ let identify _ = object end
 type part = string option * string option * ((string * string) list)
 
 let rec state (request : Dream.request) =
-  let state' = Dream.multipart_state request in
+  let state' = multipart_state request in
   let stream = state'.stream in
   match%lwt Lwt_stream.peek stream with
   | None -> let%lwt () = Lwt_stream.junk stream in Lwt.return_none
@@ -59,7 +90,7 @@ let rec state (request : Dream.request) =
     Lwt.return (Some part)
 
 and upload (request : Dream.request) =
-  let state' = Dream.multipart_state request in
+  let state' = multipart_state request in
   match state'.state_init with
   | false ->
     state request

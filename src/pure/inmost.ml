@@ -10,26 +10,6 @@ include Status
 
 
 
-(* Used for converting the stream interface of [multipart_form] into the pull
-   interface of Dream.
-
-   [state] permits to dissociate the initial state made by
-   [initial_multipart_state] and one which started to consume the body stream
-   (see the call of [Upload.upload]). *)
-type multipart_state = {
-  mutable state_init : bool;
-  mutable name : string option;
-  mutable filename : string option;
-  mutable stream : (< > * Multipart_form.Header.t * string Lwt_stream.t) Lwt_stream.t;
-}
-
-let initial_multipart_state () = {
-  state_init = true;
-  name = None;
-  filename = None;
-  stream = Lwt_stream.of_list [];
-}
-
 module Scope_variable_metadata =
 struct
   type 'a t = string option * ('a -> string) option
@@ -55,7 +35,6 @@ and client = {
   method_ : method_;
   target : string;
   request_version : int * int;
-  upload : multipart_state;
 }
 
 and server = {
@@ -183,24 +162,6 @@ let with_header name value message =
   message
   |> drop_header name
   |> add_header name value
-
-(* TODO LATER Optimize by caching the parsed cookies in a local key. *)
-(* TODO LATER: API: Dream.cookie : string -> request -> string, cookie-option...
-   the thing with cookies is that they have a high likelihood of being absent. *)
-(* TODO LATER Can decide whether to accept multiple Cookie: headers based on
-   request version. But that would entail an actual middleware - is that worth
-   it? *)
-(* TODO LATER Also not efficient, at all. Need faster parser + the cache. *)
-(* TODO DOC Using only raw cookies. *)
-(* TODO However, is it best to URL-encode cookies by default, and provide a
-   variable for opting out? *)
-(* TODO DOC We allow multiple headers sent by the client, to support HTTP/2.
-   What is this about? *)
-let all_cookies request =
-  request
-  |> headers "Cookie"
-  |> List.map Formats.from_cookie
-  |> List.flatten
 
 (* TODO Don't use this exception-raising function, to avoid clobbering user
    backtraces more. *)
@@ -349,7 +310,6 @@ let request_from_http
       method_;
       target;
       request_version = version;
-      upload = initial_multipart_state ();
     };
     headers;
     client_stream = Stream.(stream no_reader no_writer);
@@ -385,7 +345,6 @@ let request
       method_;
       target;
       request_version = version;
-      upload = initial_multipart_state ();
     };
     headers;
     client_stream;
@@ -471,7 +430,3 @@ let rec pipeline middlewares handler =
 
 let sort_headers headers =
   List.stable_sort (fun (name, _) (name', _) -> compare name name') headers
-
-(* TODO Remove to server-side code. *)
-let multipart_state request =
-  request.specific.upload

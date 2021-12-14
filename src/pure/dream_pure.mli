@@ -303,16 +303,6 @@ val pong : stream -> buffer -> int -> int -> write
     meaningful for WebSockets. *)
 end
 
-(* TODO Remove to server-side code. *)
-type multipart_state = {
-  mutable state_init : bool;
-  mutable name : string option;
-  mutable filename : string option;
-  mutable stream : (< > * Multipart_form.Header.t * string Lwt_stream.t) Lwt_stream.t;
-}
-
-val multipart_state : request -> multipart_state
-
 
 
 val no_middleware : middleware
