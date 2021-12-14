@@ -146,10 +146,6 @@ val target : request -> string
 val version : request -> int * int
 val with_method_ : [< method_ ] -> request -> request
 val with_version : int * int -> request -> request
-(* TODO Path handling should also be done by server-side-only helpers. *)
-val query : string -> request -> string option
-val queries : string -> request -> string list
-val all_queries : request -> (string * string) list
 
 
 

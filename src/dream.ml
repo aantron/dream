@@ -137,6 +137,8 @@ let with_client =
 let https =
   Dream__middleware.Server.https
 
+include Dream__middleware.Query
+
 let request ?method_ ?target ?version ?headers body =
   (* TODO Streams. *)
   let client_stream = Dream_pure.Stream.stream no_reader no_writer

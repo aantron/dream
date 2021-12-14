@@ -54,7 +54,6 @@ and 'a message = {
 and client = {
   method_ : method_;
   target : string;
-  query : (string * string) list;
   request_version : int * int;
   upload : multipart_state;
 }
@@ -137,23 +136,6 @@ let with_version version request =
 
 let status response =
   response.specific.status
-
-let all_queries request =
-  request.specific.query
-
-(* TODO percent-decode name and value. *)
-let query name request =
-  List.assoc_opt name request.specific.query
-
-let queries name request =
-  request.specific.query
-  |> List.fold_left (fun accumulator (name', value) ->
-    if name' = name then
-      value::accumulator
-    else
-      accumulator)
-    []
-  |> List.rev
 
 let all_headers message =
   message.headers
@@ -362,13 +344,10 @@ let request_from_http
     ~headers
     body =
 
-  let path, query = Formats.split_target target in
-
   let rec request = {
     specific = {
       method_;
       target;
-      query = Formats.from_form_urlencoded query;
       request_version = version;
       upload = initial_multipart_state ();
     };
@@ -398,7 +377,6 @@ let request
 
   (* This function is used for debugging, so it's fine to allocate a fake body
      and then immediately replace it. *)
-  let path, query = Formats.split_target target in
 
   let rec request = {
     specific = {
@@ -406,7 +384,6 @@ let request
          come after the response constructors? *)
       method_;
       target;
-      query = Formats.from_form_urlencoded query;
       request_version = version;
       upload = initial_multipart_state ();
     };
