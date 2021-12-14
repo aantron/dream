@@ -648,11 +648,11 @@ let ocaml_tls = {
 
 
 
-let built_in_middleware =
+let built_in_middleware error_handler =
   Dream.pipeline [
     Dream__middleware.Lowercase_headers.lowercase_headers;
     Dream__middleware.Content_length.content_length;
-    Dream__middleware.Catch.catch_errors;
+    Dream__middleware.Catch.catch (Error_handler.app error_handler);
   ]
 
 
@@ -675,7 +675,7 @@ let serve_with_details
 
   let user's_dream_handler =
     if builtins then
-      built_in_middleware user's_dream_handler
+      built_in_middleware error_handler user's_dream_handler
     else
       user's_dream_handler
   in

@@ -1954,6 +1954,12 @@ val debug_error_handler : error_handler
 (** An {!error_handler} for showing extra information about requests and
     exceptions, for use during development. *)
 
+val catch : (error -> response promise) -> middleware
+(** Forwards exceptions, rejections, and [4xx], [5xx] responses from the
+    application to the error handler. See {!section-errors}. *)
+(* TODO Error handler should not return an option, and then the type can be
+   used here. *)
+
 
 
 (** {1 Servers} *)
@@ -2055,7 +2061,7 @@ val serve :
       Dream.run ~builtins:false
       @@ Dream.lowercase_headers
       @@ Dream.content_length
-      @@ Dream.catch_errors
+      @@ Dream.catch ~error_handler
       @@ my_app
     ]}
 
@@ -2078,10 +2084,6 @@ val content_length : middleware
     headers are necessary in HTTP/1, and forbidden or redundant and difficult to
     use in HTTP/2. *)
 
-val catch_errors : middleware
-(** Forwards exceptions, rejections, and [4xx], [5xx] responses from the
-    application to the error handler. See {!section-errors}. *)
-
 val with_site_prefix : string -> middleware
 (** Removes the given prefix from the path in each request, and adds it to the
     request prefix. Responds with [502 Bad Gateway] if the path does not have
@@ -2091,6 +2093,8 @@ val with_site_prefix : string -> middleware
     domain. The default is ["/"], for no prefix. After [with_site_prefix],
     routing is done relative to the prefix, and the prefix is also necessary for
     emitting secure cookies. *)
+(* TODO Clarify that this isn't included with the built-ins, but is something on
+   topic that one might want to use. *)
 
 
 

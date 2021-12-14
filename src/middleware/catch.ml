@@ -13,8 +13,8 @@ module Dream = Dream_pure
    reaching the centralized error handler provided by the user, so it is built
    into the framework. *)
 
-(* TODO The option thing is pretty awkward. *)
-let catch_errors next_handler request =
+(* TODO The option return value thing is pretty awkward. *)
+let catch error_handler next_handler request =
 
   Lwt.try_bind
 
@@ -43,9 +43,7 @@ let catch_errors next_handler request =
           will_send_response = true;
         } in
 
-        let user's_error_handler =
-          Dream.app_error_handler (Dream.app request) in
-        user's_error_handler error
+        error_handler error
       end
       else
         Lwt.return response)
@@ -66,5 +64,4 @@ let catch_errors next_handler request =
         will_send_response = true;
       } in
 
-      let user's_error_handler = Dream.app_error_handler (Dream.app request) in
-      user's_error_handler error)
+      error_handler error)
