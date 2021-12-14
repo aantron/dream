@@ -749,7 +749,6 @@ let serve_with_maybe_https
     ~interface
     ~port
     ~stop
-    ?debug
     ~error_handler
     ~https
     ?certificate_file ?key_file
@@ -760,11 +759,6 @@ let serve_with_maybe_https
   let app = Dream.new_app (Error_handler.app error_handler) in
 
   try%lwt
-    begin match debug with
-    | Some debug -> Dream.set_debug debug app
-    | None -> ()
-    end;
-
     (* This check will at least catch secrets like "foo" when used on a public
        interface. *)
     (* if not (is_localhost interface) then
@@ -905,7 +899,6 @@ let serve
     ?(interface = default_interface)
     ?(port = default_port)
     ?(stop = never)
-    ?debug
     ?(error_handler = Error_handler.default)
     ?(https = false)
     ?certificate_file
@@ -918,7 +911,6 @@ let serve
     ~interface
     ~port
     ~stop
-    ?debug
     ~error_handler
     ~https:(if https then `OpenSSL else `No)
     ?certificate_file
@@ -934,7 +926,6 @@ let run
     ?(interface = default_interface)
     ?(port = default_port)
     ?(stop = never)
-    ?debug
     ?(error_handler = Error_handler.default)
     ?(https = false)
     ?certificate_file
@@ -1012,7 +1003,6 @@ let run
         ~interface
         ~port
         ~stop
-        ?debug
         ~error_handler
         ~https:(if https then `OpenSSL else `No)
         ?certificate_file ?key_file

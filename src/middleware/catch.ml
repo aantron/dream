@@ -40,7 +40,6 @@ let catch_errors next_handler request =
           response = Some response;
           client = Some (Dream.client request);
           severity = severity;
-          debug = Dream.debug (Dream.app request);
           will_send_response = true;
         } in
 
@@ -64,7 +63,6 @@ let catch_errors next_handler request =
         response = None;
         client = Some (Dream.client request);
         severity = `Error;
-        debug = Dream.debug (Dream.app request);
         will_send_response = true;
       } in
 

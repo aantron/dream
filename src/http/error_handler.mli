@@ -13,8 +13,9 @@ module Dream = Dream_pure
    templates and/or do logging. *)
 
 val default : Dream.error_handler
+val debug_error_handler : Dream.error_handler
 val customize :
-  (Dream.error -> string option -> Dream.response -> Dream.response Lwt.t) ->
+  (Dream.error -> string -> Dream.response -> Dream.response Lwt.t) ->
     Dream.error_handler
 
 

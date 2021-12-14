@@ -157,11 +157,7 @@ let customize template (error : Dream.error) =
     Lwt.return_none
 
   else
-    let debug_dump =
-      match error.debug with
-      | false -> None
-      | true -> Some (dump error)
-    in
+    let debug_dump = dump error in
 
     let response =
       match error.condition with
@@ -187,23 +183,24 @@ let customize template (error : Dream.error) =
 
 
 
-let default_template _error debug_dump response =
-  match debug_dump with
-  | None -> Lwt.return response
-  | Some debug_dump ->
-    let status = Dream.status response in
-    let code = Dream.status_to_int status
-    and reason = Dream.status_to_string status in
-    response
-    |> Dream.with_header "Content-Type" Dream_pure.Formats.text_html
-    |> Dream.with_body
-      (Dream__middleware.Error_template.render ~debug_dump ~code ~reason)
-    |> Lwt.return
+let default_template _error _debug_dump response =
+  Lwt.return response
 
-
+let debug_template _error debug_dump response =
+  let status = Dream.status response in
+  let code = Dream.status_to_int status
+  and reason = Dream.status_to_string status in
+  response
+  |> Dream.with_header "Content-Type" Dream_pure.Formats.text_html
+  |> Dream.with_body
+    (Dream__middleware.Error_template.render ~debug_dump ~code ~reason)
+  |> Lwt.return
 
 let default =
   customize default_template
+
+let debug_error_handler =
+  customize debug_template
 
 
 
@@ -371,7 +368,6 @@ let httpaf
     response = None;
     client = Some (Adapt.address_to_string client_address);
     severity;
-    debug = Dream.debug app;
     will_send_response = true;
   } in
 
@@ -430,7 +426,6 @@ let h2
     response = None;
     client = Some (Adapt.address_to_string client_address);
     severity;
-    debug = Dream.debug app;
     will_send_response = true;
   } in
 
@@ -472,7 +467,6 @@ let tls
     response = None;
     client = Some (Adapt.address_to_string client_address);
     severity = `Warning;
-    debug = Dream.debug app;
     will_send_response = false;
   } in
 
@@ -504,7 +498,6 @@ let websocket
     response = Some response;
     client = Some (Dream.client request);
     severity = `Warning;   (* Not sure what these errors are, yet. *)
-    debug = Dream.debug (Dream.app request);
     will_send_response = false;
   } in
 
@@ -527,7 +520,6 @@ let websocket_handshake
     response = Some response;
     client = Some (Dream.client request);
     severity = `Warning;
-    debug = Dream.debug (Dream.app request);
     will_send_response = true;
   } in
 

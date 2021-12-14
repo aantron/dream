@@ -1818,7 +1818,6 @@ type error = {
   response : response option;
   client : string option;
   severity : log_level;
-  debug : bool;
   will_send_response : bool;
 }
 (** Detailed errors. Ignore this type if only using {!Dream.error_template}.
@@ -1888,17 +1887,6 @@ type error = {
     }
 
     {li
-    [debug] is [true] if {!Dream.run} was called with [~debug].
-
-    If so, the default error handler gathers various fields from the current
-    request, formats the error condition, and passes the resulting string to the
-    template as [debug_dump].
-
-    The default template shows this string in its repsonse, instead of returning
-    a response with no body.
-    }
-
-    {li
     [will_send_response] is [true] in error contexts where Dream will still send
     a response.
 
@@ -1921,7 +1909,7 @@ type error_handler = error -> response option promise
     {!Dream.type-error}. *)
 
 val error_template :
-  (error -> string option -> response -> response promise) -> error_handler
+  (error -> string -> response -> response promise) -> error_handler
 (** Builds an {!error_handler} from a template. See example
     {{:https://github.com/aantron/dream/tree/master/example/9-error#files}
     [9-error]} \[{{:http://dream.as/9-error} playground}\].
@@ -1951,8 +1939,7 @@ val error_template :
       the error was likely caused by the client, and [500 Internal Server Error]
       if the error was likely caused by the server.
 
-    If [~debug] was passed to {!Dream.run}, [~debug_dump] will be [Some info],
-    where [info] is a multi-line string containing an error description, stack
+    [~debug_dump] is a multi-line string containing an error description, stack
     trace, request state, and other information.
 
     When an error occurs in a context where a response is not possible, the
@@ -1963,6 +1950,10 @@ val error_template :
     If the template itself raises an exception or rejects, an empty [500
     Internal Server Error] will be sent in contexts that require a response. *)
 
+val debug_error_handler : error_handler
+(** An {!error_handler} for showing extra information about requests and
+    exceptions, for use during development. *)
+
 
 
 (** {1 Servers} *)
@@ -1971,7 +1962,6 @@ val run :
   ?interface:string ->
   ?port:int ->
   ?stop:unit promise ->
-  ?debug:bool ->
   ?error_handler:error_handler ->
   ?https:bool ->
   ?certificate_file:string ->
@@ -2031,7 +2021,6 @@ val serve :
   ?interface:string ->
   ?port:int ->
   ?stop:unit promise ->
-  ?debug:bool ->
   ?error_handler:error_handler ->
   ?https:bool ->
   ?certificate_file:string ->

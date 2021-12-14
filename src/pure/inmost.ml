@@ -71,7 +71,6 @@ and server = {
 }
 
 and app = {
-  mutable app_debug : bool;
   error_handler : error -> response Lwt.t;
 }
 
@@ -111,22 +110,14 @@ and error = {
     | `Info
     | `Debug
   ];
-  debug : bool;
   will_send_response : bool;
 }
-
-let debug app =
-  app.app_debug
-
-let set_debug value app =
-  app.app_debug <- value
 
 (* TODO Remove. *)
 let app_error_handler app =
   app.error_handler
 
 let new_app error_handler = {
-  app_debug = false;
   error_handler;
 }
 

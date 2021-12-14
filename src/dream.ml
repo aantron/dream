@@ -54,6 +54,8 @@ include Dream__middleware.Lowercase_headers
 include Dream__middleware.Catch
 include Dream__middleware.Site_prefix
 
+let debug_error_handler =
+  Dream__http.Error_handler.debug_error_handler
 let error_template =
   Dream__http.Error_handler.customize
 

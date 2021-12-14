@@ -395,7 +395,6 @@ type error = {
   response : response option;
   client : string option;
   severity : log_level;
-  debug : bool;
   will_send_response : bool;
 }
 
@@ -403,8 +402,6 @@ type error_handler = error -> response option promise
 
 val new_app : (error -> response Lwt.t) -> app
 val app : request -> app
-val debug : app -> bool
-val set_debug : bool -> app -> unit
 val app_error_handler : app -> (error -> response promise)
 val request_from_http :
   app:app ->
