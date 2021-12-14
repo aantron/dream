@@ -31,6 +31,15 @@ module Dream = Dream_pure
 
 
 
+type log_level = [
+  | `Error
+  | `Warning
+  | `Info
+  | `Debug
+]
+
+
+
 (* The logging middleware assigns request ids to requests, and tries to show
    them in the logs. The scheme works as follows:
 

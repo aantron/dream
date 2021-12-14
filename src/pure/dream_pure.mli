@@ -322,39 +322,6 @@ val is_websocket : response -> (websocket -> unit promise) option
 
 
 
-type log_level = [
-  | `Error
-  | `Warning
-  | `Info
-  | `Debug
-]
-
-type error = {
-  condition : [
-    | `Response of response
-    | `String of string
-    | `Exn of exn
-  ];
-  layer : [
-    | `App
-    | `HTTP
-    | `HTTP2
-    | `TLS
-    | `WebSocket
-  ];
-  caused_by : [
-    | `Server
-    | `Client
-  ];
-  request : request option;
-  response : response option;
-  client : string option;
-  severity : log_level;
-  will_send_response : bool;
-}
-
-type error_handler = error -> response option promise
-
 val request_from_http :
   method_:method_ ->
   target:string ->

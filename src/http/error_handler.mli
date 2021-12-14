@@ -6,17 +6,18 @@
 
 
 module Dream = Dream_pure
+module Catch = Dream__middleware.Catch
 
 
 
 (* User's error handlers and defaults. These actually generate error response
    templates and/or do logging. *)
 
-val default : Dream.error_handler
-val debug_error_handler : Dream.error_handler
+val default : Catch.error_handler
+val debug_error_handler : Catch.error_handler
 val customize :
-  (Dream.error -> string -> Dream.response -> Dream.response Lwt.t) ->
-    Dream.error_handler
+  (Catch.error -> string -> Dream.response -> Dream.response Lwt.t) ->
+    Catch.error_handler
 
 
 
@@ -32,29 +33,29 @@ val customize :
     Dream.middleware *)
 
 val app :
-  Dream.error_handler ->
-    (Dream.error -> Dream.response Lwt.t)
+  Catch.error_handler ->
+    (Catch.error -> Dream.response Lwt.t)
 
 val httpaf :
-  Dream.error_handler ->
+  Catch.error_handler ->
     (Unix.sockaddr -> Httpaf.Server_connection.error_handler)
 
 val h2 :
-  Dream.error_handler ->
+  Catch.error_handler ->
     (Unix.sockaddr -> H2.Server_connection.error_handler)
 
 val tls :
-  Dream.error_handler ->
+  Catch.error_handler ->
     (Unix.sockaddr -> exn -> unit)
 
 val websocket :
-  Dream.error_handler ->
+  Catch.error_handler ->
   Dream.request ->
   Dream.response ->
     (Websocketaf.Wsd.t -> [ `Exn of exn ] -> unit)
 
 val websocket_handshake :
-  Dream.error_handler ->
+  Catch.error_handler ->
     (Dream.request -> Dream.response -> string -> Dream.response Lwt.t)
 
 

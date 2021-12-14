@@ -6,6 +6,7 @@
 
 
 module Dream = Dream_pure
+module Catch = Dream__middleware.Catch
 module Server = Dream__middleware.Server
 
 
@@ -26,7 +27,7 @@ let select_log = function
 
 
 
-let dump (error : Dream.error) =
+let dump (error : Catch.error) =
   let buffer = Buffer.create 4096 in
   let p format = Printf.bprintf buffer format in
 
@@ -110,7 +111,7 @@ let dump (error : Dream.error) =
 (* TODO LATER Some library is registering S-exp-based printers for expressions,
    which are calling functions that use exceptions during parsing, which are
    clobbering the backtrace. *)
-let customize template (error : Dream.error) =
+let customize template (error : Catch.error) =
 
   (* First, log the error. *)
 
@@ -306,7 +307,7 @@ let httpaf
   in
 
   let error = {
-    Dream.condition;
+    Catch.condition;
     layer = `HTTP;
     caused_by;
     request = None;
@@ -364,7 +365,7 @@ let h2
   in
 
   let error = {
-    Dream.condition;
+    Catch.condition;
     layer = `HTTP2;
     caused_by;
     request = None;
@@ -405,7 +406,7 @@ let tls
     user's_error_handler client_address error =
 
   let error = {
-    Dream.condition = `Exn error;
+    Catch.condition = `Exn error;
     layer = `TLS;
     caused_by = `Client;
     request = None;
@@ -436,7 +437,7 @@ let websocket
   let `Exn exn = error in
 
   let error = {
-    Dream.condition = `Exn exn;
+    Catch.condition = `Exn exn;
     layer = `WebSocket;
     caused_by = `Server;
     request = Some request;
@@ -458,7 +459,7 @@ let websocket_handshake
     fun request response error_string ->
 
   let error = {
-    Dream.condition = `String error_string;
+    Catch.condition = `String error_string;
     layer = `WebSocket;
     caused_by = `Client;
     request = Some request;

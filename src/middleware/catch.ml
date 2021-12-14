@@ -9,6 +9,32 @@ module Dream = Dream_pure
 
 
 
+type error = {
+  condition : [
+    | `Response of Dream.response
+    | `String of string
+    | `Exn of exn
+  ];
+  layer : [
+    | `App
+    | `HTTP
+    | `HTTP2
+    | `TLS
+    | `WebSocket
+  ];
+  caused_by : [
+    | `Server
+    | `Client
+  ];
+  request : Dream.request option;
+  response : Dream.response option;
+  client : string option;
+  severity : Log.log_level;
+  will_send_response : bool;
+}
+
+type error_handler = error -> Dream.response option Dream.promise
+
 (* This error handler actually *is* a middleware, but it is just one pathway for
    reaching the centralized error handler provided by the user, so it is built
    into the framework. *)
@@ -33,7 +59,7 @@ let catch error_handler next_handler request =
         in
 
         let error = {
-          Dream.condition = `Response response;
+          condition = `Response response;
           layer = `App;
           caused_by;
           request = Some request;
@@ -54,7 +80,7 @@ let catch error_handler next_handler request =
        severe protocol-level errors and integration mistakes. *)
     (fun exn ->
       let error = {
-        Dream.condition = `Exn exn;
+        condition = `Exn exn;
         layer = `App;
         caused_by = `Server;
         request = Some request;

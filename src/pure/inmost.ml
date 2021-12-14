@@ -42,45 +42,6 @@ and server = {
   websocket : (websocket -> unit Lwt.t) option;
 }
 
-and error_handler = error -> response option Lwt.t
-
-and log_level = [
-  | `Error
-  | `Warning
-  | `Info
-  | `Debug
-]
-
-and error = {
-  condition : [
-    | `Response of response
-    | `String of string
-    | `Exn of exn
-  ];
-  layer : [
-    | `TLS
-    | `HTTP
-    | `HTTP2
-    | `WebSocket
-    | `App
-  ];
-  (* TODO Any point in distinguishing HTTP and HTTP2 errors? *)
-  caused_by : [
-    | `Server
-    | `Client
-  ];
-  request : request option;
-  response : response option;
-  client : string option;
-  severity : [
-    | `Error
-    | `Warning
-    | `Info
-    | `Debug
-  ];
-  will_send_response : bool;
-}
-
 type 'a promise = 'a Lwt.t
 
 type handler = request -> response Lwt.t

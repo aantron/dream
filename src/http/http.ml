@@ -5,7 +5,11 @@
 
 
 
-module Dream = Dream_pure
+module Dream =
+struct
+  include Dream_pure
+  include Dream__middleware.Catch
+end
 module Stream = Dream_pure.Stream
 module Server = Dream__middleware.Server
 
