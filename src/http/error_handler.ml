@@ -6,6 +6,7 @@
 
 
 module Dream = Dream_pure
+module Server = Dream__middleware.Server
 
 
 
@@ -440,7 +441,7 @@ let websocket
     caused_by = `Server;
     request = Some request;
     response = Some response;
-    client = Some (Dream.client request);
+    client = Some (Server.client request);
     severity = `Warning;   (* Not sure what these errors are, yet. *)
     will_send_response = false;
   } in
@@ -462,7 +463,7 @@ let websocket_handshake
     caused_by = `Client;
     request = Some request;
     response = Some response;
-    client = Some (Dream.client request);
+    client = Some (Server.client request);
     severity = `Warning;
     will_send_response = true;
   } in

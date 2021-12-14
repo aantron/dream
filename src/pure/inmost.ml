@@ -52,7 +52,6 @@ and 'a message = {
 }
 
 and client = {
-  request_client : string;
   method_ : method_;
   target : string;
   prefix : string list;
@@ -123,9 +122,6 @@ let update message =
   message.last := message;
   message
 
-let client request =
-  request.specific.request_client
-
 let https request =
   request.specific.https
 
@@ -146,10 +142,6 @@ let path request =
 
 let version request =
   request.specific.request_version
-
-let with_client client request =
-  update
-    {request with specific = {request.specific with request_client = client}}
 
 let with_method_ method_ request =
   update {request with
@@ -386,7 +378,6 @@ let fold_locals f initial message =
   fold_scope f initial message.locals
 
 let request_from_http
-    ~client
     ~method_
     ~target
     ~https
@@ -398,7 +389,6 @@ let request_from_http
 
   let rec request = {
     specific = {
-      request_client = client;
       method_;
       target;
       prefix = [];
@@ -419,7 +409,6 @@ let request_from_http
   request
 
 let request
-    ?(client = "127.0.0.1:12345")
     ?method_
     ?(target = "/")
     ?(version = 1, 1)
@@ -441,7 +430,6 @@ let request
     specific = {
       (* TODO Is there a better fake error handler? Maybe this function should
          come after the response constructors? *)
-      request_client = client;
       method_;
       target;
       prefix = [];

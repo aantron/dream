@@ -130,11 +130,16 @@ let verify_csrf_token = verify_csrf_token ~now
 let form_tag ?method_ ?target ?enctype ?csrf_token ~action request =
   form_tag ~now ?method_ ?target ?enctype ?csrf_token ~action request
 
-let request ?client ?method_ ?target ?version ?headers body =
+let client =
+  Dream__middleware.Server.client
+let with_client =
+  Dream__middleware.Server.with_client
+
+let request ?method_ ?target ?version ?headers body =
   (* TODO Streams. *)
   let client_stream = Dream_pure.Stream.stream no_reader no_writer
   and server_stream = Dream_pure.Stream.stream (string body) no_writer in
-  request ?client ?method_ ?target ?version ?headers client_stream server_stream
+  request ?method_ ?target ?version ?headers client_stream server_stream
 
 let response ?status ?code ?headers body =
   (* TODO Streams. *)

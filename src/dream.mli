@@ -2311,7 +2311,6 @@ val with_local : 'a local -> 'a -> 'b message -> 'b message
 (** {1 Testing} *)
 
 val request :
-  ?client:string ->
   ?method_:[< method_ ] ->
   ?target:string ->
   ?version:int * int ->

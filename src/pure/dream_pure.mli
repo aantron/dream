@@ -133,7 +133,6 @@ val normalize_status : [< status ] -> status
 
 
 val request :
-  ?client:string ->
   ?method_:[< method_ ] ->
   ?target:string ->
   ?version:int * int ->
@@ -142,7 +141,6 @@ val request :
   stream ->
     request
 
-val client : request -> string
 val https : request -> bool
 val method_ : request -> method_
 val target : request -> string
@@ -150,7 +148,6 @@ val prefix : request -> string
 val internal_prefix : request -> string list
 val path : request -> string list
 val version : request -> int * int
-val with_client : string -> request -> request
 val with_method_ : [< method_ ] -> request -> request
 val with_prefix : string list -> request -> request
 val with_path : string list -> request -> request
@@ -397,7 +394,6 @@ type error = {
 type error_handler = error -> response option promise
 
 val request_from_http :
-  client:string ->
   method_:method_ ->
   target:string ->
   https:bool ->
