@@ -46,7 +46,9 @@ let with_https https request =
 (* TODO Eventually remove Dream.request_from_http as all of its functionality
    is moved here. *)
 let request ~client ~method_ ~target ~https ~version ~headers server_stream =
-  Dream.request_from_http ~method_ ~target ~version ~headers server_stream
+  (* TODO Use pre-allocated streams. *)
+  let client_stream = Dream.Stream.(stream no_reader no_writer) in
+  Dream.request ~method_ ~target ~version ~headers client_stream server_stream
   |> with_client client
   |> with_https https
 

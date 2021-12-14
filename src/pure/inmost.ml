@@ -259,29 +259,6 @@ let with_local key value message =
 let fold_locals f initial message =
   fold_scope f initial message.locals
 
-let request_from_http
-    ~method_
-    ~target
-    ~version
-    ~headers
-    body =
-
-  let rec request = {
-    specific = {
-      method_;
-      target;
-      request_version = version;
-    };
-    headers;
-    client_stream = Stream.(stream no_reader no_writer);
-    server_stream = body;
-    locals = Scope.empty;
-    first = request; (* TODO LATER What OCaml version is required for this? *)
-    last = ref request;
-  } in
-
-  request
-
 let request
     ?method_
     ?(target = "/")

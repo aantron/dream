@@ -322,16 +322,6 @@ val is_websocket : response -> (websocket -> unit promise) option
 
 
 
-val request_from_http :
-  method_:method_ ->
-  target:string ->
-  version:int * int ->
-  headers:(string * string) list ->
-  stream ->
-    request
-
-
-
 module Formats :
 sig
   val html_escape : string -> string
