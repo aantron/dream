@@ -15,12 +15,9 @@ module Dream = Dream_pure
 (* TODO This can be optimized not to convert a header if it is already
    lowercase. Another option is to use memoization to reduce GC pressure. *)
 let lowercase_headers inner_handler request =
-  if fst (Dream.version request) = 1 then
-    inner_handler request
-  else
-    let%lwt response = inner_handler request in
-    response
-    |> Dream.all_headers
+  let%lwt response = inner_handler request in
+  if fst (Dream.version request) <> 1 then
+    Dream.all_headers response
     |> List.map (fun (name, value) -> String.lowercase_ascii name, value)
-    |> fun headers -> Dream.with_all_headers headers response
-    |> Lwt.return
+    |> Dream.set_all_headers response;
+  Lwt.return response

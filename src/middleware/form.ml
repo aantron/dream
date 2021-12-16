@@ -55,7 +55,7 @@ let sort_and_check_form ~now to_value form request =
     Lwt.return (`Many_tokens form)
 
 let form ?(csrf = true) ~now request =
-  match Dream.header "Content-Type" request with
+  match Dream.header request "Content-Type" with
   | Some "application/x-www-form-urlencoded" ->
     let%lwt body = Dream.body request in
     let form = Dream_pure.Formats.from_form_urlencoded body in

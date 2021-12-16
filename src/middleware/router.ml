@@ -173,14 +173,14 @@ let path_variable : string list Dream.local =
    string. *)
 (* TODO Remove this from the API. *)
 let path the_request =
-  match Dream.local path_variable the_request with
+  match Dream.local the_request path_variable with
   | Some path -> path
   | None ->
     Dream.(Formats.(the_request |> target |> split_target |> fst |> from_path))
 
 (* TODO Move site_prefix into this file and remove with_path from the API. *)
-let with_path path request =
-  Dream.with_local path_variable path request
+let set_path request path =
+  Dream.set_local request path_variable path
 
 (* Prefix is stored backwards. *)
 let prefix_variable : string list Dream.local =
@@ -190,15 +190,15 @@ let prefix_variable : string list Dream.local =
     ()
 
 let internal_prefix request =
-  match Dream.local prefix_variable request with
+  match Dream.local request prefix_variable with
   | Some prefix -> prefix
   | None -> []
 
 let prefix request =
   Dream.Formats.make_path (List.rev (internal_prefix request))
 
-let with_prefix prefix request =
-  Dream.with_local prefix_variable prefix request
+let set_prefix request prefix =
+  Dream.set_local request prefix_variable prefix
 
 let params_variable : (string * string) list Dream.local =
   Dream.new_local
@@ -214,17 +214,17 @@ let params_variable : (string * string) list Dream.local =
 let log =
   Log.sub_log "dream.router"
 
-let missing_param name request =
+let missing_param request name =
   let message = Printf.sprintf "Dream.param: missing path parameter %S" name in
   log.error (fun log -> log ~request "%s" message);
   failwith message
 
-let param name request =
-  match Dream.local params_variable request with
-  | None -> missing_param name request
+let param request name =
+  match Dream.local request params_variable with
+  | None -> missing_param request name
   | Some params ->
     try List.assoc name params
-    with _ -> missing_param name request
+    with _ -> missing_param request name
 
 let router routes =
   let routes = List.flatten routes in
@@ -259,12 +259,12 @@ let router routes =
       match node with
       | Handler (method_, handler)
           when method_matches method_ (Dream.method_ request) ->
-        let request = Dream.with_local params_variable bindings request in
-        if is_wildcard then
-          request
-          |> with_prefix prefix
-          |> with_path path
-          |> ok handler
+        Dream.set_local request params_variable bindings;
+        if is_wildcard then begin
+          set_prefix request prefix;
+          set_path request path;
+          ok handler request
+        end
         else
           if path = [] then
             ok handler request
@@ -277,7 +277,7 @@ let router routes =
     in
 
     let params =
-      match Dream.local params_variable request with
+      match Dream.local request params_variable with
       | Some params -> params
       | None -> []
     in

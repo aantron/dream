@@ -118,7 +118,7 @@ struct
         | Some plaintext -> Some (Cstruct.to_string plaintext)
 end
 
-let secrets =
+let secrets_variable =
   Dream.new_local
     ~name:"dream.secret"
     ~show_value:(fun _secrets -> "[redacted]")
@@ -128,23 +128,22 @@ let secrets =
 (* TODO Also add warnings about implicit secret generation. However, these
    warnings might be pretty spammy. *)
 (* TODO Update examples and docs. *)
-let with_secret ?(old_secrets = []) secret =
+let set_secret ?(old_secrets = []) secret =
   let value = secret::old_secrets in
   fun next_handler request ->
-    request
-    |> Dream.with_local secrets value
-    |> next_handler
+    Dream.set_local request secrets_variable value;
+    next_handler request
 
 let fallback_secrets =
   lazy [Random.random 32]
 
 let encryption_secret request =
-  match Dream.local secrets request with
+  match Dream.local request secrets_variable with
   | Some secrets -> List.hd secrets
   | None -> List.hd (Lazy.force fallback_secrets)
 
 let decryption_secrets request =
-  match Dream.local secrets request with
+  match Dream.local request secrets_variable with
   | Some secrets -> secrets
   | None -> Lazy.force fallback_secrets
 

@@ -364,29 +364,65 @@ val method_ : request -> method_
 (** Request method. For example, [`GET]. *)
 
 val target : request -> string
-(** Request target. For example, ["/foo/bar"]. See {!Dream.val-path}. *)
+(** Request target. For example, ["/foo/bar"]. *)
 
 (**/**)
 val prefix : request -> string
 (**/**)
 
+(**/**)
 val path : request -> string list
+[@@ocaml.deprecated
+" Router path access is being removed from the API. Comment at
+  https://github.com/aantron/dream/issues"]
 (** Parsed request path. For example, ["foo"; "bar"]. *)
+(**/**)
 
+(**/**)
 val version : request -> int * int
 (** Protocol version. [(1, 1)] for HTTP/1.1 and [(2, 0)] for HTTP/2. *)
+[@@ocaml.deprecated
+" Protocol version access is being removed from the API. Comment at
+  https://github.com/aantron/dream/issues"]
+(**/**)
 
-val with_client : string -> request -> request
+val set_client : request -> string -> unit
 (** Replaces the client. See {!Dream.val-client}. *)
 
-val with_method_ : [< method_ ] -> request -> request
+(**/**)
+val with_client : string -> request -> request
+[@@ocaml.deprecated
+" Use Dream.set_client. See
+  https://aantron.github.io/dream/#val-set_client"]
+(**/**)
+
+val set_method_ : request -> [< method_ ] -> unit
 (** Replaces the method. See {!Dream.type-method_}. *)
 
+(**/**)
+val with_method_ : [< method_ ] -> request -> request
+[@@ocaml.deprecated
+" Use Dream.set_method_. See
+  https://aantron.github.io/dream/#val-set_method_"]
+(**/**)
+
+(**/**)
 val with_path : string list -> request -> request
 (** Replaces the path. See {!Dream.val-path}. *)
+[@@ocaml.deprecated
+" Router path access is being removed from the API. Comment at
+  https://github.com/aantron/dream/issues"]
+(**/**)
 
+(**/**)
 val with_version : int * int -> request -> request
 (** Replaces the version. See {!Dream.version}. *)
+[@@ocaml.deprecated
+" Protocol version access is being removed from the API. Comment at
+  https://github.com/aantron/dream/issues"]
+(**/**)
+
+(* TODO Convert query string functions to the new t-first style. *)
 
 val query : string -> request -> string option
 (** First query parameter with the given name. See
@@ -477,7 +513,7 @@ val stream :
   ?code:int ->
   ?headers:(string * string) list ->
     (response -> unit promise) -> response promise
-(** Same as {!Dream.val-respond}, but calls {!Dream.with_stream} internally to
+(** Same as {!Dream.val-respond}, but calls {!Dream.set_stream} internally to
     prepare the response for stream writing, and then runs the callback
     asynchronously to do it. See example
     {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
@@ -497,29 +533,36 @@ val status : response -> status
 
 (** {1 Headers} *)
 
-val header : string -> 'a message -> string option
+val header : 'a message -> string -> string option
 (** First header with the given name. Header names are case-insensitive. See
     {{:https://tools.ietf.org/html/rfc7230#section-3.2} RFC 7230 §3.2} and
     {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers} MDN}. *)
 
-val headers : string -> 'a message -> string list
+val headers : 'a message -> string -> string list
 (** All headers with the given name. *)
 
 val all_headers : 'a message -> (string * string) list
 (** Entire header set as name-value list. *)
 
-val has_header : string -> 'a message -> bool
+val has_header : 'a message -> string -> bool
 (** Whether the message has a header with the given name. *)
 
-val add_header : string -> string -> 'a message -> 'a message
+val add_header : 'a message -> string -> string -> unit
 (** Appends a header with the given name and value. Does not remove any existing
     headers with the same name. *)
 
-val drop_header : string -> 'a message -> 'a message
+val drop_header : 'a message -> string -> unit
 (** Removes all headers with the given name. *)
 
-val with_header : string -> string -> 'a message -> 'a message
+val set_header : 'a message -> string -> string -> unit
 (** Equivalent to {!Dream.drop_header} followed by {!Dream.add_header}. *)
+
+(**/**)
+val with_header : string -> string -> 'a message -> 'a message
+[@@ocaml.deprecated
+" Use Dream.set_header. See
+  https://aantron.github.io/dream/#val-with_header"]
+(**/**)
 
 
 
@@ -558,7 +601,7 @@ val set_cookie :
   ?secure:bool ->
   ?http_only:bool ->
   ?same_site:[< `Strict | `Lax | `None ] option ->
-    string -> string -> request -> response -> response
+    response -> string -> string -> request -> unit
 (** Appends a [Set-Cookie:] header to the {!type-response}. Infers the most
     secure defaults from the {!type-request}.
 
@@ -642,7 +685,7 @@ val set_cookie :
    ?secure:bool ->
    ?http_only:bool ->
    ?same_site:[< `Strict | `Lax | `None ] option ->
-     string -> request -> response -> response
+     response -> string -> request -> unit
 (** Deletes the given cookie.
 
     This function works by calling {!Dream.set_cookie}, and setting the cookie
@@ -655,7 +698,7 @@ val cookie :
   ?domain:string ->
   ?path:string option ->
   ?secure:bool ->
-    string -> request -> string option
+    request -> string -> string option
 (** First cookie with the given name. See example
     {{:https://github.com/aantron/dream/tree/master/example/c-cookie#files}
     [c-cookie]}.
@@ -681,8 +724,15 @@ val body : 'a message -> string promise
     {{:https://github.com/aantron/dream/tree/master/example/6-echo#files}
     [6-echo]}. *)
 
-val with_body : string -> response -> response
+val set_body : response -> string -> unit
 (** Replaces the body. *)
+
+(**/**)
+val with_body : string -> response -> response
+[@@ocaml.deprecated
+" Use Dream.set_body. See
+  https://aantron.github.io/dream/#val-set_body"]
+(**/**)
 
 (** {2 Streaming} *)
 
@@ -692,11 +742,18 @@ val read : request -> string option promise
     {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
     [j-stream]}. *)
 
-val with_stream : response -> response
+val set_stream : response -> unit
 (** Makes the {!type-response} ready for stream writing with {!Dream.write}. You
     should return it from your handler soon after — only one call to
     {!Dream.write} will be accepted before then. See {!Dream.stream} for a more
     convenient wrapper. *)
+
+(**/**)
+val with_stream : response -> response
+[@@ocaml.deprecated
+" Use Dream.set_stream instead. See
+  https://aantron.github.io/dream/#val-set_stream"]
+(**/**)
 
 val write : response -> string -> unit promise
 (** Streams out the string. The promise is fulfilled when the response can
@@ -733,7 +790,7 @@ val server_stream : 'a message -> stream
 val client_stream : 'a message -> stream
 (* TODO Document that this is for middlewares that are transforming a response
    stream or a WebSocket. *)
-val with_client_stream : stream -> 'a message -> 'a message
+val set_client_stream : 'a message -> stream -> unit
 (* TODO Normalize with with_stream, or add a separate with_server_stream. *)
 
 (* TODO Probably even close can be made optional. exn can be made optional. *)
@@ -1249,7 +1306,7 @@ val not_found : handler
 (** Always responds with [404 Not Found]. *)
 
 (* :((( *)
-val param : string -> request -> string
+val param : request -> string -> string
 (** Retrieves the path parameter. If it is missing, {!Dream.param} raises an
     exception — the program is buggy. *)
 
@@ -1453,7 +1510,7 @@ val flash_messages : middleware
 val flash : request -> (string * string) list
 (** The request's flash messages. *)
 
-val put_flash : string -> string -> request -> unit
+val put_flash : request -> string -> string -> unit
 (** Adds a flash message to the request. *)
 
 
@@ -2216,7 +2273,7 @@ val application_json : string
 
 (** {1 Cryptography} *)
 
-val with_secret : ?old_secrets:string list -> string -> middleware
+val set_secret : ?old_secrets:string list -> string -> middleware
 (** Sets a key to be used for cryptographic operations, such as signing CSRF
     tokens and encrypting cookies.
 
@@ -2300,11 +2357,18 @@ val new_local : ?name:string -> ?show_value:('a -> string) -> unit -> 'a local
     unset in each message. The optional [~name] and [~show_value] are used by
     {!Dream.run} [~debug] to show the variable in debug dumps. *)
 
-val local : 'a local -> 'b message -> 'a option
+val local : 'b message -> 'a local -> 'a option
 (** Retrieves the value of the per-message variable. *)
 
-val with_local : 'a local -> 'a -> 'b message -> 'b message
+val set_local : 'b message -> 'a local -> 'a -> unit
 (** Sets the per-message variable to the value. *)
+
+(**/**)
+val with_local : 'a local -> 'a -> 'b message -> 'b message
+[@@ocaml.deprecated
+" Use Dream.set_local instead. See
+  https://aantron.github.io/dream/#val-set_local"]
+(**/**)
 
 
 
@@ -2329,17 +2393,21 @@ val test : ?prefix:string -> handler -> (request -> response)
     the test is not wrapped in a promise. If you don't need these facilities,
     you can test [handler] by calling it directly with a request. *)
 
+(**/**)
 val first : 'a message -> 'a message
+[@@ocaml.deprecated " Simply returns its own argument."]
 (** [Dream.first message] evaluates to the original request or response that
     [message] is immutably derived from. This is useful for getting the original
     state of requests especially, when they were first created inside the HTTP
     server ({!Dream.run}). *)
 
 val last : 'a message -> 'a message
+[@@ocaml.deprecated " Simply returns its own argument."]
 (** [Dream.last message] evaluates to the latest request or response that was
     derived from [message]. This is most useful for obtaining the state of
     requests at the time an exception was raised, without having to instrument
     the latest version of the request before the exception. *)
+(**/**)
 
 val sort_headers : (string * string) list -> (string * string) list
 (** Sorts headers by name. Headers with the same name are not sorted by value or

@@ -19,9 +19,6 @@ let content_length next_handler request =
     next_handler request
   else
     let%lwt (response : Dream.response) = next_handler request in
-    if Dream.has_header "Transfer-Encoding" response then
-      Lwt.return response
-    else
-      response
-      |> Dream.add_header "Transfer-Encoding" "chunked"
-      |> Lwt.return
+    if not (Dream.has_header response "Transfer-Encoding") then
+      Dream.add_header response "Transfer-Encoding" "chunked";
+    Lwt.return response

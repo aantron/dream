@@ -274,8 +274,8 @@ let handle_over_websocket make_context schema subscriptions request websocket =
 let graphql make_context schema = fun request ->
   match Dream.method_ request with
   | `GET ->
-    let upgrade = Dream.header "Upgrade" request
-    and protocol = Dream.header "Sec-WebSocket-Protocol" request in
+    let upgrade = Dream.header request "Upgrade"
+    and protocol = Dream.header request "Sec-WebSocket-Protocol" in
     begin match upgrade, protocol with
     | Some "websocket", Some "graphql-transport-ws" ->
       Dream.websocket
@@ -291,7 +291,7 @@ let graphql make_context schema = fun request ->
     end
 
   | `POST ->
-    begin match Dream.header "Content-Type" request with
+    begin match Dream.header request "Content-Type" with
     | Some "application/json" ->
       let%lwt body = Dream.body request in
       (* TODO This almost certainly raises exceptions... *)

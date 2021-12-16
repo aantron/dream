@@ -20,19 +20,13 @@ type 'a back_end = {
 }
 
 let middleware local back_end = fun inner_handler request ->
-
-  let%lwt session =
-    back_end.load request in
-  let request =
-    Dream.with_local local session request in
-
-  let%lwt response =
-    inner_handler request in
-
+  let%lwt session = back_end.load request in
+  Dream.set_local request local session;
+  let%lwt response = inner_handler request in
   back_end.send session request response
 
 let getter local request =
-  match Dream.local local request with
+  match Dream.local request local with
   | Some session ->
     session
   | None ->
@@ -153,7 +147,7 @@ struct
     let now = gettimeofday () in
 
     let valid_session =
-      Cookie.cookie ~decrypt:false session_cookie request
+      Cookie.cookie ~decrypt:false request session_cookie
       |>? read_session_id
       |>? Hashtbl.find_opt hash_table
       |>? fun session ->
@@ -182,14 +176,14 @@ struct
     Lwt.return (operations ~now:gettimeofday hash_table lifetime session dirty, session)
 
   let send ~now (operations, session) request response =
-    if not operations.dirty then
-      Lwt.return response
-    else
+    if operations.dirty then
+    if not operations.dirty then begin
       let id = version_session_id !session.id in
       let max_age = !session.expires_at -. now () in
-      Lwt.return
-        (Cookie.set_cookie
-          session_cookie id request response ~encrypt:false ~max_age)
+      Cookie.set_cookie
+        response session_cookie id request ~encrypt:false ~max_age
+    end;
+    Lwt.return response
 
   let back_end ~now lifetime =
     let hash_table = Hashtbl.create 256 in
@@ -240,7 +234,7 @@ struct
     let now = gettimeofday () in
 
     let valid_session =
-      Cookie.cookie session_cookie request
+      Cookie.cookie request session_cookie
       |>? read_value
       |>? fun value ->
         (* TODO Is there a non-raising version of this? *)
@@ -294,9 +288,7 @@ struct
     Lwt.return (operations ~now:gettimeofday lifetime session dirty, session)
 
   let send ~now (operations, session) request response =
-    if not operations.dirty then
-      Lwt.return response
-    else
+    if operations.dirty then begin
       let max_age = !session.expires_at -. now () in
       let value =
         `Assoc [
@@ -309,8 +301,9 @@ struct
         |> Yojson.Basic.to_string
         |> version_value
       in
-      Lwt.return
-        (Cookie.set_cookie session_cookie value request response ~max_age)
+      Cookie.set_cookie response session_cookie value request ~max_age
+    end;
+    Lwt.return response
 
   let back_end ~now lifetime = {
     load = load ~now lifetime;

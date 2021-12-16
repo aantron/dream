@@ -144,8 +144,8 @@ val request :
 val method_ : request -> method_
 val target : request -> string
 val version : request -> int * int
-val with_method_ : [< method_ ] -> request -> request
-val with_version : int * int -> request -> request
+val set_method_ : request -> [< method_ ] -> unit
+val set_version : request -> int * int -> unit
 
 
 
@@ -161,21 +161,22 @@ val status : response -> status
 
 
 
-val header : string -> 'a message -> string option
-val headers : string -> 'a message -> string list
+val header : 'a message -> string -> string option
+val headers : 'a message -> string -> string list
 val all_headers : 'a message -> (string * string) list
-val has_header : string -> 'a message -> bool
-val add_header : string -> string -> 'a message -> 'a message
-val drop_header : string -> 'a message -> 'a message
-val with_header : string -> string -> 'a message -> 'a message
-val with_all_headers : (string * string) list -> 'a message -> 'a message
+val has_header : 'a message -> string -> bool
+val add_header : 'a message -> string -> string -> unit
+val drop_header : 'a message -> string -> unit
+val set_header : 'a message -> string -> string -> unit
+val set_all_headers : 'a message -> (string * string) list -> unit
 
 
 
 val body : 'a message -> string promise
-val with_body : string -> response -> response
+val set_body : response -> string -> unit
 val read : request -> string option promise
-val with_stream : 'a message -> 'a message
+val set_stream : 'a message -> unit
+(* TODO Rename set_stream, it makes kind of no sense now. *)
 val write : response -> string -> unit promise
 val flush : response -> unit promise
 val close_stream : response -> unit promise
@@ -183,7 +184,7 @@ val close_stream : response -> unit promise
    passed a request or a response. *)
 val client_stream : 'a message -> stream
 val server_stream : 'a message -> stream
-val with_client_stream : stream -> 'a message -> 'a message
+val set_client_stream : 'a message -> stream -> unit
 val next :
   stream ->
   data:(buffer -> int -> int -> bool -> bool -> unit) ->
@@ -354,13 +355,10 @@ end
 
 type 'a local
 val new_local : ?name:string -> ?show_value:('a -> string) -> unit -> 'a local
-val local : 'a local -> 'b message -> 'a option
-val with_local : 'a local -> 'a -> 'b message -> 'b message
+val local : 'b message -> 'a local -> 'a option
+val set_local : 'b message -> 'a local -> 'a -> unit
 val fold_locals : (string -> string -> 'a -> 'a) -> 'a -> 'b message -> 'a
 
 
 
-(* TODO Delete once requests are mutable. *)
-val first : 'a message -> 'a message
-val last : 'a message -> 'a message
 val sort_headers : (string * string) list -> (string * string) list

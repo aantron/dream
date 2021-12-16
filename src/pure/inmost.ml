@@ -15,6 +15,9 @@ struct
   type 'a t = string option * ('a -> string) option
 end
 module Scope = Hmap.Make (Scope_variable_metadata)
+(* TODO Rename Scope, because there is now only one scope. *)
+(* TODO Given there are now only locals, maybe it's worth renaming them to
+   something else - there is now only one concept of variables. *)
 
 type websocket = Stream.stream
 
@@ -23,19 +26,22 @@ and response = server message
 
 and 'a message = {
   specific : 'a;
-  headers : (string * string) list;
-  client_stream : Stream.stream;
-  server_stream : Stream.stream;
-  locals : Scope.t;
-  first : 'a message;
-  last : 'a message ref;
+  mutable headers : (string * string) list;
+  mutable client_stream : Stream.stream;
+  mutable server_stream : Stream.stream;
+  mutable locals : Scope.t;
 }
 
 and client = {
-  method_ : method_;
+  mutable method_ : method_;
   target : string;
-  request_version : int * int;
+  mutable request_version : int * int;
 }
+(* TODO Get rid of the version field completely? At least don't expose it in
+   Dream. It is only used internally on the server side to add the right
+   Content-Length, etc., headers. But even that can be moved out of the
+   middleware and into transport so that the version field is not necessary for
+   some middleware to decide which headers to add. *)
 
 and server = {
   status : status;
@@ -47,16 +53,6 @@ type 'a promise = 'a Lwt.t
 type handler = request -> response Lwt.t
 type middleware = handler -> handler
 
-let first message =
-  message.first
-
-let last message =
-  !(message.last)
-
-let update message =
-  message.last := message;
-  message
-
 let method_ request =
   request.specific.method_
 
@@ -66,13 +62,11 @@ let target request =
 let version request =
   request.specific.request_version
 
-let with_method_ method_ request =
-  update {request with
-    specific = {request.specific with method_ = (method_ :> method_)}}
+let set_method_ request method_ =
+  request.specific.method_ <- (method_ :> method_)
 
-let with_version version request =
-  update {request with
-    specific = {request.specific with request_version = version}}
+let set_version request version =
+  request.specific.request_version <- version
 
 let status response =
   response.specific.status
@@ -80,10 +74,10 @@ let status response =
 let all_headers message =
   message.headers
 
-let with_all_headers headers message =
-  update {message with headers}
+let set_all_headers message headers =
+  message.headers <- headers
 
-let headers name message =
+let headers message name =
   let name = String.lowercase_ascii name in
 
   message.headers
@@ -101,37 +95,27 @@ let header_basic name message =
   |> List.find (fun (name', _) -> String.lowercase_ascii name' = name)
   |> snd
 
-let header name message =
+let header message name =
   try Some (header_basic name message)
   with Not_found -> None
 
-let has_header name message =
+let has_header message name =
   try ignore (header_basic name message); true
   with Not_found -> false
 
-let add_header name value message =
-  update {message with headers = message.headers @ [(name, value)]}
+let add_header message name value =
+  message.headers <- message.headers @ [(name, value)]
 
 (* TODO Can optimize this if the header is not found? *)
-let drop_header name message =
+let drop_header message name =
   let name = String.lowercase_ascii name in
-  update {message with headers =
+  message.headers <-
     message.headers
-    |> List.filter (fun (name', _) -> String.lowercase_ascii name' <> name)}
+    |> List.filter (fun (name', _) -> String.lowercase_ascii name' <> name)
 
-let with_header name value message =
-  message
-  |> drop_header name
-  |> add_header name value
-
-(* TODO Don't use this exception-raising function, to avoid clobbering user
-   backtraces more. *)
-(* let cookie_exn name request =
-  snd (all_cookies request |> List.find (fun (name', _) -> name' = name))
-
-let cookie name request =
-  try Some (cookie_exn name request)
-  with Not_found -> None *)
+let set_header message name value =
+  drop_header message name;
+  add_header message name value
 
 (* TODO NOTE On the client, this will read the client stream until close. *)
 let body message =
@@ -146,8 +130,8 @@ let client_stream message =
 let server_stream message =
   message.server_stream
 
-let with_client_stream client_stream message =
-  update {message with client_stream}
+let set_client_stream message client_stream =
+  message.client_stream <- client_stream
 
 (* TODO Pending the dream.mli interface reorganization for the new stream
    API. *)
@@ -165,7 +149,7 @@ let next =
    middlewares that preprocess requests on the server and postprocess responses
    on the client. Or.... shouldn't this affect the client stream on the server,
    replacing its read end? *)
-let with_body body message =
+let set_body message body =
   (* TODO This is partially redundant with a length check in Stream.string, but
      that check is no longer useful as it prevents allocation of only a reader,
      rather than a complete stream. *)
@@ -176,15 +160,16 @@ let with_body body message =
     else
       Stream.(stream (string body) no_writer)
   in
-  update {message with server_stream = body}
+  message.server_stream <- body
 
 (* TODO The critical piece: the pipe should be split between the client and
    server streams. adapt.ml should be reading from the client stream. *)
-let with_stream message =
+let set_stream message =
   let reader, writer = Stream.pipe () in
   let client_stream = Stream.stream reader Stream.no_writer in
   let server_stream = Stream.stream Stream.no_reader writer in
-  update {message with client_stream; server_stream}
+  message.client_stream <- client_stream;
+  message.server_stream <- server_stream
 
 (* TODO Need to expose FIN. However, it can't have any effect even on
    WebSockets, because websocket/af does not offer the ability to pass FIN. It
@@ -250,11 +235,13 @@ type 'a local = 'a Scope.key
 let new_local ?name ?show_value () =
   Scope.Key.create (name, show_value)
 
-let local key message =
+(* TODO Tension between "t-first" and not, because typically, for a getter, the
+   "index" parameter could be partially applied. *)
+let local message key =
   Scope.find key message.locals
 
-let with_local key value message =
-  update {message with locals = Scope.add key value message.locals}
+let set_local message key value =
+  message.locals <- Scope.add key value message.locals
 
 let fold_locals f initial message =
   fold_scope f initial message.locals
@@ -288,8 +275,6 @@ let request
     client_stream;
     server_stream;
     locals = Scope.empty;
-    first = request;
-    last = ref request;
   } in
 
   request
@@ -314,8 +299,6 @@ let response
     server_stream;
     (* TODO This fully dead stream should be preallocated. *)
     locals = Scope.empty;
-    first = response;
-    last = ref response;
   } in
 
   response

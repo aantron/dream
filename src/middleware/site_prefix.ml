@@ -41,8 +41,6 @@ let with_site_prefix prefix =
     | Some path ->
       (* TODO This doesn't need to be recomputed on each request - can cache the
          result in the app. *)
-      let prefix_reversed = List.rev prefix in
-      request
-      |> Router.with_prefix prefix_reversed
-      |> Router.with_path path
-      |> next_handler
+      Router.set_prefix request (List.rev prefix);
+      Router.set_path request path;
+      next_handler request

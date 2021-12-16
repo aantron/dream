@@ -21,8 +21,8 @@ let origin_referrer_check inner_handler request =
 
   | _ ->
     let origin =
-      match Dream.header "Origin" request with
-      | Some "null" | None -> Dream.header "Referer" request
+      match Dream.header request "Origin" with
+      | Some "null" | None -> Dream.header request "Referer"
       | Some _ as origin -> origin
     in
 
@@ -39,7 +39,7 @@ let origin_referrer_check inner_handler request =
     (* TODO Also recommend Uri to users. *)
     | Some origin ->
 
-      match Dream.header "Host" request with
+      match Dream.header request "Host" with
       | None ->
         log.warning (fun log -> log ~request "Host header missing");
         (* TODO Simplify. *)

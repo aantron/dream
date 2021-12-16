@@ -84,7 +84,7 @@ let get_request_id ?request () =
   let request_id =
     match request with
     | None -> None
-    | Some request -> Dream.local id request
+    | Some request -> Dream.local request id
   in
   match request_id with
   | Some _ -> request_id
@@ -467,18 +467,19 @@ struct
     end;
 
     (* Get the requwst's id or assign a new one. *)
-    let request, id =
-      match Dream.local id request with
-      | Some id -> request, id
+    let id =
+      match Dream.local request id with
+      | Some id -> id
       | None ->
         last_id := !last_id + 1;
         let new_id = string_of_int !last_id in
-        Dream.with_local id new_id request, new_id
+        Dream.set_local request id new_id;
+        new_id
     in
 
     (* Identify the request in the log. *)
     let user_agent =
-      Dream.headers "User-Agent" request
+      Dream.headers request "User-Agent"
       |> String.concat " "
     in
 
@@ -499,7 +500,7 @@ struct
            target. *)
         let location =
           if Dream.is_redirection (Dream.status response) then
-            match Dream.header "Location" response with
+            match Dream.header response "Location" with
             | Some location -> " " ^ location
             | None -> ""
           else ""

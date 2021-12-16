@@ -143,7 +143,7 @@ let load lifetime request =
     let now = Unix.gettimeofday () in
 
     let%lwt valid_session =
-      match Cookie.cookie ~decrypt:false Session.session_cookie request with
+      match Cookie.cookie request ~decrypt:false Session.session_cookie with
       | None -> Lwt.return_none
       | Some id ->
         match Session.read_session_id id with
@@ -180,19 +180,18 @@ let load lifetime request =
   end
 
 let send (operations, session) request response =
-  if not operations.Session.dirty then
-    Lwt.return response
-  else
+  if operations.Session.dirty then begin
     let id = Session.version_session_id !session.Session.id in
     let max_age = !session.Session.expires_at -. Unix.gettimeofday () in
-    Lwt.return
-      (Cookie.set_cookie
-        Session.session_cookie
-        id
-        request
-        response
-        ~encrypt:false
-        ~max_age)
+    Cookie.set_cookie
+      response
+      Session.session_cookie
+      id
+      request
+      ~encrypt:false
+      ~max_age
+  end;
+  Lwt.return response
 
 let back_end lifetime = {
   Session.load = load lifetime;

@@ -29,7 +29,9 @@ let sql_pool ?size uri =
     fun inner_handler request ->
 
   begin match !pool_cell with
-  | Some pool -> inner_handler (Dream.with_local pool_variable pool request)
+  | Some pool ->
+    Dream.set_local request pool_variable pool;
+    inner_handler request
   | None ->
     (* The correctness of this code is subtle. There is no race condition with
        two requests attempting to create a pool only because none of the code
@@ -44,7 +46,8 @@ let sql_pool ?size uri =
     match pool with
     | Ok pool ->
       pool_cell := Some pool;
-      inner_handler (Dream.with_local pool_variable pool request)
+      Dream.set_local request pool_variable pool;
+      inner_handler request
     | Error error ->
       (* Deliberately raise an exception so that it can be communicated to any
          debug handler. *)
@@ -56,7 +59,7 @@ let sql_pool ?size uri =
   end
 
 let sql request callback =
-  match Dream.local pool_variable request with
+  match Dream.local request pool_variable with
   | None ->
     let message = "Dream.sql: no pool; did you apply Dream.sql_pool?" in
     log.error (fun log -> log ~request "%s" message);

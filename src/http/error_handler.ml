@@ -85,15 +85,13 @@ let dump (error : Catch.error) =
   begin match error.request with
   | None -> ()
   | Some request ->
-    let last = Dream.last request in
-
-    let major, minor = Dream.version last in
+    let major, minor = Dream.version request in
     p "\n\n%s %s HTTP/%i.%i"
-      (Dream.method_to_string (Dream.method_ last))
-      (Dream.target last)
+      (Dream.method_to_string (Dream.method_ request))
+      (Dream.target request)
       major minor;
 
-    Dream.all_headers last
+    Dream.all_headers request
     |> List.iter (fun (name, value) -> p "\n%s: %s" name value);
 
     Dream.fold_locals (fun name value first ->
@@ -192,11 +190,10 @@ let debug_template _error debug_dump response =
   let status = Dream.status response in
   let code = Dream.status_to_int status
   and reason = Dream.status_to_string status in
-  response
-  |> Dream.with_header "Content-Type" Dream_pure.Formats.text_html
-  |> Dream.with_body
-    (Dream__middleware.Error_template.render ~debug_dump ~code ~reason)
-  |> Lwt.return
+  Dream.set_header response "Content-Type" Dream_pure.Formats.text_html;
+  Dream.set_body response
+    (Dream__middleware.Error_template.render ~debug_dump ~code ~reason);
+  Lwt.return response
 
 let default =
   customize default_template

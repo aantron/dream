@@ -99,18 +99,16 @@ let redirect ?status ?code ?headers _request location =
   (* TODO The streams. *)
   let client_stream = stream empty no_writer
   and server_stream = stream no_reader no_writer in
-  response ?status ?code ?headers client_stream server_stream
-  |> with_header "Location" location
-  |> Lwt.return
+  let response = response ?status ?code ?headers client_stream server_stream in
+  set_header response "Location" location;
+  Lwt.return response
 
 let stream ?status ?code ?headers f =
   (* TODO Streams. *)
   let client_stream = stream empty no_writer
   and server_stream = stream no_reader no_writer in
-  let response =
-    response ?status ?code ?headers client_stream server_stream
-    |> with_stream
-  in
+  let response = response ?status ?code ?headers client_stream server_stream in
+  set_stream response;
   (* TODO Should set up an error handler for this. *)
   Lwt.async (fun () -> f response);
   Lwt.return response
@@ -132,8 +130,8 @@ let form_tag ?method_ ?target ?enctype ?csrf_token ~action request =
 
 let client =
   Dream__middleware.Server.client
-let with_client =
-  Dream__middleware.Server.with_client
+let set_client =
+  Dream__middleware.Server.set_client
 let https =
   Dream__middleware.Server.https
 let html =
@@ -154,3 +152,41 @@ let response ?status ?code ?headers body =
   let client_stream = Dream_pure.Stream.stream (string body) no_writer
   and server_stream = Dream_pure.Stream.stream no_reader no_writer in
   response ?status ?code ?headers client_stream server_stream
+
+let with_client client message =
+  set_client message client;
+  message
+
+let with_method_ method_ message =
+  set_method_ message method_;
+  message
+
+let with_version version message =
+  set_version message version;
+  message
+
+let with_path path message =
+  set_path message path;
+  message
+
+let with_header name value message =
+  set_header message name value;
+  message
+
+let with_body body message =
+  set_body message body;
+  message
+
+let with_stream message =
+  set_stream message;
+  message
+
+let with_local key value message =
+  set_local message key value;
+  message
+
+let first message =
+  message
+
+let last message =
+  message

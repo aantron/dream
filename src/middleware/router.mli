@@ -29,13 +29,13 @@ val scope : string -> Dream.middleware list -> route list -> route
    parameters, the middleware is the setter, and the retriever is, of course,
    the getter. *)
 val router : route list -> Dream.middleware
-val param : string -> Dream.request -> string
+val param : Dream.request -> string -> string
 
 (* Variables used by the router. *)
 val path : Dream.request -> string list
 val prefix : Dream.request -> string
-val with_path : string list -> Dream.request -> Dream.request
-val with_prefix : string list -> Dream.request -> Dream.request
+val set_path : Dream.request -> string list -> unit
+val set_prefix : Dream.request -> string list -> unit
 
 (**/**)
 

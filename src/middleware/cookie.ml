@@ -24,8 +24,7 @@ module Cipher = Dream__cipher.Cipher
 (* TODO DOC We allow multiple headers sent by the client, to support HTTP/2.
    What is this about? *)
 let all_cookies request =
-  request
-  |> Dream.headers "Cookie"
+  Dream.headers request "Cookie"
   |> List.map Formats.from_cookie
   |> List.flatten
 
@@ -45,8 +44,8 @@ let cookie
     ?domain
     ?path
     ?secure
-    name
-    request =
+    request
+    name =
 
   let path =
     match path with
@@ -86,10 +85,10 @@ let set_cookie
     ?secure
     ?(http_only = true)
     ?same_site
+    response
     name
     value
-    request
-    response =
+    request =
 
   (* TODO Need the site prefix, not the subsite prefix! *)
   let path =
@@ -133,7 +132,7 @@ let set_cookie
       ?expires ?max_age ?domain ?path ~secure ~http_only ?same_site name value
   in
 
-  Dream.add_header "Set-Cookie" set_cookie response
+  Dream.add_header response "Set-Cookie" set_cookie
 
 let drop_cookie
     ?prefix ?domain ?path ?secure ?http_only ?same_site name request response =

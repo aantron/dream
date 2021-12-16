@@ -43,7 +43,7 @@ let flash request =
     | _ -> failwith "Bad flash message content"
   in
   let x =
-    Cookie.cookie flash_cookie request
+    Cookie.cookie request flash_cookie
     |>? fun value ->
     match Yojson.Basic.from_string value with
     | `List y -> Some (group @@ List.map unpack y)
@@ -51,9 +51,9 @@ let flash request =
   in
   Option.value x ~default:[]
 
-let put_flash category message request =
+let put_flash request category message =
   let outbox =
-    match Dream.local storage request with
+    match Dream.local request storage with
     | Some outbox -> outbox
     | None ->
       let message = "Missing flash message middleware" in
@@ -75,15 +75,15 @@ let flash_messages inner_handler request =
     else
       log ~request "%s" "No flash messages.");
   let outbox = ref [] in
-  let request = Dream.with_local storage outbox request in
-  let existing = Cookie.cookie flash_cookie request in
+  Dream.set_local request storage outbox;
+  let existing = Cookie.cookie request flash_cookie in
   let%lwt response = inner_handler request in
   let entries = List.rev !outbox in
-  let response =
+  let () =
     match existing, entries with
-    | None, [] -> response
+    | None, [] -> ()
     | Some _, [] ->
-      Cookie.set_cookie flash_cookie "" request response ~expires:0.
+      Cookie.set_cookie response flash_cookie "" request ~expires:0.
     | _, _ ->
       let content =
         List.fold_right (fun (x,y) a -> `String x :: `String y :: a) entries []
@@ -98,6 +98,7 @@ let flash_messages inner_handler request =
         else
           ()
       in
-      Cookie.set_cookie flash_cookie value request response ~max_age:five_minutes
+      Cookie.set_cookie
+        response flash_cookie value request ~max_age:five_minutes
   in
   Lwt.return response

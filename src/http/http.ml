@@ -408,8 +408,7 @@ let wrap_handler
           let user's_websocket_handler websocket =
             Lwt.with_value
               Dream__middleware.Log.lwt_key
-              (Dream__middleware.Log.get_request_id
-                ~request:(Dream.last request) ())
+              (Dream__middleware.Log.get_request_id ~request ())
               (fun () -> user's_websocket_handler websocket)
           in
 
