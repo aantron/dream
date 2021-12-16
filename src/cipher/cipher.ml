@@ -13,7 +13,7 @@
 
 
 
-module Dream = Dream_pure
+module Dream = Dream_pure.Inmost
 
 
 

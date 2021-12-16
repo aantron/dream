@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream_pure
+module Dream = Dream_pure.Inmost
 module Catch = Dream__middleware.Catch
 
 

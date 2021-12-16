@@ -5,7 +5,8 @@
 
 
 
-module Dream = Dream_pure
+module Dream = Dream_pure.Inmost
+module Status = Dream_pure.Status
 
 
 
@@ -50,9 +51,10 @@ let catch error_handler next_handler request =
     (fun response ->
       let status = Dream.status response in
 
-      if Dream.is_client_error status || Dream.is_server_error status then begin
+      (* TODO Overfull hbox. *)
+      if Status.is_client_error status || Status.is_server_error status then begin
         let caused_by, severity =
-          if Dream.is_client_error status then
+          if Status.is_client_error status then
             `Client, `Warning
           else
             `Server, `Error

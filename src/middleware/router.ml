@@ -5,7 +5,9 @@
 
 
 
-module Dream = Dream_pure
+module Dream = Dream_pure.Inmost
+module Formats = Dream_pure.Formats
+module Method = Dream_pure.Method
 
 
 
@@ -97,7 +99,7 @@ type method_set = [
 
 let method_matches method_set method_ =
   match method_set with
-  | #Dream.method_ as method' -> Dream.methods_equal method' method_
+  | #Method.method_ as method' -> Method.methods_equal method' method_
   | `Any -> true
 
 type node =
@@ -195,7 +197,7 @@ let internal_prefix request =
   | None -> []
 
 let prefix request =
-  Dream.Formats.make_path (List.rev (internal_prefix request))
+  Formats.make_path (List.rev (internal_prefix request))
 
 let set_prefix request prefix =
   Dream.set_local request prefix_variable prefix

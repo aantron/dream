@@ -5,7 +5,9 @@
 
 
 
-module Dream = Dream_pure
+module Dream = Dream_pure.Inmost
+module Formats = Dream_pure.Formats
+module Stream = Dream_pure.Stream
 
 
 
@@ -45,7 +47,7 @@ let set_https request https =
 
 let request ~client ~method_ ~target ~https ~version ~headers server_stream =
   (* TODO Use pre-allocated streams. *)
-  let client_stream = Dream.Stream.(stream no_reader no_writer) in
+  let client_stream = Stream.(stream no_reader no_writer) in
   let request =
     Dream.request
       ~method_ ~target ~version ~headers client_stream server_stream in
@@ -57,18 +59,18 @@ let request ~client ~method_ ~target ~https ~version ~headers server_stream =
 
 let html ?status ?code ?headers body =
   (* TODO The streams. *)
-  let client_stream = Dream.Stream.(stream (string body) no_writer)
-  and server_stream = Dream.Stream.(stream no_reader no_writer) in
+  let client_stream = Stream.(stream (string body) no_writer)
+  and server_stream = Stream.(stream no_reader no_writer) in
   let response =
     Dream.response ?status ?code ?headers client_stream server_stream in
-  Dream.set_header response "Content-Type" Dream.Formats.text_html;
+  Dream.set_header response "Content-Type" Formats.text_html;
   Lwt.return response
 
 let json ?status ?code ?headers body =
   (* TODO The streams. *)
-  let client_stream = Dream.Stream.(stream (string body) no_writer)
-  and server_stream = Dream.Stream.(stream no_reader no_writer) in
+  let client_stream = Stream.(stream (string body) no_writer)
+  and server_stream = Stream.(stream no_reader no_writer) in
   let response =
     Dream.response ?status ?code ?headers client_stream server_stream in
-  Dream.set_header response "Content-Type" Dream.Formats.application_json;
+  Dream.set_header response "Content-Type" Formats.application_json;
   Lwt.return response

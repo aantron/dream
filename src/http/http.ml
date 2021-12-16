@@ -5,13 +5,12 @@
 
 
 
-module Dream =
-struct
-  include Dream_pure
-  include Dream__middleware.Catch
-end
-module Stream = Dream_pure.Stream
+module Catch = Dream__middleware.Catch
+module Dream = Dream_pure.Inmost
+module Method = Dream_pure.Method
 module Server = Dream__middleware.Server
+module Status = Dream_pure.Status
+module Stream = Dream_pure.Stream
 
 
 
@@ -20,13 +19,13 @@ module Server = Dream__middleware.Server
 
 
 let to_dream_method method_ =
-  Httpaf.Method.to_string method_ |> Dream.string_to_method
+  Httpaf.Method.to_string method_ |> Method.string_to_method
 
 let to_httpaf_status status =
-  Dream.status_to_int status |> Httpaf.Status.of_code
+  Status.status_to_int status |> Httpaf.Status.of_code
 
 let to_h2_status status =
-  Dream.status_to_int status |> H2.Status.of_code
+  Status.status_to_int status |> H2.Status.of_code
 
 let sha1 s =
   s
@@ -299,7 +298,7 @@ let websocket_handler user's_websocket_handler socket =
 (* TODO Rename conn like in the body branch. *)
 let wrap_handler
     https
-    (user's_error_handler : Dream.error_handler)
+    (user's_error_handler : Catch.error_handler)
     (user's_dream_handler : Dream.handler) =
 
   let httpaf_request_handler = fun client_address (conn : _ Gluten.Reqd.t) ->
@@ -448,7 +447,7 @@ let wrap_handler
 (* TODO Factor out what is in common between the http/af and h2 handlers. *)
 let wrap_handler_h2
     https
-    (_user's_error_handler : Dream.error_handler)
+    (_user's_error_handler : Catch.error_handler)
     (user's_dream_handler : Dream.handler) =
 
   let httpaf_request_handler = fun client_address (conn : H2.Reqd.t) ->
@@ -553,7 +552,7 @@ type tls_library = {
     certificate_file:string ->
     key_file:string ->
     handler:Dream.handler ->
-    error_handler:Dream.error_handler ->
+    error_handler:Catch.error_handler ->
       Unix.sockaddr ->
       Lwt_unix.file_descr ->
         unit Lwt.t;

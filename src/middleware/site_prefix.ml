@@ -5,7 +5,9 @@
 
 
 
-module Dream = Dream_pure
+module Dream = Dream_pure.Inmost
+module Formats = Dream_pure.Formats
+module Stream = Dream_pure.Stream
 
 
 
@@ -27,15 +29,15 @@ let rec match_site_prefix prefix path =
 let with_site_prefix prefix =
   let prefix =
     prefix
-    |> Dream_pure.Formats.from_path
-    |> Dream_pure.Formats.drop_trailing_slash
+    |> Formats.from_path
+    |> Formats.drop_trailing_slash
   in
   fun next_handler request ->
     match match_site_prefix prefix (Router.path request) with
     | None ->
       (* TODO Streams. *)
-      let client_stream = Dream.Stream.(stream empty no_writer)
-      and server_stream = Dream.Stream.(stream no_reader no_writer) in
+      let client_stream = Stream.(stream empty no_writer)
+      and server_stream = Stream.(stream no_reader no_writer) in
       Dream.response ~status:`Bad_Gateway client_stream server_stream
       |> Lwt.return
     | Some path ->

@@ -5,9 +5,12 @@
 
 
 
-module Dream = Dream_pure
 module Catch = Dream__middleware.Catch
+module Dream = Dream_pure.Inmost
+module Method = Dream_pure.Method
 module Server = Dream__middleware.Server
+module Status = Dream_pure.Status
+module Stream = Dream_pure.Stream
 
 
 
@@ -34,7 +37,7 @@ let dump (error : Catch.error) =
   begin match error.condition with
   | `Response response ->
     let status = Dream.status response in
-    p "%i %s\n" (Dream.status_to_int status) (Dream.status_to_string status)
+    p "%i %s\n" (Status.status_to_int status) (Status.status_to_string status)
 
   | `String "" ->
     p "(Library error without description payload)\n"
@@ -87,7 +90,7 @@ let dump (error : Catch.error) =
   | Some request ->
     let major, minor = Dream.version request in
     p "\n\n%s %s HTTP/%i.%i"
-      (Dream.method_to_string (Dream.method_ request))
+      (Method.method_to_string (Dream.method_ request))
       (Dream.target request)
       major minor;
 
@@ -169,8 +172,8 @@ let customize template (error : Catch.error) =
           | `Client -> `Bad_Request
         in
         (* TODO Simplify the streams creation. *)
-        let client_stream = Dream.Stream.(stream empty no_writer)
-        and server_stream = Dream.Stream.(stream no_reader no_writer) in
+        let client_stream = Stream.(stream empty no_writer)
+        and server_stream = Stream.(stream no_reader no_writer) in
         Dream.response ~status client_stream server_stream
     in
 
@@ -188,8 +191,8 @@ let default_template _error _debug_dump response =
 
 let debug_template _error debug_dump response =
   let status = Dream.status response in
-  let code = Dream.status_to_int status
-  and reason = Dream.status_to_string status in
+  let code = Status.status_to_int status
+  and reason = Status.status_to_string status in
   Dream.set_header response "Content-Type" Dream_pure.Formats.text_html;
   Dream.set_body response
     (Dream__middleware.Error_template.render ~debug_dump ~code ~reason);
@@ -235,14 +238,14 @@ let respond_with_option f =
         | Some response -> response
         | None ->
           (* TODO Simplify streams. *)
-          let client_stream = Dream.Stream.(stream empty no_writer)
-          and server_stream = Dream.Stream.(stream no_reader no_writer) in
+          let client_stream = Stream.(stream empty no_writer)
+          and server_stream = Stream.(stream no_reader no_writer) in
           Dream.response
             ~status:`Internal_Server_Error client_stream server_stream))
     (fun () ->
       (* TODO Simplify streams. *)
-      let client_stream = Dream.Stream.(stream empty no_writer)
-      and server_stream = Dream.Stream.(stream no_reader no_writer) in
+      let client_stream = Stream.(stream empty no_writer)
+      and server_stream = Stream.(stream no_reader no_writer) in
       Dream.response
         ~status:`Internal_Server_Error client_stream server_stream
       |> Lwt.return)
@@ -268,12 +271,12 @@ let app
 (* TODO Simplify streams. *)
 let default_response = function
   | `Server ->
-    let client_stream = Dream.Stream.(stream empty no_writer)
-    and server_stream = Dream.Stream.(stream no_reader no_writer) in
+    let client_stream = Stream.(stream empty no_writer)
+    and server_stream = Stream.(stream no_reader no_writer) in
     Dream.response ~status:`Internal_Server_Error client_stream server_stream
   | `Client ->
-    let client_stream = Dream.Stream.(stream empty no_writer)
-    and server_stream = Dream.Stream.(stream no_reader no_writer) in
+    let client_stream = Stream.(stream empty no_writer)
+    and server_stream = Stream.(stream no_reader no_writer) in
     Dream.response ~status:`Bad_Request client_stream server_stream
 
 let httpaf

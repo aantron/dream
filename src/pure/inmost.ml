@@ -5,10 +5,11 @@
 
 
 
-include Method
-include Status
+type method_ = Method.method_
+type status = Status.status
 
-
+type stream = Stream.stream
+type buffer = Stream.buffer
 
 module Scope_variable_metadata =
 struct
@@ -286,7 +287,7 @@ let response
     match status, code with
     | None, None -> `OK
     | Some status, _ -> (status :> status)
-    | None, Some code -> int_to_status code
+    | None, Some code -> Status.int_to_status code
   in
 
   let response = {

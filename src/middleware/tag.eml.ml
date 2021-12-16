@@ -13,6 +13,7 @@ end
 (* This slightly awkward simulation of the overall Dream module using a
    composition of internal modules is necessary to get all the helpers at the
    right positions expected by the EML templater. *)
+module Method = Dream_pure.Method
 
 
 
@@ -22,8 +23,8 @@ let form_tag
 
   let method_ =
     match method_ with
-    | None -> Dream.method_to_string `POST
-    | Some method_ -> Dream.method_to_string method_
+    | None -> Method.method_to_string `POST
+    | Some method_ -> Method.method_to_string method_
   in
   let target =
     match target with

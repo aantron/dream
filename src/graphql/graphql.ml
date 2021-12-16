@@ -5,8 +5,10 @@
 
 
 
-module Dream = Dream_pure
+module Dream = Dream_pure.Inmost
+module Method = Dream_pure.Method
 module Server = Dream__middleware.Server
+module Stream = Dream_pure.Stream
 
 
 
@@ -284,8 +286,8 @@ let graphql make_context schema = fun request ->
     | _ ->
       log.warning (fun log -> log ~request "Upgrade: websocket header missing");
       (* TODO Simplify stream creation. *)
-      let client_stream = Dream.Stream.(stream empty no_writer)
-      and server_stream = Dream.Stream.(stream no_reader no_writer) in
+      let client_stream = Stream.(stream empty no_writer)
+      and server_stream = Stream.(stream no_reader no_writer) in
       Dream.response ~status:`Not_Found client_stream server_stream
       |> Lwt.return
     end
@@ -315,17 +317,17 @@ let graphql make_context schema = fun request ->
     | _ ->
       log.warning (fun log -> log ~request
         "Content-Type not 'application/json'");
-      let client_stream = Dream.Stream.(stream empty no_writer)
-      and server_stream = Dream.Stream.(stream no_reader no_writer) in
+      let client_stream = Stream.(stream empty no_writer)
+      and server_stream = Stream.(stream no_reader no_writer) in
       Dream.response ~status:`Bad_Request client_stream server_stream
       |> Lwt.return
     end
 
   | method_ ->
     log.error (fun log -> log ~request
-      "Method %s; must be GET or POST" (Dream.method_to_string method_));
-    let client_stream = Dream.Stream.(stream empty no_writer)
-    and server_stream = Dream.Stream.(stream no_reader no_writer) in
+      "Method %s; must be GET or POST" (Method.method_to_string method_));
+    let client_stream = Stream.(stream empty no_writer)
+    and server_stream = Stream.(stream no_reader no_writer) in
     Dream.response ~status:`Not_Found client_stream server_stream
     |> Lwt.return
 

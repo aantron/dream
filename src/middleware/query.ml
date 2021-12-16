@@ -8,7 +8,8 @@
 (* TODO Long-term, query string handler is likely to become part of the
    router. *)
 
-module Dream = Dream_pure
+module Dream = Dream_pure.Inmost
+module Formats = Dream_pure.Formats
 
 
 
@@ -23,9 +24,9 @@ module Dream = Dream_pure
 
 let all_queries request =
   Dream.target request
-  |> Dream.Formats.split_target
+  |> Formats.split_target
   |> snd
-  |> Dream.Formats.from_form_urlencoded
+  |> Formats.from_form_urlencoded
 
 let query name request =
   List.assoc_opt name (all_queries request)

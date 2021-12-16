@@ -5,7 +5,8 @@
 
 
 
-module Dream = Dream_pure
+module Dream = Dream_pure.Inmost
+module Stream = Dream_pure.Stream
 
 
 
@@ -31,8 +32,8 @@ let origin_referrer_check inner_handler request =
       log.warning (fun log -> log ~request
         "Origin and Referer headers both missing");
       (* TODO Simplify. *)
-      let client_stream = Dream.Stream.(stream empty no_writer)
-      and server_stream = Dream.Stream.(stream no_reader no_writer) in
+      let client_stream = Stream.(stream empty no_writer)
+      and server_stream = Stream.(stream no_reader no_writer) in
       Dream.response ~status:`Bad_Request client_stream server_stream
       |> Lwt.return
 
@@ -43,8 +44,8 @@ let origin_referrer_check inner_handler request =
       | None ->
         log.warning (fun log -> log ~request "Host header missing");
         (* TODO Simplify. *)
-        let client_stream = Dream.Stream.(stream empty no_writer)
-        and server_stream = Dream.Stream.(stream no_reader no_writer) in
+        let client_stream = Stream.(stream empty no_writer)
+        and server_stream = Stream.(stream no_reader no_writer) in
         Dream.response ~status:`Bad_Request client_stream server_stream
         |> Lwt.return
 
@@ -81,8 +82,8 @@ let origin_referrer_check inner_handler request =
           log.warning (fun log -> log ~request
             "Origin-Host mismatch: '%s' vs. '%s'" origin host);
           (* TODO Simplify. *)
-          let client_stream = Dream.Stream.(stream empty no_writer)
-          and server_stream = Dream.Stream.(stream no_reader no_writer) in
+          let client_stream = Stream.(stream empty no_writer)
+          and server_stream = Stream.(stream no_reader no_writer) in
           Dream.response ~status:`Bad_Request client_stream server_stream
           |> Lwt.return
         end

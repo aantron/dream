@@ -5,7 +5,9 @@
 
 
 
-module Dream = Dream_pure
+module Dream = Dream_pure.Inmost
+module Method = Dream_pure.Method
+module Stream = Dream_pure.Stream
 
 
 
@@ -29,14 +31,14 @@ let from_filesystem local_root path _ =
       Lwt_io.(with_file ~mode:Input file) (fun channel ->
         let%lwt content = Lwt_io.read channel in
         (* TODO Can use some pre-allocated streams or helpers here and below. *)
-        let client_stream = Dream.Stream.(stream (string content) no_writer)
-        and server_stream = Dream.Stream.(stream no_reader no_writer) in
+        let client_stream = Stream.(stream (string content) no_writer)
+        and server_stream = Stream.(stream no_reader no_writer) in
         Dream.response ~headers:(mime_lookup path) client_stream server_stream
         |> Lwt.return))
     (fun _exn ->
       (* TODO Improve the two-stream code using some helper. *)
-      let client_stream = Dream.Stream.(stream empty no_writer)
-      and server_stream = Dream.Stream.(stream no_reader no_writer) in
+      let client_stream = Stream.(stream empty no_writer)
+      and server_stream = Stream.(stream no_reader no_writer) in
       Dream.response ~status:`Not_Found client_stream server_stream
       |> Lwt.return)
 
@@ -75,10 +77,10 @@ let validate_path request =
 
 let static ?(loader = from_filesystem) local_root = fun request ->
 
-  if not @@ Dream.methods_equal (Dream.method_ request) `GET then
+  if not @@ Method.methods_equal (Dream.method_ request) `GET then
     (* TODO Simplify this code and reduce allocations. *)
-    let client_stream = Dream.Stream.(stream empty no_writer)
-    and server_stream = Dream.Stream.(stream no_reader no_writer) in
+    let client_stream = Stream.(stream empty no_writer)
+    and server_stream = Stream.(stream no_reader no_writer) in
     Dream.response ~status:`Not_Found client_stream server_stream
     |> Lwt.return
 
@@ -86,8 +88,8 @@ let static ?(loader = from_filesystem) local_root = fun request ->
     match validate_path request with
     | None ->
       (* TODO Improve with helpers. *)
-      let client_stream = Dream.Stream.(stream empty no_writer)
-      and server_stream = Dream.Stream.(stream no_reader no_writer) in
+      let client_stream = Stream.(stream empty no_writer)
+      and server_stream = Stream.(stream no_reader no_writer) in
       Dream.response ~status:`Not_Found client_stream server_stream
       |> Lwt.return
 

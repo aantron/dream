@@ -1,6 +1,7 @@
 opam-version: "2.0"
 
 synopsis: "Internal: shared HTTP types for Dream (server) and Hyper (client)"
+description: "This package does not have a stable API."
 
 license: "MIT"
 homepage: "https://github.com/aantron/dream"

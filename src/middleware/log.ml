@@ -27,7 +27,9 @@
    This is sufficient for attaching a request id to most log messages, in
    practice. *)
 
-module Dream = Dream_pure
+module Dream = Dream_pure.Inmost
+module Method = Dream_pure.Method
+module Status = Dream_pure.Status
 
 
 
@@ -485,7 +487,7 @@ struct
 
     log.info (fun log ->
       log ~request "%s %s %s %s"
-        (Dream.method_to_string (Dream.method_ request))
+        (Method.method_to_string (Dream.method_ request))
         (Dream.target request)
         (Server.client request)
         user_agent);
@@ -499,7 +501,7 @@ struct
         (* Log the elapsed time. If the response is a redirection, log the
            target. *)
         let location =
-          if Dream.is_redirection (Dream.status response) then
+          if Status.is_redirection (Dream.status response) then
             match Dream.header response "Location" with
             | Some location -> " " ^ location
             | None -> ""
@@ -514,16 +516,16 @@ struct
             fun log ->
           let elapsed = now () -. start in
           log ~request "%i%s in %.0f μs"
-            (Dream.status_to_int status)
+            (Status.status_to_int status)
             location
             (elapsed *. 1e6)
         in
 
         begin
-          if Dream.is_server_error status then
+          if Status.is_server_error status then
             log.error report
           else
-            if Dream.is_client_error status then
+            if Status.is_client_error status then
               log.warning report
             else
               log.info report
