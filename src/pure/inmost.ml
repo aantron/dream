@@ -263,7 +263,7 @@ let request
   (* This function is used for debugging, so it's fine to allocate a fake body
      and then immediately replace it. *)
 
-  let rec request = {
+  let request = {
     specific = {
       (* TODO Is there a better fake error handler? Maybe this function should
          come after the response constructors? *)
@@ -289,7 +289,7 @@ let response
     | None, Some code -> int_to_status code
   in
 
-  let rec response = {
+  let response = {
     specific = {
       status;
       websocket = None;

@@ -380,10 +380,10 @@ val path : request -> string list
 
 (**/**)
 val version : request -> int * int
-(** Protocol version. [(1, 1)] for HTTP/1.1 and [(2, 0)] for HTTP/2. *)
 [@@ocaml.deprecated
 " Protocol version access is being removed from the API. Comment at
   https://github.com/aantron/dream/issues"]
+(** Protocol version. [(1, 1)] for HTTP/1.1 and [(2, 0)] for HTTP/2. *)
 (**/**)
 
 val set_client : request -> string -> unit
@@ -408,18 +408,18 @@ val with_method_ : [< method_ ] -> request -> request
 
 (**/**)
 val with_path : string list -> request -> request
-(** Replaces the path. See {!Dream.val-path}. *)
 [@@ocaml.deprecated
 " Router path access is being removed from the API. Comment at
   https://github.com/aantron/dream/issues"]
+(** Replaces the path. See {!Dream.val-path}. *)
 (**/**)
 
 (**/**)
 val with_version : int * int -> request -> request
-(** Replaces the version. See {!Dream.version}. *)
 [@@ocaml.deprecated
 " Protocol version access is being removed from the API. Comment at
   https://github.com/aantron/dream/issues"]
+(** Replaces the version. See {!Dream.version}. *)
 (**/**)
 
 (* TODO Convert query string functions to the new t-first style. *)

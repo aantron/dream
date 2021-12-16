@@ -37,7 +37,7 @@ let multipart_state_variable : multipart_state Dream.local =
 
 (* TODO This would be MUCH easier if requests were mutable. It's probably best
    to just break multipart until then, and have the branch be "unstable." *)
-let multipart_state request =
+let multipart_state _request =
   assert false
 
 let field_to_string (request : Dream.request) field =
