@@ -1,10 +1,10 @@
 .PHONY : build
 build :
-	@dune build -p dream-pure,dream --no-print-directory @install
+	@dune build -p dream-pure,dream-httpaf,dream --no-print-directory @install
 
 .PHONY : watch
 watch :
-	@dune build -p dream-pure,dream --no-print-directory -w
+	@dune build -p dream-pure,dream-httpaf,dream --no-print-directory -w
 
 TEST ?= test
 
