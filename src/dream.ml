@@ -83,42 +83,20 @@ let log =
 
 include Dream__server.Tag
 
-let respond ?status ?code ?headers body =
-  let client_stream = stream (string body) no_writer
-  and server_stream = stream no_reader no_writer in
-  response ?status ?code ?headers client_stream server_stream
-  |> Lwt.return
+let respond =
+  Dream__server.Helpers.respond
 
-(* TODO Actually use the request and extract the site prefix. *)
-let redirect ?status ?code ?headers _request location =
-  let status = (status :> redirection option) in
-  let status =
-    match status, code with
-    | None, None -> Some (`See_Other)
-    | _ -> status
-  in
-  (* TODO The streams. *)
-  let client_stream = stream empty no_writer
-  and server_stream = stream no_reader no_writer in
-  let response = response ?status ?code ?headers client_stream server_stream in
-  set_header response "Location" location;
-  Lwt.return response
+let redirect =
+  Dream__server.Helpers.redirect
 
-let stream ?status ?code ?headers f =
-  (* TODO Streams. *)
-  let client_stream = stream empty no_writer
-  and server_stream = stream no_reader no_writer in
-  let response = response ?status ?code ?headers client_stream server_stream in
-  set_stream response;
-  (* TODO Should set up an error handler for this. *)
-  Lwt.async (fun () -> f response);
-  Lwt.return response
+let stream =
+  Dream__server.Helpers.stream
 
-let empty ?headers status =
-  respond ?headers ~status ""
+let empty =
+  Dream__server.Helpers.empty
 
-let not_found _ =
-  respond ~status:`Not_Found ""
+let not_found =
+  Dream__server.Helpers.not_found
 
 let now () = Ptime.to_float_s (Ptime.v (Ptime_clock.now_d_ps ()))
 
@@ -142,17 +120,11 @@ let json =
 
 include Dream__server.Query
 
-let request ?method_ ?target ?version ?headers body =
-  (* TODO Streams. *)
-  let client_stream = Dream_pure.Stream.stream no_reader no_writer
-  and server_stream = Dream_pure.Stream.stream (string body) no_writer in
-  request ?method_ ?target ?version ?headers client_stream server_stream
+let request =
+  Dream__server.Helpers.request_with_body
 
-let response ?status ?code ?headers body =
-  (* TODO Streams. *)
-  let client_stream = Dream_pure.Stream.stream (string body) no_writer
-  and server_stream = Dream_pure.Stream.stream no_reader no_writer in
-  response ?status ?code ?headers client_stream server_stream
+let response =
+  Dream__server.Helpers.response_with_body
 
 let with_client client message =
   set_client message client;
