@@ -19,14 +19,14 @@ type 'a back_end = {
   send : 'a -> Dream.request -> Dream.response -> Dream.response Lwt.t;
 }
 
-let middleware local back_end = fun inner_handler request ->
+let middleware field back_end = fun inner_handler request ->
   let%lwt session = back_end.load request in
-  Dream.set_local request local session;
+  Dream.set_field request field session;
   let%lwt response = inner_handler request in
   back_end.send session request response
 
-let getter local request =
-  match Dream.local request local with
+let getter field request =
+  match Dream.field request field with
   | Some session ->
     session
   | None ->
@@ -40,10 +40,10 @@ type 'a typed_middleware = {
 }
 
 let typed_middleware ?show_value () =
-  let local = Dream.new_local ~name:"dream.session" ?show_value () in
+  let field = Dream.new_field ~name:"dream.session" ?show_value () in
   {
-    middleware = middleware local;
-    getter = getter local;
+    middleware = middleware field;
+    getter = getter field;
   }
 
 

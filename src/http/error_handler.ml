@@ -97,7 +97,7 @@ let dump (error : Catch.error) =
     Dream.all_headers request
     |> List.iter (fun (name, value) -> p "\n%s: %s" name value);
 
-    Dream.fold_locals (fun name value first ->
+    Dream.fold_fields (fun name value first ->
       if first then
         p "\n";
       p "\n%s: %s" name value;

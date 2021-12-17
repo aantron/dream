@@ -30,8 +30,8 @@ let initial_multipart_state () = {
 }
 
 (* TODO Dump the value of the multipart state somehow? *)
-let multipart_state_variable : multipart_state Dream.local =
-  Dream.new_local
+let multipart_state_field : multipart_state Dream.field =
+  Dream.new_field
     ~name:"dream.multipart"
     ()
 

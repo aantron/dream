@@ -406,7 +406,7 @@ let wrap_handler
              request_id field in requests. *)
           let user's_websocket_handler websocket =
             Lwt.with_value
-              Dream__middleware.Log.lwt_key
+              Dream__middleware.Log.id_lwt_key
               (Dream__middleware.Log.get_request_id ~request ())
               (fun () -> user's_websocket_handler websocket)
           in

@@ -11,8 +11,8 @@ module Stream = Dream_pure.Stream
 
 
 
-let client_variable =
-  Dream.new_local
+let client_field =
+  Dream.new_field
     ~name:"dream.client"
     ~show_value:(fun client -> client)
     ()
@@ -20,28 +20,28 @@ let client_variable =
 (* TODO What should be reported when the client address is missing? This is a
    sign of local testing. *)
 let client request =
-  match Dream.local request client_variable with
+  match Dream.field request client_field with
   | None -> "127.0.0.1:0"
   | Some client -> client
 
 let set_client request client =
-  Dream.set_local request client_variable client
+  Dream.set_field request client_field client
 
 
 
-let https_variable =
-  Dream.new_local
+let https_field =
+  Dream.new_field
     ~name:"dream.https"
     ~show_value:string_of_bool
     ()
 
 let https request =
-  match Dream.local request https_variable with
+  match Dream.field request https_field with
   | Some true -> true
   | _ -> false
 
 let set_https request https =
-  Dream.set_local request https_variable https
+  Dream.set_field request https_field https
 
 
 

@@ -13,8 +13,8 @@ let log =
   Dream__middleware.Log.sub_log "dream.sql"
 
 (* TODO Debug metadata for the pools. *)
-let pool_variable : (_, Caqti_error.t) Caqti_lwt.Pool.t Dream.local =
-  Dream.new_local ()
+let pool_field : (_, Caqti_error.t) Caqti_lwt.Pool.t Dream.field =
+  Dream.new_field ()
 
 let foreign_keys_on =
   Caqti_request.exec Caqti_type.unit "PRAGMA foreign_keys = ON"
@@ -30,7 +30,7 @@ let sql_pool ?size uri =
 
   begin match !pool_cell with
   | Some pool ->
-    Dream.set_local request pool_variable pool;
+    Dream.set_field request pool_field pool;
     inner_handler request
   | None ->
     (* The correctness of this code is subtle. There is no race condition with
@@ -46,7 +46,7 @@ let sql_pool ?size uri =
     match pool with
     | Ok pool ->
       pool_cell := Some pool;
-      Dream.set_local request pool_variable pool;
+      Dream.set_field request pool_field pool;
       inner_handler request
     | Error error ->
       (* Deliberately raise an exception so that it can be communicated to any
@@ -59,7 +59,7 @@ let sql_pool ?size uri =
   end
 
 let sql request callback =
-  match Dream.local request pool_variable with
+  match Dream.field request pool_field with
   | None ->
     let message = "Dream.sql: no pool; did you apply Dream.sql_pool?" in
     log.error (fun log -> log ~request "%s" message);

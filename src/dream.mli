@@ -2349,19 +2349,39 @@ val decrypt :
 
     Dream supports user-defined per-message variables for use by middlewares. *)
 
-type 'a local
+type 'a field
 (** Per-message variable. *)
 
-val new_local : ?name:string -> ?show_value:('a -> string) -> unit -> 'a local
+(**/**)
+type 'a local = 'a field
+[@@ocaml.deprecated " Renamed to type Dream.field."]
+(**/**)
+
+val new_field : ?name:string -> ?show_value:('a -> string) -> unit -> 'a field
 (** Declares a variable of type ['a] in all messages. The variable is initially
     unset in each message. The optional [~name] and [~show_value] are used by
     {!Dream.run} [~debug] to show the variable in debug dumps. *)
 
-val local : 'b message -> 'a local -> 'a option
+(**/**)
+val new_local : ?name:string -> ?show_value:('a -> string) -> unit -> 'a field
+[@@ocaml.deprecated " Renamed to Dream.new_field."]
+(**/**)
+
+val field : 'b message -> 'a field -> 'a option
 (** Retrieves the value of the per-message variable. *)
 
-val set_local : 'b message -> 'a local -> 'a -> unit
+(**/**)
+val local : 'b message -> 'a field -> 'a option
+[@@ocaml.deprecated " Renamed to Dream.field."]
+(**/**)
+
+val set_field : 'b message -> 'a field -> 'a -> unit
 (** Sets the per-message variable to the value. *)
+
+(**/**)
+val set_field : 'b message -> 'a field -> 'a -> unit
+[@@ocaml.deprecated " Renamed to Dream.set_field."]
+(**/**)
 
 (**/**)
 val with_local : 'a local -> 'a -> 'b message -> 'b message

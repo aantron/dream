@@ -11,14 +11,11 @@ type status = Status.status
 type stream = Stream.stream
 type buffer = Stream.buffer
 
-module Scope_variable_metadata =
+module Custom_field_metadata =
 struct
   type 'a t = string option * ('a -> string) option
 end
-module Scope = Hmap.Make (Scope_variable_metadata)
-(* TODO Rename Scope, because there is now only one scope. *)
-(* TODO Given there are now only locals, maybe it's worth renaming them to
-   something else - there is now only one concept of variables. *)
+module Fields = Hmap.Make (Custom_field_metadata)
 
 type websocket = Stream.stream
 
@@ -30,7 +27,7 @@ and 'a message = {
   mutable headers : (string * string) list;
   mutable client_stream : Stream.stream;
   mutable server_stream : Stream.stream;
-  mutable locals : Scope.t;
+  mutable fields : Fields.t;
 }
 
 and client = {
@@ -223,29 +220,28 @@ let close_stream message =
 let is_websocket response =
   response.specific.websocket
 
-let fold_scope f initial scope =
-  Scope.fold (fun (B (key, value)) accumulator ->
-    match Scope.Key.info key with
+
+
+type 'a field = 'a Fields.key
+
+let new_field ?name ?show_value () =
+  Fields.Key.create (name, show_value)
+
+let field message key =
+  Fields.find key message.fields
+
+let set_field message key value =
+  message.fields <- Fields.add key value message.fields
+
+let fold_fields f initial message =
+  Fields.fold (fun (B (key, value)) accumulator ->
+    match Fields.Key.info key with
     | Some name, Some show_value -> f name (show_value value) accumulator
     | _ -> accumulator)
-    scope
+    message.fields
     initial
 
-type 'a local = 'a Scope.key
 
-let new_local ?name ?show_value () =
-  Scope.Key.create (name, show_value)
-
-(* TODO Tension between "t-first" and not, because typically, for a getter, the
-   "index" parameter could be partially applied. *)
-let local message key =
-  Scope.find key message.locals
-
-let set_local message key value =
-  message.locals <- Scope.add key value message.locals
-
-let fold_locals f initial message =
-  fold_scope f initial message.locals
 
 let request
     ?method_
@@ -275,7 +271,7 @@ let request
     headers;
     client_stream;
     server_stream;
-    locals = Scope.empty;
+    fields = Fields.empty;
   } in
 
   request
@@ -299,7 +295,7 @@ let response
     client_stream;
     server_stream;
     (* TODO This fully dead stream should be preallocated. *)
-    locals = Scope.empty;
+    fields = Fields.empty;
   } in
 
   response

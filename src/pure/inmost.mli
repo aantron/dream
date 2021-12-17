@@ -111,8 +111,8 @@ val is_websocket : response -> (websocket -> unit promise) option
 
 
 
-type 'a local
-val new_local : ?name:string -> ?show_value:('a -> string) -> unit -> 'a local
-val local : 'b message -> 'a local -> 'a option
-val set_local : 'b message -> 'a local -> 'a -> unit
-val fold_locals : (string -> string -> 'a -> 'a) -> 'a -> 'b message -> 'a
+type 'a field
+val new_field : ?name:string -> ?show_value:('a -> string) -> unit -> 'a field
+val field : 'b message -> 'a field -> 'a option
+val set_field : 'b message -> 'a field -> 'a -> unit
+val fold_fields : (string -> string -> 'a -> 'a) -> 'a -> 'b message -> 'a

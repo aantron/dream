@@ -15,8 +15,8 @@ let log =
 let five_minutes =
   5. *. 60.
 
-let storage =
-  Dream.new_local ~name:"dream.flash" ()
+let storage_field =
+  Dream.new_field ~name:"dream.flash" ()
 
 let flash_cookie =
   "dream.flash"
@@ -53,7 +53,7 @@ let flash request =
 
 let put_flash request category message =
   let outbox =
-    match Dream.local request storage with
+    match Dream.field request storage_field with
     | Some outbox -> outbox
     | None ->
       let message = "Missing flash message middleware" in
@@ -75,7 +75,7 @@ let flash_messages inner_handler request =
     else
       log ~request "%s" "No flash messages.");
   let outbox = ref [] in
-  Dream.set_local request storage outbox;
+  Dream.set_field request storage_field outbox;
   let existing = Cookie.cookie request flash_cookie in
   let%lwt response = inner_handler request in
   let entries = List.rev !outbox in

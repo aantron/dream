@@ -182,8 +182,12 @@ let with_stream message =
   set_stream message;
   message
 
+type 'a local = 'a field
+let new_local = new_field
+let local = field
+
 let with_local key value message =
-  set_local message key value;
+  set_field message key value;
   message
 
 let first message =

@@ -70,13 +70,13 @@ let logs_lib_tag : string Logs.Tag.def =
 
 (* Lwt sequence-associated storage key used to pass request ids for use when
    ~request is not provided. *)
-let lwt_key : string Lwt.key =
+let id_lwt_key : string Lwt.key =
   Lwt.new_key ()
 
 (* The actual request id "field" associated with each request by the logger. If
    this field is missing, the logger assigns the request a fresh id. *)
-let id =
-  Dream.new_local
+let id_field =
+  Dream.new_field
     ~name:request_id_label
     ~show_value:(fun id -> id)
     ()
@@ -86,11 +86,11 @@ let get_request_id ?request () =
   let request_id =
     match request with
     | None -> None
-    | Some request -> Dream.local request id
+    | Some request -> Dream.field request id_field
   in
   match request_id with
   | Some _ -> request_id
-  | None -> Lwt.get lwt_key
+  | None -> Lwt.get id_lwt_key
 
 (* The current state of the request id sequence. *)
 let last_id =
@@ -470,13 +470,13 @@ struct
 
     (* Get the requwst's id or assign a new one. *)
     let id =
-      match Dream.local request id with
+      match Dream.field request id_field with
       | Some id -> id
       | None ->
         last_id := !last_id + 1;
-        let new_id = string_of_int !last_id in
-        Dream.set_local request id new_id;
-        new_id
+        let id = string_of_int !last_id in
+        Dream.set_field request id_field id;
+        id
     in
 
     (* Identify the request in the log. *)
@@ -495,7 +495,7 @@ struct
     (* Call the rest of the app. *)
     Lwt.try_bind
       (fun () ->
-        Lwt.with_value lwt_key (Some id) (fun () ->
+        Lwt.with_value id_lwt_key (Some id) (fun () ->
           next_handler request))
       (fun response ->
         (* Log the elapsed time. If the response is a redirection, log the
