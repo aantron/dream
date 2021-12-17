@@ -5,8 +5,9 @@
 
 
 
+module Catch = Dream__server.Catch
 module Dream = Dream_pure.Inmost
-module Catch = Dream__middleware.Catch
+module Log = Dream__server.Log
 
 
 
@@ -62,4 +63,4 @@ val websocket_handshake :
 
 
 (* Logger also used by elsewhere in the HTTP integration. *)
-val log : Dream__middleware.Log.sub_log
+val log : Log.sub_log

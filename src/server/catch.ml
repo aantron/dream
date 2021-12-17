@@ -66,7 +66,7 @@ let catch error_handler next_handler request =
           caused_by;
           request = Some request;
           response = Some response;
-          client = Some (Server.client request);
+          client = Some (Helpers.client request);
           severity = severity;
           will_send_response = true;
         } in
@@ -87,7 +87,7 @@ let catch error_handler next_handler request =
         caused_by = `Server;
         request = Some request;
         response = None;
-        client = Some (Server.client request);
+        client = Some (Helpers.client request);
         severity = `Error;
         will_send_response = true;
       } in

@@ -7,8 +7,8 @@
   digestif
   dream.cipher
   dream.localhost
-  dream.middleware
   dream-pure
+  dream.server
   dream-httpaf.gluten
   dream-httpaf.gluten-lwt-unix
   dream-httpaf.h2

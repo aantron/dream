@@ -489,7 +489,7 @@ struct
       log ~request "%s %s %s %s"
         (Method.method_to_string (Dream.method_ request))
         (Dream.target request)
-        (Server.client request)
+        (Helpers.client request)
         user_agent);
 
     (* Call the rest of the app. *)

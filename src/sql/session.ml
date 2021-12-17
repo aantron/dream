@@ -6,8 +6,8 @@
 
 
 module Dream = Dream_pure
-module Cookie = Dream__middleware.Cookie
-module Session = Dream__middleware.Session
+module Cookie = Dream__server.Cookie
+module Session = Dream__server.Session
 
 
 

@@ -2384,7 +2384,7 @@ val set_field : 'b message -> 'a field -> 'a -> unit
 (**/**)
 
 (**/**)
-val with_local : 'a local -> 'a -> 'b message -> 'b message
+val with_local : 'a field -> 'a -> 'b message -> 'b message
 [@@ocaml.deprecated
 " Use Dream.set_local instead. See
   https://aantron.github.io/dream/#val-set_local"]

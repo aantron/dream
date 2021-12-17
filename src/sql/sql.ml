@@ -6,11 +6,12 @@
 
 
 module Dream = Dream_pure.Inmost
+module Log = Dream__server.Log
 
 
 
 let log =
-  Dream__middleware.Log.sub_log "dream.sql"
+  Log.sub_log "dream.sql"
 
 (* TODO Debug metadata for the pools. *)
 let pool_field : (_, Caqti_error.t) Caqti_lwt.Pool.t Dream.field =

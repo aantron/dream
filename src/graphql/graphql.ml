@@ -6,8 +6,9 @@
 
 
 module Dream = Dream_pure.Inmost
+module Helpers = Dream__server.Helpers
+module Log = Dream__server.Log
 module Method = Dream_pure.Method
-module Server = Dream__middleware.Server
 module Stream = Dream_pure.Stream
 
 
@@ -24,7 +25,7 @@ module Stream = Dream_pure.Stream
        https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md *)
 
 let log =
-  Dream__middleware.Log.sub_log "dream.graphql"
+  Log.sub_log "dream.graphql"
 
 
 
@@ -238,7 +239,7 @@ let handle_over_websocket make_context schema subscriptions request websocket =
             log.error (fun log ->
               log ~request "%s" (Printexc.to_string exn));
             backtrace
-            |> Dream__middleware.Log.iter_backtrace (fun line ->
+            |> Log.iter_backtrace (fun line ->
               log.error (fun log -> log ~request "%s" line));
 
             try%lwt
@@ -302,16 +303,16 @@ let graphql make_context schema = fun request ->
       begin match%lwt run_query make_context schema request json with
       | Error json ->
         Yojson.Basic.to_string json
-        |> Server.json
+        |> Helpers.json
 
       | Ok (`Response json) ->
         Yojson.Basic.to_string json
-        |> Server.json
+        |> Helpers.json
 
       | Ok (`Stream _) ->
         make_error "Subscriptions and streaming should use WebSocket transport"
         |> Yojson.Basic.to_string
-        |> Server.json
+        |> Helpers.json
       end
 
     | _ ->
@@ -354,4 +355,4 @@ let graphiql ?(default_query = "") graphql_endpoint =
   in
 
   fun _request ->
-    Server.html (Lazy.force html)
+    Helpers.html (Lazy.force html)

@@ -5,10 +5,12 @@
 
 
 
-module Catch = Dream__middleware.Catch
+module Catch = Dream__server.Catch
 module Dream = Dream_pure.Inmost
+module Error_template = Dream__server.Error_template
 module Method = Dream_pure.Method
-module Server = Dream__middleware.Server
+module Helpers = Dream__server.Helpers
+module Log = Dream__server.Log
 module Status = Dream_pure.Status
 module Stream = Dream_pure.Stream
 
@@ -20,7 +22,7 @@ module Stream = Dream_pure.Stream
    an app. *)
 
 let log =
-  Dream__middleware.Log.sub_log "dream.http"
+  Log.sub_log "dream.http"
 
 let select_log = function
   | `Error -> log.error
@@ -48,7 +50,7 @@ let dump (error : Catch.error) =
   | `Exn exn ->
     let backtrace = Printexc.get_backtrace () in
     p "%s\n" (Printexc.to_string exn);
-    backtrace |> Dream__middleware.Log.iter_backtrace (p "%s\n")
+    backtrace |> Log.iter_backtrace (p "%s\n")
   end;
 
   p "\n";
@@ -147,7 +149,7 @@ let customize template (error : Catch.error) =
 
     select_log error.severity (fun log ->
       log ?request:error.request "%s" message);
-    backtrace |> Dream__middleware.Log.iter_backtrace (fun line ->
+    backtrace |> Log.iter_backtrace (fun line ->
       select_log error.severity (fun log ->
         log ?request:error.request "%s" line))
   end;
@@ -194,8 +196,7 @@ let debug_template _error debug_dump response =
   let code = Status.status_to_int status
   and reason = Status.status_to_string status in
   Dream.set_header response "Content-Type" Dream_pure.Formats.text_html;
-  Dream.set_body response
-    (Dream__middleware.Error_template.render ~debug_dump ~code ~reason);
+  Dream.set_body response (Error_template.render ~debug_dump ~code ~reason);
   Lwt.return response
 
 let default =
@@ -218,7 +219,7 @@ let double_faults f default =
       log "Error handler raised: %s" (Printexc.to_string exn));
 
     backtrace
-    |> Dream__middleware.Log.iter_backtrace (fun line ->
+    |> Log.iter_backtrace (fun line ->
       log.error (fun log -> log "%s" line));
 
     default ()
@@ -442,7 +443,7 @@ let websocket
     caused_by = `Server;
     request = Some request;
     response = Some response;
-    client = Some (Server.client request);
+    client = Some (Helpers.client request);
     severity = `Warning;   (* Not sure what these errors are, yet. *)
     will_send_response = false;
   } in
@@ -464,7 +465,7 @@ let websocket_handshake
     caused_by = `Client;
     request = Some request;
     response = Some response;
-    client = Some (Server.client request);
+    client = Some (Helpers.client request);
     severity = `Warning;
     will_send_response = true;
   } in

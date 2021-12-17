@@ -5,10 +5,13 @@
 
 
 
-module Catch = Dream__middleware.Catch
+module Catch = Dream__server.Catch
+module Content_length = Dream__server.Content_length
 module Dream = Dream_pure.Inmost
+module Helpers = Dream__server.Helpers
+module Log = Dream__server.Log
+module Lowercase_headers = Dream__server.Lowercase_headers
 module Method = Dream_pure.Method
-module Server = Dream__middleware.Server
 module Status = Dream_pure.Status
 module Stream = Dream_pure.Stream
 
@@ -33,7 +36,7 @@ let sha1 s =
   |> Digestif.SHA1.to_raw_string
 
 let websocket_log =
-  Dream__middleware.Log.sub_log "dream.websocket"
+  Log.sub_log "dream.websocket"
 
 let websocket_handler user's_websocket_handler socket =
 
@@ -302,7 +305,7 @@ let wrap_handler
     (user's_dream_handler : Dream.handler) =
 
   let httpaf_request_handler = fun client_address (conn : _ Gluten.Reqd.t) ->
-    Dream__middleware.Log.set_up_exception_hook ();
+    Log.set_up_exception_hook ();
 
     let conn, upgrade = conn.reqd, conn.upgrade in
 
@@ -341,7 +344,7 @@ let wrap_handler
       Stream.stream body Stream.no_writer in
 
     let request : Dream.request =
-      Server.request ~client ~method_ ~target ~https ~version ~headers body in
+      Helpers.request ~client ~method_ ~target ~https ~version ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -406,8 +409,8 @@ let wrap_handler
              request_id field in requests. *)
           let user's_websocket_handler websocket =
             Lwt.with_value
-              Dream__middleware.Log.id_lwt_key
-              (Dream__middleware.Log.get_request_id ~request ())
+              Log.id_lwt_key
+              (Log.get_request_id ~request ())
               (fun () -> user's_websocket_handler websocket)
           in
 
@@ -451,7 +454,7 @@ let wrap_handler_h2
     (user's_dream_handler : Dream.handler) =
 
   let httpaf_request_handler = fun client_address (conn : H2.Reqd.t) ->
-    Dream__middleware.Log.set_up_exception_hook ();
+    Log.set_up_exception_hook ();
 
     (* Covert the h2 request to a Dream request. *)
     let httpaf_request : H2.Request.t =
@@ -484,7 +487,7 @@ let wrap_handler_h2
       Stream.stream body Stream.no_writer in
 
     let request : Dream.request =
-      Server.request ~client ~method_ ~target ~https ~version ~headers body in
+      Helpers.request ~client ~method_ ~target ~https ~version ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -645,9 +648,9 @@ let ocaml_tls = {
 
 let built_in_middleware error_handler =
   Dream.pipeline [
-    Dream__middleware.Lowercase_headers.lowercase_headers;
-    Dream__middleware.Content_length.content_length;
-    Dream__middleware.Catch.catch (Error_handler.app error_handler);
+    Lowercase_headers.lowercase_headers;
+    Content_length.content_length;
+    Catch.catch (Error_handler.app error_handler);
   ]
 
 
@@ -871,7 +874,7 @@ let serve_with_maybe_https
     log.error (fun log ->
       log "Dream.%s: exception %s"
         caller_function_for_error_messages (Printexc.to_string exn));
-    backtrace |> Dream__middleware.Log.iter_backtrace (fun line ->
+    backtrace |> Log.iter_backtrace (fun line ->
       log.error (fun log -> log "%s" line));
     raise exn
 
@@ -965,7 +968,7 @@ let run
   create_handler Sys.sigint;
   create_handler Sys.sigterm;
 
-  let log = Dream__middleware.Log.convenience_log in
+  let log = Log.convenience_log in
 
   if greeting then begin
     let scheme =

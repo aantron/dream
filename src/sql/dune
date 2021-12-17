@@ -5,8 +5,8 @@
   caqti
   caqti-lwt
   dream.cipher
-  dream.middleware
   dream-pure
+  dream.server
   uri
   yojson)
  (preprocess (pps lwt_ppx))

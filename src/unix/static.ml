@@ -6,7 +6,9 @@
 
 
 module Dream = Dream_pure.Inmost
+module Formats = Dream_pure.Formats
 module Method = Dream_pure.Method
+module Router = Dream__server.Router
 module Stream = Dream_pure.Stream
 
 
@@ -19,7 +21,7 @@ module Stream = Dream_pure.Stream
 let mime_lookup filename =
   let content_type =
     match Magic_mime.lookup filename with
-    | "text/html" -> Dream_pure.Formats.text_html
+    | "text/html" -> Formats.text_html
     | content_type -> content_type
   in
   ["Content-Type", content_type]
@@ -49,7 +51,7 @@ let from_filesystem local_root path _ =
 (* TODO On Windows, should we also check for \ and drive letters? *)
 (* TODO Not an efficient implementation at the moment. *)
 let validate_path request =
-  let path = Dream__middleware.Router.path request in
+  let path = Router.path request in
 
   let has_slash component = String.contains component '/' in
   let has_backslash component = String.contains component '\\' in

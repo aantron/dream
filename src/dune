@@ -7,7 +7,7 @@
   dream.cipher
   dream.graphql
   dream.http
-  dream.middleware
+  dream.server
   dream.unix
   dream-pure
   dream.sql

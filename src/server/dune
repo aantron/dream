@@ -1,6 +1,6 @@
 (library
- (public_name dream.middleware)
- (name dream__middleware)
+ (public_name dream.server)
+ (name dream__server)
  (libraries
   digestif
   dream.cipher

@@ -11,51 +11,51 @@ include Dream_pure.Method
 include Dream_pure.Inmost
 include Dream_pure.Formats
 
-include Dream__middleware.Log
-include Dream__middleware.Log.Make (Ptime_clock)
+include Dream__server.Log
+include Dream__server.Log.Make (Ptime_clock)
 (* Initalize logs with the default reporter which uses [Ptime_clock], this
-   function is a part of [Dream__middleware.Log.Make], it's why it is not
-   prepended by a module name. *)
+   function is a part of [Dream__server.Log.Make], it's why it is not prepended
+   by a module name. *)
 let () =
   initialize ~setup_outputs:Fmt_tty.setup_std_outputs
-include Dream__middleware.Echo
+include Dream__server.Echo
 
 let default_log =
-  Dream__middleware.Log.sub_log (Logs.Src.name Logs.default)
+  Dream__server.Log.sub_log (Logs.Src.name Logs.default)
 
 let error = default_log.error
 let warning = default_log.warning
 let info = default_log.info
 let debug = default_log.debug
 
-include Dream__middleware.Router
+include Dream__server.Router
 include Dream__unix.Static
 
 include Dream__cipher.Cipher
-include Dream__middleware.Cookie
+include Dream__server.Cookie
 
-include Dream__middleware.Session
-include Dream__middleware.Session.Make (Ptime_clock)
+include Dream__server.Session
+include Dream__server.Session.Make (Ptime_clock)
 let sql_sessions = Dream__sql.Session.middleware
 
-include Dream__middleware.Flash
+include Dream__server.Flash
 
-include Dream__middleware.Origin_referrer_check
-include Dream__middleware.Form
-include Dream__middleware.Upload
-include Dream__middleware.Csrf
+include Dream__server.Origin_referrer_check
+include Dream__server.Form
+include Dream__server.Upload
+include Dream__server.Csrf
 
 let content_length =
-  Dream__middleware.Content_length.content_length
+  Dream__server.Content_length.content_length
 
 include Dream__graphql.Graphql
 include Dream__sql.Sql
 
 include Dream__http.Http
 
-include Dream__middleware.Lowercase_headers
-include Dream__middleware.Catch
-include Dream__middleware.Site_prefix
+include Dream__server.Lowercase_headers
+include Dream__server.Catch
+include Dream__server.Site_prefix
 
 let debug_error_handler =
   Dream__http.Error_handler.debug_error_handler
@@ -79,9 +79,9 @@ let test ?(prefix = "") handler request =
   Lwt_main.run (app request)
 
 let log =
-  Dream__middleware.Log.convenience_log
+  Dream__server.Log.convenience_log
 
-include Dream__middleware.Tag
+include Dream__server.Tag
 
 let respond ?status ?code ?headers body =
   let client_stream = stream (string body) no_writer
@@ -130,17 +130,17 @@ let form_tag ?method_ ?target ?enctype ?csrf_token ~action request =
   form_tag ~now ?method_ ?target ?enctype ?csrf_token ~action request
 
 let client =
-  Dream__middleware.Server.client
+  Dream__server.Helpers.client
 let set_client =
-  Dream__middleware.Server.set_client
+  Dream__server.Helpers.set_client
 let https =
-  Dream__middleware.Server.https
+  Dream__server.Helpers.https
 let html =
-  Dream__middleware.Server.html
+  Dream__server.Helpers.html
 let json =
-  Dream__middleware.Server.json
+  Dream__server.Helpers.json
 
-include Dream__middleware.Query
+include Dream__server.Query
 
 let request ?method_ ?target ?version ?headers body =
   (* TODO Streams. *)
