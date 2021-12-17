@@ -176,6 +176,8 @@ val normalize_method : [< method_ ] -> method_
       Dream.normalize_method (`Method "GET") = `GET
     ]} *)
 
+
+
 (** {1:status_codes Status codes} *)
 
 type informational = [
@@ -786,8 +788,8 @@ type buffer =
    streaming" should be promoted to a top-level section, Streaming. *)
 type stream
 
-val server_stream : 'a message -> stream
 val client_stream : 'a message -> stream
+val server_stream : 'a message -> stream
 (* TODO Document that this is for middlewares that are transforming a response
    stream or a WebSocket. *)
 val set_client_stream : 'a message -> stream -> unit
