@@ -3,7 +3,6 @@
  (libraries
   base
   dream
-  dream.cipher
   dream-pure
   lwt
   lwt.unix
