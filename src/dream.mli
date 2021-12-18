@@ -379,6 +379,7 @@ val path : request -> string list
 https://github.com/aantron/dream/issues
 "]
 (** Parsed request path. For example, ["foo"; "bar"]. *)
+(* TODO If not removing this, move it to section Routing. *)
 (**/**)
 
 (**/**)

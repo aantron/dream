@@ -1,10 +1,10 @@
 (library
- (name test_expect_middleware)
+ (name test_expect_server)
  (libraries
   base
   dream
-  dream.middleware
   dream-pure
+  dream.server
   lwt
   lwt.unix
   ppx_expect.common

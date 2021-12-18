@@ -4,7 +4,6 @@
   base
   dream
   dream.cipher
-  dream.middleware
   dream-pure
   lwt
   lwt.unix
