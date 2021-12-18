@@ -375,16 +375,18 @@ val prefix : request -> string
 (**/**)
 val path : request -> string list
 [@@ocaml.deprecated
-" Router path access is being removed from the API. Comment at
-  https://github.com/aantron/dream/issues"]
+"Router path access is being removed from the API. Comment at
+https://github.com/aantron/dream/issues
+"]
 (** Parsed request path. For example, ["foo"; "bar"]. *)
 (**/**)
 
 (**/**)
 val version : request -> int * int
 [@@ocaml.deprecated
-" Protocol version access is being removed from the API. Comment at
-  https://github.com/aantron/dream/issues"]
+"Protocol version access is being removed from the API. Comment at
+https://github.com/aantron/dream/issues
+"]
 (** Protocol version. [(1, 1)] for HTTP/1.1 and [(2, 0)] for HTTP/2. *)
 (**/**)
 
@@ -394,8 +396,9 @@ val set_client : request -> string -> unit
 (**/**)
 val with_client : string -> request -> request
 [@@ocaml.deprecated
-" Use Dream.set_client. See
-  https://aantron.github.io/dream/#val-set_client"]
+"Use Dream.set_client. See
+https://aantron.github.io/dream/#val-set_client
+"]
 (**/**)
 
 val set_method_ : request -> [< method_ ] -> unit
@@ -404,23 +407,26 @@ val set_method_ : request -> [< method_ ] -> unit
 (**/**)
 val with_method_ : [< method_ ] -> request -> request
 [@@ocaml.deprecated
-" Use Dream.set_method_. See
-  https://aantron.github.io/dream/#val-set_method_"]
+"Use Dream.set_method_. See
+https://aantron.github.io/dream/#val-set_method_
+"]
 (**/**)
 
 (**/**)
 val with_path : string list -> request -> request
 [@@ocaml.deprecated
-" Router path access is being removed from the API. Comment at
-  https://github.com/aantron/dream/issues"]
+"Router path access is being removed from the API. Comment at
+https://github.com/aantron/dream/issues
+"]
 (** Replaces the path. See {!Dream.val-path}. *)
 (**/**)
 
 (**/**)
 val with_version : int * int -> request -> request
 [@@ocaml.deprecated
-" Protocol version access is being removed from the API. Comment at
-  https://github.com/aantron/dream/issues"]
+"Protocol version access is being removed from the API. Comment at
+https://github.com/aantron/dream/issues
+"]
 (** Replaces the version. See {!Dream.version}. *)
 (**/**)
 
@@ -578,8 +584,9 @@ val set_header : 'a message -> string -> string -> unit
 (**/**)
 val with_header : string -> string -> 'a message -> 'a message
 [@@ocaml.deprecated
-" Use Dream.set_header. See
-  https://aantron.github.io/dream/#val-with_header"]
+"Use Dream.set_header. See
+https://aantron.github.io/dream/#val-with_header
+"]
 (**/**)
 
 
@@ -748,8 +755,9 @@ val set_body : response -> string -> unit
 (**/**)
 val with_body : string -> response -> response
 [@@ocaml.deprecated
-" Use Dream.set_body. See
-  https://aantron.github.io/dream/#val-set_body"]
+"Use Dream.set_body. See
+https://aantron.github.io/dream/#val-set_body
+"]
 (**/**)
 
 (** {2 Streaming} *)
@@ -765,8 +773,9 @@ val read : 'a message -> string option promise
 (**/**)
 val with_stream : response -> response
 [@@ocaml.deprecated
-" Use Dream.stream instead. See
-  https://aantron.github.io/dream/#val-set_stream"]
+"Use Dream.stream instead. See
+https://aantron.github.io/dream/#val-set_stream
+"]
 (**/**)
 
 val write : ?kind:[< `Text | `Binary ] -> response -> string -> unit promise
@@ -848,8 +857,9 @@ val close_stream :
 val write_buffer :
   ?offset:int -> ?length:int -> response -> buffer -> unit promise
 [@@ocaml.deprecated
-" Use Dream.write_stream. See
-  https://aantron.github.io/dream/#val-write_stream"]
+"Use Dream.write_stream. See
+https://aantron.github.io/dream/#val-write_stream
+"]
 (**/**)
 
 (* TODO Ergonomics of this stream surface API. *)
@@ -1558,8 +1568,9 @@ val put_flash : request -> string -> string -> unit
 (**/**)
 type websocket = response
 [@@ocaml.deprecated
-" Use Dream.stream. See
-  https://aantron.github.io/dream/#type-stream"]
+"Use Dream.stream. See
+https://aantron.github.io/dream/#type-stream
+"]
 (** A WebSocket connection. See {{:https://tools.ietf.org/html/rfc6455} RFC
     6455} and
     {{:https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API} MDN}. *)
@@ -1568,8 +1579,9 @@ type websocket = response
 (**/**)
 val send : ?kind:[< `Text | `Binary ] -> response -> string -> unit promise
 [@@ocaml.deprecated
-" Use Dream.write. See
-  https://aantron.github.io/dream/#val-write"]
+"Use Dream.write. See
+https://aantron.github.io/dream/#val-write
+"]
 (** Sends a single message. The WebSocket is ready another message when the
     promise resolves.
 
@@ -1584,8 +1596,9 @@ val send : ?kind:[< `Text | `Binary ] -> response -> string -> unit promise
 
 val receive : response -> string option promise
 [@@ocaml.deprecated
-" Use Dream.read. See
-  https://aantron.github.io/dream/#val-read"]
+"Use Dream.read. See
+https://aantron.github.io/dream/#val-read
+"]
 (** Retrieves a message. If the WebSocket is closed before a complete message
     arrives, the result is [None]. *)
 (**/**)
@@ -1593,8 +1606,9 @@ val receive : response -> string option promise
 (**/**)
 val close_websocket : ?code:int -> response -> unit promise
 [@@ocaml.deprecated
-" Use Dream.close. See
-  https://aantron.github.io/dream/#val-close"]
+"Use Dream.close. See
+https://aantron.github.io/dream/#val-close
+"]
 (** Closes the WebSocket. [~code] is usually not necessary, but is needed for
     some protocols based on WebSockets. See
     {{:https://tools.ietf.org/html/rfc6455#section-7.4} RFC 6455 §7.4}. *)
@@ -2394,8 +2408,9 @@ type 'a field
 (**/**)
 type 'a local = 'a field
 [@@ocaml.deprecated
-" Renamed to type Dream.field. See
-  https://aantron.github.io/dream/#type-field"]
+"Renamed to type Dream.field. See
+https://aantron.github.io/dream/#type-field
+"]
 (**/**)
 
 val new_field : ?name:string -> ?show_value:('a -> string) -> unit -> 'a field
@@ -2406,8 +2421,9 @@ val new_field : ?name:string -> ?show_value:('a -> string) -> unit -> 'a field
 (**/**)
 val new_local : ?name:string -> ?show_value:('a -> string) -> unit -> 'a field
 [@@ocaml.deprecated
-" Renamed to Dream.new_field. See
-  https://aantron.github.io/dream/#val-new_field"]
+"Renamed to Dream.new_field. See
+https://aantron.github.io/dream/#val-new_field
+"]
 (**/**)
 
 val field : 'b message -> 'a field -> 'a option
@@ -2416,8 +2432,9 @@ val field : 'b message -> 'a field -> 'a option
 (**/**)
 val local : 'b message -> 'a field -> 'a option
 [@@ocaml.deprecated
-" Renamed to Dream.field. See
-  https://aantron.github.io/dream/#val-field"]
+"Renamed to Dream.field. See
+https://aantron.github.io/dream/#val-field
+"]
 (**/**)
 
 val set_field : 'b message -> 'a field -> 'a -> unit
@@ -2426,8 +2443,9 @@ val set_field : 'b message -> 'a field -> 'a -> unit
 (**/**)
 val with_local : 'a field -> 'a -> 'b message -> 'b message
 [@@ocaml.deprecated
-" Use Dream.set_field instead. See
-  https://aantron.github.io/dream/#val-set_field"]
+"Use Dream.set_field instead. See
+https://aantron.github.io/dream/#val-set_field
+"]
 (**/**)
 
 
@@ -2455,14 +2473,14 @@ val test : ?prefix:string -> handler -> (request -> response)
 
 (**/**)
 val first : 'a message -> 'a message
-[@@ocaml.deprecated " Simply returns its own argument."]
+[@@ocaml.deprecated "Simply returns its own argument."]
 (** [Dream.first message] evaluates to the original request or response that
     [message] is immutably derived from. This is useful for getting the original
     state of requests especially, when they were first created inside the HTTP
     server ({!Dream.run}). *)
 
 val last : 'a message -> 'a message
-[@@ocaml.deprecated " Simply returns its own argument."]
+[@@ocaml.deprecated "Simply returns its own argument."]
 (** [Dream.last message] evaluates to the latest request or response that was
     derived from [message]. This is most useful for obtaining the state of
     requests at the time an exception was raised, without having to instrument
