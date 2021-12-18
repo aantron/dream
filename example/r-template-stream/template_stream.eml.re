@@ -15,7 +15,7 @@ let render = response => {
     </body>
     </html>
   };
-  Dream.close_stream(response)
+  Dream.close(response)
 };
 
 let () =

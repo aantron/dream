@@ -12,7 +12,7 @@ let () =
 
     Dream.get "/:word"
       (fun request ->
-        Dream.param "word" request
+        Dream.param request "word"
         |> render
         |> Dream.html);
 

@@ -2,7 +2,7 @@ let echo request response =
   let rec loop () =
     match%lwt Dream.read request with
     | None ->
-      Dream.close_stream response
+      Dream.close response
     | Some chunk ->
       let%lwt () = Dream.write response chunk in
       let%lwt () = Dream.flush response in

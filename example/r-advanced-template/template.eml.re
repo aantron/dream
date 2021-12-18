@@ -7,7 +7,7 @@ let render_home = tasks => {
         <% if (complete) { %>
           complete!
         <% } else { %>
-          not complete 
+          not complete
         <% }; %>
       </p>
     <% }); %>
@@ -21,7 +21,7 @@ let render_task = (tasks, task) => {
   <html>
   <body>
 %   (switch (List.find_opt(((task_, _)) => task == task_, tasks)) {
-%   | Some((name, complete)) => 
+%   | Some((name, complete)) =>
       <h1>TODO task: <%s name %>, complete: <%B complete %></h1>
 %   | None =>
       <h1>Task not found!</h1>
@@ -43,7 +43,7 @@ let () =
   @@ Dream.router([
     Dream.get("/", _ => render_home(tasks) |> Dream.html),
     Dream.get("/:task", request =>
-      Dream.param("task", request) |> render_task(tasks) |> Dream.html
+      Dream.param(request, "task") |> render_task(tasks) |> Dream.html
     ),
   ])
   @@ Dream.not_found;

@@ -8,7 +8,7 @@ let render_home tasks =
         <% if complete then ( %>
           complete!
         <% ) else ( %>
-          not complete 
+          not complete
         <% ); %>
       </p>
     <% end; %>
@@ -20,8 +20,8 @@ let render_home tasks =
 let render_task tasks task =
   <html>
   <body>
-%   (match List.find_opt (fun (task_, _) -> task = task_) tasks with 
-%   | Some (name, complete) -> 
+%   (match List.find_opt (fun (task_, _) -> task = task_) tasks with
+%   | Some (name, complete) ->
       <h1>TODO task: <%s name %>, complete: <%B complete %></h1>
 %   | None -> begin
       <h1>Task not found!</h1>
@@ -34,7 +34,7 @@ let tasks = [
   ("create examples", true);
   ("publish website", true);
   ("profit", false);
-] 
+]
 
 let () =
   Dream.run
@@ -44,11 +44,11 @@ let () =
       (fun _ ->
         render_home tasks
         |> Dream.html);
-        
+
 
     Dream.get "/:task"
       (fun request ->
-        Dream.param "task" request
+        Dream.param request "task"
         |> render_task tasks
         |> Dream.html);
 

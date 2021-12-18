@@ -35,7 +35,7 @@ socket.onclose = function(event) {
 let inject_live_reload_script inner_handler request =
   let%lwt response = inner_handler request in
 
-  match Dream.header "Content-Type" response with
+  match Dream.header response "Content-Type" with
   | Some "text/html; charset=utf-8" ->
     let%lwt body = Dream.body response in
     let soup =
@@ -51,9 +51,8 @@ let inject_live_reload_script inner_handler request =
     | Some head ->
       Soup.create_element "script" ~inner_text:live_reload_script
       |> Soup.append_child head;
-      response
-      |> Dream.with_body (Soup.to_string soup)
-      |> Lwt.return
+      Dream.set_body response (Soup.to_string soup);
+      Lwt.return response
     end
 
   | _ ->

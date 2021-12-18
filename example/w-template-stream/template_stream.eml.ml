@@ -15,7 +15,7 @@ let render response =
     </body>
     </html>
   in
-  Dream.close_stream response
+  Dream.close response
 
 let () =
   Dream.run

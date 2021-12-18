@@ -33,7 +33,7 @@ let () =
       (fun request ->
         match%lwt Dream.form request with
         | `Ok ["text", text] ->
-          let () = Dream.put_flash "Info" text request in
+          let () = Dream.put_flash request "Info" text in
           Dream.redirect request "/result"
         | _ ->
           Dream.redirect request "/");

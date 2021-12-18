@@ -28,13 +28,13 @@ let () =
 
     Dream.get "/websocket"
       (fun _ ->
-        Dream.websocket (fun websocket ->
-          match%lwt Dream.receive websocket with
+        Dream.websocket (fun response ->
+          match%lwt Dream.read response with
           | Some "Hello?" ->
-            let%lwt () = Dream.send websocket "Good-bye!" in
-            Dream.close_websocket websocket
+            let%lwt () = Dream.write response "Good-bye!" in
+            Dream.close response
           | _ ->
-            Dream.close_websocket websocket));
+            Dream.close response));
 
   ]
   @@ Dream.not_found

@@ -125,7 +125,7 @@ let init_client socket content =
     "payload", `String content;
   ]
   |> Yojson.Basic.to_string
-  |> Dream.send socket
+  |> Dream.write socket
 
 let validate_id sandbox =
   String.length sandbox > 0 && Dream.from_base64url sandbox <> None
@@ -144,7 +144,7 @@ type session = {
   mutable sandbox : string;
   syntax : syntax;
   eml : bool;
-  socket : Dream.websocket;
+  socket : Dream.response;
 }
 
 let allocated_ports =
@@ -198,7 +198,7 @@ let client_log ?(add_newline = false) session message =
     "payload", `String message;
   ]
   |> Yojson.Basic.to_string
-  |> Dream.send session.socket
+  |> Dream.write session.socket
 
 let build_sandbox sandbox syntax eml =
   let dune =
@@ -268,7 +268,7 @@ let started session port =
     "port", `Int port;
   ]
   |> Yojson.Basic.to_string
-  |> Dream.send session.socket
+  |> Dream.write session.socket
 
 let rec make_container_id () =
   let candidate = Dream.random 9 |> Dream.to_base64url in
@@ -308,7 +308,7 @@ let run session =
 
 let kill session =
   let%lwt () = kill_container session in
-  Dream.close_websocket session.socket
+  Dream.close session.socket
 
 
 
@@ -350,7 +350,7 @@ let lock_sandbox sandbox f =
       Lwt.return_unit)
 
 let rec listen session =
-  match%lwt Dream.receive session.socket with
+  match%lwt Dream.read session.socket with
   | None ->
     Dream.info (fun log -> log "WebSocket closed by client");
     kill session
@@ -500,7 +500,7 @@ let () =
 
   (* Start the Web server. *)
   let playground_handler request =
-    let sandbox = Dream.param "id" request in
+    let sandbox = Dream.param request "id" in
     match validate_id sandbox with
     | false -> Dream.empty `Not_Found
     | true ->

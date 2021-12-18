@@ -30,34 +30,34 @@ let home =
   </body>
   </html>
 
-let clients =
+let clients : (int, Dream.response) Hashtbl.t =
   Hashtbl.create 5
 
-let connect =
+let track =
   let last_client_id = ref 0 in
   fun websocket ->
     last_client_id := !last_client_id + 1;
     Hashtbl.replace clients !last_client_id websocket;
     !last_client_id
 
-let disconnect client_id =
+let forget client_id =
   Hashtbl.remove clients client_id
 
 let send message =
   Hashtbl.to_seq_values clients
   |> List.of_seq
-  |> Lwt_list.iter_p (fun client -> Dream.send client message)
+  |> Lwt_list.iter_p (fun client -> Dream.write client message)
 
-let handle_client websocket =
-  let client_id = connect websocket in
+let handle_client client =
+  let client_id = track client in
   let rec loop () =
-    match%lwt Dream.receive websocket with
+    match%lwt Dream.read client with
     | Some message ->
       let%lwt () = send message in
       loop ()
     | None ->
-      disconnect client_id;
-      Dream.close_websocket websocket
+      forget client_id;
+      Dream.close client
   in
   loop ()
 

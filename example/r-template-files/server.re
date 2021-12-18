@@ -3,7 +3,7 @@ let () =
   Dream.logger @@
   Dream.router([
     Dream.get("/:word", request =>
-      Dream.param("word", request) |> Template.render |> Dream.html
+      Dream.param(request, "word") |> Template.render |> Dream.html
     ),
   ]) @@
   Dream.not_found;

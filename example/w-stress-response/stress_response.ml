@@ -16,7 +16,7 @@ let stress ?(megabytes = 1024) ?(chunk = 64) response =
   let rec loop sent =
     if sent >= limit then
       let%lwt () = Dream.flush response in
-      let%lwt () = Dream.close_stream response in
+      let%lwt () = Dream.close response in
       Lwt.return (Unix.gettimeofday () -. start)
     else
       let%lwt () = Dream.write response chunk_a in
