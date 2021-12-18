@@ -171,7 +171,7 @@ let write ?kind message chunk =
   (* TODO Better handling of close? But it can't even occur with http/af. *)
   Stream.write
     message.server_stream
-    buffer 0 length binary false
+    buffer 0 length binary true
     ~close:(fun _code -> Lwt.wakeup_later_exn resolver End_of_file)
     (fun () -> Lwt.wakeup_later resolver ());
   promise
