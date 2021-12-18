@@ -119,6 +119,7 @@ let json = Helpers.json
 let redirect = Helpers.redirect
 let empty = Helpers.empty
 let stream = Helpers.stream
+let websocket = Helpers.websocket
 let status = Dream.status
 
 
@@ -149,17 +150,22 @@ let all_cookies = Cookie.all_cookies
 let body = Dream.body
 let set_body = Dream.set_body
 let read = Dream.read
-let set_stream = Dream.set_stream
 let write = Dream.write
 let flush = Dream.flush
-let close_stream = Dream.close_stream
+let close = Dream.close
 type buffer = Stream.buffer
 type stream = Stream.stream
 let client_stream = Dream.client_stream
 let server_stream = Dream.server_stream
 let set_client_stream = Dream.set_client_stream
-let next = Dream.next
-let write_buffer = Dream.write_buffer
+let set_server_stream = Dream.set_server_stream
+let read_stream = Stream.read
+let ready_stream = Stream.ready
+let write_stream = Stream.write
+let flush_stream = Stream.flush
+let ping_stream = Stream.ping
+let pong_stream = Stream.pong
+let close_stream = Stream.close
 
 
 
@@ -246,16 +252,6 @@ let session_expires_at = Session.session_expires_at
 let flash_messages = Flash.flash_messages
 let flash = Flash.flash
 let put_flash = Flash.put_flash
-
-
-
-(* WebSockets *)
-
-type websocket = Dream.websocket
-let websocket = Dream.websocket
-let send = Dream.send
-let receive = Dream.receive
-let close_websocket = Dream.close_websocket
 
 
 
@@ -408,8 +404,21 @@ let with_body body message =
   message
 
 let with_stream message =
-  Dream.set_stream message;
   message
+
+let write_buffer ?(offset = 0) ?length message chunk =
+  let length =
+    match length with
+    | Some length -> length
+    | None -> Bigstringaf.length chunk - offset
+  in
+  let string = Bigstringaf.substring chunk ~off:offset ~len:length in
+  write ~kind:`Binary message string
+
+type websocket = Dream.response
+let send = write
+let receive = read
+let close_websocket = close
 
 type 'a local = 'a Dream.field
 let new_local = Dream.new_field

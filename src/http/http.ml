@@ -38,7 +38,7 @@ let sha1 s =
 let websocket_log =
   Log.sub_log "dream.websocket"
 
-let websocket_handler user's_websocket_handler socket =
+let websocket_handler response socket =
 
   (* Queue of received frames. There doesn't appear to be a nice way to achieve
      backpressure with the current API of websocket/af, so that will have to be
@@ -187,77 +187,12 @@ let websocket_handler user's_websocket_handler socket =
 
   let bytes_since_flush = ref 0 in
 
-  (* TODO Not a correct implementation. Need to test moving the flush logic
-     from [write] to [ready], essentially. Alternatively, can use a pipe and its
-     logic for turning a writer into a reader. The memory impact is probably the
-     same. However, this is best done after the duplex stream clarification
-     commit, since that will change which streams do what in responses. It will
-     probably force usage of pipes anyway, so that will make piggy-backing on
-     pipes the natural solution. *)
-  (* TODO Can probably also remove val Stream.writer at that point. *)
-  let ready ~close ok =
-    if !closed then
-      close !close_code
-    else
-      ok ()
-  in
-
   let flush ~close ok =
     bytes_since_flush := 0;
     if !closed then
       close !close_code
     else
       Websocketaf.Wsd.flushed socket ok
-  in
-
-  let write buffer offset length binary fin ~close ok =
-    (* Until https://github.com/anmonteiro/websocketaf/issues/33. *)
-    if not fin then
-      websocket_log.error (fun log ->
-        log "Non-FIN frames not yet supported");
-    let kind = if binary then `Binary else `Text in
-    if !closed then
-      close !close_code
-    else begin
-      Websocketaf.Wsd.schedule socket ~kind buffer ~off:offset ~len:length;
-      bytes_since_flush := !bytes_since_flush + length;
-      if !bytes_since_flush >= 4096 then
-        flush ~close ok
-      else
-        ok ()
-    end
-  in
-
-  let ping _buffer _offset length ~close ok =
-    if length > 125 then
-      raise (Failure "Ping payload cannot exceed 125 bytes");
-    (* See https://github.com/anmonteiro/websocketaf/issues/36. *)
-    if length > 0 then
-      websocket_log.warning (fun log ->
-        log "Ping with non-empty payload not yet supported");
-    if !closed then
-      close !close_code
-    else begin
-      Websocketaf.Wsd.send_ping socket;
-      ok ()
-    end
-  in
-
-  let pong _buffer _offset length ~close ok =
-    (* TODO Is there any way for the peer to send a ping payload with more than
-       125 bytes, forcing a too-large pong and an exception? *)
-    if length > 125 then
-      raise (Failure "Pong payload cannot exceed 125 bytes");
-    (* See https://github.com/anmonteiro/websocketaf/issues/36. *)
-    if length > 0 then
-      websocket_log.warning (fun log ->
-        log "Pong with non-empty payload not yet supported");
-    if !closed then
-      close !close_code
-    else begin
-      Websocketaf.Wsd.send_pong socket;
-      ok ()
-    end
   in
 
   let close code =
@@ -269,20 +204,60 @@ let websocket_handler user's_websocket_handler socket =
     end
   in
 
-  let reader = Stream.reader ~read ~close
-  and writer = Stream.writer ~ready ~write ~flush ~ping ~pong ~close in
-  let websocket = Stream.stream reader writer in
-  (* TODO Change WebSockets to use two pipes in the response body, rather than
-     a weird stream hanging out in the heap. That way, a client and server can
-     immediately communicate with each other if they are in process, without the
-     need to interpet the WebSocket response with an HTTP layer. This will also
-     simplify the WebSocket writing code, as this HTTP adapter code will read
-     from a pipe rather than implement a writer from scratch. At that point,
-     Stream.writer can be removed from stream.mli. *)
+  let reader = Stream.reader ~read ~close in
+  Stream.forward reader (Dream.client_stream response);
 
-  (* TODO Needs error handling like the top-level app has! *)
-  Lwt.async (fun () ->
-    user's_websocket_handler websocket);
+  let rec outgoing_loop () =
+    Stream.read
+      (Dream.client_stream response)
+      ~data:(fun buffer offset length binary fin ->
+        (* Until https://github.com/anmonteiro/websocketaf/issues/33. *)
+        if not fin then
+          websocket_log.error (fun log ->
+            log "Non-FIN frames not yet supported");
+        let kind = if binary then `Binary else `Text in
+        if !closed then
+          close !close_code
+        else begin
+          Websocketaf.Wsd.schedule socket ~kind buffer ~off:offset ~len:length;
+          bytes_since_flush := !bytes_since_flush + length;
+          if !bytes_since_flush >= 4096 then
+            flush ~close outgoing_loop
+          else
+            outgoing_loop ()
+        end)
+      ~close
+      ~flush:(fun () -> flush ~close outgoing_loop)
+      ~ping:(fun _buffer _offset length ->
+        if length > 125 then
+          raise (Failure "Ping payload cannot exceed 125 bytes");
+        (* See https://github.com/anmonteiro/websocketaf/issues/36. *)
+        if length > 0 then
+          websocket_log.warning (fun log ->
+            log "Ping with non-empty payload not yet supported");
+        if !closed then
+          close !close_code
+        else begin
+          Websocketaf.Wsd.send_ping socket;
+          outgoing_loop ()
+        end)
+      ~pong:(fun _buffer _offset length ->
+        (* TODO Is there any way for the peer to send a ping payload with more
+           than 125 bytes, forcing a too-large pong and an exception? *)
+        if length > 125 then
+          raise (Failure "Pong payload cannot exceed 125 bytes");
+        (* See https://github.com/anmonteiro/websocketaf/issues/36. *)
+        if length > 0 then
+          websocket_log.warning (fun log ->
+            log "Pong with non-empty payload not yet supported");
+        if !closed then
+          close !close_code
+        else begin
+          Websocketaf.Wsd.send_pong socket;
+          outgoing_loop ()
+        end)
+  in
+  outgoing_loop ();
 
   Websocketaf.Server_connection.{frame; eof}
 
@@ -394,29 +369,15 @@ let wrap_handler
           Lwt.return_unit
         in
 
-        match Dream.is_websocket response with
-        | None ->
-
+        if not (Helpers.is_websocket response) then
           forward_response response
-
-        | Some user's_websocket_handler ->
-
+        else begin
           let error_handler =
             Error_handler.websocket user's_error_handler request response in
 
-          (* TODO This needs to be done in a more disciplined fashion. *)
-          (* TODO This could be considerably simplified using just a mutable
-             request_id field in requests. *)
-          let user's_websocket_handler websocket =
-            Lwt.with_value
-              Log.id_lwt_key
-              (Log.get_request_id ~request ())
-              (fun () -> user's_websocket_handler websocket)
-          in
-
           let proceed () =
             Websocketaf.Server_connection.create_websocket
-              ~error_handler (websocket_handler user's_websocket_handler)
+              ~error_handler (websocket_handler response)
             |> Gluten.make (module Websocketaf.Server_connection)
             |> upgrade
           in
@@ -433,6 +394,7 @@ let wrap_handler
                 user's_error_handler request response error_string
             in
             forward_response response
+        end
 
       end
       @@ fun exn ->
@@ -521,15 +483,14 @@ let wrap_handler_h2
           Lwt.return_unit
         in
 
-        match Dream.is_websocket response with
-        | None ->
+        if not (Helpers.is_websocket response) then
           forward_response response
 
         (* TODO DOC H2 appears not to support WebSocket upgrade at present.
            RFC 8441. *)
         (* TODO DOC Do we need a CONNECT method? Do users need to be informed of
            this? *)
-        | Some _user's_websocket_handler ->
+        else
           Lwt.return_unit
 
       end

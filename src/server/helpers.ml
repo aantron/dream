@@ -110,15 +110,42 @@ let redirect ?status ?code ?headers _request location =
   Dream.set_header response "Location" location;
   Lwt.return response
 
-let stream ?status ?code ?headers f =
-  (* TODO Streams. *)
-  let client_stream = Stream.(stream empty no_writer)
-  and server_stream = Stream.(stream no_reader no_writer) in
+let stream ?status ?code ?headers callback =
+  let reader, writer = Stream.pipe () in
+  let client_stream = Stream.stream reader Stream.no_writer
+  and server_stream = Stream.stream Stream.no_reader writer in
   let response =
     Dream.response ?status ?code ?headers client_stream server_stream in
-  Dream.set_stream response;
-  (* TODO Should set up an error handler for this. *)
-  Lwt.async (fun () -> f response);
+  (* TODO Should set up an error handler for this. YES. *)
+  (* TODO Make sure the request id is propagated to the callback. *)
+  let wrapped_callback _ = Lwt.async (fun () -> callback response) in
+  Stream.ready server_stream ~close:wrapped_callback wrapped_callback;
+  Lwt.return response
+
+let websocket_field =
+  Dream.new_field
+    ~name:"dream.websocket"
+    ~show_value:(Printf.sprintf "%b")
+    ()
+
+let is_websocket response =
+  match Dream.field response websocket_field with
+  | Some true -> true
+  | _ -> false
+
+(* TODO Mark the request as a WebSocket request for HTTP. *)
+let websocket ?headers callback =
+  let in_reader, in_writer = Stream.pipe ()
+  and out_reader, out_writer = Stream.pipe () in
+  let client_stream = Stream.stream out_reader in_writer
+  and server_stream = Stream.stream in_reader out_writer in
+  let response =
+    Dream.response
+      ~status:`Switching_Protocols ?headers client_stream server_stream in
+  Dream.set_field response websocket_field true;
+  (* TODO Make sure the request id is propagated to the callback. *)
+  let wrapped_callback _ = Lwt.async (fun () -> callback response) in
+  Stream.ready server_stream ~close:wrapped_callback wrapped_callback;
   Lwt.return response
 
 let empty ?headers status =

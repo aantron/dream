@@ -54,14 +54,7 @@ val pipe : unit -> reader * writer
     writing functions. For example, calling {!Stream.flush} on a pipe will cause
     the reader to call its [~flush] callback. *)
 
-val writer :
-  ready:write ->
-  write:(buffer -> int -> int -> bool -> bool -> write) ->
-  flush:write ->
-  ping:(buffer -> int -> int -> write) ->
-  pong:(buffer -> int -> int -> write) ->
-  close:(int -> unit) ->
-    writer
+val forward : reader -> stream -> unit
 
 val no_reader : reader
 

@@ -77,9 +77,6 @@ let no_writer = {
 let reader ~read ~close =
   {read; close}
 
-let writer ~ready ~write ~flush ~ping ~pong ~close =
-  {ready; write; flush; ping; pong; close}
-
 let empty =
   reader
     ~read:(fun ~data:_ ~close ~flush:_ ~ping:_ ~pong:_ -> close 1000)
@@ -303,6 +300,25 @@ let pipe () =
   } in
 
   (reader, writer)
+
+let forward (reader : reader) stream =
+  let rec loop () =
+    stream.writer.ready
+      ~close:reader.close
+      (fun () ->
+        reader.read
+          ~data:(fun buffer offset length binary fin ->
+            stream.writer.write
+              buffer offset length binary fin ~close:reader.close loop)
+          ~close:stream.writer.close
+          ~flush:(fun () ->
+            stream.writer.flush ~close:reader.close loop)
+          ~ping:(fun buffer offset length ->
+            stream.writer.ping buffer offset length ~close:reader.close loop)
+          ~pong:(fun buffer offset length ->
+            stream.writer.pong buffer offset length ~close:reader.close loop))
+  in
+  loop ()
 
 let read_convenience stream =
   let promise, resolver = Lwt.wait () in

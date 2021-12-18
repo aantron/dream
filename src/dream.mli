@@ -528,6 +528,22 @@ val stream :
           Dream.close_stream response)
     ]} *)
 
+val websocket :
+  ?headers:(string * string) list ->
+    (response -> unit promise) -> response promise
+(** Creates a fresh [101 Switching Protocols] response. Once this response is
+    returned to Dream's HTTP layer, the callback is passed a new
+    {!type-websocket}, and the application can begin using it. See example
+    {{:https://github.com/aantron/dream/tree/master/example/k-websocket#files}
+    [k-websocket]} \[{{:http://dream.as/k-websocket} playground}\].
+
+    {[
+      let my_handler = fun request ->
+        Dream.websocket (fun websocket ->
+          let%lwt () = Dream.send websocket "Hello, world!" in
+          Dream.close_websocket websocket);
+    ]} *)
+
 val status : response -> status
 (** Response {!type-status}. For example, [`OK]. *)
 
@@ -721,7 +737,7 @@ val all_cookies : request -> (string * string) list
 
 (** {1 Bodies} *)
 
-val body : 'a message -> string promise
+val body : request -> string promise
 (** Retrieves the entire body. See example
     {{:https://github.com/aantron/dream/tree/master/example/6-echo#files}
     [6-echo]}. *)
@@ -738,34 +754,32 @@ val with_body : string -> response -> response
 
 (** {2 Streaming} *)
 
-val read : request -> string option promise
+val read : 'a message -> string option promise
 (** Retrieves a body chunk. The chunk is not buffered, thus it can only be read
     once. See example
     {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
     [j-stream]}. *)
-
-val set_stream : response -> unit
-(** Makes the {!type-response} ready for stream writing with {!Dream.write}. You
-    should return it from your handler soon after — only one call to
-    {!Dream.write} will be accepted before then. See {!Dream.stream} for a more
-    convenient wrapper. *)
+(* TODO Document difference between receiving a request and receiving on a
+   WebSocket. *)
 
 (**/**)
 val with_stream : response -> response
 [@@ocaml.deprecated
-" Use Dream.set_stream instead. See
+" Use Dream.stream instead. See
   https://aantron.github.io/dream/#val-set_stream"]
 (**/**)
 
-val write : response -> string -> unit promise
+val write : ?kind:[< `Text | `Binary ] -> response -> string -> unit promise
 (** Streams out the string. The promise is fulfilled when the response can
     accept more writes. *)
+(* TODO Document clearly which of the writing functions can raise exceptions. *)
 
 val flush : response -> unit promise
 (** Flushes write buffers. Data is sent to the client. *)
 
-val close_stream : response -> unit promise
+val close : ?code:int -> 'a message -> unit promise
 (** Finishes the response stream. *)
+(* TODO Fix comment. *)
 
 (** {2 Low-level streaming} *)
 
@@ -794,10 +808,11 @@ val server_stream : 'a message -> stream
    stream or a WebSocket. *)
 val set_client_stream : 'a message -> stream -> unit
 (* TODO Normalize with with_stream, or add a separate with_server_stream. *)
+val set_server_stream : 'a message -> stream -> unit
 
 (* TODO Probably even close can be made optional. exn can be made optional. *)
 (* TODO Argument order? *)
-val next :
+val read_stream :
   stream ->
   data:(buffer -> int -> int -> bool -> bool -> unit) ->
   close:(int -> unit) ->
@@ -811,10 +826,33 @@ val next :
     - [~close] if close is requested, and
     - [~exn] to report an exception. *)
 
+val ready_stream :
+  stream -> close:(int -> unit) -> (unit -> unit) -> unit
+
+val write_stream :
+  stream -> buffer -> int -> int -> bool -> bool -> close:(int -> unit) -> (unit -> unit) -> unit
+
+val flush_stream :
+  stream -> close:(int -> unit) -> (unit -> unit) -> unit
+
+val ping_stream :
+  stream -> buffer -> int -> int -> close:(int -> unit) -> (unit -> unit) -> unit
+
+val pong_stream :
+  stream -> buffer -> int -> int -> close:(int -> unit) -> (unit -> unit) -> unit
+
+val close_stream :
+  stream -> int -> unit
+
+(**/**)
 val write_buffer :
   ?offset:int -> ?length:int -> response -> buffer -> unit promise
-(** Streams out the {!buffer} slice. [~offset] defaults to zero. [~length]
-    defaults to the length of the {!buffer}, minus [~offset]. *)
+[@@ocaml.deprecated
+" Use Dream.write_stream. See
+  https://aantron.github.io/dream/#val-write_stream"]
+(**/**)
+
+(* TODO Ergonomics of this stream surface API. *)
 
 
 
@@ -1517,31 +1555,21 @@ val put_flash : request -> string -> string -> unit
 
 
 
-(** {1 WebSockets} *)
-
-type websocket
+(**/**)
+type websocket = response
+[@@ocaml.deprecated
+" Use Dream.stream. See
+  https://aantron.github.io/dream/#type-stream"]
 (** A WebSocket connection. See {{:https://tools.ietf.org/html/rfc6455} RFC
     6455} and
     {{:https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API} MDN}. *)
+(**/**)
 
-val websocket :
-  ?headers:(string * string) list ->
-  (websocket -> unit promise) ->
-    response promise
-(** Creates a fresh [101 Switching Protocols] response. Once this response is
-    returned to Dream's HTTP layer, the callback is passed a new
-    {!type-websocket}, and the application can begin using it. See example
-    {{:https://github.com/aantron/dream/tree/master/example/k-websocket#files}
-    [k-websocket]} \[{{:http://dream.as/k-websocket} playground}\].
-
-    {[
-      let my_handler = fun request ->
-        Dream.websocket (fun websocket ->
-          let%lwt () = Dream.send websocket "Hello, world!" in
-          Dream.close_websocket websocket);
-    ]} *)
-
-val send : ?kind:[< `Text | `Binary ] -> websocket -> string -> unit promise
+(**/**)
+val send : ?kind:[< `Text | `Binary ] -> response -> string -> unit promise
+[@@ocaml.deprecated
+" Use Dream.write. See
+  https://aantron.github.io/dream/#val-write"]
 (** Sends a single message. The WebSocket is ready another message when the
     promise resolves.
 
@@ -1554,14 +1582,23 @@ val send : ?kind:[< `Text | `Binary ] -> websocket -> string -> unit promise
     {{:https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/binaryType}
     MDN, [WebSocket.binaryType]}. *)
 
-val receive : websocket -> string option promise
+val receive : response -> string option promise
+[@@ocaml.deprecated
+" Use Dream.read. See
+  https://aantron.github.io/dream/#val-read"]
 (** Retrieves a message. If the WebSocket is closed before a complete message
     arrives, the result is [None]. *)
+(**/**)
 
-val close_websocket : ?code:int -> websocket -> unit promise
+(**/**)
+val close_websocket : ?code:int -> response -> unit promise
+[@@ocaml.deprecated
+" Use Dream.close. See
+  https://aantron.github.io/dream/#val-close"]
 (** Closes the WebSocket. [~code] is usually not necessary, but is needed for
     some protocols based on WebSockets. See
     {{:https://tools.ietf.org/html/rfc6455#section-7.4} RFC 6455 §7.4}. *)
+(**/**)
 
 
 
@@ -2356,7 +2393,9 @@ type 'a field
 
 (**/**)
 type 'a local = 'a field
-[@@ocaml.deprecated " Renamed to type Dream.field."]
+[@@ocaml.deprecated
+" Renamed to type Dream.field. See
+  https://aantron.github.io/dream/#type-field"]
 (**/**)
 
 val new_field : ?name:string -> ?show_value:('a -> string) -> unit -> 'a field
@@ -2366,7 +2405,9 @@ val new_field : ?name:string -> ?show_value:('a -> string) -> unit -> 'a field
 
 (**/**)
 val new_local : ?name:string -> ?show_value:('a -> string) -> unit -> 'a field
-[@@ocaml.deprecated " Renamed to Dream.new_field."]
+[@@ocaml.deprecated
+" Renamed to Dream.new_field. See
+  https://aantron.github.io/dream/#val-new_field"]
 (**/**)
 
 val field : 'b message -> 'a field -> 'a option
@@ -2374,22 +2415,19 @@ val field : 'b message -> 'a field -> 'a option
 
 (**/**)
 val local : 'b message -> 'a field -> 'a option
-[@@ocaml.deprecated " Renamed to Dream.field."]
+[@@ocaml.deprecated
+" Renamed to Dream.field. See
+  https://aantron.github.io/dream/#val-field"]
 (**/**)
 
 val set_field : 'b message -> 'a field -> 'a -> unit
 (** Sets the per-message variable to the value. *)
 
 (**/**)
-val set_field : 'b message -> 'a field -> 'a -> unit
-[@@ocaml.deprecated " Renamed to Dream.set_field."]
-(**/**)
-
-(**/**)
 val with_local : 'a field -> 'a -> 'b message -> 'b message
 [@@ocaml.deprecated
-" Use Dream.set_local instead. See
-  https://aantron.github.io/dream/#val-set_local"]
+" Use Dream.set_field instead. See
+  https://aantron.github.io/dream/#val-set_field"]
 (**/**)
 
 

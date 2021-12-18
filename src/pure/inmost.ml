@@ -17,8 +17,6 @@ struct
 end
 module Fields = Hmap.Make (Custom_field_metadata)
 
-type websocket = Stream.stream
-
 type request = client message
 and response = server message
 
@@ -43,7 +41,6 @@ and client = {
 
 and server = {
   status : status;
-  websocket : (websocket -> unit Lwt.t) option;
 }
 
 type 'a promise = 'a Lwt.t
@@ -131,10 +128,8 @@ let server_stream message =
 let set_client_stream message client_stream =
   message.client_stream <- client_stream
 
-(* TODO Pending the dream.mli interface reorganization for the new stream
-   API. *)
-let next =
-  Stream.read
+let set_server_stream message server_stream =
+  message.server_stream <- server_stream
 
 (* Create a fresh ref. The reason this field has a ref is because it might get
    replaced when a body is forced read. That's not what's happening here - we
@@ -160,46 +155,25 @@ let set_body message body =
   in
   message.server_stream <- body
 
-(* TODO The critical piece: the pipe should be split between the client and
-   server streams. adapt.ml should be reading from the client stream. *)
-let set_stream message =
-  let reader, writer = Stream.pipe () in
-  let client_stream = Stream.stream reader Stream.no_writer in
-  let server_stream = Stream.stream Stream.no_reader writer in
-  message.client_stream <- client_stream;
-  message.server_stream <- server_stream
-
 (* TODO Need to expose FIN. However, it can't have any effect even on
    WebSockets, because websocket/af does not offer the ability to pass FIN. It
    is hardcoded to true. *)
-(* TODO Also expose binary/text. *)
-let write message chunk =
+(* TODO Also expose binary/text. What should be the default? *)
+let write ?kind message chunk =
+  let binary =
+    match kind with
+    | None | Some `Text -> false
+    | Some `Binary -> true
+  in
   let promise, resolver = Lwt.wait () in
   let length = String.length chunk in
   let buffer = Bigstringaf.of_string ~off:0 ~len:length chunk in
   (* TODO Better handling of close? But it can't even occur with http/af. *)
   Stream.write
     message.server_stream
-    buffer 0 length true false
+    buffer 0 length binary false
     ~close:(fun _code -> Lwt.wakeup_later_exn resolver End_of_file)
-    (Lwt.wakeup_later resolver);
-  promise
-
-let write_buffer ?(offset = 0) ?length message chunk =
-  let promise, resolver = Lwt.wait () in
-  let length =
-    match length with
-    | Some length -> length
-    | None -> Bigstringaf.length chunk - offset
-  in
-  (* TODO Proper handling of close. *)
-  (* TODO As above, properly expose FIN. *)
-  (* TODO Also expose binary/text. *)
-  Stream.write
-    message.server_stream
-    chunk offset length true false
-    ~close:(fun _code -> Lwt.wakeup_later_exn resolver End_of_file)
-    (Lwt.wakeup_later resolver);
+    (fun () -> Lwt.wakeup_later resolver ());
   promise
 
 (* TODO How are remote closes actually handled? There is no way for http/af to
@@ -212,13 +186,10 @@ let flush message =
     (Lwt.wakeup_later resolver);
   promise
 
-let close_stream message =
-  Stream.close message.server_stream 1000;
+(* TODO Should close even be promise-valued? *)
+let close ?(code = 1000) message =
+  Stream.close message.server_stream code;
   Lwt.return_unit
-
-(* TODO Rename. *)
-let is_websocket response =
-  response.specific.websocket
 
 
 
@@ -260,7 +231,7 @@ let request
   (* This function is used for debugging, so it's fine to allocate a fake body
      and then immediately replace it. *)
 
-  let request = {
+  {
     specific = {
       (* TODO Is there a better fake error handler? Maybe this function should
          come after the response constructors? *)
@@ -272,9 +243,7 @@ let request
     client_stream;
     server_stream;
     fields = Fields.empty;
-  } in
-
-  request
+  }
 
 let response
     ?status ?code ?(headers = []) client_stream server_stream =
@@ -286,56 +255,16 @@ let response
     | None, Some code -> Status.int_to_status code
   in
 
-  let response = {
+  {
     specific = {
       status;
-      websocket = None;
     };
     headers;
     client_stream;
     server_stream;
     (* TODO This fully dead stream should be preallocated. *)
     fields = Fields.empty;
-  } in
-
-  response
-
-let websocket ?headers handler =
-  (* TODO Simplify stream creation. *)
-  let client_stream = Stream.(stream empty no_writer)
-  and server_stream = Stream.(stream no_reader no_writer) in
-  let response =
-    response
-      ?headers ~status:`Switching_Protocols client_stream server_stream in
-  let response =
-    {response with specific =
-      {response.specific with websocket = Some handler}}
-  in
-  Lwt.return response
-
-let send ?kind websocket message =
-  let binary =
-    match kind with
-    | None | Some `Text -> false
-    | Some `Binary -> true
-  in
-  let promise, resolver = Lwt.wait () in
-  let length = String.length message in
-  Stream.write
-    websocket
-    (Bigstringaf.of_string ~off:0 ~len:length message) 0 length
-    binary true
-    ~close:(fun _code -> Lwt.wakeup_later_exn resolver End_of_file)
-    (Lwt.wakeup_later resolver);
-  (* TODO The API will likely have to change to report closing. *)
-  promise
-
-let receive websocket =
-  Stream.read_convenience websocket
-
-let close_websocket ?(code = 1000) websocket =
-  Stream.close websocket code;
-  Lwt.return_unit
+  }
 
 let no_middleware handler request =
   handler request

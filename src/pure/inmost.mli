@@ -70,44 +70,19 @@ val sort_headers : (string * string) list -> (string * string) list
 
 val body : 'a message -> string promise
 val set_body : response -> string -> unit
-val read : request -> string option promise
-val set_stream : 'a message -> unit
-(* TODO Rename set_stream, it makes kind of no sense now. *)
-val write : response -> string -> unit promise
+val read : 'a message -> string option promise
+val write : ?kind:[< `Text | `Binary ] -> response -> string -> unit promise
 val flush : response -> unit promise
-val close_stream : response -> unit promise
-(* TODO This will need to read different streams depending on whether it is
-   passed a request or a response. *)
+val close : ?code:int -> 'a message -> unit promise
 val client_stream : 'a message -> stream
 val server_stream : 'a message -> stream
 val set_client_stream : 'a message -> stream -> unit
-val next :
-  stream ->
-  data:(buffer -> int -> int -> bool -> bool -> unit) ->
-  close:(int -> unit) ->
-  flush:(unit -> unit) ->
-  ping:(buffer -> int -> int -> unit) ->
-  pong:(buffer -> int -> int -> unit) ->
-    unit
-val write_buffer :
-  ?offset:int -> ?length:int -> response -> buffer -> unit promise
+val set_server_stream : 'a message -> stream -> unit
 
 
 
 val no_middleware : middleware
 val pipeline : middleware list -> middleware
-
-
-
-type websocket = stream
-val websocket :
-  ?headers:(string * string) list ->
-  (websocket -> unit promise) ->
-    response promise
-val send : ?kind:[< `Text | `Binary ] -> websocket -> string -> unit promise
-val receive : websocket -> string option promise
-val close_websocket : ?code:int -> websocket -> unit promise
-val is_websocket : response -> (websocket -> unit promise) option
 
 
 

@@ -78,14 +78,10 @@ let run_query make_context schema request json =
 let operation_id json =
   Yojson.Basic.Util.(json |> member "id" |> to_string_option)
 
-let close_and_clean ?code subscriptions websocket =
-  match%lwt Dream.close_websocket ?code websocket with
-  | _ ->
-    Hashtbl.iter (fun _ close -> close ()) subscriptions;
-    Lwt.return_unit
-  | exception _ ->
-    Hashtbl.iter (fun _ close -> close ()) subscriptions;
-    Lwt.return_unit
+let close_and_clean ?code subscriptions response =
+  let%lwt () = Dream.close ?code response in
+  Hashtbl.iter (fun _ close -> close ()) subscriptions;
+  Lwt.return_unit
 
 let ack_message =
   `Assoc [
@@ -118,12 +114,12 @@ let complete_message id =
 
 (* TODO Take care to pass around the request Lwt.key in async, etc. *)
 (* TODO Test client complete racing against a stream. *)
-let handle_over_websocket make_context schema subscriptions request websocket =
+let handle_over_websocket make_context schema subscriptions request response =
   let rec loop inited =
-    match%lwt Dream.receive websocket with
+    match%lwt Dream.read response with
     | None ->
       log.info (fun log -> log ~request "GraphQL WebSocket closed by client");
-      close_and_clean subscriptions websocket
+      close_and_clean subscriptions response
     | Some message ->
 
     log.debug (fun log -> log ~request "Message '%s'" message);
@@ -132,13 +128,13 @@ let handle_over_websocket make_context schema subscriptions request websocket =
     match Yojson.Basic.from_string message with
     | exception _ ->
       log.warning (fun log -> log ~request "GraphQL message is not JSON");
-      close_and_clean subscriptions websocket ~code:4400
+      close_and_clean subscriptions response ~code:4400
     | json ->
 
     match Yojson.Basic.Util.(json |> member "type" |> to_string_option) with
     | None ->
       log.warning (fun log -> log ~request "GraphQL message lacks a type");
-      close_and_clean subscriptions websocket ~code:4400
+      close_and_clean subscriptions response ~code:4400
     | Some message_type ->
 
     match message_type with
@@ -146,24 +142,24 @@ let handle_over_websocket make_context schema subscriptions request websocket =
     | "connection_init" ->
       if inited then begin
         log.warning (fun log -> log ~request "Duplicate connection_init");
-        close_and_clean subscriptions websocket ~code:4429
+        close_and_clean subscriptions response ~code:4429
       end
       else begin
-        let%lwt () = Dream.send websocket ack_message in
+        let%lwt () = Dream.write response ack_message in
         loop true
       end
 
     | "complete" ->
       if not inited then begin
         log.warning (fun log -> log ~request "complete before connection_init");
-        close_and_clean subscriptions websocket ~code:4401
+        close_and_clean subscriptions response ~code:4401
       end
       else begin
         match operation_id json with
         | None ->
           log.warning (fun log ->
             log ~request "client complete: operation id missing");
-          close_and_clean subscriptions websocket ~code:4400
+          close_and_clean subscriptions response ~code:4400
         | Some id ->
           begin match Hashtbl.find_opt subscriptions id with
           | None -> ()
@@ -176,14 +172,14 @@ let handle_over_websocket make_context schema subscriptions request websocket =
       if not inited then begin
         log.warning (fun log ->
           log ~request "subscribe before connection_init");
-        close_and_clean subscriptions websocket ~code:4401
+        close_and_clean subscriptions response ~code:4401
       end
       else begin
         match operation_id json with
         | None ->
           log.warning (fun log ->
             log ~request "subscribe: operation id missing");
-          close_and_clean subscriptions websocket ~code:4400
+          close_and_clean subscriptions response ~code:4400
         | Some id ->
 
         let payload = json |> Yojson.Basic.Util.member "payload" in
@@ -197,13 +193,13 @@ let handle_over_websocket make_context schema subscriptions request websocket =
               log.warning (fun log ->
                 log ~request
                   "subscribe: error %s" (Yojson.Basic.to_string json));
-              Dream.send websocket (error_message id json)
+              Dream.write response (error_message id json)
 
             (* It's not clear that this case ever occurs, because graphql-ws is
                only used for subscriptions, at the protocol level. *)
             | Ok (`Response json) ->
-              let%lwt () = Dream.send websocket (data_message id json) in
-              let%lwt () = Dream.send websocket (complete_message id) in
+              let%lwt () = Dream.write response (data_message id json) in
+              let%lwt () = Dream.write response (complete_message id) in
               Lwt.return_unit
 
             | Ok (`Stream (stream, close)) ->
@@ -211,7 +207,7 @@ let handle_over_websocket make_context schema subscriptions request websocket =
               | true ->
                 log.warning (fun log ->
                   log ~request "subscribe: duplicate operation id");
-                close_and_clean subscriptions websocket ~code:4409
+                close_and_clean subscriptions response ~code:4409
               | false ->
 
               Hashtbl.replace subscriptions id close;
@@ -220,15 +216,15 @@ let handle_over_websocket make_context schema subscriptions request websocket =
               let%lwt () =
                 stream |> Lwt_stream.iter_s (function
                   | Ok json ->
-                    Dream.send websocket (data_message id json)
+                    Dream.write response (data_message id json)
                   | Error json ->
                     log.warning (fun log ->
                       log ~request
                         "Subscription: error %s" (Yojson.Basic.to_string json));
-                    Dream.send websocket (error_message id json))
+                    Dream.write response (error_message id json))
               in
 
-              let%lwt () = Dream.send websocket (complete_message id) in
+              let%lwt () = Dream.write response (complete_message id) in
               Hashtbl.remove subscriptions id;
               Lwt.return_unit
 
@@ -244,12 +240,12 @@ let handle_over_websocket make_context schema subscriptions request websocket =
 
             try%lwt
               let%lwt () =
-                Dream.send
-                  websocket
+                Dream.write
+                  response
                   (error_message id (make_error "Internal Server Error"))
               in
               if !subscribed then
-                Dream.send websocket (complete_message id)
+                Dream.write response (complete_message id)
               else
                 Lwt.return_unit
             with _ ->
@@ -262,7 +258,7 @@ let handle_over_websocket make_context schema subscriptions request websocket =
     | message_type ->
       log.warning (fun log ->
         log ~request "Unknown WebSocket message type '%s'" message_type);
-      close_and_clean subscriptions websocket ~code:4400
+      close_and_clean subscriptions response ~code:4400
   in
 
   loop false
@@ -281,7 +277,7 @@ let graphql make_context schema = fun request ->
     and protocol = Dream.header request "Sec-WebSocket-Protocol" in
     begin match upgrade, protocol with
     | Some "websocket", Some "graphql-transport-ws" ->
-      Dream.websocket
+      Helpers.websocket
         ~headers:["Sec-WebSocket-Protocol", "graphql-transport-ws"]
         (handle_over_websocket make_context schema (Hashtbl.create 16) request)
     | _ ->
