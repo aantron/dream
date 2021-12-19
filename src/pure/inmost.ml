@@ -5,30 +5,27 @@
 
 
 
+(* Type abbreviations and modules used in defining the primary types *)
+
 type method_ = Method.method_
 type status = Status.status
 
 type stream = Stream.stream
 type buffer = Stream.buffer
 
-module Custom_field_metadata =
-struct
-  type 'a t = string option * ('a -> string) option
-end
-module Fields = Hmap.Make (Custom_field_metadata)
+type 'a promise = 'a Lwt.t
 
-type request = client message
-and response = server message
+module Fields =
+  Hmap.Make (struct
+    type 'a t = string option * ('a -> string) option
+  end)
+(* TODO Use a record to self-document the meaning of this type. *)
 
-and 'a message = {
-  specific : 'a;
-  mutable headers : (string * string) list;
-  mutable client_stream : Stream.stream;
-  mutable server_stream : Stream.stream;
-  mutable fields : Fields.t;
-}
 
-and client = {
+
+(* Messages (requests and responses) *)
+
+type client = {
   mutable method_ : method_;
   target : string;
   mutable request_version : int * int;
@@ -39,14 +36,56 @@ and client = {
    middleware and into transport so that the version field is not necessary for
    some middleware to decide which headers to add. *)
 
-and server = {
+type server = {
   status : status;
 }
 
-type 'a promise = 'a Lwt.t
+type 'a message = {
+  specific : 'a;
+  mutable headers : (string * string) list;
+  mutable client_stream : Stream.stream;
+  mutable server_stream : Stream.stream;
+  mutable fields : Fields.t;
+}
+
+type request = client message
+type response = server message
+
+
+
+(* Functions of messages *)
 
 type handler = request -> response Lwt.t
 type middleware = handler -> handler
+
+
+
+(* Requests *)
+
+let request
+    ?method_
+    ?(target = "/")
+    ?(version = 1, 1)
+    ?(headers = [])
+    client_stream
+    server_stream =
+
+  let method_ =
+    match (method_ :> method_ option) with
+    | None -> `GET
+    | Some method_ -> method_
+  in
+  {
+    specific = {
+      method_;
+      target;
+      request_version = version;
+    };
+    headers;
+    client_stream;
+    server_stream;
+    fields = Fields.empty;
+  }
 
 let method_ request =
   request.specific.method_
@@ -63,14 +102,43 @@ let set_method_ request method_ =
 let set_version request version =
   request.specific.request_version <- version
 
+
+
+(* Responses *)
+
+let response ?status ?code ?(headers = []) client_stream server_stream =
+  let status =
+    match status, code with
+    | None, None -> `OK
+    | Some status, _ -> (status :> status)
+    | None, Some code -> Status.int_to_status code
+  in
+  {
+    specific = {
+      status;
+    };
+    headers;
+    client_stream;
+    server_stream;
+    fields = Fields.empty;
+  }
+
 let status response =
   response.specific.status
 
-let all_headers message =
-  message.headers
 
-let set_all_headers message headers =
-  message.headers <- headers
+
+(* Headers *)
+
+let header_basic name message =
+  let name = String.lowercase_ascii name in
+  message.headers
+  |> List.find (fun (name', _) -> String.lowercase_ascii name' = name)
+  |> snd
+
+let header message name =
+  try Some (header_basic name message)
+  with Not_found -> None
 
 let headers message name =
   let name = String.lowercase_ascii name in
@@ -84,15 +152,8 @@ let headers message name =
     []
   |> List.rev
 
-let header_basic name message =
-  let name = String.lowercase_ascii name in
+let all_headers message =
   message.headers
-  |> List.find (fun (name', _) -> String.lowercase_ascii name' = name)
-  |> snd
-
-let header message name =
-  try Some (header_basic name message)
-  with Not_found -> None
 
 let has_header message name =
   try ignore (header_basic name message); true
@@ -112,30 +173,20 @@ let set_header message name value =
   drop_header message name;
   add_header message name value
 
+let set_all_headers message headers =
+  message.headers <- headers
+
+let sort_headers headers =
+  List.stable_sort (fun (name, _) (name', _) -> compare name name') headers
+
+
+
+(* Streams *)
+
 (* TODO NOTE On the client, this will read the client stream until close. *)
 let body message =
   Stream.read_until_close message.server_stream
 
-let read message =
-  Stream.read_convenience message.server_stream
-
-let client_stream message =
-  message.client_stream
-
-let server_stream message =
-  message.server_stream
-
-let set_client_stream message client_stream =
-  message.client_stream <- client_stream
-
-let set_server_stream message server_stream =
-  message.server_stream <- server_stream
-
-(* Create a fresh ref. The reason this field has a ref is because it might get
-   replaced when a body is forced read. That's not what's happening here - we
-   are setting a new body. Indeed, there might be a concurrent read going on.
-   That read should not override the new body. So let it mutate the old
-   request's ref; we generate a new request with a new body ref. *)
 (* TODO NOTE In Dream, this should operate on response server_streams. In Hyper,
    it should operate on request client_streams, although there is no very good
    reason why it can't operate on general messages, which might be useful in
@@ -154,6 +205,9 @@ let set_body message body =
       Stream.(stream (string body) no_writer)
   in
   message.server_stream <- body
+
+let read message =
+  Stream.read_convenience message.server_stream
 
 (* TODO Need to expose FIN. However, it can't have any effect even on
    WebSockets, because websocket/af does not offer the ability to pass FIN. It
@@ -191,7 +245,34 @@ let close ?(code = 1000) message =
   Stream.close message.server_stream code;
   Lwt.return_unit
 
+let client_stream message =
+  message.client_stream
 
+let server_stream message =
+  message.server_stream
+
+let set_client_stream message client_stream =
+  message.client_stream <- client_stream
+
+let set_server_stream message server_stream =
+  message.server_stream <- server_stream
+
+
+
+(* Middleware *)
+
+let no_middleware handler request =
+  handler request
+
+let rec pipeline middlewares handler =
+  match middlewares with
+  | [] -> handler
+  | middleware::more -> middleware (pipeline more handler)
+(* TODO Test pipelien after the List.rev fiasco. *)
+
+
+
+(* Custom fields *)
 
 type 'a field = 'a Fields.key
 
@@ -211,69 +292,3 @@ let fold_fields f initial message =
     | _ -> accumulator)
     message.fields
     initial
-
-
-
-let request
-    ?method_
-    ?(target = "/")
-    ?(version = 1, 1)
-    ?(headers = [])
-    client_stream
-    server_stream =
-
-  let method_ =
-    match (method_ :> method_ option) with
-    | None -> `GET
-    | Some method_ -> method_
-  in
-
-  (* This function is used for debugging, so it's fine to allocate a fake body
-     and then immediately replace it. *)
-
-  {
-    specific = {
-      (* TODO Is there a better fake error handler? Maybe this function should
-         come after the response constructors? *)
-      method_;
-      target;
-      request_version = version;
-    };
-    headers;
-    client_stream;
-    server_stream;
-    fields = Fields.empty;
-  }
-
-let response
-    ?status ?code ?(headers = []) client_stream server_stream =
-
-  let status =
-    match status, code with
-    | None, None -> `OK
-    | Some status, _ -> (status :> status)
-    | None, Some code -> Status.int_to_status code
-  in
-
-  {
-    specific = {
-      status;
-    };
-    headers;
-    client_stream;
-    server_stream;
-    (* TODO This fully dead stream should be preallocated. *)
-    fields = Fields.empty;
-  }
-
-let no_middleware handler request =
-  handler request
-
-let rec pipeline middlewares handler =
-  match middlewares with
-  | [] -> handler
-  | middleware::more -> middleware (pipeline more handler)
-(* TODO Test pipelien after the List.rev fiasco. *)
-
-let sort_headers headers =
-  List.stable_sort (fun (name, _) (name', _) -> compare name name') headers
