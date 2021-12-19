@@ -755,7 +755,11 @@ let serve_with_maybe_https
               log "See arguments ~certificate_file and ~key_file");
           end;
 
-          `Memory (Dream__localhost.certificate, Dream__localhost.key, `Silent)
+          `Memory (
+            Dream__certificate.localhost_certificate,
+            Dream__certificate.localhost_certificate_key,
+            `Silent
+          )
 
         | Some certificate_file, Some key_file, None, None ->
           `File (certificate_file, key_file)

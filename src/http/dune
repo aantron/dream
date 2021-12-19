@@ -5,8 +5,8 @@
   bigarray-compat
   bigstringaf
   digestif
+  dream.certificate
   dream.cipher
-  dream.localhost
   dream-pure
   dream.server
   dream-httpaf.gluten
