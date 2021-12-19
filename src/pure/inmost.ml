@@ -15,11 +15,11 @@ type buffer = Stream.buffer
 
 type 'a promise = 'a Lwt.t
 
-module Fields =
-  Hmap.Make (struct
-    type 'a t = string option * ('a -> string) option
-  end)
-(* TODO Use a record to self-document the meaning of this type. *)
+type 'a field_metadata = {
+  name : string option;
+  show_value : ('a -> string) option;
+}
+module Fields = Hmap.Make (struct type 'a t = 'a field_metadata end)
 
 
 
@@ -28,7 +28,7 @@ module Fields =
 type client = {
   mutable method_ : method_;
   target : string;
-  mutable request_version : int * int;
+  mutable version : int * int;
 }
 (* TODO Get rid of the version field completely? At least don't expose it in
    Dream. It is only used internally on the server side to add the right
@@ -79,7 +79,7 @@ let request
     specific = {
       method_;
       target;
-      request_version = version;
+      version;
     };
     headers;
     client_stream;
@@ -94,13 +94,13 @@ let target request =
   request.specific.target
 
 let version request =
-  request.specific.request_version
+  request.specific.version
 
 let set_method_ request method_ =
   request.specific.method_ <- (method_ :> method_)
 
 let set_version request version =
-  request.specific.request_version <- version
+  request.specific.version <- version
 
 
 
@@ -277,7 +277,7 @@ let rec pipeline middlewares handler =
 type 'a field = 'a Fields.key
 
 let new_field ?name ?show_value () =
-  Fields.Key.create (name, show_value)
+  Fields.Key.create {name; show_value}
 
 let field message key =
   Fields.find key message.fields
@@ -288,7 +288,8 @@ let set_field message key value =
 let fold_fields f initial message =
   Fields.fold (fun (B (key, value)) accumulator ->
     match Fields.Key.info key with
-    | Some name, Some show_value -> f name (show_value value) accumulator
+    | {name = Some name; show_value = Some show_value} ->
+      f name (show_value value) accumulator
     | _ -> accumulator)
     message.fields
     initial
