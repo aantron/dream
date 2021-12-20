@@ -60,14 +60,12 @@ depends: [
   "graphql_parser"
   "graphql-lwt"
   "lwt"
-  "lwt_ppx" {>= "1.2.2"}
   "lwt_ssl"
   "logs" {>= "0.5.0"}
   "magic-mime"
   "mirage-clock"
   "mirage-crypto" {>= "0.8.1"}  # AES-256-GCM.
   "mirage-crypto-rng" {>= "0.8.0"}  # Signature of initialize.
-  "multipart_form" {>= "0.3.0"}
   "ocaml" {>= "4.08.0"}
   "ptime" {>= "0.8.1"}  # Ptime.v.
   "ssl" {>= "0.5.8"}  # Ssl.get_negotiated_alpn_protocol.
