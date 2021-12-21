@@ -22,7 +22,7 @@ let address_to_string : Unix.sockaddr -> string = function
 let forward_body_general
     (response : Message.response)
     (_write_string : ?off:int -> ?len:int -> string -> unit)
-    (write_buffer : ?off:int -> ?len:int -> Message.buffer -> unit)
+    (write_buffer : ?off:int -> ?len:int -> Stream.buffer -> unit)
     http_flush
     close =
 

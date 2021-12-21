@@ -19,40 +19,34 @@ type 'a promise = 'a Lwt.t
 type handler = request -> response promise
 type middleware = handler -> handler
 
-type method_ = Method.method_
-type status = Status.status
-
-type stream = Stream.stream
-type buffer = Stream.buffer
-
 
 
 val request :
-  ?method_:[< method_ ] ->
+  ?method_:[< Method.method_ ] ->
   ?target:string ->
   ?version:int * int ->
   ?headers:(string * string) list ->
-  stream ->
-  stream ->
+  Stream.stream ->
+  Stream.stream ->
     request
 
-val method_ : request -> method_
+val method_ : request -> Method.method_
 val target : request -> string
 val version : request -> int * int
-val set_method_ : request -> [< method_ ] -> unit
+val set_method_ : request -> [< Method.method_ ] -> unit
 val set_version : request -> int * int -> unit
 
 
 
 val response :
-  ?status:[< status ] ->
+  ?status:[< Status.status ] ->
   ?code:int ->
   ?headers:(string * string) list ->
-  stream ->
-  stream ->
+  Stream.stream ->
+  Stream.stream ->
     response
 
-val status : response -> status
+val status : response -> Status.status
 
 
 
@@ -74,10 +68,10 @@ val read : 'a message -> string option promise
 val write : ?kind:[< `Text | `Binary ] -> response -> string -> unit promise
 val flush : response -> unit promise
 val close : ?code:int -> 'a message -> unit promise
-val client_stream : 'a message -> stream
-val server_stream : 'a message -> stream
-val set_client_stream : 'a message -> stream -> unit
-val set_server_stream : 'a message -> stream -> unit
+val client_stream : 'a message -> Stream.stream
+val server_stream : 'a message -> Stream.stream
+val set_client_stream : 'a message -> Stream.stream -> unit
+val set_server_stream : 'a message -> Stream.stream -> unit
 
 
 

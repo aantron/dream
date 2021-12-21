@@ -7,12 +7,6 @@
 
 (* Type abbreviations and modules used in defining the primary types *)
 
-type method_ = Method.method_
-type status = Status.status
-
-type stream = Stream.stream
-type buffer = Stream.buffer
-
 type 'a promise = 'a Lwt.t
 
 type 'a field_metadata = {
@@ -26,7 +20,7 @@ module Fields = Hmap.Make (struct type 'a t = 'a field_metadata end)
 (* Messages (requests and responses) *)
 
 type client = {
-  mutable method_ : method_;
+  mutable method_ : Method.method_;
   target : string;
   mutable version : int * int;
 }
@@ -37,7 +31,7 @@ type client = {
    some middleware to decide which headers to add. *)
 
 type server = {
-  status : status;
+  status : Status.status;
 }
 
 type 'a message = {
@@ -71,7 +65,7 @@ let request
     server_stream =
 
   let method_ =
-    match (method_ :> method_ option) with
+    match (method_ :> Method.method_ option) with
     | None -> `GET
     | Some method_ -> method_
   in
@@ -97,7 +91,7 @@ let version request =
   request.specific.version
 
 let set_method_ request method_ =
-  request.specific.method_ <- (method_ :> method_)
+  request.specific.method_ <- (method_ :> Method.method_)
 
 let set_version request version =
   request.specific.version <- version
@@ -110,7 +104,7 @@ let response ?status ?code ?(headers = []) client_stream server_stream =
   let status =
     match status, code with
     | None, None -> `OK
-    | Some status, _ -> (status :> status)
+    | Some status, _ -> (status :> Status.status)
     | None, Some code -> Status.int_to_status code
   in
   {
