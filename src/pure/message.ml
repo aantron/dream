@@ -177,29 +177,6 @@ let sort_headers headers =
 
 (* Streams *)
 
-(* TODO NOTE On the client, this will read the client stream until close. *)
-let body message =
-  Stream.read_until_close message.server_stream
-
-(* TODO NOTE In Dream, this should operate on response server_streams. In Hyper,
-   it should operate on request client_streams, although there is no very good
-   reason why it can't operate on general messages, which might be useful in
-   middlewares that preprocess requests on the server and postprocess responses
-   on the client. Or.... shouldn't this affect the client stream on the server,
-   replacing its read end? *)
-let set_body message body =
-  (* TODO This is partially redundant with a length check in Stream.string, but
-     that check is no longer useful as it prevents allocation of only a reader,
-     rather than a complete stream. *)
-  let body =
-    if String.length body = 0 then
-      (* TODO Should probably preallocate this as a stream. *)
-      Stream.(stream empty no_writer)
-    else
-      Stream.(stream (string body) no_writer)
-  in
-  message.client_stream <- body
-
 let read message =
   Stream.read_convenience message.server_stream
 
@@ -287,3 +264,42 @@ let fold_fields f initial message =
     | _ -> accumulator)
     message.fields
     initial
+
+
+
+(* Whole-body access *)
+
+(* TODO Show the value somehow. *)
+let body_field : string promise field =
+  new_field
+    ~name:"dream.body"
+    ()
+
+(* TODO NOTE On the client, this will read the client stream until close. *)
+let body message =
+  match field message body_field with
+  | Some body_promise -> body_promise
+  | None ->
+    let body_promise = Stream.read_until_close message.server_stream in
+    set_field message body_field body_promise;
+    body_promise
+
+(* TODO Should usage of this function affect the body field? *)
+(* TODO NOTE In Dream, this should operate on response server_streams. In Hyper,
+   it should operate on request client_streams, although there is no very good
+   reason why it can't operate on general messages, which might be useful in
+   middlewares that preprocess requests on the server and postprocess responses
+   on the client. Or.... shouldn't this affect the client stream on the server,
+   replacing its read end? *)
+let set_body message body =
+  (* TODO This is partially redundant with a length check in Stream.string, but
+     that check is no longer useful as it prevents allocation of only a reader,
+     rather than a complete stream. *)
+  let body =
+    if String.length body = 0 then
+      (* TODO Should probably preallocate this as a stream. *)
+      Stream.(stream empty no_writer)
+    else
+      Stream.(stream (string body) no_writer)
+  in
+  message.client_stream <- body
