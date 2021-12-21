@@ -7,7 +7,7 @@
 
 (* https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html *)
 
-module Dream = Dream_pure.Inmost
+module Message = Dream_pure.Message
 
 
 
@@ -15,18 +15,18 @@ let log =
   Log.sub_log "dream.session"
 
 type 'a back_end = {
-  load : Dream.request -> 'a Lwt.t;
-  send : 'a -> Dream.request -> Dream.response -> Dream.response Lwt.t;
+  load : Message.request -> 'a Lwt.t;
+  send : 'a -> Message.request -> Message.response -> Message.response Lwt.t;
 }
 
 let middleware field back_end = fun inner_handler request ->
   let%lwt session = back_end.load request in
-  Dream.set_field request field session;
+  Message.set_field request field session;
   let%lwt response = inner_handler request in
   back_end.send session request response
 
 let getter field request =
-  match Dream.field request field with
+  match Message.field request field with
   | Some session ->
     session
   | None ->
@@ -35,12 +35,12 @@ let getter field request =
     failwith message
 
 type 'a typed_middleware = {
-  middleware : 'a back_end -> Dream.middleware;
-  getter : Dream.request -> 'a;
+  middleware : 'a back_end -> Message.middleware;
+  getter : Message.request -> 'a;
 }
 
 let typed_middleware ?show_value () =
-  let field = Dream.new_field ~name:"dream.session" ?show_value () in
+  let field = Message.new_field ~name:"dream.session" ?show_value () in
   {
     middleware = middleware field;
     getter = getter field;

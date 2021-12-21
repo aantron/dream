@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Message = Dream_pure.Message
 module Stream = Dream_pure.Stream
 
 
@@ -16,14 +16,14 @@ let log =
 (* TODO Rename all next_handler to inner_handler. *)
 let origin_referrer_check inner_handler request =
 
-  match Dream.method_ request with
+  match Message.method_ request with
   | `GET | `HEAD ->
     inner_handler request
 
   | _ ->
     let origin =
-      match Dream.header request "Origin" with
-      | Some "null" | None -> Dream.header request "Referer"
+      match Message.header request "Origin" with
+      | Some "null" | None -> Message.header request "Referer"
       | Some _ as origin -> origin
     in
 
@@ -34,19 +34,19 @@ let origin_referrer_check inner_handler request =
       (* TODO Simplify. *)
       let client_stream = Stream.(stream empty no_writer)
       and server_stream = Stream.(stream no_reader no_writer) in
-      Dream.response ~status:`Bad_Request client_stream server_stream
+      Message.response ~status:`Bad_Request client_stream server_stream
       |> Lwt.return
 
     (* TODO Also recommend Uri to users. *)
     | Some origin ->
 
-      match Dream.header request "Host" with
+      match Message.header request "Host" with
       | None ->
         log.warning (fun log -> log ~request "Host header missing");
         (* TODO Simplify. *)
         let client_stream = Stream.(stream empty no_writer)
         and server_stream = Stream.(stream no_reader no_writer) in
-        Dream.response ~status:`Bad_Request client_stream server_stream
+        Message.response ~status:`Bad_Request client_stream server_stream
         |> Lwt.return
 
       | Some host ->
@@ -84,6 +84,6 @@ let origin_referrer_check inner_handler request =
           (* TODO Simplify. *)
           let client_stream = Stream.(stream empty no_writer)
           and server_stream = Stream.(stream no_reader no_writer) in
-          Dream.response ~status:`Bad_Request client_stream server_stream
+          Message.response ~status:`Bad_Request client_stream server_stream
           |> Lwt.return
         end

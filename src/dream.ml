@@ -10,7 +10,6 @@ module Cipher = Dream__cipher.Cipher
 module Cookie = Dream__server.Cookie
 module Content_length = Dream__server.Content_length
 module Csrf = Dream__server.Csrf
-module Dream = Dream_pure.Inmost
 module Echo = Dream__server.Echo
 module Error_handler = Dream__http.Error_handler
 module Flash = Dream__server.Flash
@@ -20,6 +19,7 @@ module Graphql = Dream__graphql.Graphql
 module Helpers = Dream__server.Helpers
 module Http = Dream__http.Http
 module Lowercase_headers = Dream__server.Lowercase_headers
+module Message = Dream_pure.Message
 module Method = Dream_pure.Method
 module Origin_referrer_check = Dream__server.Origin_referrer_check
 module Query = Dream__server.Query
@@ -68,16 +68,16 @@ end
 
 (* Types *)
 
-type request = Dream.request
-type response = Dream.response
-type handler = Dream.handler
-type middleware = Dream.middleware
+type request = Message.request
+type response = Message.response
+type handler = Message.handler
+type middleware = Message.middleware
 type route = Router.route
 
-type 'a message = 'a Dream.message
-type client = Dream.client
-type server = Dream.server
-type 'a promise = 'a Dream.promise
+type 'a message = 'a Message.message
+type client = Message.client
+type server = Message.server
+type 'a promise = 'a Message.promise
 
 
 
@@ -97,13 +97,13 @@ include Status
 
 let client = Helpers.client
 let https = Helpers.https
-let method_ = Dream.method_
-let target = Dream.target
+let method_ = Message.method_
+let target = Message.target
 let prefix = Router.prefix
 let path = Router.path
-let version = Dream.version
+let version = Message.version
 let set_client = Helpers.set_client
-let set_method_ = Dream.set_method_
+let set_method_ = Message.set_method_
 let query = Query.query
 let queries = Query.queries
 let all_queries = Query.all_queries
@@ -120,19 +120,19 @@ let redirect = Helpers.redirect
 let empty = Helpers.empty
 let stream = Helpers.stream
 let websocket = Helpers.websocket
-let status = Dream.status
+let status = Message.status
 
 
 
 (* Headers *)
 
-let header = Dream.header
-let headers = Dream.headers
-let all_headers = Dream.all_headers
-let has_header = Dream.has_header
-let add_header = Dream.add_header
-let drop_header = Dream.drop_header
-let set_header = Dream.set_header
+let header = Message.header
+let headers = Message.headers
+let all_headers = Message.all_headers
+let has_header = Message.has_header
+let add_header = Message.add_header
+let drop_header = Message.drop_header
+let set_header = Message.set_header
 
 
 
@@ -147,18 +147,18 @@ let all_cookies = Cookie.all_cookies
 
 (* Bodies *)
 
-let body = Dream.body
-let set_body = Dream.set_body
-let read = Dream.read
-let write = Dream.write
-let flush = Dream.flush
-let close = Dream.close
+let body = Message.body
+let set_body = Message.set_body
+let read = Message.read
+let write = Message.write
+let flush = Message.flush
+let close = Message.close
 type buffer = Stream.buffer
 type stream = Stream.stream
-let client_stream = Dream.client_stream
-let server_stream = Dream.server_stream
-let set_client_stream = Dream.set_client_stream
-let set_server_stream = Dream.set_server_stream
+let client_stream = Message.client_stream
+let server_stream = Message.server_stream
+let set_client_stream = Message.set_client_stream
+let set_server_stream = Message.set_server_stream
 let read_stream = Stream.read
 let ready_stream = Stream.ready
 let write_stream = Stream.write
@@ -199,8 +199,8 @@ let form_tag ?method_ ?target ?enctype ?csrf_token ~action request =
 
 (* Middleware *)
 
-let no_middleware = Dream.no_middleware
-let pipeline = Dream.pipeline
+let no_middleware = Message.no_middleware
+let pipeline = Message.pipeline
 
 
 
@@ -295,7 +295,7 @@ let set_log_level = Log.set_log_level
 
 type error = Catch.error = {
   condition : [
-    | `Response of Dream.response
+    | `Response of Message.response
     | `String of string
     | `Exn of exn
   ];
@@ -310,8 +310,8 @@ type error = Catch.error = {
     | `Server
     | `Client
   ];
-  request : Dream.request option;
-  response : Dream.response option;
+  request : Message.request option;
+  response : Message.response option;
   client : string option;
   severity : Log.log_level;
   will_send_response : bool;
@@ -350,10 +350,10 @@ let decrypt = Cipher.decrypt
 
 (* Custom fields *)
 
-type 'a field = 'a Dream.field
-let new_field = Dream.new_field
-let field = Dream.field
-let set_field = Dream.set_field
+type 'a field = 'a Message.field
+let new_field = Message.new_field
+let field = Message.field
+let set_field = Message.set_field
 
 
 
@@ -372,7 +372,7 @@ let test ?(prefix = "") handler request =
 
   Lwt_main.run (app request)
 
-let sort_headers = Dream.sort_headers
+let sort_headers = Message.sort_headers
 let echo = Echo.echo
 
 
@@ -384,11 +384,11 @@ let with_client client message =
   message
 
 let with_method_ method_ message =
-  Dream.set_method_ message method_;
+  Message.set_method_ message method_;
   message
 
 let with_version version message =
-  Dream.set_version message version;
+  Message.set_version message version;
   message
 
 let with_path path message =
@@ -396,11 +396,11 @@ let with_path path message =
   message
 
 let with_header name value message =
-  Dream.set_header message name value;
+  Message.set_header message name value;
   message
 
 let with_body body message =
-  Dream.set_body message body;
+  Message.set_body message body;
   message
 
 let with_stream message =
@@ -415,17 +415,17 @@ let write_buffer ?(offset = 0) ?length message chunk =
   let string = Bigstringaf.substring chunk ~off:offset ~len:length in
   write ~kind:`Binary message string
 
-type websocket = Dream.response
+type websocket = Message.response
 let send = write
 let receive = read
 let close_websocket = close
 
-type 'a local = 'a Dream.field
-let new_local = Dream.new_field
-let local = Dream.field
+type 'a local = 'a Message.field
+let new_local = Message.new_field
+let local = Message.field
 
 let with_local key value message =
-  Dream.set_field message key value;
+  Message.set_field message key value;
   message
 
 let first message =

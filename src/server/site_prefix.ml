@@ -5,8 +5,8 @@
 
 
 
-module Dream = Dream_pure.Inmost
 module Formats = Dream_pure.Formats
+module Message = Dream_pure.Message
 module Stream = Dream_pure.Stream
 
 
@@ -38,7 +38,7 @@ let with_site_prefix prefix =
       (* TODO Streams. *)
       let client_stream = Stream.(stream empty no_writer)
       and server_stream = Stream.(stream no_reader no_writer) in
-      Dream.response ~status:`Bad_Gateway client_stream server_stream
+      Message.response ~status:`Bad_Gateway client_stream server_stream
       |> Lwt.return
     | Some path ->
       (* TODO This doesn't need to be recomputed on each request - can cache the

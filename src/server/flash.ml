@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Message = Dream_pure.Message
 
 
 
@@ -16,7 +16,7 @@ let five_minutes =
   5. *. 60.
 
 let storage_field =
-  Dream.new_field ~name:"dream.flash" ()
+  Message.new_field ~name:"dream.flash" ()
 
 let flash_cookie =
   "dream.flash"
@@ -53,7 +53,7 @@ let flash request =
 
 let put_flash request category message =
   let outbox =
-    match Dream.field request storage_field with
+    match Message.field request storage_field with
     | Some outbox -> outbox
     | None ->
       let message = "Missing flash message middleware" in
@@ -75,7 +75,7 @@ let flash_messages inner_handler request =
     else
       log ~request "%s" "No flash messages.");
   let outbox = ref [] in
-  Dream.set_field request storage_field outbox;
+  Message.set_field request storage_field outbox;
   let existing = Cookie.cookie request flash_cookie in
   let%lwt response = inner_handler request in
   let entries = List.rev !outbox in

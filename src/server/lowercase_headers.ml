@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Message = Dream_pure.Message
 
 
 
@@ -16,8 +16,8 @@ module Dream = Dream_pure.Inmost
    lowercase. Another option is to use memoization to reduce GC pressure. *)
 let lowercase_headers inner_handler request =
   let%lwt response = inner_handler request in
-  if fst (Dream.version request) <> 1 then
-    Dream.all_headers response
+  if fst (Message.version request) <> 1 then
+    Message.all_headers response
     |> List.map (fun (name, value) -> String.lowercase_ascii name, value)
-    |> Dream.set_all_headers response;
+    |> Message.set_all_headers response;
   Lwt.return response

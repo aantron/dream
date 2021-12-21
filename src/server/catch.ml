@@ -5,14 +5,14 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Message = Dream_pure.Message
 module Status = Dream_pure.Status
 
 
 
 type error = {
   condition : [
-    | `Response of Dream.response
+    | `Response of Message.response
     | `String of string
     | `Exn of exn
   ];
@@ -27,14 +27,14 @@ type error = {
     | `Server
     | `Client
   ];
-  request : Dream.request option;
-  response : Dream.response option;
+  request : Message.request option;
+  response : Message.response option;
   client : string option;
   severity : Log.log_level;
   will_send_response : bool;
 }
 
-type error_handler = error -> Dream.response option Dream.promise
+type error_handler = error -> Message.response option Message.promise
 
 (* This error handler actually *is* a middleware, but it is just one pathway for
    reaching the centralized error handler provided by the user, so it is built
@@ -49,7 +49,7 @@ let catch error_handler next_handler request =
       next_handler request)
 
     (fun response ->
-      let status = Dream.status response in
+      let status = Message.status response in
 
       (* TODO Overfull hbox. *)
       if Status.is_client_error status || Status.is_server_error status then begin

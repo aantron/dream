@@ -6,8 +6,8 @@
 
 
 module Catch = Dream__server.Catch
-module Dream = Dream_pure.Inmost
 module Log = Dream__server.Log
+module Message = Dream_pure.Message
 
 
 
@@ -17,7 +17,7 @@ module Log = Dream__server.Log
 val default : Catch.error_handler
 val debug_error_handler : Catch.error_handler
 val customize :
-  (Catch.error -> string -> Dream.response -> Dream.response Lwt.t) ->
+  (Catch.error -> string -> Message.response -> Message.response Lwt.t) ->
     Catch.error_handler
 
 
@@ -35,7 +35,7 @@ val customize :
 
 val app :
   Catch.error_handler ->
-    (Catch.error -> Dream.response Lwt.t)
+    (Catch.error -> Message.response Lwt.t)
 
 val httpaf :
   Catch.error_handler ->
@@ -51,13 +51,13 @@ val tls :
 
 val websocket :
   Catch.error_handler ->
-  Dream.request ->
-  Dream.response ->
+  Message.request ->
+  Message.response ->
     (Websocketaf.Wsd.t -> [ `Exn of exn ] -> unit)
 
 val websocket_handshake :
   Catch.error_handler ->
-    (Dream.request -> Dream.response -> string -> Dream.response Lwt.t)
+    (Message.request -> Message.response -> string -> Message.response Lwt.t)
 
 
 

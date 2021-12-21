@@ -7,10 +7,10 @@
 
 module Catch = Dream__server.Catch
 module Content_length = Dream__server.Content_length
-module Dream = Dream_pure.Inmost
 module Helpers = Dream__server.Helpers
 module Log = Dream__server.Log
 module Lowercase_headers = Dream__server.Lowercase_headers
+module Message = Dream_pure.Message
 module Method = Dream_pure.Method
 module Status = Dream_pure.Status
 module Stream = Dream_pure.Stream
@@ -205,11 +205,11 @@ let websocket_handler response socket =
   in
 
   let reader = Stream.reader ~read ~close in
-  Stream.forward reader (Dream.client_stream response);
+  Stream.forward reader (Message.client_stream response);
 
   let rec outgoing_loop () =
     Stream.read
-      (Dream.client_stream response)
+      (Message.client_stream response)
       ~data:(fun buffer offset length binary fin ->
         (* Until https://github.com/anmonteiro/websocketaf/issues/33. *)
         if not fin then
@@ -277,7 +277,7 @@ let websocket_handler response socket =
 let wrap_handler
     https
     (user's_error_handler : Catch.error_handler)
-    (user's_dream_handler : Dream.handler) =
+    (user's_dream_handler : Message.handler) =
 
   let httpaf_request_handler = fun client_address (conn : _ Gluten.Reqd.t) ->
     Log.set_up_exception_hook ();
@@ -318,7 +318,7 @@ let wrap_handler
     let body =
       Stream.stream body Stream.no_writer in
 
-    let request : Dream.request =
+    let request : Message.request =
       Helpers.request ~client ~method_ ~target ~https ~version ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
@@ -347,7 +347,7 @@ let wrap_handler
               transmit the resulting error response. *)
         let forward_response response =
           let headers =
-            Httpaf.Headers.of_list (Dream.all_headers response) in
+            Httpaf.Headers.of_list (Message.all_headers response) in
 
           (* let version =
             match Dream.version_override response with
@@ -355,7 +355,7 @@ let wrap_handler
             | Some (major, minor) -> Some Httpaf.Version.{major; minor}
           in *)
           let status =
-            to_httpaf_status (Dream.status response) in
+            to_httpaf_status (Message.status response) in
           (* let reason =
             Dream.reason_override response in *)
 
@@ -383,7 +383,7 @@ let wrap_handler
           in
 
           let headers =
-            Httpaf.Headers.of_list (Dream.all_headers response) in
+            Httpaf.Headers.of_list (Message.all_headers response) in
 
           Websocketaf.Handshake.respond_with_upgrade ~headers ~sha1 conn proceed
           |> function
@@ -413,7 +413,7 @@ let wrap_handler
 let wrap_handler_h2
     https
     (_user's_error_handler : Catch.error_handler)
-    (user's_dream_handler : Dream.handler) =
+    (user's_dream_handler : Message.handler) =
 
   let httpaf_request_handler = fun client_address (conn : H2.Reqd.t) ->
     Log.set_up_exception_hook ();
@@ -448,7 +448,7 @@ let wrap_handler_h2
     let body =
       Stream.stream body Stream.no_writer in
 
-    let request : Dream.request =
+    let request : Message.request =
       Helpers.request ~client ~method_ ~target ~https ~version ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
@@ -470,9 +470,9 @@ let wrap_handler_h2
 
         let forward_response response =
           let headers =
-            H2.Headers.of_list (Dream.all_headers response) in
+            H2.Headers.of_list (Message.all_headers response) in
           let status =
-            to_h2_status (Dream.status response) in
+            to_h2_status (Message.status response) in
           let h2_response =
             H2.Response.create ~headers status in
           let body =
@@ -515,7 +515,7 @@ type tls_library = {
   create_handler :
     certificate_file:string ->
     key_file:string ->
-    handler:Dream.handler ->
+    handler:Message.handler ->
     error_handler:Catch.error_handler ->
       Unix.sockaddr ->
       Lwt_unix.file_descr ->
@@ -608,7 +608,7 @@ let ocaml_tls = {
 
 
 let built_in_middleware error_handler =
-  Dream.pipeline [
+  Message.pipeline [
     Lowercase_headers.lowercase_headers;
     Content_length.content_length;
     Catch.catch (Error_handler.app error_handler);

@@ -5,15 +5,15 @@
 
 
 
-module Dream = Dream_pure.Inmost
 module Formats = Dream_pure.Formats
+module Message = Dream_pure.Message
 module Status = Dream_pure.Status
 module Stream = Dream_pure.Stream
 
 
 
 let client_field =
-  Dream.new_field
+  Message.new_field
     ~name:"dream.client"
     ~show_value:(fun client -> client)
     ()
@@ -21,28 +21,28 @@ let client_field =
 (* TODO What should be reported when the client address is missing? This is a
    sign of local testing. *)
 let client request =
-  match Dream.field request client_field with
+  match Message.field request client_field with
   | None -> "127.0.0.1:0"
   | Some client -> client
 
 let set_client request client =
-  Dream.set_field request client_field client
+  Message.set_field request client_field client
 
 
 
 let https_field =
-  Dream.new_field
+  Message.new_field
     ~name:"dream.https"
     ~show_value:string_of_bool
     ()
 
 let https request =
-  match Dream.field request https_field with
+  match Message.field request https_field with
   | Some true -> true
   | _ -> false
 
 let set_https request https =
-  Dream.set_field request https_field https
+  Message.set_field request https_field https
 
 
 
@@ -50,7 +50,7 @@ let request ~client ~method_ ~target ~https ~version ~headers server_stream =
   (* TODO Use pre-allocated streams. *)
   let client_stream = Stream.(stream no_reader no_writer) in
   let request =
-    Dream.request
+    Message.request
       ~method_ ~target ~version ~headers client_stream server_stream in
   set_client request client;
   set_https request https;
@@ -60,7 +60,7 @@ let request_with_body ?method_ ?target ?version ?headers body =
   (* TODO Streams. *)
   let client_stream = Stream.(stream no_reader no_writer)
   and server_stream = Stream.(stream (string body) no_writer) in
-  Dream.request ?method_ ?target ?version ?headers client_stream server_stream
+  Message.request ?method_ ?target ?version ?headers client_stream server_stream
 
 
 
@@ -69,8 +69,8 @@ let html ?status ?code ?headers body =
   let client_stream = Stream.(stream (string body) no_writer)
   and server_stream = Stream.(stream no_reader no_writer) in
   let response =
-    Dream.response ?status ?code ?headers client_stream server_stream in
-  Dream.set_header response "Content-Type" Formats.text_html;
+    Message.response ?status ?code ?headers client_stream server_stream in
+  Message.set_header response "Content-Type" Formats.text_html;
   Lwt.return response
 
 let json ?status ?code ?headers body =
@@ -78,20 +78,20 @@ let json ?status ?code ?headers body =
   let client_stream = Stream.(stream (string body) no_writer)
   and server_stream = Stream.(stream no_reader no_writer) in
   let response =
-    Dream.response ?status ?code ?headers client_stream server_stream in
-  Dream.set_header response "Content-Type" Formats.application_json;
+    Message.response ?status ?code ?headers client_stream server_stream in
+  Message.set_header response "Content-Type" Formats.application_json;
   Lwt.return response
 
 let response_with_body ?status ?code ?headers body =
   (* TODO Streams. *)
   let client_stream = Stream.(stream (string body) no_writer)
   and server_stream = Stream.(stream no_reader no_writer) in
-  Dream.response ?status ?code ?headers client_stream server_stream
+  Message.response ?status ?code ?headers client_stream server_stream
 
 let respond ?status ?code ?headers body =
   let client_stream = Stream.(stream (string body) no_writer)
   and server_stream = Stream.(stream no_reader no_writer) in
-  Dream.response ?status ?code ?headers client_stream server_stream
+  Message.response ?status ?code ?headers client_stream server_stream
   |> Lwt.return
 
 (* TODO Actually use the request and extract the site prefix. *)
@@ -106,8 +106,8 @@ let redirect ?status ?code ?headers _request location =
   let client_stream = Stream.(stream empty no_writer)
   and server_stream = Stream.(stream no_reader no_writer) in
   let response =
-    Dream.response ?status ?code ?headers client_stream server_stream in
-  Dream.set_header response "Location" location;
+    Message.response ?status ?code ?headers client_stream server_stream in
+  Message.set_header response "Location" location;
   Lwt.return response
 
 let stream ?status ?code ?headers callback =
@@ -115,7 +115,7 @@ let stream ?status ?code ?headers callback =
   let client_stream = Stream.stream reader Stream.no_writer
   and server_stream = Stream.stream Stream.no_reader writer in
   let response =
-    Dream.response ?status ?code ?headers client_stream server_stream in
+    Message.response ?status ?code ?headers client_stream server_stream in
   (* TODO Should set up an error handler for this. YES. *)
   (* TODO Make sure the request id is propagated to the callback. *)
   let wrapped_callback _ = Lwt.async (fun () -> callback response) in
@@ -123,13 +123,13 @@ let stream ?status ?code ?headers callback =
   Lwt.return response
 
 let websocket_field =
-  Dream.new_field
+  Message.new_field
     ~name:"dream.websocket"
     ~show_value:(Printf.sprintf "%b")
     ()
 
 let is_websocket response =
-  match Dream.field response websocket_field with
+  match Message.field response websocket_field with
   | Some true -> true
   | _ -> false
 
@@ -140,9 +140,9 @@ let websocket ?headers callback =
   let client_stream = Stream.stream out_reader in_writer
   and server_stream = Stream.stream in_reader out_writer in
   let response =
-    Dream.response
+    Message.response
       ~status:`Switching_Protocols ?headers client_stream server_stream in
-  Dream.set_field response websocket_field true;
+  Message.set_field response websocket_field true;
   (* TODO Make sure the request id is propagated to the callback. *)
   let wrapped_callback _ = Lwt.async (fun () -> callback response) in
   Stream.ready server_stream ~close:wrapped_callback wrapped_callback;

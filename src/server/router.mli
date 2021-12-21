@@ -5,37 +5,37 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Message = Dream_pure.Message
 
 type route
 
 (* Leaf routes. *)
-val get : string -> Dream.handler -> route
-val post : string -> Dream.handler -> route
-val put : string -> Dream.handler -> route
-val delete : string -> Dream.handler -> route
-val head : string -> Dream.handler -> route
-val connect : string -> Dream.handler -> route
-val options : string -> Dream.handler -> route
-val trace : string -> Dream.handler -> route
-val patch : string -> Dream.handler -> route
-val any : string -> Dream.handler -> route
+val get : string -> Message.handler -> route
+val post : string -> Message.handler -> route
+val put : string -> Message.handler -> route
+val delete : string -> Message.handler -> route
+val head : string -> Message.handler -> route
+val connect : string -> Message.handler -> route
+val options : string -> Message.handler -> route
+val trace : string -> Message.handler -> route
+val patch : string -> Message.handler -> route
+val any : string -> Message.handler -> route
 val no_route : route
 
 (* Route groups. *)
-val scope : string -> Dream.middleware list -> route list -> route
+val scope : string -> Message.middleware list -> route list -> route
 
 (* The middleware and the path parameter retriever. With respect to path
    parameters, the middleware is the setter, and the retriever is, of course,
    the getter. *)
-val router : route list -> Dream.middleware
-val param : Dream.request -> string -> string
+val router : route list -> Message.middleware
+val param : Message.request -> string -> string
 
 (* Variables used by the router. *)
-val path : Dream.request -> string list
-val prefix : Dream.request -> string
-val set_path : Dream.request -> string list -> unit
-val set_prefix : Dream.request -> string list -> unit
+val path : Message.request -> string list
+val prefix : Message.request -> string
+val set_path : Message.request -> string list -> unit
+val set_prefix : Message.request -> string list -> unit
 
 (**/**)
 

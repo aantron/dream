@@ -8,8 +8,8 @@
 (* TODO Long-term, query string handler is likely to become part of the
    router. *)
 
-module Dream = Dream_pure.Inmost
 module Formats = Dream_pure.Formats
+module Message = Dream_pure.Message
 
 
 
@@ -23,7 +23,7 @@ module Formats = Dream_pure.Formats
       |> String.concat ", ") *)
 
 let all_queries request =
-  Dream.target request
+  Message.target request
   |> Formats.split_target
   |> snd
   |> Formats.from_form_urlencoded

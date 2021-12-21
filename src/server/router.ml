@@ -5,8 +5,8 @@
 
 
 
-module Dream = Dream_pure.Inmost
 module Formats = Dream_pure.Formats
+module Message = Dream_pure.Message
 module Method = Dream_pure.Method
 
 
@@ -93,7 +93,7 @@ let rec strip_empty_trailing_token = function
 
 
 type method_set = [
-  | Dream.method_
+  | Method.method_
   | `Any
 ]
 
@@ -103,7 +103,7 @@ let method_matches method_set method_ =
   | `Any -> true
 
 type node =
-  | Handler of method_set * Dream.handler
+  | Handler of method_set * Message.handler
   | Scope of route
 
 and route = (token list * node) list
@@ -165,8 +165,8 @@ let scope prefix middlewares routes =
 
 
 
-let path_field : string list Dream.field =
-  Dream.new_field
+let path_field : string list Message.field =
+  Message.new_field
     ~name:"dream.path"
     ~show_value:(fun path -> String.concat "/" path)
     ()
@@ -175,24 +175,25 @@ let path_field : string list Dream.field =
    string. *)
 (* TODO Remove this from the API. *)
 let path the_request =
-  match Dream.field the_request path_field with
+  match Message.field the_request path_field with
   | Some path -> path
   | None ->
-    Dream.(Formats.(the_request |> target |> split_target |> fst |> from_path))
+    Message.(Formats.(
+      the_request |> target |> split_target |> fst |> from_path))
 
 (* TODO Move site_prefix into this file and remove with_path from the API. *)
 let set_path request path =
-  Dream.set_field request path_field path
+  Message.set_field request path_field path
 
 (* Prefix is stored backwards. *)
-let prefix_field : string list Dream.field =
-  Dream.new_field
+let prefix_field : string list Message.field =
+  Message.new_field
     ~name:"dream.prefix"
     ~show_value:(fun prefix -> String.concat "/" (List.rev prefix))
     ()
 
 let internal_prefix request =
-  match Dream.field request prefix_field with
+  match Message.field request prefix_field with
   | Some prefix -> prefix
   | None -> []
 
@@ -200,10 +201,10 @@ let prefix request =
   Formats.make_path (List.rev (internal_prefix request))
 
 let set_prefix request prefix =
-  Dream.set_field request prefix_field prefix
+  Message.set_field request prefix_field prefix
 
-let params_field : (string * string) list Dream.field =
-  Dream.new_field
+let params_field : (string * string) list Message.field =
+  Message.new_field
     ~name:"dream.params"
     ~show_value:(fun params ->
       params
@@ -222,7 +223,7 @@ let missing_param request name =
   failwith message
 
 let param request name =
-  match Dream.field request params_field with
+  match Message.field request params_field with
   | None -> missing_param request name
   | Some params ->
     try List.assoc name params
@@ -260,8 +261,8 @@ let router routes =
     and try_node bindings prefix path node is_wildcard ok fail =
       match node with
       | Handler (method_, handler)
-          when method_matches method_ (Dream.method_ request) ->
-        Dream.set_field request params_field bindings;
+          when method_matches method_ (Message.method_ request) ->
+        Message.set_field request params_field bindings;
         if is_wildcard then begin
           set_prefix request prefix;
           set_path request path;
@@ -279,7 +280,7 @@ let router routes =
     in
 
     let params =
-      match Dream.field request params_field with
+      match Message.field request params_field with
       | Some params -> params
       | None -> []
     in

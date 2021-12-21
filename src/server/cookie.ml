@@ -6,8 +6,8 @@
 
 
 module Cipher = Dream__cipher.Cipher
-module Dream = Dream_pure.Inmost
 module Formats = Dream_pure.Formats
+module Message = Dream_pure.Message
 
 
 
@@ -24,7 +24,7 @@ module Formats = Dream_pure.Formats
 (* TODO DOC We allow multiple headers sent by the client, to support HTTP/2.
    What is this about? *)
 let all_cookies request =
-  Dream.headers request "Cookie"
+  Message.headers request "Cookie"
   |> List.map Formats.from_cookie
   |> List.flatten
 
@@ -132,7 +132,7 @@ let set_cookie
       ?expires ?max_age ?domain ?path ~secure ~http_only ?same_site name value
   in
 
-  Dream.add_header response "Set-Cookie" set_cookie
+  Message.add_header response "Set-Cookie" set_cookie
 
 let drop_cookie
     ?prefix ?domain ?path ?secure ?http_only ?same_site name request response =

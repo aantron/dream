@@ -27,7 +27,7 @@
    This is sufficient for attaching a request id to most log messages, in
    practice. *)
 
-module Dream = Dream_pure.Inmost
+module Message = Dream_pure.Message
 module Method = Dream_pure.Method
 module Status = Dream_pure.Status
 
@@ -76,7 +76,7 @@ let id_lwt_key : string Lwt.key =
 (* The actual request id "field" associated with each request by the logger. If
    this field is missing, the logger assigns the request a fresh id. *)
 let id_field =
-  Dream.new_field
+  Message.new_field
     ~name:request_id_label
     ~show_value:(fun id -> id)
     ()
@@ -86,7 +86,7 @@ let get_request_id ?request () =
   let request_id =
     match request with
     | None -> None
-    | Some request -> Dream.field request id_field
+    | Some request -> Message.field request id_field
   in
   match request_id with
   | Some _ -> request_id
@@ -294,7 +294,7 @@ let initialized () : [ `Initialized ] =
 
 (* The "front end." *)
 type ('a, 'b) conditional_log =
-  ((?request:Dream.request ->
+  ((?request:Message.request ->
    ('a, Stdlib.Format.formatter, unit, 'b) Stdlib.format4 -> 'a) -> 'b) ->
     unit
 
@@ -470,25 +470,25 @@ struct
 
     (* Get the requwst's id or assign a new one. *)
     let id =
-      match Dream.field request id_field with
+      match Message.field request id_field with
       | Some id -> id
       | None ->
         last_id := !last_id + 1;
         let id = string_of_int !last_id in
-        Dream.set_field request id_field id;
+        Message.set_field request id_field id;
         id
     in
 
     (* Identify the request in the log. *)
     let user_agent =
-      Dream.headers request "User-Agent"
+      Message.headers request "User-Agent"
       |> String.concat " "
     in
 
     log.info (fun log ->
       log ~request "%s %s %s %s"
-        (Method.method_to_string (Dream.method_ request))
-        (Dream.target request)
+        (Method.method_to_string (Message.method_ request))
+        (Message.target request)
         (Helpers.client request)
         user_agent);
 
@@ -501,17 +501,17 @@ struct
         (* Log the elapsed time. If the response is a redirection, log the
            target. *)
         let location =
-          if Status.is_redirection (Dream.status response) then
-            match Dream.header response "Location" with
+          if Status.is_redirection (Message.status response) then
+            match Message.header response "Location" with
             | Some location -> " " ^ location
             | None -> ""
           else ""
         in
 
-        let status = Dream.status response in
+        let status = Message.status response in
 
         let report :
-          (?request:Dream.request ->
+          (?request:Message.request ->
             ('a, Format.formatter, unit, 'b) format4 -> 'a) -> 'b =
             fun log ->
           let elapsed = now () -. start in

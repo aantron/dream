@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Message = Dream_pure.Message
 
 
 
@@ -30,8 +30,8 @@ let initial_multipart_state () = {
 }
 
 (* TODO Dump the value of the multipart state somehow? *)
-let multipart_state_field : multipart_state Dream.field =
-  Dream.new_field
+let multipart_state_field : multipart_state Message.field =
+  Message.new_field
     ~name:"dream.multipart"
     ()
 
@@ -40,7 +40,7 @@ let multipart_state_field : multipart_state Dream.field =
 let multipart_state _request =
   assert false
 
-let field_to_string (request : Dream.request) field =
+let field_to_string (request : Message.request) field =
   let open Multipart_form in
   match field with
   | Field.Field (field_name, Field.Content_type, v) ->
@@ -57,7 +57,7 @@ let field_to_string (request : Dream.request) field =
 
 let log = Log.sub_log "dream.upload"
 
-let upload_part (request : Dream.request) =
+let upload_part (request : Message.request) =
   let state = multipart_state request in
   match%lwt Lwt_stream.peek state.stream with
   | None -> Lwt.return_none
@@ -74,7 +74,7 @@ let identify _ = object end
 
 type part = string option * string option * ((string * string) list)
 
-let rec state (request : Dream.request) =
+let rec state (request : Message.request) =
   let state' = multipart_state request in
   let stream = state'.stream in
   match%lwt Lwt_stream.peek stream with
@@ -89,14 +89,14 @@ let rec state (request : Dream.request) =
       state'.name, state'.filename, headers in
     Lwt.return (Some part)
 
-and upload (request : Dream.request) =
+and upload (request : Message.request) =
   let state' = multipart_state request in
   match state'.state_init with
   | false ->
     state request
 
   | true ->
-    let content_type = match Dream.header request "Content-Type" with
+    let content_type = match Message.header request "Content-Type" with
     | Some content_type ->
       Result.to_option
         (Multipart_form.Content_type.of_string (content_type ^ "\r\n"))
@@ -112,7 +112,7 @@ and upload (request : Dream.request) =
       failwith message
 
     | Some content_type ->
-      let body = Lwt_stream.from (fun () -> Dream.read request) in
+      let body = Lwt_stream.from (fun () -> Message.read request) in
       let `Parse th, stream =
         Multipart_form_lwt.stream ~identify body content_type in
       Lwt.async (fun () -> let%lwt _ = th in Lwt.return_unit);
@@ -125,14 +125,14 @@ type multipart_form =
 module Map = Map.Make (String)
 
 let multipart ?(csrf=true) ~now request =
-  let content_type = match Dream.header request "Content-Type" with
+  let content_type = match Message.header request "Content-Type" with
     | Some content_type ->
       Result.to_option (Multipart_form.Content_type.of_string (content_type ^ "\r\n"))
     | None -> None in
   match content_type with
   | None -> Lwt.return `Wrong_content_type
   | Some content_type ->
-    let body = Lwt_stream.from (fun () -> Dream.read request) in
+    let body = Lwt_stream.from (fun () -> Message.read request) in
     match%lwt Multipart_form_lwt.of_stream_to_list body content_type with
     | Error (`Msg _err) ->
       Lwt.return `Wrong_content_type (* XXX(dinosaure): better error? *)

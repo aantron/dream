@@ -6,11 +6,11 @@
 
 
 module Catch = Dream__server.Catch
-module Dream = Dream_pure.Inmost
 module Error_template = Dream__server.Error_template
 module Method = Dream_pure.Method
 module Helpers = Dream__server.Helpers
 module Log = Dream__server.Log
+module Message = Dream_pure.Message
 module Status = Dream_pure.Status
 module Stream = Dream_pure.Stream
 
@@ -38,7 +38,7 @@ let dump (error : Catch.error) =
 
   begin match error.condition with
   | `Response response ->
-    let status = Dream.status response in
+    let status = Message.status response in
     p "%i %s\n" (Status.status_to_int status) (Status.status_to_string status)
 
   | `String "" ->
@@ -90,16 +90,16 @@ let dump (error : Catch.error) =
   begin match error.request with
   | None -> ()
   | Some request ->
-    let major, minor = Dream.version request in
+    let major, minor = Message.version request in
     p "\n\n%s %s HTTP/%i.%i"
-      (Method.method_to_string (Dream.method_ request))
-      (Dream.target request)
+      (Method.method_to_string (Message.method_ request))
+      (Message.target request)
       major minor;
 
-    Dream.all_headers request
+    Message.all_headers request
     |> List.iter (fun (name, value) -> p "\n%s: %s" name value);
 
-    Dream.fold_fields (fun name value first ->
+    Message.fold_fields (fun name value first ->
       if first then
         p "\n";
       p "\n%s: %s" name value;
@@ -176,7 +176,7 @@ let customize template (error : Catch.error) =
         (* TODO Simplify the streams creation. *)
         let client_stream = Stream.(stream empty no_writer)
         and server_stream = Stream.(stream no_reader no_writer) in
-        Dream.response ~status client_stream server_stream
+        Message.response ~status client_stream server_stream
     in
 
     (* No need to catch errors when calling the template, because every call
@@ -192,11 +192,11 @@ let default_template _error _debug_dump response =
   Lwt.return response
 
 let debug_template _error debug_dump response =
-  let status = Dream.status response in
+  let status = Message.status response in
   let code = Status.status_to_int status
   and reason = Status.status_to_string status in
-  Dream.set_header response "Content-Type" Dream_pure.Formats.text_html;
-  Dream.set_body response (Error_template.render ~debug_dump ~code ~reason);
+  Message.set_header response "Content-Type" Dream_pure.Formats.text_html;
+  Message.set_body response (Error_template.render ~debug_dump ~code ~reason);
   Lwt.return response
 
 let default =
@@ -241,13 +241,13 @@ let respond_with_option f =
           (* TODO Simplify streams. *)
           let client_stream = Stream.(stream empty no_writer)
           and server_stream = Stream.(stream no_reader no_writer) in
-          Dream.response
+          Message.response
             ~status:`Internal_Server_Error client_stream server_stream))
     (fun () ->
       (* TODO Simplify streams. *)
       let client_stream = Stream.(stream empty no_writer)
       and server_stream = Stream.(stream no_reader no_writer) in
-      Dream.response
+      Message.response
         ~status:`Internal_Server_Error client_stream server_stream
       |> Lwt.return)
 
@@ -274,11 +274,11 @@ let default_response = function
   | `Server ->
     let client_stream = Stream.(stream empty no_writer)
     and server_stream = Stream.(stream no_reader no_writer) in
-    Dream.response ~status:`Internal_Server_Error client_stream server_stream
+    Message.response ~status:`Internal_Server_Error client_stream server_stream
   | `Client ->
     let client_stream = Stream.(stream empty no_writer)
     and server_stream = Stream.(stream no_reader no_writer) in
-    Dream.response ~status:`Bad_Request client_stream server_stream
+    Message.response ~status:`Bad_Request client_stream server_stream
 
 let httpaf
     user's_error_handler =
@@ -328,7 +328,7 @@ let httpaf
         | None -> default_response caused_by
       in
 
-      let headers = Httpaf.Headers.of_list (Dream.all_headers response) in
+      let headers = Httpaf.Headers.of_list (Message.all_headers response) in
       let body = start_response headers in
 
       Adapt.forward_body response body;
@@ -386,7 +386,7 @@ let h2
         | None -> default_response caused_by
       in
 
-      let headers = H2.Headers.of_list (Dream.all_headers response) in
+      let headers = H2.Headers.of_list (Message.all_headers response) in
       let body = start_response headers in
 
       Adapt.forward_body_h2 response body;

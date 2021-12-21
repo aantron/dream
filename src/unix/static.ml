@@ -5,8 +5,8 @@
 
 
 
-module Dream = Dream_pure.Inmost
 module Formats = Dream_pure.Formats
+module Message = Dream_pure.Message
 module Method = Dream_pure.Method
 module Router = Dream__server.Router
 module Stream = Dream_pure.Stream
@@ -35,13 +35,13 @@ let from_filesystem local_root path _ =
         (* TODO Can use some pre-allocated streams or helpers here and below. *)
         let client_stream = Stream.(stream (string content) no_writer)
         and server_stream = Stream.(stream no_reader no_writer) in
-        Dream.response ~headers:(mime_lookup path) client_stream server_stream
+        Message.response ~headers:(mime_lookup path) client_stream server_stream
         |> Lwt.return))
     (fun _exn ->
       (* TODO Improve the two-stream code using some helper. *)
       let client_stream = Stream.(stream empty no_writer)
       and server_stream = Stream.(stream no_reader no_writer) in
-      Dream.response ~status:`Not_Found client_stream server_stream
+      Message.response ~status:`Not_Found client_stream server_stream
       |> Lwt.return)
 
 (* TODO Add ETag handling. *)
@@ -79,11 +79,11 @@ let validate_path request =
 
 let static ?(loader = from_filesystem) local_root = fun request ->
 
-  if not @@ Method.methods_equal (Dream.method_ request) `GET then
+  if not @@ Method.methods_equal (Message.method_ request) `GET then
     (* TODO Simplify this code and reduce allocations. *)
     let client_stream = Stream.(stream empty no_writer)
     and server_stream = Stream.(stream no_reader no_writer) in
-    Dream.response ~status:`Not_Found client_stream server_stream
+    Message.response ~status:`Not_Found client_stream server_stream
     |> Lwt.return
 
   else
@@ -92,19 +92,19 @@ let static ?(loader = from_filesystem) local_root = fun request ->
       (* TODO Improve with helpers. *)
       let client_stream = Stream.(stream empty no_writer)
       and server_stream = Stream.(stream no_reader no_writer) in
-      Dream.response ~status:`Not_Found client_stream server_stream
+      Message.response ~status:`Not_Found client_stream server_stream
       |> Lwt.return
 
     | Some path ->
       let%lwt response = loader local_root path request in
-      if not (Dream.has_header response "Content-Type") then begin
-        match Dream.status response with
+      if not (Message.has_header response "Content-Type") then begin
+        match Message.status response with
         | `OK
         | `Non_Authoritative_Information
         | `No_Content
         | `Reset_Content
         | `Partial_Content ->
-          Dream.add_header response "Content-Type" (Magic_mime.lookup path)
+          Message.add_header response "Content-Type" (Magic_mime.lookup path)
         | _ ->
           ()
       end;

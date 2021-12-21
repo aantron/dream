@@ -5,9 +5,9 @@
 
 
 
-module Dream = Dream_pure.Inmost
 module Helpers = Dream__server.Helpers
 module Log = Dream__server.Log
+module Message = Dream_pure.Message
 module Method = Dream_pure.Method
 module Stream = Dream_pure.Stream
 
@@ -79,7 +79,7 @@ let operation_id json =
   Yojson.Basic.Util.(json |> member "id" |> to_string_option)
 
 let close_and_clean ?code subscriptions response =
-  let%lwt () = Dream.close ?code response in
+  let%lwt () = Message.close ?code response in
   Hashtbl.iter (fun _ close -> close ()) subscriptions;
   Lwt.return_unit
 
@@ -116,7 +116,7 @@ let complete_message id =
 (* TODO Test client complete racing against a stream. *)
 let handle_over_websocket make_context schema subscriptions request response =
   let rec loop inited =
-    match%lwt Dream.read response with
+    match%lwt Message.read response with
     | None ->
       log.info (fun log -> log ~request "GraphQL WebSocket closed by client");
       close_and_clean subscriptions response
@@ -145,7 +145,7 @@ let handle_over_websocket make_context schema subscriptions request response =
         close_and_clean subscriptions response ~code:4429
       end
       else begin
-        let%lwt () = Dream.write response ack_message in
+        let%lwt () = Message.write response ack_message in
         loop true
       end
 
@@ -193,13 +193,13 @@ let handle_over_websocket make_context schema subscriptions request response =
               log.warning (fun log ->
                 log ~request
                   "subscribe: error %s" (Yojson.Basic.to_string json));
-              Dream.write response (error_message id json)
+              Message.write response (error_message id json)
 
             (* It's not clear that this case ever occurs, because graphql-ws is
                only used for subscriptions, at the protocol level. *)
             | Ok (`Response json) ->
-              let%lwt () = Dream.write response (data_message id json) in
-              let%lwt () = Dream.write response (complete_message id) in
+              let%lwt () = Message.write response (data_message id json) in
+              let%lwt () = Message.write response (complete_message id) in
               Lwt.return_unit
 
             | Ok (`Stream (stream, close)) ->
@@ -216,15 +216,15 @@ let handle_over_websocket make_context schema subscriptions request response =
               let%lwt () =
                 stream |> Lwt_stream.iter_s (function
                   | Ok json ->
-                    Dream.write response (data_message id json)
+                    Message.write response (data_message id json)
                   | Error json ->
                     log.warning (fun log ->
                       log ~request
                         "Subscription: error %s" (Yojson.Basic.to_string json));
-                    Dream.write response (error_message id json))
+                    Message.write response (error_message id json))
               in
 
-              let%lwt () = Dream.write response (complete_message id) in
+              let%lwt () = Message.write response (complete_message id) in
               Hashtbl.remove subscriptions id;
               Lwt.return_unit
 
@@ -240,12 +240,12 @@ let handle_over_websocket make_context schema subscriptions request response =
 
             try%lwt
               let%lwt () =
-                Dream.write
+                Message.write
                   response
                   (error_message id (make_error "Internal Server Error"))
               in
               if !subscribed then
-                Dream.write response (complete_message id)
+                Message.write response (complete_message id)
               else
                 Lwt.return_unit
             with _ ->
@@ -271,10 +271,10 @@ let handle_over_websocket make_context schema subscriptions request response =
    carrying WebSocket upgrade headers. *)
 
 let graphql make_context schema = fun request ->
-  match Dream.method_ request with
+  match Message.method_ request with
   | `GET ->
-    let upgrade = Dream.header request "Upgrade"
-    and protocol = Dream.header request "Sec-WebSocket-Protocol" in
+    let upgrade = Message.header request "Upgrade"
+    and protocol = Message.header request "Sec-WebSocket-Protocol" in
     begin match upgrade, protocol with
     | Some "websocket", Some "graphql-transport-ws" ->
       Helpers.websocket
@@ -285,14 +285,14 @@ let graphql make_context schema = fun request ->
       (* TODO Simplify stream creation. *)
       let client_stream = Stream.(stream empty no_writer)
       and server_stream = Stream.(stream no_reader no_writer) in
-      Dream.response ~status:`Not_Found client_stream server_stream
+      Message.response ~status:`Not_Found client_stream server_stream
       |> Lwt.return
     end
 
   | `POST ->
-    begin match Dream.header request "Content-Type" with
+    begin match Message.header request "Content-Type" with
     | Some "application/json" ->
-      let%lwt body = Dream.body request in
+      let%lwt body = Message.body request in
       (* TODO This almost certainly raises exceptions... *)
       let json = Yojson.Basic.from_string body in
 
@@ -316,7 +316,7 @@ let graphql make_context schema = fun request ->
         "Content-Type not 'application/json'");
       let client_stream = Stream.(stream empty no_writer)
       and server_stream = Stream.(stream no_reader no_writer) in
-      Dream.response ~status:`Bad_Request client_stream server_stream
+      Message.response ~status:`Bad_Request client_stream server_stream
       |> Lwt.return
     end
 
@@ -325,7 +325,7 @@ let graphql make_context schema = fun request ->
       "Method %s; must be GET or POST" (Method.method_to_string method_));
     let client_stream = Stream.(stream empty no_writer)
     and server_stream = Stream.(stream no_reader no_writer) in
-    Dream.response ~status:`Not_Found client_stream server_stream
+    Message.response ~status:`Not_Found client_stream server_stream
     |> Lwt.return
 
 

@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Message = Dream_pure.Message
 
 
 
@@ -55,9 +55,9 @@ let sort_and_check_form ~now to_value form request =
     Lwt.return (`Many_tokens form)
 
 let form ?(csrf = true) ~now request =
-  match Dream.header request "Content-Type" with
+  match Message.header request "Content-Type" with
   | Some "application/x-www-form-urlencoded" ->
-    let%lwt body = Dream.body request in
+    let%lwt body = Message.body request in
     let form = Dream_pure.Formats.from_form_urlencoded body in
     if csrf then
     sort_and_check_form ~now (fun string -> string) form request

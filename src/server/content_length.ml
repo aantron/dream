@@ -5,7 +5,7 @@
 
 
 
-module Dream = Dream_pure.Inmost
+module Message = Dream_pure.Message
 
 
 
@@ -15,10 +15,10 @@ module Dream = Dream_pure.Inmost
 (* Add a Content-Length header to HTTP 1.x responses that have a fixed body but
    don't yet have the header. *)
 let content_length next_handler request =
-  if fst (Dream.version request) <> 1 then
+  if fst (Message.version request) <> 1 then
     next_handler request
   else
-    let%lwt (response : Dream.response) = next_handler request in
-    if not (Dream.has_header response "Transfer-Encoding") then
-      Dream.add_header response "Transfer-Encoding" "chunked";
+    let%lwt (response : Message.response) = next_handler request in
+    if not (Message.has_header response "Transfer-Encoding") then
+      Message.add_header response "Transfer-Encoding" "chunked";
     Lwt.return response
