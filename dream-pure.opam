@@ -18,6 +18,7 @@ depends: [
   "dune" {>= "2.7.0"}  # --instrument-with.
   "hmap"
   "lwt"
+  "lwt_ppx" {>= "1.2.2"}
   "ocaml" {>= "4.08.0"}
   "ptime" {>= "0.8.1"}  # Ptime.weekday.
   "uri" {>= "4.2.0"}
