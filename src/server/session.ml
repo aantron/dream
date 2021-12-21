@@ -176,8 +176,7 @@ struct
     Lwt.return (operations ~now:gettimeofday hash_table lifetime session dirty, session)
 
   let send ~now (operations, session) request response =
-    if operations.dirty then
-    if not operations.dirty then begin
+    if operations.dirty then begin
       let id = version_session_id !session.id in
       let max_age = !session.expires_at -. now () in
       Cookie.set_cookie
