@@ -2018,6 +2018,7 @@ type error_handler = error -> response option promise
 
     The behavior of Dream's default error handler is described at
     {!Dream.type-error}. *)
+(* TODO Get rid of the option? *)
 
 val error_template :
   (error -> string -> response -> response promise) -> error_handler

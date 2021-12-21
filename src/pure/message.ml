@@ -198,7 +198,7 @@ let set_body message body =
     else
       Stream.(stream (string body) no_writer)
   in
-  message.server_stream <- body
+  message.client_stream <- body
 
 let read message =
   Stream.read_convenience message.server_stream

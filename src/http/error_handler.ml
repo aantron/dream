@@ -182,9 +182,8 @@ let customize template (error : Catch.error) =
     (* No need to catch errors when calling the template, because every call
        site of the error handler already has error handlers for catching double
        faults. *)
-    response
-    |> template error debug_dump
-    |> Lwt.map (fun response -> Some response)
+    let%lwt response = template error debug_dump response in
+    Lwt.return (Some response)
 
 
 
