@@ -4,7 +4,6 @@
  (libraries
   base64
   bigstringaf
-  multipart_form
   hmap
   lwt
   uri
