@@ -35,10 +35,13 @@ let multipart_state_field : multipart_state Message.field =
     ~name:"dream.multipart"
     ()
 
-(* TODO This would be MUCH easier if requests were mutable. It's probably best
-   to just break multipart until then, and have the branch be "unstable." *)
-let multipart_state _request =
-  assert false
+let multipart_state request =
+  match Message.field request multipart_state_field with
+  | Some state -> state
+  | None ->
+    let state = initial_multipart_state () in
+    Message.set_field request multipart_state_field state;
+    state
 
 let field_to_string (request : Message.request) field =
   let open Multipart_form in
