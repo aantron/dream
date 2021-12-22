@@ -77,16 +77,23 @@ let no_writer = {
 let reader ~read ~close =
   {read; close}
 
-let empty =
+let null = {
+  reader = no_reader;
+  writer = no_writer;
+}
+
+let empty_reader =
   reader
     ~read:(fun ~data:_ ~close ~flush:_ ~ping:_ ~pong:_ -> close 1000)
     ~close:ignore
 
+let empty = {
+  reader = empty_reader;
+  writer = no_writer;
+}
+
 (* TODO This shows the awkwardness in string-to-string body reading. *)
-let string the_string =
-  if String.length the_string = 0 then
-    empty
-  else begin
+let string_reader the_string =
     (* Storing the string in a ref here so that we can "lose" it eagerly once
        the stream is closed, making the memory available to the GC. *)
     let string_ref = ref (Some the_string) in
@@ -108,7 +115,15 @@ let string the_string =
     in
 
     reader ~read ~close
-  end
+
+let string the_string =
+  if String.length the_string = 0 then
+    empty
+  else
+    {
+      reader = string_reader the_string;
+      writer = no_writer;
+    }
 
 let read stream ~data ~close ~flush =
   stream.reader.read ~data ~close ~flush

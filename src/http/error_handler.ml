@@ -173,10 +173,7 @@ let customize template (error : Catch.error) =
           | `Server -> `Internal_Server_Error
           | `Client -> `Bad_Request
         in
-        (* TODO Simplify the streams creation. *)
-        let client_stream = Stream.(stream empty no_writer)
-        and server_stream = Stream.(stream no_reader no_writer) in
-        Message.response ~status client_stream server_stream
+        Message.response ~status Stream.empty Stream.null
     in
 
     (* No need to catch errors when calling the template, because every call
@@ -237,17 +234,10 @@ let respond_with_option f =
       |> Lwt.map (function
         | Some response -> response
         | None ->
-          (* TODO Simplify streams. *)
-          let client_stream = Stream.(stream empty no_writer)
-          and server_stream = Stream.(stream no_reader no_writer) in
           Message.response
-            ~status:`Internal_Server_Error client_stream server_stream))
+            ~status:`Internal_Server_Error Stream.empty Stream.null))
     (fun () ->
-      (* TODO Simplify streams. *)
-      let client_stream = Stream.(stream empty no_writer)
-      and server_stream = Stream.(stream no_reader no_writer) in
-      Message.response
-        ~status:`Internal_Server_Error client_stream server_stream
+      Message.response ~status:`Internal_Server_Error Stream.empty Stream.null
       |> Lwt.return)
 
 
@@ -268,16 +258,11 @@ let app
 
 
 
-(* TODO Simplify streams. *)
 let default_response = function
   | `Server ->
-    let client_stream = Stream.(stream empty no_writer)
-    and server_stream = Stream.(stream no_reader no_writer) in
-    Message.response ~status:`Internal_Server_Error client_stream server_stream
+    Message.response ~status:`Internal_Server_Error Stream.empty Stream.null
   | `Client ->
-    let client_stream = Stream.(stream empty no_writer)
-    and server_stream = Stream.(stream no_reader no_writer) in
-    Message.response ~status:`Bad_Request client_stream server_stream
+    Message.response ~status:`Bad_Request Stream.empty Stream.null
 
 let httpaf
     user's_error_handler =

@@ -10,11 +10,6 @@ module Stream = Dream_pure.Stream
 
 
 
-(* TODO Convert to streaming later. *)
 let echo request =
-  (* TODO Simplfy this code. Can in fact just pass the request's server stream
-     as the response's client stream. *)
-  let client_stream = Message.server_stream request in
-  let server_stream = Stream.(stream no_reader no_writer) in
-  Message.response client_stream server_stream
+  Message.response (Message.server_stream request) Stream.null
   |> Lwt.return

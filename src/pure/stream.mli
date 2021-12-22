@@ -41,14 +41,6 @@ val reader : read:read -> close:(int -> unit) -> reader
     response to {!Stream.close}. It doesn't need to call {!Stream.close} again
     on the stream. It should be used to free any underlying resources. *)
 
-val empty : reader
-(** A read-only stream whose reading function always calls its [~close]
-    callback. *)
-
-val string : string -> reader
-(** A read-only stream which calls its [~data] callback once with the contents
-    of the given string, and then always calls [~close]. *)
-
 val pipe : unit -> reader * writer
 (** A stream which matches each call of the reading function to one call of its
     writing functions. For example, calling {!Stream.flush} on a pipe will cause
@@ -63,6 +55,17 @@ val no_writer : writer
 val stream : reader -> writer -> stream
 (* TODO Consider tupling the arguments, as that will make it easier to pass the
    result of Stream.pipe. *)
+
+val null : stream
+(** A stream which is neither readable nor writable. *)
+
+val empty : stream
+(** A read-only stream whose reading function always calls its [~close]
+    callback. *)
+
+val string : string -> stream
+(** A read-only stream which calls its [~data] callback once with the contents
+    of the given string, and then always calls [~close]. *)
 
 val close : stream -> int -> unit
 (** Closes the given stream. Causes a pending reader or writer to call its

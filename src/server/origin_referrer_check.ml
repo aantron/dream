@@ -31,10 +31,7 @@ let origin_referrer_check inner_handler request =
     | None ->
       log.warning (fun log -> log ~request
         "Origin and Referer headers both missing");
-      (* TODO Simplify. *)
-      let client_stream = Stream.(stream empty no_writer)
-      and server_stream = Stream.(stream no_reader no_writer) in
-      Message.response ~status:`Bad_Request client_stream server_stream
+      Message.response ~status:`Bad_Request Stream.empty Stream.null
       |> Lwt.return
 
     (* TODO Also recommend Uri to users. *)
@@ -43,10 +40,7 @@ let origin_referrer_check inner_handler request =
       match Message.header request "Host" with
       | None ->
         log.warning (fun log -> log ~request "Host header missing");
-        (* TODO Simplify. *)
-        let client_stream = Stream.(stream empty no_writer)
-        and server_stream = Stream.(stream no_reader no_writer) in
-        Message.response ~status:`Bad_Request client_stream server_stream
+        Message.response ~status:`Bad_Request Stream.empty Stream.null
         |> Lwt.return
 
       | Some host ->
@@ -81,9 +75,6 @@ let origin_referrer_check inner_handler request =
         else begin
           log.warning (fun log -> log ~request
             "Origin-Host mismatch: '%s' vs. '%s'" origin host);
-          (* TODO Simplify. *)
-          let client_stream = Stream.(stream empty no_writer)
-          and server_stream = Stream.(stream no_reader no_writer) in
-          Message.response ~status:`Bad_Request client_stream server_stream
+          Message.response ~status:`Bad_Request Stream.empty Stream.null
           |> Lwt.return
         end

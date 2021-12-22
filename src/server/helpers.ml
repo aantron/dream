@@ -47,51 +47,36 @@ let set_https request https =
 
 
 let request ~client ~method_ ~target ~https ~version ~headers server_stream =
-  (* TODO Use pre-allocated streams. *)
-  let client_stream = Stream.(stream no_reader no_writer) in
   let request =
     Message.request
-      ~method_ ~target ~version ~headers client_stream server_stream in
+      ~method_ ~target ~version ~headers Stream.null server_stream in
   set_client request client;
   set_https request https;
   request
 
 let request_with_body ?method_ ?target ?version ?headers body =
-  (* TODO Streams. *)
-  let client_stream = Stream.(stream no_reader no_writer)
-  and server_stream = Stream.(stream (string body) no_writer) in
-  Message.request ?method_ ?target ?version ?headers client_stream server_stream
+  Message.request
+    ?method_ ?target ?version ?headers Stream.null (Stream.string body)
 
 
 
 let html ?status ?code ?headers body =
-  (* TODO The streams. *)
-  let client_stream = Stream.(stream (string body) no_writer)
-  and server_stream = Stream.(stream no_reader no_writer) in
   let response =
-    Message.response ?status ?code ?headers client_stream server_stream in
+    Message.response ?status ?code ?headers (Stream.string body) Stream.null in
   Message.set_header response "Content-Type" Formats.text_html;
   Lwt.return response
 
 let json ?status ?code ?headers body =
-  (* TODO The streams. *)
-  let client_stream = Stream.(stream (string body) no_writer)
-  and server_stream = Stream.(stream no_reader no_writer) in
   let response =
-    Message.response ?status ?code ?headers client_stream server_stream in
+    Message.response ?status ?code ?headers (Stream.string body) Stream.null in
   Message.set_header response "Content-Type" Formats.application_json;
   Lwt.return response
 
 let response_with_body ?status ?code ?headers body =
-  (* TODO Streams. *)
-  let client_stream = Stream.(stream (string body) no_writer)
-  and server_stream = Stream.(stream no_reader no_writer) in
-  Message.response ?status ?code ?headers client_stream server_stream
+  Message.response ?status ?code ?headers (Stream.string body) Stream.null
 
 let respond ?status ?code ?headers body =
-  let client_stream = Stream.(stream (string body) no_writer)
-  and server_stream = Stream.(stream no_reader no_writer) in
-  Message.response ?status ?code ?headers client_stream server_stream
+  Message.response ?status ?code ?headers (Stream.string body) Stream.null
   |> Lwt.return
 
 (* TODO Actually use the request and extract the site prefix. *)
@@ -102,11 +87,8 @@ let redirect ?status ?code ?headers _request location =
     | None, None -> Some (`See_Other)
     | _ -> status
   in
-  (* TODO The streams. *)
-  let client_stream = Stream.(stream empty no_writer)
-  and server_stream = Stream.(stream no_reader no_writer) in
   let response =
-    Message.response ?status ?code ?headers client_stream server_stream in
+    Message.response ?status ?code ?headers Stream.empty Stream.null in
   Message.set_header response "Location" location;
   Lwt.return response
 

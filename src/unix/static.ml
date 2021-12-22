@@ -32,16 +32,11 @@ let from_filesystem local_root path _ =
     (fun () ->
       Lwt_io.(with_file ~mode:Input file) (fun channel ->
         let%lwt content = Lwt_io.read channel in
-        (* TODO Can use some pre-allocated streams or helpers here and below. *)
-        let client_stream = Stream.(stream (string content) no_writer)
-        and server_stream = Stream.(stream no_reader no_writer) in
-        Message.response ~headers:(mime_lookup path) client_stream server_stream
+        Message.response
+          ~headers:(mime_lookup path) (Stream.string content) Stream.null
         |> Lwt.return))
     (fun _exn ->
-      (* TODO Improve the two-stream code using some helper. *)
-      let client_stream = Stream.(stream empty no_writer)
-      and server_stream = Stream.(stream no_reader no_writer) in
-      Message.response ~status:`Not_Found client_stream server_stream
+      Message.response ~status:`Not_Found Stream.empty Stream.null
       |> Lwt.return)
 
 (* TODO Add ETag handling. *)
@@ -80,19 +75,13 @@ let validate_path request =
 let static ?(loader = from_filesystem) local_root = fun request ->
 
   if not @@ Method.methods_equal (Message.method_ request) `GET then
-    (* TODO Simplify this code and reduce allocations. *)
-    let client_stream = Stream.(stream empty no_writer)
-    and server_stream = Stream.(stream no_reader no_writer) in
-    Message.response ~status:`Not_Found client_stream server_stream
+    Message.response ~status:`Not_Found Stream.empty Stream.null
     |> Lwt.return
 
   else
     match validate_path request with
     | None ->
-      (* TODO Improve with helpers. *)
-      let client_stream = Stream.(stream empty no_writer)
-      and server_stream = Stream.(stream no_reader no_writer) in
-      Message.response ~status:`Not_Found client_stream server_stream
+      Message.response ~status:`Not_Found Stream.empty Stream.null
       |> Lwt.return
 
     | Some path ->

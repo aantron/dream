@@ -292,14 +292,4 @@ let body message =
    on the client. Or.... shouldn't this affect the client stream on the server,
    replacing its read end? *)
 let set_body message body =
-  (* TODO This is partially redundant with a length check in Stream.string, but
-     that check is no longer useful as it prevents allocation of only a reader,
-     rather than a complete stream. *)
-  let body =
-    if String.length body = 0 then
-      (* TODO Should probably preallocate this as a stream. *)
-      Stream.(stream empty no_writer)
-    else
-      Stream.(stream (string body) no_writer)
-  in
-  message.client_stream <- body
+  message.client_stream <- Stream.string body
