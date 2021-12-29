@@ -100,7 +100,7 @@ and route
 
 (** {2 Helpers} *)
 
-and 'a message
+and 'a message = 'a Dream_pure.Message.message
 (** ['a message], pronounced “any message,” allows some functions to take either
     {!type-request} or {!type-response} as arguments, because both are defined
     in terms of ['a message]. For example, in {!section-headers}:
@@ -109,14 +109,15 @@ and 'a message
       val Dream.header : string -> 'a message -> string option
     ]} *)
 
-and client
-and server
+and client = Dream_pure.Message.client
+and server = Dream_pure.Message.server
 (** Type parameters for {!message} for {!type-request} and {!type-response},
     respectively. These are “phantom” types. They have no meaning other than
     they are different from each other. Dream only ever creates [client message]
     and [server message]. [client] and [server] are never mentioned again in the
     docs. *)
 (* TODO These docs need to be clarified. *)
+(* TODO Hide all the Dream_pure type equalities. *)
 
 and 'a promise = 'a Lwt.t
 (** Dream uses {{:https://github.com/ocsigen/lwt} Lwt} for promises and
