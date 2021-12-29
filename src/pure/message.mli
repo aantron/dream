@@ -34,6 +34,7 @@ val method_ : request -> Method.method_
 val target : request -> string
 val version : request -> int * int
 val set_method_ : request -> [< Method.method_ ] -> unit
+val set_target : request -> string -> unit
 val set_version : request -> int * int -> unit
 
 

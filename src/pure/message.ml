@@ -21,7 +21,7 @@ module Fields = Hmap.Make (struct type 'a t = 'a field_metadata end)
 
 type client = {
   mutable method_ : Method.method_;
-  target : string;
+  mutable target : string;
   mutable version : int * int;
 }
 (* TODO Get rid of the version field completely? At least don't expose it in
@@ -92,6 +92,9 @@ let version request =
 
 let set_method_ request method_ =
   request.specific.method_ <- (method_ :> Method.method_)
+
+let set_target request target =
+  request.specific.target <- target
 
 let set_version request version =
   request.specific.version <- version
