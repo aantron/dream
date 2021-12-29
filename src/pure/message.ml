@@ -34,7 +34,12 @@ type server = {
   status : Status.status;
 }
 
+type kind =
+  | Request
+  | Response
+
 type 'a message = {
+  kind : kind;
   specific : 'a;
   mutable headers : (string * string) list;
   mutable client_stream : Stream.stream;
@@ -70,6 +75,7 @@ let request
     | Some method_ -> method_
   in
   {
+    kind = Request;
     specific = {
       method_;
       target;
@@ -111,6 +117,7 @@ let response ?status ?code ?(headers = []) client_stream server_stream =
     | None, Some code -> Status.int_to_status code
   in
   {
+    kind = Response;
     specific = {
       status;
     };
@@ -278,21 +285,21 @@ let body_field : string promise field =
     ~name:"dream.body"
     ()
 
-(* TODO NOTE On the client, this will read the client stream until close. *)
 let body message =
   match field message body_field with
   | Some body_promise -> body_promise
   | None ->
-    let body_promise = Stream.read_until_close message.server_stream in
+    let stream =
+      match message.kind with
+      | Request -> message.server_stream
+      | Response -> message.client_stream
+    in
+    let body_promise = Stream.read_until_close stream in
     set_field message body_field body_promise;
     body_promise
 
-(* TODO Should usage of this function affect the body field? *)
-(* TODO NOTE In Dream, this should operate on response server_streams. In Hyper,
-   it should operate on request client_streams, although there is no very good
-   reason why it can't operate on general messages, which might be useful in
-   middlewares that preprocess requests on the server and postprocess responses
-   on the client. Or.... shouldn't this affect the client stream on the server,
-   replacing its read end? *)
 let set_body message body =
-  message.client_stream <- Stream.string body
+  set_field message body_field (Lwt.return body);
+  match message.kind with
+  | Request -> message.server_stream <- Stream.string body
+  | Response -> message.client_stream <- Stream.string body

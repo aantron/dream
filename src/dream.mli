@@ -745,12 +745,12 @@ val all_cookies : request -> (string * string) list
 
 (** {1 Bodies} *)
 
-val body : request -> string promise
+val body : 'a message -> string promise
 (** Retrieves the entire body. See example
     {{:https://github.com/aantron/dream/tree/master/example/6-echo#files}
     [6-echo]}. *)
 
-val set_body : response -> string -> unit
+val set_body : 'a message -> string -> unit
 (** Replaces the body. *)
 
 (**/**)
