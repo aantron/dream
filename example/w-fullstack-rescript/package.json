@@ -1,10 +1,10 @@
 {
   "name": "fullstack-rescript",
   "dependencies": {
-    "rescript": "*",
-    "rescript-webapi": "*",
     "esbuild": "*",
-    "esy": "*"
+    "esy": "*",
+    "rescript": "*",
+    "rescript-webapi": "*"
   },
   "scripts": {
     "build": "rescript",
