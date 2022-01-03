@@ -47,7 +47,6 @@ author: "Anton Bachin <antonbachin@yahoo.com>"
 maintainer: "Anton Bachin <antonbachin@yahoo.com>"
 
 depends: [
-  "dream"
   "dune" {>= "2.7.0"}
   "dream"
   "dream-pure"
@@ -58,6 +57,8 @@ depends: [
   "digestif" {>= "1.0.0"}
   "lwt"
   "tls-mirage"
+  "mirage-time"
+  "tcpip"
   "lwt_ppx" {>= "1.2.2"}
   "letsencrypt" {>= "0.3.0"}
   "emile" {>= "1.1"}
