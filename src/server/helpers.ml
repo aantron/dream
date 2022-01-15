@@ -101,7 +101,9 @@ let stream ?status ?code ?headers callback =
   (* TODO Should set up an error handler for this. YES. *)
   (* TODO Make sure the request id is propagated to the callback. *)
   let wrapped_callback _ = Lwt.async (fun () -> callback response) in
-  Stream.ready server_stream ~close:wrapped_callback wrapped_callback;
+  Stream.ready
+    server_stream
+    ~close:wrapped_callback ~exn:wrapped_callback wrapped_callback;
   Lwt.return response
 
 let websocket_field =
@@ -127,7 +129,9 @@ let websocket ?headers callback =
   Message.set_field response websocket_field true;
   (* TODO Make sure the request id is propagated to the callback. *)
   let wrapped_callback _ = Lwt.async (fun () -> callback response) in
-  Stream.ready server_stream ~close:wrapped_callback wrapped_callback;
+  Stream.ready
+    server_stream
+    ~close:wrapped_callback ~exn:wrapped_callback wrapped_callback;
   Lwt.return response
 
 let empty ?headers status =

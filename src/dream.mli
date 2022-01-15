@@ -826,10 +826,11 @@ val set_server_stream : 'a message -> stream -> unit
 val read_stream :
   stream ->
   data:(buffer -> int -> int -> bool -> bool -> unit) ->
-  close:(int -> unit) ->
   flush:(unit -> unit) ->
   ping:(buffer -> int -> int -> unit) ->
   pong:(buffer -> int -> int -> unit) ->
+  close:(int -> unit) ->
+  exn:(exn -> unit) ->
     unit
 (** Waits for the next stream event, and calls:
 
@@ -838,22 +839,26 @@ val read_stream :
     - [~exn] to report an exception. *)
 
 val ready_stream :
-  stream -> close:(int -> unit) -> (unit -> unit) -> unit
+  stream -> close:(int -> unit) -> exn:(exn -> unit) -> (unit -> unit) -> unit
 
 val write_stream :
-  stream -> buffer -> int -> int -> bool -> bool -> close:(int -> unit) -> (unit -> unit) -> unit
+  stream -> buffer -> int -> int -> bool -> bool -> close:(int -> unit) -> exn:(exn -> unit) -> (unit -> unit) -> unit
 
 val flush_stream :
-  stream -> close:(int -> unit) -> (unit -> unit) -> unit
+  stream -> close:(int -> unit) -> exn:(exn -> unit) -> (unit -> unit) -> unit
 
 val ping_stream :
-  stream -> buffer -> int -> int -> close:(int -> unit) -> (unit -> unit) -> unit
+  stream -> buffer -> int -> int -> close:(int -> unit) -> exn:(exn -> unit) -> (unit -> unit) -> unit
 
 val pong_stream :
-  stream -> buffer -> int -> int -> close:(int -> unit) -> (unit -> unit) -> unit
+  stream -> buffer -> int -> int -> close:(int -> unit) -> exn:(exn -> unit) -> (unit -> unit) -> unit
 
 val close_stream :
   stream -> int -> unit
+
+val abort_stream :
+  stream -> exn -> unit
+(* TODO Line widths above. *)
 
 (**/**)
 val write_buffer :

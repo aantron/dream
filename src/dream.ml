@@ -166,6 +166,7 @@ let flush_stream = Stream.flush
 let ping_stream = Stream.ping
 let pong_stream = Stream.pong
 let close_stream = Stream.close
+let abort_stream = Stream.abort
 
 
 

@@ -14,8 +14,6 @@ let read_and_dump stream =
     ~data:(fun buffer offset length binary fin ->
       Printf.printf "read: data: BINARY=%b FIN=%b %s\n"
         binary fin (Bigstringaf.substring buffer ~off:offset ~len:length))
-    ~close:(fun code ->
-      Printf.printf "read: close: CODE=%i\n" code)
     ~flush:(fun () ->
       print_endline "read: flush")
     ~ping:(fun buffer offset length ->
@@ -24,11 +22,17 @@ let read_and_dump stream =
     ~pong:(fun buffer offset length ->
       Printf.printf "read: pong: %s\n"
         (Bigstringaf.substring buffer ~off:offset ~len:length))
+    ~close:(fun code ->
+      Printf.printf "read: close: CODE=%i\n" code)
+    ~exn:(fun exn ->
+      Printf.printf "read: exn: %s\n" (Printexc.to_string exn))
 
 let flush_and_dump stream =
   Stream.flush stream
     ~close:(fun code ->
       Printf.printf "flush: close: CODE=%i\n" code)
+    ~exn:(fun exn ->
+      Printf.printf "flush: exn: %s\n" (Printexc.to_string exn))
     (fun () ->
       print_endline "flush: ok")
 
@@ -36,6 +40,8 @@ let write_and_dump stream buffer offset length binary fin =
   Stream.write stream buffer offset length binary fin
     ~close:(fun code ->
       Printf.printf "write: close: CODE=%i\n" code)
+    ~exn:(fun exn ->
+      Printf.printf "write: exn: %s\n" (Printexc.to_string exn))
     (fun () ->
       print_endline "write: ok")
 
@@ -44,6 +50,8 @@ let ping_and_dump payload stream =
   Stream.ping stream (Bigstringaf.of_string ~off:0 ~len:length payload) 0 length
     ~close:(fun code ->
       Printf.printf "ping: close: CODE=%i\n" code)
+    ~exn:(fun exn ->
+      Printf.printf "ping: exn: %s\n" (Printexc.to_string exn))
     (fun () ->
       print_endline "ping: ok")
 
@@ -52,6 +60,8 @@ let pong_and_dump payload stream =
   Stream.pong stream (Bigstringaf.of_string ~off:0 ~len:length payload) 0 length
     ~close:(fun code ->
       Printf.printf "pong: close: CODE=%i\n" code)
+    ~exn:(fun exn ->
+      Printf.printf "pong: exn: %s\n" (Printexc.to_string exn))
     (fun () ->
       print_endline "pong: ok")
 
@@ -60,7 +70,7 @@ let pong_and_dump payload stream =
 (* Read-only streams. *)
 
 let%expect_test _ =
-  let stream = Stream.(stream empty no_writer) in
+  let stream = Stream.empty in
   read_and_dump stream;
   read_and_dump stream;
   Stream.close stream 1005;
@@ -71,13 +81,13 @@ let%expect_test _ =
     read: close: CODE=1000 |}]
 
 let%expect_test _ =
-  let stream = Stream.(stream empty no_writer) in
+  let stream = Stream.empty in
   Stream.close stream 1005;
   read_and_dump stream;
   [%expect {| read: close: CODE=1000 |}]
 
 let%expect_test _ =
-  let stream = Stream.(stream (string "foo") no_writer) in
+  let stream = Stream.string "foo" in
   read_and_dump stream;
   read_and_dump stream;
   read_and_dump stream;
@@ -90,7 +100,7 @@ let%expect_test _ =
     read: close: CODE=1000 |}]
 
 let%expect_test _ =
-  let stream = Stream.(stream (string "") no_writer) in
+  let stream = Stream.string "" in
   read_and_dump stream;
   read_and_dump stream;
   [%expect {|
@@ -98,13 +108,13 @@ let%expect_test _ =
     read: close: CODE=1000 |}]
 
 let%expect_test _ =
-  let stream = Stream.(stream (string "foo") no_writer) in
+  let stream = Stream.string "foo" in
   Stream.close stream 1005;
   read_and_dump stream;
   [%expect {| read: close: CODE=1000 |}]
 
 let%expect_test _ =
-  let stream = Stream.(stream empty no_writer) in
+  let stream = Stream.empty in
   (try write_and_dump stream Bigstringaf.empty 0 0 false false
   with Failure _ as exn -> print_endline (Printexc.to_string exn));
   (try flush_and_dump stream

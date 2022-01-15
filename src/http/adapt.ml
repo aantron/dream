@@ -26,6 +26,8 @@ let forward_body_general
     http_flush
     close =
 
+  let abort _exn = close 1000 in
+
   let bytes_since_flush = ref 0 in
 
   let rec send () =
@@ -34,10 +36,11 @@ let forward_body_general
       Stream.read
         stream
         ~data
-        ~close
         ~flush
         ~ping
         ~pong
+        ~close
+        ~exn:abort
 
   and data chunk off len _binary _fin =
     write_buffer ~off ~len chunk;

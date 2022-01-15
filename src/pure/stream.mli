@@ -20,10 +20,11 @@ type 'a promise =
 
 type read =
   data:(buffer -> int -> int -> bool -> bool -> unit) ->
-  close:(int -> unit) ->
   flush:(unit -> unit) ->
   ping:(buffer -> int -> int -> unit) ->
   pong:(buffer -> int -> int -> unit) ->
+  close:(int -> unit) ->
+  exn:(exn -> unit) ->
     unit
 (** A reading function. Awaits the next event on the stream. For each call of a
     reading function, one of the callbacks will eventually be called, according
@@ -31,12 +32,13 @@ type read =
 
 type write =
   close:(int -> unit) ->
+  exn:(exn -> unit) ->
   (unit -> unit) ->
     unit
 (** A writing function. Pushes an event into a stream. May take additional
     arguments before [~ok]. *)
 
-val reader : read:read -> close:(int -> unit) -> reader
+val reader : read:read -> close:(int -> unit) -> abort:(exn -> unit) -> reader
 (** Creates a read-only stream from the given reader. [~close] is called in
     response to {!Stream.close}. It doesn't need to call {!Stream.close} again
     on the stream. It should be used to free any underlying resources. *)
@@ -70,6 +72,8 @@ val string : string -> stream
 val close : stream -> int -> unit
 (** Closes the given stream. Causes a pending reader or writer to call its
     [~close] callback. *)
+
+val abort : stream -> exn -> unit
 
 val read : stream -> read
 (** Awaits the next stream event. See {!Stream.type-read}. *)

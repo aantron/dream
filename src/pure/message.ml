@@ -208,6 +208,7 @@ let write ?kind message chunk =
     message.server_stream
     buffer 0 length binary true
     ~close:(fun _code -> Lwt.wakeup_later_exn resolver End_of_file)
+    ~exn:(fun exn -> Lwt.wakeup_later_exn resolver exn)
     (fun () -> Lwt.wakeup_later resolver ());
   promise
 
@@ -218,6 +219,7 @@ let flush message =
   Stream.flush
     message.server_stream
     ~close:(fun _code -> Lwt.wakeup_later_exn resolver End_of_file)
+    ~exn:(fun exn -> Lwt.wakeup_later_exn resolver exn)
     (Lwt.wakeup_later resolver);
   promise
 

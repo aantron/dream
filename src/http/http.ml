@@ -120,7 +120,7 @@ let websocket_handler response socket =
 
   (* TODO Can this be canceled by a user's close? i.e. will that eventually
      cause a call to eof above? *)
-  let rec read ~data ~close ~flush ~ping ~pong =
+  let rec read ~data ~flush ~ping ~pong ~close ~exn =
     if !closed then
       close !close_code
     else
@@ -157,10 +157,10 @@ let websocket_handler response socket =
           drain_payload payload @@ fun _buffer _offset length ->
           websocket_log.warning (fun log ->
             log "Unknown frame type with length %i" length);
-          read ~data ~close ~flush ~ping ~pong
+          read ~data ~flush ~ping ~pong ~close ~exn
         | Some (`Data properties, payload) ->
           current_payload := Some (properties, payload);
-          read ~data ~close ~flush ~ping ~pong
+          read ~data ~flush ~ping ~pong ~close ~exn
         end
       | Some ((binary, fin), payload) ->
         Websocketaf.Payload.schedule_read
@@ -169,7 +169,7 @@ let websocket_handler response socket =
             match !last_chunk with
             | None ->
               last_chunk := Some (buffer, off, len);
-              read ~data ~close ~flush ~ping ~pong
+              read ~data ~flush ~ping ~pong ~close ~exn
             | Some (last_buffer, last_offset, last_length) ->
               last_chunk := Some (buffer, off, len);
               let binary = binary = `Binary in
@@ -178,7 +178,7 @@ let websocket_handler response socket =
             current_payload := None;
             match !last_chunk with
             | None ->
-              read ~data ~close ~flush ~ping ~pong
+              read ~data ~flush ~ping ~pong ~close ~exn
             | Some (last_buffer, last_offset, last_length) ->
               last_chunk := None;
               let binary = binary = `Binary in
@@ -204,7 +204,9 @@ let websocket_handler response socket =
     end
   in
 
-  let reader = Stream.reader ~read ~close in
+  let abort _exn = close 1005 in
+
+  let reader = Stream.reader ~read ~close ~abort in
   Stream.forward reader (Message.client_stream response);
 
   let rec outgoing_loop () =
@@ -226,7 +228,6 @@ let websocket_handler response socket =
           else
             outgoing_loop ()
         end)
-      ~close
       ~flush:(fun () -> flush ~close outgoing_loop)
       ~ping:(fun _buffer _offset length ->
         if length > 125 then
@@ -256,6 +257,8 @@ let websocket_handler response socket =
           Websocketaf.Wsd.send_pong socket;
           outgoing_loop ()
         end)
+      ~close
+      ~exn:abort
   in
   outgoing_loop ();
 
@@ -305,7 +308,7 @@ let wrap_handler
     (* TODO Should the stream be auto-closed? It doesn't even have a closed
        state. The whole thing is just a wrapper for whatever the http/af
        behavior is. *)
-    let read ~data ~close ~flush:_ ~ping:_ ~pong:_ =
+    let read ~data ~flush:_ ~ping:_ ~pong:_ ~close ~exn:_ =
       Httpaf.Body.Reader.schedule_read
         body
         ~on_eof:(fun () -> close 1000)
@@ -314,7 +317,7 @@ let wrap_handler
     let close _code =
       Httpaf.Body.Reader.close body in
     let body =
-      Stream.reader ~read ~close in
+      Stream.reader ~read ~close ~abort:close in
     let body =
       Stream.stream body Stream.no_writer in
 
@@ -435,7 +438,7 @@ let wrap_handler_h2
 
     let body =
       H2.Reqd.request_body conn in
-    let read ~data ~close ~flush:_ ~ping:_ ~pong:_ =
+    let read ~data ~flush:_ ~ping:_ ~pong:_ ~close ~exn:_ =
       H2.Body.schedule_read
         body
         ~on_eof:(fun () -> close 1000)
@@ -444,7 +447,7 @@ let wrap_handler_h2
     let close _code =
       H2.Body.close_reader body in
     let body =
-      Stream.reader ~read ~close in
+      Stream.reader ~read ~close ~abort:close in
     let body =
       Stream.stream body Stream.no_writer in
 
