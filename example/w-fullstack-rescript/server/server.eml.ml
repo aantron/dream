@@ -7,7 +7,8 @@ let home =
   </html>
 
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.router [
 

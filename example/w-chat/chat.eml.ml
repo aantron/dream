@@ -1,3 +1,5 @@
+open Eio.Std
+
 let home =
   <html>
   <body>
@@ -44,16 +46,19 @@ let forget client_id =
   Hashtbl.remove clients client_id
 
 let send message =
+  Switch.run @@ fun sw ->
   Hashtbl.to_seq_values clients
   |> List.of_seq
-  |> Lwt_list.iter_p (fun client -> Dream.write client message)
+  |> List.iter (fun client ->
+      Fibre.fork ~sw (fun () -> Dream.write client message)
+    )
 
 let handle_client client =
   let client_id = track client in
   let rec loop () =
-    match%lwt Dream.read client with
+    match Dream.read client with
     | Some message ->
-      let%lwt () = send message in
+      send message;
       loop ()
     | None ->
       forget client_id;
@@ -62,7 +67,8 @@ let handle_client client =
   loop ()
 
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.router [
 
@@ -70,7 +76,7 @@ let () =
       (fun _ -> Dream.html home);
 
     Dream.get "/websocket"
-      (fun _ -> Dream.websocket handle_client);
+      (fun request -> Dream.websocket request handle_client);
 
   ]
   @@ Dream.not_found

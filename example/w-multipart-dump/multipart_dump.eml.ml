@@ -10,7 +10,8 @@ let home request =
   </html>
 
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.memory_sessions
   @@ Dream.router [
@@ -19,7 +20,7 @@ let () =
       Dream.html (home request));
 
     Dream.post "/" (fun request ->
-      let%lwt body = Dream.body request in
+      let body = Dream.body request in
       Dream.respond
         ~headers:["Content-Type", "text/plain"]
         body);

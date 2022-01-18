@@ -20,10 +20,10 @@ type 'a back_end = {
 }
 
 let middleware field back_end = fun inner_handler request ->
-  let%lwt session = back_end.load request in
+  let session = Lwt_eio.Promise.await_lwt (back_end.load request) in
   Message.set_field request field session;
-  let%lwt response = inner_handler request in
-  back_end.send session request response
+  let response = inner_handler request in
+  Lwt_eio.Promise.await_lwt (back_end.send session request response)
 
 let getter field request =
   match Message.field request field with
@@ -56,8 +56,8 @@ type session = {
 }
 
 type operations = {
-  put : string -> string -> unit Lwt.t;
-  invalidate : unit -> unit Lwt.t;
+  put : string -> string -> unit;
+  invalidate : unit -> unit;
   mutable dirty : bool;
 }
 
@@ -124,14 +124,12 @@ struct
     session.payload
     |> List.remove_assoc name
     |> fun dictionary -> (name, value)::dictionary
-    |> fun dictionary -> session.payload <- dictionary;
-    Lwt.return_unit
+    |> fun dictionary -> session.payload <- dictionary
 
   let invalidate hash_table ~now lifetime operations session =
     Hashtbl.remove hash_table !session.id;
     session := create hash_table (now () +. lifetime);
-    operations.dirty <- true;
-    Lwt.return_unit
+    operations.dirty <- true
 
   let operations ~now hash_table lifetime session dirty =
     let rec operations = {
@@ -213,13 +211,11 @@ struct
     |> List.remove_assoc name
     |> fun dictionary -> (name, value)::dictionary
     |> fun dictionary -> session.payload <- dictionary;
-    operations.dirty <- true;
-    Lwt.return_unit
+    operations.dirty <- true
 
   let invalidate ~now lifetime operations session =
     session := create (now () +. lifetime);
-    operations.dirty <- true;
-    Lwt.return_unit
+    operations.dirty <- true
 
   let operations ~now lifetime session dirty =
     let rec operations = {

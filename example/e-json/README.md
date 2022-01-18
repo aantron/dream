@@ -44,7 +44,7 @@ To get this working, we have to add `ppx_yojson_conv` to our
 <pre><code>(executable
  (name json)
  (libraries dream)
- <b>(preprocess (pps lwt_ppx ppx_yojson_conv)))</b>
+ <b>(preprocess (pps ppx_yojson_conv)))</b>
 </code></pre>
 
 and to

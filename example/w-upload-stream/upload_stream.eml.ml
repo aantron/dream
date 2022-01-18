@@ -23,7 +23,8 @@ let report files =
   </html>
 
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.memory_sessions
   @@ Dream.router [
@@ -33,11 +34,11 @@ let () =
 
     Dream.post "/" (fun request ->
       let rec receive file_sizes =
-        match%lwt Dream.upload request with
+        match Dream.upload request with
         | None -> Dream.html (report (List.rev file_sizes))
         | Some (_, filename, _) ->
           let rec count_size size =
-            match%lwt Dream.upload_part request with
+            match Dream.upload_part request with
             | None -> receive ((filename, size)::file_sizes)
             | Some chunk -> count_size (size + String.length chunk)
           in

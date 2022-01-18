@@ -12,7 +12,8 @@ let html_to_string html =
   Format.asprintf "%a" (Tyxml.Html.pp ()) html
 
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.router [
 

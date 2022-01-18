@@ -33,11 +33,11 @@ socket.onclose = function(event) {
 |js}
 
 let inject_live_reload_script inner_handler request =
-  let%lwt response = inner_handler request in
+  let response = inner_handler request in
 
   match Dream.header response "Content-Type" with
   | Some "text/html; charset=utf-8" ->
-    let%lwt body = Dream.body response in
+    let body = Dream.body response in
     let soup =
       Markup.string body
       |> Markup.parse_html ~context:`Document
@@ -47,19 +47,20 @@ let inject_live_reload_script inner_handler request =
 
     begin match Soup.Infix.(soup $? "head") with
     | None ->
-      Lwt.return response
+      response
     | Some head ->
       Soup.create_element "script" ~inner_text:live_reload_script
       |> Soup.append_child head;
       Dream.set_body response (Soup.to_string soup);
-      Lwt.return response
+      response
     end
 
   | _ ->
-    Lwt.return response
+    response
 
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ inject_live_reload_script
   @@ Dream.router [
@@ -70,9 +71,9 @@ let () =
       |> Printf.sprintf "Good morning, world! Random tag: %s"
       |> Dream.html);
 
-    Dream.get "/_live-reload" (fun _ ->
-      Dream.websocket (fun socket ->
-        let%lwt _ = Dream.read socket in
+    Dream.get "/_live-reload" (fun request ->
+      Dream.websocket request (fun socket ->
+        let _ = Dream.read socket in
         Dream.close socket));
 
   ]

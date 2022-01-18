@@ -1,16 +1,16 @@
-let render = response => {
-  let%lwt () = {
+let render = clock => response => {
+  let () = {
     %% response
     <html>
     <body>
 
 %     let rec paragraphs = index => {
         <p><%i index %></p>
-%       let%lwt () = Dream.flush(response);
-%       let%lwt () = Lwt_unix.sleep(1.);
-%       paragraphs(index + 1);
+%       Dream.flush(response);
+%       Eio.Time.sleep(clock, 1.);
+%       if (index < 10) paragraphs(index + 1);
 %     };
-%     let%lwt () = paragraphs(0);
+%     paragraphs(0);
 
     </body>
     </html>
@@ -19,6 +19,7 @@ let render = response => {
 };
 
 let () =
-  Dream.run
+  Eio_main.run @@ env =>
+  Dream.run(env)
   @@ Dream.logger
-  @@ _ => Dream.stream(~headers=[("Content-Type", Dream.text_html)], render);
+  @@ request => Dream.stream(~headers=[("Content-Type", Dream.text_html)], request, render(env#clock));

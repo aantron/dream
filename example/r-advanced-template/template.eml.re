@@ -38,7 +38,8 @@ let tasks = [
 ];
 
 let () =
-  Dream.run
+  Eio_main.run @@ env =>
+  Dream.run(env)
   @@ Dream.logger
   @@ Dream.router([
     Dream.get("/", _ => render_home(tasks) |> Dream.html),

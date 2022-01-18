@@ -36,7 +36,8 @@ let default_query =
   "{\\n  users {\\n    name\\n    id\\n  }\\n}\\n"
 
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.origin_referrer_check
   @@ Dream.router [

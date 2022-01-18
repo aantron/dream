@@ -1,3 +1,5 @@
+open Eio.Std
+
 let home =
   <html>
   <body>
@@ -34,44 +36,47 @@ let server_state =
 let last_message =
   ref 0
 
-let rec message_loop () =
-  let%lwt () = Lwt_unix.sleep (Random.float 2.) in
-  incr last_message;
+let message_loop clock =
+  while true do
+    Eio.Time.sleep clock (Random.float 2.);
+    incr last_message;
 
-  let message = string_of_int !last_message in
-  Dream.log "Generated message %s" message;
+    let message = string_of_int !last_message in
+    Dream.log "Generated message %s" message;
 
-  begin match !server_state with
-  | Client_waiting f ->
-    server_state := Messages_accumulating [];
-    f message
-  | Messages_accumulating list ->
-    server_state := Messages_accumulating (message::list)
-  end;
-
-  message_loop ()
+    begin match !server_state with
+      | Client_waiting f ->
+        server_state := Messages_accumulating [];
+        f message
+      | Messages_accumulating list ->
+        server_state := Messages_accumulating (message::list)
+    end
+  done
 
 let () =
-  Lwt.async message_loop;
+  Eio_main.run @@ fun env ->
+  Fibre.both
+    (fun () -> message_loop env#clock)
+    (fun () ->
+       Dream.run env
+       @@ Dream.logger
+       @@ Dream.router [
 
-  Dream.run
-  @@ Dream.logger
-  @@ Dream.router [
+         Dream.get "/" (fun _ -> Dream.html home);
 
-    Dream.get "/" (fun _ -> Dream.html home);
+         Dream.get "/poll" (fun _ ->
+             match !server_state with
+             | Client_waiting _ ->
+               Dream.empty `Unauthorized
+             | Messages_accumulating [] ->
+               let response_promise, respond = Promise.create () in
+               server_state := Client_waiting (fun message ->
+                   Promise.fulfill respond (Dream.response message));
+               Promise.await response_promise
+             | Messages_accumulating messages ->
+               server_state := Messages_accumulating [];
+               Dream.html (String.concat "\n" (List.rev messages)));
 
-    Dream.get "/poll" (fun _ ->
-      match !server_state with
-      | Client_waiting _ ->
-        Dream.empty `Unauthorized
-      | Messages_accumulating [] ->
-        let response_promise, respond = Lwt.wait () in
-        server_state := Client_waiting (fun message ->
-          Lwt.wakeup_later respond (Dream.response message));
-        response_promise
-      | Messages_accumulating messages ->
-        server_state := Messages_accumulating [];
-        Dream.html (String.concat "\n" (List.rev messages)));
-
-  ]
-  @@ Dream.not_found
+       ]
+       @@ Dream.not_found
+    )

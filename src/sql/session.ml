@@ -119,15 +119,19 @@ let put request (session : Session.session) name value =
   |> List.remove_assoc name
   |> fun dictionary -> (name, value)::dictionary
   |> fun dictionary -> session.payload <- dictionary;
-  Sql.sql request (fun db -> update db session)
+  Lwt_eio.Promise.await_lwt begin
+    Sql.sql request (fun db -> update db session)
+  end
 
 let invalidate request lifetime operations (session : Session.session ref) =
-  Sql.sql request begin fun db ->
-    let%lwt () = remove db !session.id in
-    let%lwt new_session = create db (Unix.gettimeofday () +. lifetime) 1 in
-    session := new_session;
-    operations.Session.dirty <- true;
-    Lwt.return_unit
+  Lwt_eio.Promise.await_lwt begin
+    Sql.sql request begin fun db ->
+      let%lwt () = remove db !session.id in
+      let%lwt new_session = create db (Unix.gettimeofday () +. lifetime) 1 in
+      session := new_session;
+      operations.Session.dirty <- true;
+      Lwt.return_unit
+    end
   end
 
 let operations request lifetime (session : Session.session ref) dirty =

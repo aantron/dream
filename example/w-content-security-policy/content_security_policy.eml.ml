@@ -6,7 +6,8 @@ let home =
   </html>
 
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.router [
 
@@ -21,7 +22,7 @@ let () =
         "You should not be able to see this inside a frame!");
 
     Dream.post "/violation" (fun request ->
-      let%lwt report = Dream.body request in
+      let report = Dream.body request in
       Dream.error (fun log -> log "%s" report);
       Dream.empty `OK);
 

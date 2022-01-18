@@ -33,20 +33,21 @@ let render comments request =
   </html>
 
 let () =
-  Dream.run ~interface:"0.0.0.0"
+  Eio_main.run @@ fun env ->
+  Dream.run ~interface:"0.0.0.0" env
   @@ Dream.logger
   @@ Dream.sql_pool "postgresql://dream:password@postgres/dream"
   @@ Dream.sql_sessions
   @@ Dream.router [
 
     Dream.get "/" (fun request ->
-      let%lwt comments = Dream.sql request list_comments in
+      let comments = Dream.sql request list_comments in
       Dream.html (render comments request));
 
     Dream.post "/" (fun request ->
-      match%lwt Dream.form request with
+      match Dream.form request with
       | `Ok ["text", text] ->
-        let%lwt () = Dream.sql request (add_comment text) in
+        Dream.sql request (add_comment text);
         Dream.redirect request "/"
       | _ ->
         Dream.empty `Bad_Request);

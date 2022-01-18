@@ -1,22 +1,23 @@
 let echo request response =
   let rec loop () =
-    match%lwt Dream.read request with
+    match Dream.read request with
     | None ->
       Dream.close response
     | Some chunk ->
-      let%lwt () = Dream.write response chunk in
-      let%lwt () = Dream.flush response in
+      Dream.write response chunk;
+      Dream.flush response;
       loop ()
   in
   loop ()
 
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.router [
 
     Dream.post "/echo" (fun request ->
-      Dream.stream
+      Dream.stream request
         ~headers:["Content-Type", "application/octet-stream"]
         (echo request));
 

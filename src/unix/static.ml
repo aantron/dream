@@ -28,16 +28,16 @@ let mime_lookup filename =
 
 let from_filesystem local_root path _ =
   let file = Filename.concat local_root path in
-  Lwt.catch
-    (fun () ->
+  try
+    Lwt_eio.Promise.await_lwt (
       Lwt_io.(with_file ~mode:Input file) (fun channel ->
-        let%lwt content = Lwt_io.read channel in
-        Message.response
-          ~headers:(mime_lookup path) (Stream.string content) Stream.null
-        |> Lwt.return))
-    (fun _exn ->
-      Message.response ~status:`Not_Found Stream.empty Stream.null
-      |> Lwt.return)
+          let%lwt content = Lwt_io.read channel in
+          Message.response
+            ~headers:(mime_lookup path) (Stream.string content) Stream.null
+          |> Lwt.return)
+    )
+  with _exn ->
+    Message.response ~status:`Not_Found Stream.empty Stream.null
 
 (* TODO Add ETag handling. *)
 (* TODO Add Content-Length handling? *)
@@ -76,16 +76,14 @@ let static ?(loader = from_filesystem) local_root = fun request ->
 
   if not @@ Method.methods_equal (Message.method_ request) `GET then
     Message.response ~status:`Not_Found Stream.empty Stream.null
-    |> Lwt.return
 
   else
     match validate_path request with
     | None ->
       Message.response ~status:`Not_Found Stream.empty Stream.null
-      |> Lwt.return
 
     | Some path ->
-      let%lwt response = loader local_root path request in
+      let response = loader local_root path request in
       if not (Message.has_header response "Content-Type") then begin
         match Message.status response with
         | `OK
@@ -97,4 +95,4 @@ let static ?(loader = from_filesystem) local_root = fun request ->
         | _ ->
           ()
       end;
-      Lwt.return response
+      response

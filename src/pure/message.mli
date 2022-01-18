@@ -16,7 +16,7 @@ type request = client message
 type response = server message
 
 type 'a promise = 'a Lwt.t
-type handler = request -> response promise
+type handler = request -> response
 type middleware = handler -> handler
 
 

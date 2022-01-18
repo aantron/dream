@@ -6,8 +6,10 @@ This project is so simple that it doesn't even log requests!
 
 ```ocaml
 let () =
-  Dream.run (fun _ ->
-    Dream.html "Good morning, world!")
+  Eio_main.run (fun env ->
+    Dream.run env (fun _ ->
+      Dream.html "Good morning, world!")
+  )
 ```
 
 <br>
@@ -36,6 +38,11 @@ If you'd like to copy out the server binary, you can do it like this:
 
 The name will change as you go through the tutorial examples. It's always the
 name of the `.ml` file, but with `.ml` changed to `.exe`.
+
+<br>
+
+A Dream server runs in an [Eio](https://github.com/ocaml-multicore/eio) event loop,
+which is created by `Eio_main.run`.
 
 <br>
 

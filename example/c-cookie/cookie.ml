@@ -1,5 +1,6 @@
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.set_secret "foo"
   @@ Dream.logger
   @@ fun request ->
@@ -13,4 +14,4 @@ let () =
       let response = Dream.response "Set language preference; come again!" in
       Dream.add_header response "Content-Type" Dream.text_html;
       Dream.set_cookie response "ui.language" "ut-OP" request;
-      Lwt.return response
+      response

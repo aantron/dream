@@ -43,8 +43,7 @@ file to run the template preprocessor:
 
 <pre><code>(executable
  (name template)
- (libraries dream)
- (preprocess (pps lwt_ppx)))
+ (libraries dream))
 
 <b>(rule
  (targets template.ml)

@@ -29,7 +29,8 @@ let default_query =
   "subscription {\\n  count(until: 3)\\n}\\n"
 
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.origin_referrer_check
   @@ Dream.router [

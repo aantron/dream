@@ -4,7 +4,6 @@
    Copyright 2021 Anton Bachin *)
 
 
-
 (* Type abbreviations and modules used in defining the primary types *)
 
 type 'a promise = 'a Lwt.t
@@ -54,7 +53,7 @@ type response = server message
 
 (* Functions of messages *)
 
-type handler = request -> response Lwt.t
+type handler = request -> response
 type middleware = handler -> handler
 
 

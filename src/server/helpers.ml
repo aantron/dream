@@ -4,6 +4,7 @@
    Copyright 2021 Anton Bachin *)
 
 
+open Eio.Std
 
 module Formats = Dream_pure.Formats
 module Message = Dream_pure.Message
@@ -46,10 +47,17 @@ let set_https request https =
 
 
 
-let request ~client ~method_ ~target ~https ~version ~headers server_stream =
+let switch_field =
+  Message.new_field
+    ~name:"dream.switch"
+    ~show_value:(Fmt.to_to_string Switch.dump)
+    ()
+
+let request ~sw ~client ~method_ ~target ~https ~version ~headers server_stream =
   let request =
     Message.request
       ~method_ ~target ~version ~headers Stream.null server_stream in
+  Message.set_field request switch_field sw;
   set_client request client;
   set_https request https;
   request
@@ -64,20 +72,19 @@ let html ?status ?code ?headers body =
   let response =
     Message.response ?status ?code ?headers (Stream.string body) Stream.null in
   Message.set_header response "Content-Type" Formats.text_html;
-  Lwt.return response
+  response
 
 let json ?status ?code ?headers body =
   let response =
     Message.response ?status ?code ?headers (Stream.string body) Stream.null in
   Message.set_header response "Content-Type" Formats.application_json;
-  Lwt.return response
+  response
 
 let response_with_body ?status ?code ?headers body =
   Message.response ?status ?code ?headers (Stream.string body) Stream.null
 
 let respond ?status ?code ?headers body =
   Message.response ?status ?code ?headers (Stream.string body) Stream.null
-  |> Lwt.return
 
 (* TODO Actually use the request and extract the site prefix. *)
 let redirect ?status ?code ?headers _request location =
@@ -90,9 +97,24 @@ let redirect ?status ?code ?headers _request location =
   let response =
     Message.response ?status ?code ?headers Stream.empty Stream.null in
   Message.set_header response "Location" location;
-  Lwt.return response
+  response
 
-let stream ?status ?code ?headers callback =
+(* Ideally, we'd create a new Eio switch for each connection.
+   But connection creation happens from Lwt at the moment, so we just
+   push the exception back to Lwt to keep things working as before. *)
+let fork_from_lwt ~sw fn =
+  Fibre.fork ~sw (fun () ->
+      try fn ()
+      with ex -> !Lwt.async_exception_hook ex
+    )
+
+let get_switch request =
+  match Message.field request switch_field with
+  | Some sw -> sw
+  | None -> failwith "Missing switch field on request!"
+
+let stream ?status ?code ?headers request callback =
+  let sw = get_switch request in
   let reader, writer = Stream.pipe () in
   let client_stream = Stream.stream reader Stream.no_writer
   and server_stream = Stream.stream Stream.no_reader writer in
@@ -100,9 +122,9 @@ let stream ?status ?code ?headers callback =
     Message.response ?status ?code ?headers client_stream server_stream in
   (* TODO Should set up an error handler for this. YES. *)
   (* TODO Make sure the request id is propagated to the callback. *)
-  let wrapped_callback _ = Lwt.async (fun () -> callback response) in
+  let wrapped_callback _ = fork_from_lwt ~sw (fun () -> callback response) in
   Stream.ready server_stream ~close:wrapped_callback wrapped_callback;
-  Lwt.return response
+  response
 
 let websocket_field =
   Message.new_field
@@ -116,7 +138,8 @@ let is_websocket response =
   | _ -> false
 
 (* TODO Mark the request as a WebSocket request for HTTP. *)
-let websocket ?headers callback =
+let websocket ?headers request callback =
+  let sw = get_switch request in
   let in_reader, in_writer = Stream.pipe ()
   and out_reader, out_writer = Stream.pipe () in
   let client_stream = Stream.stream out_reader in_writer
@@ -126,9 +149,9 @@ let websocket ?headers callback =
       ~status:`Switching_Protocols ?headers client_stream server_stream in
   Message.set_field response websocket_field true;
   (* TODO Make sure the request id is propagated to the callback. *)
-  let wrapped_callback _ = Lwt.async (fun () -> callback response) in
+  let wrapped_callback _ = fork_from_lwt ~sw (fun () -> callback response) in
   Stream.ready server_stream ~close:wrapped_callback wrapped_callback;
-  Lwt.return response
+  response
 
 let empty ?headers status =
   respond ?headers ~status ""

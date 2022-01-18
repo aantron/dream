@@ -23,7 +23,8 @@ let report files =
   </html>
 
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.memory_sessions
   @@ Dream.router [
@@ -32,7 +33,7 @@ let () =
       Dream.html (home request));
 
     Dream.post "/" (fun request ->
-      match%lwt Dream.multipart request with
+      match Dream.multipart request with
       | `Ok ["files", files] -> Dream.html (report files)
       | _ -> Dream.empty `Bad_Request);
 

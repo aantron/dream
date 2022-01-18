@@ -19,7 +19,8 @@ let result request =
 
 let () =
   Dream.set_log_level "dream.flash" `Debug;
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.memory_sessions
   @@ Dream.flash_messages
@@ -31,9 +32,9 @@ let () =
 
     Dream.post "/"
       (fun request ->
-        match%lwt Dream.form request with
+        match Dream.form request with
         | `Ok ["text", text] ->
-          let () = Dream.put_flash request "Info" text in
+          Dream.put_flash request "Info" text;
           Dream.redirect request "/result"
         | _ ->
           Dream.redirect request "/");

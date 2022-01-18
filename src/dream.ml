@@ -147,12 +147,12 @@ let all_cookies = Cookie.all_cookies
 
 (* Bodies *)
 
-let body = Message.body
+let body x = Lwt_eio.Promise.await_lwt (Message.body x)
 let set_body = Message.set_body
-let read = Message.read
-let write = Message.write
-let flush = Message.flush
-let close = Message.close
+let read body = Lwt_eio.Promise.await_lwt (Message.read body)
+let write ?kind response data = Lwt_eio.Promise.await_lwt (Message.write ?kind response data)
+let flush response = Lwt_eio.Promise.await_lwt (Message.flush response)
+let close ?code msg = Lwt_eio.Promise.await_lwt (Message.close ?code msg)
 type buffer = Stream.buffer
 type stream = Stream.stream
 let client_stream = Message.client_stream
@@ -178,12 +178,12 @@ let origin_referrer_check = Origin_referrer_check.origin_referrer_check
 (* Forms *)
 
 type 'a form_result = 'a Form.form_result
-let form = Form.form ~now
+let form ?csrf x = Lwt_eio.Promise.await_lwt (Form.form ~now ?csrf x)
 type multipart_form = Upload.multipart_form
-let multipart = Upload.multipart ~now
+let multipart ?csrf x = Lwt_eio.Promise.await_lwt (Upload.multipart ~now ?csrf x)
 type part = Upload.part
-let upload = Upload.upload
-let upload_part = Upload.upload_part
+let upload request = Lwt_eio.Promise.await_lwt (Upload.upload request)
+let upload_part request = Lwt_eio.Promise.await_lwt (Upload.upload_part request)
 type csrf_result = Csrf.csrf_result
 let csrf_token = Csrf.csrf_token ~now
 let verify_csrf_token = Csrf.verify_csrf_token ~now
@@ -265,7 +265,7 @@ let graphiql = Graphql.graphiql
 (* SQL *)
 
 let sql_pool = Sql.sql_pool
-let sql = Sql.sql
+let sql req fn = Lwt_eio.Promise.await_lwt (Sql.sql req fn)
 
 
 
@@ -370,7 +370,11 @@ let test ?(prefix = "") handler request =
     @@ handler
   in
 
-  Lwt_main.run (app request)
+  let result = ref None in
+  Eio_main.run (fun _env ->
+      result := Some (app request)
+    );
+  Option.get !result
 
 let sort_headers = Message.sort_headers
 let echo = Echo.echo

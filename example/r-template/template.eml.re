@@ -7,7 +7,8 @@ let greet = who => {
 };
 
 let () =
-  Dream.run
+  Eio_main.run @@ env =>
+  Dream.run(env)
   @@ Dream.logger
   @@ Dream.router([
 

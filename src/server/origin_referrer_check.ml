@@ -32,7 +32,6 @@ let origin_referrer_check inner_handler request =
       log.warning (fun log -> log ~request
         "Origin and Referer headers both missing");
       Message.response ~status:`Bad_Request Stream.empty Stream.null
-      |> Lwt.return
 
     (* TODO Also recommend Uri to users. *)
     | Some origin ->
@@ -41,7 +40,6 @@ let origin_referrer_check inner_handler request =
       | None ->
         log.warning (fun log -> log ~request "Host header missing");
         Message.response ~status:`Bad_Request Stream.empty Stream.null
-        |> Lwt.return
 
       | Some host ->
 
@@ -76,5 +74,4 @@ let origin_referrer_check inner_handler request =
           log.warning (fun log -> log ~request
             "Origin-Host mismatch: '%s' vs. '%s'" origin host);
           Message.response ~status:`Bad_Request Stream.empty Stream.null
-          |> Lwt.return
         end

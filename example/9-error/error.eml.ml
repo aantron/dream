@@ -12,9 +12,10 @@ let my_error_template _error debug_info suggested_response =
     </body>
     </html>
   end;
-  Lwt.return suggested_response
+  suggested_response
 
 let () =
-  Dream.run ~error_handler:(Dream.error_template my_error_template)
+  Eio_main.run @@ fun env ->
+  Dream.run ~error_handler:(Dream.error_template my_error_template) env
   @@ Dream.logger
   @@ Dream.not_found

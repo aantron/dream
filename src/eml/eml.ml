@@ -688,17 +688,16 @@ struct
     init = (fun () ->
       print "let ___eml_write string = Dream.write response string in\n");
 
-    finish = (fun () ->
-      print "Lwt.return_unit\n");
+    finish = ignore;
 
     text =
-      Printf.ksprintf print "let%%lwt () = ___eml_write %S in\n";
+      Printf.ksprintf print "___eml_write %S;\n";
 
     format =
-      Printf.ksprintf print "let%%lwt () = Printf.ksprintf ___eml_write %S ";
+      Printf.ksprintf print "Printf.ksprintf ___eml_write %S ";
 
     format_end = (fun () ->
-      print " in\n");
+      print ";\n");
   }
 
   let stream_reason print = {
@@ -707,14 +706,13 @@ struct
     init = (fun () ->
       print "let ___eml_write = string => Dream.write(response, string);\n");
 
-    finish = (fun () ->
-      print "Lwt.return_unit\n");
+    finish = ignore;
 
     text =
-      Printf.ksprintf print "let%%lwt () = ___eml_write(%S);\n";
+      Printf.ksprintf print "___eml_write(%S);\n";
 
     format =
-      Printf.ksprintf print "let%%lwt () = Printf.ksprintf(___eml_write, %S)";
+      Printf.ksprintf print "Printf.ksprintf(___eml_write, %S)";
 
     format_end = (fun () ->
       print ";\n");

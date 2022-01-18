@@ -36,7 +36,6 @@ let with_site_prefix prefix =
     match match_site_prefix prefix (Router.path request) with
     | None ->
       Message.response ~status:`Bad_Gateway Stream.empty Stream.null
-      |> Lwt.return
     | Some path ->
       (* TODO This doesn't need to be recomputed on each request - can cache the
          result in the app. *)

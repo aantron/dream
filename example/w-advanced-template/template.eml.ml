@@ -37,7 +37,8 @@ let tasks = [
 ]
 
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.router [
     Dream.get "/"

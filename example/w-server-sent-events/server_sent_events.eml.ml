@@ -1,3 +1,5 @@
+open Eio.Std
+
 let home =
   <html>
   <body>
@@ -26,17 +28,17 @@ let notify =
 let last_message =
   ref 0
 
-let rec message_loop () =
-  let%lwt () = Lwt_unix.sleep (Random.float 2.) in
+let message_loop clock =
+  while true do
+    Eio.Time.sleep clock (Random.float 2.);
 
-  incr last_message;
-  let message = string_of_int !last_message in
-  Dream.log "Generated message %s" message;
+    incr last_message;
+    let message = string_of_int !last_message in
+    Dream.log "Generated message %s" message;
 
-  server_state := message::!server_state;
-  !notify ();
-
-  message_loop ()
+    server_state := message::!server_state;
+    !notify ()
+  done
 
 let rec forward_messages response =
   let%lwt messages =
@@ -58,23 +60,28 @@ let rec forward_messages response =
   |> List.map (Printf.sprintf "data: %s\n\n")
   |> String.concat ""
   |> fun text ->
-    let%lwt () = Dream.write response text in
-    let%lwt () = Dream.flush response in
+    Dream.write response text;
+    Dream.flush response;
     forward_messages response
 
+let forward_messages response = Lwt_eio.Promise.await_lwt (forward_messages response)
+
 let () =
-  Lwt.async message_loop;
+  Eio_main.run @@ fun env ->
+  Fibre.both
+    (fun () -> message_loop env#clock)
+    (fun () ->
+       Dream.run env
+       @@ Dream.logger
+       @@ Dream.router [
 
-  Dream.run
-  @@ Dream.logger
-  @@ Dream.router [
+         Dream.get "/" (fun _ -> Dream.html home);
 
-    Dream.get "/" (fun _ -> Dream.html home);
+         Dream.get "/push" (fun request ->
+             Dream.stream request
+               ~headers:["Content-Type", "text/event-stream"]
+               forward_messages);
 
-    Dream.get "/push" (fun _ ->
-      Dream.stream
-        ~headers:["Content-Type", "text/event-stream"]
-        forward_messages);
-
-  ]
-  @@ Dream.not_found
+       ]
+       @@ Dream.not_found
+    )
