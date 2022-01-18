@@ -1,9 +1,0 @@
-opam-version: "2.0"
-
-depends: [
-  "caqti-driver-sqlite3"
-  "dune" {>= "2.0.0"}
-  "ocaml"
-  "ppx_yojson_conv"
-  "reason"
-]

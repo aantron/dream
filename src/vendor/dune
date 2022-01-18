@@ -1,39 +1,6 @@
 (data_only_dirs *)
 
 
-
-(subdir paf/lib
- (library
-  (name paf)
-  (public_name dream-mirage.paf)
-  (modules paf)
-  (libraries faraday bigstringaf ke mimic)))
-
-(subdir paf/lib
- (library
-  (name alpn)
-  (public_name dream-mirage.paf.alpn)
-  (modules alpn)
-  (libraries dream-mirage.paf dream-httpaf.httpaf dream-httpaf.h2)))
-
-(subdir paf/lib
- (library
-  (name paf_mirage)
-  (public_name dream-mirage.paf.mirage)
-  (modules paf_mirage)
-  (libraries dream-mirage.paf tls-mirage mirage-time mirage-stack dream-mirage.paf.alpn)))
-
-(subdir paf/lib
- (library
-  (name le)
-  (wrapped false)
-  (public_name dream-mirage.paf.le)
-  (modules lE)
-  (libraries dream-httpaf.httpaf dream-mirage.paf mirage-time mirage-stack duration tls-mirage emile
-    letsencrypt)))
-
-
-
 (subdir gluten/lib
  (library
   (name gluten)
