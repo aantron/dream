@@ -1,5 +1,0 @@
-(library
- (name test_expect_pure_stream)
- (libraries test_expect_pure)
- (inline_tests)
- (preprocess (pps lwt_ppx ppx_expect)))
