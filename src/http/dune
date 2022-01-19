@@ -19,6 +19,7 @@
   lwt_ssl
   ssl
   dream-httpaf.dream-websocketaf
+  dream-httpaf.websocketaf
  )
  (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))
