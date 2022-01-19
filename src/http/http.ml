@@ -38,8 +38,7 @@ let sha1 s =
 let websocket_log =
   Log.sub_log "dream.websocket"
 
-let websocket_handler response socket =
-
+let websocket_handler stream socket =
   (* Queue of received frames. There doesn't appear to be a nice way to achieve
      backpressure with the current API of websocket/af, so that will have to be
      added later. The user-facing API of Dream does support backpressure. *)
@@ -207,11 +206,11 @@ let websocket_handler response socket =
   let abort _exn = close 1005 in
 
   let reader = Stream.reader ~read ~close ~abort in
-  Stream.forward reader (Message.client_stream response);
+  Stream.forward reader stream;
 
   let rec outgoing_loop () =
     Stream.read
-      (Message.client_stream response)
+      stream
       ~data:(fun buffer offset length binary fin ->
         (* Until https://github.com/anmonteiro/websocketaf/issues/33. *)
         if not fin then
@@ -380,7 +379,8 @@ let wrap_handler
 
           let proceed () =
             Websocketaf.Server_connection.create_websocket
-              ~error_handler (websocket_handler response)
+              ~error_handler
+              (websocket_handler (Message.client_stream response))
             |> Gluten.make (module Websocketaf.Server_connection)
             |> upgrade
           in
