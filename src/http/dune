@@ -17,8 +17,6 @@
   dream-httpaf.httpaf-lwt-unix
   lwt
   lwt.unix
-  lwt_ssl
-  ssl
   dream-httpaf.websocketaf
  )
  (preprocess (pps lwt_ppx))

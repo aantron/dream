@@ -61,7 +61,7 @@
    (select
     ssl_io.ml
     from
-    (lwt_ssl -> ssl_io.real.ml)
+    (lwt_ssl_disabled -> ssl_io.real.ml)
     (-> ssl_io.dummy.ml))
    (select
     tls_io.ml
