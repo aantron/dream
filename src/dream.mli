@@ -2079,7 +2079,6 @@ val catch : (error -> response) -> middleware
 val run :
   ?interface:string ->
   ?port:int ->
-  ?stop:unit promise ->
   ?error_handler:error_handler ->
   ?https:bool ->
   ?certificate_file:string ->
@@ -2087,7 +2086,7 @@ val run :
   ?builtins:bool ->
   ?greeting:bool ->
   ?adjust_terminal:bool ->
-  < clock: Eio.Time.clock; ..> ->
+  < clock:#Eio.Time.clock; net:#Eio.Net.t; ..> ->
     handler -> unit
 (** Runs the Web application represented by the {!handler}, by default at
     {{:http://localhost:8080} http://localhost:8080}.
@@ -2099,10 +2098,6 @@ val run :
     - [~interface] is the network interface to listen on. Defaults to
       ["localhost"]. Use ["0.0.0.0"] to listen on all interfaces.
     - [~port] is the port to listen on. Defaults to [8080].
-    - [~stop] is a promise that causes the server to stop accepting new
-      requests, and {!Dream.run} to return. Requests that have already entered
-      the Web application continue to be processed. The default value is a
-      promise that never resolves. However, see also [~stop_on_input].
     - [~debug:true] enables debug information in error templates. See
       {!Dream.error_template}. The default is [false], to prevent accidental
       deployment with debug output turned on. See example
@@ -2139,12 +2134,12 @@ val run :
 val serve :
   ?interface:string ->
   ?port:int ->
-  ?stop:unit promise ->
   ?error_handler:error_handler ->
   ?https:bool ->
   ?certificate_file:string ->
   ?key_file:string ->
   ?builtins:bool ->
+  net:#Eio.Net.t ->
     handler -> unit
 (** Like {!Dream.run}, but returns a promise that does not resolve until the
     server stops listening, instead of calling

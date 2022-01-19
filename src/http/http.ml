@@ -518,16 +518,18 @@ type tls_library = {
     key_file:string ->
     handler:Message.handler ->
     error_handler:Catch.error_handler ->
+    sw:Switch.t ->
       Unix.sockaddr ->
       Lwt_unix.file_descr ->
         unit Lwt.t;
 }
 
-let no_tls ~sw = {
+let no_tls = {
   create_handler = begin fun
       ~certificate_file:_ ~key_file:_
       ~handler
-      ~error_handler ->
+      ~error_handler
+      ~sw ->
     Httpaf_lwt_unix.Server.create_connection_handler
       ?config:None
       ~request_handler:(wrap_handler ~sw false error_handler handler)
@@ -535,7 +537,7 @@ let no_tls ~sw = {
   end;
 }
 
-let openssl ~sw:_ = {
+let openssl = {
   create_handler = fun ~certificate_file:_ -> failwith "https://github.com/savonet/ocaml-ssl/issues/76"
 (*
   create_handler = begin fun
@@ -597,11 +599,12 @@ let openssl ~sw:_ = {
 }
 
 (* TODO LATER Add ALPN + HTTP/2.0 with ocaml-tls, too. *)
-let ocaml_tls ~sw = {
+let ocaml_tls = {
   create_handler = fun
       ~certificate_file ~key_file
       ~handler
-      ~error_handler ->
+      ~error_handler
+      ~sw ->
     Httpaf_lwt_unix.Server.TLS.create_connection_handler_with_default
       ~certfile:certificate_file ~keyfile:key_file
       ?config:None
@@ -620,12 +623,22 @@ let built_in_middleware error_handler =
 
 
 
+let of_unix_addr = function
+  | Unix.ADDR_INET (host, port) -> `Tcp (host, port)
+  | Unix.ADDR_UNIX path -> `Unix path
+
+let to_unix_addr = function
+  | `Tcp (host, port) -> Unix.ADDR_INET (host, port)
+  | `Unix path -> Unix.ADDR_UNIX path
+
+
+
 let serve_with_details
     caller_function_for_error_messages
     tls_library
+    ~net
     ~interface
     ~port
-    ~stop
     ~error_handler
     ~certificate_file
     ~key_file
@@ -669,36 +682,40 @@ let serve_with_details
      be pattern matching on the exception (but that might introduce dependency
      coupling), or the upstream should be patched to distinguish the errors in
      some useful way. *)
-  let httpaf_connection_handler client_address socket =
-    Lwt.catch
-      (fun () ->
-         httpaf_connection_handler client_address socket)
-      (fun exn ->
-         tls_error_handler client_address exn;
-         Lwt.return_unit)
+  let httpaf_connection_handler ~sw flow client_address =
+    let client_address = to_unix_addr client_address in
+    try
+      let fd = Eio_unix.FD.take flow |> Option.get in
+      let socket = Lwt_unix.of_unix_file_descr fd in
+      Lwt_eio.Promise.await_lwt @@
+      httpaf_connection_handler ~sw client_address socket
+    with exn ->
+      tls_error_handler client_address exn
   in
 
-  (* Look up the low-level address corresponding to the interface. Hopefully,
-     this is a local interface. *)
-  let%lwt addresses = Lwt_unix.getaddrinfo interface (string_of_int port) [] in
-  match addresses with
-  | [] ->
-    Printf.ksprintf failwith "Dream.%s: no interface with address %s"
-      caller_function_for_error_messages interface
-  | address::_ ->
-    let listen_address = Lwt_unix.(address.ai_addr) in
+  let listen_address = Lwt_eio.Promise.await_lwt @@
+    (* Look up the low-level address corresponding to the interface. Hopefully,
+       this is a local interface. *)
+    let%lwt addresses = Lwt_unix.getaddrinfo interface (string_of_int port) [] in
+    match addresses with
+    | [] ->
+      Printf.ksprintf failwith "Dream.%s: no interface with address %s"
+        caller_function_for_error_messages interface
+    | address::_ ->
+      Lwt.return (of_unix_addr Lwt_unix.(address.ai_addr))
+  in
 
-
-    (* Bring up the HTTP server. Wait for the server to actually get started.
-       Then, wait for the ~stop promise. If the ~stop promise ever resolves, stop
-       the server. *)
-    let%lwt server =
-      Lwt_io.establish_server_with_client_socket
-        listen_address
-        httpaf_connection_handler in
-
-    let%lwt () = stop in
-    Lwt_io.shutdown_server server
+  (* Bring up the HTTP server. *)
+  Switch.run @@ fun sw ->
+  let socket =
+    Eio.Net.listen ~sw net listen_address
+      ~reuse_addr:true
+      ~backlog:(Lwt_unix.somaxconn () [@ocaml.warning "-3"])
+  in
+  while true do
+    Eio.Net.accept_sub ~sw socket httpaf_connection_handler
+      ~on_error:(fun ex -> !Lwt.async_exception_hook ex)
+  done
 
 
 
@@ -709,17 +726,15 @@ let serve_with_maybe_https
     caller_function_for_error_messages
     ~interface
     ~port
-    ~stop
     ~error_handler
     ~https
     ?certificate_file ?key_file
     ?certificate_string ?key_string
     ~builtins
+    ~net
     user's_dream_handler =
 
-  Switch.run @@ fun sw ->
   try
-    Lwt_eio.Promise.await_lwt @@
     (* This check will at least catch secrets like "foo" when used on a public
        interface. *)
     (* if not (is_localhost interface) then
@@ -734,10 +749,10 @@ let serve_with_maybe_https
     | `No ->
       serve_with_details
         caller_function_for_error_messages
-        (no_tls ~sw)
+        no_tls
+        ~net
         ~interface
         ~port
-        ~stop
         ~error_handler
         ~certificate_file:""
         ~key_file:""
@@ -791,8 +806,8 @@ let serve_with_maybe_https
 
       let tls_library =
         match tls_library with
-        | `OpenSSL -> openssl ~sw
-        | `OCaml_TLS -> ocaml_tls ~sw
+        | `OpenSSL -> openssl
+        | `OCaml_TLS -> ocaml_tls
       in
 
       match certificate_and_key with
@@ -800,9 +815,9 @@ let serve_with_maybe_https
         serve_with_details
           caller_function_for_error_messages
           tls_library
+          ~net
           ~interface
           ~port
-          ~stop
           ~error_handler
           ~certificate_file
           ~key_file
@@ -810,6 +825,7 @@ let serve_with_maybe_https
           user's_dream_handler
 
       | `Memory (certificate_string, key_string, verbose_or_silent) ->
+        Lwt_eio.Promise.await_lwt @@
         Lwt_io.with_temp_file begin fun (certificate_file, certificate_stream) ->
         Lwt_io.with_temp_file begin fun (key_file, key_stream) ->
 
@@ -825,16 +841,17 @@ let serve_with_maybe_https
         let%lwt () = Lwt_io.close certificate_stream in
         let%lwt () = Lwt_io.close key_stream in
 
+        Lwt_eio.run_eio @@ fun () ->
         serve_with_details
           caller_function_for_error_messages
           tls_library
           ~interface
           ~port
-          ~stop
           ~error_handler
           ~certificate_file
           ~key_file
           ~builtins
+          ~net
           user's_dream_handler
 
         end
@@ -853,26 +870,25 @@ let serve_with_maybe_https
 
 let default_interface = "localhost"
 let default_port = 8080
-let never = fst (Lwt.wait ())
 
 
 
 let serve
     ?(interface = default_interface)
     ?(port = default_port)
-    ?(stop = never)
     ?(error_handler = Error_handler.default)
     ?(https = false)
     ?certificate_file
     ?key_file
     ?(builtins = true)
+    ~net
     user's_dream_handler =
 
   serve_with_maybe_https
     "serve"
+    ~net
     ~interface
     ~port
-    ~stop
     ~error_handler
     ~https:(if https then `OCaml_TLS else `No)
     ?certificate_file
@@ -887,7 +903,6 @@ let serve
 let run
     ?(interface = default_interface)
     ?(port = default_port)
-    ?(stop = never)
     ?(error_handler = Error_handler.default)
     ?(https = false)
     ?certificate_file
@@ -964,9 +979,9 @@ let run
       Lwt_eio.with_event_loop ~clock:env#clock @@ fun () ->
       serve_with_maybe_https
         "run"
+        ~net:env#net
         ~interface
         ~port
-        ~stop
         ~error_handler
         ~https:(if https then `OCaml_TLS else `No)
         ?certificate_file ?key_file

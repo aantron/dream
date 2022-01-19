@@ -99,15 +99,6 @@ let redirect ?status ?code ?headers _request location =
   Message.set_header response "Location" location;
   response
 
-(* Ideally, we'd create a new Eio switch for each connection.
-   But connection creation happens from Lwt at the moment, so we just
-   push the exception back to Lwt to keep things working as before. *)
-let fork_from_lwt ~sw fn =
-  Fibre.fork ~sw (fun () ->
-      try fn ()
-      with ex -> !Lwt.async_exception_hook ex
-    )
-
 let get_switch request =
   match Message.field request switch_field with
   | Some sw -> sw
@@ -122,7 +113,7 @@ let stream ?status ?code ?headers request callback =
     Message.response ?status ?code ?headers client_stream server_stream in
   (* TODO Should set up an error handler for this. YES. *)
   (* TODO Make sure the request id is propagated to the callback. *)
-  let wrapped_callback _ = fork_from_lwt ~sw (fun () -> callback response) in
+  let wrapped_callback _ = Fibre.fork ~sw (fun () -> callback response) in
   Stream.ready server_stream ~close:wrapped_callback wrapped_callback;
   response
 
@@ -149,7 +140,7 @@ let websocket ?headers request callback =
       ~status:`Switching_Protocols ?headers client_stream server_stream in
   Message.set_field response websocket_field true;
   (* TODO Make sure the request id is propagated to the callback. *)
-  let wrapped_callback _ = fork_from_lwt ~sw (fun () -> callback response) in
+  let wrapped_callback _ = Fibre.fork ~sw (fun () -> callback response) in
   Stream.ready server_stream ~close:wrapped_callback wrapped_callback;
   response
 
