@@ -2,13 +2,12 @@
  (public_name dream.http)
  (name dream__http)
  (libraries
-  bigarray-compat
-  bigstringaf
   digestif
   dream.certificate
   dream.cipher
   dream-pure
   dream.server
+  dream-httpaf
   dream-httpaf.gluten
   dream-httpaf.gluten-lwt-unix
   dream-httpaf.h2
