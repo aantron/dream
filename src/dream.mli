@@ -838,9 +838,6 @@ val read_stream :
     - [~close] if close is requested, and
     - [~exn] to report an exception. *)
 
-val ready_stream :
-  stream -> close:(int -> unit) -> exn:(exn -> unit) -> (unit -> unit) -> unit
-
 val write_stream :
   stream -> buffer -> int -> int -> bool -> bool -> close:(int -> unit) -> exn:(exn -> unit) -> (unit -> unit) -> unit
 

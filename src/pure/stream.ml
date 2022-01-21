@@ -33,7 +33,6 @@ type reader = {
 }
 
 type writer = {
-  ready : write;
   data : buffer -> int -> int -> bool -> bool -> write;
   flush : write;
   ping : buffer -> int -> int -> write;
@@ -61,9 +60,6 @@ let no_reader = {
 }
 
 let no_writer = {
-  ready =
-    (fun ~close:_ ~exn:_ _ok ->
-      raise (Failure "ready called on a read-only stream"));
   data =
     (fun _buffer _offset _length _binary _fin ~close:_ ~exn:_ _ok ->
       raise (Failure "write to a read-only stream"));
@@ -147,10 +143,6 @@ let close stream code =
 let abort stream exn =
   stream.reader.abort exn;
   stream.writer.abort exn
-
-(* TODO Test this somehow with guards for early writing on a pipe. *)
-let ready stream ~close ~exn ok =
-  stream.writer.ready ~close ~exn ok
 
 let write stream buffer offset length binary fin ~close ~exn ok =
   stream.writer.data buffer offset length binary fin ~close ~exn ok
@@ -240,13 +232,18 @@ let pipe () =
       exn the_exn
   in
 
-  let ready ~close ~exn ok =
+  let rec data buffer offset length binary fin ~close ~exn ok =
     match internal.state with
     | `Idle ->
-      internal.write_ok_callback <- ok;
+      internal.write_ok_callback <- (fun () ->
+        data buffer offset length binary fin ~close ~exn ok);
       internal.write_close_callback <- close;
-      internal.write_abort_callback <- exn;
+      internal.write_abort_callback <- exn
     | `Reader_waiting ->
+      internal.state <- `Idle;
+      let read_data_callback = internal.read_data_callback in
+      clean_up_reader_fields internal;
+      read_data_callback buffer offset length binary fin;
       ok ()
     | `Closed code ->
       close code
@@ -254,53 +251,36 @@ let pipe () =
       exn the_exn
   in
 
-  let data buffer offset length binary fin ~close ~exn ok =
+  let rec flush ~close ~exn ok =
     match internal.state with
     | `Idle ->
-      raise (Failure "stream write: the stream is not ready")
-    | `Reader_waiting ->
-      internal.state <- `Idle;
-      let read_data_callback = internal.read_data_callback in
-      clean_up_reader_fields internal;
-      internal.write_ok_callback <- ok;
+      internal.write_ok_callback <- (fun () ->
+        flush ~close ~exn ok);
       internal.write_close_callback <- close;
-      internal.write_abort_callback <- exn;
-      read_data_callback buffer offset length binary fin;
-    | `Closed code ->
-      close code
-    | `Aborted the_exn ->
-      exn the_exn
-  in
-
-  let flush ~close ~exn ok =
-    match internal.state with
-    | `Idle ->
-      raise (Failure "stream flush: the previous write has not completed")
+      internal.write_abort_callback <- exn
     | `Reader_waiting ->
       internal.state <- `Idle;
       let read_flush_callback = internal.read_flush_callback in
       clean_up_reader_fields internal;
-      internal.write_ok_callback <- ok;
-      internal.write_close_callback <- close;
-      internal.write_abort_callback <- exn;
-      read_flush_callback ()
+      read_flush_callback ();
+      ok ()
     | `Closed code ->
       close code
     | `Aborted the_exn ->
       exn the_exn
   in
 
-  let ping buffer offset length ~close ~exn ok =
+  let rec ping buffer offset length ~close ~exn ok =
     match internal.state with
     | `Idle ->
-      raise (Failure "stream ping: the previous write has not completed")
+      internal.write_ok_callback <- (fun () ->
+        ping buffer offset length ~close ~exn ok);
+      internal.write_close_callback <- close;
+      internal.write_abort_callback <- exn
     | `Reader_waiting ->
       internal.state <- `Idle;
       let read_ping_callback = internal.read_ping_callback in
       clean_up_reader_fields internal;
-      internal.write_ok_callback <- ok;
-      internal.write_close_callback <- close;
-      internal.write_abort_callback <- exn;
       read_ping_callback buffer offset length
     | `Closed code ->
       close code
@@ -308,17 +288,17 @@ let pipe () =
       exn the_exn
   in
 
-  let pong buffer offset length ~close ~exn ok =
+  let rec pong buffer offset length ~close ~exn ok =
     match internal.state with
     | `Idle ->
-      raise (Failure "stream pong: the previous write has not completed")
+      internal.write_ok_callback <- (fun () ->
+        pong buffer offset length ~close ~exn ok);
+      internal.write_close_callback <- close;
+      internal.write_abort_callback <- exn
     | `Reader_waiting ->
       internal.state <- `Idle;
       let read_pong_callback = internal.read_pong_callback in
       clean_up_reader_fields internal;
-      internal.write_ok_callback <- ok;
-      internal.write_close_callback <- close;
-      internal.write_abort_callback <- exn;
       read_pong_callback buffer offset length
     | `Closed code ->
       close code
@@ -368,7 +348,6 @@ let pipe () =
     abort;
   }
   and writer = {
-    ready;
     data;
     flush;
     ping;
@@ -381,10 +360,6 @@ let pipe () =
 
 let forward (reader : reader) stream =
   let rec loop () =
-    stream.writer.ready
-      ~close:reader.close
-      ~exn:reader.abort
-      (fun () ->
         reader.read
           ~data:(fun buffer offset length binary fin ->
             stream.writer.data
@@ -401,7 +376,7 @@ let forward (reader : reader) stream =
             stream.writer.pong
               buffer offset length ~close:reader.close ~exn:reader.abort loop)
           ~close:stream.writer.close
-          ~exn:stream.writer.abort)
+          ~exn:stream.writer.abort
   in
   loop ()
 

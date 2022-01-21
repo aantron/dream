@@ -87,8 +87,6 @@ val read_until_close : stream -> string promise
 (** Reads a stream completely until [~close], and accumulates the data into a
     string. *)
 
-val ready : stream -> write
-
 val write : stream -> buffer -> int -> int -> bool -> bool -> write
 (** A writing function that sends a data buffer on the given stream. No more
     writing functions should be called on the stream until this function calls

@@ -160,7 +160,6 @@ let server_stream = Message.server_stream
 let set_client_stream = Message.set_client_stream
 let set_server_stream = Message.set_server_stream
 let read_stream = Stream.read
-let ready_stream = Stream.ready
 let write_stream = Stream.write
 let flush_stream = Stream.flush
 let ping_stream = Stream.ping
