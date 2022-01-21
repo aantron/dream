@@ -1,10 +1,10 @@
-type incoming
-type outgoing
+type client
+type server
 
 type 'a message
 
-type request = incoming message
-type response = outgoing message
+type request = client message
+type response = server message
 
 type handler = request -> response Lwt.t
 type middleware = handler -> handler
@@ -114,7 +114,7 @@ module Make
 
   val html : ?status:status -> ?code:int -> ?headers:(string * string) list -> string -> response Lwt.t
 
-  val param : string -> request -> string
+  val param : request -> string ->  string
 
   type csrf_result =
     [ `Ok
@@ -176,13 +176,12 @@ module Make
     ; response : response option
     ; client : string option
     ; severity : log_level
-    ; debug : bool
     ; will_send_response : bool }
 
   type error_handler = error -> response option Lwt.t
 
   val error_template :
-    (string option -> response -> response Lwt.t) -> error_handler
+  (error -> string -> response -> response Lwt.t) -> error_handler
 
   val https :
        ?stop:Lwt_switch.t

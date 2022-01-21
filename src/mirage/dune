@@ -7,10 +7,9 @@
   digestif
   dream.cipher
   dream.localhost
-  dream.middleware
+  dream.server
   dream-pure
-  dream.h2
-  dream.httpaf
+  dream-httpaf.h2
   lwt
   dream-mirage.paf
   dream-mirage.paf.alpn
