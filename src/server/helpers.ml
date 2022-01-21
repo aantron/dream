@@ -139,3 +139,14 @@ let empty ?headers status =
 
 let not_found _ =
   respond ~status:`Not_Found ""
+
+
+
+let read message =
+  Message.read (Message.server_stream message)
+
+let write ?kind message chunk =
+  Message.write ?kind (Message.server_stream message) chunk
+
+let flush message =
+  Message.flush (Message.server_stream message)

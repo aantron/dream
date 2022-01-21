@@ -115,7 +115,7 @@ and upload (request : Message.request) =
       failwith message
 
     | Some content_type ->
-      let body = Lwt_stream.from (fun () -> Message.read request) in
+      let body = Lwt_stream.from (fun () -> Helpers.read request) in
       let `Parse th, stream =
         Multipart_form_lwt.stream ~identify body content_type in
       Lwt.async (fun () -> let%lwt _ = th in Lwt.return_unit);
@@ -135,7 +135,7 @@ let multipart ?(csrf=true) ~now request =
   match content_type with
   | None -> Lwt.return `Wrong_content_type
   | Some content_type ->
-    let body = Lwt_stream.from (fun () -> Message.read request) in
+    let body = Lwt_stream.from (fun () -> Helpers.read request) in
     match%lwt Multipart_form_lwt.of_stream_to_list body content_type with
     | Error (`Msg _err) ->
       Lwt.return `Wrong_content_type (* XXX(dinosaure): better error? *)

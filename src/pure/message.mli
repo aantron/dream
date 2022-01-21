@@ -65,9 +65,10 @@ val sort_headers : (string * string) list -> (string * string) list
 
 val body : 'a message -> string promise
 val set_body : 'a message -> string -> unit
-val read : 'a message -> string option promise
-val write : ?kind:[< `Text | `Binary ] -> response -> string -> unit promise
-val flush : response -> unit promise
+val read : Stream.stream -> string option promise
+val write :
+  ?kind:[< `Text | `Binary ] -> Stream.stream -> string -> unit promise
+val flush : Stream.stream -> unit promise
 val close : ?code:int -> 'a message -> unit promise
 val client_stream : 'a message -> Stream.stream
 val server_stream : 'a message -> Stream.stream

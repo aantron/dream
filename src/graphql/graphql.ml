@@ -116,7 +116,7 @@ let complete_message id =
 (* TODO Test client complete racing against a stream. *)
 let handle_over_websocket make_context schema subscriptions request response =
   let rec loop inited =
-    match%lwt Message.read response with
+    match%lwt Helpers.read response with
     | None ->
       log.info (fun log -> log ~request "GraphQL WebSocket closed by client");
       close_and_clean subscriptions response
@@ -145,7 +145,7 @@ let handle_over_websocket make_context schema subscriptions request response =
         close_and_clean subscriptions response ~code:4429
       end
       else begin
-        let%lwt () = Message.write response ack_message in
+        let%lwt () = Helpers.write response ack_message in
         loop true
       end
 
@@ -193,13 +193,13 @@ let handle_over_websocket make_context schema subscriptions request response =
               log.warning (fun log ->
                 log ~request
                   "subscribe: error %s" (Yojson.Basic.to_string json));
-              Message.write response (error_message id json)
+              Helpers.write response (error_message id json)
 
             (* It's not clear that this case ever occurs, because graphql-ws is
                only used for subscriptions, at the protocol level. *)
             | Ok (`Response json) ->
-              let%lwt () = Message.write response (data_message id json) in
-              let%lwt () = Message.write response (complete_message id) in
+              let%lwt () = Helpers.write response (data_message id json) in
+              let%lwt () = Helpers.write response (complete_message id) in
               Lwt.return_unit
 
             | Ok (`Stream (stream, close)) ->
@@ -216,15 +216,15 @@ let handle_over_websocket make_context schema subscriptions request response =
               let%lwt () =
                 stream |> Lwt_stream.iter_s (function
                   | Ok json ->
-                    Message.write response (data_message id json)
+                    Helpers.write response (data_message id json)
                   | Error json ->
                     log.warning (fun log ->
                       log ~request
                         "Subscription: error %s" (Yojson.Basic.to_string json));
-                    Message.write response (error_message id json))
+                    Helpers.write response (error_message id json))
               in
 
-              let%lwt () = Message.write response (complete_message id) in
+              let%lwt () = Helpers.write response (complete_message id) in
               Hashtbl.remove subscriptions id;
               Lwt.return_unit
 
@@ -240,12 +240,12 @@ let handle_over_websocket make_context schema subscriptions request response =
 
             try%lwt
               let%lwt () =
-                Message.write
+                Helpers.write
                   response
                   (error_message id (make_error "Internal Server Error"))
               in
               if !subscribed then
-                Message.write response (complete_message id)
+                Helpers.write response (complete_message id)
               else
                 Lwt.return_unit
             with _ ->

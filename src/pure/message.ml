@@ -187,14 +187,14 @@ let sort_headers headers =
 
 (* Streams *)
 
-let read message =
-  Stream.read_convenience message.server_stream
+let read stream =
+  Stream.read_convenience stream
 
 (* TODO Need to expose FIN. However, it can't have any effect even on
    WebSockets, because websocket/af does not offer the ability to pass FIN. It
    is hardcoded to true. *)
 (* TODO Also expose binary/text. What should be the default? *)
-let write ?kind message chunk =
+let write ?kind stream chunk =
   let binary =
     match kind with
     | None | Some `Text -> false
@@ -205,7 +205,7 @@ let write ?kind message chunk =
   let buffer = Bigstringaf.of_string ~off:0 ~len:length chunk in
   (* TODO Better handling of close? But it can't even occur with http/af. *)
   Stream.write
-    message.server_stream
+    stream
     buffer 0 length binary true
     ~close:(fun _code -> Lwt.wakeup_later_exn resolver End_of_file)
     ~exn:(fun exn -> Lwt.wakeup_later_exn resolver exn)
@@ -214,10 +214,10 @@ let write ?kind message chunk =
 
 (* TODO How are remote closes actually handled? There is no way for http/af to
    report them to the user application through the writer. *)
-let flush message =
+let flush stream =
   let promise, resolver = Lwt.wait () in
   Stream.flush
-    message.server_stream
+    stream
     ~close:(fun _code -> Lwt.wakeup_later_exn resolver End_of_file)
     ~exn:(fun exn -> Lwt.wakeup_later_exn resolver exn)
     (Lwt.wakeup_later resolver);

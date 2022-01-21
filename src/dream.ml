@@ -149,9 +149,9 @@ let all_cookies = Cookie.all_cookies
 
 let body = Message.body
 let set_body = Message.set_body
-let read = Message.read
-let write = Message.write
-let flush = Message.flush
+let read = Helpers.read
+let write = Helpers.write
+let flush = Helpers.flush
 let close = Message.close
 type buffer = Stream.buffer
 type stream = Stream.stream
