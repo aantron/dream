@@ -409,7 +409,7 @@ let read_convenience stream =
         stream.writer.pong buffer offset length ~close ~exn:abort loop)
 
       ~pong:(fun _buffer _offset _length ->
-        ())
+        loop ())
 
       ~close
 
@@ -454,7 +454,7 @@ let read_until_close stream =
         stream.writer.pong buffer offset length ~close ~exn:abort loop)
 
       ~pong:(fun _buffer _offset _length ->
-        ())
+        loop ())
 
       ~close
 
