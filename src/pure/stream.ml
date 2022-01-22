@@ -105,24 +105,34 @@ let string_reader the_string =
   (* Storing the string in a ref here so that we can "lose" it eagerly once
      the stream is closed, making the memory available to the GC. *)
   let string_ref = ref (Some the_string) in
+  let exn_ref = ref None in
 
-  let read ~data ~flush:_ ~ping:_ ~pong:_ ~close ~exn:_ =
-    match !string_ref with
-    | Some stored_string ->
-      string_ref := None;
-      let length = String.length stored_string in
-      data
-        (Bigstringaf.of_string ~off:0 ~len:length stored_string)
-        0 length true true
+  let read ~data ~flush:_ ~ping:_ ~pong:_ ~close ~exn =
+    match !exn_ref with
+    | Some the_exn ->
+      exn the_exn
     | None ->
-      close 1000
+      match !string_ref with
+      | Some stored_string ->
+        string_ref := None;
+        let length = String.length stored_string in
+        data
+          (Bigstringaf.of_string ~off:0 ~len:length stored_string)
+          0 length true true
+      | None ->
+        close 1000
   in
 
   let close _code =
-    string_ref := None;
+    string_ref := None
   in
 
-  reader ~read ~close ~abort:close
+  let abort exn =
+    string_ref := None;
+    exn_ref := Some exn
+  in
+
+  reader ~read ~close ~abort
 
 let string the_string =
   if String.length the_string = 0 then
