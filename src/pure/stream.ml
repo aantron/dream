@@ -370,23 +370,23 @@ let pipe () =
 
 let forward (reader : reader) stream =
   let rec loop () =
-        reader.read
-          ~data:(fun buffer offset length binary fin ->
-            stream.writer.data
-              buffer offset length
-              binary fin
-              ~close:reader.close ~exn:reader.abort
-              loop)
-          ~flush:(fun () ->
-            stream.writer.flush ~close:reader.close ~exn:reader.abort loop)
-          ~ping:(fun buffer offset length ->
-            stream.writer.ping
-              buffer offset length ~close:reader.close ~exn:reader.abort loop)
-          ~pong:(fun buffer offset length ->
-            stream.writer.pong
-              buffer offset length ~close:reader.close ~exn:reader.abort loop)
-          ~close:stream.writer.close
-          ~exn:stream.writer.abort
+    reader.read
+      ~data:(fun buffer offset length binary fin ->
+        stream.writer.data
+          buffer offset length
+          binary fin
+          ~close:reader.close ~exn:reader.abort
+          loop)
+      ~flush:(fun () ->
+        stream.writer.flush ~close:reader.close ~exn:reader.abort loop)
+      ~ping:(fun buffer offset length ->
+        stream.writer.ping
+          buffer offset length ~close:reader.close ~exn:reader.abort loop)
+      ~pong:(fun buffer offset length ->
+        stream.writer.pong
+          buffer offset length ~close:reader.close ~exn:reader.abort loop)
+      ~close:stream.writer.close
+      ~exn:stream.writer.abort
   in
   loop ()
 
