@@ -20,7 +20,7 @@ let forward_body_general
     http_flush
     close =
   let bytes_since_flush = ref 0 in
-  let abort _exn = close 1000 in
+  let abort _exn = Printf.printf "ABORT\n%!"; close 1000 in
 
   let rec send () =
     Dream.Message.client_stream response

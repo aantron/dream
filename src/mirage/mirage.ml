@@ -255,6 +255,65 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Mirag
     let service = Alpn.service (alpn protocol) ~error_handler ~request_handler accept close in
     init ~port stack >>= fun t ->
     let `Initialized th = serve ?stop service t in th
+
+let respond = Helpers.respond
+    let empty = Helpers.empty
+
+
+let validate_path request =
+  let path = Dream__server.Router.path request in
+
+  let has_slash component = String.contains component '/' in
+  let has_backslash component = String.contains component '\\' in
+  let has_slash = List.exists has_slash path in
+  let has_backslash = List.exists has_backslash path in
+  let has_dot = List.exists ((=) Filename.current_dir_name) path in
+  let has_dotdot = List.exists ((=) Filename.parent_dir_name) path in
+  let has_empty = List.exists ((=) "") path in
+  let is_empty = path = [] in
+
+  if has_slash ||
+     has_backslash ||
+     has_dot ||
+     has_dotdot ||
+     has_empty ||
+     is_empty then
+    None
+
+  else
+    let path = String.concat Filename.dir_sep path in
+    if Filename.is_relative path then
+      Some path
+    else
+      None
+
+let static ~loader local_root = fun request ->
+
+  if not @@ Method.methods_equal (Message.method_ request) `GET then
+    Message.response ~status:`Not_Found Stream.empty Stream.null
+    |> Lwt.return
+
+  else
+    match validate_path request with
+    | None ->
+      Message.response ~status:`Not_Found Stream.empty Stream.null
+      |> Lwt.return
+
+    | Some path ->
+      let%lwt response = loader local_root path request in
+      if not (Message.has_header response "Content-Type") then begin
+        match Message.status response with
+        | `OK
+        | `Non_Authoritative_Information
+        | `No_Content
+        | `Reset_Content
+        | `Partial_Content ->
+          Message.add_header response "Content-Type" (Magic_mime.lookup path)
+        | _ ->
+          ()
+      end;
+      Lwt.return response
+
 end
 
 include Message
