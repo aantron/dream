@@ -291,7 +291,8 @@ let pipe () =
       internal.state <- `Idle;
       let read_ping_callback = internal.read_ping_callback in
       clean_up_reader_fields internal;
-      read_ping_callback buffer offset length
+      read_ping_callback buffer offset length;
+      ok ()
     | `Closed code ->
       close code
     | `Aborted the_exn ->
@@ -309,7 +310,8 @@ let pipe () =
       internal.state <- `Idle;
       let read_pong_callback = internal.read_pong_callback in
       clean_up_reader_fields internal;
-      read_pong_callback buffer offset length
+      read_pong_callback buffer offset length;
+      ok ()
     | `Closed code ->
       close code
     | `Aborted the_exn ->
