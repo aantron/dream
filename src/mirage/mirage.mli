@@ -12,7 +12,7 @@ type middleware = handler -> handler
 module Make
   (Pclock : Mirage_clock.PCLOCK)
   (Time : Mirage_time.S)
-  (Stack : Mirage_stack.V4V6) : sig
+  (Stack : Tcpip.Stack.V4V6) : sig
 
   type route
 
