@@ -65,6 +65,7 @@ depends: [
   "lwt_ssl"
   "logs" {>= "0.5.0"}
   "magic-mime"
+  "mirage-stack"
   "mirage-clock" {>= "3.0.0"}  # now_d_ps : unit -> int * int64.
   "mirage-crypto" {>= "0.8.1"}  # AES-256-GCM.
   "mirage-crypto-rng"
