@@ -50,7 +50,10 @@ depends: [
   "dream"
   "dune" {>= "2.7.0"}
   "dream"
+  "dream-pure"
+  "dream-httpaf"
   "bigarray-compat"
+  "mimic"
   "bigstringaf"
   "digestif" {>= "1.0.0"}
   "lwt"
