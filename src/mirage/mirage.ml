@@ -169,9 +169,23 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
 
   include Formats
 
+  type 'a promise = 'a Lwt.t
+
   let not_found = Helpers.not_found
 
+  (* Responses *)
+
+  let response = Helpers.response_with_body
+  let respond = Helpers.respond
   let html = Helpers.html
+  let json = Helpers.json
+  let redirect = Helpers.redirect
+  let empty = Helpers.empty
+  let stream = Helpers.stream
+  let websocket = Helpers.websocket
+  let status = Message.status
+
+
 
   let log =
     Log.convenience_log
@@ -256,8 +270,6 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
     init ~port stack >>= fun t ->
     let `Initialized th = serve ?stop service t in th
 
-let respond = Helpers.respond
-    let empty = Helpers.empty
 
 
 let validate_path request =

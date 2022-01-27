@@ -112,13 +112,116 @@ module Make
   val info      : ('a, unit) conditional_log
   (* val debug     : ('a, unit) conditional_log *)
 
-  val html : ?status:status -> ?code:int -> ?headers:(string * string) list -> string -> response Lwt.t
-
   val param : request -> string ->  string
 
+  type 'a promise = 'a Lwt.t
+
+  (** {1 Responses} *)
+
+  val response :
+    ?status:[< status ] ->
+    ?code:int ->
+    ?headers:(string * string) list ->
+      string -> response
+  (** Creates a new {!type-response} with the given string as body. [~code] and
+      [~status] are two ways to specify the {!type-status} code, which is [200 OK]
+      by default. The headers are empty by default.
+
+      Note that browsers may interpret lack of a [Content-Type:] header as if its
+      value were [application/octet-stream] or [text/html; charset=us-ascii],
+      which will prevent correct interpretation of UTF-8 strings. Either add a
+      [Content-Type:] header using [~headers] or {!Dream.add_header}, or use a
+      wrapper like {!Dream.html}. The modern [Content-Type:] for HTML is
+      [text/html; charset=utf-8]. See {!Dream.text_html}. *)
+
+  val respond :
+    ?status:[< status ] ->
+    ?code:int ->
+    ?headers:(string * string) list ->
+      string -> response promise
+  (** Same as {!Dream.val-response}, but the new {!type-response} is wrapped in a
+      {!type-promise}. *)
+
+  val html :
+    ?status:[< status ] ->
+    ?code:int ->
+    ?headers:(string * string) list ->
+      string -> response promise
+  (** Same as {!Dream.respond}, but adds [Content-Type: text/html; charset=utf-8].
+      See {!Dream.text_html}.
+
+      As your Web app develops, consider adding [Content-Security-Policy] headers,
+      as described in example
+      {{:https://github.com/aantron/dream/tree/master/example/w-content-security-policy#files}
+      [w-content-security-policy]}. These headers are completely optional, but
+      they can provide an extra layer of defense for a mature app. *)
+
+  val json :
+    ?status:[< status ] ->
+    ?code:int ->
+    ?headers:(string * string) list ->
+      string -> response promise
+  (** Same as {!Dream.respond}, but adds [Content-Type: application/json]. See
+      {!Dream.application_json}. *)
+
+  val redirect :
+    ?status:[< redirection ] ->
+    ?code:int ->
+    ?headers:(string * string) list ->
+      request -> string -> response promise
+  (** Creates a new {!type-response}. Adds a [Location:] header with the given
+      string. The default status code is [303 See Other], for a temporary
+      redirection. Use [~status:`Moved_Permanently] or [~code:301] for a permanent
+      redirection.
+
+      If you use [~code], be sure the number follows the pattern [3xx], or most
+      browsers and other clients won't actually perform a redirect.
+
+      The {!type-request} is used for retrieving the site prefix, if the string is
+      an absolute path. Most applications don't have a site prefix. *)
+
   val empty :
-  ?headers:(string * string) list ->
-    status -> response Lwt.t
+    ?headers:(string * string) list ->
+      status -> response promise
+  (** Same as {!Dream.val-response} with the empty string for a body. *)
+
+  val stream :
+    ?status:[< status ] ->
+    ?code:int ->
+    ?headers:(string * string) list ->
+      (response -> unit promise) -> response promise
+  (** Same as {!Dream.val-respond}, but calls {!Dream.set_stream} internally to
+      prepare the response for stream writing, and then runs the callback
+      asynchronously to do it. See example
+      {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
+      [j-stream]}.
+
+      {[
+        fun request ->
+          Dream.stream (fun response ->
+            let%lwt () = Dream.write response "foo" in
+            Dream.close_stream response)
+      ]} *)
+
+  val websocket :
+    ?headers:(string * string) list ->
+      (response -> unit promise) -> response promise
+  (** Creates a fresh [101 Switching Protocols] response. Once this response is
+      returned to Dream's HTTP layer, the callback is passed a new
+      {!type-websocket}, and the application can begin using it. See example
+      {{:https://github.com/aantron/dream/tree/master/example/k-websocket#files}
+      [k-websocket]} \[{{:http://dream.as/k-websocket} playground}\].
+
+      {[
+        let my_handler = fun request ->
+          Dream.websocket (fun websocket ->
+            let%lwt () = Dream.send websocket "Hello, world!" in
+            Dream.close_websocket websocket);
+      ]} *)
+
+  val status : response -> status
+  (** Response {!type-status}. For example, [`OK]. *)
+
 (** Same as {!Dream.val-response} with the empty string for a body. *)
 
 val static :
