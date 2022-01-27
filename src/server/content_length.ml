@@ -20,5 +20,6 @@ let content_length next_handler request =
   else
     let%lwt (response : Message.response) = next_handler request in
     if not (Message.has_header response "Transfer-Encoding") then
-      Message.add_header response "Transfer-Encoding" "chunked";
+      if not (Message.has_header response "Content-Length") then
+        Message.add_header response "Transfer-Encoding" "chunked";
     Lwt.return response

@@ -421,6 +421,8 @@ let read_convenience stream =
 
   promise
 
+(* TODO It's probably best to protect "wakeups" of the promise to prevent
+   Invalid_argument from Lwt. *)
 let read_until_close stream =
   let promise, resolver = Lwt.wait () in
   let length = ref 0 in
