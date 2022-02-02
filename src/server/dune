@@ -11,7 +11,7 @@
   magic-mime
   mirage-clock
   multipart_form
-  multipart_form.lwt
+  multipart_form-lwt
   ptime
   unstrctrd
   uri
