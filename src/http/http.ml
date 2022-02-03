@@ -624,11 +624,11 @@ let built_in_middleware error_handler =
 
 
 let of_unix_addr = function
-  | Unix.ADDR_INET (host, port) -> `Tcp (host, port)
+  | Unix.ADDR_INET (host, port) -> `Tcp (Eio_unix.Ipaddr.of_unix host, port)
   | Unix.ADDR_UNIX path -> `Unix path
 
 let to_unix_addr = function
-  | `Tcp (host, port) -> Unix.ADDR_INET (host, port)
+  | `Tcp (host, port) -> Unix.ADDR_INET (Eio_unix.Ipaddr.to_unix host, port)
   | `Unix path -> Unix.ADDR_UNIX path
 
 
