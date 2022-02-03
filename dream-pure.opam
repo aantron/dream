@@ -22,6 +22,7 @@ depends: [
   "ocaml" {>= "4.08.0"}
   "ptime" {>= "0.8.1"}  # Ptime.weekday.
   "uri" {>= "4.2.0"}
+  "eio" {>= "0.1"}
 
   # Testing, development.
   "alcotest" {with-test}

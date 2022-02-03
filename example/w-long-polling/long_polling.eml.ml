@@ -71,7 +71,7 @@ let () =
              | Messages_accumulating [] ->
                let response_promise, respond = Promise.create () in
                server_state := Client_waiting (fun message ->
-                   Promise.fulfill respond (Dream.response message));
+                   Promise.resolve respond (Dream.response message));
                Promise.await response_promise
              | Messages_accumulating messages ->
                server_state := Messages_accumulating [];
