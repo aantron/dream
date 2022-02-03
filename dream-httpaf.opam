@@ -16,9 +16,7 @@ depends: [
   "dune" {>= "2.7.0"}  # --instrument-with.
   "lwt"
   "lwt_ppx" {>= "1.2.2"}
-  "lwt_ssl"
   "ocaml" {>= "4.08.0"}
-  "ssl" {>= "0.5.8"}  # Ssl.get_negotiated_alpn_protocol.
 
   # Currently vendored.
   # "gluten"
