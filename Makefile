@@ -19,7 +19,7 @@ test :
 
 .PHONY : test-watch
 test-watch :
-	@dune build --no-print-directory -w --root . @$(TEST)/runtest
+	@dune build --no-print-directory -w @$(TEST)/runtest
 
 .PHONY : coverage-serve
 coverage-serve :
@@ -27,7 +27,7 @@ coverage-serve :
 
 .PHONY : promote
 promote :
-	dune promote --root .
+	dune promote
 	@make --no-print-directory test
 
 .PHONY : docs
