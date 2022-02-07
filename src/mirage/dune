@@ -9,12 +9,12 @@
   dream.localhost
   dream.middleware
   dream-pure
-  dream.h2
-  dream.httpaf
+  dream.dream-h2
+  dream.dream-httpaf
   lwt
-  dream-mirage.paf
-  dream-mirage.paf.alpn
-  dream-mirage.paf.mirage
+  dream-mirage.dream-paf
+  dream-mirage.dream-paf.alpn
+  dream-mirage.dream-paf.mirage
  )
  (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

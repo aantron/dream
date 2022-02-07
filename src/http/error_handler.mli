@@ -39,11 +39,11 @@ val app :
 
 val httpaf :
   Catch.error_handler ->
-    (Unix.sockaddr -> Httpaf.Server_connection.error_handler)
+    (Unix.sockaddr -> Dream_httpaf.Server_connection.error_handler)
 
 val h2 :
   Catch.error_handler ->
-    (Unix.sockaddr -> H2.Server_connection.error_handler)
+    (Unix.sockaddr -> Dream_h2.Server_connection.error_handler)
 
 val tls :
   Catch.error_handler ->

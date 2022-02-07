@@ -22,13 +22,13 @@ module Stream = Dream_pure.Stream
 
 
 let to_dream_method method_ =
-  Httpaf.Method.to_string method_ |> Method.string_to_method
+  Dream_httpaf.Method.to_string method_ |> Method.string_to_method
 
 let to_httpaf_status status =
-  Status.status_to_int status |> Httpaf.Status.of_code
+  Status.status_to_int status |> Dream_httpaf.Status.of_code
 
 let to_h2_status status =
-  Status.status_to_int status |> H2.Status.of_code
+  Status.status_to_int status |> Dream_h2.Status.of_code
 
 let sha1 s =
   s
@@ -56,14 +56,16 @@ let wrap_handler
     (user's_error_handler : Catch.error_handler)
     (user's_dream_handler : Message.handler) =
 
-  let httpaf_request_handler = fun client_address (conn : _ Gluten.Reqd.t) ->
+  let httpaf_request_handler =
+      fun client_address (conn : _ Dream_gluten.Reqd.t) ->
+
     Log.set_up_exception_hook ();
 
     let conn, upgrade = conn.reqd, conn.upgrade in
 
     (* Covert the http/af request to a Dream request. *)
-    let httpaf_request : Httpaf.Request.t =
-      Httpaf.Reqd.request conn in
+    let httpaf_request : Dream_httpaf.Request.t =
+      Dream_httpaf.Reqd.request conn in
 
     let client =
       Adapt.address_to_string client_address in
@@ -74,22 +76,22 @@ let wrap_handler
     let version =
       (httpaf_request.version.major, httpaf_request.version.minor) in
     let headers =
-      Httpaf.Headers.to_list httpaf_request.headers in
+      Dream_httpaf.Headers.to_list httpaf_request.headers in
 
     let body =
-      Httpaf.Reqd.request_body conn in
+      Dream_httpaf.Reqd.request_body conn in
     (* TODO Review per-chunk allocations. *)
     (* TODO Should the stream be auto-closed? It doesn't even have a closed
        state. The whole thing is just a wrapper for whatever the http/af
        behavior is. *)
     let read ~data ~flush:_ ~ping:_ ~pong:_ ~close ~exn:_ =
-      Httpaf.Body.Reader.schedule_read
+      Dream_httpaf.Body.Reader.schedule_read
         body
         ~on_eof:(fun () -> close 1000)
         ~on_read:(fun buffer ~off ~len -> data buffer off len true false)
     in
     let close _code =
-      Httpaf.Body.Reader.close body in
+      Dream_httpaf.Body.Reader.close body in
     let body =
       Stream.reader ~read ~close ~abort:close in
     let body =
@@ -124,7 +126,7 @@ let wrap_handler
               transmit the resulting error response. *)
         let forward_response response =
           let headers =
-            Httpaf.Headers.of_list (Message.all_headers response) in
+            Dream_httpaf.Headers.of_list (Message.all_headers response) in
 
           (* let version =
             match Dream.version_override response with
@@ -137,9 +139,9 @@ let wrap_handler
             Dream.reason_override response in *)
 
           let httpaf_response =
-            Httpaf.Response.create ~headers status in
+            Dream_httpaf.Response.create ~headers status in
           let body =
-            Httpaf.Reqd.respond_with_streaming conn httpaf_response in
+            Dream_httpaf.Reqd.respond_with_streaming conn httpaf_response in
 
           Adapt.forward_body response body;
 
@@ -157,12 +159,12 @@ let wrap_handler
               ~error_handler
               (Dream_httpaf.Websocket.websocket_handler
                 (Message.client_stream response))
-            |> Gluten.make (module Websocketaf.Server_connection)
+            |> Dream_gluten.make (module Websocketaf.Server_connection)
             |> upgrade
           in
 
           let headers =
-            Httpaf.Headers.of_list (Message.all_headers response) in
+            Dream_httpaf.Headers.of_list (Message.all_headers response) in
 
           Websocketaf.Handshake.respond_with_upgrade ~headers ~sha1 conn proceed
           |> function
@@ -179,7 +181,7 @@ let wrap_handler
       @@ fun exn ->
         (* TODO There was something in the fork changelogs about not requiring
            report exn. Is it relevant to this? *)
-        Httpaf.Reqd.report_exn conn exn;
+        Dream_httpaf.Reqd.report_exn conn exn;
         Lwt.return_unit
     end
   in
@@ -194,12 +196,12 @@ let wrap_handler_h2
     (_user's_error_handler : Catch.error_handler)
     (user's_dream_handler : Message.handler) =
 
-  let httpaf_request_handler = fun client_address (conn : H2.Reqd.t) ->
+  let httpaf_request_handler = fun client_address (conn : Dream_h2.Reqd.t) ->
     Log.set_up_exception_hook ();
 
     (* Covert the h2 request to a Dream request. *)
-    let httpaf_request : H2.Request.t =
-      H2.Reqd.request conn in
+    let httpaf_request : Dream_h2.Request.t =
+      Dream_h2.Reqd.request conn in
 
     let client =
       Adapt.address_to_string client_address in
@@ -210,18 +212,18 @@ let wrap_handler_h2
     let version =
       (2, 0) in
     let headers =
-      H2.Headers.to_list httpaf_request.headers in
+      Dream_h2.Headers.to_list httpaf_request.headers in
 
     let body =
-      H2.Reqd.request_body conn in
+      Dream_h2.Reqd.request_body conn in
     let read ~data ~flush:_ ~ping:_ ~pong:_ ~close ~exn:_ =
-      H2.Body.schedule_read
+      Dream_h2.Body.schedule_read
         body
         ~on_eof:(fun () -> close 1000)
         ~on_read:(fun buffer ~off ~len -> data buffer off len true false)
     in
     let close _code =
-      H2.Body.close_reader body in
+      Dream_h2.Body.close_reader body in
     let body =
       Stream.reader ~read ~close ~abort:close in
     let body =
@@ -249,13 +251,13 @@ let wrap_handler_h2
 
         let forward_response response =
           let headers =
-            H2.Headers.of_list (Message.all_headers response) in
+            Dream_h2.Headers.of_list (Message.all_headers response) in
           let status =
             to_h2_status (Message.status response) in
           let h2_response =
-            H2.Response.create ~headers status in
+            Dream_h2.Response.create ~headers status in
           let body =
-            H2.Reqd.respond_with_streaming conn h2_response in
+            Dream_h2.Reqd.respond_with_streaming conn h2_response in
 
           Adapt.forward_body_h2 response body;
 
@@ -276,7 +278,7 @@ let wrap_handler_h2
       @@ fun exn ->
         (* TODO LATER There was something in the fork changelogs about not
            requiring report_exn. Is it relevant to this? *)
-        H2.Reqd.report_exn conn exn;
+        Dream_h2.Reqd.report_exn conn exn;
         Lwt.return_unit
     end
   in
@@ -306,7 +308,7 @@ let no_tls = {
       ~certificate_file:_ ~key_file:_
       ~handler
       ~error_handler ->
-    Httpaf_lwt_unix.Server.create_connection_handler
+    Dream_httpaf_lwt_unix.Server.create_connection_handler
       ?config:None
       ~request_handler:(wrap_handler false error_handler handler)
       ~error_handler:(Error_handler.httpaf error_handler)
@@ -320,21 +322,21 @@ let openssl = {
       ~error_handler ->
 
     let httpaf_handler =
-      Httpaf_lwt_unix.Server.SSL.create_connection_handler
+      Dream_httpaf_lwt_unix.Server.SSL.create_connection_handler
         ?config:None
       ~request_handler:(wrap_handler true error_handler handler)
       ~error_handler:(Error_handler.httpaf error_handler)
     in
 
     let h2_handler =
-      H2_lwt_unix.Server.SSL.create_connection_handler
+      Dream_h2_lwt_unix.Server.SSL.create_connection_handler
         ?config:None
       ~request_handler:(wrap_handler_h2 true error_handler handler)
       ~error_handler:(Error_handler.h2 error_handler)
     in
 
     let perform_tls_handshake =
-      Gluten_lwt_unix.Server.SSL.create_default
+      Dream_gluten_lwt_unix.Server.SSL.create_default
         ~alpn_protocols:["h2"; "http/1.1"]
         ~certfile:certificate_file
         ~keyfile:key_file
@@ -377,7 +379,7 @@ let ocaml_tls = {
       ~certificate_file ~key_file
       ~handler
       ~error_handler ->
-    Httpaf_lwt_unix.Server.TLS.create_connection_handler_with_default
+    Dream_httpaf_lwt_unix.Server.TLS.create_connection_handler_with_default
       ~certfile:certificate_file ~keyfile:key_file
       ?config:None
       ~request_handler:(wrap_handler true error_handler handler)
@@ -583,7 +585,8 @@ let serve_with_maybe_https
           user's_dream_handler
 
       | `Memory (certificate_string, key_string, verbose_or_silent) ->
-        Lwt_io.with_temp_file begin fun (certificate_file, certificate_stream) ->
+        Lwt_io.with_temp_file begin
+          fun (certificate_file, certificate_stream) ->
         Lwt_io.with_temp_file begin fun (key_file, key_stream) ->
 
         if verbose_or_silent <> `Silent then begin

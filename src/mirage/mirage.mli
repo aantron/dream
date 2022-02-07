@@ -196,7 +196,7 @@ module Make
        ?stop:Lwt_switch.t
     -> port:int
     -> ?prefix:string
-    -> ?protocol:[ `H2 | `HTTP_1_1 ]
+    -> ?protocol:[ `Dream_h2 | `HTTP_1_1 ]
     -> Stack.TCP.t
     -> ?error_handler:error_handler
     -> handler

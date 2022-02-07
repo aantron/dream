@@ -3,30 +3,30 @@ module Dream = Dream__pure.Inmost
 open Rresult
 open Lwt.Infix
 
-let to_dream_method meth = Httpaf.Method.to_string meth |> Dream.string_to_method
-let to_httpaf_status status = Dream.status_to_int status |> Httpaf.Status.of_code
-let to_h2_status status = Dream.status_to_int status |> H2.Status.of_code
+let to_dream_method meth = Dream_httpaf.Method.to_string meth |> Dream.string_to_method
+let to_httpaf_status status = Dream.status_to_int status |> Dream_httpaf.Status.of_code
+let to_h2_status status = Dream.status_to_int status |> Dream_h2.Status.of_code
 let sha1 str = Digestif.SHA1.(to_raw_string (digest_string str))
 let const x = fun _ -> x
 let ( >>? ) = Lwt_result.bind
 
 let wrap_handler_httpaf app _user's_error_handler user's_dream_handler =
   let httpaf_request_handler = fun client reqd ->
-    let httpaf_request = Httpaf.Reqd.request reqd in
+    let httpaf_request = Dream_httpaf.Reqd.request reqd in
     let method_ = to_dream_method httpaf_request.meth in
     let target  = httpaf_request.target in
     let version = (httpaf_request.version.major, httpaf_request.version.minor) in
-    let headers = Httpaf.Headers.to_list httpaf_request.headers in
-    let body    = Httpaf.Reqd.request_body reqd in
+    let headers = Dream_httpaf.Headers.to_list httpaf_request.headers in
+    let body    = Dream_httpaf.Reqd.request_body reqd in
 
     let read ~data ~close ~flush:_ ~ping:_ ~pong:_ =
-      Httpaf.Body.Reader.schedule_read
+      Dream_httpaf.Body.Reader.schedule_read
         body
         ~on_eof:(fun () -> close 1000)
         ~on_read:(fun buffer ~off ~len -> data buffer off len true false)
     in
     let close _close =
-      Httpaf.Body.Reader.close body in
+      Dream_httpaf.Body.Reader.close body in
     let body =
       Dream__pure.Stream.read_only ~read ~close in
 
@@ -58,12 +58,12 @@ let wrap_handler_httpaf app _user's_error_handler user's_dream_handler =
               transmit the resulting error response. *)
         let forward_response response =
           let headers =
-            Httpaf.Headers.of_list (Dream.all_headers response) in
+            Dream_httpaf.Headers.of_list (Dream.all_headers response) in
 
           (* let version =
             match Dream.version_override response with
             | None -> None
-            | Some (major, minor) -> Some Httpaf.Version.{major; minor}
+            | Some (major, minor) -> Some Dream_httpaf.Version.{major; minor}
           in *)
           let status =
             to_httpaf_status (Dream.status response) in
@@ -71,9 +71,9 @@ let wrap_handler_httpaf app _user's_error_handler user's_dream_handler =
             Dream.reason_override response in *)
 
           let httpaf_response =
-            Httpaf.Response.create ~headers status in
+            Dream_httpaf.Response.create ~headers status in
           let body =
-            Httpaf.Reqd.respond_with_streaming reqd httpaf_response in
+            Dream_httpaf.Reqd.respond_with_streaming reqd httpaf_response in
 
           Adapt.forward_body response body;
 
@@ -85,7 +85,7 @@ let wrap_handler_httpaf app _user's_error_handler user's_dream_handler =
       @@ fun exn ->
         (* TODO LATER There was something in the fork changelogs about not
            requiring report_exn. Is it relevant to this? *)
-        Httpaf.Reqd.report_exn reqd exn;
+        Dream_httpaf.Reqd.report_exn reqd exn;
         Lwt.return_unit
     end
   in
@@ -109,7 +109,7 @@ let error_handler
     fun client ?request error start_response ->
   match request with
   | Some (Alpn.Request_HTTP_1_1 request) ->
-    let start_response hdrs : Httpaf.Body.Writer.t = match start_response Alpn.(Headers_HTTP_1_1 hdrs) with
+    let start_response hdrs : Dream_httpaf.Body.Writer.t = match start_response Alpn.(Headers_HTTP_1_1 hdrs) with
       | Alpn.Body_HTTP_1_1 (Alpn.Wr, Alpn.Body_wr body) -> body
       | _ -> Fmt.failwith "Impossible to respond with an h2 respond to an HTTP/1.1 client" in
     Error_handler.httpaf app user's_error_handler client ?request:(Some request) error start_response
@@ -122,17 +122,17 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Mirag
   include Dream__middleware.Log
   include Dream__middleware.Log.Make (Pclock)
   include Dream__middleware.Echo
-  
+
   let default_log =
     Dream__middleware.Log.sub_log (Logs.Src.name Logs.default)
-  
+
   let error = default_log.error
   let warning = default_log.warning
   let info = default_log.info
   let debug = default_log.debug
-  
+
   include Dream__middleware.Router
-  
+
   include Dream__middleware.Session
   include Dream__middleware.Session.Make (Pclock)
 
@@ -140,10 +140,10 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Mirag
   include Dream__middleware.Form
   include Dream__middleware.Upload
   include Dream__middleware.Csrf
-  
+
   let content_length =
     Dream__middleware.Content_length.content_length
-  
+
   include Dream__middleware.Lowercase_headers
   include Dream__middleware.Catch
   include Dream__middleware.Request_id
@@ -169,10 +169,10 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Mirag
   let csrf_token = csrf_token ~now
   let verify_csrf_token = verify_csrf_token ~now
   let form_tag = form_tag ~now
-  
+
   include Dream__pure.Formats
 
-  include Paf_mirage.Make (Time) (Stack)
+  include Dream_paf_mirage.Make (Time) (Stack)
 
   let alpn =
     let module R = (val Mimic.repr tls_protocol) in
@@ -205,7 +205,7 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Mirag
     let prefix = prefix
       |> Dream__pure.Formats.from_path
       |> Dream__pure.Formats.drop_trailing_slash in
-    initialize ~setup_outputs:ignore ;    
+    initialize ~setup_outputs:ignore ;
     let app = Dream__pure.Inmost.new_app (Error_handler.app user's_error_handler) prefix in
     let accept t = accept t >>? fun flow ->
       let edn = Stack.TCP.dst flow in
@@ -223,7 +223,7 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Mirag
 
   let alpn protocol =
     let protocol = match protocol with
-      | `H2 -> "h2"
+      | `Dream_h2 -> "h2"
       | `HTTP_1_1 -> "http/1.1" in
     let module R = (val Mimic.repr tcp_protocol) in
     let alpn _ = Some protocol in

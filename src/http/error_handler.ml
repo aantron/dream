@@ -268,7 +268,7 @@ let httpaf
     user's_error_handler =
     fun client_address ?request error start_response ->
 
-  ignore (request : Httpaf.Request.t option);
+  ignore (request : Dream_httpaf.Request.t option);
   (* TODO LATER Should factor out the request translation function and use it to
      partially recover the request info. *)
 
@@ -312,7 +312,8 @@ let httpaf
         | None -> default_response caused_by
       in
 
-      let headers = Httpaf.Headers.of_list (Message.all_headers response) in
+      let headers =
+        Dream_httpaf.Headers.of_list (Message.all_headers response) in
       let body = start_response headers in
 
       Adapt.forward_body response body;
@@ -346,7 +347,7 @@ let h2
       `String "Content-Length missing or negative",
       `Error,
       `Server
-      (* TODO LATER When does H2 raise `Internal_server_error? *)
+      (* TODO LATER When does Dream_h2 raise `Internal_server_error? *)
   in
 
   let error = {
@@ -370,7 +371,7 @@ let h2
         | None -> default_response caused_by
       in
 
-      let headers = H2.Headers.of_list (Message.all_headers response) in
+      let headers = Dream_h2.Headers.of_list (Message.all_headers response) in
       let body = start_response headers in
 
       Adapt.forward_body_h2 response body;
