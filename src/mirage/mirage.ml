@@ -402,18 +402,20 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
   let https ?stop ~port ?(prefix= "") stack
     ?(cfg= Tls.Config.server ~certificates:localhost_certificate ())
     ?error_handler:(user's_error_handler : error_handler = Error_handler.default) (user's_dream_handler : Message.handler) =
-    initialize ~setup_outputs:ignore ;    
-    let accept t = accept t >>? fun flow ->
+    initialize ~setup_outputs:ignore ; 
+    let connect flow =
       let edn = Stack.TCP.dst flow in
-      TLS.server_of_flow cfg flow >>= function
+      TLS.server_of_flow cfg flow
+      >>= function
       | Ok flow -> Lwt.return_ok (edn, flow)
-      | Error err -> Lwt.return (R.error_msgf "%a" TLS.pp_write_error err) in
+      | Error err -> Lwt.return (R.error_msgf "%a" TLS.pp_write_error err) 
+    in
     let user's_dream_handler =
       built_in_middleware prefix user's_error_handler user's_dream_handler in
     let error_handler = error_handler user's_error_handler in
     let request_handler =
       request_handler user's_error_handler user's_dream_handler in
-    let service = Alpn.service alpn ~error_handler ~request_handler accept close in
+    let service = Alpn.service alpn ~error_handler ~request_handler connect accept close in
     init ~port stack >>= fun t ->
     let `Initialized th = serve ?stop service t in th
 
@@ -438,7 +440,7 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
       built_in_middleware prefix user's_error_handler user's_dream_handler in
     let error_handler = error_handler user's_error_handler in
     let request_handler = request_handler user's_error_handler user's_dream_handler in
-    let service = Alpn.service (alpn protocol) ~error_handler ~request_handler accept close in
+    let service = Alpn.service (alpn protocol) ~error_handler ~request_handler Lwt.return_ok accept close in
     init ~port stack >>= fun t ->
     let `Initialized th = serve ?stop service t in th
 
