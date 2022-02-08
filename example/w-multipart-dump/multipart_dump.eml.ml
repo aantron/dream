@@ -1,7 +1,8 @@
 let home request =
   <html>
   <body>
-    <form action="/" method="post" enctype="multipart/form-data"><%s! Dream.csrf_tag request %>
+    <form action="/" method="post" enctype="multipart/form-data">
+      <%s! Dream.csrf_tag request %>
       <input name="text"><br>
       <input name="files" type="file" multiple><br>
       <button>Submit!</button>

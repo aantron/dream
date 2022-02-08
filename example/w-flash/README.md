@@ -13,7 +13,8 @@ absolutely primitive form with just one field:
 let form request =
   <html>
   <body>
-    <form action="/" method="post"><%s! Dream.csrf_tag request %>
+    <form action="/" method="post">
+      <%s! Dream.csrf_tag request %>
       <input name="text" autofocus>
     </form>
   </body>

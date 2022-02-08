@@ -915,7 +915,8 @@ val origin_referrer_check : middleware
     with a CSRF token:
 
     {[
-      <form action="/"><%s! Dream.csrf_tag request %>
+      <form action="/">
+        <%s! Dream.csrf_tag request %>
         <input name="my.field">
       </form>
     ]}
@@ -1050,7 +1051,8 @@ val multipart : ?csrf:bool -> request -> multipart_form form_result promise
     [multipart/form-data]. The CSRF token can be generated in a template with
 
     {[
-      <form action="/" enctype="multipart/form-data"><%s! Dream.csrf_tag request %>
+      <form action="/" enctype="multipart/form-data">
+        <%s! Dream.csrf_tag request %>
     ]}
 
     See section {!section-templates}, and example
@@ -1232,7 +1234,8 @@ val csrf_tag : request -> string
     {!Dream.val-form} and {!Dream.val-multipart}. For example, in a template,
 
     {[
-      <form method="post" action="/"><%s! Dream.csrf_tag request %>
+      <form method="post" action="/">
+        <%s! Dream.csrf_tag request %>
         <input name="my.field">
       </form>
     ]}
@@ -1240,7 +1243,8 @@ val csrf_tag : request -> string
     expands to
 
     {[
-      <form method="post" action="/"><input name="dream.csrf" type="hidden" value="a-token">
+      <form method="post" action="/">
+        <input name="dream.csrf" type="hidden" value="a-token">
         <input name="my.field">
       </form>
     ]}

@@ -25,7 +25,8 @@ let render comments request =
 %   comments |> List.iter (fun (_id, comment) ->
       <p><%s comment %></p><% ); %>
 
-    <form action="/" method="post"><%s! Dream.csrf_tag request %>
+    <form action="/" method="post">
+      <%s! Dream.csrf_tag request %>
       <input name="text" autofocus>
     </form>
 

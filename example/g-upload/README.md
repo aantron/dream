@@ -11,7 +11,8 @@ sizes:
 let home request =
   <html>
   <body>
-    <form action="/" method="post" enctype="multipart/form-data"><%s! Dream.csrf_tag request %>
+    <form action="/" method="post" enctype="multipart/form-data">
+      <%s! Dream.csrf_tag request %>
       <input name="files" type="file" multiple>
       <button>Submit!</button>
     </form>
