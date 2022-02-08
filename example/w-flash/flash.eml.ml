@@ -1,7 +1,7 @@
 let form request =
   <html>
   <body>
-    <%s! Dream.form_tag ~action:"/" request %>
+    <form action="/" method="post"><%s! Dream.csrf_tag request %>
       <input name="text" autofocus>
     </form>
   </body>

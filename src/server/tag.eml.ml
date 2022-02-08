@@ -16,6 +16,9 @@ end
 module Method = Dream_pure.Method
 
 
+let csrf_tag ~now request =
+  let token = Csrf.csrf_token ~now request in
+  <input name="<%s! Csrf.field_name %>" type="hidden" value="<%s! token %>">
 
 (* TODO Include the path prefix. *)
 let form_tag
@@ -45,6 +48,5 @@ let form_tag
     method="<%s! method_ %>"
     action="<%s action %>"<%s! target %><%s! enctype %>>
 % if csrf_token then begin
-%   let token = Csrf.csrf_token ~now request in
-    <input name="<%s! Csrf.field_name %>" type="hidden" value="<%s! token %>">
+    <%s! csrf_tag ~now request %>
 % end;

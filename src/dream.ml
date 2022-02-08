@@ -195,6 +195,7 @@ let verify_csrf_token = Csrf.verify_csrf_token ~now
 let form_tag ?method_ ?target ?enctype ?csrf_token ~action request =
   Tag.form_tag ~now ?method_ ?target ?enctype ?csrf_token ~action request
 
+let csrf_tag = Tag.csrf_tag ~now
 
 
 (* Middleware *)
