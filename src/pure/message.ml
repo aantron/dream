@@ -224,8 +224,8 @@ let flush stream =
   promise
 
 (* TODO Should close even be promise-valued? *)
-let close ?(code = 1000) message =
-  Stream.close message.server_stream code;
+let close ?(code = 1000) stream =
+  Stream.close stream code;
   Lwt.return_unit
 
 let client_stream message =

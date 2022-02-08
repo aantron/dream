@@ -69,7 +69,7 @@ val read : Stream.stream -> string option promise
 val write :
   ?kind:[< `Text | `Binary ] -> Stream.stream -> string -> unit promise
 val flush : Stream.stream -> unit promise
-val close : ?code:int -> 'a message -> unit promise
+val close : ?code:int -> Stream.stream -> unit promise
 val client_stream : 'a message -> Stream.stream
 val server_stream : 'a message -> Stream.stream
 val set_client_stream : 'a message -> Stream.stream -> unit

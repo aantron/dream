@@ -79,6 +79,8 @@ type client = Message.client
 type server = Message.server
 type 'a promise = 'a Message.promise
 
+type stream = Stream.stream
+
 
 
 (* Methods *)
@@ -149,12 +151,16 @@ let all_cookies = Cookie.all_cookies
 
 let body = Message.body
 let set_body = Message.set_body
-let read = Helpers.read
-let write = Helpers.write
-let flush = Helpers.flush
-let close = Helpers.close
+
+
+
+(* Streaming I/O *)
+
+let read = Message.read
+let write = Message.write
+let flush = Message.flush
+let close = Message.close
 type buffer = Stream.buffer
-type stream = Stream.stream
 let client_stream = Message.client_stream
 let server_stream = Message.server_stream
 let set_client_stream = Message.set_client_stream
@@ -414,12 +420,19 @@ let write_buffer ?(offset = 0) ?length message chunk =
     | None -> Bigstringaf.length chunk - offset
   in
   let string = Bigstringaf.substring chunk ~off:offset ~len:length in
-  write ~kind:`Binary message string
+  write ~kind:`Binary (Message.server_stream message) string
 
-type websocket = Message.response
-let send = write
-let receive = read
-let close_websocket = close
+type websocket =
+  Message.response
+
+let send ?kind response chunk =
+  write ?kind (Message.server_stream response) chunk
+
+let receive response =
+  read (Message.server_stream response)
+
+let close_websocket ?code response =
+  close ?code (Message.server_stream response)
 
 type 'a local = 'a Message.field
 let new_local = Message.new_field

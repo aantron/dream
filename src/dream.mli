@@ -132,6 +132,9 @@ and 'a promise = 'a Lwt.t
     exception backtrace — though, in most cases, you should still extend it with
     [raise] and [let%lwt], instead. *)
 
+type stream
+(* TODO Document. *)
+
 
 
 (** {1 Methods} *)
@@ -522,7 +525,7 @@ val stream :
   ?status:[< status ] ->
   ?code:int ->
   ?headers:(string * string) list ->
-    (response -> unit promise) -> response promise
+    (stream -> unit promise) -> response promise
 (** Same as {!Dream.val-respond}, but calls {!Dream.set_stream} internally to
     prepare the response for stream writing, and then runs the callback
     asynchronously to do it. See example
@@ -538,7 +541,7 @@ val stream :
 
 val websocket :
   ?headers:(string * string) list ->
-    (response -> unit promise) -> response promise
+    (stream -> unit promise) -> response promise
 (** Creates a fresh [101 Switching Protocols] response. Once this response is
     returned to Dream's HTTP layer, the callback is passed a new
     {!type-websocket}, and the application can begin using it. See example
@@ -763,8 +766,9 @@ https://aantron.github.io/dream/#val-set_body
 (**/**)
 
 (** {2 Streaming} *)
+(* TODO Should probably be promoted to its own section. *)
 
-val read : 'a message -> string option promise
+val read : stream -> string option promise
 (** Retrieves a body chunk. The chunk is not buffered, thus it can only be read
     once. See example
     {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
@@ -780,15 +784,15 @@ https://aantron.github.io/dream/#val-set_stream
 "]
 (**/**)
 
-val write : ?kind:[< `Text | `Binary ] -> response -> string -> unit promise
+val write : ?kind:[< `Text | `Binary ] -> stream -> string -> unit promise
 (** Streams out the string. The promise is fulfilled when the response can
     accept more writes. *)
 (* TODO Document clearly which of the writing functions can raise exceptions. *)
 
-val flush : response -> unit promise
+val flush : stream -> unit promise
 (** Flushes write buffers. Data is sent to the client. *)
 
-val close : ?code:int -> 'a message -> unit promise
+val close : ?code:int -> stream -> unit promise
 (** Finishes the response stream. *)
 (* TODO Fix comment. *)
 
@@ -811,7 +815,6 @@ type buffer =
 (* TODO Remove old functions from signature. *)
 (* TODO Should there be a section for this somewhere? Probably "low-level
    streaming" should be promoted to a top-level section, Streaming. *)
-type stream
 
 val client_stream : 'a message -> stream
 val server_stream : 'a message -> stream
