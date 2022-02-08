@@ -103,27 +103,16 @@ let stream ?status ?code ?headers callback =
   Lwt.async (fun () -> callback response);
   Lwt.return response
 
-let websocket_field =
-  Message.new_field
-    ~name:"dream.websocket"
-    ~show_value:(Printf.sprintf "%b")
-    ()
-
-let is_websocket response =
-  match Message.field response websocket_field with
-  | Some true -> true
-  | _ -> false
-
 (* TODO Mark the request as a WebSocket request for HTTP. *)
 let websocket ?headers callback =
-  let in_reader, in_writer = Stream.pipe ()
-  and out_reader, out_writer = Stream.pipe () in
-  let client_stream = Stream.stream out_reader in_writer
-  and server_stream = Stream.stream in_reader out_writer in
   let response =
     Message.response
-      ~status:`Switching_Protocols ?headers client_stream server_stream in
-  Message.set_field response websocket_field true;
+      ~status:`Switching_Protocols ?headers Stream.empty Stream.null in
+  let server_stream = Message.create_websocket response in
+  (* TODO Figure out what should actually be returned to the client and/or
+     provided to the callback. Probably the server stream. The surface API for
+     WebSockets also needs to be designed. *)
+  ignore server_stream;
   (* TODO Make sure the request id is propagated to the callback. *)
   (* TODO Close the WwbSocket on leaked exceptions, etc. *)
   Lwt.async (fun () -> callback response);
@@ -137,11 +126,33 @@ let not_found _ =
 
 
 
+(* TODO Once the WebSocket API exists, these functions should not check whether
+   the message has a WebSocket. *)
 let read message =
-  Message.read (Message.server_stream message)
+  match Message.get_websocket message with
+  | None ->
+    Message.read (Message.server_stream message)
+  | Some (_client_stream, server_stream) ->
+    Message.read server_stream
 
 let write ?kind message chunk =
-  Message.write ?kind (Message.server_stream message) chunk
+  match Message.get_websocket message with
+  | None ->
+    Message.write ?kind (Message.server_stream message) chunk
+  | Some (_client_stream, server_stream) ->
+    Message.write ?kind server_stream chunk
 
 let flush message =
-  Message.flush (Message.server_stream message)
+  match Message.get_websocket message with
+  | None ->
+    Message.flush (Message.server_stream message)
+  | Some (_client_stream, server_stream) ->
+    Message.flush server_stream
+
+let close ?(code = 1000) message =
+  match Message.get_websocket message with
+  | None ->
+    Message.close message
+  | Some (_client_stream, server_stream) ->
+    Stream.close server_stream code;
+    Lwt.return_unit

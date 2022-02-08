@@ -77,6 +77,14 @@ val set_server_stream : 'a message -> Stream.stream -> unit
 
 
 
+(* TODO Once the outer WebSocket I/O API is figured out, it should be possible
+   to replace 'a message by response more specifically. *)
+val create_websocket : 'a message -> Stream.stream
+val get_websocket : 'a message -> (Stream.stream * Stream.stream) option
+val set_websocket_client_stream : 'a message -> Stream.stream -> unit
+
+
+
 val no_middleware : middleware
 val pipeline : middleware list -> middleware
 

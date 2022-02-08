@@ -146,17 +146,17 @@ let wrap_handler
           Lwt.return_unit
         in
 
-        if not (Helpers.is_websocket response) then
+        match Message.get_websocket response with
+        | None ->
           forward_response response
-        else begin
+        | Some (client_stream, _server_stream) ->
           let error_handler =
             Error_handler.websocket user's_error_handler request response in
 
           let proceed () =
             Websocketaf.Server_connection.create_websocket
               ~error_handler
-              (Dream_httpaf.Websocket.websocket_handler
-                (Message.client_stream response))
+              (Dream_httpaf.Websocket.websocket_handler client_stream)
             |> Gluten.make (module Websocketaf.Server_connection)
             |> upgrade
           in
@@ -173,8 +173,6 @@ let wrap_handler
                 user's_error_handler request response error_string
             in
             forward_response response
-        end
-
       end
       @@ fun exn ->
         (* TODO There was something in the fork changelogs about not requiring
@@ -262,16 +260,15 @@ let wrap_handler_h2
           Lwt.return_unit
         in
 
-        if not (Helpers.is_websocket response) then
+        match Message.get_websocket response with
+        | None ->
           forward_response response
-
+        | Some _ ->
         (* TODO DOC H2 appears not to support WebSocket upgrade at present.
            RFC 8441. *)
         (* TODO DOC Do we need a CONNECT method? Do users need to be informed of
            this? *)
-        else
           Lwt.return_unit
-
       end
       @@ fun exn ->
         (* TODO LATER There was something in the fork changelogs about not

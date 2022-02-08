@@ -305,3 +305,27 @@ let set_body message body =
   match message.kind with
   | Request -> message.server_stream <- Stream.string body
   | Response -> message.client_stream <- Stream.string body
+
+
+
+(* TODO Once the higher-level WebSocket API is settled, no longer store the
+   server stream. *)
+let websocket_field =
+  new_field ~name:"dream.websocket" ()
+
+let create_websocket response =
+  let in_reader, in_writer = Stream.pipe ()
+  and out_reader, out_writer = Stream.pipe () in
+  let client_stream = Stream.stream out_reader in_writer
+  and server_stream = Stream.stream in_reader out_writer in
+  set_field response websocket_field (client_stream, server_stream);
+  server_stream
+
+let get_websocket response =
+  field response websocket_field
+
+let set_websocket_client_stream response stream =
+  match get_websocket response with
+  | None -> raise (Failure "not a WebSocket")
+  | Some (_client_stream, server_stream) ->
+    set_field response websocket_field (stream, server_stream)
