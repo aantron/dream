@@ -8,7 +8,8 @@ let show_form ?message request =
       <p>You entered: <b><%s message %>!</b></p>
 %   end;
 
-    <%s! Dream.form_tag ~action:"/" request %>
+    <form action="/" method="post">
+      <%s! Dream.csrf_tag request %>
       <input name="message" autofocus>
     </form>
 

@@ -910,12 +910,13 @@ val origin_referrer_check : middleware
 
 (** {1 Forms}
 
-    {!Dream.form_tag} and {!Dream.val-form} round-trip secure forms.
-    {!Dream.form_tag} is used inside a template to generate a form header with a
-    CSRF token:
+    {!Dream.csrf_tag} and {!Dream.val-form} round-trip secure forms.
+    {!Dream.csrf_tag} is used inside a form template to generate a hidden field
+    with a CSRF token:
 
     {[
-      <%s! Dream.form_tag ~action:"/" request %>
+      <form action="/" method="post">
+        <%s! Dream.csrf_tag request %>
         <input name="my.field">
       </form>
     ]}
@@ -956,13 +957,13 @@ type 'a form_result = [
 
 val form : ?csrf:bool -> request -> (string * string) list form_result promise
 (** Parses the request body as a form. Performs CSRF checks. Use
-    {!Dream.form_tag} in a template to transparently generate forms that will
-    pass these checks. See {!section-templates} and example
+    {!Dream.csrf_tag} in a form template to transparently generate forms that
+    will pass these checks. See {!section-templates} and example
     {{:https://github.com/aantron/dream/tree/master/example/d-form#readme}
     [d-form]}.
 
     - [Content-Type:] must be [application/x-www-form-urlencoded].
-    - The form must have a field named [dream.csrf]. {!Dream.form_tag} adds such
+    - The form must have a field named [dream.csrf]. {!Dream.csrf_tag} adds such
       a field.
     - {!Dream.form} calls {!Dream.verify_csrf_token} to check the token in
       [dream.csrf].
@@ -1047,15 +1048,14 @@ type multipart_form =
 
 val multipart : ?csrf:bool -> request -> multipart_form form_result promise
 (** Like {!Dream.form}, but also reads files, and [Content-Type:] must be
-    [multipart/form-data]. The [<form>] tag and CSRF token can be generated in a
-    template with
+    [multipart/form-data]. The CSRF token can be generated in a template with
 
     {[
-      <%s! Dream.form_tag ~action:"/"
-             ~enctype:`Multipart_form_data request %>
+      <form action="/" method="post" enctype="multipart/form-data">
+        <%s! Dream.csrf_tag request %>
     ]}
 
-    See {!Dream.form_tag}, section {!section-templates}, and example
+    See section {!section-templates}, and example
     {{:https://github.com/aantron/dream/tree/master/example/g-upload#files}
     [g-upload]}.
 
@@ -1090,7 +1090,7 @@ val upload : request -> part option promise
     {!Dream.upload} does not verify a CSRF token. There are several ways to add
     CSRF protection for an upload stream, including:
 
-    - Generate the form with {!Dream.form_tag}. Check for
+    - Generate a CSRF token with {!Dream.csrf_tag}. Check for
       [`Field ("dream.csrf", token)] during upload and call
       {!Dream.verify_csrf_token}.
     - Use {{:https://developer.mozilla.org/en-US/docs/Web/API/FormData}
@@ -1104,8 +1104,9 @@ val upload_part : request -> string option promise
 
     It's usually not necessary to handle CSRF tokens directly.
 
-    - Form tag generator {!Dream.form_tag} generates and inserts a CSRF token
-      that {!Dream.val-form} and {!Dream.val-multipart} transparently verify.
+    - CSRF token field generator {!Dream.csrf_tag} generates and inserts a CSRF
+      token that {!Dream.val-form} and {!Dream.val-multipart} transparently
+      verify.
     - AJAX can be protected from CSRF by {!Dream.origin_referrer_check}.
 
     CSRF functions are exposed for creating custom schemes, and for
@@ -1227,6 +1228,29 @@ let render message =
     HTML text and quoted attribute values. It does not offer XSS protection in
     unquoted attribute values, CSS in [<style>] tags, or literal JavaScript in
     [<script>] tags. *)
+
+val csrf_tag : request -> string
+(** Generates an [<input>] tag with a CSRF token, suitable for use with
+    {!Dream.val-form} and {!Dream.val-multipart}. For example, in a template,
+
+    {[
+      <form method="post" action="/">
+        <%s! Dream.csrf_tag request %>
+        <input name="my.field">
+      </form>
+    ]}
+
+    expands to
+
+    {[
+      <form method="post" action="/">
+        <input name="dream.csrf" type="hidden" value="a-token">
+        <input name="my.field">
+      </form>
+    ]}
+
+    It is recommended to put the CSRF tag immediately after the starting
+    [<form>] tag, to prevent certain kinds of DOM manipulation-based attacks. *)
 
 val form_tag :
   ?method_:[< method_ ] ->

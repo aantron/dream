@@ -140,6 +140,8 @@ module Make
   val form : ?csrf:bool -> request -> (string * string) list form_result Lwt.t
   val multipart : ?csrf:bool -> request -> multipart_form form_result Lwt.t
 
+  val csrf_tag : request -> string
+
   val form_tag :
     ?method_:method_ ->
     ?target:string ->

@@ -122,17 +122,17 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Mirag
   include Dream__middleware.Log
   include Dream__middleware.Log.Make (Pclock)
   include Dream__middleware.Echo
-  
+
   let default_log =
     Dream__middleware.Log.sub_log (Logs.Src.name Logs.default)
-  
+
   let error = default_log.error
   let warning = default_log.warning
   let info = default_log.info
   let debug = default_log.debug
-  
+
   include Dream__middleware.Router
-  
+
   include Dream__middleware.Session
   include Dream__middleware.Session.Make (Pclock)
 
@@ -140,10 +140,10 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Mirag
   include Dream__middleware.Form
   include Dream__middleware.Upload
   include Dream__middleware.Csrf
-  
+
   let content_length =
     Dream__middleware.Content_length.content_length
-  
+
   include Dream__middleware.Lowercase_headers
   include Dream__middleware.Catch
   include Dream__middleware.Request_id
@@ -168,8 +168,9 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Mirag
   let multipart = multipart ~now
   let csrf_token = csrf_token ~now
   let verify_csrf_token = verify_csrf_token ~now
+  let csrf_tag = csrf_tag ~now
   let form_tag = form_tag ~now
-  
+
   include Dream__pure.Formats
 
   include Paf_mirage.Make (Time) (Stack)
