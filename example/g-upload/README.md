@@ -92,7 +92,8 @@ the CSRF token in the template, and pass the `enctype="multipart/form-data"`
 attribute as needed for forms to upload files:
 
 ```html
-<form method="post" action="/" enctype="multipart/form-data"><input name="dream.csrf" type="hidden" value="...">
+<form method="post" action="/" enctype="multipart/form-data">
+  <input name="dream.csrf" type="hidden" value="...">
 
   <!-- Our fields -->
   <input name="files" type="file" multiple>
