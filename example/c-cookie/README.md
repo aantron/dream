@@ -6,20 +6,21 @@ Let's [set our own cookie](https://aantron.github.io/dream/#cookies):
 
 ```ocaml
 let () =
-  Dream.run ~secret:"foo"
+  Dream.run
+  @@ Dream.set_secret "foo"
   @@ Dream.logger
   @@ fun request ->
 
-    match Dream.cookie "ui.language" request with
+    match Dream.cookie request "ui.language" with
     | Some value ->
       Printf.ksprintf
         Dream.html "Your preferred language is %s!" (Dream.html_escape value)
 
     | None ->
-      Dream.response "Set language preference; come again!"
-      |> Dream.add_header "Content-Type" Dream.text_html
-      |> Dream.set_cookie "ui.language" "ut-OP" request
-      |> Lwt.return
+      let response = Dream.response "Set language preference; come again!" in
+      Dream.add_header response "Content-Type" Dream.text_html;
+      Dream.set_cookie response request "ui.language" "ut-OP";
+      Lwt.return response
 ```
 
 <pre><code><b>$ cd example/c-cookie</b>

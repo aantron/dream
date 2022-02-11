@@ -2,12 +2,12 @@
 
 <br>
 
-Getting Dream to respond with more debug information is as easy as adding
-`~debug:true` to [`Dream.run`](https://aantron.github.io/dream/#val-run):
+Dream has a built-in error handler for showing debug information. You can enable
+it by passing it to `Dream.run`:
 
 ```ocaml
 let () =
-  Dream.run ~debug:true
+  Dream.run ~error_handler:Dream.debug_error_handler
   @@ Dream.logger
   @@ Dream.router [
 
@@ -38,31 +38,34 @@ response, and [http://localhost:8080/fail](http://localhost:8080/fail)
 debugger will show reports like this:
 
 ```
-(Failure "The Web app failed!")
-Raised at Stdlib__string.index_rec in file "string.ml", line 115, characters 19-34
-Called from Sexplib0__Sexp.Printing.index_of_newline in file "src/sexp.ml", line 113, characters 13-47
+Failure("The Web app failed!")
+Raised at Stdlib__map.Make.find in file "map.ml", line 137, characters 10-25
+Called from Logs.Tag.find in file "src/logs.ml", line 154, characters 14-32
 
 From: Application
 Blame: Server
 Severity: Error
 
-Client: 127.0.0.1:61988
+Client: 127.0.0.1:64687
 
 GET /fail HTTP/1.1
 Host: localhost:8080
 Connection: keep-alive
 Upgrade-Insecure-Requests: 1
-User-Agent: Mozilla/5.0 [...snip...]
-Accept: text/html,application/xhtml+xml, [...snip...]
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
 Sec-GPC: 1
 Sec-Fetch-Site: none
 Sec-Fetch-Mode: navigate
 Sec-Fetch-User: ?1
 Sec-Fetch-Dest: document
 Accept-Encoding: gzip, deflate, br
-Accept-Language: en-US;q=0.9,en;q=0.8
+Accept-Language: en-US,en;q=0.9,ru-RU;q=0.8,ru;q=0.7
 
-dream.request_id.last_id: 2
+dream.client: 127.0.0.1:64687
+dream.https: false
+dream.request_id: 3
+dream.params:
 ```
 <!-- Get the request id in the list. -->
 
@@ -76,7 +79,7 @@ As you can see, the report includes:
 - `Severity:` a suggested log level for the error,
 - `Client:` the client address,
 - request headers,
-- any request-scoped and application-scoped variables set in the request.
+- any other request variables.
 
 <!-- TODO Link to the tutorial example on variables and also mention that they
      are advanced and usually internal. -->
@@ -91,8 +94,9 @@ work with in development.
 
 <br>
 
-Both the debugger's output and the non-debug error page are fully customizable
-&mdash; we will do this in the [very next example](../9-error#files)!
+You can have Dream show a custom error page with any information or graphics
+that you like &mdash; we will do this in the [very next
+example](../9-error#files)!
 
 <!-- TODO Fix after stack trace is fixed. -->
 <!-- TODO Show the log -->

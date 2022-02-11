@@ -20,7 +20,7 @@ let () =
 
     Dream.get "/echo/:word"
       (fun request ->
-        Dream.html (Dream.param "word" request));
+        Dream.html (Dream.param request "word"));
 
   ]
   @@ Dream.not_found

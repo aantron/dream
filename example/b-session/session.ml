@@ -4,10 +4,10 @@ let () =
   @@ Dream.memory_sessions
   @@ fun request ->
 
-    match Dream.session "user" request with
+    match Dream.session_field request "user" with
     | None ->
       let%lwt () = Dream.invalidate_session request in
-      let%lwt () = Dream.put_session "user" "alice" request in
+      let%lwt () = Dream.set_session_field request "user" "alice" in
       Dream.html "You weren't logged in; but now you are!"
 
     | Some username ->

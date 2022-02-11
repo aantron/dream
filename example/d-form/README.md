@@ -16,7 +16,7 @@ let show_form ?message request =
       <p>You entered: <b><%s message %>!</b></p>
 %   end;
 
-    <form action="/" method="post">
+    <form method="POST" action="/">
       <%s! Dream.csrf_tag request %>
       <input name="message" autofocus>
     </form>

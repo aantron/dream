@@ -12,5 +12,5 @@ let () =
     | None ->
       let response = Dream.response "Set language preference; come again!" in
       Dream.add_header response "Content-Type" Dream.text_html;
-      Dream.set_cookie response "ui.language" "ut-OP" request;
+      Dream.set_cookie response request "ui.language" "ut-OP";
       Lwt.return response
