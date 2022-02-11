@@ -182,16 +182,14 @@ let%expect_test _ =
   read_and_dump stream;
   print_endline "checkpoint 1";
   flush_and_dump stream;
-  (try flush_and_dump stream
-  with Failure _ as exn -> print_endline (Printexc.to_string exn));
-  read_and_dump stream;
   flush_and_dump stream;
+  read_and_dump stream;
   [%expect {|
     checkpoint 1
     read: flush
-    (Failure "stream flush: the previous write has not completed")
     flush: ok
-    read: flush |}]
+    read: flush
+    flush: ok |}]
 
 
 
@@ -206,16 +204,14 @@ let%expect_test _ =
   read_and_dump stream;
   print_endline "checkpoint 1";
   write_and_dump stream buffer 0 3 false true;
-  (try write_and_dump stream buffer 1 1 true false
-  with Failure _ as exn -> print_endline (Printexc.to_string exn));
+  write_and_dump stream buffer 1 1 true false;
   read_and_dump stream;
-  write_and_dump stream buffer 0 3 true true;
   [%expect {|
     checkpoint 1
     read: data: BINARY=false FIN=true foo
-    (Failure "stream write: the stream is not ready")
     write: ok
-    read: data: BINARY=true FIN=true foo |}]
+    read: data: BINARY=true FIN=false o
+    write: ok |}]
 
 
 
@@ -227,16 +223,14 @@ let%expect_test _ =
   read_and_dump stream;
   print_endline "checkpoint 1";
   ping_and_dump "foo" stream;
-  (try ping_and_dump "bar" stream
-  with Failure _ as exn -> print_endline (Printexc.to_string exn));
+  ping_and_dump "bar" stream;
   read_and_dump stream;
-  ping_and_dump "baz" stream;
   [%expect {|
     checkpoint 1
     read: ping: foo
-    (Failure "stream ping: the previous write has not completed")
     ping: ok
-    read: ping: baz |}]
+    read: ping: bar
+    ping: ok |}]
 
 
 
@@ -248,16 +242,14 @@ let%expect_test _ =
   read_and_dump stream;
   print_endline "checkpoint 1";
   pong_and_dump "foo" stream;
-  (try pong_and_dump "bar" stream
-  with Failure _ as exn -> print_endline (Printexc.to_string exn));
+  pong_and_dump "bar" stream;
   read_and_dump stream;
-  pong_and_dump "baz" stream;
   [%expect {|
     checkpoint 1
     read: pong: foo
-    (Failure "stream pong: the previous write has not completed")
     pong: ok
-    read: pong: baz |}]
+    read: pong: bar
+    pong: ok |}]
 
 
 

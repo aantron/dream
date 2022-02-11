@@ -166,6 +166,9 @@ let ping stream buffer offset length ~close ~exn ok =
 let pong stream buffer offset length ~close ~exn ok =
   stream.writer.pong buffer offset length ~close ~exn ok
 
+(* TODO Restore "double write" checks by adding a state showing that a writer
+   is already queued, and add tests for this. This should be done after ping
+   and pong get their separate queues. *)
 type pipe = {
   mutable state : [
     | `Idle
