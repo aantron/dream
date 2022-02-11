@@ -13,6 +13,7 @@ author: "Anton Bachin <antonbachin@yahoo.com>"
 maintainer: "Anton Bachin <antonbachin@yahoo.com>"
 
 depends: [
+  "dream-pure"
   "dune" {>= "2.7.0"}  # --instrument-with.
   "lwt"
   "lwt_ppx" {>= "1.2.2"}

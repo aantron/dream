@@ -68,7 +68,7 @@ clean : clean-coverage
 	dune clean
 	dune clean --root .
 	make --no-print-directory -C docs/web clean
-	rm -rf src/graphiql/node_modules dream-* _release
+	rm -rf src/graphiql/node_modules
 
 .PHONY : test-ocamlformat
 test-ocamlformat :
@@ -94,12 +94,14 @@ todo-all :
 
 VERSION := $(shell git describe --abbrev=0)
 RELEASE := dream-$(VERSION)
-FILES := src dream.opam dune-project LICENSE.md README.md
+FILES := \
+  src dream.opam dream-httpaf.opam dream-pure.opam dream-mirage.opam \
+	dune-project LICENSE.md README.md
 
 .PHONY : release
 release : clean
 	rm -rf $(RELEASE) $(RELEASE).tar $(RELEASE).tar.gz _release
-	mkdir $(RELEASE)
+	mkdir -p $(RELEASE)
 	cp -r $(FILES) $(RELEASE)
 	rm -rf $(RELEASE)/src/vendor/gluten/.github
 	rm -rf $(RELEASE)/src/vendor/gluten/async
@@ -135,10 +137,14 @@ release : clean
 	mkdir -p _release
 	cp $(RELEASE).tar.gz _release
 	(cd _release && tar xf $(RELEASE).tar.gz)
+	opam remove -y dream-pure dream-httpaf dream
+	opam pin remove -y dream-pure dream-httpaf dream
+	opam pin add -y --no-action dream-pure _release/$(RELEASE) --kind=path
+	opam pin add -y --no-action dream-httpaf _release/$(RELEASE) --kind=path
 	opam pin add -y --no-action dream _release/$(RELEASE) --kind=path
 	opam reinstall -y --verbose dream
 	cd example/1-hello && dune exec --root . ./hello.exe || true
-	opam remove -y dream
-	opam pin remove -y dream
+	opam remove -y dream-pure dream-httpaf dream
+	opam pin remove -y dream-pure dream-httpaf dream
 	md5sum $(RELEASE).tar.gz
 	ls -l $(RELEASE).tar.gz

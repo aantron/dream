@@ -53,8 +53,8 @@ depends: [
   "caqti-lwt"
   "conf-libev" {os != "win32"}
   "cstruct" {>= "6.0.0"}
-  "dream-pure"
   "dream-httpaf"
+  "dream-pure"
   "dune" {>= "2.7.0"}  # --instrument-with.
   "fmt" {>= "0.8.7"}  # `Italic.
   "graphql_parser"
