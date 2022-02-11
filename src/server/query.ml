@@ -28,10 +28,10 @@ let all_queries request =
   |> snd
   |> Formats.from_form_urlencoded
 
-let query name request =
+let query request name =
   List.assoc_opt name (all_queries request)
 
-let queries name request =
+let queries request name =
   all_queries request
   |> List.fold_left (fun accumulator (name', value) ->
     if name' = name then

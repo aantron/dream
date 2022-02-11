@@ -432,16 +432,14 @@ https://github.com/aantron/dream/issues
 (** Replaces the version. See {!Dream.version}. *)
 (**/**)
 
-(* TODO Convert query string functions to the new t-first style. *)
-
-val query : string -> request -> string option
+val query : request -> string -> string option
 (** First query parameter with the given name. See
     {{:https://tools.ietf.org/html/rfc3986#section-3.4} RFC 3986 §3.4} and
     example
     {{:https://github.com/aantron/dream/tree/master/example/w-query#files}
     [w-query]}. *)
 
-val queries : string -> request -> string list
+val queries : request -> string -> string list
 (** All query parameters with the given name. *)
 
 val all_queries : request -> (string * string) list

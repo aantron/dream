@@ -6,8 +6,7 @@
 
 
 let query name string =
-  Dream.request ~target:("/?" ^ string) ""
-  |> Dream.query name
+  Dream.query (Dream.request ~target:("/?" ^ string) "") name
   |> function
     | Some value -> Printf.printf "%S\n" value
     | None -> print_endline "None"
@@ -36,8 +35,7 @@ let%expect_test _ =
 
 
 let queries name string =
-  Dream.request ~target:("/?" ^ string) ""
-  |> Dream.queries name
+  Dream.queries (Dream.request ~target:("/?" ^ string) "") name
   |> List.map (Printf.sprintf "%S")
   |> String.concat " "
   |> Printf.printf "[%s]\n"
