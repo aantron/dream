@@ -1340,12 +1340,17 @@ val csrf_tag : request -> string
     It is recommended to put the CSRF tag immediately after the starting
     [<form>] tag, to prevent certain kinds of DOM manipulation-based attacks. *)
 
+(**/**)
 val form_tag :
   ?method_:[< method_ ] ->
   ?target:string ->
   ?enctype:[< `Multipart_form_data ] ->
   ?csrf_token:bool ->
     action:string -> request -> string
+[@ocaml.deprecated
+"Use Dream.csrf_tag. See
+https://aantron.github.io/dream/#val-csrf_tag
+"]
 (** Generates a [<form>] tag and an [<input>] tag with a CSRF token, suitable
     for use with {!Dream.val-form} and {!Dream.val-multipart}. For example, in
     a template,
@@ -1373,6 +1378,7 @@ val form_tag :
     Pass [~enctype:`Multipart_form_data] for a file upload form.
 
     [~csrf_token:false] suppresses generation of the [dream.csrf] field. *)
+(**/**)
 
 
 
@@ -1637,15 +1643,39 @@ val mime_lookup : string -> (string * string) list
     {{:https://github.com/aantron/dream/tree/master/example/b-session#files}
     [b-session]} \[{{:http://dream.as/b-session} playground}\]. *)
 
-val session : string -> request -> string option
+val session_field : request -> string -> string option
 (** Value from the request's session. *)
 
-val put_session : string -> string -> request -> unit promise
+(**/**)
+val session : string -> request -> string option
+[@ocaml.deprecated
+"Renamed to Dream.session_field. See
+https://aantron.github.io/dream/#val-session_field
+"]
+(**/**)
+
+val set_session_field : request -> string -> string -> unit promise
 (** Mutates a value in the request's session. The back end may commit the value
     to storage immediately, so this function returns a promise. *)
 
-val all_session_values : request -> (string * string) list
+(**/**)
+val put_session : string -> string -> request -> unit promise
+[@ocaml.deprecated
+"Renamed to Dream.set_session_field. See
+https://aantron.github.io/dream/#val-set_session_field
+"]
+(**/**)
+
+val all_session_fields : request -> (string * string) list
 (** Full session dictionary. *)
+
+(**/**)
+val all_session_values : request -> (string * string) list
+[@ocaml.deprecated
+"Renamed to Dream.all_session_fields. See
+https://aantron.github.io/dream/#val-all_session_fields
+"]
+(**/**)
 
 val invalidate_session : request -> unit promise
 (** Invalidates the request's session, replacing it with a fresh, empty
@@ -1695,14 +1725,22 @@ val session_expires_at : request -> float
     {{:https://github.com/aantron/dream/tree/master/example/w-flash#files}
     [w-flash]} \[{{:http://dream.as/w-flash} playground}\]. *)
 
-val flash_messages : middleware
+val flash : middleware
 (** Implements storing flash messages in cookies. *)
 
-val flash : request -> (string * string) list
+val flash_messages : request -> (string * string) list
 (** The request's flash messages. *)
 
-val put_flash : request -> string -> string -> unit
+val add_flash_message : request -> string -> string -> unit
 (** Adds a flash message to the request. *)
+
+(**/**)
+val put_flash : request -> string -> string -> unit
+[@@ocaml.deprecated
+"Renamed to Dream.add_flash_message. See
+https://aantron.github.io/dream/#val-add_flash_message
+"]
+(**/**)
 
 
 

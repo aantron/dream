@@ -252,10 +252,14 @@ let mime_lookup = Static.mime_lookup
 
 
 (* Sessions *)
+(* TODO Internalize argument order and name changes. *)
 
 let session = Session.session
+let session_field request name = session name request
 let put_session = Session.put_session
+let set_session_field request name value = put_session name value request
 let all_session_values = Session.all_session_values
+let all_session_fields = all_session_values
 let invalidate_session = Session.invalidate_session
 let memory_sessions = Session.memory_sessions
 let cookie_sessions = Session.cookie_sessions
@@ -267,10 +271,12 @@ let session_expires_at = Session.session_expires_at
 
 
 (* Flash messages *)
+(* TODO Internalize argument order and name changes. *)
 
-let flash_messages = Flash.flash_messages
-let flash = Flash.flash
+let flash = Flash.flash_messages
+let flash_messages = Flash.flash
 let put_flash = Flash.put_flash
+let add_flash_message = Flash.put_flash
 
 
 

@@ -984,22 +984,6 @@ let verify_csrf_token_replacement = {|
 </pre>
 |}
 
-let form_tag_expected = {|<div class="spec value" id="val-form_tag">
- <a href="#val-form_tag" class="anchor"></a><code><span><span class="keyword">val</span> form_tag : <span>?method_:<span>[&lt; <a href="#type-method_">method_</a> ]</span> <span class="arrow">-&gt;</span></span> <span>?target:string <span class="arrow">-&gt;</span></span>
-<span>?enctype:<span>[&lt; `Multipart_form_data ]</span> <span class="arrow">-&gt;</span></span> <span>?csrf_token:bool <span class="arrow">-&gt;</span></span> <span>action:string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> string</span></code>
-</div>
-|}
-
-let form_tag_replacement = {|
-<pre><span class="keyword">val</span> form_tag :
-  ?method_:[&lt; <a href="#type-method_">method_</a> ] ->
-  ?target:string ->
-  ?enctype:[&lt; `Multipart_form_data ] ->
-  ?csrf_token:bool ->
-    action:string -> <a href="#type-request">request</a> -> string
-</pre>
-|}
-
 let scope_expected = {|<div class="spec value" id="val-scope">
  <a href="#val-scope" class="anchor"></a><code><span><span class="keyword">val</span> scope : <span>string <span class="arrow">-&gt;</span></span> <span><span><a href="#type-middleware">middleware</a> list</span> <span class="arrow">-&gt;</span></span> <span><span><a href="#type-route">route</a> list</span> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
 </div>
@@ -1095,14 +1079,14 @@ let static_replacement = {|
 </pre>
 |}
 
-let set_session_expected = {|<div class="spec value" id="val-put_session">
- <a href="#val-put_session" class="anchor"></a><code><span><span class="keyword">val</span> put_session : <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+let set_session_expected = {|<div class="spec value" id="val-set_session_field">
+ <a href="#val-set_session_field" class="anchor"></a><code><span><span class="keyword">val</span> set_session_field : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let set_session_replacement = {|
-<pre><span class="keyword">val</span> put_session :
-  string -> string -> <a href="#type-request">request</a> -> unit <a href="#type-promise">promise</a>
+<pre><span class="keyword">val</span> set_session_field :
+  <a href="#type-request">request</a> -> string -> string -> unit <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -1827,7 +1811,6 @@ let pretty_print_signatures soup =
     verify_csrf_token_expected
     verify_csrf_token_replacement;
 
-  multiline "#val-form_tag" form_tag_expected form_tag_replacement;
   multiline "#val-scope" scope_expected scope_replacement;
   replace "#val-get" get_expected get_replacement;
   replace "#val-post" post_expected post_replacement;
@@ -1838,7 +1821,8 @@ let pretty_print_signatures soup =
   replace "#val-patch" patch_expected patch_replacement;
   replace "#val-any" any_expected any_replacement;
   multiline "#val-static" static_expected static_replacement;
-  multiline "#val-put_session" set_session_expected set_session_replacement;
+  multiline "#val-set_session_field"
+    set_session_expected set_session_replacement;
   multiline "#val-websocket" websocket_expected websocket_replacement;
   multiline "#val-send" send_expected send_replacement;
   multiline "#val-close_websocket"
