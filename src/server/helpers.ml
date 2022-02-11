@@ -103,19 +103,29 @@ let stream ?status ?code ?headers callback =
   Lwt.async (fun () -> callback server_stream);
   Lwt.return response
 
-(* TODO Mark the request as a WebSocket request for HTTP. *)
-let websocket ?headers callback =
-  let response =
-    Message.response
-      ~status:`Switching_Protocols ?headers Stream.empty Stream.null in
-  let server_stream = Message.create_websocket response in
-  (* TODO Make sure the request id is propagated to the callback. *)
-  (* TODO Close the WwbSocket on leaked exceptions, etc. *)
-  Lwt.async (fun () -> callback server_stream);
-  Lwt.return response
-
 let empty ?headers status =
   respond ?headers ~status ""
 
 let not_found _ =
   respond ~status:`Not_Found ""
+
+
+
+let websocket ?headers callback =
+  let response =
+    Message.response
+      ~status:`Switching_Protocols ?headers Stream.empty Stream.null in
+  let websocket = Message.create_websocket response in
+  (* TODO Make sure the request id is propagated to the callback. *)
+  (* TODO Close the WwbSocket on leaked exceptions, etc. *)
+  Lwt.async (fun () -> callback websocket);
+  Lwt.return response
+
+let receive (_, server_stream) =
+  Message.receive server_stream
+
+let receive_fragment (_, server_stream) =
+  Message.receive_fragment server_stream
+
+let send ?text_or_binary ?end_of_message (_, server_stream) data =
+  Message.send ?text_or_binary ?end_of_message server_stream data

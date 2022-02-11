@@ -65,11 +65,13 @@ val sort_headers : (string * string) list -> (string * string) list
 
 val body : 'a message -> string promise
 val set_body : 'a message -> string -> unit
+
+
+
 val read : Stream.stream -> string option promise
-val write :
-  ?kind:[< `Text | `Binary ] -> Stream.stream -> string -> unit promise
+val write : Stream.stream -> string -> unit promise
 val flush : Stream.stream -> unit promise
-val close : ?code:int -> Stream.stream -> unit promise
+val close : Stream.stream -> unit promise
 val client_stream : 'a message -> Stream.stream
 val server_stream : 'a message -> Stream.stream
 val set_client_stream : 'a message -> Stream.stream -> unit
@@ -77,11 +79,34 @@ val set_server_stream : 'a message -> Stream.stream -> unit
 
 
 
-(* TODO Once the outer WebSocket I/O API is figured out, it should be possible
-   to replace 'a message by response more specifically. *)
-val create_websocket : 'a message -> Stream.stream
-val get_websocket : 'a message -> (Stream.stream * Stream.stream) option
-val set_websocket_client_stream : 'a message -> Stream.stream -> unit
+(* TODO Is there any reason not to have a separate WebSocket type? Would we want
+   to do anything with a WebSocket that we normally do with responses? The
+   answer is no... It's easier to have a separate type. *)
+val create_websocket : response -> (Stream.stream * Stream.stream)
+val get_websocket : response -> (Stream.stream * Stream.stream) option
+val close_websocket : ?code:int -> Stream.stream * Stream.stream -> unit promise
+
+type text_or_binary = [
+  | `Text
+  | `Binary
+]
+
+type end_of_message = [
+  | `End_of_message
+  | `Continues
+]
+
+(* TODO This also needs message length limits. *)
+val receive :
+  Stream.stream -> string option promise
+val receive_fragment :
+  Stream.stream -> (string * text_or_binary * end_of_message) option promise
+val send :
+  ?text_or_binary:text_or_binary ->
+  ?end_of_message:end_of_message ->
+  Stream.stream ->
+  string ->
+    unit promise
 
 
 

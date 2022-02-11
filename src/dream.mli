@@ -132,9 +132,6 @@ and 'a promise = 'a Lwt.t
     exception backtrace — though, in most cases, you should still extend it with
     [raise] and [let%lwt], instead. *)
 
-type stream
-(* TODO Document. *)
-
 
 
 (** {1 Methods} *)
@@ -521,40 +518,6 @@ val empty :
     status -> response promise
 (** Same as {!Dream.val-response} with the empty string for a body. *)
 
-val stream :
-  ?status:[< status ] ->
-  ?code:int ->
-  ?headers:(string * string) list ->
-    (stream -> unit promise) -> response promise
-(** Same as {!Dream.val-respond}, but calls {!Dream.set_stream} internally to
-    prepare the response for stream writing, and then runs the callback
-    asynchronously to do it. See example
-    {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
-    [j-stream]}.
-
-    {[
-      fun request ->
-        Dream.stream (fun response ->
-          let%lwt () = Dream.write response "foo" in
-          Dream.close_stream response)
-    ]} *)
-
-val websocket :
-  ?headers:(string * string) list ->
-    (stream -> unit promise) -> response promise
-(** Creates a fresh [101 Switching Protocols] response. Once this response is
-    returned to Dream's HTTP layer, the callback is passed a new
-    {!type-websocket}, and the application can begin using it. See example
-    {{:https://github.com/aantron/dream/tree/master/example/k-websocket#files}
-    [k-websocket]} \[{{:http://dream.as/k-websocket} playground}\].
-
-    {[
-      let my_handler = fun request ->
-        Dream.websocket (fun websocket ->
-          let%lwt () = Dream.send websocket "Hello, world!" in
-          Dream.close_websocket websocket);
-    ]} *)
-
 val status : response -> status
 (** Response {!type-status}. For example, [`OK]. *)
 
@@ -765,8 +728,30 @@ https://aantron.github.io/dream/#val-set_body
 "]
 (**/**)
 
-(** {2 Streaming} *)
-(* TODO Should probably be promoted to its own section. *)
+
+
+(** {1 Streams} *)
+
+type stream
+(* TODO Document. *)
+
+val stream :
+  ?status:[< status ] ->
+  ?code:int ->
+  ?headers:(string * string) list ->
+    (stream -> unit promise) -> response promise
+(** Same as {!Dream.val-respond}, but calls {!Dream.set_stream} internally to
+    prepare the response for stream writing, and then runs the callback
+    asynchronously to do it. See example
+    {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
+    [j-stream]}.
+
+    {[
+      fun request ->
+        Dream.stream (fun response ->
+          let%lwt () = Dream.write response "foo" in
+          Dream.close_stream response)
+    ]} *)
 
 val read : stream -> string option promise
 (** Retrieves a body chunk. The chunk is not buffered, thus it can only be read
@@ -784,7 +769,7 @@ https://aantron.github.io/dream/#val-set_stream
 "]
 (**/**)
 
-val write : ?kind:[< `Text | `Binary ] -> stream -> string -> unit promise
+val write : stream -> string -> unit promise
 (** Streams out the string. The promise is fulfilled when the response can
     accept more writes. *)
 (* TODO Document clearly which of the writing functions can raise exceptions. *)
@@ -792,7 +777,7 @@ val write : ?kind:[< `Text | `Binary ] -> stream -> string -> unit promise
 val flush : stream -> unit promise
 (** Flushes write buffers. Data is sent to the client. *)
 
-val close : ?code:int -> stream -> unit promise
+val close : stream -> unit promise
 (** Finishes the response stream. *)
 (* TODO Fix comment. *)
 
@@ -870,6 +855,55 @@ https://aantron.github.io/dream/#val-write_stream
 (**/**)
 
 (* TODO Ergonomics of this stream surface API. *)
+
+
+
+(** {1 WebSockets} *)
+
+type websocket
+(** A WebSocket connection. See {{:https://tools.ietf.org/html/rfc6455} RFC
+    6455} and
+    {{:https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API} MDN}. *)
+
+val websocket :
+  ?headers:(string * string) list ->
+    (websocket -> unit promise) -> response promise
+(** Creates a fresh [101 Switching Protocols] response. Once this response is
+    returned to Dream's HTTP layer, the callback is passed a new
+    {!type-websocket}, and the application can begin using it. See example
+    {{:https://github.com/aantron/dream/tree/master/example/k-websocket#files}
+    [k-websocket]} \[{{:http://dream.as/k-websocket} playground}\].
+
+    {[
+      let my_handler = fun request ->
+        Dream.websocket (fun websocket ->
+          let%lwt () = Dream.send websocket "Hello, world!" in
+          Dream.close_websocket websocket);
+    ]} *)
+
+val send : ?text_or_binary:[ `Text | `Binary ] -> ?end_of_message:[ `End_of_message | `Continues ] -> websocket -> string -> unit promise
+(** Sends a single message. The WebSocket is ready another message when the
+    promise resolves.
+
+    With [~kind:`Text], the default, the message is interpreted as a UTF-8
+    string. The client will receive it transcoded to JavaScript's UTF-16
+    representation.
+
+    With [~kind:`Binary], the message will be received unmodified, as either a
+    [Blob] or an [ArrayBuffer]. See
+    {{:https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/binaryType}
+    MDN, [WebSocket.binaryType]}. *)
+
+val receive : websocket -> string option promise
+(** Retrieves a message. If the WebSocket is closed before a complete message
+    arrives, the result is [None]. *)
+
+val receive_fragment : websocket -> (string * [ `Text | `Binary ] * [ `End_of_message | `Continues ]) option promise
+
+val close_websocket : ?code:int -> websocket -> unit promise
+(** Closes the WebSocket. [~code] is usually not necessary, but is needed for
+    some protocols based on WebSockets. See
+    {{:https://tools.ietf.org/html/rfc6455#section-7.4} RFC 6455 §7.4}. *)
 
 
 
@@ -1593,57 +1627,6 @@ val flash : request -> (string * string) list
 
 val put_flash : request -> string -> string -> unit
 (** Adds a flash message to the request. *)
-
-
-
-(**/**)
-type websocket = response
-[@@ocaml.deprecated
-"Use Dream.stream. See
-https://aantron.github.io/dream/#type-stream
-"]
-(** A WebSocket connection. See {{:https://tools.ietf.org/html/rfc6455} RFC
-    6455} and
-    {{:https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API} MDN}. *)
-(**/**)
-
-(**/**)
-val send : ?kind:[< `Text | `Binary ] -> response -> string -> unit promise
-[@@ocaml.deprecated
-"Use Dream.write. See
-https://aantron.github.io/dream/#val-write
-"]
-(** Sends a single message. The WebSocket is ready another message when the
-    promise resolves.
-
-    With [~kind:`Text], the default, the message is interpreted as a UTF-8
-    string. The client will receive it transcoded to JavaScript's UTF-16
-    representation.
-
-    With [~kind:`Binary], the message will be received unmodified, as either a
-    [Blob] or an [ArrayBuffer]. See
-    {{:https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/binaryType}
-    MDN, [WebSocket.binaryType]}. *)
-
-val receive : response -> string option promise
-[@@ocaml.deprecated
-"Use Dream.read. See
-https://aantron.github.io/dream/#val-read
-"]
-(** Retrieves a message. If the WebSocket is closed before a complete message
-    arrives, the result is [None]. *)
-(**/**)
-
-(**/**)
-val close_websocket : ?code:int -> response -> unit promise
-[@@ocaml.deprecated
-"Use Dream.close. See
-https://aantron.github.io/dream/#val-close
-"]
-(** Closes the WebSocket. [~code] is usually not necessary, but is needed for
-    some protocols based on WebSockets. See
-    {{:https://tools.ietf.org/html/rfc6455#section-7.4} RFC 6455 §7.4}. *)
-(**/**)
 
 
 
