@@ -47,4 +47,3 @@ let () =
       receive []);
 
   ]
-  @@ Dream.not_found

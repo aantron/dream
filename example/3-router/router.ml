@@ -12,4 +12,3 @@ let () =
         Dream.html (Dream.param request "word"));
 
   ]
-  @@ Dream.not_found

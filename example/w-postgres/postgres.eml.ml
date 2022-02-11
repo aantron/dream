@@ -25,7 +25,7 @@ let render comments request =
 %   comments |> List.iter (fun (_id, comment) ->
       <p><%s comment %></p><% ); %>
 
-    <form action="/" method="post">
+    <form method="POST" action="/">
       <%s! Dream.csrf_tag request %>
       <input name="text" autofocus>
     </form>
@@ -53,4 +53,3 @@ let () =
         Dream.empty `Bad_Request);
 
   ]
-  @@ Dream.not_found

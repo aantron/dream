@@ -7,30 +7,28 @@ their whole bodies into memory, and then writing them. Here, we echo request
 bodies chunk by chunk:
 
 ```ocaml
-let echo request response =
-  let rec loop () =
-    match%lwt Dream.read request with
-    | None ->
-      Dream.close_stream response
-    | Some chunk ->
-      let%lwt () = Dream.write response chunk in
-      let%lwt () = Dream.flush response in
-      loop ()
-  in
-  loop ()
-
 let () =
   Dream.run
   @@ Dream.logger
   @@ Dream.router [
 
     Dream.post "/echo" (fun request ->
+      let request_stream = Dream.body_stream request in
       Dream.stream
         ~headers:["Content-Type", "application/octet-stream"]
-        (echo request));
+        (fun response_stream ->
+          let rec loop () =
+            match%lwt Dream.read request_stream with
+            | None ->
+              Dream.close response_stream
+            | Some chunk ->
+              let%lwt () = Dream.write response_stream chunk in
+              let%lwt () = Dream.flush response_stream in
+              loop ()
+          in
+          loop ()));
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/j-stream</b>

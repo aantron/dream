@@ -28,8 +28,7 @@ let () =
     Dream.get("/",
       (_ => Dream.html(html_to_string(greet("world"))))),
 
-  ])
-  @@ Dream.not_found
+  ]);
 ```
 
 <pre><code><b>$ cd example/r-tyxml</b>

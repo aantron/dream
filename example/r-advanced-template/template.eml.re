@@ -45,6 +45,5 @@ let () =
     Dream.get("/:task", request =>
       Dream.param(request, "task") |> render_task(tasks) |> Dream.html
     ),
-  ])
-  @@ Dream.not_found;
+  ]);
 

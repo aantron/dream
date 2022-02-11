@@ -28,7 +28,6 @@ let () =
         |> Dream.html);
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/7-template</b>

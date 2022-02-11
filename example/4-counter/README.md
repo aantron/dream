@@ -22,7 +22,6 @@ let () =
     Dream.get "/" (fun _ ->
       Dream.html (Printf.sprintf "Saw %i request(s)!" !count));
   ]
-  @@ Dream.not_found
 ```
 <pre><code><b>$ cd example/4-counter</b>
 <b>$ npm install esy && npx esy</b>

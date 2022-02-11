@@ -93,7 +93,6 @@ let () =
   @@ Dream.router [
     Dream.get "/" (fun _request -> Dream.html home)
   ]
-  @@ Dream.not_found
 ```
 
 To build, run:

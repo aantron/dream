@@ -39,7 +39,6 @@ let () =
       (Dream.static "./static");
 
   ]
-  @@ Dream.not_found
 ```
 
 ...and the rest of the message in the client,

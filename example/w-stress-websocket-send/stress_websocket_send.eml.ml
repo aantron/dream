@@ -42,11 +42,11 @@ let stress websocket =
   let start = Unix.gettimeofday () in
   let rec loop sent =
     if sent >= limit then
-      let%lwt () = Dream.close websocket in
+      let%lwt () = Dream.close_websocket websocket in
       Lwt.return (Unix.gettimeofday () -. start)
     else
-      let%lwt () = Dream.write websocket frame_a ~kind:`Binary in
-      let%lwt () = Dream.write websocket frame_b ~kind:`Binary in
+      let%lwt () = Dream.send websocket frame_a ~text_or_binary:`Binary in
+      let%lwt () = Dream.send websocket frame_b ~text_or_binary:`Binary in
       let%lwt () = Lwt.pause () in
       loop (sent + frame + frame)
   in
@@ -72,4 +72,3 @@ let () =
       (fun _ -> Dream.websocket stress);
 
   ]
-  @@ Dream.not_found

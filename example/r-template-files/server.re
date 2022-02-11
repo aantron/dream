@@ -5,5 +5,4 @@ let () =
     Dream.get("/:word", request =>
       Dream.param(request, "word") |> Template.render |> Dream.html
     ),
-  ]) @@
-  Dream.not_found;
+  ]);

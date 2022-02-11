@@ -4,4 +4,3 @@ let () =
   @@ Dream.router [
     Dream.get "/static/**" (Dream.static ".")
   ]
-  @@ Dream.not_found

@@ -4,7 +4,7 @@ let show_heap_size () =
   |> fun bytes -> bytes /. 1024. /. 1024.
   |> Dream.log "Heap size: %.0f MB"
 
-let stress ?(megabytes = 1024) ?(chunk = 64) response =
+let stress ?(megabytes = 1024) ?(chunk = 64) stream =
   let limit = megabytes * 1024 * 1024 in
   let chunk = chunk * 1024 in
 
@@ -15,12 +15,12 @@ let stress ?(megabytes = 1024) ?(chunk = 64) response =
 
   let rec loop sent =
     if sent >= limit then
-      let%lwt () = Dream.flush response in
-      let%lwt () = Dream.close response in
+      let%lwt () = Dream.flush stream in
+      let%lwt () = Dream.close stream in
       Lwt.return (Unix.gettimeofday () -. start)
     else
-      let%lwt () = Dream.write response chunk_a in
-      let%lwt () = Dream.write response chunk_b in
+      let%lwt () = Dream.write stream chunk_a in
+      let%lwt () = Dream.write stream chunk_b in
       let%lwt () = Lwt.pause () in
       loop (sent + chunk + chunk)
   in
@@ -50,4 +50,3 @@ let () =
           ?chunk:(query_int "chunk" request)));
 
   ]
-  @@ Dream.not_found

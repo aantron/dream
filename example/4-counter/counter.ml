@@ -12,4 +12,3 @@ let () =
     Dream.get "/" (fun _ ->
       Dream.html (Printf.sprintf "Saw %i request(s)!" !count));
   ]
-  @@ Dream.not_found

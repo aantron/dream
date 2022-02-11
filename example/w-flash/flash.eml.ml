@@ -1,7 +1,7 @@
 let form request =
   <html>
   <body>
-    <form action="/" method="post">
+    <form method="POST" action="/">
       <%s! Dream.csrf_tag request %>
       <input name="text" autofocus>
     </form>
@@ -12,7 +12,7 @@ let result request =
   <html>
   <body>
 
-%   Dream.flash request |> List.iter (fun (category, text) ->
+%   Dream.flash_messages request |> List.iter (fun (category, text) ->
       <p><%s category %>: <%s text %></p><% ); %>
 
   </body>
@@ -23,7 +23,7 @@ let () =
   Dream.run
   @@ Dream.logger
   @@ Dream.memory_sessions
-  @@ Dream.flash_messages
+  @@ Dream.flash
   @@ Dream.router [
 
     Dream.get  "/"
@@ -34,7 +34,7 @@ let () =
       (fun request ->
         match%lwt Dream.form request with
         | `Ok ["text", text] ->
-          let () = Dream.put_flash request "Info" text in
+          let () = Dream.add_flash_message request "Info" text in
           Dream.redirect request "/result"
         | _ ->
           Dream.redirect request "/");
@@ -44,4 +44,3 @@ let () =
         Dream.html (result request));
 
   ]
-  @@ Dream.not_found

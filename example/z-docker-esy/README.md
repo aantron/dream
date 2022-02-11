@@ -14,7 +14,6 @@ let () =
     Dream.get "/" (fun _ ->
       Dream.html "Dream started by Docker Compose, built with esy!");
   ]
-  @@ Dream.not_found
 ```
 
 It uses [Docker Compose](https://docs.docker.com/compose/), so that you can

@@ -37,7 +37,6 @@ let () =
       (Dream.static "./static");
 
   ]
-  @@ Dream.not_found
 ```
 
 The rest is printed by the client, in

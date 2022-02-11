@@ -57,7 +57,6 @@ let () =
       receive []);
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ npm install esy && npx esy</b>

@@ -23,4 +23,3 @@ let () =
         |> Dream.json);
 
   ]
-  @@ Dream.not_found

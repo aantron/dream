@@ -37,8 +37,7 @@ let () =
     Dream.get("/static/**",
       Dream.static("./static")),
 
-  ])
-  @@ Dream.not_found;
+  ]);
 ```
 
 ...and the client, in

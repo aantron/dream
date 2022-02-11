@@ -34,7 +34,6 @@ let () =
   @@ Dream.router [
     Dream.get "/" (fun _ -> Dream.html "Dream started by systemd!");
   ]
-  @@ Dream.not_found
 ```
 
 It is live at [http://systemd.dream.as](http://systemd.dream.as). As a second

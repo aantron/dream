@@ -47,7 +47,6 @@ let () =
             Dream.close_websocket websocket));
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/k-websocket</b>

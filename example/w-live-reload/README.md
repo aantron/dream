@@ -93,7 +93,6 @@ let () =
         Dream.close_websocket socket));
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/w-live-reload</b>

@@ -2,7 +2,7 @@
 
 <br>
 
-Dream templates allow for interleaving any control structures with your template code. This example shows how to do this with if statements, list iterations, and pattern matching. Although it may seem intuitive that the code somehow 'returns' the template, in reality the HTML generation happens in an imperative style. This means that any code within the template must evaluate to `unit`, and so the semicolons in this example are not optional. We use `List.iter` instead of `List.map` for a similar reason. 
+Dream templates allow for interleaving any control structures with your template code. This example shows how to do this with if statements, list iterations, and pattern matching. Although it may seem intuitive that the code somehow 'returns' the template, in reality the HTML generation happens in an imperative style. This means that any code within the template must evaluate to `unit`, and so the semicolons in this example are not optional. We use `List.iter` instead of `List.map` for a similar reason.
 
 ```ocaml
 (* In OCaml, `begin ... end` is the same as `( ... )` *)
@@ -15,7 +15,7 @@ let render_home tasks =
         <% if complete then ( %>
           complete!
         <% ) else ( %>
-          not complete 
+          not complete
         <% ); %>
       </p>
     <% end; %>
@@ -27,8 +27,8 @@ let render_home tasks =
 let render_task tasks task =
   <html>
   <body>
-%   (match List.find_opt (fun (task_, _) -> task = task_) tasks with 
-%   | Some (name, complete) -> 
+%   (match List.find_opt (fun (task_, _) -> task = task_) tasks with
+%   | Some (name, complete) ->
       <h1>TODO task: <%s name %>, complete: <%B complete %></h1>
 %   | None -> begin
       <h1>Task not found!</h1>
@@ -41,7 +41,7 @@ let tasks = [
   ("create examples", true);
   ("publish website", true);
   ("profit", false);
-] 
+]
 
 let () =
   Dream.run
@@ -51,7 +51,7 @@ let () =
       (fun _ ->
         render_home tasks
         |> Dream.html);
-        
+
 
     Dream.get "/:task"
       (fun request ->
@@ -60,7 +60,6 @@ let () =
         |> Dream.html);
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/w-advanced-template</b>

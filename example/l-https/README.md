@@ -2,12 +2,12 @@
 
 <br>
 
-Enabling HTTPS in Dream is very easy: just pass `~https:true` to
+Enabling HTTPS in Dream is very easy: just pass `~tls:true` to
 [`Dream.run`](https://aantron.github.io/dream/#val-run):
 
 ```ocaml
 let () =
-  Dream.run ~https:true
+  Dream.run ~tls:true
   @@ Dream.logger
   @@ fun _ -> Dream.html "Good morning, world!"
 ```

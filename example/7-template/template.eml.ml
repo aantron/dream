@@ -17,4 +17,3 @@ let () =
         |> Dream.html);
 
   ]
-  @@ Dream.not_found

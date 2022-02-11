@@ -14,5 +14,4 @@ let () =
     Dream.get("/",
       (_ => Dream.html(greet("world")))),
 
-  ])
-  @@ Dream.not_found;
+  ]);

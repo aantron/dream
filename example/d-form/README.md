@@ -43,7 +43,6 @@ let () =
           Dream.empty `Bad_Request);
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/d-form</b>

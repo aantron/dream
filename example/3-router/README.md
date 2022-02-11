@@ -23,7 +23,6 @@ let () =
         Dream.html (Dream.param request "word"));
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/3-router</b>
@@ -42,12 +41,7 @@ The syntax `:word` in a route creates a path parameter, which can be read with
 
 <!-- TODO hyperlink Dream.param to docsc, also Dream.logger. -->
 
-[The whole router is a middleware](https://aantron.github.io/dream/#val-router),
-just like [`Dream.logger`](https://aantron.github.io/dream/#val-logger). When
-none of the routes match, the router passes the request to the next handler,
-which is right beneath it. In this example, we just respond with `404 Not
-Found` when that happens.
-
+When none of the routes match, the router returns a `404 Not Found` response.
 Except for the status code, the `404 Not Found` response is *completely* empty,
 so it might not display well in your browser. In example
 [**`9-error`**](../9-error#files), we will decorate all error responses with

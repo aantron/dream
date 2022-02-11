@@ -3,7 +3,7 @@
 This example deploys a very simple Dream
 [application](https://github.com/aantron/dream/blob/master/example/z-fly/app.ml)
 to [Fly](https://www.fly.io/), a hosting platform that scales and smartly moves your servers closer to your users. A low-usage app can be hosted for
-[free](https://fly.io/docs/about/pricing/#free-tier). Fly offers [flyctl](https://fly.io/docs/getting-started/installing-flyctl/), their CLI, that makes [deployment](https://fly.io/docs/hands-on/start/) and  
+[free](https://fly.io/docs/about/pricing/#free-tier). Fly offers [flyctl](https://fly.io/docs/getting-started/installing-flyctl/), their CLI, that makes [deployment](https://fly.io/docs/hands-on/start/) and
 [scaling](https://fly.io/docs/reference/scaling/) super simple.
 
 ```ocaml
@@ -13,7 +13,6 @@ let () =
   @@ Dream.router [
     Dream.get "/" (fun _ -> Dream.html "Dream deployed on Fly!");
   ]
-  @@ Dream.not_found
 ```
 
 It uses [Docker Compose](https://docs.docker.com/compose/), so that you can

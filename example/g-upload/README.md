@@ -11,7 +11,7 @@ sizes:
 let home request =
   <html>
   <body>
-    <form action="/" method="post" enctype="multipart/form-data">
+    <form method="POST" action="/" enctype="multipart/form-data">
       <%s! Dream.csrf_tag request %>
       <input name="files" type="file" multiple>
       <button>Submit!</button>
@@ -48,7 +48,6 @@ let () =
       | _ -> Dream.empty `Bad_Request);
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/g-upload</b>
@@ -89,10 +88,11 @@ like [`Dream.form`](https://aantron.github.io/dream/#val-form) when it comes to
 See example [**`d-form`**](../d-form#files). We use
 [`Dream.csrf_tag`](https://aantron.github.io/dream/#val-csrf_tag) to generate
 the CSRF token in the template, and pass the `enctype="multipart/form-data"`
-attribute as needed for forms to upload files:
+attribute as needed for forms to upload files. The template output looks like
+this:
 
 ```html
-<form method="post" action="/" enctype="multipart/form-data">
+<form method="POST" action="/" enctype="multipart/form-data">
   <input name="dream.csrf" type="hidden" value="...">
 
   <!-- Our fields -->

@@ -53,5 +53,4 @@ let () =
   @@ Dream.router([
     Dream.any("/graphql", Dream.graphql(Lwt.return, schema)),
     Dream.get("/", Dream.graphiql(~default_query, "/graphql")),
-  ])
-  @@ Dream.not_found;
+  ]);

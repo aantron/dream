@@ -35,7 +35,6 @@ let () =
         |> Dream.json);
 
   ]
-  @@ Dream.not_found
 ```
 
 To get this working, we have to add `ppx_yojson_conv` to our

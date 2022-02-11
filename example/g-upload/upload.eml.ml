@@ -1,7 +1,7 @@
 let home request =
   <html>
   <body>
-    <form action="/" method="post" enctype="multipart/form-data">
+    <form method="POST" action="/" enctype="multipart/form-data">
       <%s! Dream.csrf_tag request %>
       <input name="files" type="file" multiple>
       <button>Submit!</button>
@@ -38,4 +38,3 @@ let () =
       | _ -> Dream.empty `Bad_Request);
 
   ]
-  @@ Dream.not_found

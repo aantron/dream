@@ -18,4 +18,3 @@ let () =
       (Dream.static "./static");
 
   ]
-  @@ Dream.not_found

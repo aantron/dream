@@ -11,16 +11,16 @@ hash table, listens for messages, and forwards them to all the other WebSockets
 in the hash table:
 
 ```ocaml
-let handle_client websocket =
-  let client_id = connect websocket in
+let handle_client client =
+  let client_id = track client in
   let rec loop () =
-    match%lwt Dream.receive websocket with
+    match%lwt Dream.receive client with
     | Some message ->
       let%lwt () = send message in
       loop ()
     | None ->
-      disconnect client_id;
-      Dream.close_websocket websocket
+      forget client_id;
+      Dream.close_websocket client
   in
   loop ()
 ```

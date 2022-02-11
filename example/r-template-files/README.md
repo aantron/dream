@@ -40,8 +40,7 @@ let () =
     Dream.get("/:word", request =>
       Dream.param("word", request) |> Template.render |> Dream.html
     ),
-  ]) @@
-  Dream.not_found;
+  ]);
 ```
 
 <pre><code><b>$ cd example/r-template-files</b>

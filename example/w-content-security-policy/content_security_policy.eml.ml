@@ -26,4 +26,3 @@ let () =
       Dream.empty `OK);
 
   ]
-  @@ Dream.not_found

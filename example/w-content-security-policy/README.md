@@ -41,7 +41,6 @@ let () =
       Dream.empty `OK);
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/w-content-security-policy</b>

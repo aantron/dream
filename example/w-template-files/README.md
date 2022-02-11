@@ -44,7 +44,6 @@ let () =
         |> Dream.html);
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/w-template-files</b>

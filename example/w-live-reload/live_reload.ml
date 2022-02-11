@@ -72,8 +72,7 @@ let () =
 
     Dream.get "/_live-reload" (fun _ ->
       Dream.websocket (fun socket ->
-        let%lwt _ = Dream.read socket in
-        Dream.close socket));
+        let%lwt _ = Dream.receive socket in
+        Dream.close_websocket socket));
 
   ]
-  @@ Dream.not_found

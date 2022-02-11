@@ -74,4 +74,3 @@ let () =
         Dream.html (String.concat "\n" (List.rev messages)));
 
   ]
-  @@ Dream.not_found

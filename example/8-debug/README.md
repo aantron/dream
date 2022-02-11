@@ -20,7 +20,6 @@ let () =
         raise (Failure "The Web app failed!"));
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/8-debug</b>
