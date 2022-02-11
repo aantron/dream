@@ -28,7 +28,7 @@ val scope : string -> Message.middleware list -> route list -> route
 (* The middleware and the path parameter retriever. With respect to path
    parameters, the middleware is the setter, and the retriever is, of course,
    the getter. *)
-val router : route list -> Message.middleware
+val router : route list -> Message.handler
 val param : Message.request -> string -> string
 
 (* Variables used by the router. *)

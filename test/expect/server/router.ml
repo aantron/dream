@@ -92,8 +92,7 @@ let%expect_test _ =
 let show ?(prefix = "/") ?(method_ = `GET) target router =
   try
     Dream.request ~method_ ~target ""
-    |> Dream.test ~prefix
-      (router @@ fun _ -> Dream.respond ~status:`Not_Found "")
+    |> Dream.test ~prefix router
     |> fun response ->
       let body =
         Dream.client_stream response
@@ -349,9 +348,9 @@ let%expect_test _ =
     Dream.param: missing path parameter "x" |}]
 
 let%expect_test _ =
-  show "/" @@ (fun next_handler request ->
+  show "/" @@ (fun request ->
     ignore (Dream.param request "x");
-    next_handler request);
+    Dream.empty `Not_Found);
   [%expect {| Dream.param: missing path parameter "x" |}]
 
 (* Router respects site prefix. *)
@@ -525,7 +524,7 @@ let%expect_test _ =
 
 (* Router sequence works. *)
 
-let%expect_test _ =
+(* let%expect_test _ =
   show "/abc/def" @@ Dream.pipeline [
     Dream.router [
       Dream.get "/abc/ghi" (fun _ -> Dream.respond "first");
@@ -536,7 +535,7 @@ let%expect_test _ =
   ];
   [%expect {|
     Response: 200 OK
-    second |}]
+    second |}] *)
 
 (* Wildcard routes. *)
 
@@ -701,8 +700,7 @@ let%expect_test _ =
       |> Dream.router [
         Dream.get "/def" (fun request ->
           Dream.respond (Dream.prefix request ^ " " ^ path request));
-      ]
-      @@ (fun _ -> Dream.respond ~status:`Not_Found ""))
+      ])
   ];
   [%expect {|
     Response: 200 OK
@@ -719,8 +717,7 @@ let%expect_test _ =
             (Dream.param request "x")
             (Dream.param request "y")
             (path request));
-      ]
-      @@ (fun _ -> Dream.respond ~status:`Not_Found ""))
+      ])
   ];
   [%expect {|
     Response: 200 OK
@@ -736,8 +733,7 @@ let%expect_test _ =
             (Dream.prefix request)
             (Dream.param request "x")
             (path request));
-      ]
-      @@ (fun _ -> Dream.respond ~status:`Not_Found ""))
+      ])
   ];
   [%expect {|
     Response: 200 OK

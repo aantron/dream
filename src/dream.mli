@@ -1439,11 +1439,10 @@ val set_server_stream : request -> stream -> unit
 
 (** {1 Routing} *)
 
-val router : route list -> middleware
-(** Creates a router. Besides interpreting routes, a router is a middleware
-    which calls its next handler if none of its routes match the request. Route
-    components starting with [:] are parameters, which can be retrieved with
-    {!Dream.param}. See example
+val router : route list -> handler
+(** Creates a router. If none of the routes match the request, the router
+    returns {!Dream.not_found}. Route components starting with [:] are
+    parameters, which can be retrieved with {!Dream.param}. See example
     {{:https://github.com/aantron/dream/tree/master/example/3-router#files}
     [3-router]} \[{{:http://dream.as/3-router} playground}\].
 
@@ -1454,7 +1453,6 @@ val router : route list -> middleware
           Dream.get "/echo/:word" @@ fun request ->
             Dream.html (Dream.param "word" request);
         ]
-        @@ Dream.not_found
     ]}
 
     {!Dream.scope} is the main form of site composition. However, Dream also
@@ -1466,7 +1464,6 @@ val router : route list -> middleware
         @@ Dream.router [
           Dream.get "/static/**" @@ Dream.static "www/static";
         ]
-        @@ Dream.not_found
     ]}
 
     [**] causes the request's path to be trimmed by the route prefix, and the

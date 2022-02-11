@@ -232,7 +232,7 @@ let param request name =
 let router routes =
   let routes = List.flatten routes in
 
-  fun next_handler request ->
+  fun request ->
 
     (* TODO Probably unnecessary (because it's better to just convert this to a
        trie), but the method can be checked before descending down the route. *)
@@ -297,4 +297,4 @@ let router routes =
     try_routes
       params prefix path routes
       (fun handler request -> handler request)
-      (fun () -> next_handler request)
+      (fun () -> Helpers.not_found request)
