@@ -360,8 +360,8 @@ val normalize_status : [< status ] -> status
 val client : request -> string
 (** Client sending the request. For example, ["127.0.0.1:56001"]. *)
 
-val https : request -> bool
-(** Whether the request was sent over HTTPS. *)
+val tls : request -> bool
+(** Whether the request was sent over a TLS connection. *)
 
 val method_ : request -> method_
 (** Request method. For example, [`GET]. *)
@@ -651,7 +651,7 @@ val set_cookie :
       {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#Path_attribute}
       MDN}.
     - [~secure] sets the [Secure] attribute. By default, [Secure] is set if
-      {!Dream.https} is [true] for the {!type-request}. See
+      {!Dream.tls} is [true] for the {!type-request}. See
       {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.1.2.5}
       RFC 6265bis §4.1.2.5} and
       {{:https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#restrict_access_to_cookies}
@@ -2208,7 +2208,7 @@ val run :
   ?port:int ->
   ?stop:unit promise ->
   ?error_handler:error_handler ->
-  ?https:bool ->
+  ?tls:bool ->
   ?certificate_file:string ->
   ?key_file:string ->
   ?builtins:bool ->
@@ -2238,8 +2238,8 @@ val run :
       low-level errors. See {!section-errors} and example
       {{:https://github.com/aantron/dream/tree/master/example/9-error#files}
       [9-error]} \[{{:http://dream.as/9-error} playground}\].
-    - [~https:true] enables HTTPS. You should also specify [~certificate_file]
-      and [~key_file]. However, for development, Dream includes an insecure
+    - [~tls:true] enables TLS. You should also specify [~certificate_file] and
+      [~key_file]. However, for development, Dream includes an insecure
       compiled-in
       {{:https://github.com/aantron/dream/tree/master/src/certificate#files}
       localhost certificate}. Enabling HTTPS also enables transparent upgrading
@@ -2247,9 +2247,9 @@ val run :
       {{:https://github.com/aantron/dream/tree/master/example/l-https#files}
       [l-https]}.
     - [~certificate_file] and [~key_file] specify the certificate and key file,
-      respectively, when using [~https]. They are not required for development,
+      respectively, when using [~tls]. They are not required for development,
       but are required for production. Dream will write a warning to the log if
-      you are using [~https], don't provide [~certificate_file] and [~key_file],
+      you are using [~tls], don't provide [~certificate_file] and [~key_file],
       and [~interface] is not ["localhost"].
     - [~builtins:false] disables {!section-builtin}.
 
@@ -2267,7 +2267,7 @@ val serve :
   ?port:int ->
   ?stop:unit promise ->
   ?error_handler:error_handler ->
-  ?https:bool ->
+  ?tls:bool ->
   ?certificate_file:string ->
   ?key_file:string ->
   ?builtins:bool ->

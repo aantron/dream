@@ -49,8 +49,8 @@ let origin_referrer_check inner_handler request =
 
         let schemes_match =
           match Uri.scheme origin_uri with
-          | Some "http" -> not (Helpers.https request)
-          | Some "https" -> Helpers.https request
+          | Some "http" -> not (Helpers.tls request)
+          | Some "https" -> Helpers.tls request
           | _ -> false
         in
 

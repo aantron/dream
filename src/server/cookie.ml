@@ -56,7 +56,7 @@ let cookie
   let secure =
     match secure with
     | Some secure -> secure
-    | None -> Helpers.https request
+    | None -> Helpers.tls request
   in
 
   let cookie_prefix = infer_cookie_prefix cookie_prefix domain path secure in
@@ -100,7 +100,7 @@ let set_cookie
   let secure =
     match secure with
     | Some secure -> secure
-    | None -> Helpers.https request
+    | None -> Helpers.tls request
   in
 
   let cookie_prefix = infer_cookie_prefix cookie_prefix domain path secure in

@@ -30,28 +30,28 @@ let set_client request client =
 
 
 
-let https_field =
+let tls_field =
   Message.new_field
-    ~name:"dream.https"
+    ~name:"dream.tls"
     ~show_value:string_of_bool
     ()
 
-let https request =
-  match Message.field request https_field with
+let tls request =
+  match Message.field request tls_field with
   | Some true -> true
   | _ -> false
 
-let set_https request https =
-  Message.set_field request https_field https
+let set_tls request tls =
+  Message.set_field request tls_field tls
 
 
 
-let request ~client ~method_ ~target ~https ~version ~headers server_stream =
+let request ~client ~method_ ~target ~tls ~version ~headers server_stream =
   let request =
     Message.request
       ~method_ ~target ~version ~headers Stream.null server_stream in
   set_client request client;
-  set_https request https;
+  set_tls request tls;
   request
 
 let request_with_body ?method_ ?target ?version ?headers body =

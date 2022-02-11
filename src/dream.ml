@@ -96,7 +96,7 @@ include Status
 (* Requests *)
 
 let client = Helpers.client
-let https = Helpers.https
+let tls = Helpers.tls
 let method_ = Message.method_
 let target = Message.target
 let prefix = Router.prefix

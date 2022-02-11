@@ -52,7 +52,7 @@ let websocket_log =
    chance to tell the user that something is wrong with their app. *)
 (* TODO Rename conn like in the body branch. *)
 let wrap_handler
-    https
+    tls
     (user's_error_handler : Catch.error_handler)
     (user's_dream_handler : Message.handler) =
 
@@ -96,7 +96,7 @@ let wrap_handler
       Stream.stream body Stream.no_writer in
 
     let request : Message.request =
-      Helpers.request ~client ~method_ ~target ~https ~version ~headers body in
+      Helpers.request ~client ~method_ ~target ~tls ~version ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -188,7 +188,7 @@ let wrap_handler
 
 (* TODO Factor out what is in common between the http/af and h2 handlers. *)
 let wrap_handler_h2
-    https
+    tls
     (_user's_error_handler : Catch.error_handler)
     (user's_dream_handler : Message.handler) =
 
@@ -226,7 +226,7 @@ let wrap_handler_h2
       Stream.stream body Stream.no_writer in
 
     let request : Message.request =
-      Helpers.request ~client ~method_ ~target ~https ~version ~headers body in
+      Helpers.request ~client ~method_ ~target ~tls ~version ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -483,7 +483,7 @@ let serve_with_maybe_https
     ~port
     ~stop
     ~error_handler
-    ~https
+    ~tls
     ?certificate_file ?key_file
     ?certificate_string ?key_string
     ~builtins
@@ -500,7 +500,7 @@ let serve_with_maybe_https
     end; *)
     (* TODO Make sure there is a similar check in cipher.ml now.Hpack *)
 
-    match https with
+    match tls with
     | `No ->
       serve_with_details
         caller_function_for_error_messages
@@ -632,7 +632,7 @@ let serve
     ?(port = default_port)
     ?(stop = never)
     ?(error_handler = Error_handler.default)
-    ?(https = false)
+    ?(tls = false)
     ?certificate_file
     ?key_file
     ?(builtins = true)
@@ -644,7 +644,7 @@ let serve
     ~port
     ~stop
     ~error_handler
-    ~https:(if https then `OpenSSL else `No)
+    ~tls:(if tls then `OpenSSL else `No)
     ?certificate_file
     ?key_file
     ?certificate_string:None
@@ -659,7 +659,7 @@ let run
     ?(port = default_port)
     ?(stop = never)
     ?(error_handler = Error_handler.default)
-    ?(https = false)
+    ?(tls = false)
     ?certificate_file
     ?key_file
     ?(builtins = true)
@@ -713,7 +713,7 @@ let run
 
   if greeting then begin
     let scheme =
-      if https then
+      if tls then
         "https"
       else
         "http"
@@ -736,7 +736,7 @@ let run
         ~port
         ~stop
         ~error_handler
-        ~https:(if https then `OpenSSL else `No)
+        ~tls:(if tls then `OpenSSL else `No)
         ?certificate_file ?key_file
         ?certificate_string:None ?key_string:None
         ~builtins

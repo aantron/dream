@@ -63,7 +63,7 @@ Accept-Encoding: gzip, deflate, br
 Accept-Language: en-US,en;q=0.9,ru-RU;q=0.8,ru;q=0.7
 
 dream.client: 127.0.0.1:64687
-dream.https: false
+dream.tls: false
 dream.request_id: 3
 dream.params:
 ```
