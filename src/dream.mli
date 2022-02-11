@@ -542,6 +542,7 @@ val has_header : 'a message -> string -> bool
 val add_header : 'a message -> string -> string -> unit
 (** Appends a header with the given name and value. Does not remove any existing
     headers with the same name. *)
+(* TODO Does this fit on one line in the docs now? *)
 
 val drop_header : 'a message -> string -> unit
 (** Removes all headers with the given name. *)
@@ -805,9 +806,9 @@ val client_stream : 'a message -> stream
 val server_stream : 'a message -> stream
 (* TODO Document that this is for middlewares that are transforming a response
    stream or a WebSocket. *)
-val set_client_stream : 'a message -> stream -> unit
+val set_client_stream : response -> stream -> unit
 (* TODO Normalize with with_stream, or add a separate with_server_stream. *)
-val set_server_stream : 'a message -> stream -> unit
+val set_server_stream : request -> stream -> unit
 
 (* TODO Probably even close can be made optional. exn can be made optional. *)
 (* TODO Argument order? *)
@@ -881,7 +882,10 @@ val websocket :
           Dream.close_websocket websocket);
     ]} *)
 
-val send : ?text_or_binary:[ `Text | `Binary ] -> ?end_of_message:[ `End_of_message | `Continues ] -> websocket -> string -> unit promise
+val send :
+  ?text_or_binary:[< `Text | `Binary ] ->
+  ?end_of_message:[< `End_of_message | `Continues ] ->
+    websocket -> string -> unit promise
 (** Sends a single message. The WebSocket is ready another message when the
     promise resolves.
 
