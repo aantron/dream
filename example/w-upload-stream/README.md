@@ -11,7 +11,7 @@ the total size of each uploaded file:
 let home request =
   <html>
   <body>
-    <form action="/" enctype="multipart/form-data" method="post">
+    <form method="POST" action="/" enctype="multipart/form-data">
       <%s! Dream.csrf_tag request %>
       <input name="files" type="file" multiple>
       <button>Submit!</button>

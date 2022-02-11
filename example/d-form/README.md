@@ -59,7 +59,7 @@ a CSRF token into it using the
 generate the `<input>` tag.
 
 ```html
-<form method="post" action="/">
+<form method="POST" action="/">
   <input name="dream.csrf" type="hidden" value="j8vjZ6...">
 
   <!-- The rest we actually wrote ourselves in the template! -->
