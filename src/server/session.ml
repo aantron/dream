@@ -180,7 +180,7 @@ struct
       let id = version_session_id !session.id in
       let max_age = !session.expires_at -. now () in
       Cookie.set_cookie
-        response session_cookie id request ~encrypt:false ~max_age
+        response request session_cookie id ~encrypt:false ~max_age
     end;
     Lwt.return response
 
@@ -300,7 +300,7 @@ struct
         |> Yojson.Basic.to_string
         |> version_value
       in
-      Cookie.set_cookie response session_cookie value request ~max_age
+      Cookie.set_cookie response request session_cookie value ~max_age
     end;
     Lwt.return response
 

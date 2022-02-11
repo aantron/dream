@@ -86,9 +86,9 @@ let set_cookie
     ?(http_only = true)
     ?same_site
     response
+    request
     name
-    value
-    request =
+    value =
 
   (* TODO Need the site prefix, not the subsite prefix! *)
   let path =
@@ -135,7 +135,7 @@ let set_cookie
   Message.add_header response "Set-Cookie" set_cookie
 
 let drop_cookie
-    ?prefix ?domain ?path ?secure ?http_only ?same_site name request response =
+    ?prefix ?domain ?path ?secure ?http_only ?same_site response request name =
   set_cookie
     ?prefix ~encrypt:false ~expires:0. ?domain ?path ?secure ?http_only
-    ?same_site name "" request response
+    ?same_site response request name ""

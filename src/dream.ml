@@ -153,6 +153,7 @@ let set_body = Message.set_body
 (* Streams *)
 
 type stream = Stream.stream
+let body_stream = Message.server_stream
 let stream = Helpers.stream
 let read = Message.read
 let write = Message.write
@@ -177,6 +178,8 @@ let abort_stream = Stream.abort
 
 type websocket = stream * stream
 let websocket = Helpers.websocket
+type text_or_binary = [ `Text | `Binary ]
+type end_of_message = [ `End_of_message | `Continues ]
 let send = Helpers.send
 let receive = Helpers.receive
 let receive_fragment = Helpers.receive_fragment

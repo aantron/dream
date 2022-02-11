@@ -102,8 +102,8 @@ val receive :
 val receive_fragment :
   Stream.stream -> (string * text_or_binary * end_of_message) option promise
 val send :
-  ?text_or_binary:text_or_binary ->
-  ?end_of_message:end_of_message ->
+  ?text_or_binary:[< text_or_binary ] ->
+  ?end_of_message:[< end_of_message ] ->
   Stream.stream ->
   string ->
     unit promise

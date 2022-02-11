@@ -390,12 +390,20 @@ let receive stream =
   | None -> Lwt.return_none
   | Some (message, _) -> Lwt.return (Some message)
 
-let send
-    ?(text_or_binary = `Text) ?(end_of_message = `End_of_message) stream data =
-
+let send ?text_or_binary ?end_of_message stream data =
   let promise, resolver = Lwt.wait () in
-  let binary = text_or_binary = `Binary in
-  let fin = end_of_message = `End_of_message in
+  let binary =
+    match text_or_binary with
+    | Some `Binary -> true
+    | Some `Text -> false
+    | None -> false
+  in
+  let fin =
+    match end_of_message with
+    | Some `End_of_message -> true
+    | Some `Continues -> false
+    | None -> true
+  in
   let length = String.length data in
   let buffer = Bigstringaf.of_string ~off:0 ~len:length data in
   Stream.write

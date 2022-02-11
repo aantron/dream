@@ -462,8 +462,8 @@ ul ul li {
     margin-bottom: 24px;
   }
 
-  #type-outgoing + .spec-doc {
-    margin-top: -1.5rem;
+  #type-server + .spec-doc {
+    margin-top: -26px;
     margin-bottom: 48px;
   }
   #val-patch + .spec-doc {

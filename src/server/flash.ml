@@ -83,7 +83,8 @@ let flash_messages inner_handler request =
     match existing, entries with
     | None, [] -> ()
     | Some _, [] ->
-      Cookie.set_cookie response flash_cookie "" request ~expires:0.
+      (* TODO Use drop_cookie? *)
+      Cookie.set_cookie response request flash_cookie "" ~expires:0.
     | _, _ ->
       let content =
         List.fold_right (fun (x,y) a -> `String x :: `String y :: a) entries []
@@ -99,6 +100,6 @@ let flash_messages inner_handler request =
           ()
       in
       Cookie.set_cookie
-        response flash_cookie value request ~max_age:five_minutes
+        response request flash_cookie value ~max_age:five_minutes
   in
   Lwt.return response

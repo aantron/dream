@@ -569,8 +569,8 @@ https://aantron.github.io/dream/#val-with_header
     [c-cookie]} \[{{:http://dream.as/c-cookie} playground}\].
 
     {[
-      Dream.set_cookie "my.cookie" "foo" request response
-      Dream.cookie "my.cookie" request
+      Dream.set_cookie response request "my.cookie" "foo"
+      Dream.cookie request "my.cookie"
     ]}
 
     The {!Dream.cookie} call evaluates to [Some "foo"], but the actual cookie
@@ -595,12 +595,12 @@ val set_cookie :
   ?secure:bool ->
   ?http_only:bool ->
   ?same_site:[< `Strict | `Lax | `None ] option ->
-    response -> string -> string -> request -> unit
+    response -> request -> string -> string -> unit
 (** Appends a [Set-Cookie:] header to the {!type-response}. Infers the most
     secure defaults from the {!type-request}.
 
     {[
-      Dream.set_cookie "my.cookie" "value" request response
+      Dream.set_cookie request response "my.cookie" "value"
     ]}
 
     Specify {!Dream.run} argument [~secret], or the Web app will not be able to
@@ -679,12 +679,12 @@ val set_cookie :
    ?secure:bool ->
    ?http_only:bool ->
    ?same_site:[< `Strict | `Lax | `None ] option ->
-     response -> string -> request -> unit
+     response -> request -> string -> unit
 (** Deletes the given cookie.
 
     This function works by calling {!Dream.set_cookie}, and setting the cookie
     to expire in the past. Pass all the same optional values that you would pass
-    to {!Dream.set_cookie}, to make sure that the same cookie is deleted. *)
+    to {!Dream.set_cookie} to make sure that the same cookie is deleted. *)
 
 val cookie :
   ?prefix:[< `Host | `Secure ] option ->
@@ -698,7 +698,7 @@ val cookie :
     [c-cookie]}.
 
     {[
-      Dream.cookie "my.cookie" request
+      Dream.cookie request "my.cookie"
     ]}
 
     Pass the same optional arguments as to {!Dream.set_cookie} for the same
@@ -734,29 +734,30 @@ https://aantron.github.io/dream/#val-set_body
 (** {1 Streams} *)
 
 type stream
-(* TODO Document. *)
+(** Gradual reading of request bodies or gradual writing of response bodies. *)
+
+val body_stream : request -> stream
+(** A stream that can be used to gradually read the request's body. *)
 
 val stream :
   ?status:[< status ] ->
   ?code:int ->
   ?headers:(string * string) list ->
     (stream -> unit promise) -> response promise
-(** Same as {!Dream.val-respond}, but calls {!Dream.set_stream} internally to
-    prepare the response for stream writing, and then runs the callback
-    asynchronously to do it. See example
+(** Creates a response with a {!type-stream} open for writing, and passes the
+    stream to the callback when it is ready. See example
     {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
     [j-stream]}.
 
     {[
       fun request ->
-        Dream.stream (fun response ->
-          let%lwt () = Dream.write response "foo" in
-          Dream.close_stream response)
+        Dream.stream (fun stream ->
+          let%lwt () = Dream.write stream "foo" in
+          Dream.close stream)
     ]} *)
 
 val read : stream -> string option promise
-(** Retrieves a body chunk. The chunk is not buffered, thus it can only be read
-    once. See example
+(** Retrieves a body chunk. See example
     {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
     [j-stream]}. *)
 (* TODO Document difference between receiving a request and receiving on a
@@ -776,13 +777,14 @@ val write : stream -> string -> unit promise
 (* TODO Document clearly which of the writing functions can raise exceptions. *)
 
 val flush : stream -> unit promise
-(** Flushes write buffers. Data is sent to the client. *)
+(** Flushes the stream's write buffer. Data is sent to the client. *)
 
 val close : stream -> unit promise
-(** Finishes the response stream. *)
-(* TODO Fix comment. *)
+(** Closes the stream. *)
 
-(** {2 Low-level streaming} *)
+(** {2 Low-level streaming}
+
+    Note: this part of the API is still a work in progress. *)
 
 type buffer =
   (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
@@ -797,19 +799,6 @@ type buffer =
     - {{:https://github.com/mirage/ocaml-cstruct/blob/9a8b9a79bdfa2a1b8455bc26689e0228cc6fac8e/lib/cstruct.mli#L139}
       [Cstruct.buffer]} in Cstruct. *)
 
-(* TODO What should the body stream retrieval function be called? *)
-(* TODO Remove old functions from signature. *)
-(* TODO Should there be a section for this somewhere? Probably "low-level
-   streaming" should be promoted to a top-level section, Streaming. *)
-
-val client_stream : 'a message -> stream
-val server_stream : 'a message -> stream
-(* TODO Document that this is for middlewares that are transforming a response
-   stream or a WebSocket. *)
-val set_client_stream : response -> stream -> unit
-(* TODO Normalize with with_stream, or add a separate with_server_stream. *)
-val set_server_stream : request -> stream -> unit
-
 (* TODO Probably even close can be made optional. exn can be made optional. *)
 (* TODO Argument order? *)
 val read_stream :
@@ -823,28 +812,75 @@ val read_stream :
     unit
 (** Waits for the next stream event, and calls:
 
-    - [~buffer] with an offset and length, if a {!type-buffer} is written,
-    - [~close] if close is requested, and
+    - [~data] with an offset and length, if a {!type-buffer} is received,
+    ~ [~flush] if a flush request is received,
+    - [~ping] if a ping is received (WebSockets only),
+    - [~pong] if a pong is received (WebSockets only),
+    - [~close] if the stream is closed, and
     - [~exn] to report an exception. *)
 
 val write_stream :
-  stream -> buffer -> int -> int -> bool -> bool -> close:(int -> unit) -> exn:(exn -> unit) -> (unit -> unit) -> unit
+  stream ->
+  buffer -> int -> int ->
+  bool -> bool ->
+  close:(int -> unit) ->
+  exn:(exn -> unit) ->
+  (unit -> unit) ->
+    unit
+(** Writes a {!type-buffer} into the stream:
+
+    {[
+      write_stream stream buffer offset length binary fin ~close ~exn callback
+    ]}
+
+    [write_stream] calls one of its three callback functions, depending on what
+    happens with the write:
+
+    - [~close] if the stream is closed before the write completes,
+    - [~exn] to report an exception during or before the write,
+    - [callback] to report that the write has succeeded and the stream can
+      accept another write.
+
+    [binary] and [fin] are for WebSockets only. [binary] marks the stream as
+    containing binary (non-text) data, and [fin] sets the [FIN] bit, indicating
+    the end of a message. These two parameters are ignored by non-WebSocket
+    streams. *)
 
 val flush_stream :
-  stream -> close:(int -> unit) -> exn:(exn -> unit) -> (unit -> unit) -> unit
+  stream ->
+  close:(int -> unit) ->
+  exn:(exn -> unit) ->
+  (unit -> unit) ->
+    unit
+(** Requests the stream be flushed. The callbacks have the same meaning as in
+    {!write_stream}. *)
 
 val ping_stream :
-  stream -> buffer -> int -> int -> close:(int -> unit) -> exn:(exn -> unit) -> (unit -> unit) -> unit
+  stream ->
+  buffer -> int -> int ->
+  close:(int -> unit) ->
+  exn:(exn -> unit) ->
+  (unit -> unit) ->
+    unit
+(** Sends a ping frame on the WebSocket stream. The buffer is typically empty,
+    but may contain up to 125 bytes of data. *)
 
 val pong_stream :
-  stream -> buffer -> int -> int -> close:(int -> unit) -> exn:(exn -> unit) -> (unit -> unit) -> unit
+  stream ->
+  buffer -> int -> int ->
+  close:(int -> unit) ->
+  exn:(exn -> unit) ->
+  (unit -> unit) ->
+    unit
+(** Like {!ping_stream}, but sends a pong event. *)
 
-val close_stream :
-  stream -> int -> unit
+val close_stream : stream -> int -> unit
+(** Closes the stream. The integer parameter is a WebSocket close code, and is
+    ignored by non-WebSocket streams. *)
 
-val abort_stream :
-  stream -> exn -> unit
-(* TODO Line widths above. *)
+val abort_stream : stream -> exn -> unit
+(** Aborts the stream, causing all readers and writers to receive the given
+    exception. *)
 
 (**/**)
 val write_buffer :
@@ -882,27 +918,38 @@ val websocket :
           Dream.close_websocket websocket);
     ]} *)
 
-val send :
-  ?text_or_binary:[< `Text | `Binary ] ->
-  ?end_of_message:[< `End_of_message | `Continues ] ->
-    websocket -> string -> unit promise
-(** Sends a single message. The WebSocket is ready another message when the
-    promise resolves.
+type text_or_binary = [ `Text | `Binary ]
+(** See {!send} and {!receive_fragment}. *)
 
-    With [~kind:`Text], the default, the message is interpreted as a UTF-8
-    string. The client will receive it transcoded to JavaScript's UTF-16
+type end_of_message = [ `End_of_message | `Continues ]
+(** See {!send} and {!receive_fragment}. *)
+
+val send :
+  ?text_or_binary:[< text_or_binary ] ->
+  ?end_of_message:[< end_of_message ] ->
+    websocket -> string -> unit promise
+(** Sends a single WebSocket message. The WebSocket is ready another message
+    when the promise resolves.
+
+    With [~text_or_binary:`Text], the default, the message is interpreted as a
+    UTF-8 string. The client will receive it transcoded to JavaScript's UTF-16
     representation.
 
-    With [~kind:`Binary], the message will be received unmodified, as either a
-    [Blob] or an [ArrayBuffer]. See
+    With [~text_or_binary:`Binary], the message will be received unmodified, as
+    either a [Blob] or an [ArrayBuffer]. See
     {{:https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/binaryType}
-    MDN, [WebSocket.binaryType]}. *)
+    MDN, [WebSocket.binaryType]}.
+
+    [~end_of_message] is ignored for now, as the WebSocket library underlying
+    Dream does not support sending message fragments yet. *)
 
 val receive : websocket -> string option promise
-(** Retrieves a message. If the WebSocket is closed before a complete message
+(** Receives a message. If the WebSocket is closed before a complete message
     arrives, the result is [None]. *)
 
-val receive_fragment : websocket -> (string * [ `Text | `Binary ] * [ `End_of_message | `Continues ]) option promise
+val receive_fragment :
+  websocket -> (string * text_or_binary * end_of_message) option promise
+(** Receives a single fragment of a message, streaming it. *)
 
 val close_websocket : ?code:int -> websocket -> unit promise
 (** Closes the WebSocket. [~code] is usually not necessary, but is needed for
@@ -1356,6 +1403,31 @@ Dream.pipeline [middleware_1; middleware_2] @@ handler
     {v
                middleware_1 @@ middleware_2 @@ handler
     v} *)
+
+(* TODO Need a way to create fresh streams. *)
+(** {2 Stream transformers}
+
+    When writing a middleware that transforms a request body stream, use
+    {!server_stream} to retrieve the server's view of the body stream. Create a
+    new transformed stream (note: a function for doing this is not yet exposed),
+    and replace the request's server stream by your transformed stream with
+    {!set_server_stream}.
+
+    When transforming a response stream, replace the client stream instead. *)
+
+val client_stream : 'a message -> stream
+(** The stream that clients interact with. *)
+
+val server_stream : 'a message -> stream
+(** The stream that servers interact with. *)
+
+val set_client_stream : response -> stream -> unit
+(** Replaces the stream that the client will use when it receives the
+    response. *)
+
+val set_server_stream : request -> stream -> unit
+(** Replaces the stream that the server will use when it receives the
+    request. *)
 
 
 

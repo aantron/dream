@@ -185,9 +185,9 @@ let send (operations, session) request response =
     let max_age = !session.Session.expires_at -. Unix.gettimeofday () in
     Cookie.set_cookie
       response
+      request
       Session.session_cookie
       id
-      request
       ~encrypt:false
       ~max_age
   end;
