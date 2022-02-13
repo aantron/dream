@@ -166,7 +166,6 @@ let has_header message name =
 let add_header message name value =
   message.headers <- message.headers @ [(name, value)]
 
-(* TODO Can optimize this if the header is not found? *)
 let drop_header message name =
   let name = String.lowercase_ascii name in
   message.headers <-
@@ -202,8 +201,6 @@ let write stream chunk =
     (fun () -> Lwt.wakeup_later resolver ());
   promise
 
-(* TODO How are remote closes actually handled? There is no way for http/af to
-   report them to the user application through the writer. *)
 let flush stream =
   let promise, resolver = Lwt.wait () in
   Stream.flush
@@ -213,7 +210,6 @@ let flush stream =
     (Lwt.wakeup_later resolver);
   promise
 
-(* TODO Should close even be promise-valued? *)
 let close stream =
   Stream.close stream 1000;
   Lwt.return_unit
@@ -241,7 +237,6 @@ let rec pipeline middlewares handler =
   match middlewares with
   | [] -> handler
   | middleware::more -> middleware (pipeline more handler)
-(* TODO Test pipelien after the List.rev fiasco. *)
 
 
 
@@ -298,8 +293,6 @@ let set_body message body =
 
 
 
-(* TODO Once the higher-level WebSocket API is settled, no longer store the
-   server stream. *)
 let websocket_field =
   new_field ~name:"dream.websocket" ()
 

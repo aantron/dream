@@ -79,9 +79,6 @@ val set_server_stream : 'a message -> Stream.stream -> unit
 
 
 
-(* TODO Is there any reason not to have a separate WebSocket type? Would we want
-   to do anything with a WebSocket that we normally do with responses? The
-   answer is no... It's easier to have a separate type. *)
 val create_websocket : response -> (Stream.stream * Stream.stream)
 val get_websocket : response -> (Stream.stream * Stream.stream) option
 val close_websocket : ?code:int -> Stream.stream * Stream.stream -> unit promise
