@@ -125,7 +125,7 @@ let init_client socket content =
     "payload", `String content;
   ]
   |> Yojson.Basic.to_string
-  |> Dream.write socket
+  |> Dream.send socket
 
 let validate_id sandbox =
   String.length sandbox > 0 && Dream.from_base64url sandbox <> None
@@ -144,7 +144,7 @@ type session = {
   mutable sandbox : string;
   syntax : syntax;
   eml : bool;
-  socket : Dream.response;
+  socket : Dream.websocket;
 }
 
 let allocated_ports =
@@ -198,7 +198,7 @@ let client_log ?(add_newline = false) session message =
     "payload", `String message;
   ]
   |> Yojson.Basic.to_string
-  |> Dream.write session.socket
+  |> Dream.send session.socket
 
 let build_sandbox sandbox syntax eml =
   let dune =
@@ -268,7 +268,7 @@ let started session port =
     "port", `Int port;
   ]
   |> Yojson.Basic.to_string
-  |> Dream.write session.socket
+  |> Dream.send session.socket
 
 let rec make_container_id () =
   let candidate = Dream.random 9 |> Dream.to_base64url in
@@ -308,7 +308,7 @@ let run session =
 
 let kill session =
   let%lwt () = kill_container session in
-  Dream.close session.socket
+  Dream.close_websocket session.socket
 
 
 
@@ -350,7 +350,7 @@ let lock_sandbox sandbox f =
       Lwt.return_unit)
 
 let rec listen session =
-  match%lwt Dream.read session.socket with
+  match%lwt Dream.receive session.socket with
   | None ->
     Dream.info (fun log -> log "WebSocket closed by client");
     kill session
@@ -533,7 +533,7 @@ let () =
        nice error handling here, because a valid client won't trigger them. If
        they occur, they are harmless to the server. *)
     Dream.get "/socket" (fun request ->
-      match Dream.query "sandbox" request with
+      match Dream.query request "sandbox" with
       | None -> Dream.empty `Bad_Request
       | Some sandbox ->
       match validate_id sandbox with
@@ -555,8 +555,7 @@ let () =
     Dream.get "/:id" playground_handler;
     Dream.get "/:id/**" playground_handler;
 
-  ]
-  @@ Dream.not_found;
+  ];
 
   Dream.log "Killing all containers";
   Sys.command "docker kill $(docker ps -q)" |> ignore;
