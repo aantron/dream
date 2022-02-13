@@ -90,11 +90,9 @@ let dump (error : Catch.error) =
   begin match error.request with
   | None -> ()
   | Some request ->
-    let major, minor = Message.version request in
-    p "\n\n%s %s HTTP/%i.%i"
+    p "\n\n%s %s"
       (Method.method_to_string (Message.method_ request))
-      (Message.target request)
-      major minor;
+      (Message.target request);
 
     Message.all_headers request
     |> List.iter (fun (name, value) -> p "\n%s: %s" name value);

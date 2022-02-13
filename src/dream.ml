@@ -99,7 +99,6 @@ let method_ = Message.method_
 let target = Message.target
 let prefix = Router.prefix
 let path = Router.path
-let version = Message.version
 let set_client = Helpers.set_client
 let set_method_ = Message.set_method_
 let query = Query.query
@@ -406,10 +405,6 @@ let with_client client message =
 
 let with_method_ method_ message =
   Message.set_method_ message method_;
-  message
-
-let with_version version message =
-  Message.set_version message version;
   message
 
 let with_path path message =

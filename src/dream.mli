@@ -383,15 +383,6 @@ https://github.com/aantron/dream/issues
 (* TODO If not removing this, move it to section Routing. *)
 (**/**)
 
-(**/**)
-val version : request -> int * int
-[@@ocaml.deprecated
-"Protocol version access is being removed from the API. Comment at
-https://github.com/aantron/dream/issues
-"]
-(** Protocol version. [(1, 1)] for HTTP/1.1 and [(2, 0)] for HTTP/2. *)
-(**/**)
-
 val set_client : request -> string -> unit
 (** Replaces the client. See {!Dream.val-client}. *)
 
@@ -421,15 +412,6 @@ val with_path : string list -> request -> request
 https://github.com/aantron/dream/issues
 "]
 (** Replaces the path. See {!Dream.val-path}. *)
-(**/**)
-
-(**/**)
-val with_version : int * int -> request -> request
-[@@ocaml.deprecated
-"Protocol version access is being removed from the API. Comment at
-https://github.com/aantron/dream/issues
-"]
-(** Replaces the version. See {!Dream.version}. *)
 (**/**)
 
 val query : request -> string -> string option
@@ -2564,7 +2546,6 @@ https://aantron.github.io/dream/#val-set_field
 val request :
   ?method_:[< method_ ] ->
   ?target:string ->
-  ?version:int * int ->
   ?headers:(string * string) list ->
     string -> request
 (** [Dream.request body] creates a fresh request with the given body for

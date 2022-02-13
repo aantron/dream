@@ -24,7 +24,6 @@ type middleware = handler -> handler
 val request :
   ?method_:[< Method.method_ ] ->
   ?target:string ->
-  ?version:int * int ->
   ?headers:(string * string) list ->
   Stream.stream ->
   Stream.stream ->
@@ -32,10 +31,8 @@ val request :
 
 val method_ : request -> Method.method_
 val target : request -> string
-val version : request -> int * int
 val set_method_ : request -> [< Method.method_ ] -> unit
 val set_target : request -> string -> unit
-val set_version : request -> int * int -> unit
 
 
 

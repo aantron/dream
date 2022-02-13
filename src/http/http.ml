@@ -69,8 +69,6 @@ let wrap_handler
       to_dream_method httpaf_request.meth in
     let target =
       httpaf_request.target in
-    let version =
-      (httpaf_request.version.major, httpaf_request.version.minor) in
     let headers =
       Httpaf.Headers.to_list httpaf_request.headers in
 
@@ -94,7 +92,7 @@ let wrap_handler
       Stream.stream body Stream.no_writer in
 
     let request : Message.request =
-      Helpers.request ~client ~method_ ~target ~tls ~version ~headers body in
+      Helpers.request ~client ~method_ ~target ~tls ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -198,8 +196,6 @@ let wrap_handler_h2
       to_dream_method httpaf_request.meth in
     let target =
       httpaf_request.target in
-    let version =
-      (2, 0) in
     let headers =
       H2.Headers.to_list httpaf_request.headers in
 
@@ -219,7 +215,7 @@ let wrap_handler_h2
       Stream.stream body Stream.no_writer in
 
     let request : Message.request =
-      Helpers.request ~client ~method_ ~target ~tls ~version ~headers body in
+      Helpers.request ~client ~method_ ~target ~tls ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This

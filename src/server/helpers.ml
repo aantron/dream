@@ -46,17 +46,15 @@ let set_tls request tls =
 
 
 
-let request ~client ~method_ ~target ~tls ~version ~headers server_stream =
+let request ~client ~method_ ~target ~tls ~headers server_stream =
   let request =
-    Message.request
-      ~method_ ~target ~version ~headers Stream.null server_stream in
+    Message.request ~method_ ~target ~headers Stream.null server_stream in
   set_client request client;
   set_tls request tls;
   request
 
-let request_with_body ?method_ ?target ?version ?headers body =
-  Message.request
-    ?method_ ?target ?version ?headers Stream.null (Stream.string body)
+let request_with_body ?method_ ?target ?headers body =
+  Message.request ?method_ ?target ?headers Stream.null (Stream.string body)
 
 
 

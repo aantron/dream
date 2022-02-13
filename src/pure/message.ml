@@ -22,13 +22,7 @@ module Fields = Hmap.Make (struct type 'a t = 'a field_metadata end)
 type client = {
   mutable method_ : Method.method_;
   mutable target : string;
-  mutable version : int * int;
 }
-(* TODO Get rid of the version field completely? At least don't expose it in
-   Dream. It is only used internally on the server side to add the right
-   Content-Length, etc., headers. But even that can be moved out of the
-   middleware and into transport so that the version field is not necessary for
-   some middleware to decide which headers to add. *)
 
 type server = {
   mutable status : Status.status;
@@ -66,7 +60,6 @@ type middleware = handler -> handler
 let request
     ?method_
     ?(target = "/")
-    ?(version = 1, 1)
     ?(headers = [])
     client_stream
     server_stream =
@@ -81,7 +74,6 @@ let request
     specific = {
       method_;
       target;
-      version;
     };
     headers;
     client_stream;
@@ -96,17 +88,11 @@ let method_ request =
 let target request =
   request.specific.target
 
-let version request =
-  request.specific.version
-
 let set_method_ request method_ =
   request.specific.method_ <- (method_ :> Method.method_)
 
 let set_target request target =
   request.specific.target <- target
-
-let set_version request version =
-  request.specific.version <- version
 
 
 
