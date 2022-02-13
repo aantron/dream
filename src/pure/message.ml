@@ -190,6 +190,13 @@ let set_all_headers message headers =
 let sort_headers headers =
   List.stable_sort (fun (name, _) (name', _) -> compare name name') headers
 
+let lowercase_headers message =
+  let headers =
+    message.headers
+    |> List.map (fun (name, value) -> String.lowercase_ascii name, value)
+  in
+  message.headers <- headers
+
 
 
 (* Whole-body access *)

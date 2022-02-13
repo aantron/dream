@@ -61,6 +61,7 @@ val drop_header : 'a message -> string -> unit
 val set_header : 'a message -> string -> string -> unit
 val set_all_headers : 'a message -> (string * string) list -> unit
 val sort_headers : (string * string) list -> (string * string) list
+val lowercase_headers : 'a message -> unit
 
 
 

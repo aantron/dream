@@ -8,7 +8,6 @@
 module Catch = Dream__server.Catch
 module Helpers = Dream__server.Helpers
 module Log = Dream__server.Log
-module Lowercase_headers = Dream__server.Lowercase_headers
 module Message = Dream_pure.Message
 module Method = Dream_pure.Method
 module Status = Dream_pure.Status
@@ -241,6 +240,7 @@ let wrap_handler_h2
 
         let forward_response response =
           Message.drop_content_length_headers response;
+          Message.lowercase_headers response;
           let headers =
             H2.Headers.of_list (Message.all_headers response) in
           let status =
@@ -380,7 +380,6 @@ let ocaml_tls = {
 
 let built_in_middleware error_handler =
   Message.pipeline [
-    Lowercase_headers.lowercase_headers;
     Catch.catch (Error_handler.app error_handler);
   ]
 

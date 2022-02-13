@@ -17,7 +17,6 @@ module Formats = Dream_pure.Formats
 module Graphql = Dream__graphql.Graphql
 module Helpers = Dream__server.Helpers
 module Http = Dream__http.Http
-module Lowercase_headers = Dream__server.Lowercase_headers
 module Message = Dream_pure.Message
 module Method = Dream_pure.Method
 module Origin_referrer_check = Dream__server.Origin_referrer_check
@@ -352,7 +351,6 @@ let catch = Catch.catch
 
 let run = Http.run
 let serve = Http.serve
-let lowercase_headers = Lowercase_headers.lowercase_headers
 let with_site_prefix = Site_prefix.with_site_prefix
 
 

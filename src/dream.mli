@@ -2296,16 +2296,12 @@ val serve :
 
     {[
       Dream.run ~builtins:false
-      @@ Dream.lowercase_headers
       @@ Dream.catch ~error_handler
       @@ my_app
     ]}
 
     The middleware can be replaced with work-alikes, or omitted to use Dream as
     a fairly raw abstraction layer over low-level HTTP libraries. *)
-
-val lowercase_headers : middleware
-(** Lowercases response headers for HTTP/2 requests. *)
 
 val with_site_prefix : string -> middleware
 (** Removes the given prefix from the path in each request, and adds it to the
