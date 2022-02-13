@@ -44,6 +44,7 @@ type 'a message = {
   mutable headers : (string * string) list;
   mutable client_stream : Stream.stream;
   mutable server_stream : Stream.stream;
+  mutable body : string promise option;
   mutable fields : Fields.t;
 }
 
@@ -84,6 +85,7 @@ let request
     headers;
     client_stream;
     server_stream;
+    body = None;
     fields = Fields.empty;
   }
 
@@ -124,6 +126,7 @@ let response ?status ?code ?(headers = []) client_stream server_stream =
     headers;
     client_stream;
     server_stream;
+    body = None;
     fields = Fields.empty;
   }
 
@@ -266,14 +269,8 @@ let fold_fields f initial message =
 
 (* Whole-body access *)
 
-(* TODO Show the value somehow. *)
-let body_field : string promise field =
-  new_field
-    ~name:"dream.body"
-    ()
-
 let body message =
-  match field message body_field with
+  match message.body with
   | Some body_promise -> body_promise
   | None ->
     let stream =
@@ -282,11 +279,11 @@ let body message =
       | Response -> message.client_stream
     in
     let body_promise = Stream.read_until_close stream in
-    set_field message body_field body_promise;
+    message.body <- Some body_promise;
     body_promise
 
 let set_body message body =
-  set_field message body_field (Lwt.return body);
+  message.body <- Some (Lwt.return body);
   match message.kind with
   | Request -> message.server_stream <- Stream.string body
   | Response -> message.client_stream <- Stream.string body
