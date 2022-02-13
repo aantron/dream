@@ -32,6 +32,7 @@ type client = {
 
 type server = {
   status : Status.status;
+  mutable websocket : (Stream.stream * Stream.stream) option;
 }
 
 type kind =
@@ -122,6 +123,7 @@ let response ?status ?code ?(headers = []) client_stream server_stream =
     kind = Response;
     specific = {
       status;
+      websocket = None;
     };
     headers;
     client_stream;
@@ -290,20 +292,17 @@ let fold_fields f initial message =
 
 
 
-let websocket_field =
-  new_field ~name:"dream.websocket" ()
-
 let create_websocket response =
   let in_reader, in_writer = Stream.pipe ()
   and out_reader, out_writer = Stream.pipe () in
   let client_stream = Stream.stream out_reader in_writer
   and server_stream = Stream.stream in_reader out_writer in
   let websocket = (client_stream, server_stream) in
-  set_field response websocket_field websocket;
+  response.specific.websocket <- Some websocket;
   websocket
 
 let get_websocket response =
-  field response websocket_field
+  response.specific.websocket
 
 let close_websocket ?(code = 1000) (client_stream, server_stream) =
   Stream.close client_stream code;
