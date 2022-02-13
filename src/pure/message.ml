@@ -187,6 +187,29 @@ let sort_headers headers =
 
 
 
+(* Whole-body access *)
+
+let body message =
+  match message.body with
+  | Some body_promise -> body_promise
+  | None ->
+    let stream =
+      match message.kind with
+      | Request -> message.server_stream
+      | Response -> message.client_stream
+    in
+    let body_promise = Stream.read_until_close stream in
+    message.body <- Some body_promise;
+    body_promise
+
+let set_body message body =
+  message.body <- Some (Lwt.return body);
+  match message.kind with
+  | Request -> message.server_stream <- Stream.string body
+  | Response -> message.client_stream <- Stream.string body
+
+
+
 (* Streams *)
 
 let read stream =
@@ -264,29 +287,6 @@ let fold_fields f initial message =
     | _ -> accumulator)
     message.fields
     initial
-
-
-
-(* Whole-body access *)
-
-let body message =
-  match message.body with
-  | Some body_promise -> body_promise
-  | None ->
-    let stream =
-      match message.kind with
-      | Request -> message.server_stream
-      | Response -> message.client_stream
-    in
-    let body_promise = Stream.read_until_close stream in
-    message.body <- Some body_promise;
-    body_promise
-
-let set_body message body =
-  message.body <- Some (Lwt.return body);
-  match message.kind with
-  | Request -> message.server_stream <- Stream.string body
-  | Response -> message.client_stream <- Stream.string body
 
 
 
