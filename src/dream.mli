@@ -1107,8 +1107,8 @@ type multipart_form =
 
     If a file field has zero files when submitted, browsers send
     ["field-name", [Some ""; ""]]. {!Dream.multipart} replaces this with
-    ["field-name", []]. Use the advanced interface {!Dream.upload} for the raw
-    behavior.
+    ["field-name", []]. Use the advanced interface, {!Dream.val-upload}, for the
+    raw behavior.
 
     Non-file fields always have one value, which might be the empty string.
 
@@ -1158,8 +1158,8 @@ val upload : request -> part option promise
     again. [None] from {!Dream.val-upload} indicates that all parts have been
     received.
 
-    {!Dream.upload} does not verify a CSRF token. There are several ways to add
-    CSRF protection for an upload stream, including:
+    {!Dream.val-upload} does not verify a CSRF token. There are several ways to
+    add CSRF protection for an upload stream, including:
 
     - Generate a CSRF token with {!Dream.csrf_tag}. Check for
       [`Field ("dream.csrf", token)] during upload and call

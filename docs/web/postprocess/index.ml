@@ -1569,8 +1569,8 @@ let decrypt_replacement = {|
 |}
 
 let request_expected = {|<div class="spec value" id="val-request">
- <a href="#val-request" class="anchor"></a><code><span><span class="keyword">val</span> request : <span>?method_:<span>[&lt; <a href="#type-method_">method_</a> ]</span> <span class="arrow">-&gt;</span></span> <span>?target:string <span class="arrow">-&gt;</span></span> <span>?version:<span>(int * int)</span> <span class="arrow">-&gt;</span></span>
-<span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-request">request</a></span></code>
+ <a href="#val-request" class="anchor"></a><code><span><span class="keyword">val</span> request : <span>?method_:<span>[&lt; <a href="#type-method_">method_</a> ]</span> <span class="arrow">-&gt;</span></span> <span>?target:string <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span>
+<span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-request">request</a></span></code>
 </div>
 |}
 
@@ -1578,7 +1578,6 @@ let request_replacement = {|
 <pre><span class="keyword">val</span> request :
   <span class="optional">?method_:[&lt; <a href="#type-method_">method_</a> ] ->
   ?target:string ->
-  ?version:int * int ->
   ?headers:(string * string) list -></span>
     string -> <a href="#type-request">request</a>
 </pre>|}
