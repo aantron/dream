@@ -48,6 +48,7 @@ val response :
     response
 
 val status : response -> Status.status
+val set_status : response -> Status.status -> unit
 
 
 

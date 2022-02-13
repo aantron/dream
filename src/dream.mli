@@ -519,6 +519,9 @@ val empty :
 val status : response -> status
 (** Response {!type-status}. For example, [`OK]. *)
 
+val set_status : response -> status -> unit
+(** Sets the response status. *)
+
 
 
 (** {1 Headers} *)

@@ -31,7 +31,7 @@ type client = {
    some middleware to decide which headers to add. *)
 
 type server = {
-  status : Status.status;
+  mutable status : Status.status;
   mutable websocket : (Stream.stream * Stream.stream) option;
 }
 
@@ -134,6 +134,9 @@ let response ?status ?code ?(headers = []) client_stream server_stream =
 
 let status response =
   response.specific.status
+
+let set_status response status =
+  response.specific.status <- status
 
 
 
