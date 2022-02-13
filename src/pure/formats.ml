@@ -48,7 +48,6 @@ let from_cookie s =
    specially. This might not be important, however, if user agents treat cookies
    as opaque, because then only Dream has to deal with its own cookies. *)
 
-(* TODO Reasonable, secure defaults. *)
 let to_set_cookie
     ?expires ?max_age ?domain ?path ?secure ?http_only ?same_site name value =
 
@@ -58,8 +57,8 @@ let to_set_cookie
     | Some time ->
       let weekday =
         match Ptime.weekday time with
-        | `Sun -> "Sun" | `Mon -> "Mon" | `Tue -> "Tue" | `Wed -> "Wed" | `Thu -> "Thu"
-        | `Fri -> "Fri" | `Sat -> "Sat"
+        | `Sun -> "Sun" | `Mon -> "Mon" | `Tue -> "Tue" | `Wed -> "Wed"
+        | `Thu -> "Thu" | `Fri -> "Fri" | `Sat -> "Sat"
       in
       let ((y, m, d), ((hh, mm, ss), _tz_offset_s)) = Ptime.to_date_time time in
       let month =
@@ -69,8 +68,8 @@ let to_set_cookie
         | 11 -> "Nov" | 12 -> "Dec"
         | _ -> assert false
       in
-      (* [Ptime.to_date_time] docs give range 0..60 for [ss], accounting for leap
-         seconds. However, RFC 6265 §5.1.1 states:
+      (* [Ptime.to_date_time] docs give range 0..60 for [ss], accounting for
+         leap seconds. However, RFC 6265 §5.1.1 states:
 
          5.  Abort these steps and fail to parse the cookie-date if:
 
@@ -203,11 +202,6 @@ let rec drop_trailing_slash = function
   | [""] -> []
   | component::components ->
     component::(drop_trailing_slash components)
-
-(* TODO Currently used mainly for debugging; needs to be replaced by an escaping
-   function. *)
-let make_path path =
-  "/" ^ (String.concat "/" path)
 
 let to_path ?(relative = false) ?(international = true) components =
   let rec filter_empty_components = function

@@ -198,7 +198,7 @@ let internal_prefix request =
   | None -> []
 
 let prefix request =
-  Formats.make_path (List.rev (internal_prefix request))
+  Formats.to_path (List.rev (internal_prefix request))
 
 let set_prefix request prefix =
   Message.set_field request prefix_field prefix

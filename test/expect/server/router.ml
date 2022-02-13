@@ -19,7 +19,8 @@ let () =
 
 let path request =
   Dream.path request
-  |> Dream_pure.Formats.make_path
+  |> String.concat "/"
+  |> fun path -> "/" ^ path
 
 
 

@@ -21,7 +21,6 @@ val split_target : string -> string * string
 val from_path : string -> string list
 val to_path : ?relative:bool -> ?international:bool -> string list -> string
 val drop_trailing_slash : string list -> string list
-val make_path : string list -> string
 val text_html : string
 val application_json : string
 
