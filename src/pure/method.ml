@@ -48,13 +48,18 @@ let string_to_method = function
   | "PATCH" -> `PATCH
   | method_ -> `Method method_
 
-(* TODO Test this. *)
-(* TODO Technically, this does one allocation in case the string can't be
-   converted to a variant, which can be saved by inlining string_to_method.
-   However, this is probably extremely rare. *)
 let normalize_method method_ =
   match (method_ :> method_) with
-  | `Method method_ -> string_to_method method_
+  | `Method "GET" -> `GET
+  | `Method "POST" -> `POST
+  | `Method "PUT" -> `PUT
+  | `Method "DELETE" -> `DELETE
+  | `Method "HEAD" -> `HEAD
+  | `Method "CONNECT" -> `CONNECT
+  | `Method "OPTIONS" -> `OPTIONS
+  | `Method "TRACE" -> `TRACE
+  | `Method "PATCH" -> `PATCH
+  | `Method _ as method_ -> method_
   | method_ -> method_
 
 let methods_equal method_1 method_2 =

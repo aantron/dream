@@ -65,6 +65,55 @@ let%expect_test _ =
     string "get"
     string "FOO" |}]
 
+let normalize method_ =
+  let result = Dream.normalize_method method_ in
+  match result with
+  | `Method method_ ->
+    Printf.printf "%S\n" method_
+  | _ ->
+    Printf.printf "`%s\n" (Dream.method_to_string result)
+
+let%expect_test _ =
+  normalize `GET;
+  normalize (`Method "GET");
+  normalize (`Method "get");
+  normalize `POST;
+  normalize (`Method "POST");
+  normalize `PUT;
+  normalize (`Method "PUT");
+  normalize `DELETE;
+  normalize (`Method "DELETE");
+  normalize `HEAD;
+  normalize (`Method "HEAD");
+  normalize `CONNECT;
+  normalize (`Method "CONNECT");
+  normalize `OPTIONS;
+  normalize (`Method "OPTIONS");
+  normalize `TRACE;
+  normalize (`Method "TRACE");
+  normalize `PATCH;
+  normalize (`Method "PATCH");
+  [%expect {|
+    `GET
+    `GET
+    "get"
+    `POST
+    `POST
+    `PUT
+    `PUT
+    `DELETE
+    `DELETE
+    `HEAD
+    `HEAD
+    `CONNECT
+    `CONNECT
+    `OPTIONS
+    `OPTIONS
+    `TRACE
+    `TRACE
+    `PATCH
+    `PATCH |}]
+
 let equal method_1 method_2 =
   Printf.printf "%B\n" (Dream.methods_equal method_1 method_2)
 
