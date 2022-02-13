@@ -256,42 +256,6 @@ let set_server_stream message server_stream =
 
 
 
-(* Middleware *)
-
-let no_middleware handler request =
-  handler request
-
-let rec pipeline middlewares handler =
-  match middlewares with
-  | [] -> handler
-  | middleware::more -> middleware (pipeline more handler)
-
-
-
-(* Custom fields *)
-
-type 'a field = 'a Fields.key
-
-let new_field ?name ?show_value () =
-  Fields.Key.create {name; show_value}
-
-let field message key =
-  Fields.find key message.fields
-
-let set_field message key value =
-  message.fields <- Fields.add key value message.fields
-
-let fold_fields f initial message =
-  Fields.fold (fun (B (key, value)) accumulator ->
-    match Fields.Key.info key with
-    | {name = Some name; show_value = Some show_value} ->
-      f name (show_value value) accumulator
-    | _ -> accumulator)
-    message.fields
-    initial
-
-
-
 let create_websocket response =
   let in_reader, in_writer = Stream.pipe ()
   and out_reader, out_writer = Stream.pipe () in
@@ -401,3 +365,39 @@ let send ?text_or_binary ?end_of_message stream data =
     ~exn:(fun exn -> Lwt.wakeup_later_exn resolver exn)
     (fun () -> Lwt.wakeup_later resolver ());
   promise
+
+
+
+(* Middleware *)
+
+let no_middleware handler request =
+  handler request
+
+let rec pipeline middlewares handler =
+  match middlewares with
+  | [] -> handler
+  | middleware::more -> middleware (pipeline more handler)
+
+
+
+(* Custom fields *)
+
+type 'a field = 'a Fields.key
+
+let new_field ?name ?show_value () =
+  Fields.Key.create {name; show_value}
+
+let field message key =
+  Fields.find key message.fields
+
+let set_field message key value =
+  message.fields <- Fields.add key value message.fields
+
+let fold_fields f initial message =
+  Fields.fold (fun (B (key, value)) accumulator ->
+    match Fields.Key.info key with
+    | {name = Some name; show_value = Some show_value} ->
+      f name (show_value value) accumulator
+    | _ -> accumulator)
+    message.fields
+    initial
