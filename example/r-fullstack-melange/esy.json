@@ -1,7 +1,7 @@
 {
   "name": "fullstack-melange",
   "dependencies": {
-    "@opam/dream": "1.0.0~alpha2",
+    "@opam/dream": "1.0.0~alpha3",
     "@opam/dune": "^2.0",
     "@opam/reason": "^3.7.0",
     "melange": "melange-re/melange",

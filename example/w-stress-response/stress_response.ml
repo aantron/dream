@@ -32,8 +32,8 @@ let stress ?(megabytes = 1024) ?(chunk = 64) stream =
 
   Lwt.return_unit
 
-let query_int name request =
-  Dream.query name request |> Option.map int_of_string
+let query_int request name =
+  Dream.query request name |> Option.map int_of_string
 
 let () =
   show_heap_size ();
@@ -46,7 +46,7 @@ let () =
       Dream.stream
         ~headers:["Content-Type", "application/octet-stream"]
         (stress
-          ?megabytes:(query_int "mb" request)
-          ?chunk:(query_int "chunk" request)));
+          ?megabytes:(query_int request "mb")
+          ?chunk:(query_int request "chunk")));
 
   ]
