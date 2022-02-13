@@ -66,6 +66,8 @@ val sort_headers : (string * string) list -> (string * string) list
 
 val body : 'a message -> string promise
 val set_body : 'a message -> string -> unit
+val set_content_length_headers : 'a message -> unit
+val drop_content_length_headers : 'a message -> unit
 
 
 

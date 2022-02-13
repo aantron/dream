@@ -6,7 +6,6 @@
 
 
 module Catch = Dream__server.Catch
-module Content_length = Dream__server.Content_length
 module Helpers = Dream__server.Helpers
 module Log = Dream__server.Log
 module Lowercase_headers = Dream__server.Lowercase_headers
@@ -123,18 +122,13 @@ let wrap_handler
            2. Upon failure to establish a WebSocket, the function is called to
               transmit the resulting error response. *)
         let forward_response response =
+          Message.set_content_length_headers response;
+
           let headers =
             Httpaf.Headers.of_list (Message.all_headers response) in
 
-          (* let version =
-            match Dream.version_override response with
-            | None -> None
-            | Some (major, minor) -> Some Httpaf.Version.{major; minor}
-          in *)
           let status =
             to_httpaf_status (Message.status response) in
-          (* let reason =
-            Dream.reason_override response in *)
 
           let httpaf_response =
             Httpaf.Response.create ~headers status in
@@ -246,6 +240,7 @@ let wrap_handler_h2
         (* Extract the Dream response's headers. *)
 
         let forward_response response =
+          Message.drop_content_length_headers response;
           let headers =
             H2.Headers.of_list (Message.all_headers response) in
           let status =
@@ -386,7 +381,6 @@ let ocaml_tls = {
 let built_in_middleware error_handler =
   Message.pipeline [
     Lowercase_headers.lowercase_headers;
-    Content_length.content_length;
     Catch.catch (Error_handler.app error_handler);
   ]
 

@@ -8,7 +8,6 @@
 module Catch = Dream__server.Catch
 module Cipher = Dream__cipher.Cipher
 module Cookie = Dream__server.Cookie
-module Content_length = Dream__server.Content_length
 module Csrf = Dream__server.Csrf
 module Echo = Dream__server.Echo
 module Error_handler = Dream__http.Error_handler
@@ -354,7 +353,6 @@ let catch = Catch.catch
 let run = Http.run
 let serve = Http.serve
 let lowercase_headers = Lowercase_headers.lowercase_headers
-let content_length = Content_length.content_length
 let with_site_prefix = Site_prefix.with_site_prefix
 
 
@@ -391,8 +389,7 @@ let request = Helpers.request_with_body
    corresponding tests. *)
 let test ?(prefix = "") handler request =
   let app =
-    Content_length.content_length
-    @@ Site_prefix.with_site_prefix prefix
+    Site_prefix.with_site_prefix prefix
     @@ handler
   in
 

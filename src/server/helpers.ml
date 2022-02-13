@@ -60,24 +60,24 @@ let request_with_body ?method_ ?target ?version ?headers body =
 
 
 
-let html ?status ?code ?headers body =
+let response_with_body ?status ?code ?headers body =
   let response =
-    Message.response ?status ?code ?headers (Stream.string body) Stream.null in
+    Message.response ?status ?code ?headers Stream.null Stream.null in
+  Message.set_body response body;
+  response
+
+let respond ?status ?code ?headers body =
+  Lwt.return (response_with_body ?status ?code ?headers body)
+
+let html ?status ?code ?headers body =
+  let response = response_with_body ?status ?code ?headers body in
   Message.set_header response "Content-Type" Formats.text_html;
   Lwt.return response
 
 let json ?status ?code ?headers body =
-  let response =
-    Message.response ?status ?code ?headers (Stream.string body) Stream.null in
+  let response = response_with_body ?status ?code ?headers body in
   Message.set_header response "Content-Type" Formats.application_json;
   Lwt.return response
-
-let response_with_body ?status ?code ?headers body =
-  Message.response ?status ?code ?headers (Stream.string body) Stream.null
-
-let respond ?status ?code ?headers body =
-  Message.response ?status ?code ?headers (Stream.string body) Stream.null
-  |> Lwt.return
 
 (* TODO Actually use the request and extract the site prefix. *)
 let redirect ?status ?code ?headers _request location =
@@ -87,8 +87,7 @@ let redirect ?status ?code ?headers _request location =
     | None, None -> Some (`See_Other)
     | _ -> status
   in
-  let response =
-    Message.response ?status ?code ?headers Stream.empty Stream.null in
+  let response = response_with_body ?status ?code ?headers "" in
   Message.set_header response "Location" location;
   Lwt.return response
 

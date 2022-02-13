@@ -2297,7 +2297,6 @@ val serve :
     {[
       Dream.run ~builtins:false
       @@ Dream.lowercase_headers
-      @@ Dream.content_length
       @@ Dream.catch ~error_handler
       @@ my_app
     ]}
@@ -2307,19 +2306,6 @@ val serve :
 
 val lowercase_headers : middleware
 (** Lowercases response headers for HTTP/2 requests. *)
-
-val content_length : middleware
-(** If the request has {!Dream.version} [(1, _)], then...
-
-    - if the response does not have [Content-Length:] and the body is a string,
-      sets [Content-Length:] to the string's length, or
-    - if the response does not have [Transfer-Encoding:] and the body is a
-      stream, sets [Transfer-Encoding: chunked].
-
-    This is built in because an application cannot be expected to decide
-    including these headers in the face of transparent HTTP/2 upgrades. The
-    headers are necessary in HTTP/1, and forbidden or redundant and difficult to
-    use in HTTP/2. *)
 
 val with_site_prefix : string -> middleware
 (** Removes the given prefix from the path in each request, and adds it to the
