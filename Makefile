@@ -7,10 +7,11 @@ watch :
 	@dune build -p dream-pure,dream-httpaf,dream --no-print-directory -w
 
 TEST ?= test
+ROOT := $(shell [ -f ../dune-workspace ] && echo .. || echo .)
 
 .PHONY : test
 test :
-	@find . -name '*.coverage' | xargs rm -f
+	@find $(ROOT) -name '*.coverage' | xargs rm -f
 	@dune build --no-print-directory \
 	  --instrument-with bisect_ppx --force @$(TEST)/runtest
 	@bisect-ppx-report html
