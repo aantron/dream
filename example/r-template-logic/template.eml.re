@@ -43,7 +43,6 @@ let () =
   @@ Dream.router([
     Dream.get("/", _ => render_home(tasks) |> Dream.html),
     Dream.get("/:task", request =>
-      Dream.param(request, "task") |> render_task(tasks) |> Dream.html
+      Dream.param("task", request) |> render_task(tasks) |> Dream.html
     ),
   ]);
-

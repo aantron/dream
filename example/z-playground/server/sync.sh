@@ -56,8 +56,8 @@ example w-chat
 example w-graphql-subscription
 example w-long-polling
 example w-server-sent-events
+example w-template-logic
 example w-template-stream
-example w-advanced-template
 example w-upload-stream
 example w-content-security-policy
 example w-multipart-dump
@@ -77,8 +77,8 @@ function example_re {
 }
 example_re r-hello
 example_re r-template
+example_re r-template-logic
 example_re r-template-stream
-example_re r-advanced-template
 example_re r-graphql
 example_re r-tyxml
 touch ./sync-temp/sandbox/r-tyxml/no-eml
