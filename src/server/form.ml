@@ -54,17 +54,24 @@ let sort_and_check_form ~now to_value form request =
     log.warning (fun log -> log ~request "CSRF token duplicated");
     Lwt.return (`Many_tokens form)
 
+let wrong_content_type request =
+  log.warning (fun log -> log ~request
+    "Content-Type not 'application/x-www-form-urlencoded'");
+  Lwt.return `Wrong_content_type
+
 let form ?(csrf = true) ~now request =
   match Message.header request "Content-Type" with
-  | Some "application/x-www-form-urlencoded" ->
+  | Some content_type ->
+    begin match String.split_on_char ';' content_type with
+    | "application/x-www-form-urlencoded"::_ ->
     let%lwt body = Message.body request in
     let form = Dream_pure.Formats.from_form_urlencoded body in
     if csrf then
     sort_and_check_form ~now (fun string -> string) form request
     else
     Lwt.return (`Ok (sort form))
-
+    | _ ->
+      wrong_content_type request
+    end
   | _ ->
-    log.warning (fun log -> log ~request
-      "Content-Type not 'application/x-www-form-urlencoded'");
-    Lwt.return `Wrong_content_type
+    wrong_content_type request
