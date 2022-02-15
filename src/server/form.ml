@@ -5,6 +5,7 @@
 
 
 
+module Formats = Dream_pure.Formats
 module Message = Dream_pure.Message
 
 
@@ -61,17 +62,16 @@ let wrong_content_type request =
 
 let form ?(csrf = true) ~now request =
   match Message.header request "Content-Type" with
+  | None ->
+    wrong_content_type request
   | Some content_type ->
-    begin match String.split_on_char ';' content_type with
+    match String.split_on_char ';' content_type with
     | "application/x-www-form-urlencoded"::_ ->
-    let%lwt body = Message.body request in
-    let form = Dream_pure.Formats.from_form_urlencoded body in
-    if csrf then
-    sort_and_check_form ~now (fun string -> string) form request
-    else
-    Lwt.return (`Ok (sort form))
+      let%lwt body = Message.body request in
+      let form = Formats.from_form_urlencoded body in
+      if csrf then
+        sort_and_check_form ~now (fun string -> string) form request
+      else
+        Lwt.return (`Ok (sort form))
     | _ ->
       wrong_content_type request
-    end
-  | _ ->
-    wrong_content_type request
