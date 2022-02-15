@@ -1,50 +1,48 @@
-(* In OCaml, `begin ... end` is the same as `( ... )` *)
 let render_home tasks =
   <html>
   <body>
-    <h1>My TODO</h1>
-    <% tasks |> List.iter begin fun (name, complete) -> %>
+%   tasks |> List.iter begin fun (name, complete) ->
       <p>Task <%s name %>:
-        <% if complete then ( %>
+%       if complete then begin
           complete!
-        <% ) else ( %>
-          not complete
-        <% ); %>
+%       end
+%       else begin
+          not complete.
+%       end;
       </p>
-    <% end; %>
+%   end;
   </body>
   </html>
 
-
-(* You can also begin a line with `%` instead of using `<% ... %>` *)
 let render_task tasks task =
   <html>
   <body>
-%   (match List.find_opt (fun (task_, _) -> task = task_) tasks with
-%   | Some (name, complete) ->
-      <h1>TODO task: <%s name %>, complete: <%B complete %></h1>
-%   | None -> begin
-      <h1>Task not found!</h1>
-%   end);
+%   begin match List.assoc_opt task tasks with
+%   | Some complete ->
+      <p>Task: <%s task %></p>
+      <p>Complete: <%B complete %></p>
+%   | None ->
+      <p>Task not found!</p>
+%   end;
   </body>
   </html>
 
 let tasks = [
-  ("write documentation", true);
-  ("create examples", true);
-  ("publish website", true);
-  ("profit", false);
+  ("Write documentation", true);
+  ("Create examples", true);
+  ("Publish website", true);
+  ("Profit", false);
 ]
 
 let () =
   Dream.run
   @@ Dream.logger
   @@ Dream.router [
+
     Dream.get "/"
       (fun _ ->
         render_home tasks
         |> Dream.html);
-
 
     Dream.get "/:task"
       (fun request ->

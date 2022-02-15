@@ -43,7 +43,9 @@ That's because it access certain fields of the request to set some fairly
 aggressive security defaults:
 
 - Cookie encryption, for which it accesses the encryption key. This is why we
-  passed `~secret` to [`Dream.run`](https://aantron.github.io/dream/#val-run).
+  used the
+  [`Dream.set_secret`](https://aantron.github.io/dream/#val-set_secret)
+  middleware.
 - Whether the request likely came through an HTTPS connection, to set the
   [`Secure`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#restrict_access_to_cookies)
   attribute.

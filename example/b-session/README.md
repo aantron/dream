@@ -62,10 +62,10 @@ There are two other session back ends, which are persistent:
   stores session data in encrypted cookies. That is, session data is stored on
   clients, rather than on the server. You can replace `Dream.memory_sessions`
   with `Dream.cookie_sessions` and it will work right away. However, if you
-  want to be able to decrypt sessions set by previous runs of the server, pass
-  `~secret:"my-secret"` to
-  [`Dream.run`](https://aantron.github.io/dream/#val-run) so that it doesn't
-  generate a random key each time.
+  want to be able to decrypt sessions set by previous runs of the server, use
+  the [`Dream.set_secret`](https://aantron.github.io/dream/#val-set_secret)
+  middleware before `Dream.cookie_sessions`. If you don't, the server will be
+  using a different random encryption key each time it starts.
 - [`Dream.sql_sessions`](https://aantron.github.io/dream/#val-sql_sessions)
   stores sessions in a database. It is shown in example
   [**`h-sql`**](../h-sql#files).

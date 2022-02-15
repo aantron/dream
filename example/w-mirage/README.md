@@ -1,4 +1,6 @@
-### DreamOS
+# `w-mirage`
+
+<br>
 
 This example is a simple unikernel which has a front-page and an echo route to
 repeat what the user said into the URL. This is a simple example of how to make

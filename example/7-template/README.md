@@ -140,8 +140,10 @@ and not supported by Dream.
 
 **See also:**
 
-- [**`w-template-files`**](../w-template-files) moves the template into a
+- [**`w-template-files`**](../w-template-files#files) moves the template into a
   separate `.eml.html` to avoid problems with editor support.
+- [**`w-template-logic`**](../w-template-logic#files) shows how to put control
+  flow into templates.
 - [**`w-tyxml`**](../w-tyxml#files) shows how to use
   [TyXML](https://github.com/ocsigen/tyxml), a different templater that uses
   OCaml's type system to prevent emitting many kinds of invalid HTML.

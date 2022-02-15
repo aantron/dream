@@ -38,14 +38,15 @@ let result request =
 
 The app just displays the form. The text that is entered into the form by the
 user is placed into a flash message using
-[`Dream.put_flash`](https://aantron.github.io/dream/#val-put_flash). The app
+[`Dream.add_flash_message`](https://aantron.github.io/dream/#val-add_flash_message).
+The app
 then tells the client to redirect to `/result`. The handler for `/result` calls
 the `result` template, which retrieves the flash message using
-[`Dream.flash`](https://aantron.github.io/dream/#val-put_flash) and displays it.
-We need to include
-[`Dream.flash_messages`](https://aantron.github.io/dream/#val-flash_messages) in
-our middleware stack, because that is the piece that actually puts the messages
-into cookies and reads them back out:
+[`Dream.flash_messages`](https://aantron.github.io/dream/#val-flash_messages)
+and displays it. We need to include
+[`Dream.flash`](https://aantron.github.io/dream/#val-flash) in our middleware
+stack, because that is the piece that actually puts the messages into cookies
+and reads them back out:
 
 ```ocaml
 let () =
@@ -77,7 +78,7 @@ let () =
 ```
 
 The example configures a custom log level for flash messages using
-`Dream.set_log_level`. Setting this to "debug" means the server logs
+`Dream.set_log_level`. Setting this to `` `Debug`` means the server logs
 will display a log point summarizing the flash messages on every
 request, like this:
 

@@ -75,4 +75,15 @@ rather than `ws://`, on the client.
 
 <br>
 
+**See also:**
+
+- [**`w-chat`**](../w-chat#files) is a simple WebSocket-based chat application.
+- [**`w-live-reload`**](../w-live-reload#files) uses WebSockets to implement
+  live reloading.
+- [**`w-graphql-subscription`**](../w-graphql-subscription) does not show a
+  WebSocket directly, but shows GraphQL subscriptions, which are implemented
+  over WebSockets.
+
+<br>
+
 [Up to the tutorial index](../#readme)

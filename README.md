@@ -47,8 +47,8 @@ Dream is **one flat module** in **one package**, documented on
 - [**Cryptography**][crypto] helpers, key rotation, and a chosen cipher.
 - A neat [**logger**][logging], and attention to configuring the OCaml runtime
   nicely.
-- [**Deployment**][deploy] instructions for **Digital Ocean** and **Heroku**,
-  with sample CI scripts.
+- [**Deployment**][deploy] instructions for **Digital Ocean**, **Heroku**, and
+  **Fly.io**, with sample CI scripts.
 
 <br>
 
@@ -110,48 +110,36 @@ into.
 
 ## Quick start
 
-<br>
+Visit one of the first tutorials in the [online
+playground][2-middleware-playground], and read its
+[docs](https://github.com/aantron/dream/tree/master/example/2-middleware#files).
+You can get and build it locally with:
 
 <pre><b>bash -c "$(curl -fsSL https://raw.githubusercontent.com/aantron/dream/master/example/quickstart.sh)"</b></pre>
 
-<br>
+Most of the other [examples][tutorial] are also loaded in the playground. See
+the links on its [home page][playground].
 
-This downloads and runs [`quickstart.sh`][quickstart.sh], which does a
-sandboxed build of one of the first [tutorials][tutorial],
-[**`2-middleware`**][2-middleware]. It's mostly the same as:
+## esy
 
-```
-git clone https://github.com/aantron/dream.git --recursive
-cd dream/example/2-middleware
-npm install esy && npx esy
-npx esy start
-```
-
-Knowing that, you can start from any other [example][tutorial]. All of them
-include their own build commands. They don't have to be subdirectories of
-`dream` &mdash; you can copy them out to start your own project directory.
-Especially consider starting with the [full-stack examples][fullstack], which
-build both a Dream server and a JavaScript client.
+Visit any of the [examples][tutorial], such as
+[**`2-middleware`**][2-middleware], and re-create the files locally. The file
+[`esy.json`](https://github.com/aantron/dream/blob/master/example/2-middleware/esy.json)
+shows how to depend on Dream. All of the examples are installed by running `npx
+esy`, and started with `npx esy start`.
 
 ### opam
 
 ```
-opam install dream.1.0.0~alpha2
+opam install dream
 ```
 
-After that, go to one of the examples, such as [**`1-hello`**][1-hello], and
-build it:
+After that, go to any of the [examples][tutorial], such as
+[**`2-middleware`**][2-middleware], re-create the files locally, and run it:
 
 ```
-cd example/1-hello
-dune exec --root . ./hello.exe
+dune exec ./middleware.exe
 ```
-
-### Playground
-
-Most of the examples are loaded into the [playground][playground]. For instance,
-[**`2-middleware`**][2-middleware] is at
-[http://dream.as/2-middleware][2-middleware-playground].
 
 [esy-example]: https://github.com/aantron/dream/tree/master/example/w-esy#files
 [quickstart.sh]: https://github.com/aantron/dream/blob/master/example/quickstart.sh

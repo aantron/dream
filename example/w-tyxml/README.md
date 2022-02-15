@@ -109,4 +109,4 @@ this, please [open an issue](https://github.com/aantron/dream/issues).
 
 <br>
 
-[Up to the tutorial index](../#examples)
+[Up to the example index](../#examples)

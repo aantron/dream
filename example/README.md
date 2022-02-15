@@ -55,6 +55,10 @@ There are several examples showing Dream with Reason syntax.
 - [**`r-hello`**](r-hello#files) &nbsp;&mdash;&nbsp; the simplest Dream server.
 - [**`r-template`**](r-template#files) &nbsp;&mdash;&nbsp; renders HTML
   templates and protects against XSS.
+- [**`r-template-files`**](r-template-files#files) &nbsp;&mdash;&nbsp; templates
+  in separate `.html` files for better editor support.
+- [**`r-template-logic`**](r-template-logic#files) &nbsp;&mdash;&nbsp; control
+  flow inside templates.
 - [**`r-template-stream`**](r-template-stream#files) &nbsp;&mdash;&nbsp; streams
   templates as response bodies.
 - [**`r-tyxml`**](r-tyxml#files) &nbsp;&mdash;&nbsp; type-checked server-side
@@ -79,6 +83,7 @@ There are several examples showing Dream with Reason syntax.
 
 - [**`z-heroku`**](z-heroku#files) &nbsp;&mdash;&nbsp; to
   [Heroku](https://www.heroku.com).
+- [**`z-fly`**](z-fly@files) &nbsp;&mdash;&nbsp; to [Fly.io](https://fly.io/).
 - [**`z-docker-esy`**](z-docker-esy#files) &nbsp;&mdash;&nbsp; on a server,
   using Docker, with package manager esy.
 - [**`z-docker-opam`**](z-docker-opam#files) &nbsp;&mdash;&nbsp; on a server,
@@ -97,8 +102,10 @@ if something is missing!
 
 <br>
 
-- [**`w-template-files`**](w-template-files#files) &nbsp;&mdash;&nbsp;
-  templates in separate `.html` files for better editor support.
+- [**`w-template-files`**](w-template-files#files) &nbsp;&mdash;&nbsp; templates
+  in separate `.html` files for better editor support.
+- [**`w-template-logic`**](w-template-logic#files) &nbsp;&mdash;&nbsp; control
+  flow inside templates.
 - [**`w-graphql-subscription`**](w-graphql-subscription#files)
   &nbsp;&mdash;&nbsp; GraphQL subscriptions.
 - [**`w-postgres`**](w-postgres#files) &nbsp;&mdash;&nbsp; connects to a

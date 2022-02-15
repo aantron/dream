@@ -1315,13 +1315,15 @@ val csrf_tag : request -> string
 
     {[
       <form method="POST" action="/">
-        <input name="dream.csrf" type="hidden" value="a-token">
+        <input name="dream.csrf" type="hidden" value="j8vjZ6...">
         <input name="my.field">
       </form>
     ]}
 
-    It is recommended to put the CSRF tag immediately after the starting
-    [<form>] tag, to prevent certain kinds of DOM manipulation-based attacks. *)
+    It is
+    {{:https://portswigger.net/web-security/csrf/tokens#how-should-csrf-tokens-be-transmitted}
+    recommended} to put the CSRF tag immediately after the starting [<form>]
+    tag, to prevent certain kinds of DOM manipulation-based attacks. *)
 
 (**/**)
 val form_tag :

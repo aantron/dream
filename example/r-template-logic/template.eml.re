@@ -1,48 +1,52 @@
 let render_home = tasks => {
   <html>
   <body>
-    <h1>My TODO</h1>
-    <% tasks |> List.iter(((name, complete)) => { %>
+%   tasks |> List.iter(((name, complete)) => {
       <p>Task <%s name %>:
-        <% if (complete) { %>
+%       if (complete) {
           complete!
-        <% } else { %>
+%       } else {
           not complete
-        <% }; %>
+%       };
       </p>
-    <% }); %>
+%   });
   </body>
   </html>
 };
 
-
-// You can begin a line with `%` instead of using `<% ... %>`
 let render_task = (tasks, task) => {
   <html>
   <body>
-%   (switch (List.find_opt(((task_, _)) => task == task_, tasks)) {
-%   | Some((name, complete)) =>
-      <h1>TODO task: <%s name %>, complete: <%B complete %></h1>
+%   (switch (List.assoc_opt(task, tasks)) {
+%   | Some(complete) =>
+      <p>Task: <%s task %></p>
+      <p>Complete: <%B complete %></p>
 %   | None =>
-      <h1>Task not found!</h1>
+      <p>Task not found!</p>
 %   });
   </body>
   </html>
 };
 
 let tasks = [
-  ("write documentation", true),
-  ("create examples", true),
-  ("publish website", true),
-  ("profit", false),
+  ("Write documentation", true),
+  ("Create examples", true),
+  ("Publish website", true),
+  ("Profit", false),
 ];
 
 let () =
   Dream.run
   @@ Dream.logger
   @@ Dream.router([
-    Dream.get("/", _ => render_home(tasks) |> Dream.html),
+
+    Dream.get("/", _ =>
+      render_home(tasks)
+      |> Dream.html),
+
     Dream.get("/:task", request =>
-      Dream.param("task", request) |> render_task(tasks) |> Dream.html
-    ),
+      Dream.param(request, "task")
+      |> render_task(tasks)
+      |> Dream.html),
+
   ]);
