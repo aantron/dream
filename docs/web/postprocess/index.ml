@@ -1621,6 +1621,16 @@ let server_replacement' = {|
 <code><span><span class="keyword">and</span> server</span></code>
 |}
 
+let set_secret_expected = {|<div class="spec value" id="val-set_secret">
+ <a href="#val-set_secret" class="anchor"></a><code><span><span class="keyword">val</span> set_secret : <span>?old_secrets:<span>string list</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-middleware">middleware</a></span></code>
+</div>
+|}
+
+let set_secret_replacement = {|
+<pre><span class="keyword">val</span> set_secret :
+  ?old_secrets:string list -> string -> <a href="#type-middleware">middleware</a>
+</pre>|}
+
 let pretty_print_signatures soup =
   let method_ = soup $ "#type-method_" in
   if_expected
@@ -1943,7 +1953,10 @@ let pretty_print_signatures soup =
     "#type-end_of_message" end_of_message_expected end_of_message_replacement;
 
   multiline
-    "#val-receive_fragment" receive_fragment_expected receive_fragment_replacement
+    "#val-receive_fragment"
+    receive_fragment_expected receive_fragment_replacement;
+
+  multiline "#val-set_secret" set_secret_expected set_secret_replacement
 
 let remove_stdlib soup =
   soup $$ ".xref-unresolved:contains(\"Stdlib\")" |> Soup.iter (fun element ->
