@@ -12,8 +12,6 @@ module Message = Dream_pure.Message
 
 
 (* TODO LATER Optimize by caching the parsed cookies in a local key. *)
-(* TODO LATER: API: Dream.cookie : string -> request -> string, cookie-option...
-   the thing with cookies is that they have a high likelihood of being absent. *)
 (* TODO LATER Can decide whether to accept multiple Cookie: headers based on
    request version. But that would entail an actual middleware - is that worth
    it? *)
@@ -107,7 +105,7 @@ let set_cookie
 
   let same_site =
     match same_site with
-    | None -> Some `Strict
+    | None -> Some `Lax
     | Some None -> None
     | Some (Some `Strict) -> Some `Strict
     | Some (Some `Lax) -> Some `Lax
