@@ -7,23 +7,20 @@ in a response [stream](https://aantron.github.io/dream/#streaming):
 
 ```reason
 let render = response => {
-  let%lwt () = {
-    %% response
-    <html>
-    <body>
+  %% response
+  <html>
+  <body>
 
-%     let rec paragraphs = index => {
-        <p><%i index %></p>
-%       let%lwt () = Dream.flush(response);
-%       let%lwt () = Lwt_unix.sleep(1.);
-%       paragraphs(index + 1);
-%     };
-%     let%lwt () = paragraphs(0);
+%   let rec paragraphs = index => {
+      <p><%i index %></p>
+%     let%lwt () = Dream.flush(response);
+%     let%lwt () = Lwt_unix.sleep(1.);
+%     paragraphs(index + 1);
+%   };
+%   let%lwt () = paragraphs(0);
 
-    </body>
-    </html>
-  };
-  Dream.close_stream(response)
+  </body>
+  </html>
 };
 
 let () =

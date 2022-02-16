@@ -89,15 +89,25 @@ let redirect ?status ?code ?headers _request location =
   Message.set_header response "Location" location;
   Lwt.return response
 
-let stream ?status ?code ?headers callback =
+let stream ?status ?code ?headers ?(close = true) callback =
   let reader, writer = Stream.pipe () in
   let client_stream = Stream.stream reader Stream.no_writer
   and server_stream = Stream.stream Stream.no_reader writer in
   let response =
     Message.response ?status ?code ?headers client_stream server_stream in
-  (* TODO Should set up an error handler for this. YES. *)
+
   (* TODO Make sure the request id is propagated to the callback. *)
-  Lwt.async (fun () -> callback server_stream);
+  Lwt.async (fun () ->
+    if close then
+      match%lwt callback server_stream with
+      | () ->
+        Message.close server_stream
+      | exception exn ->
+        let%lwt () = Message.close server_stream in
+        raise exn
+    else
+      callback server_stream);
+
   Lwt.return response
 
 let empty ?headers status =
@@ -108,14 +118,24 @@ let not_found _ =
 
 
 
-let websocket ?headers callback =
+let websocket ?headers ?(close = true) callback =
   let response =
     Message.response
       ~status:`Switching_Protocols ?headers Stream.empty Stream.null in
   let websocket = Message.create_websocket response in
+
   (* TODO Make sure the request id is propagated to the callback. *)
-  (* TODO Close the WwbSocket on leaked exceptions, etc. *)
-  Lwt.async (fun () -> callback websocket);
+  Lwt.async (fun () ->
+    if close then
+      match%lwt callback websocket with
+      | () ->
+        Message.close_websocket websocket
+      | exception exn ->
+        let%lwt () = Message.close_websocket websocket ~code:1005 in
+        raise exn
+    else
+      callback websocket);
+
   Lwt.return response
 
 let receive (_, server_stream) =

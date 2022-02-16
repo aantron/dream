@@ -14,6 +14,7 @@ let () =
 
     Dream.post "/echo" (fun request ->
       let request_stream = Dream.body_stream request in
+
       Dream.stream
         ~headers:["Content-Type", "application/octet-stream"]
         (fun response_stream ->
@@ -47,7 +48,15 @@ curl -X POST http://localhost:8080/echo -T -
 
 You will see the server responding immediately to each line on STDIN.
 
-See [*Streaming*](https://aantron.github.io/dream/#streaming) in the API docs.
+<br>
+
+Note that you don't have to call
+[`Dream.close`](https://aantron.github.io/dream/#val-close) on the stream
+explicitly. [`Dream.stream`](https://aantron.github.io/dream/#val-stream)
+automatically closes the stream when the callback's promise resolves or is
+rejected with an exception.
+
+See [*Streams*](https://aantron.github.io/dream/#streams) in the API docs.
 
 <br>
 

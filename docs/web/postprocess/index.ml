@@ -592,7 +592,7 @@ let val_redirect_replacement = {|
 
 let stream_expected = {|<div class="spec value" id="val-stream">
  <a href="#val-stream" class="anchor"></a><code><span><span class="keyword">val</span> stream : <span>?status:<span>[&lt; <a href="#type-status">status</a> ]</span> <span class="arrow">-&gt;</span></span> <span>?code:int <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span>
-<span><span>(<span><a href="#type-stream">stream</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
+<span>?close:bool <span class="arrow">-&gt;</span></span> <span><span>(<span><a href="#type-stream">stream</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
@@ -601,6 +601,7 @@ let stream_replacement = {|
   ?status:[&lt; <a href="#type-status">status</a> ] ->
   ?code:int ->
   ?headers:(string * string) list ->
+  ?close:bool ->
     (<a href="#type-stream">stream</a> -> unit <a href="#type-promise">promise</a>) -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
 </pre>
 |}
@@ -1091,13 +1092,14 @@ let set_session_replacement = {|
 |}
 
 let websocket_expected = {|<div class="spec value" id="val-websocket">
- <a href="#val-websocket" class="anchor"></a><code><span><span class="keyword">val</span> websocket : <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span> <span><span>(<span><a href="#type-websocket">websocket</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
+ <a href="#val-websocket" class="anchor"></a><code><span><span class="keyword">val</span> websocket : <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span> <span>?close:bool <span class="arrow">-&gt;</span></span> <span><span>(<span><a href="#type-websocket">websocket</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let websocket_replacement = {|
 <pre><span class="keyword">val</span> websocket :
   ?headers:(string * string) list ->
+  ?close:bool ->
     (<a href="#type-websocket">websocket</a> -> unit <a href="#type-promise">promise</a>) -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
 </pre>
 |}

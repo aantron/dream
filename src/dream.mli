@@ -726,6 +726,7 @@ val stream :
   ?status:[< status ] ->
   ?code:int ->
   ?headers:(string * string) list ->
+  ?close:bool ->
     (stream -> unit promise) -> response promise
 (** Creates a response with a {!type-stream} open for writing, and passes the
     stream to the callback when it is ready. See example
@@ -735,9 +736,11 @@ val stream :
     {[
       fun request ->
         Dream.stream (fun stream ->
-          let%lwt () = Dream.write stream "foo" in
-          Dream.close stream)
-    ]} *)
+          Dream.write stream "foo")
+    ]}
+
+    [Dream.stream] automatically closes the stream when the callback returns or
+    raises an exception. Pass [~close:false] to suppress this behavior. *)
 
 val read : stream -> string option promise
 (** Retrieves a body chunk. See example
@@ -887,6 +890,7 @@ type websocket
 
 val websocket :
   ?headers:(string * string) list ->
+  ?close:bool ->
     (websocket -> unit promise) -> response promise
 (** Creates a fresh [101 Switching Protocols] response. Once this response is
     returned to Dream's HTTP layer, the callback is passed a new
@@ -897,9 +901,12 @@ val websocket :
     {[
       let my_handler = fun request ->
         Dream.websocket (fun websocket ->
-          let%lwt () = Dream.send websocket "Hello, world!" in
-          Dream.close_websocket websocket);
-    ]} *)
+          let%lwt () = Dream.send websocket "Hello, world!");
+    ]}
+
+    [Dream.websocket] automatically closes the WebSocket when the callback
+    returns or raises an exception. Pass [~close:false] to suppress this
+    behavior. *)
 
 type text_or_binary = [ `Text | `Binary ]
 (** See {!send} and {!receive_fragment}. *)
