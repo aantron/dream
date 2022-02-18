@@ -9,4 +9,5 @@
 (library
  (name eml)
  (modules eml)
+ (libraries camlp-streams)
  (instrumentation (backend bisect_ppx)))
