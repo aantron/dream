@@ -23,8 +23,7 @@ let () =
     Dream.get("/",
       (_ => Dream.html(greet("world")))),
 
-  ])
-  @@ Dream.not_found;
+  ]);
 ```
 
 <pre><code><b>$ cd example/r-template</b>
