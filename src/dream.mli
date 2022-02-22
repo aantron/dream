@@ -1555,7 +1555,6 @@ val static :
         @@ Dream.router {
           Dream.get "/static/**" @@ Dream.static "www/static";
         }
-        @@ Dream.not_found
     ]}
 
     [Dream.static local_directory] validates the path substituted for [**] by
@@ -1767,7 +1766,6 @@ val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
           Dream.any "/graphql"  (Dream.graphql Lwt.return schema);
           Dream.get "/graphiql" (Dream.graphiql "/graphql");
         ]
-        @@ Dream.not_found
     ]}
 
     [make_context] is called by {!Dream.val-graphql} on every {!type-request} to

@@ -20,7 +20,6 @@ module Make
     @@ Dream.router
     [ Dream.get "/" (fun _ -> Dream.html "Good morning, world! (from MirageOS)")
     ; Dream.get "/echo/:word" echo ]
-    @@ Dream.not_found
 
   module DNS = Dns_client_mirage.Make (Random) (Time) (Mclock) (Pclock) (Stack)
   module Let = LE.Make (Time) (Stack)
