@@ -1062,7 +1062,7 @@ val form : ?csrf:bool -> request -> (string * string) list form_result promise
     {[
       match%lwt Dream.form request with
       | `Ok      ["email", email; "name", name] -> (* ... *)
-      | `Expired ["email", email; "name", name] -> (* ... *)
+      | `Expired (["email", email; "name", name], _) -> (* ... *)
       | _ -> Dream.empty `Bad_Request
     ]}
 
