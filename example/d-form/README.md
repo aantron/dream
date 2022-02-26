@@ -82,10 +82,10 @@ return a [value other than
 The form fields carried inside `` `Ok _`` are returned in sorted order, so you
 can reliably pattern-match on them.
 
-The bad token results, like `` `Expired _``, also carry the form fields. You can
-add handling for them to recover. For example, if you receive a form with an
-expired token, you may want to resend it with some of the fields pre-filled to
-received values, so that the user can try again quickly.
+The bad token results, like `` `Expired (_, _)``, also carry the form fields.
+You can add handling for them to recover. For example, if you receive a form
+with an expired token, you may want to resend it with some of the fields pre-
+filled to received values, so that the user can try again quickly.
 
 However, do not send back any sensitive data, because *any* result other than
 `` `Ok _`` *might* indicate an attack in progress. That said, `` `Expired _``
