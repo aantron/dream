@@ -28,7 +28,7 @@ let wrap_handler_httpaf _user's_error_handler user's_dream_handler =
     let httpaf_request = Httpaf.Reqd.request reqd in
     let method_ = to_dream_method httpaf_request.meth in
     let target  = httpaf_request.target in
-    let version = (httpaf_request.version.major, httpaf_request.version.minor) in
+    let _version = (httpaf_request.version.major, httpaf_request.version.minor) in
     let headers = Httpaf.Headers.to_list httpaf_request.headers in
     let body    = Httpaf.Reqd.request_body reqd in
 
@@ -48,7 +48,7 @@ let wrap_handler_httpaf _user's_error_handler user's_dream_handler =
     let client_stream = Stream.(stream no_reader no_writer) in
     let server_stream = Stream.(stream body no_writer) in
 
-    let request = Message.request ~method_ ~target ~version ~headers client_stream server_stream in
+    let request = Message.request ~method_ ~target ~headers client_stream server_stream in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -149,7 +149,6 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
   let info = default_log.info
   let debug = default_log.debug
   
-  include Dream__server.Router
   module Session = struct 
     include Dream__server.Session
     include Dream__server.Session.Make (Pclock)
@@ -162,10 +161,7 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
   include Dream__server.Upload
   include Dream__server.Csrf
   
-  let content_length =
-    Dream__server.Content_length.content_length
   
-  include Dream__server.Lowercase_headers
   include Dream__server.Catch
   include Dream__server.Site_prefix
 
@@ -193,13 +189,13 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
 
   (* Requests *)
 
+
+  let body_stream = Message.server_stream
   let client = Helpers.client
-  let https = Helpers.https
   let method_ = Message.method_
   let target = Message.target
   let prefix = Router.prefix
   let path = Router.path
-  let version = Message.version
   let set_client = Helpers.set_client
   let set_method_ = Message.set_method_
   let query = Query.query
@@ -215,8 +211,11 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
   let redirect = Helpers.redirect
   let empty = Helpers.empty
   let stream = Helpers.stream
-  let websocket = Helpers.websocket
   let status = Message.status
+  let read = Message.read
+  let write = Message.write
+  let flush = Message.flush
+
 
   (* Headers *)
 
@@ -240,9 +239,6 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
 
   let body = Message.body
   let set_body = Message.set_body
-  let read = Helpers.read
-  let write = Helpers.write
-  let flush = Helpers.flush
   let close = Message.close
   type buffer = Stream.buffer
   type stream = Stream.stream
@@ -259,6 +255,17 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
   let abort_stream = Stream.abort
 
 
+  (* websockets *)
+
+  type websocket = stream * stream
+  let websocket = Helpers.websocket
+  type text_or_binary = [ `Text | `Binary ]
+  type end_of_message = [ `End_of_message | `Continues ]
+  let send = Helpers.send
+  let receive = Helpers.receive
+  let receive_fragment = Helpers.receive_fragment
+  let close_websocket = Message.close_websocket
+
 
   (* Middleware *)
 
@@ -268,7 +275,7 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
 
   (* Routing *)
 
-  let router = Router.router
+  let router (r: route list): handler = Router.router r
   let get = Router.get
   let post = Router.post
   let put = Router.put
@@ -381,8 +388,6 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
 
   let built_in_middleware prefix error_handler=
     Message.pipeline [
-      Dream__server.Lowercase_headers.lowercase_headers;
-      Dream__server.Content_length.content_length;
       Dream__server.Catch.catch (Error_handler.app error_handler);
       Dream__server.Site_prefix.with_site_prefix prefix;
     ]

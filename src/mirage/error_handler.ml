@@ -18,76 +18,72 @@ let select_log = function
   | `Info -> log.info
   | `Debug -> log.debug
 
-let dump (error : Dream__server.Catch.error) =
-  let buffer = Buffer.create 4096 in
-  let p format = Printf.bprintf buffer format in
-
-  begin match error.condition with
-  | `Response response ->
-    let status = Message.status response in
-    p "%i %s\n" (Status.status_to_int status) (Status.status_to_string status)
-
-  | `String "" ->
-    p "(Library error without description payload)\n"
-
-  | `String string ->
-    p "%s\n" string
-
-  | `Exn exn ->
-    let backtrace = Printexc.get_backtrace () in
-    p "%s\n" (Printexc.to_string exn);
-    backtrace |> Dream__server.Log.iter_backtrace (p "%s\n")
-  end;
-
-  p "\n";
-
-  let layer =
-    match error.layer with
-    | `TLS -> "TLS library"
-    | `HTTP -> "HTTP library"
-    | `HTTP2 -> "HTTP2 library"
-    | `WebSocket -> "WebSocket library"
-    | `App -> "Application"
-  in
-
-  let blame =
-    match error.caused_by with
-    | `Server -> "Server"
-    | `Client -> "Client"
-  in
-
-  let severity =
-    match error.severity with
-    | `Error -> "Error"
-    | `Warning -> "Warning"
-    | `Info -> "Info"
-    | `Debug -> "Debug"
-  in
-
-  p "From: %s\n" layer;
-  p "Blame: %s\n" blame;
-  p "Severity: %s" severity;
-
-  begin match error.client with
-  | None -> ()
-  | Some client -> p "\n\nClient: %s" client
-  end;
-
-  begin match error.request with
-  | None -> ()
-  | Some request ->
-
-    let major, minor = Message.version request in
-    p "\n\n%s %s HTTP/%i.%i"
-      (Method.method_to_string (Message.method_ request))
-      (Message.target request)
-      major minor;
-
-    Message.all_headers request
-    |> List.iter (fun (name, value) -> p "\n%s: %s" name value);
-
-    let show_variables kind =
-      kind (fun name value first ->
+  let dump (error : Catch.error) =
+    let buffer = Buffer.create 4096 in
+    let p format = Printf.bprintf buffer format in
+  
+    begin match error.condition with
+    | `Response response ->
+      let status = Message.status response in
+      p "%i %s\n" (Status.status_to_int status) (Status.status_to_string status)
+  
+    | `String "" ->
+      p "(Library error without description payload)\n"
+  
+    | `String string ->
+      p "%s\n" string
+  
+    | `Exn exn ->
+      let backtrace = Printexc.get_backtrace () in
+      p "%s\n" (Printexc.to_string exn);
+      backtrace |> Log.iter_backtrace (p "%s\n")
+    end;
+  
+    p "\n";
+  
+    let layer =
+      match error.layer with
+      | `TLS -> "TLS library"
+      | `HTTP -> "HTTP library"
+      | `HTTP2 -> "HTTP2 library"
+      | `WebSocket -> "WebSocket library"
+      | `App -> "Application"
+    in
+  
+    let blame =
+      match error.caused_by with
+      | `Server -> "Server"
+      | `Client -> "Client"
+    in
+  
+    let severity =
+      match error.severity with
+      | `Error -> "Error"
+      | `Warning -> "Warning"
+      | `Info -> "Info"
+      | `Debug -> "Debug"
+    in
+  
+    p "From: %s\n" layer;
+    p "Blame: %s\n" blame;
+    p "Severity: %s" severity;
+  
+    begin match error.client with
+    | None -> ()
+    | Some client -> p "\n\nClient: %s" client
+    end;
+  
+    begin match error.request with
+    | None -> ()
+    | Some request ->
+      p "\n\n%s %s"
+        (Method.method_to_string (Message.method_ request))
+        (Message.target request);
+  
+      Message.all_headers request
+      |> List.iter (fun (name, value) -> p "\n%s: %s" name value);
+  
+      Message.fold_fields (fun name value first ->
         if first then
           p "\n";
         p "\n%s: %s" name value;
@@ -95,11 +91,9 @@ let dump (error : Dream__server.Catch.error) =
         true
         request
       |> ignore
-    in
-    show_variables Message.fold_fields
-  end;
-
-  Buffer.contents buffer
+    end;
+  
+    Buffer.contents buffer
 
   let customize template (error : Catch.error) =
 
