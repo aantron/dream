@@ -60,6 +60,7 @@ depends: [
   "tls-mirage"
   "lwt_ppx" {>= "1.2.2"}
   "letsencrypt" {>= "0.3.0"}
+  "emile" {>= "1.1"}
 ]
 
 build: [
