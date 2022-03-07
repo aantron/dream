@@ -586,7 +586,7 @@ val set_cookie :
       Dream.set_cookie request response "my.cookie" "value"
     ]}
 
-    Specify {!Dream.run} argument [~secret], or the Web app will not be able to
+    Use the {!Dream.set_secret} middleware, or the Web app will not be able to
     decrypt cookies from prior starts.
 
     See example
@@ -609,7 +609,7 @@ val set_cookie :
     - [~encrypt:false] disables cookie encryption. In that case, you must make
       sure that the cookie value does not contain [=], [;], or newlines. The
       easiest way to do so is to pass the value through an encoder like
-      {!Dream.to_base64url}. See {!Dream.run} argument [~secret].
+      {!Dream.to_base64url}. See {!Dream.set_secret}.
     - [~expires] sets the [Expires=] attribute. The value is compatible with
       {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Unix.html#VALgettimeofday}
       [Unix.gettimeofday]}. See
@@ -1213,9 +1213,9 @@ type csrf_result = [
 
 val csrf_token : ?valid_for:float -> request -> string
 (** Returns a fresh CSRF token bound to the given request's and signed with the
-    [~secret] given to {!Dream.run}. [~valid_for] is the token's lifetime, in
-    seconds. The default value is one hour ([3600.]). Dream uses signed tokens
-    that are not stored server-side. *)
+    secret given to {!Dream.set_secret}. [~valid_for] is the token's lifetime,
+    in seconds. The default value is one hour ([3600.]). Dream uses signed
+    tokens that are not stored server-side. *)
 
 val verify_csrf_token : request -> string -> csrf_result promise
 (** Checks that the CSRF token is valid for the {!type-request}'s session. *)
@@ -1676,8 +1676,8 @@ val memory_sessions : ?lifetime:float -> middleware
     Session data is lost when the server process exits. *)
 
 val cookie_sessions : ?lifetime:float -> middleware
-(** Stores sessions in encrypted cookies. Pass {!Dream.run} [~secret] to be able
-    to decrypt cookies from previous server runs. *)
+(** Stores sessions in encrypted cookies. Use {!Dream.set_secret} to be able to
+    decrypt cookies from previous server runs. *)
 
 val sql_sessions : ?lifetime:float -> middleware
 (** Stores sessions in an SQL database. Passes session IDs to clients in
@@ -2455,8 +2455,7 @@ val random : int -> string
 val encrypt :
   ?associated_data:string ->
     request -> string -> string
-(** Signs and encrypts the string using the [~secret] in the request. See
-    {!Dream.run} for setting [~secret].
+(** Signs and encrypts the string using the secret set by {!Dream.set_secret}.
 
     [~associated_data] is included when computing the signature, but not
     included in the ciphertext. It can be used like a “salt,” to force
@@ -2490,9 +2489,9 @@ val decrypt :
     request -> string -> string option
 (** Reverses {!Dream.encrypt}.
 
-    To support secret rotation, the decryption secrets with which decryption is
-    attempted are [(~secret)::(~old_secrets)]. See the descriptions of [~secret]
-    and [~old_secrets] in {!Dream.run}. *)
+    To support secret rotation, this function first tries to decrypt the string
+    using the main secret set by {!Dream.set_secret}, and then each of the old
+    secrets passed to {!Dream.set_secret} in [~old_secrets]. *)
 
 
 
