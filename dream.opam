@@ -49,6 +49,7 @@ maintainer: "Anton Bachin <antonbachin@yahoo.com>"
 depends: [
   "base-unix"
   "bigarray-compat"
+  "camlp-streams"
   "caqti" {>= "1.6.0"}  # https://github.com/aantron/dream/issues/44.
   "caqti-lwt"
   "conf-libev" {os != "win32"}
