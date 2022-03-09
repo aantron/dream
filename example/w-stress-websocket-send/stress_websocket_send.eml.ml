@@ -49,7 +49,7 @@ let stress websocket =
     ) else (
       Dream.write websocket frame_a ~kind:`Binary;
       Dream.write websocket frame_b ~kind:`Binary;
-      Fibre.yield ();
+      Fiber.yield ();
       loop (sent + frame + frame)
     )
   in

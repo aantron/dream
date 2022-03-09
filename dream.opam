@@ -71,7 +71,7 @@ depends: [
   "ptime" {>= "0.8.1"}  # Ptime.v.
   "uri" {>= "4.2.0"}
   "yojson"  # ...
-  "eio_main" {>= "0.1"}
+  "eio_main" {>= "0.2"}
   "lwt_eio" {>= "0.1"}
 
   # Testing, development.

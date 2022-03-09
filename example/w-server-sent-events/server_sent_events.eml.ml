@@ -68,7 +68,7 @@ let forward_messages response = Lwt_eio.Promise.await_lwt (forward_messages resp
 
 let () =
   Eio_main.run @@ fun env ->
-  Fibre.both
+  Fiber.both
     (fun () -> message_loop env#clock)
     (fun () ->
        Dream.run env

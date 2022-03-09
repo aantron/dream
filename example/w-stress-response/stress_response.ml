@@ -23,7 +23,7 @@ let stress ?(megabytes = 1024) ?(chunk = 64) response =
     ) else (
       Dream.write response chunk_a;
       Dream.write response chunk_b;
-      Fibre.yield ();
+      Fiber.yield ();
       loop (sent + chunk + chunk)
     )
   in
