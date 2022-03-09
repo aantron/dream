@@ -42,7 +42,7 @@ To get this, we depend on package `tyxml-jsx` in
 
 <pre><code>{
   "dependencies": {
-    "@opam/dream": "1.0.0~alpha3",
+    "@opam/dream": "1.0.0~alpha4",
     "@opam/dune": "^2.0",
     "@opam/reason": "^3.7.0",
     "@opam/tyxml": "*",

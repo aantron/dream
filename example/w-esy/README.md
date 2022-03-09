@@ -10,7 +10,7 @@ and looks like this:
 ```json
 {
   "dependencies": {
-    "@opam/dream": "1.0.0~alpha3",
+    "@opam/dream": "1.0.0~alpha4",
     "@opam/dune": "^2.0",
     "ocaml": "4.12.x"
   },

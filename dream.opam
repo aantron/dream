@@ -55,7 +55,7 @@ depends: [
   "conf-libev" {os != "win32"}
   "cstruct" {>= "6.0.0"}
   "dream-httpaf"
-  "dream-pure"
+  "dream-pure" {>= "1.0.0~alpha2"}
   "dune" {>= "2.7.0"}  # --instrument-with.
   "fmt" {>= "0.8.7"}  # `Italic.
   "graphql_parser"

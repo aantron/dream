@@ -1600,7 +1600,7 @@ let message_expected = {|<div class="spec type" id="type-message">
 |}
 
 let message_replacement = {|
-<code><span><span class="keyword">and</span> message</span></code>
+<code><span><span class="keyword">and</span> 'a message</span></code>
 |}
 
 let client_expected' = {|<div class="spec type" id="type-client">

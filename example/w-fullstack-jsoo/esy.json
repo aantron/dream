@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@opam/dream": "1.0.0~alpha3",
+    "@opam/dream": "1.0.0~alpha4",
     "@opam/dune": "^2.0",
     "@opam/js_of_ocaml": "*",
     "@opam/js_of_ocaml-ppx": "*",
