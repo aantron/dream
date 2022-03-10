@@ -414,7 +414,7 @@ https://github.com/aantron/dream/issues
 (** Replaces the path. See {!Dream.val-path}. *)
 (**/**)
 
-val query : request -> string -> ?filter_empty:bool -> unit -> string option
+val query : request -> ?filter_empty:bool -> string -> string option
 (** First query parameter with the given name. See
     {{:https://tools.ietf.org/html/rfc3986#section-3.4} RFC 3986 §3.4} and
     example

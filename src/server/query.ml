@@ -28,7 +28,7 @@ let all_queries request =
   |> snd
   |> Formats.from_form_urlencoded
 
-let query request name ?(filter_empty = false) () =
+let query request ?(filter_empty = false) name =
   match (List.assoc_opt name (all_queries request), filter_empty) with
   | None, _ -> None
   | Some v, false -> Some v

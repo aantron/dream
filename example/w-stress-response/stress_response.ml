@@ -33,7 +33,7 @@ let stress ?(megabytes = 1024) ?(chunk = 64) stream =
   Lwt.return_unit
 
 let query_int request name =
-  Dream.query request name () |> Option.map int_of_string
+  Dream.query request name |> Option.map int_of_string
 
 let () =
   show_heap_size ();

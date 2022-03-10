@@ -5,23 +5,23 @@
 
 
 
-let query name string ~filter_empty =
-  Dream.query (Dream.request ~target:("/?" ^ string) "") name ~filter_empty ()
+let query name ?(filter_empty) string =
+  Dream.query (Dream.request ~target:("/?" ^ string) "") name ?filter_empty
   |> function
     | Some value -> Printf.printf "%S\n" value
     | None -> print_endline "None"
 
 let%expect_test _ =
-  query ~filter_empty:false "a" "a=b";
-  query ~filter_empty:false "" "a=b";
-  query ~filter_empty:false "" "";
-  query ~filter_empty:false "a" "";
-  query ~filter_empty:false "a" "a=";
-  query ~filter_empty:false "" "=a";
-  query ~filter_empty:false "a" "a=b&a=c";
-  query ~filter_empty:false "c" "a=b&c=d";
-  query ~filter_empty:false "a b" "a+b=c";
-  query ~filter_empty:false "a" "a";
+  query "a" "a=b";
+  query "" "a=b";
+  query "" "";
+  query "a" "";
+  query "a" "a=";
+  query "" "=a";
+  query "a" "a=b&a=c";
+  query "c" "a=b&c=d";
+  query "a b" "a+b=c";
+  query "a" "a";
   query ~filter_empty:true "a" "a";
   query ~filter_empty:true "a" "a ";
   query ~filter_empty:true "a" "a  ";
