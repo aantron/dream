@@ -533,7 +533,7 @@ let () =
        nice error handling here, because a valid client won't trigger them. If
        they occur, they are harmless to the server. *)
     Dream.get "/socket" (fun request ->
-      match Dream.query request "sandbox" with
+      match Dream.query request "sandbox" () with
       | None -> Dream.empty `Bad_Request
       | Some sandbox ->
       match validate_id sandbox with

@@ -8,7 +8,7 @@ This very simple example accesses a value in the query string with
 ```ocaml
 let () =
   Dream.run (fun request ->
-    match Dream.query request "echo" with
+    match Dream.query request "echo" () with
     | None ->
       Dream.html "Use ?echo=foo to give a message to echo!"
     | Some message ->
