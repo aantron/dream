@@ -6,7 +6,7 @@
 
 
 let query name string =
-  Dream.query (Dream.request ~target:("/?" ^ string) "") name
+  Dream.query (Dream.request ~target:("/?" ^ string) "") name ()
   |> function
     | Some value -> Printf.printf "%S\n" value
     | None -> print_endline "None"
