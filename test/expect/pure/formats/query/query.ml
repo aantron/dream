@@ -5,7 +5,7 @@
 
 
 
-let query ?(filter_empty) name string =
+let query ?filter_empty name string =
   Dream.query (Dream.request ~target:("/?" ^ string) "") name ?filter_empty
   |> function
     | Some value -> Printf.printf "%S\n" value
