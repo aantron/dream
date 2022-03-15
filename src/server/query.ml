@@ -29,10 +29,13 @@ let all_queries request =
   |> Formats.from_form_urlencoded
 
 let query ?(filter_empty = false) request name =
-  match (List.assoc_opt name (all_queries request), filter_empty) with
-  | None, _ -> None
-  | Some v, false -> Some v
-  | Some v, true -> if String.trim v = "" then None else Some v
+  match List.assoc_opt name (all_queries request) with
+  | None -> None
+  | Some v as result ->
+    if filter_empty && String.trim v = "" then
+      None
+    else
+      result
 
 let queries request name =
   all_queries request
