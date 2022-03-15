@@ -29,6 +29,11 @@ let%expect_test _ =
   query ~filter_empty:true "a" "a= ";
   query ~filter_empty:true "a" "a=  ";
   query ~filter_empty:true "a" "a= &a=b";
+  query ~filter_empty:true "a" "a= b ";
+  query ~filter_empty:true "a" "a=b";
+  query ~filter_empty:true "a b" "a+b=c";
+  query ~filter_empty:true "" "=a";
+  query ~filter_empty:true "" "= a ";
   [%expect {|
     "b"
     None
@@ -47,6 +52,11 @@ let%expect_test _ =
     None
     None
     None
+    " b "
+    "b"
+    "c"
+    "a"
+    " a "
     |}]
 
 
