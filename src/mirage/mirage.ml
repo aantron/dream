@@ -75,6 +75,8 @@ let wrap_handler_httpaf _user's_error_handler user's_dream_handler =
            2. Upon failure to establish a WebSocket, the function is called to
               transmit the resulting error response. *)
         let forward_response response =
+          Message.set_content_length_headers response;
+
           let headers =
             Httpaf.Headers.of_list (Message.all_headers response) in
 
