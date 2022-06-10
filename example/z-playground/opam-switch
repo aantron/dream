@@ -95,7 +95,7 @@ installed: [
   "psq.0.2.0"
   "ptime.0.8.6"
   "re.1.10.3"
-  "reason.3.7.0"
+  "reason.3.8.0"
   "result.1.5"
   "rresult.0.7.0"
   "seq.base"

@@ -116,18 +116,18 @@ let%expect_test _ =
 let%expect_test _ =
   let stream = Stream.empty in
   (try write_and_dump stream Bigstringaf.empty 0 0 false false
-  with Failure _ as exn -> print_endline (Printexc.to_string exn));
+  with Failure msg -> print_endline msg);
   (try flush_and_dump stream
-  with Failure _ as exn -> print_endline (Printexc.to_string exn));
+  with Failure msg -> print_endline msg);
   (try ping_and_dump "foo" stream
-  with Failure _ as exn -> print_endline (Printexc.to_string exn));
+  with Failure msg -> print_endline msg);
   (try pong_and_dump "bar" stream
-  with Failure _ as exn -> print_endline (Printexc.to_string exn));
+  with Failure msg -> print_endline msg);
   [%expect {|
-    (Failure "write to a read-only stream")
-    (Failure "flush of a read-only stream")
-    (Failure "ping on a read-only stream")
-    (Failure "pong on a read-only stream") |}]
+    write to a read-only stream
+    flush of a read-only stream
+    ping on a read-only stream
+    pong on a read-only stream |}]
 
 
 
@@ -138,8 +138,8 @@ let%expect_test _ =
   let stream = Stream.stream reader writer in
   read_and_dump stream;
   try read_and_dump stream
-  with Failure _ as exn -> print_endline (Printexc.to_string exn);
-  [%expect {| (Failure "stream read: the previous read has not completed") |}]
+  with Failure msg -> print_endline msg;
+  [%expect {| stream read: the previous read has not completed |}]
 
 
 

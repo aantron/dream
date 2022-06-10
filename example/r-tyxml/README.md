@@ -44,7 +44,7 @@ To get this, we depend on package `tyxml-jsx` in
   "dependencies": {
     "@opam/dream": "1.0.0~alpha4",
     "@opam/dune": "^2.0",
-    "@opam/reason": "^3.7.0",
+    "@opam/reason": "^3.8.0",
     "@opam/tyxml": "*",
     <b>"@opam/tyxml-jsx": "*",</b>
     "ocaml": "4.12.x"

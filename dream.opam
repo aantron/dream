@@ -50,7 +50,7 @@ depends: [
   "base-unix"
   "bigarray-compat"
   "camlp-streams"
-  "caqti" {>= "1.6.0"}  # https://github.com/aantron/dream/issues/44.
+  "caqti" {>= "1.6.0" & <= "1.7.0"}  # https://github.com/aantron/dream/issues/44.
   "caqti-lwt"
   "conf-libev" {os != "win32"}
   "cstruct" {>= "6.0.0"}

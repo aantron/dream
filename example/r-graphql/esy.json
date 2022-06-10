@@ -2,7 +2,7 @@
   "dependencies": {
     "@opam/dream": "1.0.0~alpha4",
     "@opam/dune": "^2.0",
-    "@opam/reason": "^3.7.0",
+    "@opam/reason": "^3.8.0",
     "ocaml": "4.12.x"
   },
   "devDependencies": {
