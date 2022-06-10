@@ -4,7 +4,7 @@
     "@opam/conf-libssl": "3",
     "@opam/dream": "1.0.0~alpha5",
     "@opam/dune": "^3.0",
-    "@opam/reason": "^3.7.0",
+    "@opam/reason": "^3.8.0",
     "melange": "melange-re/melange",
     "ocaml": "^4.14.0"
   },
