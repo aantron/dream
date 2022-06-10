@@ -7,7 +7,7 @@
 
 module Command_line :
 sig
-  val parse : unit -> (string * string * [ `OCaml | `Reason ]) list
+  val parse : unit -> (string * string * [ `OCaml | `Reason ] * bool) list
 end =
 struct
   let usage = {|Usage:
@@ -24,6 +24,9 @@ struct
   let emit_reason =
     ref false
 
+  let std_out = 
+    ref false
+
   let options = Arg.align [
     "--workspace",
     Arg.Set_string workspace_path,
@@ -31,6 +34,9 @@ struct
     "--emit-reason",
     Arg.Set emit_reason,
     " Emit Reason syntax after preprocessing the template";
+    "--stdout",
+    Arg.Set std_out,
+    " Print to STDOUT";
   ]
 
   let set_file file =
@@ -71,7 +77,7 @@ struct
         | ".re" -> `Reason
         | _ -> `OCaml
       in
-      file, Filename.concat prefix file, syntax)
+      file, Filename.concat prefix file, syntax, !std_out)
 end
 
 let () =
