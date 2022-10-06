@@ -422,7 +422,9 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
       TLS.server_of_flow cfg flow
       >>= function
       | Ok flow -> Lwt.return_ok (edn, flow)
-      | Error err -> Lwt.return (R.error_msgf "%a" TLS.pp_write_error err) 
+      | Error err ->
+        TCP.close flow >>= fun () ->
+        Lwt.return (R.error_msgf "%a" TLS.pp_write_error err)
     in
     let user's_dream_handler =
       built_in_middleware prefix user's_error_handler user's_dream_handler in
