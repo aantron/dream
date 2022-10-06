@@ -355,9 +355,6 @@ module Make
   val client : request -> string
   (** Client sending the request. For example, ["127.0.0.1:56001"]. *)
 
-  val https : request -> bool
-  (** Whether the request was sent over HTTPS. *)
-
   val method_ : request -> method_
   (** Request method. For example, [`GET]. *)
 

@@ -18,13 +18,10 @@ open Lwt.Infix
 
 let to_dream_method meth = Httpaf.Method.to_string meth |> Method.string_to_method
 let to_httpaf_status status = Status.status_to_int status |> Httpaf.Status.of_code
-let to_h2_status status = Status.status_to_int status |> H2.Status.of_code
-let sha1 str = Digestif.SHA1.(to_raw_string (digest_string str))
-let const x = fun _ -> x
 let ( >>? ) = Lwt_result.bind
 
 let wrap_handler_httpaf _user's_error_handler user's_dream_handler =
-  let httpaf_request_handler = fun client reqd ->
+  let httpaf_request_handler = fun _ reqd ->
     let httpaf_request = Httpaf.Reqd.request reqd in
     let method_ = to_dream_method httpaf_request.meth in
     let target  = httpaf_request.target in
@@ -113,26 +110,41 @@ let wrap_handler_httpaf _user's_error_handler user's_dream_handler =
   httpaf_request_handler
 
 let request_handler
-  : Catch.error_handler -> Message.handler -> string -> Alpn.reqd -> unit
+  : type reqd headers request response ro wo.
+    Catch.error_handler -> Message.handler -> 
+      _ -> _ -> reqd ->
+      (reqd, headers, request, response, ro, wo) Alpn.protocol -> unit
   = fun (user's_error_handler : Catch.error_handler)
       (user's_dream_handler : Message.handler) -> ();
-    fun client_address -> function
-    | Alpn.Reqd_HTTP_1_1 reqd -> wrap_handler_httpaf user's_error_handler user's_dream_handler client_address reqd
+    fun _ _ reqd -> function
+    | Alpn.HTTP_1_1 _ ->
+      wrap_handler_httpaf user's_error_handler user's_dream_handler () reqd
     | _ -> assert false
 
 let error_handler
-  : Catch.error_handler -> string -> ?request:Alpn.request -> Alpn.server_error ->
-    (Alpn.headers -> Alpn.body) -> unit
+  : type reqd headers request response ro wo.
+    Catch.error_handler -> 
+    _ -> (reqd, headers, request, response, ro, wo) Alpn.protocol ->
+      ?request:request -> _ -> (headers -> wo) -> unit
   = fun 
       (user's_error_handler : Catch.error_handler) -> ();
-    fun client ?request error start_response ->
-  match request with
-  | Some (Alpn.Request_HTTP_1_1 request) ->
-    let start_response hdrs : Httpaf.Body.Writer.t = match start_response Alpn.(Headers_HTTP_1_1 hdrs) with
-      | Alpn.Body_HTTP_1_1 (Alpn.Wr, Alpn.Body_wr body) -> body
-      | _ -> Fmt.failwith "Impossible to respond with an h2 respond to an HTTP/1.1 client" in
-    Error_handler.httpaf user's_error_handler client ?request:(Some request) error start_response
-  | _ -> assert false (* TODO *)
+    fun client protocol ?request error respond ->
+    match protocol with
+    | Alpn.HTTP_1_1 _ ->
+      let start_response hdrs : Httpaf.Body.Writer.t = 
+        respond hdrs
+      in
+      Error_handler.httpaf user's_error_handler client ?request:(Some request) error start_response
+    | _ -> assert false (* TODO *)
+
+let handler user_err user_resp =
+  {
+    Alpn.error=(fun edn protocol ?request error respond -> 
+      error_handler user_err edn protocol ?request error respond);
+    request=(fun flow edn reqd protocol ->
+      request_handler user_err user_resp flow edn reqd protocol)
+  }
+
 
 module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip.Stack.V4V6) = struct
   include Dream_pure
@@ -169,10 +181,10 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
 
   let error_template =
     Error_handler.customize
-
+(* 
   let random =
     Dream__cipher.Random.random
-
+ *)
   include Formats
 
   (* Types *)
@@ -197,9 +209,9 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
   let method_ = Message.method_
   let target = Message.target
   let prefix = Router.prefix
-  let path = Router.path
-  let set_client = Helpers.set_client
-  let set_method_ = Message.set_method_
+ (*  let path = Router.path *)
+  (* let set_client = Helpers.set_client *)
+  (* let set_method_ = Message.set_method_ *)
   let query = Query.query
   let queries = Query.queries
   let all_queries = Query.all_queries
@@ -360,7 +372,7 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
     will_send_response : bool;
   }
   type error_handler = Catch.error_handler
-  let error_template = Error_handler.customize
+(*   let error_template = Error_handler.customize *)
   let catch = Catch.catch
 
   (* Cryptography *)
@@ -377,7 +389,7 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
   let field = Message.field
   let set_field = Message.set_field
 
-  open Paf_mirage.Make (Time) (Stack)
+  open Paf_mirage.Make (Stack.TCP)
 
   let alpn =
     let module R = (val Mimic.repr tls_protocol) in
@@ -406,7 +418,7 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
     ?error_handler:(user's_error_handler : error_handler = Error_handler.default) (user's_dream_handler : Message.handler) =
     initialize ~setup_outputs:ignore ; 
     let connect flow =
-      let edn = Stack.TCP.dst flow in
+      let edn = TCP.dst flow in
       TLS.server_of_flow cfg flow
       >>= function
       | Ok flow -> Lwt.return_ok (edn, flow)
@@ -414,10 +426,8 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
     in
     let user's_dream_handler =
       built_in_middleware prefix user's_error_handler user's_dream_handler in
-    let error_handler = error_handler user's_error_handler in
-    let request_handler =
-      request_handler user's_error_handler user's_dream_handler in
-    let service = Alpn.service alpn ~error_handler ~request_handler connect accept close in
+    let handler = handler user's_error_handler user's_dream_handler in
+    let service = Alpn.service alpn handler connect accept close in
     init ~port stack >>= fun t ->
     let `Initialized th = serve ?stop service t in th
 
@@ -436,16 +446,14 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
     user's_dream_handler =
     initialize ~setup_outputs:ignore ;
     let accept t = accept t >>? fun flow ->
-      let edn = Stack.TCP.dst flow in
+      let edn = TCP.dst flow in
       Lwt.return_ok (edn, flow) in
     let user's_dream_handler =
       built_in_middleware prefix user's_error_handler user's_dream_handler in
-    let error_handler = error_handler user's_error_handler in
-    let request_handler = request_handler user's_error_handler user's_dream_handler in
-    let service = Alpn.service (alpn protocol) ~error_handler ~request_handler Lwt.return_ok accept close in
+    let handler = handler user's_error_handler user's_dream_handler in
+    let service = Alpn.service (alpn protocol) handler Lwt.return_ok accept close in
     init ~port stack >>= fun t ->
     let `Initialized th = serve ?stop service t in th
-
 
 
   let validate_path request =
