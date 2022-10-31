@@ -9,7 +9,7 @@
 	url = https://github.com/aantron/websocketaf.git
 [submodule "src/vendor/h2"]
 	path = src/vendor/h2
-	url = https://github.com/aantron/ocaml-h2.git
+	url = https://github.com/novemberkilo/ocaml-h2.git
 [submodule "src/vendor/paf"]
 	path = src/vendor/paf
 	url = https://github.com/dinosaure/paf-le-chien.git
