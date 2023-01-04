@@ -111,7 +111,7 @@ let wrap_handler_httpaf _user's_error_handler user's_dream_handler =
 
 let request_handler
   : type reqd headers request response ro wo.
-    Catch.error_handler -> Message.handler -> 
+    Catch.error_handler -> Message.handler ->
       _ -> _ -> reqd ->
       (reqd, headers, request, response, ro, wo) Alpn.protocol -> unit
   = fun (user's_error_handler : Catch.error_handler)
@@ -123,15 +123,15 @@ let request_handler
 
 let error_handler
   : type reqd headers request response ro wo.
-    Catch.error_handler -> 
+    Catch.error_handler ->
     _ -> (reqd, headers, request, response, ro, wo) Alpn.protocol ->
       ?request:request -> _ -> (headers -> wo) -> unit
-  = fun 
+  = fun
       (user's_error_handler : Catch.error_handler) -> ();
     fun client protocol ?request error respond ->
     match protocol with
     | Alpn.HTTP_1_1 _ ->
-      let start_response hdrs : Httpaf.Body.Writer.t = 
+      let start_response hdrs : Httpaf.Body.Writer.t =
         respond hdrs
       in
       Error_handler.httpaf user's_error_handler client ?request:(Some request) error start_response
@@ -139,7 +139,7 @@ let error_handler
 
 let handler user_err user_resp =
   {
-    Alpn.error=(fun edn protocol ?request error respond -> 
+    Alpn.error=(fun edn protocol ?request error respond ->
       error_handler user_err edn protocol ?request error respond);
     request=(fun flow edn reqd protocol ->
       request_handler user_err user_resp flow edn reqd protocol)
@@ -154,34 +154,34 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
   include Log
   include Log.Make (Pclock)
   include Dream__server.Echo
-  
+
   let default_log =
     Log.sub_log (Logs.Src.name Logs.default)
-  
+
   let error = default_log.error
   let warning = default_log.warning
   let info = default_log.info
   let debug = default_log.debug
-  
-  module Session = struct 
+
+  module Session = struct
     include Dream__server.Session
     include Dream__server.Session.Make (Pclock)
   end
   module Flash = Dream__server.Flash
-  
+
 
   include Dream__server.Origin_referrer_check
   include Dream__server.Form
   include Dream__server.Upload
   include Dream__server.Csrf
-  
-  
+
+
   include Dream__server.Catch
   include Dream__server.Site_prefix
 
   let error_template =
     Error_handler.customize
-(* 
+(*
   let random =
     Dream__cipher.Random.random
  *)
@@ -209,9 +209,9 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
   let method_ = Message.method_
   let target = Message.target
   let prefix = Router.prefix
- (*  let path = Router.path *)
-  (* let set_client = Helpers.set_client *)
-  (* let set_method_ = Message.set_method_ *)
+  let path = Router.path
+  let set_client = Helpers.set_client
+  let set_method_ = Message.set_method_
   let query = Query.query
   let queries = Query.queries
   let all_queries = Query.all_queries
@@ -338,13 +338,13 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
   let csrf_token = csrf_token ~now
   let verify_csrf_token = verify_csrf_token ~now
   let csrf_tag = Tag.csrf_tag ~now
-  
+
   (* Templates *)
 
   let form_tag ?method_ ?target ?enctype ?csrf_token ~action request =
     Tag.form_tag ~now ?method_ ?target ?enctype ?csrf_token ~action request
 
-  
+
 
   (* Errors *)
 
@@ -416,7 +416,7 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
   let https ?stop ~port ?(prefix= "") stack
     ?(cfg= Tls.Config.server ~certificates:localhost_certificate ())
     ?error_handler:(user's_error_handler : error_handler = Error_handler.default) (user's_dream_handler : Message.handler) =
-    initialize ~setup_outputs:ignore ; 
+    initialize ~setup_outputs:ignore ;
     let connect flow =
       let edn = TCP.dst flow in
       TLS.server_of_flow cfg flow
@@ -494,7 +494,7 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
       | content_type -> content_type
     in
     ["Content-Type", content_type]
-  
+
   let static ~loader local_root = fun request ->
 
     if not @@ Method.methods_equal (Message.method_ request) `GET then
