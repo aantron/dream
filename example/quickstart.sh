@@ -3,7 +3,7 @@
 set -e
 
 EXAMPLE=2-middleware
-REPO=https://github.com/aantron/dream
+REPO=https://github.com/beajeanm/dream
 if [ "$1" == "" ]
 then
   REF=master
