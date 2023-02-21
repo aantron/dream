@@ -367,6 +367,16 @@ module Make
 
   (**/**)
 
+  (**/**)
+  val path : request -> string list
+  [@@ocaml.deprecated
+  "Router path access is being removed from the API. Comment at
+  https://github.com/aantron/dream/issues
+  "]
+  (** Parsed request path. For example, ["foo"; "bar"]. *)
+  (* TODO If not removing this, move it to section Routing. *)
+  (**/**)
+
   val set_client : request -> string -> unit
   (** Replaces the client. See {!Dream.val-client}. *)
 
