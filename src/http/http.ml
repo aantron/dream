@@ -202,13 +202,13 @@ let wrap_handler_h2
     let body =
       H2.Reqd.request_body conn in
     let read ~data ~flush:_ ~ping:_ ~pong:_ ~close ~exn:_ =
-      H2.Body.schedule_read
+      H2.Body.Reader.schedule_read
         body
         ~on_eof:(fun () -> close 1000)
         ~on_read:(fun buffer ~off ~len -> data buffer off len true false)
     in
     let close _code =
-      H2.Body.close_reader body in
+      H2.Body.Reader.close body in
     let body =
       Stream.reader ~read ~close ~abort:close in
     let body =
