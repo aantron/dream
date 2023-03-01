@@ -17,8 +17,12 @@ let log =
 let pool_field : (_, Caqti_error.t) Caqti_lwt.Pool.t Message.field =
   Message.new_field ()
 
+(* TODO This may not be necessary since Caqti 1.8.0. May require some messing
+   around, "Enable foreign key constraint checks for SQLite3 starting at tweaks
+   version 1.8." in CHANGES. *)
 let foreign_keys_on =
   Caqti_request.exec Caqti_type.unit "PRAGMA foreign_keys = ON"
+  [@ocaml.warning "-3"]
 
 let post_connect (module Db : Caqti_lwt.CONNECTION) =
   match Caqti_driver_info.dialect_tag Db.driver_info with
