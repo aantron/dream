@@ -84,7 +84,7 @@ depends: [
   "caqti-driver-sqlite3" {with-test}
   "crunch" {with-test}
   "lambdasoup" {with-test}
-  "ppx_expect" {with-test}
+  "ppx_expect" {with-test & >= "v0.15.0"}  # Formatting changes.
   "ppx_yojson_conv" {with-test}
   "reason" {with-test}
   "tyxml" {with-test & >= "4.5.0"}

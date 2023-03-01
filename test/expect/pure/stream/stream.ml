@@ -124,10 +124,10 @@ let%expect_test _ =
   (try pong_and_dump "bar" stream
   with Failure _ as exn -> print_endline (Printexc.to_string exn));
   [%expect {|
-    (Failure "write to a read-only stream")
-    (Failure "flush of a read-only stream")
-    (Failure "ping on a read-only stream")
-    (Failure "pong on a read-only stream") |}]
+    Failure("write to a read-only stream")
+    Failure("flush of a read-only stream")
+    Failure("ping on a read-only stream")
+    Failure("pong on a read-only stream") |}]
 
 
 
@@ -139,7 +139,7 @@ let%expect_test _ =
   read_and_dump stream;
   try read_and_dump stream
   with Failure _ as exn -> print_endline (Printexc.to_string exn);
-  [%expect {| (Failure "stream read: the previous read has not completed") |}]
+  [%expect {| Failure("stream read: the previous read has not completed") |}]
 
 
 
