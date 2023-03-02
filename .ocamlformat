@@ -8,7 +8,6 @@ space-around-lists = false
 space-around-records = false
 break-infix = fit-or-vertical
 break-separators = after
-space-around-records = true
 break-cases = fit-or-vertical
 cases-exp-indent = 2
 exp-grouping = preserve
