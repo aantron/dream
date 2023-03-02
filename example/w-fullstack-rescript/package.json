@@ -4,7 +4,7 @@
     "esbuild": "*",
     "esy": "*",
     "rescript": "*",
-    "rescript-webapi": "*"
+    "rescript-webapi": "^0.5.0"
   },
   "scripts": {
     "postinstall": "npx esy install",

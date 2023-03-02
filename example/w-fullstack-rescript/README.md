@@ -58,7 +58,7 @@ let () = {
 
     let p = document |> Document.createElement("p")
     p->Element.setInnerText(text)
-    body |> Element.appendChild(p)
+    body |> Element.appendChild(~child=p)
   }
 }
 ```
