@@ -88,8 +88,10 @@ depends: [
   "ppx_yojson_conv" {with-test}
   "reason" {with-test}
   "tyxml" {with-test & >= "4.5.0"}
-  "tyxml-jsx" {with-test & >= "4.5.0"}
-  "tyxml-ppx" {with-test & >= "4.5.0"}
+
+  # Blocked until https://github.com/ocsigen/tyxml/pull/312.
+  # "tyxml-jsx" {with-test & >= "4.5.0"}
+  # "tyxml-ppx" {with-test & >= "4.5.0"}
 ]
 
 build: [

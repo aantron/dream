@@ -9,6 +9,8 @@ jobs:
         os:
         - ubuntu-latest
         ocaml:
+        - 5.0.x
+        - 4.14.x
         - 4.13.x
         - 4.12.x
         - 4.11.x
@@ -55,7 +57,7 @@ jobs:
         then
           opam exec -- dune runtest
 
-          EXAMPLES=$(find example -maxdepth 1 -type d -not -name "w-mirage*"| grep -v "^example/0" | grep -v "^example$" | sort)
+          EXAMPLES=$(find example -maxdepth 1 -type d -not -name "w-mirage*" -not -name "r-tyxml" | grep -v "^example/0" | grep -v "^example$" | sort)
           shopt -s nullglob
 
           for EXAMPLE in $EXAMPLES
