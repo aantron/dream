@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@opam/conf-libssl": "3",
     "@opam/dream": "1.0.0~alpha4",
     "@opam/dune": "^2.0",
     "@opam/reason": "^3.7.0",

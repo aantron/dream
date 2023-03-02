@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@opam/caqti-driver-sqlite3": "^1.7.0",
+    "@opam/conf-libssl": "3",
     "@opam/dream": "1.0.0~alpha4",
     "@opam/dune": "^2.0",
     "ocaml": "4.12.x"
