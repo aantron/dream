@@ -1049,7 +1049,9 @@ val form : ?csrf:bool -> request -> (string * string) list form_result promise
     The call must be done under a session middleware, since each CSRF token is
     scoped to a session. See {!section-sessions}.
 
-    Form fields are sorted for easy pattern matching:
+    The returned form fields are sorted in alphabetical order for reliable
+    pattern matching. This is because browsers can transmit the form fields in a
+    different order from how they appear in the HTML:
 
     {[
       match%lwt Dream.form request with
