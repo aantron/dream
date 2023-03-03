@@ -27,10 +27,11 @@ let serialize_payload payload =
 
 let insert =
   let query =
-    R.exec T.(tup4 string string float string) {|
+    let open Caqti_request.Infix in
+    (T.(tup4 string string float string) ->. T.unit) {|
       INSERT INTO dream_session (id, label, expires_at, payload)
       VALUES ($1, $2, $3, $4)
-    |} [@ocaml.warning "-3"] in
+    |} in
 
   fun (module Db : DB) (session : Session.session) ->
     let payload = serialize_payload session.payload in
@@ -40,9 +41,9 @@ let insert =
 
 let find_opt =
   let query =
-    R.find_opt T.string T.(tup3 string float string)
-      "SELECT label, expires_at, payload FROM dream_session WHERE id = $1"
-    [@ocaml.warning "-3"] in
+    let open Caqti_request.Infix in
+    (T.string ->? T.(tup3 string float string))
+      "SELECT label, expires_at, payload FROM dream_session WHERE id = $1" in
 
   fun (module Db : DB) id ->
     let%lwt result = Db.find_opt query id in
@@ -68,9 +69,9 @@ let find_opt =
 
 let refresh =
   let query =
-    R.exec T.(tup2 float string)
-      "UPDATE dream_session SET expires_at = $1 WHERE id = $2"
-    [@ocaml.warning "-3"] in
+    let open Caqti_request.Infix in
+    (T.(tup2 float string) ->. T.unit)
+      "UPDATE dream_session SET expires_at = $1 WHERE id = $2" in
 
   fun (module Db : DB) (session : Session.session) ->
     let%lwt result = Db.exec query (session.expires_at, session.id) in
@@ -78,9 +79,9 @@ let refresh =
 
 let update =
   let query =
-    R.exec T.(tup2 string string)
-      "UPDATE dream_session SET payload = $1 WHERE id = $2"
-    [@ocaml.warning "-3"] in
+    let open Caqti_request.Infix in
+    (T.(tup2 string string) ->. T.unit)
+      "UPDATE dream_session SET payload = $1 WHERE id = $2" in
 
   fun (module Db : DB) (session : Session.session) ->
     let payload = serialize_payload session.payload in
@@ -89,8 +90,8 @@ let update =
 
 let remove =
   let query =
-    R.exec T.string "DELETE FROM dream_session WHERE id = $1"
-    [@ocaml.warning "-3"] in
+    let open Caqti_request.Infix in
+    (T.string ->. T.unit) "DELETE FROM dream_session WHERE id = $1"  in
 
   fun (module Db : DB) id ->
     let%lwt result = Db.exec query id in

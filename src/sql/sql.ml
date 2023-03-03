@@ -21,7 +21,8 @@ let pool_field : (_, Caqti_error.t) Caqti_lwt.Pool.t Message.field =
    around, "Enable foreign key constraint checks for SQLite3 starting at tweaks
    version 1.8." in CHANGES. *)
 let foreign_keys_on =
-  Caqti_request.exec Caqti_type.unit "PRAGMA foreign_keys = ON"
+  let open Caqti_request.Infix in
+  (Caqti_type.unit ->. Caqti_type.unit) "PRAGMA foreign_keys = ON"
   [@ocaml.warning "-3"]
 
 let post_connect (module Db : Caqti_lwt.CONNECTION) =
