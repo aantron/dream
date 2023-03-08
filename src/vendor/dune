@@ -40,7 +40,8 @@
   (public_name dream-httpaf.gluten)
   (libraries
    bigstringaf
-   faraday)))
+   faraday
+   ke)))
 
 (subdir gluten/lwt
  (library
