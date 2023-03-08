@@ -235,12 +235,11 @@ let websocket_handler stream socket =
   in
   outgoing_loop ();
 
-  Websocketaf.Server_connection.{frame; eof}
+  Websocketaf.Websocket_connection.{frame; eof}
 
   (* TODO The equality between server and client input handlers is not
      exposed in the websocketaf API.
      https://github.com/anmonteiro/websocketaf/issues/39. *)
 let client_websocket_handler :
     Stream.stream -> Websocketaf.Wsd.t ->
-      Websocketaf.Client_connection.input_handlers =
-  Obj.magic websocket_handler
+      Websocketaf.Websocket_connection.input_handlers = websocket_handler

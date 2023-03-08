@@ -6,12 +6,12 @@
   bigstringaf
   digestif
   dream.cipher
-  dream.localhost
-  dream.middleware
+  dream.server
+  dream.certificate
   dream-pure
-  dream.h2
-  dream.httpaf
+  dream-httpaf.h2
   lwt
+  tcpip
   dream-mirage.paf
   dream-mirage.paf.alpn
   dream-mirage.paf.mirage

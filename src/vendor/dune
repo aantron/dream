@@ -21,7 +21,7 @@
   (name paf_mirage)
   (public_name dream-mirage.paf.mirage)
   (modules paf_mirage)
-  (libraries dream-mirage.paf tls-mirage mirage-time mirage-stack dream-mirage.paf.alpn)))
+  (libraries tcpip dream-mirage.paf tls-mirage mirage-time dream-mirage.paf.alpn)))
 
 (subdir paf/lib
  (library
@@ -29,7 +29,7 @@
   (wrapped false)
   (public_name dream-mirage.paf.le)
   (modules lE)
-  (libraries dream-httpaf.httpaf dream-mirage.paf mirage-time mirage-stack duration tls-mirage emile
+  (libraries tcpip dream-httpaf.httpaf dream-mirage.paf mirage-time duration tls-mirage emile
     letsencrypt)))
 
 
@@ -40,7 +40,8 @@
   (public_name dream-httpaf.gluten)
   (libraries
    bigstringaf
-   faraday)))
+   faraday
+   ke)))
 
 (subdir gluten/lwt
  (library

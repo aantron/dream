@@ -744,7 +744,7 @@ struct
 
         output.format ("%" ^ format);
         if needs_escape then
-          output.print "(Dream.html_escape ";
+          output.print "(Dream_pure.Formats.html_escape ";
         output.print "(\n";
 
         Printf.ksprintf output.print "#%i \"%s\"\n" (line + 1) location;
