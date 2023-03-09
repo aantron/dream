@@ -20,7 +20,6 @@ depends: [
   "lwt_ssl"
   "ocaml" {>= "4.08.0"}
   "ssl" {>= "0.5.8"}  # Ssl.get_negotiated_alpn_protocol.
-  "dream-pure" {= version}
 
   # Currently vendored.
   # "gluten"
