@@ -38,6 +38,8 @@ depends: [
   "digestif" {>= "0.7.2"}  # websocket/af, sha1, default implementation.
   "faraday" {>= "0.6.1"}
   "faraday-lwt-unix"
+  "ke" {>= "0.5"}  # Gluten.
+  "lwt_ssl" {>= "1.2.0"}  # Gluten.
   "psq"  # h2.
   "result"  # http/af, websocket/af.
 ]
