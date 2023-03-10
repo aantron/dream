@@ -5,6 +5,9 @@
 
 
 
+module Httpaf = Dream_httpaf_.Httpaf
+module H2 = Dream_h2.H2
+
 module Stream = Dream_pure.Stream
 module Message = Dream_pure.Message
 

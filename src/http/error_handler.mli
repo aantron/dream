@@ -5,6 +5,10 @@
 
 
 
+module Httpaf = Dream_httpaf_.Httpaf
+module H2 = Dream_h2.H2
+module Websocketaf = Dream_websocketaf.Websocketaf
+
 module Catch = Dream__server.Catch
 module Log = Dream__server.Log
 module Message = Dream_pure.Message

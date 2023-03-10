@@ -8,17 +8,17 @@
   dream-pure
   dream.server
   dream-httpaf
-  dream-httpaf.gluten
-  dream-httpaf.gluten-lwt-unix
-  dream-httpaf.h2
-  dream-httpaf.h2-lwt-unix
-  dream-httpaf.httpaf
-  dream-httpaf.httpaf-lwt-unix
+  dream-httpaf.dream-gluten
+  dream-httpaf.dream-gluten-lwt-unix
+  dream-httpaf.dream-h2
+  dream-httpaf.dream-h2-lwt-unix
+  dream-httpaf.dream-httpaf_
+  dream-httpaf.dream-httpaf_-lwt-unix
   lwt
   lwt.unix
   lwt_ssl
   ssl
-  dream-httpaf.websocketaf
+  dream-httpaf.dream-websocketaf
  )
  (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

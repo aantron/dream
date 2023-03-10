@@ -5,6 +5,8 @@
 
 
 
+module Websocketaf = Dream_websocketaf.Websocketaf
+
 module Stream = Dream_pure.Stream
 
 

@@ -36,8 +36,8 @@
 
 (subdir gluten/lib
  (library
-  (name gluten)
-  (public_name dream-httpaf.gluten)
+  (name dream_gluten)
+  (public_name dream-httpaf.dream-gluten)
   (libraries
    bigstringaf
    faraday
@@ -45,19 +45,19 @@
 
 (subdir gluten/lwt
  (library
-  (name gluten_lwt)
-  (public_name dream-httpaf.gluten-lwt)
+  (name dream_gluten_lwt)
+  (public_name dream-httpaf.dream-gluten-lwt)
   (libraries
-   dream-httpaf.gluten
+   dream-httpaf.dream-gluten
    lwt)))
 
 (subdir gluten/lwt-unix
  (library
-  (name gluten_lwt_unix)
-  (public_name dream-httpaf.gluten-lwt-unix)
+  (name dream_gluten_lwt_unix)
+  (public_name dream-httpaf.dream-gluten-lwt-unix)
   (libraries
    faraday-lwt-unix
-   dream-httpaf.gluten-lwt
+   dream-httpaf.dream-gluten-lwt
    lwt.unix
    (select
     ssl_io.ml
@@ -75,44 +75,44 @@
 
 (subdir websocketaf/lib
  (library
-  (name websocketaf)
-  (public_name dream-httpaf.websocketaf)
+  (name dream_websocketaf)
+  (public_name dream-httpaf.dream-websocketaf)
   (libraries
    angstrom
    base64
    bigstringaf
    faraday
-   dream-httpaf.gluten
-   httpaf
+   dream-httpaf.dream-gluten
+   dream-httpaf.dream-httpaf_
    result)))
 
 (subdir websocketaf/lwt
  (library
-  (name websocketaf_lwt)
-  (public_name dream-httpaf.websocketaf-lwt)
+  (name dream_websocketaf_lwt)
+  (public_name dream-httpaf.dream-websocketaf-lwt)
   (libraries
    base64
    digestif.ocaml
-   dream-httpaf.gluten-lwt
+   dream-httpaf.dream-gluten-lwt
    lwt
-   dream-httpaf.websocketaf)))
+   dream-httpaf.dream-websocketaf)))
 
 (subdir websocketaf/lwt-unix
  (library
-  (name websocketaf_lwt_unix)
-  (public_name dream-httpaf.websocketaf-lwt-unix)
+  (name dream_websocketaf_lwt_unix)
+  (public_name dream-httpaf.dream-websocketaf-lwt-unix)
   (libraries
    faraday-lwt-unix
-   dream-httpaf.gluten-lwt-unix
+   dream-httpaf.dream-gluten-lwt-unix
    lwt.unix
-   dream-httpaf.websocketaf-lwt)))
+   dream-httpaf.dream-websocketaf-lwt)))
 
 
 
 (subdir httpaf/lib
  (library
-  (name httpaf)
-  (public_name dream-httpaf.httpaf)
+  (name dream_httpaf_)
+  (public_name dream-httpaf.dream-httpaf_)
   (libraries
    angstrom
    bigstringaf
@@ -121,23 +121,23 @@
 
 (subdir httpaf/lwt
  (library
-  (name httpaf_lwt)
-  (public_name dream-httpaf.httpaf-lwt)
+  (name dream_httpaf__lwt)
+  (public_name dream-httpaf.dream-httpaf_-lwt)
   (libraries
-   dream-httpaf.gluten
-   dream-httpaf.gluten-lwt
-   dream-httpaf.httpaf
+   dream-httpaf.dream-gluten
+   dream-httpaf.dream-gluten-lwt
+   dream-httpaf.dream-httpaf_
    lwt)))
 
 (subdir httpaf/lwt-unix
  (library
-  (name httpaf_lwt_unix)
-  (public_name dream-httpaf.httpaf-lwt-unix)
+  (name dream_httpaf__lwt_unix)
+  (public_name dream-httpaf.dream-httpaf_-lwt-unix)
   (libraries
    faraday-lwt-unix
-   dream-httpaf.gluten-lwt-unix
-   dream-httpaf.httpaf
-   dream-httpaf.httpaf-lwt
+   dream-httpaf.dream-gluten-lwt-unix
+   dream-httpaf.dream-httpaf_
+   dream-httpaf.dream-httpaf_-lwt
    lwt.unix)))
 
 
@@ -150,8 +150,8 @@
 
 (subdir h2/hpack/src
  (library
-  (name hpack)
-  (public_name dream-httpaf.hpack)
+  (name dream_hpack)
+  (public_name dream-httpaf.dream-hpack)
   (libraries
    angstrom
    faraday))
@@ -165,35 +165,35 @@
 
 (subdir h2/lib
  (library
-  (name h2)
-  (public_name dream-httpaf.h2)
+  (name dream_h2)
+  (public_name dream-httpaf.dream-h2)
   (libraries
    angstrom
    base64
    bigstringaf
    faraday
-   dream-httpaf.hpack
-   dream-httpaf.httpaf
+   dream-httpaf.dream-hpack
+   dream-httpaf.dream-httpaf_
    psq
    result)))
 
 (subdir h2/lwt
  (library
-  (name h2_lwt)
-  (public_name dream-httpaf.h2-lwt)
+  (name dream_h2_lwt)
+  (public_name dream-httpaf.dream-h2-lwt)
   (libraries
-   dream-httpaf.gluten
-   dream-httpaf.gluten-lwt
+   dream-httpaf.dream-gluten
+   dream-httpaf.dream-gluten-lwt
    lwt
-   dream-httpaf.h2)))
+   dream-httpaf.dream-h2)))
 
 (subdir h2/lwt-unix
  (library
-  (name h2_lwt_unix)
-  (public_name dream-httpaf.h2-lwt-unix)
+  (name dream_h2_lwt_unix)
+  (public_name dream-httpaf.dream-h2-lwt-unix)
   (libraries
    faraday-lwt-unix
-   dream-httpaf.gluten-lwt-unix
-   dream-httpaf.h2
-   dream-httpaf.h2-lwt
+   dream-httpaf.dream-gluten-lwt-unix
+   dream-httpaf.dream-h2
+   dream-httpaf.dream-h2-lwt
    lwt.unix)))
