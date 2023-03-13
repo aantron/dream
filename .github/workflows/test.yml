@@ -93,3 +93,29 @@ jobs:
         else
           exit 1
         fi
+
+  mirage:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - run: mkdir ../repo-copy
+    - run: cp -r * ../repo-copy/
+    - uses: avsm/setup-ocaml@v2
+      with:
+        ocaml-compiler: 4.14.x
+    - run: opam install --yes --deps-only ./dream-pure.opam ./dream-httpaf.opam ./dream.opam ./dream-mirage.opam
+    - run: opam install --yes mirage mirage-clock-unix
+    - run: cd example/w-mirage && mv config.ml config.ml.backup
+    - run: cd example/w-mirage && sed -e 's/package "dream-mirage"//' < config.ml.backup > config.ml
+    - run: cd example/w-mirage && opam exec -- mirage configure -t unix
+    - run: cd example/w-mirage && opam exec -- make depends
+    - run: cd example/w-mirage && ls duniverse
+    - run: cp -r ../repo-copy example/w-mirage/duniverse/dream
+    - run: cd example/w-mirage/duniverse && rm -rf ocaml-cstruct logs ke fmt lwt bytes seq mirage-flow sexplib0 ptime tls domain-name ocaml-ipaddr mirage-clock ocplib-endian
+    - run: cd example/w-mirage && mv config.ml.backup config.ml
+    - run: cd example/w-mirage && sed -e 's/(libraries/(libraries dream-mirage/' < dune.build > dune.build.2
+    - run: cd example/w-mirage && mv dune.build.2 dune.build
+    - run: cd example/w-mirage && opam exec -- dune build
+    - run: file example/w-mirage/_build/default/main.exe
