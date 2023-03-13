@@ -1,3 +1,7 @@
+module Httpaf = Dream_httpaf_.Httpaf
+module Paf_mirage = Dream_paf_mirage.Paf_mirage
+module Alpn = Dream_alpn.Alpn
+
 module Catch = Dream__server.Catch
 module Error_template = Dream__server.Error_template
 module Method = Dream_pure.Method

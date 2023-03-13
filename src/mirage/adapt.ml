@@ -6,6 +6,9 @@
    XXX(dinosaure): same as [src/http/adapt.ml] without [address_to_string] - which
    depends on [Unix]. *)
 
+module Httpaf = Dream_httpaf_.Httpaf
+module H2 = Dream_h2.H2
+
 module Dream = Dream_pure
 module Stream = Dream_pure.Stream
 

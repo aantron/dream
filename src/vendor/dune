@@ -4,32 +4,31 @@
 
 (subdir paf/lib
  (library
-  (name paf)
-  (public_name dream-mirage.paf)
+  (name dream_paf)
+  (public_name dream-mirage.dream-paf)
   (modules paf)
   (libraries faraday bigstringaf ke mimic)))
 
 (subdir paf/lib
  (library
-  (name alpn)
-  (public_name dream-mirage.paf.alpn)
+  (name dream_alpn)
+  (public_name dream-mirage.dream-paf.alpn)
   (modules alpn)
-  (libraries dream-mirage.paf dream-httpaf.httpaf dream-httpaf.h2)))
+  (libraries dream-mirage.dream-paf dream-httpaf.dream-httpaf_ dream-httpaf.dream-h2)))
 
 (subdir paf/lib
  (library
-  (name paf_mirage)
-  (public_name dream-mirage.paf.mirage)
+  (name dream_paf_mirage)
+  (public_name dream-mirage.dream-paf.mirage)
   (modules paf_mirage)
-  (libraries tcpip dream-mirage.paf tls-mirage mirage-time dream-mirage.paf.alpn)))
+  (libraries tcpip dream-mirage.dream-paf tls-mirage mirage-time dream-mirage.dream-paf.alpn)))
 
 (subdir paf/lib
  (library
-  (name le)
-  (wrapped false)
-  (public_name dream-mirage.paf.le)
+  (name dream_le)
+  (public_name dream-mirage.dream-paf.le)
   (modules lE)
-  (libraries tcpip dream-httpaf.httpaf dream-mirage.paf mirage-time duration tls-mirage emile
+  (libraries tcpip dream-httpaf.httpaf dream-mirage.dream-paf mirage-time duration tls-mirage emile
     letsencrypt)))
 
 

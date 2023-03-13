@@ -1,3 +1,4 @@
+module Httpaf = Dream_httpaf_.Httpaf
 
 module Catch = Dream__server.Catch
 module Error_template = Dream__server.Error_template
@@ -21,26 +22,26 @@ let select_log = function
   let dump (error : Catch.error) =
     let buffer = Buffer.create 4096 in
     let p format = Printf.bprintf buffer format in
-  
+
     begin match error.condition with
     | `Response response ->
       let status = Message.status response in
       p "%i %s\n" (Status.status_to_int status) (Status.status_to_string status)
-  
+
     | `String "" ->
       p "(Library error without description payload)\n"
-  
+
     | `String string ->
       p "%s\n" string
-  
+
     | `Exn exn ->
       let backtrace = Printexc.get_backtrace () in
       p "%s\n" (Printexc.to_string exn);
       backtrace |> Log.iter_backtrace (p "%s\n")
     end;
-  
+
     p "\n";
-  
+
     let layer =
       match error.layer with
       | `TLS -> "TLS library"
@@ -49,13 +50,13 @@ let select_log = function
       | `WebSocket -> "WebSocket library"
       | `App -> "Application"
     in
-  
+
     let blame =
       match error.caused_by with
       | `Server -> "Server"
       | `Client -> "Client"
     in
-  
+
     let severity =
       match error.severity with
       | `Error -> "Error"
@@ -63,26 +64,26 @@ let select_log = function
       | `Info -> "Info"
       | `Debug -> "Debug"
     in
-  
+
     p "From: %s\n" layer;
     p "Blame: %s\n" blame;
     p "Severity: %s" severity;
-  
+
     begin match error.client with
     | None -> ()
     | Some client -> p "\n\nClient: %s" client
     end;
-  
+
     begin match error.request with
     | None -> ()
     | Some request ->
       p "\n\n%s %s"
         (Method.method_to_string (Message.method_ request))
         (Message.target request);
-  
+
       Message.all_headers request
       |> List.iter (fun (name, value) -> p "\n%s: %s" name value);
-  
+
       Message.fold_fields (fun name value first ->
         if first then
           p "\n";
@@ -92,23 +93,23 @@ let select_log = function
         request
       |> ignore
     end;
-  
+
     Buffer.contents buffer
 
   let customize template (error : Catch.error) =
 
     (* First, log the error. *)
-  
+
     begin match error.condition with
     | `Response _ -> ()
     | `String _ | `Exn _ as condition ->
-  
+
       let client =
         match error.client with
         | None -> ""
         | Some client ->  " (" ^ client ^ ")"
       in
-  
+
       let layer =
         match error.layer with
         | `TLS -> ["TLS" ^ client]
@@ -117,7 +118,7 @@ let select_log = function
         | `WebSocket -> ["WebSocket" ^ client]
         | `App -> []
       in
-  
+
       let description, backtrace =
         match condition with
         | `String string -> string, ""
@@ -125,26 +126,26 @@ let select_log = function
           let backtrace = Printexc.get_backtrace () in
           Printexc.to_string exn, backtrace
       in
-  
+
       let message = String.concat ": " (layer @ [description]) in
-  
+
       select_log error.severity (fun log ->
         log ?request:error.request "%s" message);
       backtrace |> Log.iter_backtrace (fun line ->
         select_log error.severity (fun log ->
           log ?request:error.request "%s" line))
     end;
-  
+
     (* If Dream will not send a response for this error, we are done after
        logging. Otherwise, if debugging is enabled, gather a bunch of information.
        Then, call the template, and return the response. *)
-  
+
     if not error.will_send_response then
       Lwt.return_none
-  
+
     else
       let debug_dump = dump error in
-  
+
       let response =
         match error.condition with
         | `Response response -> response
@@ -156,7 +157,7 @@ let select_log = function
           in
           Message.response ~status Stream.empty Stream.null
       in
-  
+
       (* No need to catch errors when calling the template, because every call
          site of the error handler already has error handlers for catching double
          faults. *)
@@ -168,7 +169,7 @@ let select_log = function
       Message.response ~status:`Internal_Server_Error Stream.empty Stream.null
     | `Client ->
       Message.response ~status:`Bad_Request Stream.empty Stream.null
-  
+
 let default_template _error _debug_dump response =
   Lwt.return response
 
@@ -241,7 +242,7 @@ let respond_with_option f =
     (fun () ->
       Message.response ~status:`Internal_Server_Error Stream.empty Stream.null
       |> Lwt.return)
-  
+
 
 let app user's_error_handler = fun error ->
   respond_with_option (fun () -> user's_error_handler error)
