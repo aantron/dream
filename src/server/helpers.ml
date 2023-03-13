@@ -72,7 +72,7 @@ let response_with_body ?status ?code ?headers body =
   response
 
 let respond ?status ?code ?headers body =
-  Lwt.return (response_with_body ?status ?code ?headers body)
+  response_with_body ?status ?code ?headers body
 
 let html ?status ?code ?headers body =
   let response = response_with_body ?status ?code ?headers body in
@@ -137,22 +137,6 @@ let is_websocket response =
   | Some true -> true
   | _ -> false
 
-(* TODO Mark the request as a WebSocket request for HTTP. *)
-let websocket ?headers request callback =
-  let sw = get_switch request in
-  let in_reader, in_writer = Stream.pipe ()
-  and out_reader, out_writer = Stream.pipe () in
-  let client_stream = Stream.stream out_reader in_writer
-  and server_stream = Stream.stream in_reader out_writer in
-  let response =
-    Message.response
-      ~status:`Switching_Protocols ?headers client_stream server_stream in
-  Message.set_field response websocket_field true;
-  (* TODO Make sure the request id is propagated to the callback. *)
-  let wrapped_callback _ = Fiber.fork ~sw (fun () -> callback response) in
-  Stream.ready server_stream ~close:wrapped_callback wrapped_callback;
-  response
-
 let empty ?headers status =
   respond ?headers ~status ""
 
@@ -168,18 +152,19 @@ let websocket ?headers ?(close = true) callback =
   let websocket = Message.create_websocket response in
 
   (* TODO Make sure the request id is propagated to the callback. *)
-  Lwt.async (fun () ->
+  begin
     if close then
-      match%lwt callback websocket with
+      match callback websocket with
       | () ->
         Message.close_websocket websocket
       | exception exn ->
-        let%lwt () = Message.close_websocket websocket ~code:1005 in
+        Message.close_websocket websocket ~code:1005;
         raise exn
     else
-      callback websocket);
+      callback websocket
+  end;
 
-  Lwt.return response
+  response
 
 let receive (_, server_stream) =
   Message.receive server_stream

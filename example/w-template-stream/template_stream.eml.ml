@@ -36,6 +36,13 @@ let render response =
 (* %       if index < 10 then paragraphs (index + 1) *)
 (* %     in *)
 (* %     paragraphs 0; *)
+(* %     let rec paragraphs index = *)
+(*         <p><%i index %></p> *)
+(* %       Dream.flush response; *)
+(* %       Eio_unix.sleep 1.; *)
+(* %       paragraphs (index + 1) *)
+(* %     in *)
+(* %     paragraphs 0 *)
 
   </body>
   </html>

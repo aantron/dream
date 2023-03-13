@@ -313,25 +313,24 @@ let no_tls = {
 }
 
 let openssl = {
-  create_handler = fun ~certificate_file:_ -> failwith "https://github.com/savonet/ocaml-ssl/issues/76"
-(*
   create_handler = begin fun
       ~certificate_file ~key_file
       ~handler
-      ~error_handler ->
+      ~error_handler
+      ~sw ->
 
     let httpaf_handler =
       Httpaf_lwt_unix.Server.SSL.create_connection_handler
         ?config:None
       ~request_handler:(wrap_handler ~sw true error_handler handler)
-      ~error_handler:(Error_handler.httpaf ~sw error_handler)
+      ~error_handler:(Error_handler.httpaf error_handler)
     in
 
     let h2_handler =
       H2_lwt_unix.Server.SSL.create_connection_handler
         ?config:None
-      ~request_handler:(wrap_handler_h2 true error_handler handler)
-      ~error_handler:(Error_handler.h2 ~sw error_handler)
+      ~request_handler:(wrap_handler_h2 ~sw true error_handler handler)
+      ~error_handler:(Error_handler.h2 error_handler)
     in
 
     let perform_tls_handshake =
@@ -458,7 +457,7 @@ let serve_with_details
   let httpaf_connection_handler ~sw flow client_address =
     let client_address = to_unix_addr client_address in
     try
-      let fd = Eio_unix.FD.take flow |> Option.get in
+      let fd = Eio_unix.FD.take_opt flow |> Option.get in
       let socket = Lwt_unix.of_unix_file_descr fd in
       Lwt_eio.Promise.await_lwt @@
       httpaf_connection_handler ~sw client_address socket
@@ -486,7 +485,7 @@ let serve_with_details
       ~backlog:(Lwt_unix.somaxconn () [@ocaml.warning "-3"])
   in
   while true do
-    Eio.Net.accept_sub ~sw socket httpaf_connection_handler
+    Eio.Net.accept_fork ~sw socket (httpaf_connection_handler ~sw)
       ~on_error:(fun ex -> !Lwt.async_exception_hook ex)
   done
 

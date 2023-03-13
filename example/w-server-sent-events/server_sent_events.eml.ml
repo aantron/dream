@@ -77,8 +77,8 @@ let () =
 
          Dream.get "/" (fun _ -> Dream.html home);
 
-         Dream.get "/push" (fun request ->
-             Dream.stream request
+         Dream.get "/push" (fun _ ->
+             Dream.stream
                ~headers:["Content-Type", "text/event-stream"]
                forward_messages);
 
@@ -87,4 +87,5 @@ let () =
         ~headers:["Content-Type", "text/event-stream"]
         forward_messages);
 
-  ]
+       ]
+    )

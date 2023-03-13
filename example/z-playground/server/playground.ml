@@ -66,7 +66,7 @@ let create_sandboxes_directory () =
   | exception Unix.(Unix_error (EEXIST, _, _)) -> Lwt.return_unit
 
 let exists sandbox =
-  Lwt_unix.file_exists (sandbox_root // sandbox)
+  Lwt_eio.Promise.await_lwt @@ Lwt_unix.file_exists (sandbox_root // sandbox)
 
 let write_file sandbox file content =
   Lwt_io.(with_file
@@ -97,7 +97,7 @@ let rec create ?(attempts = 3) syntax eml code =
     match sandbox.[0] with
     | '_' | '-' -> create ~attempts syntax eml code
     | _ ->
-      match%lwt exists sandbox with
+      match exists sandbox with
       | true -> create ~attempts:(attempts - 1) syntax eml code
       | false -> create_named sandbox syntax eml code
 
@@ -152,15 +152,14 @@ let allocated_ports =
 
 let kill_container session =
   match session.container with
-  | None -> Lwt.return_unit
+  | None -> ()
   | Some {container_id; port} ->
     session.container <- None;
     Dream.info (fun log ->
       log "Sandbox %s: killing container %s" session.sandbox container_id);
-    let%lwt _status =
+    let _status =
       exec "docker kill %s > /dev/null 2> /dev/null" container_id in
-    Hashtbl.remove allocated_ports port;
-    Lwt.return_unit
+    Hashtbl.remove allocated_ports port
 
 let min_port = 9000
 let max_port = 9999
@@ -241,7 +240,7 @@ let build session =
   | Some output ->
     Dream.info (fun log ->
       log "Sandbox %s: sending build output" session.sandbox);
-    client_log session output;%lwt
+    client_log session output;
     Lwt.return_false
 
 let image_exists sandbox =
@@ -301,13 +300,13 @@ let run session =
       client_log ~add_newline:true session line)
   end;
   alive;%lwt
-  started session port;%lwt
+  started session port;
   Dream.info (fun log ->
     log "Sandbox %s: started %s on port %i" session.sandbox container_id port);
   Lwt.return_unit
 
 let kill session =
-  let%lwt () = kill_container session in
+  kill_container session;
   Dream.close_websocket session.socket
 
 
@@ -350,7 +349,7 @@ let lock_sandbox sandbox f =
       Lwt.return_unit)
 
 let rec listen session =
-  match%lwt Dream.receive session.socket with
+  match Dream.receive session.socket with
   | None ->
     Dream.info (fun log -> log "WebSocket closed by client");
     kill session
@@ -504,23 +503,22 @@ let () =
     match validate_id sandbox with
     | false -> Dream.empty `Not_Found
     | true ->
-    match%lwt exists sandbox with
+    match exists sandbox with
     | false -> Dream.empty `Not_Found
     | true ->
-    let%lwt example =
+    let example =
       match sandbox.[1] with
       | '-' ->
-        if%lwt Lwt_unix.file_exists (sandbox_root // sandbox // "keep") then
-          Lwt.return (Some sandbox)
+        if Lwt_eio.Promise.await_lwt @@ Lwt_unix.file_exists (sandbox_root // sandbox // "keep") then
+          Some sandbox
         else
-          Lwt.return_none
-      | _ -> Lwt.return_none
-      | exception _ -> Lwt.return_none
+          None
+      | _ | exception _ -> None
     in
     Dream.html (Client.html example)
   in
 
-  Dream.run ~interface:"0.0.0.0" ~port:80 ~stop ~adjust_terminal:false
+  Eio_main.run (fun env -> Dream.run env ~interface:"0.0.0.0" ~port:80 ~adjust_terminal:false
   @@ Dream.logger
   @@ Dream.router [
 

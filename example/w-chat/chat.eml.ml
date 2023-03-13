@@ -76,6 +76,6 @@ let () =
       (fun _ -> Dream.html home);
 
     Dream.get "/websocket"
-      (fun request -> Dream.websocket request handle_client);
+      (fun _ -> Dream.websocket handle_client);
 
   ]

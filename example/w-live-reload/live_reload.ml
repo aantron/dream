@@ -72,7 +72,7 @@ let () =
       |> Dream.html);
 
     Dream.get "/_live-reload" (fun request ->
-      Dream.websocket request (fun socket ->
+      Dream.websocket (fun socket ->
         let _ = Dream.receive socket in
         Dream.close_websocket socket));
 

@@ -891,7 +891,7 @@ type websocket
 val websocket :
   ?headers:(string * string) list ->
   ?close:bool ->
-    (websocket -> unit promise) -> response promise
+    (websocket -> unit) -> response
 (** Creates a fresh [101 Switching Protocols] response. Once this response is
     returned to Dream's HTTP layer, the callback is passed a new
     {!type-websocket}, and the application can begin using it. See example
@@ -917,7 +917,7 @@ type end_of_message = [ `End_of_message | `Continues ]
 val send :
   ?text_or_binary:[< text_or_binary ] ->
   ?end_of_message:[< end_of_message ] ->
-    websocket -> string -> unit promise
+    websocket -> string -> unit
 (** Sends a single WebSocket message. The WebSocket is ready another message
     when the promise resolves.
 
@@ -933,7 +933,7 @@ val send :
     [~end_of_message] is ignored for now, as the WebSocket library underlying
     Dream does not support sending message fragments yet. *)
 
-val receive : websocket -> string option promise
+val receive : websocket -> string option
 (** Receives a message. If the WebSocket is closed before a complete message
     arrives, the result is [None]. *)
 
@@ -941,7 +941,7 @@ val receive_fragment :
   websocket -> (string * text_or_binary * end_of_message) option promise
 (** Receives a single fragment of a message, streaming it. *)
 
-val close_websocket : ?code:int -> websocket -> unit promise
+val close_websocket : ?code:int -> websocket -> unit
 (** Closes the WebSocket. [~code] is usually not necessary, but is needed for
     some protocols based on WebSockets. See
     {{:https://tools.ietf.org/html/rfc6455#section-7.4} RFC 6455 §7.4}. *)
@@ -1758,7 +1758,7 @@ https://aantron.github.io/dream/#val-add_flash_message
     OWASP {i GraphQL Cheat Sheet}} for an overview of security topics related to
     GraphQL. *)
 
-val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
+val graphql : (request -> 'a) -> 'a Graphql_lwt.Schema.schema -> handler
 (** [Dream.graphql make_context schema] serves the GraphQL [schema].
 
     {[

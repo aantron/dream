@@ -48,11 +48,11 @@ let run_query make_context schema request json =
   and variables =      json |> Y.member "variables" |> Option.some in
 
   match query with
-  | None -> Lwt.return (Error (make_error "No query"))
+  | None -> Error (make_error "No query")
   | Some query ->
 
   match Graphql_parser.parse query with
-  | Error message -> Lwt.return (Error (make_error message))
+  | Error message -> Error (make_error message)
   | Ok query ->
 
   (* TODO Consider being more strict here, allowing only `Assoc and `Null. *)
@@ -66,9 +66,9 @@ let run_query make_context schema request json =
       None
   in
 
-  let%lwt context = make_context request in
+  let context = make_context request in
 
-  Graphql_lwt.Schema.execute
+  Lwt_eio.Promise.await_lwt @@ Graphql_lwt.Schema.execute
     ?variables ?operation_name schema context query
 
 
@@ -79,9 +79,8 @@ let operation_id json =
   Yojson.Basic.Util.(json |> member "id" |> to_string_option)
 
 let close_and_clean ?code subscriptions websocket =
-  let%lwt () = Message.close_websocket ?code websocket in
-  Hashtbl.iter (fun _ close -> close ()) subscriptions;
-  Lwt.return_unit
+  Message.close_websocket ?code websocket;
+  Hashtbl.iter (fun _ close -> close ()) subscriptions
 
 let ack_message =
   `Assoc [
@@ -115,9 +114,8 @@ let complete_message id =
 (* TODO Take care to pass around the request Lwt.key in async, etc. *)
 (* TODO Test client complete racing against a stream. *)
 let handle_over_websocket make_context schema subscriptions request websocket =
-  Lwt_eio.Promise.await_lwt @@
   let rec loop inited =
-    match%lwt Helpers.receive websocket with
+    match Helpers.receive websocket with
     | None ->
       log.info (fun log -> log ~request "GraphQL WebSocket closed by client");
       close_and_clean subscriptions websocket
@@ -146,7 +144,7 @@ let handle_over_websocket make_context schema subscriptions request websocket =
         close_and_clean subscriptions websocket ~code:4429
       end
       else begin
-        let%lwt () = Helpers.send websocket ack_message in
+        Helpers.send websocket ack_message;
         loop true
       end
 
@@ -185,11 +183,11 @@ let handle_over_websocket make_context schema subscriptions request websocket =
 
         let payload = json |> Yojson.Basic.Util.member "payload" in
 
-        Lwt.async begin fun () ->
+        begin
           let subscribed = ref false in
 
-          try%lwt
-            match%lwt run_query make_context schema request payload with
+          try
+            match run_query make_context schema request payload with
             | Error json ->
               log.warning (fun log ->
                 log ~request
@@ -199,9 +197,8 @@ let handle_over_websocket make_context schema subscriptions request websocket =
             (* It's not clear that this case ever occurs, because graphql-ws is
                only used for subscriptions, at the protocol level. *)
             | Ok (`Response json) ->
-              let%lwt () = Helpers.send websocket (data_message id json) in
-              let%lwt () = Helpers.send websocket (complete_message id) in
-              Lwt.return_unit
+              Helpers.send websocket (data_message id json);
+              Helpers.send websocket (complete_message id)
 
             | Ok (`Stream (stream, close)) ->
               match Hashtbl.mem subscriptions id with
@@ -214,20 +211,17 @@ let handle_over_websocket make_context schema subscriptions request websocket =
               Hashtbl.replace subscriptions id close;
               subscribed := true;
 
-              let%lwt () =
-                stream |> Lwt_stream.iter_s (function
+              Lwt_eio.Promise.await_lwt (stream |> Lwt_stream.iter (function
                   | Ok json ->
                     Helpers.send websocket (data_message id json)
                   | Error json ->
                     log.warning (fun log ->
-                      log ~request
-                        "Subscription: error %s" (Yojson.Basic.to_string json));
-                    Helpers.send websocket (error_message id json))
-              in
+                        log ~request
+                          "Subscription: error %s" (Yojson.Basic.to_string json));
+                    Helpers.send websocket (error_message id json)));
 
-              let%lwt () = Helpers.send websocket (complete_message id) in
-              Hashtbl.remove subscriptions id;
-              Lwt.return_unit
+              Helpers.send websocket (complete_message id);
+              Hashtbl.remove subscriptions id
 
           with exn ->
             let backtrace = Printexc.get_backtrace () in
@@ -239,18 +233,14 @@ let handle_over_websocket make_context schema subscriptions request websocket =
             |> Log.iter_backtrace (fun line ->
               log.error (fun log -> log ~request "%s" line));
 
-            try%lwt
-              let%lwt () =
-                Helpers.send
-                  websocket
-                  (error_message id (make_error "Internal Server Error"))
-              in
+            try
+              Helpers.send
+                websocket
+                (error_message id (make_error "Internal Server Error"));
               if !subscribed then
                 Helpers.send websocket (complete_message id)
-              else
-                Lwt.return_unit
             with _ ->
-              Lwt.return_unit
+              ()
           end;
 
         loop inited
@@ -280,7 +270,6 @@ let graphql make_context schema = fun request ->
     | Some "websocket", Some "graphql-transport-ws" ->
       Helpers.websocket
         ~headers:["Sec-WebSocket-Protocol", "graphql-transport-ws"]
-        request
         (handle_over_websocket make_context schema (Hashtbl.create 16) request)
     | _ ->
       log.warning (fun log -> log ~request "Upgrade: websocket header missing");
@@ -295,7 +284,7 @@ let graphql make_context schema = fun request ->
         (* TODO This almost certainly raises exceptions... *)
         let json = Yojson.Basic.from_string body in
 
-        begin match%lwt run_query make_context schema request json with
+        begin match run_query make_context schema request json with
           | Error json ->
             Yojson.Basic.to_string json
             |> Helpers.json

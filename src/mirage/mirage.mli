@@ -3,7 +3,7 @@ type server
 type 'a message
 type request = client message
 type response = server message
-type handler = request -> response Lwt.t
+type handler = request -> response
 type middleware = handler -> handler
 
 module Make
@@ -28,7 +28,7 @@ module Make
 
   (** The remaining three types are for building up Web apps. *)
 
-  and handler = request -> response promise
+  and handler = request -> response
   (** Handlers are asynchronous functions from requests to responses. Example
       {{:https://github.com/aantron/dream/tree/master/example/1-hello#files}
       [1-hello]} \[{{:http://dream.as/1-hello} playground}\] shows the simplest
@@ -420,7 +420,7 @@ module Make
     ?code:int ->
     ?headers:(string * string) list ->
     string ->
-    response promise
+    response
   (** Same as {!Dream.val-response}, but the new {!type-response} is wrapped in a
       {!type-promise}. *)
 
@@ -429,7 +429,7 @@ module Make
     ?code:int ->
     ?headers:(string * string) list ->
     string ->
-    response promise
+    response
   (** Same as {!Dream.respond}, but adds [Content-Type: text/html; charset=utf-8].
       See {!Dream.text_html}.
 
@@ -444,7 +444,7 @@ module Make
     ?code:int ->
     ?headers:(string * string) list ->
     string ->
-    response promise
+    response
   (** Same as {!Dream.respond}, but adds [Content-Type: application/json]. See
       {!Dream.application_json}. *)
 
@@ -454,7 +454,7 @@ module Make
     ?headers:(string * string) list ->
     request ->
     string ->
-    response promise
+    response
   (** Creates a new {!type-response}. Adds a [Location:] header with the given
       string. The default status code is [303 See Other], for a temporary
       redirection. Use [~status:`Moved_Permanently] or [~code:301] for a permanent
@@ -466,7 +466,7 @@ module Make
       The {!type-request} is used for retrieving the site prefix, if the string is
       an absolute path. Most applications don't have a site prefix. *)
 
-  val empty : ?headers:(string * string) list -> status -> response promise
+  val empty : ?headers:(string * string) list -> status -> response
   (** Same as {!Dream.val-response} with the empty string for a body. *)
 
   type websocket
@@ -477,8 +477,8 @@ module Make
   val websocket :
     ?headers:(string * string) list ->
     ?close:bool ->
-    (websocket -> unit promise) ->
-    response promise
+    (websocket -> unit) ->
+    response
   (** Creates a fresh [101 Switching Protocols] response. Once this response is
     returned to Dream's HTTP layer, the callback is passed a new
     {!type-websocket}, and the application can begin using it. See example
@@ -510,7 +510,7 @@ module Make
     ?end_of_message:[< end_of_message] ->
     websocket ->
     string ->
-    unit promise
+    unit
   (** Sends a single WebSocket message. The WebSocket is ready another message
       when the promise resolves.
 
@@ -526,7 +526,7 @@ module Make
       [~end_of_message] is ignored for now, as the WebSocket library underlying
       Dream does not support sending message fragments yet. *)
 
-  val receive : websocket -> string option promise
+  val receive : websocket -> string option
   (** Receives a message. If the WebSocket is closed before a complete message
       arrives, the result is [None]. *)
 
@@ -768,8 +768,8 @@ module Make
     ?code:int ->
     ?headers:(string * string) list ->
     ?close:bool ->
-    (stream -> unit promise) ->
-    response promise
+    (stream -> unit) ->
+    response
   (** Creates a response with a {!type-stream} open for writing, and passes the
     stream to the callback when it is ready. See example
     {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
@@ -1473,14 +1473,14 @@ module Make
   val session : string -> request -> string option
   (** Value from the request's session. *)
 
-  val put_session : string -> string -> request -> unit promise
+  val put_session : string -> string -> request -> unit
   (** Mutates a value in the request's session. The back end may commit the value
       to storage immediately, so this function returns a promise. *)
 
   val all_session_values : request -> (string * string) list
   (** Full session dictionary. *)
 
-  val invalidate_session : request -> unit promise
+  val invalidate_session : request -> unit
   (** Invalidates the request's session, replacing it with a fresh, empty
       pre-session. *)
 
@@ -1766,7 +1766,7 @@ module Make
       [true].
       }} *)
 
-  type error_handler = error -> response option promise
+  type error_handler = error -> response option
   (** Error handlers log errors and convert them into responses. Ignore if using
       {!Dream.error_template}.
 
@@ -1782,7 +1782,7 @@ module Make
   (* TODO Get rid of the option? *)
 
   val error_template :
-    (error -> string -> response -> response promise) -> error_handler
+    (error -> string -> response -> response) -> error_handler
   (** Builds an {!error_handler} from a template. See example
       {{:https://github.com/aantron/dream/tree/master/example/9-error#files}
       [9-error]} \[{{:http://dream.as/9-error} playground}\].
@@ -1823,7 +1823,7 @@ module Make
       If the template itself raises an exception or rejects, an empty [500
       Internal Server Error] will be sent in contexts that require a response. *)
 
-  val catch : (error -> response promise) -> middleware
+  val catch : (error -> response) -> middleware
   (** Forwards exceptions, rejections, and [4xx], [5xx] responses from the
       application to the error handler. See {!section-errors}. *)
   (* TODO Error handler should not return an option, and then the type can be

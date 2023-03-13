@@ -45,7 +45,7 @@ let () =
   @@ Dream.router [
 
     Dream.get "/" (fun request ->
-      Dream.stream request
+      Dream.stream
         ~headers:["Content-Type", "application/octet-stream"]
         (stress
           ?megabytes:(query_int request "mb")
