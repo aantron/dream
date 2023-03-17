@@ -41,7 +41,7 @@ depends: [
   "ke" {>= "0.5"}  # Gluten.
   "lwt_ssl" {>= "1.2.0"}  # Gluten.
   "psq"  # h2.
-  "result"  # http/af, websocket/af.
+  "result"  # websocket/af.
 ]
 
 build: [

@@ -52,7 +52,6 @@
    angstrom
    bigstringaf
    faraday
-   result
   )))
 
 (subdir httpaf/lwt
