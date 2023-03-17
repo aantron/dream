@@ -54,6 +54,7 @@ depends: [
   "dream-httpaf"
   "dream-pure"
   "dune" {>= "2.7.0"}
+  "duration"
   "emile" {>= "1.1"}
   "letsencrypt" {>= "0.3.0"}
   "lwt"
