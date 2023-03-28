@@ -6,6 +6,10 @@ build :
 watch :
 	@dune build -p dream-pure,dream-httpaf,dream --no-print-directory -w
 
+.PHONY : deps
+deps :
+	opam install --deps-only --with-test ./dream-pure.opam ./dream-httpaf.opam ./dream.opam
+
 TEST ?= test
 ROOT := $(shell [ -f ../dune-workspace ] && echo .. || echo .)
 
