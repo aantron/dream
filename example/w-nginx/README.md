@@ -46,6 +46,7 @@ events {
 The reference for
 [`nginx.conf`](https://github.com/aantron/dream/blob/master/example/w-nginx/nginx.conf)
 can be found [here](https://nginx.org/en/docs/).
+Note that you'll need to put a bit more work into the nginx configuration if you want your application to handle websockets, refer to nginx' [manual](http://nginx.org/en/docs/http/websocket.html) for more details.
 
 Our
 [`docker-compose.yml`](https://github.com/aantron/dream/blob/master/example/w-nginx/docker-compose.yml)
