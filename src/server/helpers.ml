@@ -102,29 +102,26 @@ let get_switch request =
   | None -> failwith "Missing switch field on request!"
 
 let stream ?status ?code ?headers ?(close = true) callback =
-  let sw = get_switch request in
   let reader, writer = Stream.pipe () in
   let client_stream = Stream.stream reader Stream.no_writer
   and server_stream = Stream.stream Stream.no_reader writer in
   let response =
     Message.response ?status ?code ?headers client_stream server_stream in
+  (* FIXME untested *)
+  let sw = get_switch response in
+  let callback stream = Fiber.fork ~sw (fun () -> callback stream) in
 
   (* TODO Make sure the request id is propagated to the callback. *)
-  Lwt.async (fun () ->
-    if close then
-      match%lwt callback server_stream with
-      | () ->
-        Message.close server_stream
-      | exception exn ->
-        let%lwt () = Message.close server_stream in
-        raise exn
-    else
-      callback server_stream);
-
-  Lwt.return response
-  (* let wrapped_callback _ = Fiber.fork ~sw (fun () -> callback response) in *)
-  (* Stream.ready server_stream ~close:wrapped_callback wrapped_callback; *)
-  (* response *)
+  (if close then
+    match callback server_stream with
+    | () ->
+      Message.close server_stream
+    | exception exn ->
+      Message.close server_stream;
+      raise exn
+  else
+    callback server_stream);
+  response
 
 let websocket_field =
   Message.new_field

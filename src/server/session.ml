@@ -15,15 +15,15 @@ let log =
   Log.sub_log "dream.session"
 
 type 'a back_end = {
-  load : Message.request -> 'a Lwt.t;
-  send : 'a -> Message.request -> Message.response -> Message.response Lwt.t;
+  load : Message.request -> 'a;
+  send : 'a -> Message.request -> Message.response -> Message.response;
 }
 
 let middleware field back_end = fun inner_handler request ->
-  let session = Lwt_eio.Promise.await_lwt (back_end.load request) in
+  let session = back_end.load request in
   Message.set_field request field session;
   let response = inner_handler request in
-  Lwt_eio.Promise.await_lwt (back_end.send session request response)
+  back_end.send session request response
 
 let getter field request =
   match Message.field request field with
@@ -171,7 +171,7 @@ struct
     in
 
     let session = ref session in
-    Lwt.return (operations ~now:gettimeofday hash_table lifetime session dirty, session)
+    operations ~now:gettimeofday hash_table lifetime session dirty, session
 
   let send ~now (operations, session) request response =
     if operations.dirty then begin
@@ -180,7 +180,7 @@ struct
       Cookie.set_cookie
         response request session_cookie id ~encrypt:false ~max_age
     end;
-    Lwt.return response
+    response
 
   let back_end ~now lifetime =
     let hash_table = Hashtbl.create 256 in
@@ -280,7 +280,7 @@ struct
     in
 
     let session = ref session in
-    Lwt.return (operations ~now:gettimeofday lifetime session dirty, session)
+    operations ~now:gettimeofday lifetime session dirty, session
 
   let send ~now (operations, session) request response =
     if operations.dirty then begin
@@ -298,7 +298,7 @@ struct
       in
       Cookie.set_cookie response request session_cookie value ~max_age
     end;
-    Lwt.return response
+    response
 
   let back_end ~now lifetime = {
     load = load ~now lifetime;

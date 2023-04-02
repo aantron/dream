@@ -7,7 +7,6 @@
   dream-pure
   fmt
   logs
-  lwt
   magic-mime
   mirage-clock
   multipart_form
@@ -18,7 +17,6 @@
   yojson
   lwt_eio
  )
- (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))
 
 (rule
