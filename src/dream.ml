@@ -76,7 +76,6 @@ type route = Router.route
 type 'a message = 'a Message.message
 type client = Message.client
 type server = Message.server
-type 'a promise = 'a Message.promise
 
 
 
@@ -144,7 +143,7 @@ let all_cookies = Cookie.all_cookies
 
 (* Bodies *)
 
-let body x = Lwt_eio.Promise.await_lwt (Message.body x)
+let body x = Message.body x
 let set_body = Message.set_body
 
 
@@ -195,12 +194,12 @@ let origin_referrer_check = Origin_referrer_check.origin_referrer_check
 (* Forms *)
 
 type 'a form_result = 'a Form.form_result
-let form ?csrf x = Lwt_eio.Promise.await_lwt (Form.form ~now ?csrf x)
+let form ?csrf x = Form.form ~now ?csrf x
 type multipart_form = Upload.multipart_form
-let multipart ?csrf x = Lwt_eio.Promise.await_lwt (Upload.multipart ~now ?csrf x)
+let multipart ?csrf x = Upload.multipart ~now ?csrf x
 type part = Upload.part
-let upload request = Lwt_eio.Promise.await_lwt (Upload.upload request)
-let upload_part request = Lwt_eio.Promise.await_lwt (Upload.upload_part request)
+let upload request = Upload.upload request
+let upload_part request = Upload.upload_part request
 type csrf_result = Csrf.csrf_result
 let csrf_token = Csrf.csrf_token ~now
 let verify_csrf_token = Csrf.verify_csrf_token ~now
@@ -289,7 +288,7 @@ let graphiql = Graphql.graphiql
 (* SQL *)
 
 let sql_pool = Sql.sql_pool
-let sql req fn = Lwt_eio.Promise.await_lwt (Sql.sql req fn)
+let sql req fn = Sql.sql req fn
 
 
 

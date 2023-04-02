@@ -118,7 +118,6 @@ and server = Dream_pure.Message.server
 (* TODO These docs need to be clarified. *)
 (* TODO Hide all the Dream_pure type equalities. *)
 
-and 'a promise = 'a Lwt.t
 (** Dream uses {{:https://github.com/ocsigen/lwt} Lwt} for promises and
     asynchronous I/O. See example
     {{:https://github.com/aantron/dream/tree/master/example/5-promise#files}
@@ -742,7 +741,7 @@ val stream :
     [Dream.stream] automatically closes the stream when the callback returns or
     raises an exception. Pass [~close:false] to suppress this behavior. *)
 
-val read : stream -> string option promise
+val read : stream -> string option
 (** Retrieves a body chunk. See example
     {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
     [j-stream]}. *)
@@ -757,15 +756,15 @@ https://aantron.github.io/dream/#val-set_stream
 "]
 (**/**)
 
-val write : stream -> string -> unit promise
+val write : stream -> string -> unit
 (** Streams out the string. The promise is fulfilled when the response can
     accept more writes. *)
 (* TODO Document clearly which of the writing functions can raise exceptions. *)
 
-val flush : stream -> unit promise
+val flush : stream -> unit
 (** Flushes the stream's write buffer. Data is sent to the client. *)
 
-val close : stream -> unit promise
+val close : stream -> unit
 (** Closes the stream. *)
 
 (** {2 Low-level streaming}
@@ -938,7 +937,7 @@ val receive : websocket -> string option
     arrives, the result is [None]. *)
 
 val receive_fragment :
-  websocket -> (string * text_or_binary * end_of_message) option promise
+  websocket -> (string * text_or_binary * end_of_message) option
 (** Receives a single fragment of a message, streaming it. *)
 
 val close_websocket : ?code:int -> websocket -> unit
@@ -1219,7 +1218,7 @@ val csrf_token : ?valid_for:float -> request -> string
     in seconds. The default value is one hour ([3600.]). Dream uses signed
     tokens that are not stored server-side. *)
 
-val verify_csrf_token : request -> string -> csrf_result promise
+val verify_csrf_token : request -> string -> csrf_result
 (** Checks that the CSRF token is valid for the {!type-request}'s session. *)
 
 
@@ -1846,7 +1845,7 @@ val graphiql : ?default_query:string -> string -> handler
 val sql_pool : ?size:int -> string -> middleware
 (** Makes an SQL connection pool available to its inner handler. *)
 
-val sql : request -> (Caqti_lwt.connection -> 'a promise) -> 'a
+val sql : request -> (Caqti_lwt.connection -> 'a) -> 'a
 (** Runs the callback with a connection from the SQL pool. See example
     {{:https://github.com/aantron/dream/tree/master/example/h-sql#files}
     [h-sql]}.
