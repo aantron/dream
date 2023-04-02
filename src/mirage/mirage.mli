@@ -128,7 +128,6 @@ module Make
   (* TODO These docs need to be clarified. *)
   (* TODO Hide all the Dream_pure type equalities. *)
 
-  and 'a promise = 'a Lwt.t
   (** Dream uses {{:https://github.com/ocsigen/lwt} Lwt} for promises and
       asynchronous I/O. See example
       {{:https://github.com/aantron/dream/tree/master/example/5-promise#files}
@@ -531,10 +530,10 @@ module Make
       arrives, the result is [None]. *)
 
   val receive_fragment :
-    websocket -> (string * text_or_binary * end_of_message) option promise
+    websocket -> (string * text_or_binary * end_of_message) option
   (** Receives a single fragment of a message, streaming it. *)
 
-  val close_websocket : ?code:int -> websocket -> unit promise
+  val close_websocket : ?code:int -> websocket -> unit
   (** Closes the WebSocket. [~code] is usually not necessary, but is needed for
       some protocols based on WebSockets. See
       {{:https://tools.ietf.org/html/rfc6455#section-7.4} RFC 6455 §7.4}. *)
@@ -728,7 +727,7 @@ module Make
 
   (** {1 Bodies} *)
 
-  val body : 'a message -> string promise
+  val body : 'a message -> string
   (** Retrieves the entire body. See example
       {{:https://github.com/aantron/dream/tree/master/example/6-echo#files}
       [6-echo]}. *)
@@ -784,22 +783,22 @@ module Make
     [Dream.stream] automatically closes the stream when the callback returns or
     raises an exception. Pass [~close:false] to suppress this behavior. *)
 
-  val read : stream -> string option promise
+  val read : stream -> string option
   (** Retrieves a body chunk. See example
       {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
       [j-stream]}. *)
   (* TODO Document difference between receiving a request and receiving on a
      WebSocket. *)
 
-  val write : stream -> string -> unit promise
+  val write : stream -> string -> unit
   (** Streams out the string. The promise is fulfilled when the response can
       accept more writes. *)
   (* TODO Document clearly which of the writing functions can raise exceptions. *)
 
-  val flush : stream -> unit promise
+  val flush : stream -> unit
   (** Flushes the stream's write buffer. Data is sent to the client. *)
 
-  val close : stream -> unit promise
+  val close : stream -> unit
   (** Closes the stream. *)
 
   val client_stream : 'a message -> stream
@@ -951,7 +950,7 @@ module Make
       activity, or tokens so old that decryption keys have since been rotated on
       the server. *)
 
-  val form : ?csrf:bool -> request -> (string * string) list form_result promise
+  val form : ?csrf:bool -> request -> (string * string) list form_result
   (** Parses the request body as a form. Performs CSRF checks. Use
       {!Dream.form_tag} in a template to transparently generate forms that will
       pass these checks. See {!section-templates} and example
@@ -1041,7 +1040,7 @@ module Make
       OWASP {i File Upload Cheat Sheet}} for security precautions for upload
       forms. *)
 
-  val multipart : ?csrf:bool -> request -> multipart_form form_result promise
+  val multipart : ?csrf:bool -> request -> multipart_form form_result
   (** Like {!Dream.form}, but also reads files, and [Content-Type:] must be
       [multipart/form-data]. The [<form>] tag and CSRF token can be generated in a
       template with
@@ -1074,7 +1073,7 @@ module Make
       Note that, in the general case, [filename] and [headers] are not reliable.
       [name] is the form field name. *)
 
-  val upload : request -> part option promise
+  val upload : request -> part option
   (** Retrieves the next upload part.
 
       Upon getting [Some (name, filename, headers)] from this function, the user
@@ -1093,7 +1092,7 @@ module Make
         [FormData]} in the client to submit [multipart/form-data] by AJAX, and
         include a custom header. *)
 
-  val upload_part : request -> string option promise
+  val upload_part : request -> string option
   (** Retrieves a part chunk. *)
 
   (** {2 CSRF tokens}
@@ -1133,7 +1132,7 @@ module Make
       seconds. The default value is one hour ([3600.]). Dream uses signed tokens
       that are not stored server-side. *)
 
-  val verify_csrf_token : request -> string -> csrf_result promise
+  val verify_csrf_token : request -> string -> csrf_result
   (** Checks that the CSRF token is valid for the {!type-request}'s session. *)
 
   val csrf_tag : request -> string

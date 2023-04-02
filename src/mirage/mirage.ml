@@ -202,7 +202,6 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
   type 'a message = 'a Message.message
   type client = Message.client
   type server = Message.server
-  type 'a promise = 'a Message.promise
 
 
   (* Requests *)
