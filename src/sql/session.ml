@@ -35,9 +35,10 @@ let insert =
 
   fun (module Db : DB) (session : Session.session) ->
     let payload = serialize_payload session.payload in
-    let%lwt result =
+    let result =
+      Lwt_eio.Promise.await_lwt @@
       Db.exec query (session.id, session.label, session.expires_at, payload) in
-    Caqti_lwt.or_fail result
+    Lwt_eio.Promise.await_lwt @@ Caqti_lwt.or_fail result
 
 let find_opt =
   let query =
@@ -46,9 +47,9 @@ let find_opt =
       "SELECT label, expires_at, payload FROM dream_session WHERE id = $1" in
 
   fun (module Db : DB) id ->
-    let%lwt result = Db.find_opt query id in
-    match%lwt Caqti_lwt.or_fail result with
-    | None -> Lwt.return_none
+    let result = Lwt_eio.Promise.await_lwt @@ Db.find_opt query id in
+    match Lwt_eio.Promise.await_lwt @@ Caqti_lwt.or_fail result with
+    | None -> None
     | Some (label, expires_at, payload) ->
       (* TODO Mind exceptions! *)
       let payload =
@@ -60,7 +61,7 @@ let find_opt =
               | _ -> failwith "Bad payload")
           | _ -> failwith "Bad payload"
       in
-      Lwt.return_some Session.{
+      Some Session.{
         id;
         label;
         expires_at;
@@ -74,8 +75,8 @@ let refresh =
       "UPDATE dream_session SET expires_at = $1 WHERE id = $2" in
 
   fun (module Db : DB) (session : Session.session) ->
-    let%lwt result = Db.exec query (session.expires_at, session.id) in
-    Caqti_lwt.or_fail result
+    let result = Lwt_eio.Promise.await_lwt @@ Db.exec query (session.expires_at, session.id) in
+    Lwt_eio.Promise.await_lwt @@ Caqti_lwt.or_fail result
 
 let update =
   let query =
@@ -85,8 +86,8 @@ let update =
 
   fun (module Db : DB) (session : Session.session) ->
     let payload = serialize_payload session.payload in
-    let%lwt result = Db.exec query (payload, session.id) in
-    Caqti_lwt.or_fail result
+    let result = Lwt_eio.Promise.await_lwt @@ Db.exec query (payload, session.id) in
+    Lwt_eio.Promise.await_lwt @@ Caqti_lwt.or_fail result
 
 let remove =
   let query =
@@ -94,8 +95,8 @@ let remove =
     (T.string ->. T.unit) "DELETE FROM dream_session WHERE id = $1"  in
 
   fun (module Db : DB) id ->
-    let%lwt result = Db.exec query id in
-    Caqti_lwt.or_fail result
+    let result = Lwt_eio.Promise.await_lwt @@ Db.exec query id in
+    Lwt_eio.Promise.await_lwt @@ Caqti_lwt.or_fail result
 
 (* TODO Session sharing is greatly complicated by the backing store; is it ok to
    just work with snapshots? All kinds of race conditions may be possible,
@@ -114,30 +115,25 @@ let rec create db expires_at attempt =
   } in
   (* Assume that any exception is a PRIMARY KEY collision (extremely unlikely)
      and try a couple more times. *)
-  match%lwt insert db session with
+  match insert db session with
   | exception Caqti_error.Exn _ when attempt <= 3 ->
     create db expires_at (attempt + 1)
   | () ->
-    Lwt.return session
+    session
 
 let put request (session : Session.session) name value =
   session.payload
   |> List.remove_assoc name
   |> fun dictionary -> (name, value)::dictionary
   |> fun dictionary -> session.payload <- dictionary;
-  Lwt_eio.Promise.await_lwt begin
-    Sql.sql request (fun db -> update db session)
-  end
+  Sql.sql request (fun db -> update db session)
 
 let invalidate request lifetime operations (session : Session.session ref) =
-  Lwt_eio.Promise.await_lwt begin
-    Sql.sql request begin fun db ->
-      let%lwt () = remove db !session.id in
-      let%lwt new_session = create db (Unix.gettimeofday () +. lifetime) 1 in
-      session := new_session;
-      operations.Session.dirty <- true;
-      Lwt.return_unit
-    end
+  Sql.sql request begin fun db ->
+    remove db !session.id;
+    let new_session = create db (Unix.gettimeofday () +. lifetime) 1 in
+    session := new_session;
+    operations.Session.dirty <- true
   end
 
 let operations request lifetime (session : Session.session ref) dirty =
@@ -152,41 +148,41 @@ let load lifetime request =
   Sql.sql request begin fun db ->
     let now = Unix.gettimeofday () in
 
-    let%lwt valid_session =
+    let valid_session =
       match Cookie.cookie request ~decrypt:false Session.session_cookie with
-      | None -> Lwt.return_none
+      | None -> None
       | Some id ->
         match Session.read_session_id id with
-        | None -> Lwt.return_none
+        | None -> None
         | Some id ->
-          match%lwt find_opt db id with
-          | None -> Lwt.return_none
+          match find_opt db id with
+          | None -> None
           | Some session ->
             if session.expires_at > now then
-              Lwt.return (Some session)
+              Some session
             else begin
-              let%lwt () = remove db id in
-              Lwt.return_none
+              remove db id;
+              None
             end
     in
 
-    let%lwt dirty, session =
+    let dirty, session =
       match valid_session with
       | Some session ->
         if session.expires_at -. now > (lifetime /. 2.) then
-          Lwt.return (false, session)
+          false, session
         else begin
           session.expires_at <- now +. lifetime;
-          let%lwt () = refresh db session in
-          Lwt.return (true, session)
+          refresh db session;
+          true, session
         end
       | None ->
-        let%lwt session = create db (now +. lifetime) 1 in
-        Lwt.return (true, session)
+        let session = create db (now +. lifetime) 1 in
+        true, session
     in
 
     let session = ref session in
-    Lwt.return (operations request lifetime session dirty, session)
+    operations request lifetime session dirty, session
   end
 
 let send (operations, session) request response =
@@ -201,7 +197,7 @@ let send (operations, session) request response =
       ~encrypt:false
       ~max_age
   end;
-  Lwt.return response
+  response
 
 let back_end lifetime = {
   Session.load = load lifetime;
