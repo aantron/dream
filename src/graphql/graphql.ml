@@ -279,8 +279,7 @@ let graphql make_context schema = fun request ->
   | `POST ->
     begin match Message.header request "Content-Type" with
     | Some "application/json" ->
-      Lwt_eio.Promise.await_lwt (
-        let%lwt body = Message.body request in
+        let body = Message.body request in
         (* TODO This almost certainly raises exceptions... *)
         let json = Yojson.Basic.from_string body in
 
@@ -288,20 +287,16 @@ let graphql make_context schema = fun request ->
           | Error json ->
             Yojson.Basic.to_string json
             |> Helpers.json
-            |> Lwt.return
 
           | Ok (`Response json) ->
             Yojson.Basic.to_string json
             |> Helpers.json
-            |> Lwt.return
 
           | Ok (`Stream _) ->
             make_error "Subscriptions and streaming should use WebSocket transport"
             |> Yojson.Basic.to_string
             |> Helpers.json
-            |> Lwt.return
         end
-      )
 
     | _ ->
       log.warning (fun log -> log ~request
