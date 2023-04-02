@@ -113,73 +113,67 @@ let wrap_handler ~sw
        customizable here. The handler itself is customizable (to catch all)
        exceptions, and the error callback that gets leaked exceptions is also
        customizable. *)
-    Lwt.async begin fun () ->
-      Lwt.catch begin fun () ->
-        (* Do the big call. *)
-        let%lwt response = Lwt_eio.run_eio (fun () -> user's_dream_handler request) in
+    try
+      (* Do the big call. *)
+      let response = user's_dream_handler request in
 
-        (* Extract the Dream response's headers. *)
+      (* Extract the Dream response's headers. *)
 
-        (* This is the default function that translates the Dream response to an
+      (* This is the default function that translates the Dream response to an
            http/af response and sends it. We pre-define the function, however,
            because it is called from two places:
 
            1. Upon a normal response, the function is called unconditionally.
            2. Upon failure to establish a WebSocket, the function is called to
               transmit the resulting error response. *)
-        let forward_response response =
-          Message.set_content_length_headers response;
+      let forward_response response =
+        Message.set_content_length_headers response;
 
-          let headers =
-            Httpaf.Headers.of_list (Message.all_headers response) in
+        let headers =
+          Httpaf.Headers.of_list (Message.all_headers response) in
 
-          let status =
-            to_httpaf_status (Message.status response) in
+        let status =
+          to_httpaf_status (Message.status response) in
 
-          let httpaf_response =
-            Httpaf.Response.create ~headers status in
-          let body =
-            Httpaf.Reqd.respond_with_streaming conn httpaf_response in
+        let httpaf_response =
+          Httpaf.Response.create ~headers status in
+        let body =
+          Httpaf.Reqd.respond_with_streaming conn httpaf_response in
 
-          Adapt.forward_body response body;
+        Adapt.forward_body response body
+      in
 
-          Lwt.return_unit
+      match Message.get_websocket response with
+      | None ->
+        forward_response response
+      | Some (client_stream, _server_stream) ->
+        let error_handler =
+          Error_handler.websocket user's_error_handler request response in
+
+        let proceed () =
+          Websocketaf.Server_connection.create_websocket
+            ~error_handler
+            (Dream_httpaf.Websocket.websocket_handler client_stream)
+          |> Gluten.make (module Websocketaf.Server_connection)
+          |> upgrade
         in
 
-        match Message.get_websocket response with
-        | None ->
-          forward_response response
-        | Some (client_stream, _server_stream) ->
-          let error_handler =
-            Error_handler.websocket user's_error_handler request response in
+        let headers =
+          Httpaf.Headers.of_list (Message.all_headers response) in
 
-          let proceed () =
-            Websocketaf.Server_connection.create_websocket
-              ~error_handler
-              (Dream_httpaf.Websocket.websocket_handler client_stream)
-            |> Gluten.make (module Websocketaf.Server_connection)
-            |> upgrade
+        Websocketaf.Handshake.respond_with_upgrade ~headers ~sha1 conn proceed
+        |> function
+        | Ok () -> ()
+        | Error error_string ->
+          let response =
+            Error_handler.websocket_handshake
+              user's_error_handler request response error_string
           in
-
-          let headers =
-            Httpaf.Headers.of_list (Message.all_headers response) in
-
-          Websocketaf.Handshake.respond_with_upgrade ~headers ~sha1 conn proceed
-          |> function
-          | Ok () -> Lwt.return_unit
-          | Error error_string ->
-            let response =
-              Error_handler.websocket_handshake
-                user's_error_handler request response error_string
-            in
-            forward_response response
-      end
-      @@ fun exn ->
-        (* TODO There was something in the fork changelogs about not requiring
+          forward_response response
+    with exn ->
+      (* TODO There was something in the fork changelogs about not requiring
            report exn. Is it relevant to this? *)
-        Httpaf.Reqd.report_exn conn exn;
-        Lwt.return_unit
-    end
+      Httpaf.Reqd.report_exn conn exn
   in
 
   httpaf_request_handler
@@ -236,46 +230,40 @@ let wrap_handler_h2 ~sw
        customizable here. The handler itself is customizable (to catch all)
        exceptions, and the error callback that gets leaked exceptions is also
        customizable. *)
-    Lwt.async begin fun () ->
-      Lwt.catch begin fun () ->
-        (* Do the big call. *)
-        let%lwt response = Lwt_eio.run_eio (fun () -> user's_dream_handler request) in
+    try
+      (* Do the big call. *)
+      let response = user's_dream_handler request in
 
-        (* Extract the Dream response's headers. *)
+      (* Extract the Dream response's headers. *)
 
-        let forward_response response =
-          Message.drop_content_length_headers response;
-          Message.lowercase_headers response;
-          let headers =
-            H2.Headers.of_list (Message.all_headers response) in
-          let status =
-            to_h2_status (Message.status response) in
-          let h2_response =
-            H2.Response.create ~headers status in
-          let body =
-            H2.Reqd.respond_with_streaming conn h2_response in
+      let forward_response response =
+        Message.drop_content_length_headers response;
+        Message.lowercase_headers response;
+        let headers =
+          H2.Headers.of_list (Message.all_headers response) in
+        let status =
+          to_h2_status (Message.status response) in
+        let h2_response =
+          H2.Response.create ~headers status in
+        let body =
+          H2.Reqd.respond_with_streaming conn h2_response in
 
-          Adapt.forward_body_h2 response body;
+        Adapt.forward_body_h2 response body
+      in
 
-          Lwt.return_unit
-        in
-
-        match Message.get_websocket response with
-        | None ->
-          forward_response response
-        | Some _ ->
+      match Message.get_websocket response with
+      | None ->
+        forward_response response
+      | Some _ ->
         (* TODO DOC H2 appears not to support WebSocket upgrade at present.
            RFC 8441. *)
         (* TODO DOC Do we need a CONNECT method? Do users need to be informed of
            this? *)
-          Lwt.return_unit
-      end
-      @@ fun exn ->
-        (* TODO LATER There was something in the fork changelogs about not
+        ()
+    with exn ->
+      (* TODO LATER There was something in the fork changelogs about not
            requiring report_exn. Is it relevant to this? *)
-        H2.Reqd.report_exn conn exn;
-        Lwt.return_unit
-    end
+      H2.Reqd.report_exn conn exn
   in
 
   httpaf_request_handler
@@ -294,9 +282,9 @@ type tls_library = {
     handler:Message.handler ->
     error_handler:Catch.error_handler ->
     sw:Switch.t ->
-      Unix.sockaddr ->
-      Lwt_unix.file_descr ->
-        unit Lwt.t;
+    Unix.sockaddr ->
+    Lwt_unix.file_descr ->
+    unit;
 }
 
 let no_tls = {
@@ -304,11 +292,16 @@ let no_tls = {
       ~certificate_file:_ ~key_file:_
       ~handler
       ~error_handler
-      ~sw ->
-    Httpaf_lwt_unix.Server.create_connection_handler
-      ?config:None
-      ~request_handler:(wrap_handler ~sw false error_handler handler)
-      ~error_handler:(Error_handler.httpaf error_handler)
+      ~sw
+      sockaddr
+      fd ->
+      Lwt_eio.Promise.await_lwt @@
+      Httpaf_lwt_unix.Server.create_connection_handler
+        ?config:None
+        ~request_handler:(wrap_handler ~sw false error_handler handler)
+        ~error_handler:(Error_handler.httpaf error_handler)
+        sockaddr
+        fd
   end;
 }
 
@@ -319,18 +312,22 @@ let openssl = {
       ~error_handler
       ~sw ->
 
-    let httpaf_handler =
+    let httpaf_handler sockaddr socket =
       Httpaf_lwt_unix.Server.SSL.create_connection_handler
         ?config:None
       ~request_handler:(wrap_handler ~sw true error_handler handler)
       ~error_handler:(Error_handler.httpaf error_handler)
+      sockaddr socket
+      |> Lwt_eio.Promise.await_lwt
     in
 
-    let h2_handler =
+    let h2_handler sockaddr socket =
       H2_lwt_unix.Server.SSL.create_connection_handler
         ?config:None
       ~request_handler:(wrap_handler_h2 ~sw true error_handler handler)
       ~error_handler:(Error_handler.h2 error_handler)
+      sockaddr socket
+      |> Lwt_eio.Promise.await_lwt
     in
 
     let perform_tls_handshake =
@@ -341,7 +338,7 @@ let openssl = {
     in
 
     fun client_address unix_socket ->
-      let%lwt tls_endpoint = perform_tls_handshake client_address unix_socket in
+      let tls_endpoint = Lwt_eio.Promise.await_lwt @@ perform_tls_handshake client_address unix_socket in
       (* TODO LATER This part with getting the negotiated protocol belongs in
          Gluten. Right now, we've picked up a hard dep on OpenSSL. *)
       (* See also https://github.com/anmonteiro/ocaml-h2/blob/66d92f1694b488ea638aa5073c796e164d5fbd9e/examples/alpn/unix/alpn_server_ssl.ml#L57 *)
@@ -369,7 +366,6 @@ let openssl = {
         | Some _ ->
           assert false
   end;
-*)
 }
 
 (* TODO LATER Add ALPN + HTTP/2.0 with ocaml-tls, too. *)
@@ -378,12 +374,17 @@ let ocaml_tls = {
       ~certificate_file ~key_file
       ~handler
       ~error_handler
-      ~sw ->
+      ~sw
+      sockaddr
+      fd ->
+      Lwt_eio.Promise.await_lwt @@
     Httpaf_lwt_unix.Server.TLS.create_connection_handler_with_default
       ~certfile:certificate_file ~keyfile:key_file
       ?config:None
       ~request_handler:(wrap_handler ~sw true error_handler handler)
       ~error_handler:(Error_handler.httpaf error_handler)
+      sockaddr
+      fd
 }
 
 
@@ -459,22 +460,22 @@ let serve_with_details
     try
       let fd = Eio_unix.FD.take_opt flow |> Option.get in
       let socket = Lwt_unix.of_unix_file_descr fd in
-      Lwt_eio.Promise.await_lwt @@
       httpaf_connection_handler ~sw client_address socket
     with exn ->
       tls_error_handler client_address exn
   in
 
-  let listen_address = Lwt_eio.Promise.await_lwt @@
+  let listen_address =
     (* Look up the low-level address corresponding to the interface. Hopefully,
        this is a local interface. *)
-    let%lwt addresses = Lwt_unix.getaddrinfo interface (string_of_int port) [] in
+    let addresses = Lwt_eio.Promise.await_lwt @@ Lwt_unix.getaddrinfo interface (string_of_int port) [] in
     match addresses with
     | [] ->
+      Lwt_eio.Promise.await_lwt @@
       Printf.ksprintf failwith "Dream.%s: no interface with address %s"
         caller_function_for_error_messages interface
     | address::_ ->
-      Lwt.return (of_unix_addr Lwt_unix.(address.ai_addr))
+      of_unix_addr Lwt_unix.(address.ai_addr)
   in
 
   (* Bring up the HTTP server. *)

@@ -210,7 +210,7 @@ let debug_error_handler =
 
 
 let double_faults f default =
-  Lwt.catch f begin fun exn ->
+  try f () with exn ->
     let backtrace = Printexc.get_backtrace () in
 
     log.error (fun log ->
@@ -221,7 +221,6 @@ let double_faults f default =
       log.error (fun log -> log "%s" line));
 
     default ()
-  end
 
 (* If the user's handler fails to provide a response, return an empty 500
    response. Don't return the original response we passed to the error handler,
@@ -230,10 +229,8 @@ let double_faults f default =
    is a programming error, so it's probably fine to return a generic server
    error. *)
 let respond_with_option f =
-  Lwt_eio.Promise.await_lwt @@
   double_faults
     (fun () ->
-      Lwt_eio.run_eio @@ fun () ->
       match f () with
       | Some response -> response
       | None ->
@@ -241,7 +238,6 @@ let respond_with_option f =
           ~status:`Internal_Server_Error Stream.empty Stream.null)
     (fun () ->
       Message.response ~status:`Internal_Server_Error Stream.empty Stream.null
-      |> Lwt.return
     )
 
 
@@ -306,9 +302,8 @@ let httpaf
     will_send_response = true;
   } in
 
-  Lwt.async begin fun () ->
     double_faults begin fun () ->
-      let%lwt response = Lwt_eio.run_eio (fun () -> user's_error_handler error) in
+      let response = user's_error_handler error in
 
       let response =
         match response with
@@ -319,12 +314,9 @@ let httpaf
       let headers = Httpaf.Headers.of_list (Message.all_headers response) in
       let body = start_response headers in
 
-      Adapt.forward_body response body;
-
-      Lwt.return_unit
+      Adapt.forward_body response body
     end
-      Lwt.return
-  end
+      (fun () -> ())
 
 
 
@@ -364,9 +356,8 @@ let h2
     will_send_response = true;
   } in
 
-  Lwt.async begin fun () ->
     double_faults begin fun () ->
-      let%lwt response = Lwt_eio.run_eio (fun () -> user's_error_handler error) in
+      let response = user's_error_handler error in
 
       let response =
         match response with
@@ -377,12 +368,9 @@ let h2
       let headers = H2.Headers.of_list (Message.all_headers response) in
       let body = start_response headers in
 
-      Adapt.forward_body_h2 response body;
-
-      Lwt.return_unit
+      Adapt.forward_body_h2 response body
     end
-      Lwt.return
-  end
+      (fun () -> ())
 
 
 
@@ -405,10 +393,9 @@ let tls
     will_send_response = false;
   } in
 
-  Lwt.async (fun () ->
     double_faults
-      (fun () -> Lwt_eio.run_eio (fun () -> user's_error_handler error |> ignore))
-      Lwt.return)
+      (fun () -> user's_error_handler error |> ignore)
+      (fun () -> ())
 
 
 
@@ -436,10 +423,9 @@ let websocket
     will_send_response = false;
   } in
 
-  Lwt.async (fun () ->
     double_faults
-      (fun () -> Lwt_eio.run_eio (fun () -> user's_error_handler error |> ignore))
-      Lwt.return)
+      (fun () -> user's_error_handler error |> ignore)
+      (fun () -> ())
 
 
 
