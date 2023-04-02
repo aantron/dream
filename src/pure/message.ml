@@ -6,8 +6,6 @@
 
 (* Type abbreviations and modules used in defining the primary types *)
 
-type 'a promise = 'a Lwt.t
-
 type 'a field_metadata = {
   name : string option;
   show_value : ('a -> string) option;
@@ -38,7 +36,7 @@ type 'a message = {
   mutable headers : (string * string) list;
   mutable client_stream : Stream.stream;
   mutable server_stream : Stream.stream;
-  mutable body : string promise option;
+  mutable body : string option;
   mutable fields : Fields.t;
 }
 
@@ -200,7 +198,7 @@ let body message =
     body_promise
 
 let set_body message body =
-  message.body <- Some (Lwt.return body);
+  message.body <- Some body;
   match message.kind with
   | Request -> message.server_stream <- Stream.string body
   | Response -> message.client_stream <- Stream.string body
@@ -215,13 +213,9 @@ let set_content_length_headers message =
       match message.body with
       | None ->
         add_header message "Transfer-Encoding" "chunked"
-      | Some body_promise ->
-        match Lwt.poll body_promise with
-        | None ->
-          add_header message "Transfer-Encoding" "chunked"
-        | Some body ->
-          let length = string_of_int (String.length body) in
-          add_header message "Content-Length" length
+      | Some body ->
+        let length = string_of_int (String.length body) in
+        add_header message "Content-Length" length
 
 let drop_content_length_headers message =
   drop_header message "Content-Length";
@@ -235,29 +229,28 @@ let read stream =
   Stream.read_convenience stream
 
 let write stream chunk =
-  let promise, resolver = Lwt.wait () in
+  let promise, resolver = Eio.Promise.create () in
   let length = String.length chunk in
   let buffer = Bigstringaf.of_string ~off:0 ~len:length chunk in
   Stream.write
     stream
     buffer 0 length false true
-    ~close:(fun _code -> Lwt.wakeup_later_exn resolver End_of_file)
-    ~exn:(fun exn -> Lwt.wakeup_later_exn resolver exn)
-    (fun () -> Lwt.wakeup_later resolver ());
-  promise
+    ~close:(fun _code -> Eio.Promise.resolve_error resolver End_of_file)
+    ~exn:(fun exn -> Eio.Promise.resolve_error resolver exn)
+    (fun () -> Eio.Promise.resolve_ok resolver ());
+  Eio.Promise.await_exn promise
 
 let flush stream =
-  let promise, resolver = Lwt.wait () in
+  let promise, resolver = Eio.Promise.create () in
   Stream.flush
     stream
-    ~close:(fun _code -> Lwt.wakeup_later_exn resolver End_of_file)
-    ~exn:(fun exn -> Lwt.wakeup_later_exn resolver exn)
-    (Lwt.wakeup_later resolver);
-  promise
+    ~close:(fun _code -> Eio.Promise.resolve_error resolver End_of_file)
+    ~exn:(fun exn -> Eio.Promise.resolve_error resolver exn)
+    (Eio.Promise.resolve_ok resolver);
+  Eio.Promise.await_exn promise
 
 let close stream =
-  Stream.close stream 1000;
-  Lwt.return_unit
+  Stream.close stream 1000
 
 let client_stream message =
   message.client_stream
@@ -287,8 +280,7 @@ let get_websocket response =
 
 let close_websocket ?(code = 1000) (client_stream, server_stream) =
   Stream.close client_stream code;
-  Stream.close server_stream code;
-  Lwt.return_unit
+  Stream.close server_stream code
 
 type text_or_binary = [
   | `Text
@@ -301,9 +293,9 @@ type end_of_message = [
 ]
 
 let receive_fragment stream =
-  let promise, resolver = Lwt.wait () in
-  let close _code = Lwt.wakeup_later resolver None in
-  let abort exn = Lwt.wakeup_later_exn resolver exn in
+  let promise, resolver = Eio.Promise.create () in
+  let close _code = Eio.Promise.resolve_ok resolver None in
+  let abort exn = Eio.Promise.resolve_error resolver exn in
 
   let rec loop () =
     Stream.read stream
@@ -314,7 +306,7 @@ let receive_fragment stream =
         in
         let text_or_binary = if binary then `Binary else `Text in
         let end_of_message = if fin then `End_of_message else `Continues in
-        Lwt.wakeup_later
+        Eio.Promise.resolve_ok
           resolver (Some (string, text_or_binary, end_of_message)))
 
       ~flush:loop
@@ -331,7 +323,7 @@ let receive_fragment stream =
   in
   loop ();
 
-  promise
+  Eio.Promise.await_exn promise
 
 (* TODO This can be optimized by using a buffer, and also by immediately
    returning the first chunk without accumulation if FIN is set on it. *)
@@ -339,29 +331,29 @@ let receive_fragment stream =
    still gracefully return None. *)
 let receive_full stream =
   let rec receive_continuations text_or_binary acc =
-    match%lwt receive_fragment stream with
+    match receive_fragment stream with
     | None ->
-      Lwt.return (Some (acc, text_or_binary))
+      Some (acc, text_or_binary)
     | Some (fragment, _, `End_of_message) ->
-      Lwt.return (Some (acc ^ fragment, text_or_binary))
+      Some (acc ^ fragment, text_or_binary)
     | Some (fragment, _, `Continues) ->
       receive_continuations text_or_binary (acc ^ fragment)
   in
-  match%lwt receive_fragment stream with
+  match receive_fragment stream with
   | None ->
-    Lwt.return_none
+    None
   | Some (fragment, text_or_binary, `End_of_message) ->
-    Lwt.return (Some (fragment, text_or_binary))
+    Some (fragment, text_or_binary)
   | Some (fragment, text_or_binary, `Continues) ->
     receive_continuations text_or_binary fragment
 
 let receive stream =
-  match%lwt receive_full stream with
-  | None -> Lwt.return_none
-  | Some (message, _) -> Lwt.return (Some message)
+  match receive_full stream with
+  | None -> None
+  | Some (message, _) -> Some message
 
 let send ?text_or_binary ?end_of_message stream data =
-  let promise, resolver = Lwt.wait () in
+  let promise, resolver = Eio.Promise.create () in
   let binary =
     match text_or_binary with
     | Some `Binary -> true
@@ -378,10 +370,10 @@ let send ?text_or_binary ?end_of_message stream data =
   let buffer = Bigstringaf.of_string ~off:0 ~len:length data in
   Stream.write
     stream buffer 0 length binary fin
-    ~close:(fun _code -> Lwt.wakeup_later_exn resolver End_of_file)
-    ~exn:(fun exn -> Lwt.wakeup_later_exn resolver exn)
-    (fun () -> Lwt.wakeup_later resolver ());
-  promise
+    ~close:(fun _code -> Eio.Promise.resolve_error resolver End_of_file)
+    ~exn:(fun exn -> Eio.Promise.resolve_error resolver exn)
+    (fun () -> Eio.Promise.resolve_ok resolver ());
+  Eio.Promise.await_exn promise
 
 
 

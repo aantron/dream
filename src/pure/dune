@@ -5,10 +5,8 @@
   base64
   bigstringaf
   hmap
-  lwt
   eio
   uri
   ptime
  )
- (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))
