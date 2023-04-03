@@ -36,9 +36,9 @@ let server_state =
 let last_message =
   ref 0
 
-let message_loop clock =
+let message_loop () =
   while true do
-    Eio.Time.sleep clock (Random.float 2.);
+    Eio_unix.sleep (Random.float 2.);
     incr last_message;
 
     let message = string_of_int !last_message in
@@ -56,7 +56,7 @@ let message_loop clock =
 let () =
   Eio_main.run @@ fun env ->
   Fiber.both
-    (fun () -> message_loop env#clock)
+    message_loop
     (fun () ->
        Dream.run env
        @@ Dream.logger
