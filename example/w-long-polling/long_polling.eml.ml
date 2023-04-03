@@ -55,7 +55,7 @@ let message_loop clock =
 
 let () =
   Eio_main.run @@ fun env ->
-  Fibre.both
+  Fiber.both
     (fun () -> message_loop env#clock)
     (fun () ->
        Dream.run env

@@ -50,7 +50,7 @@ let send message =
   Hashtbl.to_seq_values clients
   |> List.of_seq
   |> List.iter (fun client ->
-      Fibre.fork ~sw (fun () -> Dream.send client message)
+      Fiber.fork ~sw (fun () -> Dream.send client message)
     )
 
 let handle_client client =

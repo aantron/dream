@@ -43,13 +43,13 @@ let stress websocket =
   let limit = 1024 * 1024 * 1024 in
   let start = Unix.gettimeofday () in
   let rec loop sent =
-    if sent >= limit then
-      let () = Dream.close_websocket websocket in
+    if sent >= limit then (
+     Dream.close_websocket websocket;
       Unix.gettimeofday () -. start
-    else
-      let () = Dream.send websocket frame_a ~text_or_binary:`Binary in
-      let () = Dream.send websocket frame_b ~text_or_binary:`Binary in
-      let () = Fiber.yield () in
+    ) else (
+      Dream.send websocket frame_a ~text_or_binary:`Binary;
+      Dream.send websocket frame_b ~text_or_binary:`Binary;
+      Fiber.yield ();
       loop (sent + frame + frame)
     )
   in

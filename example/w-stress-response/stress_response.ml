@@ -16,14 +16,14 @@ let stress ?(megabytes = 1024) ?(chunk = 64) stream =
   let start = Unix.gettimeofday () in
 
   let rec loop sent =
-    if sent >= limit then
-      let () = Dream.flush stream in
-      let () = Dream.close stream in
+    if sent >= limit then (
+      Dream.flush stream;
+      Dream.close stream;
       Unix.gettimeofday () -. start
-    else
-      let () = Dream.write stream chunk_a in
-      let () = Dream.write stream chunk_b in
-      let () = Fiber.yield () in
+    ) else (
+      Dream.write stream chunk_a;
+      Dream.write stream chunk_b;
+      Fiber.yield ();
       loop (sent + chunk + chunk)
     )
   in
