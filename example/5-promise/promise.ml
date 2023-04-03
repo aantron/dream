@@ -2,17 +2,17 @@ let successful = ref 0
 let failed = ref 0
 
 let count_requests inner_handler request =
-  try%lwt
-    let%lwt response = inner_handler request in
+  try
+    let response = inner_handler request in
     successful := !successful + 1;
-    Lwt.return response
-
+    response
   with exn ->
     failed := !failed + 1;
     raise exn
 
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ count_requests
   @@ Dream.router [

@@ -115,6 +115,7 @@ let complete_message id =
 (* TODO Take care to pass around the request Lwt.key in async, etc. *)
 (* TODO Test client complete racing against a stream. *)
 let handle_over_websocket make_context schema subscriptions request websocket =
+  Lwt_eio.Promise.await_lwt @@
   let rec loop inited =
     match%lwt Helpers.receive websocket with
     | None ->
@@ -279,47 +280,50 @@ let graphql make_context schema = fun request ->
     | Some "websocket", Some "graphql-transport-ws" ->
       Helpers.websocket
         ~headers:["Sec-WebSocket-Protocol", "graphql-transport-ws"]
+        request
         (handle_over_websocket make_context schema (Hashtbl.create 16) request)
     | _ ->
       log.warning (fun log -> log ~request "Upgrade: websocket header missing");
       Message.response ~status:`Not_Found Stream.empty Stream.null
-      |> Lwt.return
     end
 
   | `POST ->
     begin match Message.header request "Content-Type" with
     | Some "application/json" ->
-      let%lwt body = Message.body request in
-      (* TODO This almost certainly raises exceptions... *)
-      let json = Yojson.Basic.from_string body in
+      Lwt_eio.Promise.await_lwt (
+        let%lwt body = Message.body request in
+        (* TODO This almost certainly raises exceptions... *)
+        let json = Yojson.Basic.from_string body in
 
-      begin match%lwt run_query make_context schema request json with
-      | Error json ->
-        Yojson.Basic.to_string json
-        |> Helpers.json
+        begin match%lwt run_query make_context schema request json with
+          | Error json ->
+            Yojson.Basic.to_string json
+            |> Helpers.json
+            |> Lwt.return
 
-      | Ok (`Response json) ->
-        Yojson.Basic.to_string json
-        |> Helpers.json
+          | Ok (`Response json) ->
+            Yojson.Basic.to_string json
+            |> Helpers.json
+            |> Lwt.return
 
-      | Ok (`Stream _) ->
-        make_error "Subscriptions and streaming should use WebSocket transport"
-        |> Yojson.Basic.to_string
-        |> Helpers.json
-      end
+          | Ok (`Stream _) ->
+            make_error "Subscriptions and streaming should use WebSocket transport"
+            |> Yojson.Basic.to_string
+            |> Helpers.json
+            |> Lwt.return
+        end
+      )
 
     | _ ->
       log.warning (fun log -> log ~request
         "Content-Type not 'application/json'");
       Message.response ~status:`Bad_Request Stream.empty Stream.null
-      |> Lwt.return
     end
 
   | method_ ->
     log.error (fun log -> log ~request
       "Method %s; must be GET or POST" (Method.method_to_string method_));
     Message.response ~status:`Not_Found Stream.empty Stream.null
-    |> Lwt.return
 
 
 

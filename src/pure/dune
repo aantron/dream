@@ -6,6 +6,7 @@
   bigstringaf
   hmap
   lwt
+  eio
   uri
   ptime
  )

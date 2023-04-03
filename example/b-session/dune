@@ -1,6 +1,5 @@
 (executable
  (name session)
- (libraries dream)
- (preprocess (pps lwt_ppx)))
+ (libraries dream))
 
 (data_only_dirs _esy esy.lock lib node_modules)

@@ -4,6 +4,7 @@
    Copyright 2021 Anton Bachin *)
 
 
+open Eio.Std
 
 module Formats = Dream_pure.Formats
 module Message = Dream_pure.Message
@@ -46,7 +47,13 @@ let set_tls request tls =
 
 
 
-let request ~client ~method_ ~target ~tls ~headers server_stream =
+let switch_field =
+  Message.new_field
+    ~name:"dream.switch"
+    ~show_value:(Fmt.to_to_string Switch.dump)
+    ()
+
+let request ~sw ~client ~method_ ~target ~tls ~headers server_stream =
   let request =
     Message.request ~method_ ~target ~headers Stream.null server_stream in
   set_client request client;
@@ -70,12 +77,12 @@ let respond ?status ?code ?headers body =
 let html ?status ?code ?headers body =
   let response = response_with_body ?status ?code ?headers body in
   Message.set_header response "Content-Type" Formats.text_html;
-  Lwt.return response
+  response
 
 let json ?status ?code ?headers body =
   let response = response_with_body ?status ?code ?headers body in
   Message.set_header response "Content-Type" Formats.application_json;
-  Lwt.return response
+  response
 
 (* TODO Actually use the request and extract the site prefix. *)
 let redirect ?status ?code ?headers _request location =
@@ -87,9 +94,24 @@ let redirect ?status ?code ?headers _request location =
   in
   let response = response_with_body ?status ?code ?headers "" in
   Message.set_header response "Location" location;
-  Lwt.return response
+  response
+
+(* Ideally, we'd create a new Eio switch for each connection.
+   But connection creation happens from Lwt at the moment, so we just
+   push the exception back to Lwt to keep things working as before. *)
+let fork_from_lwt ~sw fn =
+  Fibre.fork ~sw (fun () ->
+      try fn ()
+      with ex -> !Lwt.async_exception_hook ex
+    )
+
+let get_switch request =
+  match Message.field request switch_field with
+  | Some sw -> sw
+  | None -> failwith "Missing switch field on request!"
 
 let stream ?status ?code ?headers ?(close = true) callback =
+  let sw = get_switch request in
   let reader, writer = Stream.pipe () in
   let client_stream = Stream.stream reader Stream.no_writer
   and server_stream = Stream.stream Stream.no_reader writer in
@@ -109,6 +131,36 @@ let stream ?status ?code ?headers ?(close = true) callback =
       callback server_stream);
 
   Lwt.return response
+  (* let wrapped_callback _ = fork_from_lwt ~sw (fun () -> callback response) in *)
+  (* Stream.ready server_stream ~close:wrapped_callback wrapped_callback; *)
+  (* response *)
+
+let websocket_field =
+  Message.new_field
+    ~name:"dream.websocket"
+    ~show_value:(Printf.sprintf "%b")
+    ()
+
+let is_websocket response =
+  match Message.field response websocket_field with
+  | Some true -> true
+  | _ -> false
+
+(* TODO Mark the request as a WebSocket request for HTTP. *)
+let websocket ?headers request callback =
+  let sw = get_switch request in
+  let in_reader, in_writer = Stream.pipe ()
+  and out_reader, out_writer = Stream.pipe () in
+  let client_stream = Stream.stream out_reader in_writer
+  and server_stream = Stream.stream in_reader out_writer in
+  let response =
+    Message.response
+      ~status:`Switching_Protocols ?headers client_stream server_stream in
+  Message.set_field response websocket_field true;
+  (* TODO Make sure the request id is propagated to the callback. *)
+  let wrapped_callback _ = fork_from_lwt ~sw (fun () -> callback response) in
+  Stream.ready server_stream ~close:wrapped_callback wrapped_callback;
+  response
 
 let empty ?headers status =
   respond ?headers ~status ""

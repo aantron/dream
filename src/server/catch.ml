@@ -34,7 +34,7 @@ type error = {
   will_send_response : bool;
 }
 
-type error_handler = error -> Message.response option Message.promise
+type error_handler = error -> Message.response option
 
 (* This error handler actually *is* a middleware, but it is just one pathway for
    reaching the centralized error handler provided by the user, so it is built
@@ -43,12 +43,8 @@ type error_handler = error -> Message.response option Message.promise
 (* TODO The option return value thing is pretty awkward. *)
 let catch error_handler next_handler request =
 
-  Lwt.try_bind
-
-    (fun () ->
-      next_handler request)
-
-    (fun response ->
+  match next_handler request with
+  | response ->
       let status = Message.status response in
 
       (* TODO Overfull hbox. *)
@@ -74,13 +70,13 @@ let catch error_handler next_handler request =
         error_handler error
       end
       else
-        Lwt.return response)
+        response
 
     (* This exception handler is partially redundant, in that the HTTP-level
        handlers will also catch exceptions. However, this handler is able to
        capture more relevant context. We leave the HTTP-level handlers for truly
        severe protocol-level errors and integration mistakes. *)
-    (fun exn ->
+  | exception exn ->
       let error = {
         condition = `Exn exn;
         layer = `App;
@@ -92,4 +88,4 @@ let catch error_handler next_handler request =
         will_send_response = true;
       } in
 
-      error_handler error)
+      error_handler error

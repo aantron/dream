@@ -9,9 +9,10 @@ middlewares, the [*logger*](https://aantron.github.io/dream/#val-logger):
 
 ```ocaml
 let () =
-  Dream.run
-    (Dream.logger (fun _ ->
-      Dream.html "Good morning, world!"))
+  Eio_main.run (fun env ->
+    Dream.run env
+      (Dream.logger (fun _ ->
+        Dream.html "Good morning, world!")))
 ```
 
 <br>
@@ -25,7 +26,8 @@ in this example looks like this:
 
 ```ocaml
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ fun _ -> Dream.html "Good morning, world!"
 ```

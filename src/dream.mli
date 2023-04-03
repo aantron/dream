@@ -4,7 +4,6 @@
    Copyright 2021 Anton Bachin *)
 
 
-
 (** {1 Types}
 
     Dream is built on just five types. The first two are the data types of
@@ -19,7 +18,7 @@ and response = server message
 
 (** The remaining three types are for building up Web apps. *)
 
-and handler = request -> response promise
+and handler = request -> response
 (** Handlers are asynchronous functions from requests to responses. Example
     {{:https://github.com/aantron/dream/tree/master/example/1-hello#files}
     [1-hello]} \[{{:http://dream.as/1-hello} playground}\] shows the simplest
@@ -451,7 +450,7 @@ val respond :
   ?status:[< status ] ->
   ?code:int ->
   ?headers:(string * string) list ->
-    string -> response promise
+    string -> response
 (** Same as {!Dream.val-response}, but the new {!type-response} is wrapped in a
     {!type-promise}. *)
 
@@ -459,7 +458,7 @@ val html :
   ?status:[< status ] ->
   ?code:int ->
   ?headers:(string * string) list ->
-    string -> response promise
+    string -> response
 (** Same as {!Dream.respond}, but adds [Content-Type: text/html; charset=utf-8].
     See {!Dream.text_html}.
 
@@ -473,7 +472,7 @@ val json :
   ?status:[< status ] ->
   ?code:int ->
   ?headers:(string * string) list ->
-    string -> response promise
+    string -> response
 (** Same as {!Dream.respond}, but adds [Content-Type: application/json]. See
     {!Dream.application_json}. *)
 
@@ -481,7 +480,7 @@ val redirect :
   ?status:[< redirection ] ->
   ?code:int ->
   ?headers:(string * string) list ->
-    request -> string -> response promise
+    request -> string -> response
 (** Creates a new {!type-response}. Adds a [Location:] header with the given
     string. The default status code is [303 See Other], for a temporary
     redirection. Use [~status:`Moved_Permanently] or [~code:301] for a permanent
@@ -495,8 +494,9 @@ val redirect :
 
 val empty :
   ?headers:(string * string) list ->
-    status -> response promise
+    status -> response
 (** Same as {!Dream.val-response} with the empty string for a body. *)
+
 
 val status : response -> status
 (** Response {!type-status}. For example, [`OK]. *)
@@ -696,7 +696,7 @@ val all_cookies : request -> (string * string) list
 
 (** {1 Bodies} *)
 
-val body : 'a message -> string promise
+val body : 'a message -> string
 (** Retrieves the entire body. See example
     {{:https://github.com/aantron/dream/tree/master/example/6-echo#files}
     [6-echo]}. *)
@@ -870,7 +870,7 @@ val abort_stream : stream -> exn -> unit
 
 (**/**)
 val write_buffer :
-  ?offset:int -> ?length:int -> response -> buffer -> unit promise
+  ?offset:int -> ?length:int -> response -> buffer -> unit
 [@@ocaml.deprecated
 "Use Dream.write_stream. See
 https://aantron.github.io/dream/#val-write_stream
@@ -1033,7 +1033,7 @@ type 'a form_result = [
     activity, or tokens so old that decryption keys have since been rotated on
     the server. *)
 
-val form : ?csrf:bool -> request -> (string * string) list form_result promise
+val form : ?csrf:bool -> request -> (string * string) list form_result
 (** Parses the request body as a form. Performs CSRF checks. Use
     {!Dream.csrf_tag} in a form template to transparently generate forms that
     will pass these checks. See {!section-templates} and example
@@ -1126,7 +1126,7 @@ type multipart_form =
     OWASP {i File Upload Cheat Sheet}} for security precautions for upload
     forms. *)
 
-val multipart : ?csrf:bool -> request -> multipart_form form_result promise
+val multipart : ?csrf:bool -> request -> multipart_form form_result
 (** Like {!Dream.form}, but also reads files, and [Content-Type:] must be
     [multipart/form-data]. The CSRF token can be generated in a template with
 
@@ -1158,7 +1158,7 @@ type part = string option * string option * ((string * string) list)
     Note that, in the general case, [filename] and [headers] are not reliable.
     [name] is the form field name. *)
 
-val upload : request -> part option promise
+val upload : request -> part option
 (** Retrieves the next upload part.
 
     Upon getting [Some (name, filename, headers)] from this function, the user
@@ -1177,7 +1177,7 @@ val upload : request -> part option promise
       [FormData]} in the client to submit [multipart/form-data] by AJAX, and
       include a custom header. *)
 
-val upload_part : request -> string option promise
+val upload_part : request -> string option
 (** Retrieves a part chunk. *)
 
 (** {2 CSRF tokens}
@@ -1846,7 +1846,7 @@ val graphiql : ?default_query:string -> string -> handler
 val sql_pool : ?size:int -> string -> middleware
 (** Makes an SQL connection pool available to its inner handler. *)
 
-val sql : request -> (Caqti_lwt.connection -> 'a promise) -> 'a promise
+val sql : request -> (Caqti_lwt.connection -> 'a promise) -> 'a
 (** Runs the callback with a connection from the SQL pool. See example
     {{:https://github.com/aantron/dream/tree/master/example/h-sql#files}
     [h-sql]}.
@@ -2121,7 +2121,7 @@ type error = {
     [true].
     }} *)
 
-type error_handler = error -> response option promise
+type error_handler = error -> response option
 (** Error handlers log errors and convert them into responses. Ignore if using
     {!Dream.error_template}.
 
@@ -2137,7 +2137,7 @@ type error_handler = error -> response option promise
 (* TODO Get rid of the option? *)
 
 val error_template :
-  (error -> string -> response -> response promise) -> error_handler
+  (error -> string -> response -> response) -> error_handler
 (** Builds an {!error_handler} from a template. See example
     {{:https://github.com/aantron/dream/tree/master/example/9-error#files}
     [9-error]} \[{{:http://dream.as/9-error} playground}\].
@@ -2182,7 +2182,7 @@ val debug_error_handler : error_handler
 (** An {!error_handler} for showing extra information about requests and
     exceptions, for use during development. *)
 
-val catch : (error -> response promise) -> middleware
+val catch : (error -> response) -> middleware
 (** Forwards exceptions, rejections, and [4xx], [5xx] responses from the
     application to the error handler. See {!section-errors}. *)
 (* TODO Error handler should not return an option, and then the type can be
@@ -2203,6 +2203,7 @@ val run :
   ?builtins:bool ->
   ?greeting:bool ->
   ?adjust_terminal:bool ->
+  < clock: Eio.Time.clock; ..> ->
     handler -> unit
 (** Runs the Web application represented by the {!handler}, by default at
     {{:http://localhost:8080} http://localhost:8080}.
@@ -2260,7 +2261,7 @@ val serve :
   ?certificate_file:string ->
   ?key_file:string ->
   ?builtins:bool ->
-    handler -> unit promise
+    handler -> unit
 (** Like {!Dream.run}, but returns a promise that does not resolve until the
     server stops listening, instead of calling
     {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun} [Lwt_main.run]}.
@@ -2555,7 +2556,7 @@ val request :
   ?method_:[< method_ ] ->
   ?target:string ->
   ?headers:(string * string) list ->
-    string -> request
+  string -> request
 (** [Dream.request body] creates a fresh request with the given body for
     testing. The optional arguments set the corresponding {{!requests} request
     fields}. *)

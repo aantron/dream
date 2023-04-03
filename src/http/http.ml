@@ -4,6 +4,7 @@
    Copyright 2021 Anton Bachin *)
 
 
+open Eio.Std
 
 module Gluten = Dream_gluten.Gluten
 module Gluten_lwt_unix = Dream_gluten_lwt_unix.Gluten_lwt_unix
@@ -57,7 +58,7 @@ let websocket_log =
    that ordinarily shouldn't be relied on by the user - this is just our last
    chance to tell the user that something is wrong with their app. *)
 (* TODO Rename conn like in the body branch. *)
-let wrap_handler
+let wrap_handler ~sw
     tls
     (user's_error_handler : Catch.error_handler)
     (user's_dream_handler : Message.handler) =
@@ -100,7 +101,7 @@ let wrap_handler
       Stream.stream body Stream.no_writer in
 
     let request : Message.request =
-      Helpers.request ~client ~method_ ~target ~tls ~headers body in
+      Helpers.request ~sw ~client ~method_ ~target ~tls ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -115,7 +116,7 @@ let wrap_handler
     Lwt.async begin fun () ->
       Lwt.catch begin fun () ->
         (* Do the big call. *)
-        let%lwt response = user's_dream_handler request in
+        let%lwt response = Lwt_eio.run_eio (fun () -> user's_dream_handler request) in
 
         (* Extract the Dream response's headers. *)
 
@@ -167,7 +168,7 @@ let wrap_handler
           |> function
           | Ok () -> Lwt.return_unit
           | Error error_string ->
-            let%lwt response =
+            let response =
               Error_handler.websocket_handshake
                 user's_error_handler request response error_string
             in
@@ -186,7 +187,7 @@ let wrap_handler
 
 
 (* TODO Factor out what is in common between the http/af and h2 handlers. *)
-let wrap_handler_h2
+let wrap_handler_h2 ~sw
     tls
     (_user's_error_handler : Catch.error_handler)
     (user's_dream_handler : Message.handler) =
@@ -223,7 +224,7 @@ let wrap_handler_h2
       Stream.stream body Stream.no_writer in
 
     let request : Message.request =
-      Helpers.request ~client ~method_ ~target ~tls ~headers body in
+      Helpers.request ~sw ~client ~method_ ~target ~tls ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -238,7 +239,7 @@ let wrap_handler_h2
     Lwt.async begin fun () ->
       Lwt.catch begin fun () ->
         (* Do the big call. *)
-        let%lwt response = user's_dream_handler request in
+        let%lwt response = Lwt_eio.run_eio (fun () -> user's_dream_handler request) in
 
         (* Extract the Dream response's headers. *)
 
@@ -297,19 +298,19 @@ type tls_library = {
         unit Lwt.t;
 }
 
-let no_tls = {
+let no_tls ~sw = {
   create_handler = begin fun
       ~certificate_file:_ ~key_file:_
       ~handler
       ~error_handler ->
     Httpaf_lwt_unix.Server.create_connection_handler
       ?config:None
-      ~request_handler:(wrap_handler false error_handler handler)
+      ~request_handler:(wrap_handler ~sw false error_handler handler)
       ~error_handler:(Error_handler.httpaf error_handler)
   end;
 }
 
-let openssl = {
+let openssl ~sw:_ = {
   create_handler = fun ~certificate_file:_ -> failwith "https://github.com/savonet/ocaml-ssl/issues/76"
 (*
   create_handler = begin fun
@@ -320,15 +321,15 @@ let openssl = {
     let httpaf_handler =
       Httpaf_lwt_unix.Server.SSL.create_connection_handler
         ?config:None
-      ~request_handler:(wrap_handler true error_handler handler)
-      ~error_handler:(Error_handler.httpaf error_handler)
+      ~request_handler:(wrap_handler ~sw true error_handler handler)
+      ~error_handler:(Error_handler.httpaf ~sw error_handler)
     in
 
     let h2_handler =
       H2_lwt_unix.Server.SSL.create_connection_handler
         ?config:None
       ~request_handler:(wrap_handler_h2 true error_handler handler)
-      ~error_handler:(Error_handler.h2 error_handler)
+      ~error_handler:(Error_handler.h2 ~sw error_handler)
     in
 
     let perform_tls_handshake =
@@ -371,7 +372,7 @@ let openssl = {
 }
 
 (* TODO LATER Add ALPN + HTTP/2.0 with ocaml-tls, too. *)
-let ocaml_tls = {
+let ocaml_tls ~sw = {
   create_handler = fun
       ~certificate_file ~key_file
       ~handler
@@ -379,7 +380,7 @@ let ocaml_tls = {
     Httpaf_lwt_unix.Server.TLS.create_connection_handler_with_default
       ~certfile:certificate_file ~keyfile:key_file
       ?config:None
-      ~request_handler:(wrap_handler true error_handler handler)
+      ~request_handler:(wrap_handler ~sw true error_handler handler)
       ~error_handler:(Error_handler.httpaf error_handler)
 }
 
@@ -444,10 +445,10 @@ let serve_with_details
   let httpaf_connection_handler client_address socket =
     Lwt.catch
       (fun () ->
-        httpaf_connection_handler client_address socket)
+         httpaf_connection_handler client_address socket)
       (fun exn ->
-        tls_error_handler client_address exn;
-        Lwt.return_unit)
+         tls_error_handler client_address exn;
+         Lwt.return_unit)
   in
 
   (* Look up the low-level address corresponding to the interface. Hopefully,
@@ -458,19 +459,19 @@ let serve_with_details
     Printf.ksprintf failwith "Dream.%s: no interface with address %s"
       caller_function_for_error_messages interface
   | address::_ ->
-  let listen_address = Lwt_unix.(address.ai_addr) in
+    let listen_address = Lwt_unix.(address.ai_addr) in
 
 
-  (* Bring up the HTTP server. Wait for the server to actually get started.
-     Then, wait for the ~stop promise. If the ~stop promise ever resolves, stop
-     the server. *)
-  let%lwt server =
-    Lwt_io.establish_server_with_client_socket
-      listen_address
-      httpaf_connection_handler in
+    (* Bring up the HTTP server. Wait for the server to actually get started.
+       Then, wait for the ~stop promise. If the ~stop promise ever resolves, stop
+       the server. *)
+    let%lwt server =
+      Lwt_io.establish_server_with_client_socket
+        listen_address
+        httpaf_connection_handler in
 
-  let%lwt () = stop in
-  Lwt_io.shutdown_server server
+    let%lwt () = stop in
+    Lwt_io.shutdown_server server
 
 
 
@@ -489,7 +490,9 @@ let serve_with_maybe_https
     ~builtins
     user's_dream_handler =
 
-  try%lwt
+  Switch.run @@ fun sw ->
+  try
+    Lwt_eio.Promise.await_lwt @@
     (* This check will at least catch secrets like "foo" when used on a public
        interface. *)
     (* if not (is_localhost interface) then
@@ -504,7 +507,7 @@ let serve_with_maybe_https
     | `No ->
       serve_with_details
         caller_function_for_error_messages
-        no_tls
+        (no_tls ~sw)
         ~interface
         ~port
         ~stop
@@ -561,8 +564,8 @@ let serve_with_maybe_https
 
       let tls_library =
         match tls_library with
-        | `OpenSSL -> openssl
-        | `OCaml_TLS -> ocaml_tls
+        | `OpenSSL -> openssl ~sw
+        | `OCaml_TLS -> ocaml_tls ~sw
       in
 
       match certificate_and_key with
@@ -665,6 +668,7 @@ let run
     ?(builtins = true)
     ?(greeting = true)
     ?(adjust_terminal = true)
+    env
     user's_dream_handler =
 
   let () = if Sys.unix then
@@ -729,7 +733,8 @@ let run
   end;
 
   try
-    Lwt_main.run begin
+    begin
+      Lwt_eio.with_event_loop ~clock:env#clock @@ fun () ->
       serve_with_maybe_https
         "run"
         ~interface

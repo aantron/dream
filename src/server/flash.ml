@@ -77,7 +77,7 @@ let flash_messages inner_handler request =
   let outbox = ref [] in
   Message.set_field request storage_field outbox;
   let existing = Cookie.cookie request flash_cookie in
-  let%lwt response = inner_handler request in
+  let response = inner_handler request in
   let entries = List.rev !outbox in
   let () =
     match existing, entries with
@@ -102,4 +102,4 @@ let flash_messages inner_handler request =
       Cookie.set_cookie
         response request flash_cookie value ~max_age:five_minutes
   in
-  Lwt.return response
+  response

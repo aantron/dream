@@ -12,4 +12,3 @@ module Stream = Dream_pure.Stream
 
 let echo request =
   Message.response (Message.server_stream request) Stream.null
-  |> Lwt.return

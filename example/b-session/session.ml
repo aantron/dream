@@ -1,13 +1,14 @@
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.memory_sessions
   @@ fun request ->
 
     match Dream.session_field request "user" with
     | None ->
-      let%lwt () = Dream.invalidate_session request in
-      let%lwt () = Dream.set_session_field request "user" "alice" in
+      Dream.invalidate_session request;
+      Dream.set_session_field request "user" "alice";
       Dream.html "You weren't logged in; but now you are!"
 
     | Some username ->

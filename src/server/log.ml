@@ -493,11 +493,8 @@ struct
         user_agent);
 
     (* Call the rest of the app. *)
-    Lwt.try_bind
-      (fun () ->
-        Lwt.with_value id_lwt_key (Some id) (fun () ->
-          next_handler request))
-      (fun response ->
+    match Lwt.with_value id_lwt_key (Some id) (fun () -> next_handler request) with
+    | response ->
         (* Log the elapsed time. If the response is a redirection, log the
            target. *)
         let location =
@@ -531,21 +528,20 @@ struct
               log.info report
         end;
 
-        Lwt.return response)
-
-      (fun exn ->
-        let backtrace = Printexc.get_backtrace () in
-        (* In case of exception, log the exception. We alsp log the backtrace
-           here, even though it is likely to be redundant, because some OCaml
-           libraries install exception printers that will clobber the backtrace
-           right during Printexc.to_string! *)
-        log.warning (fun log ->
+        response
+    | exception exn ->
+      let backtrace = Printexc.get_backtrace () in
+      (* In case of exception, log the exception. We alsp log the backtrace
+         here, even though it is likely to be redundant, because some OCaml
+         libraries install exception printers that will clobber the backtrace
+         right during Printexc.to_string! *)
+      log.warning (fun log ->
           log ~request "Aborted by: %s" (Printexc.to_string exn));
 
-        backtrace
-        |> iter_backtrace (fun line -> log.warning (fun log -> log "%s" line));
+      backtrace
+      |> iter_backtrace (fun line -> log.warning (fun log -> log "%s" line));
 
-        Lwt.fail exn)
+      raise exn
 end
 
 
