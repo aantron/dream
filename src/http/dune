@@ -13,14 +13,9 @@
   dream-httpaf.dream-h2
   dream-httpaf.dream-h2-lwt-unix
   dream-httpaf.dream-httpaf_
-  dream-httpaf.dream-httpaf_-lwt-unix
   dream-httpaf.dream-httpaf_-eio
-  lwt.unix
-  lwt_ssl
   ssl
   dream-httpaf.dream-websocketaf
-  lwt_eio
   eio_main
  )
- (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

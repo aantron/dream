@@ -412,6 +412,7 @@ let serve_with_details
     ~interface
     ~port
     ~error_handler
+    ~backlog
     ~certificate_file
     ~key_file
     ~builtins
@@ -464,13 +465,13 @@ let serve_with_details
   let listen_address =
     (* Look up the low-level address corresponding to the interface. Hopefully,
        this is a local interface. *)
-    let addresses = Lwt_eio.Promise.await_lwt @@ Lwt_unix.getaddrinfo interface (string_of_int port) [] in
+    let addresses = Unix.getaddrinfo interface (string_of_int port) [] in
     match addresses with
     | [] ->
       Printf.ksprintf failwith "Dream.%s: no interface with address %s"
         caller_function_for_error_messages interface
     | address::_ ->
-      of_unix_addr Lwt_unix.(address.ai_addr)
+      of_unix_addr address.ai_addr
   in
 
   (* Bring up the HTTP server. *)
@@ -478,7 +479,7 @@ let serve_with_details
   let socket =
     Eio.Net.listen ~sw net listen_address
       ~reuse_addr:true
-      ~backlog:(Lwt_unix.somaxconn () [@ocaml.warning "-3"])
+      ~backlog
   in
   while true do
     Eio.Net.accept_fork ~sw socket (httpaf_connection_handler ~sw)
@@ -495,6 +496,7 @@ let serve_with_maybe_https
     ~interface
     ~port
     ~error_handler
+    ~backlog
     ~tls
     ?certificate_file ?key_file
     ?certificate_string ?key_string
@@ -522,6 +524,7 @@ let serve_with_maybe_https
         ~interface
         ~port
         ~error_handler
+        ~backlog
         ~certificate_file:""
         ~key_file:""
         ~builtins
@@ -645,6 +648,7 @@ let serve
     ?(interface = default_interface)
     ?(port = default_port)
     ?(error_handler = Error_handler.default)
+    ?(backlog = 10)
     ?(tls = false)
     ?certificate_file
     ?key_file
@@ -658,6 +662,7 @@ let serve
     ~interface
     ~port
     ~error_handler
+    ~backlog
     ~tls:(if tls then `OpenSSL else `No)
     ?certificate_file
     ?key_file
@@ -672,6 +677,7 @@ let run
     ?(interface = default_interface)
     ?(port = default_port)
     ?(error_handler = Error_handler.default)
+    ?(backlog = 10)
     ?(tls = false)
     ?certificate_file
     ?key_file
@@ -744,13 +750,13 @@ let run
 
   try
     begin
-      Lwt_eio.with_event_loop ~clock:env#clock @@ fun () ->
       serve_with_maybe_https
         "run"
         ~net:env#net
         ~interface
         ~port
         ~error_handler
+        ~backlog
         ~tls:(if tls then `OpenSSL else `No)
         ?certificate_file ?key_file
         ?certificate_string:None ?key_string:None

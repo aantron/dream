@@ -2195,6 +2195,7 @@ val run :
   ?interface:string ->
   ?port:int ->
   ?error_handler:error_handler ->
+  ?backlog:int ->
   ?tls:bool ->
   ?certificate_file:string ->
   ?key_file:string ->
@@ -2250,6 +2251,7 @@ val serve :
   ?interface:string ->
   ?port:int ->
   ?error_handler:error_handler ->
+  ?backlog:int ->
   ?tls:bool ->
   ?certificate_file:string ->
   ?key_file:string ->
