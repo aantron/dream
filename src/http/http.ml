@@ -7,9 +7,9 @@
 open Eio.Std
 
 module Gluten = Dream_gluten.Gluten
-module Gluten_lwt_unix = Dream_gluten_lwt_unix.Gluten_lwt_unix
+module Gluten_eio = Dream_gluten_eio.Gluten_eio
 module Httpaf = Dream_httpaf_.Httpaf
-module Httpaf_lwt_unix = Dream_httpaf__lwt_unix.Httpaf_lwt_unix
+module Httpaf_eio = Dream_httpaf__eio.Httpaf_eio
 module H2 = Dream_h2.H2
 module H2_lwt_unix = Dream_h2_lwt_unix.H2_lwt_unix
 module Websocketaf = Dream_websocketaf.Websocketaf
@@ -282,8 +282,8 @@ type tls_library = {
     handler:Message.handler ->
     error_handler:Catch.error_handler ->
     sw:Switch.t ->
-    Unix.sockaddr ->
-    Lwt_unix.file_descr ->
+    Eio.Net.Sockaddr.stream ->
+    Eio.Flow.two_way ->
     unit;
 }
 
@@ -295,8 +295,7 @@ let no_tls = {
       ~sw
       sockaddr
       fd ->
-      Lwt_eio.Promise.await_lwt @@
-      Httpaf_lwt_unix.Server.create_connection_handler
+      Httpaf_eio.Server.create_connection_handler
         ?config:None
         ~request_handler:(wrap_handler ~sw false error_handler handler)
         ~error_handler:(Error_handler.httpaf error_handler)
@@ -456,11 +455,8 @@ let serve_with_details
      coupling), or the upstream should be patched to distinguish the errors in
      some useful way. *)
   let httpaf_connection_handler ~sw flow client_address =
-    let client_address = to_unix_addr client_address in
     try
-      let fd = Eio_unix.FD.take_opt flow |> Option.get in
-      let socket = Lwt_unix.of_unix_file_descr fd in
-      httpaf_connection_handler ~sw client_address socket
+      httpaf_connection_handler ~sw client_address flow
     with exn ->
       tls_error_handler client_address exn
   in
@@ -471,7 +467,6 @@ let serve_with_details
     let addresses = Lwt_eio.Promise.await_lwt @@ Lwt_unix.getaddrinfo interface (string_of_int port) [] in
     match addresses with
     | [] ->
-      Lwt_eio.Promise.await_lwt @@
       Printf.ksprintf failwith "Dream.%s: no interface with address %s"
         caller_function_for_error_messages interface
     | address::_ ->

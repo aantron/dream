@@ -9,11 +9,12 @@
   dream.server
   dream-httpaf
   dream-httpaf.dream-gluten
-  dream-httpaf.dream-gluten-lwt-unix
+  dream-httpaf.dream-gluten-eio
   dream-httpaf.dream-h2
   dream-httpaf.dream-h2-lwt-unix
   dream-httpaf.dream-httpaf_
   dream-httpaf.dream-httpaf_-lwt-unix
+  dream-httpaf.dream-httpaf_-eio
   lwt.unix
   lwt_ssl
   ssl

@@ -20,6 +20,15 @@
    lwt
   )))
 
+(subdir gluten/eio
+ (library
+  (name dream_gluten_eio)
+  (public_name dream-httpaf.dream-gluten-eio)
+  (libraries
+   dream-httpaf.dream-gluten
+   unix eio bigstringaf
+  )))
+
 (subdir gluten/lwt-unix
  (library
   (name dream_gluten_lwt_unix)
@@ -63,6 +72,18 @@
    dream-httpaf.dream-httpaf_
    lwt
   )))
+
+(subdir httpaf/eio
+ (library
+  (name dream_httpaf__eio)
+  (public_name dream-httpaf.dream-httpaf_-eio)
+  (libraries
+    dream-httpaf.dream-httpaf_
+    eio
+    dream-httpaf.dream-gluten
+    dream-httpaf.dream-gluten-eio
+  )))
+
 
 (subdir httpaf/lwt-unix
  (library
@@ -223,7 +244,7 @@
   (modules lE)
   (libraries
    tcpip
-   dream-httpaf.httpaf
+   dream-httpaf.dream-httpaf_
    dream-mirage.dream-paf
    mirage-time
    duration

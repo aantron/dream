@@ -43,15 +43,15 @@ val app :
 
 val httpaf :
   Catch.error_handler ->
-    (Unix.sockaddr -> Httpaf.Server_connection.error_handler)
+    (Eio.Net.Sockaddr.stream -> Httpaf.Server_connection.error_handler)
 
 val h2 :
   Catch.error_handler ->
-    (Unix.sockaddr -> H2.Server_connection.error_handler)
+    (Eio.Net.Sockaddr.stream -> H2.Server_connection.error_handler)
 
 val tls :
   Catch.error_handler ->
-    (Unix.sockaddr -> exn -> unit)
+    (Eio.Net.Sockaddr.stream -> exn -> unit)
 
 val websocket :
   Catch.error_handler ->
