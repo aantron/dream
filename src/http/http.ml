@@ -304,6 +304,7 @@ let no_tls = {
   end;
 }
 
+(*
 let openssl = {
   create_handler = begin fun
       ~certificate_file ~key_file
@@ -385,6 +386,7 @@ let ocaml_tls = {
       sockaddr
       fd
 }
+*)
 
 
 
@@ -530,6 +532,7 @@ let serve_with_maybe_https
         ~builtins
         user's_dream_handler
 
+(*
     | `OpenSSL | `OCaml_TLS as tls_library ->
       (* TODO Writing temporary files is extremely questionable for anything
          except the fake localhost certificate. This needs loud warnings. IIRC
@@ -627,6 +630,7 @@ let serve_with_maybe_https
 
         end
         end
+  *)
 
   with exn ->
     let backtrace = Printexc.get_backtrace () in
@@ -663,7 +667,8 @@ let serve
     ~port
     ~error_handler
     ~backlog
-    ~tls:(if tls then `OpenSSL else `No)
+    (* ~tls:(if tls then `OpenSSL else `No) *)
+    ~tls:`No
     ?certificate_file
     ?key_file
     ?certificate_string:None
@@ -757,7 +762,8 @@ let run
         ~port
         ~error_handler
         ~backlog
-        ~tls:(if tls then `OpenSSL else `No)
+        (* ~tls:(if tls then `OpenSSL else `No) *)
+        ~tls:`No
         ?certificate_file ?key_file
         ?certificate_string:None ?key_string:None
         ~builtins
