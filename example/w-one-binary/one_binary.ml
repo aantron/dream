@@ -8,5 +8,5 @@ let () =
   Dream.run env
   @@ Dream.logger
   @@ Dream.router [
-    Dream.get "/assets/**" (Dream.static ~loader "")
+    Dream.get "/assets/**" (Dream.static ~loader (Eio.Stdenv.cwd env))
   ]

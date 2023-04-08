@@ -15,8 +15,6 @@ module Stream = Dream_pure.Stream
 
 (* TODO Not at all efficient; can at least stream the file, maybe even cache. *)
 (* TODO Also mind newlines on Windows. *)
-(* TODO NOTE Using Lwt_io because it has a nice "read the whole thing"
-   function. *)
 
 let mime_lookup filename =
   let content_type =
@@ -27,15 +25,11 @@ let mime_lookup filename =
   ["Content-Type", content_type]
 
 let from_filesystem local_root path _ =
-  let file = Filename.concat local_root path in
+  let file = Eio.Path.(local_root / path) in
   try
-    Lwt_eio.Promise.await_lwt (
-      Lwt_io.(with_file ~mode:Input file) (fun channel ->
-          let%lwt content = Lwt_io.read channel in
-          Message.response
-            ~headers:(mime_lookup path) (Stream.string content) Stream.null
-          |> Lwt.return)
-    )
+    let content = Eio.Path.load file in
+    Message.response
+      ~headers:(mime_lookup path) (Stream.string content) Stream.null
   with _exn ->
     Message.response ~status:`Not_Found Stream.empty Stream.null
 
