@@ -726,7 +726,7 @@ val stream :
   ?code:int ->
   ?headers:(string * string) list ->
   ?close:bool ->
-    (stream -> unit promise) -> response promise
+    (stream -> unit) -> response
 (** Creates a response with a {!type-stream} open for writing, and passes the
     stream to the callback when it is ready. See example
     {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
@@ -1643,12 +1643,12 @@ https://aantron.github.io/dream/#val-session_field
 "]
 (**/**)
 
-val set_session_field : request -> string -> string -> unit promise
+val set_session_field : request -> string -> string -> unit
 (** Mutates a value in the request's session. The back end may commit the value
     to storage immediately, so this function returns a promise. *)
 
 (**/**)
-val put_session : string -> string -> request -> unit promise
+val put_session : string -> string -> request -> unit
 [@ocaml.deprecated
 "Renamed to Dream.set_session_field. See
 https://aantron.github.io/dream/#val-set_session_field
@@ -1666,7 +1666,7 @@ https://aantron.github.io/dream/#val-all_session_fields
 "]
 (**/**)
 
-val invalidate_session : request -> unit promise
+val invalidate_session : request -> unit
 (** Invalidates the request's session, replacing it with a fresh, empty
     pre-session. *)
 
