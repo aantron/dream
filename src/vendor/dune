@@ -11,15 +11,6 @@
    ke
   )))
 
-(subdir gluten/lwt
- (library
-  (name dream_gluten_lwt)
-  (public_name dream-httpaf.dream-gluten-lwt)
-  (libraries
-   dream-httpaf.dream-gluten
-   lwt
-  )))
-
 (subdir gluten/eio
  (library
   (name dream_gluten_eio)
@@ -28,27 +19,6 @@
    dream-httpaf.dream-gluten
    unix eio bigstringaf
   )))
-
-(subdir gluten/lwt-unix
- (library
-  (name dream_gluten_lwt_unix)
-  (public_name dream-httpaf.dream-gluten-lwt-unix)
-  (libraries
-   faraday-lwt-unix
-   dream-httpaf.dream-gluten-lwt
-   lwt.unix
-   (select
-    ssl_io.ml
-    from
-    (lwt_ssl -> ssl_io.real.ml)
-    (-> ssl_io.dummy.ml))
-   (select
-    tls_io.ml
-    from
-    (tls.lwt -> tls_io.real.ml)
-    (-> tls_io.dummy.ml))
-  )
-  (modules gluten_lwt_unix tls_io ssl_io)))
 
 
 
@@ -62,17 +32,6 @@
    faraday
   )))
 
-(subdir httpaf/lwt
- (library
-  (name dream_httpaf__lwt)
-  (public_name dream-httpaf.dream-httpaf_-lwt)
-  (libraries
-   dream-httpaf.dream-gluten
-   dream-httpaf.dream-gluten-lwt
-   dream-httpaf.dream-httpaf_
-   lwt
-  )))
-
 (subdir httpaf/eio
  (library
   (name dream_httpaf__eio)
@@ -82,19 +41,6 @@
     eio
     dream-httpaf.dream-gluten
     dream-httpaf.dream-gluten-eio
-  )))
-
-
-(subdir httpaf/lwt-unix
- (library
-  (name dream_httpaf__lwt_unix)
-  (public_name dream-httpaf.dream-httpaf_-lwt-unix)
-  (libraries
-   faraday-lwt-unix
-   dream-httpaf.dream-gluten-lwt-unix
-   dream-httpaf.dream-httpaf_
-   dream-httpaf.dream-httpaf_-lwt
-   lwt.unix
   )))
 
 
@@ -111,29 +57,6 @@
    dream-httpaf.dream-gluten
    dream-httpaf.dream-httpaf_
    result
-  )))
-
-(subdir websocketaf/lwt
- (library
-  (name dream_websocketaf_lwt)
-  (public_name dream-httpaf.dream-websocketaf-lwt)
-  (libraries
-   base64
-   digestif.ocaml
-   dream-httpaf.dream-gluten-lwt
-   lwt
-   dream-httpaf.dream-websocketaf
-  )))
-
-(subdir websocketaf/lwt-unix
- (library
-  (name dream_websocketaf_lwt_unix)
-  (public_name dream-httpaf.dream-websocketaf-lwt-unix)
-  (libraries
-   faraday-lwt-unix
-   dream-httpaf.dream-gluten-lwt-unix
-   lwt.unix
-   dream-httpaf.dream-websocketaf-lwt
   )))
 
 
@@ -176,27 +99,15 @@
    result
   )))
 
-(subdir h2/lwt
+(subdir h2/eio
  (library
-  (name dream_h2_lwt)
-  (public_name dream-httpaf.dream-h2-lwt)
+  (name dream_h2_eio)
+  (public_name dream-httpaf.dream-h2-eio)
   (libraries
    dream-httpaf.dream-gluten
-   dream-httpaf.dream-gluten-lwt
-   lwt
+   dream-httpaf.dream-gluten-eio
+   eio
    dream-httpaf.dream-h2
-  )))
-
-(subdir h2/lwt-unix
- (library
-  (name dream_h2_lwt_unix)
-  (public_name dream-httpaf.dream-h2-lwt-unix)
-  (libraries
-   faraday-lwt-unix
-   dream-httpaf.dream-gluten-lwt-unix
-   dream-httpaf.dream-h2
-   dream-httpaf.dream-h2-lwt
-   lwt.unix
   )))
 
 
