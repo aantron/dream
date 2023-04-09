@@ -19,14 +19,14 @@ type multipart_state = {
   mutable state_init : bool;
   mutable name : string option;
   mutable filename : string option;
-  mutable stream : (< > * Multipart_form.Header.t * string Lwt_stream.t) Lwt_stream.t;
+  mutable stream : (< > * Multipart_form.Header.t * string Eio.Stream.t) Eio.Stream.t;
 }
 
 let initial_multipart_state () = {
   state_init = true;
   name = None;
   filename = None;
-  stream = Lwt_stream.of_list [];
+  stream = Eio.Stream.create max_int;
 }
 
 (* TODO Dump the value of the multipart state somehow? *)
@@ -62,14 +62,15 @@ let log = Log.sub_log "dream.upload"
 
 let upload_part (request : Message.request) =
   let state = multipart_state request in
-  match Lwt_eio.Promise.await_lwt @@ Lwt_stream.peek state.stream with
+  match Eio.Stream.take_nonblocking state.stream with
   | None -> None
   | Some (_uid, _header, stream) ->
-    match Lwt_eio.Promise.await_lwt @@ Lwt_stream.get stream with
+    match Eio.Stream.take_nonblocking stream with
     | Some _ as v -> v
     | None ->
       log.debug (fun m -> m "End of the part.") ;
-      Lwt_eio.Promise.await_lwt @@ Lwt_stream.junk state.stream;
+      (* TODO this doesn't look right? *)
+      Eio.Stream.take state.stream |> ignore;
       None
       (* XXX(dinosaure): delete the current part from the [stream]. *)
 
@@ -80,9 +81,10 @@ type part = string option * string option * ((string * string) list)
 let rec state (request : Message.request) =
   let state' = multipart_state request in
   let stream = state'.stream in
-  match Lwt_eio.Promise.await_lwt @@ Lwt_stream.peek stream with
+  match Eio.Stream.take_nonblocking stream with
   | None ->
-    Lwt_eio.Promise.await_lwt @@ Lwt_stream.junk stream;
+    (* TODO this doesn't look right? *)
+    Eio.Stream.take stream |> ignore;
     None
   | Some (_, headers, _stream) ->
     let headers =
@@ -117,12 +119,12 @@ and upload (request : Message.request) =
       failwith message
 
     | Some content_type ->
-      let body =
-        Lwt_stream.from_direct (fun () ->
-            Message.read (Message.server_stream request)) in
-      let `Parse th, stream =
-        Multipart_form_lwt.stream ~identify body content_type in
-      let _ = Lwt_eio.Promise.await_lwt th in
+      let body = Eio.Stream.create 1 in
+      Eio.Stream.add body (Message.read (Message.server_stream request));
+      Eio.Switch.run @@ fun sw ->
+      let th, stream =
+        Multipart_form_eio.stream ~sw ~identify body content_type in
+      let _ = Eio.Promise.await th in
       state'.stream <- stream;
       state'.state_init <- false;
       state request
@@ -139,10 +141,9 @@ let multipart ?(csrf=true) ~now request =
   match content_type with
   | None -> `Wrong_content_type
   | Some content_type ->
-    let body =
-      Lwt_stream.from_direct (fun () ->
-        Message.read (Message.server_stream request)) in
-    match Lwt_eio.Promise.await_lwt @@ Multipart_form_lwt.of_stream_to_list body content_type with
+    let body = Eio.Stream.create 1 in
+    Eio.Stream.add body (Message.read (Message.server_stream request));
+    match Multipart_form_eio.of_stream_to_list body content_type with
     | Error (`Msg _err) ->
       `Wrong_content_type (* XXX(dinosaure): better error? *)
     | Ok (tree, assoc) ->
