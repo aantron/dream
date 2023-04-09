@@ -1624,7 +1624,6 @@ module Make
 
   val initialize_log :
     ?backtraces:bool ->
-    ?async_exception_hook:bool ->
     ?level:[< log_level] ->
     ?enable:bool ->
     unit ->

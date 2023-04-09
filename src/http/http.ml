@@ -64,8 +64,6 @@ let wrap_handler ~sw
     (user's_dream_handler : Message.handler) =
 
   let httpaf_request_handler = fun client_address (conn : _ Gluten.Reqd.t) ->
-    Log.set_up_exception_hook ();
-
     let conn, upgrade = conn.reqd, conn.upgrade in
 
     (* Covert the http/af request to a Dream request. *)
@@ -187,8 +185,6 @@ let wrap_handler_h2 ~sw
     (user's_dream_handler : Message.handler) =
 
   let httpaf_request_handler = fun client_address (conn : H2.Reqd.t) ->
-    Log.set_up_exception_hook ();
-
     (* Covert the h2 request to a Dream request. *)
     let httpaf_request : H2.Request.t =
       H2.Reqd.request conn in
@@ -485,7 +481,7 @@ let serve_with_details
   in
   while true do
     Eio.Net.accept_fork ~sw socket (httpaf_connection_handler ~sw)
-      ~on_error:(fun ex -> !Lwt.async_exception_hook ex)
+      ~on_error:(fun ex -> raise ex)
   done
 
 

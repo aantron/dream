@@ -1965,7 +1965,6 @@ val sub_log : ?level:[< log_level] -> string -> sub_log
 
 val initialize_log :
   ?backtraces:bool ->
-  ?async_exception_hook:bool ->
   ?level:[< log_level ] ->
   ?enable:bool ->
     unit -> unit

@@ -261,9 +261,6 @@ let sources : (string * Logs.src) list ref =
 let set_printexc =
   ref true
 
-let set_async_exception_hook =
-  ref true
-
 let _initialized = ref None
 
 let to_logs_level l =
@@ -382,19 +379,8 @@ let log =
 
 
 
-let set_up_exception_hook () =
-  if !set_async_exception_hook then begin
-    set_async_exception_hook := false;
-    Lwt.async_exception_hook := fun exn ->
-      let backtrace = Printexc.get_backtrace () in
-      log.error (fun log -> log "Async exception: %s" (Printexc.to_string exn));
-      backtrace
-      |> iter_backtrace (fun line -> log.error (fun log -> log "%s" line))
-  end
-
 let initialize_log
     ?(backtraces = true)
-    ?(async_exception_hook = true)
     ?level:level_
     ?enable:(enable_ = true)
     () =
@@ -402,10 +388,6 @@ let initialize_log
   if backtraces then
     Printexc.record_backtrace true;
   set_printexc := false;
-
-  if async_exception_hook then
-    set_up_exception_hook ();
-  set_async_exception_hook := false;
 
   let level_ =
     Option.map to_logs_level level_
