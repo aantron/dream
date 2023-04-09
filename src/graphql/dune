@@ -7,6 +7,7 @@
   dream.server
   graphql_parser
   graphql-lwt
+  lwt_eio
   str
   yojson
  )

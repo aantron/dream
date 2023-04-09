@@ -15,7 +15,6 @@
   unstrctrd
   uri
   yojson
-  lwt_eio
  )
  (instrumentation (backend bisect_ppx)))
 

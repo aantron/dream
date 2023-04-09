@@ -53,9 +53,8 @@ let () =
 let now () =
   Ptime.to_float_s (Ptime.v (Ptime_clock.now_d_ps ()))
 
-let () =
-  Random.initialize (fun () ->
-    Mirage_crypto_rng_lwt.initialize (module Mirage_crypto_rng.Fortuna))
+let mirage_crypto_run env =
+  Mirage_crypto_rng_eio.run (module Mirage_crypto_rng.Fortuna) env
 
 module Session =
 struct

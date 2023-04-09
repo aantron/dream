@@ -4,6 +4,7 @@
  (libraries
   caqti
   caqti-lwt
+  lwt_eio
   dream.cipher
   dream-pure
   dream.server
