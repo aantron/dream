@@ -1,6 +1,6 @@
 (test
  (name upload)
- (libraries dream))
+ (libraries dream dream.http eio eio.mock bigstringaf))
 
 (rule
  (targets upload.ml)
