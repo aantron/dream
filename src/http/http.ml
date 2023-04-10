@@ -19,6 +19,7 @@ module Helpers = Dream__server.Helpers
 module Log = Dream__server.Log
 module Message = Dream_pure.Message
 module Method = Dream_pure.Method
+module Random = Dream__cipher.Random
 module Status = Dream_pure.Status
 module Stream = Dream_pure.Stream
 
@@ -687,6 +688,7 @@ let run
     ?(adjust_terminal = true)
     env
     user's_dream_handler =
+  Random.run env @@ fun () ->
 
   let () = if Sys.unix then
     Sys.(set_signal sigpipe Signal_ignore)
