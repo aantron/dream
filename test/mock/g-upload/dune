@@ -1,0 +1,10 @@
+(test
+ (name upload)
+ (libraries dream))
+
+(rule
+ (targets upload.ml)
+ (deps upload.eml.ml)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))
+
+(data_only_dirs _esy esy.lock lib node_modules)
