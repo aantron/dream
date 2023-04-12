@@ -59,7 +59,7 @@ let websocket_log =
    that ordinarily shouldn't be relied on by the user - this is just our last
    chance to tell the user that something is wrong with their app. *)
 (* TODO Rename conn like in the body branch. *)
-let wrap_handler ~sw
+let wrap_handler
     tls
     (user's_error_handler : Catch.error_handler)
     (user's_dream_handler : Message.handler) =
@@ -100,7 +100,7 @@ let wrap_handler ~sw
       Stream.stream body Stream.no_writer in
 
     let request : Message.request =
-      Helpers.request ~sw ~client ~method_ ~target ~tls ~headers body in
+      Helpers.request ~client ~method_ ~target ~tls ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -180,7 +180,7 @@ let wrap_handler ~sw
 
 
 (* TODO Factor out what is in common between the http/af and h2 handlers. *)
-let wrap_handler_h2 ~sw
+let wrap_handler_h2
     tls
     (_user's_error_handler : Catch.error_handler)
     (user's_dream_handler : Message.handler) =
@@ -215,7 +215,7 @@ let wrap_handler_h2 ~sw
       Stream.stream body Stream.no_writer in
 
     let request : Message.request =
-      Helpers.request ~sw ~client ~method_ ~target ~tls ~headers body in
+      Helpers.request ~client ~method_ ~target ~tls ~headers body in
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -278,7 +278,6 @@ type tls_library = {
     key_file:string ->
     handler:Message.handler ->
     error_handler:Catch.error_handler ->
-    sw:Switch.t ->
     Eio.Net.Sockaddr.stream ->
     Eio.Flow.two_way ->
     unit;
@@ -289,12 +288,11 @@ let no_tls = {
       ~certificate_file:_ ~key_file:_
       ~handler
       ~error_handler
-      ~sw
       sockaddr
       fd ->
       Httpaf_eio.Server.create_connection_handler
         ?config:None
-        ~request_handler:(wrap_handler ~sw false error_handler handler)
+        ~request_handler:(wrap_handler false error_handler handler)
         ~error_handler:(Error_handler.httpaf error_handler)
         sockaddr
         fd
@@ -454,9 +452,9 @@ let serve_with_details
      be pattern matching on the exception (but that might introduce dependency
      coupling), or the upstream should be patched to distinguish the errors in
      some useful way. *)
-  let httpaf_connection_handler ~sw flow client_address =
+  let httpaf_connection_handler flow client_address =
     try
-      httpaf_connection_handler ~sw client_address flow
+      httpaf_connection_handler client_address flow
     with exn ->
       tls_error_handler client_address exn
   in
@@ -481,7 +479,7 @@ let serve_with_details
       ~backlog
   in
   while true do
-    Eio.Net.accept_fork ~sw socket (httpaf_connection_handler ~sw)
+    Eio.Net.accept_fork ~sw socket httpaf_connection_handler
       ~on_error:(fun ex -> raise ex)
   done
 

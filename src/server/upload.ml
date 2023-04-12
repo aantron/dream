@@ -120,7 +120,7 @@ and upload (request : Message.request) =
 
     | Some content_type ->
       let body = Eio.Stream.create 1 in
-      Eio.Stream.add body (Message.read (Message.server_stream request));
+      Eio.Stream.add body (Message.read (Message.server_stream request) |> Option.get);
       Eio.Switch.run @@ fun sw ->
       let th, stream =
         Multipart_form_eio.stream ~sw ~identify body content_type in
@@ -142,7 +142,7 @@ let multipart ?(csrf=true) ~now request =
   | None -> `Wrong_content_type
   | Some content_type ->
     let body = Eio.Stream.create 1 in
-    Eio.Stream.add body (Message.read (Message.server_stream request));
+    Eio.Stream.add body (Message.read (Message.server_stream request) |> Option.get);
     match Multipart_form_eio.of_stream_to_list body content_type with
     | Error (`Msg _err) ->
       `Wrong_content_type (* XXX(dinosaure): better error? *)

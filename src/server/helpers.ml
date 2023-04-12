@@ -53,7 +53,7 @@ let switch_field =
     ~show_value:(Fmt.to_to_string Switch.dump)
     ()
 
-let request ~sw ~client ~method_ ~target ~tls ~headers server_stream =
+let request ~client ~method_ ~target ~tls ~headers server_stream =
   let request =
     Message.request ~method_ ~target ~headers Stream.null server_stream in
   set_client request client;
