@@ -79,8 +79,8 @@ val read : stream -> read
 (** Awaits the next stream event. See {!Stream.type-read}. *)
 
 val read_convenience : stream -> string option promise
-(** A wrapper around {!Stream.read} that converts [~data] with content [s] into
-    [Some s], and [~close] into [None], and uses them to resolve a promise.
+(** A wrapper around {!Stream.val-read} that converts [~data] with content [s]
+    into [Some s], and [~close] into [None], and uses them to resolve a promise.
     [~flush] is ignored. *)
 
 val read_until_close : stream -> string promise
