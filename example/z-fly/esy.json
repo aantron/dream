@@ -6,8 +6,8 @@
   "dependencies": {
     "@opam/conf-libssl": "3",
     "@opam/dream": "1.0.0~alpha5",
-    "@opam/dune": "^2.0",
-    "ocaml": "4.12.x"
+    "@opam/dune": "^3.0",
+    "ocaml": "^4.14.0"
   },
   "devDependencies": {
     "@opam/ocaml-lsp-server": "*"
