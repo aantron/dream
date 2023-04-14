@@ -2,7 +2,7 @@
   "dependencies": {
     "@opam/caqti-driver-postgresql": "*",
     "@opam/conf-libssl": "3",
-    "@opam/dream": "1.0.0~alpha4",
+    "@opam/dream": "1.0.0~alpha5",
     "@opam/dune": "^2.0",
     "ocaml": "4.12.x"
   },
