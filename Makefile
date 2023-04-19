@@ -1,10 +1,6 @@
 PACKAGES := dream-pure,dream-httpaf,dream
 
 .PHONY : build
-
-default:
-	@dune build
-
 build :
 	@dune build --only-packages $(PACKAGES) --no-print-directory @install
 
