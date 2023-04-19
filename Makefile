@@ -6,7 +6,7 @@ build :
 
 .PHONY : watch
 watch :
-	@dune build --only-packages $(PACKAGES) --no-print-directory -w
+	@dune build --only-packages $(PACKAGES) --no-print-directory @install -w
 
 .PHONY : deps
 deps :
