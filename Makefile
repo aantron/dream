@@ -1,10 +1,12 @@
+PACKAGES := dream-pure,dream-httpaf,dream
+
 .PHONY : build
 build :
-	@dune build -p dream-pure,dream-httpaf,dream --no-print-directory @install
+	@dune build --only-packages $(PACKAGES) --no-print-directory @install
 
 .PHONY : watch
 watch :
-	@dune build -p dream-pure,dream-httpaf,dream --no-print-directory -w
+	@dune build --only-packages $(PACKAGES) --no-print-directory -w
 
 .PHONY : deps
 deps :
