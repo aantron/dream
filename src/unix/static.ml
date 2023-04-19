@@ -66,7 +66,7 @@ let validate_path request =
     else
       None
 
-let static ?(loader = from_filesystem) local_root = fun request ->
+let static local_root = fun request ->
 
   if not @@ Method.methods_equal (Message.method_ request) `GET then
     Message.response ~status:`Not_Found Stream.empty Stream.null
@@ -77,7 +77,7 @@ let static ?(loader = from_filesystem) local_root = fun request ->
       Message.response ~status:`Not_Found Stream.empty Stream.null
 
     | Some path ->
-      let response = loader local_root path request in
+      let response = from_filesystem local_root path request in
       if not (Message.has_header response "Content-Type") then begin
         match Message.status response with
         | `OK

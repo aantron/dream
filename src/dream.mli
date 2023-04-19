@@ -1544,7 +1544,6 @@ val no_route : route
 (** {1 Static files} *)
 
 val static :
-  ?loader:('a Eio.Path.t -> string -> handler) ->
     'a Eio.Path.t -> handler
 (** Serves static files from a local directory. See example
     {{:https://github.com/aantron/dream/tree/master/example/f-static#files}
