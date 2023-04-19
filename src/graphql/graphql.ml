@@ -68,7 +68,7 @@ let run_query make_context schema request json =
 
   let context = make_context request in
 
-  Lwt_eio.Promise.await_lwt @@ Graphql_lwt.Schema.execute
+  Lwt_eio.run_lwt @@ fun () -> Graphql_lwt.Schema.execute
     ?variables ?operation_name schema context query
 
 
@@ -211,7 +211,7 @@ let handle_over_websocket make_context schema subscriptions request websocket =
               Hashtbl.replace subscriptions id close;
               subscribed := true;
 
-              Lwt_eio.Promise.await_lwt (stream |> Lwt_stream.iter (function
+              Lwt_eio.run_lwt (fun () -> stream |> Lwt_stream.iter (function
                   | Ok json ->
                     Helpers.send websocket (data_message id json)
                   | Error json ->

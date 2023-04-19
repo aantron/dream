@@ -36,9 +36,9 @@ let insert =
   fun (module Db : DB) (session : Session.session) ->
     let payload = serialize_payload session.payload in
     let result =
-      Lwt_eio.Promise.await_lwt @@
+      Lwt_eio.run_lwt @@ fun () ->
       Db.exec query (session.id, session.label, session.expires_at, payload) in
-    Lwt_eio.Promise.await_lwt @@ Caqti_lwt.or_fail result
+    Lwt_eio.run_lwt @@ fun () -> Caqti_lwt.or_fail result
 
 let find_opt =
   let query =
@@ -47,8 +47,8 @@ let find_opt =
       "SELECT label, expires_at, payload FROM dream_session WHERE id = $1" in
 
   fun (module Db : DB) id ->
-    let result = Lwt_eio.Promise.await_lwt @@ Db.find_opt query id in
-    match Lwt_eio.Promise.await_lwt @@ Caqti_lwt.or_fail result with
+    let result = Lwt_eio.run_lwt @@ fun () -> Db.find_opt query id in
+    match Lwt_eio.run_lwt @@ fun () -> Caqti_lwt.or_fail result with
     | None -> None
     | Some (label, expires_at, payload) ->
       (* TODO Mind exceptions! *)
@@ -75,8 +75,8 @@ let refresh =
       "UPDATE dream_session SET expires_at = $1 WHERE id = $2" in
 
   fun (module Db : DB) (session : Session.session) ->
-    let result = Lwt_eio.Promise.await_lwt @@ Db.exec query (session.expires_at, session.id) in
-    Lwt_eio.Promise.await_lwt @@ Caqti_lwt.or_fail result
+    let result = Lwt_eio.run_lwt @@ fun () -> Db.exec query (session.expires_at, session.id) in
+    Lwt_eio.run_lwt @@ fun () -> Caqti_lwt.or_fail result
 
 let update =
   let query =
@@ -86,8 +86,8 @@ let update =
 
   fun (module Db : DB) (session : Session.session) ->
     let payload = serialize_payload session.payload in
-    let result = Lwt_eio.Promise.await_lwt @@ Db.exec query (payload, session.id) in
-    Lwt_eio.Promise.await_lwt @@ Caqti_lwt.or_fail result
+    let result = Lwt_eio.run_lwt @@ fun () -> Db.exec query (payload, session.id) in
+    Lwt_eio.run_lwt @@ fun () -> Caqti_lwt.or_fail result
 
 let remove =
   let query =
@@ -95,8 +95,8 @@ let remove =
     (T.string ->. T.unit) "DELETE FROM dream_session WHERE id = $1"  in
 
   fun (module Db : DB) id ->
-    let result = Lwt_eio.Promise.await_lwt @@ Db.exec query id in
-    Lwt_eio.Promise.await_lwt @@ Caqti_lwt.or_fail result
+    let result = Lwt_eio.run_lwt @@ fun () -> Db.exec query id in
+    Lwt_eio.run_lwt @@ fun () -> Caqti_lwt.or_fail result
 
 (* TODO Session sharing is greatly complicated by the backing store; is it ok to
    just work with snapshots? All kinds of race conditions may be possible,

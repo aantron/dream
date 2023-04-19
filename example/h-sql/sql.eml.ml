@@ -7,8 +7,8 @@ let list_comments =
     (T.unit ->* T.(tup2 int string))
     "SELECT id, text FROM comment" in
   fun (module Db : DB) ->
-    let comments_or_error = Lwt_eio.Promise.await_lwt @@ Db.collect_list query () in
-    Lwt_eio.Promise.await_lwt @@ Caqti_lwt.or_fail comments_or_error
+    let comments_or_error = Lwt_eio.run_lwt @@ fun () -> Db.collect_list query () in
+    Lwt_eio.run_lwt @@ fun () -> Caqti_lwt.or_fail comments_or_error
 
 let add_comment =
   let query =
@@ -16,8 +16,8 @@ let add_comment =
     (T.string ->. T.unit)
     "INSERT INTO comment (text) VALUES ($1)" in
   fun text (module Db : DB) ->
-    let unit_or_error = Lwt_eio.Promise.await_lwt @@ Db.exec query text in
-    Lwt_eio.Promise.await_lwt @@ Caqti_lwt.or_fail unit_or_error
+    let unit_or_error = Lwt_eio.run_lwt @@ fun () -> Db.exec query text in
+    Lwt_eio.run_lwt @@ fun () -> Caqti_lwt.or_fail unit_or_error
 
 let render comments request =
   <html>

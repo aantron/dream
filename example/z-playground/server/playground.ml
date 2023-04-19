@@ -58,7 +58,7 @@ COPY server.exe server.exe
 |}
 
 let exec format =
-  Printf.ksprintf (fun command -> Lwt_eio.Promise.await_lwt @@ Lwt_process.(exec (shell command))) format
+  Printf.ksprintf (fun command -> Lwt_eio.run_lwt @@ fun () -> Lwt_process.(exec (shell command))) format
 
 let create_sandboxes_directory () =
   match%lwt Lwt_unix.mkdir sandbox_root 0o755 with
@@ -66,7 +66,7 @@ let create_sandboxes_directory () =
   | exception Unix.(Unix_error (EEXIST, _, _)) -> Lwt.return_unit
 
 let exists sandbox =
-  Lwt_eio.Promise.await_lwt @@ Lwt_unix.file_exists (sandbox_root // sandbox)
+  Lwt_eio.run_lwt @@ fun () -> Lwt_unix.file_exists (sandbox_root // sandbox)
 
 let write_file sandbox file content =
   Lwt_io.(with_file
@@ -103,18 +103,18 @@ let rec create ?(attempts = 3) syntax eml code =
 
 let read sandbox =
   let no_eml_exists =
-    Lwt_eio.Promise.await_lwt @@ Lwt_unix.file_exists (sandbox_root // sandbox // "no-eml") in
+    Lwt_eio.run_lwt @@ fun () -> Lwt_unix.file_exists (sandbox_root // sandbox // "no-eml") in
   let eml = not no_eml_exists in
   let base = if eml then "server.eml" else "server" in
   let ocaml_promise =
-    Lwt_eio.Promise.await_lwt @@ Lwt_io.(with_file
+    Lwt_eio.run_lwt @@ fun () -> Lwt_io.(with_file
       ~mode:Input (sandbox_root // sandbox // base ^ ".ml") read)
   in
   match ocaml_promise with
   | content -> content, `OCaml, eml
   | exception _ ->
     let content =
-      Lwt_eio.Promise.await_lwt @@ Lwt_io.(with_file
+      Lwt_eio.run_lwt @@ fun () -> Lwt_io.(with_file
         ~mode:Input (sandbox_root // sandbox // base ^ ".re") read)
     in
     content, `Reason, eml
@@ -340,7 +340,7 @@ let lock_sandbox sandbox f =
       decr sandbox_users;
       if !sandbox_users = 0 then
         !notify_gc ())
-    (fun () -> Lwt_eio.Promise.await_lwt @@ Lwt_mutex.with_lock mutex f)
+    (fun () -> Lwt_eio.run_lwt @@ fun () -> Lwt_mutex.with_lock mutex f)
 
 let rec listen session =
   match Dream.receive session.socket with
@@ -457,8 +457,8 @@ let rec gc ?(initial = true) () =
         ()
       else begin
         let _, syntax, eml = read sandbox in
-        let _ = Lwt_eio.Promise.await_lwt @@ build_sandbox sandbox syntax eml in
-        Lwt_eio.Promise.await_lwt @@ image_sandbox sandbox
+        let _ = Lwt_eio.run_lwt @@ fun () -> build_sandbox sandbox syntax eml in
+        Lwt_eio.run_lwt @@ fun () -> image_sandbox sandbox
       end;
       Lwt.return_unit);
     Lwt.return_unit
@@ -505,7 +505,7 @@ let () =
     let example =
       match sandbox.[1] with
       | '-' ->
-        if Lwt_eio.Promise.await_lwt @@ Lwt_unix.file_exists (sandbox_root // sandbox // "keep") then
+        if Lwt_eio.run_lwt @@ fun () -> Lwt_unix.file_exists (sandbox_root // sandbox // "keep") then
           Some sandbox
         else
           None

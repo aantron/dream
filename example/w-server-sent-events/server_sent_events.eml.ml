@@ -64,7 +64,7 @@ let rec forward_messages stream =
     let () = Dream.flush stream in
     forward_messages stream
 
-let forward_messages response = Lwt_eio.Promise.await_lwt (forward_messages response)
+let forward_messages response = Lwt_eio.run_lwt @@ fun () -> forward_messages response
 
 let () =
   Eio_main.run @@ fun env ->
