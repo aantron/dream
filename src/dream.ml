@@ -385,12 +385,7 @@ let test ?(prefix = "") handler request =
     Site_prefix.with_site_prefix prefix
     @@ handler
   in
-
-  let result = ref None in
-  Eio_main.run (fun _env ->
-      result := Some (app request)
-    );
-  Option.get !result
+  Eio_main.run (fun _env -> app request)
 
 let sort_headers = Message.sort_headers
 let echo = Echo.echo

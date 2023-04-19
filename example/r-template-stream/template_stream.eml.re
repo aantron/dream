@@ -1,4 +1,4 @@
-let render = clock => response => {
+let render = response => {
   %% response
   <html>
   <body>

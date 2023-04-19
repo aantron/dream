@@ -408,6 +408,7 @@ let serve_with_details
     ~net
     ~interface
     ~port
+    ?stop
     ~error_handler
     ~backlog
     ~certificate_file
@@ -478,10 +479,7 @@ let serve_with_details
       ~reuse_addr:true
       ~backlog
   in
-  while true do
-    Eio.Net.accept_fork ~sw socket httpaf_connection_handler
-      ~on_error:(fun ex -> raise ex)
-  done
+  Eio.Net.run_server ?stop socket httpaf_connection_handler ~on_error:raise
 
 
 
@@ -492,6 +490,7 @@ let serve_with_maybe_https
     caller_function_for_error_messages
     ~interface
     ~port
+    ?stop
     ~error_handler
     ~backlog
     ~tls
@@ -520,6 +519,7 @@ let serve_with_maybe_https
         ~net
         ~interface
         ~port
+        ?stop
         ~error_handler
         ~backlog
         ~certificate_file:""
@@ -646,6 +646,7 @@ let default_port = 8080
 let serve
     ?(interface = default_interface)
     ?(port = default_port)
+    ?stop
     ?(error_handler = Error_handler.default)
     ?(backlog = 10)
     ?(tls = false)
@@ -660,6 +661,7 @@ let serve
     ~net
     ~interface
     ~port
+    ?stop
     ~error_handler
     ~backlog
     (* ~tls:(if tls then `OpenSSL else `No) *)
@@ -676,6 +678,7 @@ let serve
 let run
     ?(interface = default_interface)
     ?(port = default_port)
+    ?stop
     ?(error_handler = Error_handler.default)
     ?(backlog = 10)
     ?(tls = false)

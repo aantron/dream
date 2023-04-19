@@ -2193,6 +2193,7 @@ val catch : (error -> response) -> middleware
 val run :
   ?interface:string ->
   ?port:int ->
+  ?stop:unit Eio.Promise.t ->
   ?error_handler:error_handler ->
   ?backlog:int ->
   ?tls:bool ->
@@ -2249,6 +2250,7 @@ val run :
 val serve :
   ?interface:string ->
   ?port:int ->
+  ?stop:unit Eio.Promise.t ->
   ?error_handler:error_handler ->
   ?backlog:int ->
   ?tls:bool ->

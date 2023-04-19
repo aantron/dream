@@ -49,9 +49,8 @@ let send message =
   Switch.run @@ fun sw ->
   Hashtbl.to_seq_values clients
   |> List.of_seq
-  |> List.iter (fun client ->
-      Fiber.fork ~sw (fun () -> Dream.send client message)
-    )
+  |> Fiber.List.iter (fun client ->
+      Dream.send client message)
 
 let handle_client client =
   let client_id = track client in
