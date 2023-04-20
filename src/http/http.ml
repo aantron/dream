@@ -112,67 +112,69 @@ let wrap_handler
        customizable here. The handler itself is customizable (to catch all)
        exceptions, and the error callback that gets leaked exceptions is also
        customizable. *)
-    try
-      (* Do the big call. *)
-      let response = user's_dream_handler request in
+    begin
+      try
+        (* Do the big call. *)
+        let response = user's_dream_handler request in
 
-      (* Extract the Dream response's headers. *)
+        (* Extract the Dream response's headers. *)
 
-      (* This is the default function that translates the Dream response to an
+        (* This is the default function that translates the Dream response to an
            http/af response and sends it. We pre-define the function, however,
            because it is called from two places:
 
            1. Upon a normal response, the function is called unconditionally.
            2. Upon failure to establish a WebSocket, the function is called to
               transmit the resulting error response. *)
-      let forward_response response =
-        Message.set_content_length_headers response;
+        let forward_response response =
+          Message.set_content_length_headers response;
 
-        let headers =
-          Httpaf.Headers.of_list (Message.all_headers response) in
+          let headers =
+            Httpaf.Headers.of_list (Message.all_headers response) in
 
-        let status =
-          to_httpaf_status (Message.status response) in
+          let status =
+            to_httpaf_status (Message.status response) in
 
-        let httpaf_response =
-          Httpaf.Response.create ~headers status in
-        let body =
-          Httpaf.Reqd.respond_with_streaming conn httpaf_response in
+          let httpaf_response =
+            Httpaf.Response.create ~headers status in
+          let body =
+            Httpaf.Reqd.respond_with_streaming conn httpaf_response in
 
-        Adapt.forward_body response body
-      in
-
-      match Message.get_websocket response with
-      | None ->
-        forward_response response
-      | Some (client_stream, _server_stream) ->
-        let error_handler =
-          Error_handler.websocket user's_error_handler request response in
-
-        let proceed () =
-          Websocketaf.Server_connection.create_websocket
-            ~error_handler
-            (Dream_httpaf.Websocket.websocket_handler client_stream)
-          |> Gluten.make (module Websocketaf.Server_connection)
-          |> upgrade
+          Adapt.forward_body response body
         in
 
-        let headers =
-          Httpaf.Headers.of_list (Message.all_headers response) in
-
-        Websocketaf.Handshake.respond_with_upgrade ~headers ~sha1 conn proceed
-        |> function
-        | Ok () -> ()
-        | Error error_string ->
-          let response =
-            Error_handler.websocket_handshake
-              user's_error_handler request response error_string
-          in
+        match Message.get_websocket response with
+        | None ->
           forward_response response
-    with exn ->
-      (* TODO There was something in the fork changelogs about not requiring
+        | Some (client_stream, _server_stream) ->
+          let error_handler =
+            Error_handler.websocket user's_error_handler request response in
+
+          let proceed () =
+            Websocketaf.Server_connection.create_websocket
+              ~error_handler
+              (Dream_httpaf.Websocket.websocket_handler client_stream)
+            |> Gluten.make (module Websocketaf.Server_connection)
+            |> upgrade
+          in
+
+          let headers =
+            Httpaf.Headers.of_list (Message.all_headers response) in
+
+          Websocketaf.Handshake.respond_with_upgrade ~headers ~sha1 conn proceed
+          |> function
+          | Ok () -> ()
+          | Error error_string ->
+            let response =
+              Error_handler.websocket_handshake
+                user's_error_handler request response error_string
+            in
+            forward_response response
+      with exn ->
+        (* TODO There was something in the fork changelogs about not requiring
            report exn. Is it relevant to this? *)
-      Httpaf.Reqd.report_exn conn exn
+        Httpaf.Reqd.report_exn conn exn
+    end
   in
 
   httpaf_request_handler
@@ -227,40 +229,42 @@ let wrap_handler_h2
        customizable here. The handler itself is customizable (to catch all)
        exceptions, and the error callback that gets leaked exceptions is also
        customizable. *)
-    try
-      (* Do the big call. *)
-      let response = user's_dream_handler request in
+    begin
+      try
+        (* Do the big call. *)
+        let response = user's_dream_handler request in
 
-      (* Extract the Dream response's headers. *)
+        (* Extract the Dream response's headers. *)
 
-      let forward_response response =
-        Message.drop_content_length_headers response;
-        Message.lowercase_headers response;
-        let headers =
-          H2.Headers.of_list (Message.all_headers response) in
-        let status =
-          to_h2_status (Message.status response) in
-        let h2_response =
-          H2.Response.create ~headers status in
-        let body =
-          H2.Reqd.respond_with_streaming conn h2_response in
+        let forward_response response =
+          Message.drop_content_length_headers response;
+          Message.lowercase_headers response;
+          let headers =
+            H2.Headers.of_list (Message.all_headers response) in
+          let status =
+            to_h2_status (Message.status response) in
+          let h2_response =
+            H2.Response.create ~headers status in
+          let body =
+            H2.Reqd.respond_with_streaming conn h2_response in
 
-        Adapt.forward_body_h2 response body
-      in
+          Adapt.forward_body_h2 response body
+        in
 
-      match Message.get_websocket response with
-      | None ->
-        forward_response response
-      | Some _ ->
-        (* TODO DOC H2 appears not to support WebSocket upgrade at present.
-           RFC 8441. *)
-        (* TODO DOC Do we need a CONNECT method? Do users need to be informed of
-           this? *)
-        ()
-    with exn ->
-      (* TODO LATER There was something in the fork changelogs about not
+        match Message.get_websocket response with
+        | None ->
+          forward_response response
+        | Some _ ->
+          (* TODO DOC H2 appears not to support WebSocket upgrade at present.
+             RFC 8441. *)
+          (* TODO DOC Do we need a CONNECT method? Do users need to be informed of
+             this? *)
+          ()
+      with exn ->
+        (* TODO LATER There was something in the fork changelogs about not
            requiring report_exn. Is it relevant to this? *)
-      H2.Reqd.report_exn conn exn
+        H2.Reqd.report_exn conn exn
+    end
   in
 
   httpaf_request_handler

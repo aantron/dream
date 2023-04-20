@@ -279,24 +279,24 @@ let graphql make_context schema = fun request ->
   | `POST ->
     begin match Message.header request "Content-Type" with
     | Some "application/json" ->
-        let body = Message.body request in
-        (* TODO This almost certainly raises exceptions... *)
-        let json = Yojson.Basic.from_string body in
+      let body = Message.body request in
+      (* TODO This almost certainly raises exceptions... *)
+      let json = Yojson.Basic.from_string body in
 
-        begin match run_query make_context schema request json with
-          | Error json ->
-            Yojson.Basic.to_string json
-            |> Helpers.json
+      begin match run_query make_context schema request json with
+        | Error json ->
+          Yojson.Basic.to_string json
+          |> Helpers.json
 
-          | Ok (`Response json) ->
-            Yojson.Basic.to_string json
-            |> Helpers.json
+        | Ok (`Response json) ->
+          Yojson.Basic.to_string json
+          |> Helpers.json
 
-          | Ok (`Stream _) ->
-            make_error "Subscriptions and streaming should use WebSocket transport"
-            |> Yojson.Basic.to_string
-            |> Helpers.json
-        end
+        | Ok (`Stream _) ->
+          make_error "Subscriptions and streaming should use WebSocket transport"
+          |> Yojson.Basic.to_string
+          |> Helpers.json
+      end
 
     | _ ->
       log.warning (fun log -> log ~request

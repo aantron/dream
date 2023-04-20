@@ -215,26 +215,30 @@ let httpaf user's_error_handler = fun client_address ?request:_ error start_resp
     will_send_response = true;
   } in
 
-  double_faults begin fun () ->
-    let response = user's_error_handler error in
-    let response = match response with
-      | Some response -> response
-      | None -> default_response caused_by in
-    let headers = Httpaf.Headers.of_list (Message.all_headers response) in
-    let body = start_response headers in
-    Adapt.forward_body response body
-  end (fun () -> ())
+  begin
+    double_faults begin fun () ->
+      let response = user's_error_handler error in
+      let response = match response with
+        | Some response -> response
+        | None -> default_response caused_by in
+      let headers = Httpaf.Headers.of_list (Message.all_headers response) in
+      let body = start_response headers in
+      Adapt.forward_body response body
+    end (fun () -> ())
+  end
 
 let respond_with_option f =
-  double_faults
-    (fun () ->
-       match f () with
-       | Some response -> response
-       | None ->
-         Message.response
-           ~status:`Internal_Server_Error Stream.empty Stream.null)
-    (fun () ->
-      Message.response ~status:`Internal_Server_Error Stream.empty Stream.null)
+  begin
+    double_faults
+      (fun () ->
+         match f () with
+         | Some response -> response
+         | None ->
+           Message.response
+             ~status:`Internal_Server_Error Stream.empty Stream.null)
+      (fun () ->
+         Message.response ~status:`Internal_Server_Error Stream.empty Stream.null)
+  end
 
 let app user's_error_handler = fun error ->
   respond_with_option (fun () -> user's_error_handler error)
