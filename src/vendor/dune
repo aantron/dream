@@ -150,19 +150,3 @@
    mirage-time
    dream-mirage.dream-paf.alpn
   )))
-
-(subdir paf/lib
- (library
-  (name dream_le)
-  (public_name dream-mirage.dream-paf.le)
-  (modules lE)
-  (libraries
-   tcpip
-   dream-httpaf.dream-httpaf_
-   dream-mirage.dream-paf
-   mirage-time
-   duration
-   tls-mirage
-   emile
-   letsencrypt
-  )))

@@ -10,6 +10,8 @@
   dream.certificate
   dream-pure
   dream-httpaf.dream-h2
+  lwt
+  rresult
   tcpip
   dream-mirage.dream-paf
   dream-mirage.dream-paf.alpn
