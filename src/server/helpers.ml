@@ -44,8 +44,6 @@ let tls request =
 let set_tls request tls =
   Message.set_field request tls_field tls
 
-let drop_empty_headers request = Message.drop_header request ""
-  
 let request ~client ~method_ ~target ~tls ~headers server_stream =
   let request =
     Message.request ~method_ ~target ~headers Stream.null server_stream in
