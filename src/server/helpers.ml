@@ -67,7 +67,6 @@ let respond ?status ?code ?headers body =
 let html ?status ?code ?headers body =
   let response = response_with_body ?status ?code ?headers body in
   Message.set_header response "Content-Type" Formats.text_html;
-  Message.drop_header response "";
   Lwt.return response
 
 let json ?status ?code ?headers body =
