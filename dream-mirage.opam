@@ -61,9 +61,9 @@ depends: [
   "lwt_ppx" {>= "1.2.2"}
   "mimic"
   "mirage-time"
+  "rresult"
   "tcpip"
   "tls-mirage"
-  "rresult"
 ]
 
 build: [
