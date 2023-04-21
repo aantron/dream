@@ -17,7 +17,10 @@
   (public_name dream-httpaf.dream-gluten-eio)
   (libraries
    dream-httpaf.dream-gluten
-   unix eio bigstringaf
+   unix
+   eio
+   eio.unix
+   bigstringaf
   )))
 
 
