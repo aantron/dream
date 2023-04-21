@@ -503,6 +503,10 @@ let serve_with_maybe_https
     ~builtins
     ~net
     user's_dream_handler =
+  ignore certificate_file;
+  ignore key_file;
+  ignore certificate_string;
+  ignore key_string;
 
   try
     (* This check will at least catch secrets like "foo" when used on a public
@@ -659,6 +663,7 @@ let serve
     ?(builtins = true)
     ~net
     user's_dream_handler =
+  ignore tls;
 
   serve_with_maybe_https
     "serve"
@@ -763,6 +768,7 @@ let run
         ~net:env#net
         ~interface
         ~port
+        ?stop
         ~error_handler
         ~backlog
         (* ~tls:(if tls then `OpenSSL else `No) *)
