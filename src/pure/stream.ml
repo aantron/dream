@@ -466,4 +466,4 @@ let read_until_close stream =
   in
   loop ();
 
-  Eio.Promise.await_exn promise
+  promise

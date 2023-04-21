@@ -279,7 +279,7 @@ let graphql make_context schema = fun request ->
   | `POST ->
     begin match Message.header request "Content-Type" with
     | Some "application/json" ->
-      let body = Message.body request in
+      let body = Eio.Promise.await_exn @@ Message.body request in
       (* TODO This almost certainly raises exceptions... *)
       let json = Yojson.Basic.from_string body in
 

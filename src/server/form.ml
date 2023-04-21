@@ -67,7 +67,7 @@ let form ?(csrf = true) ~now request =
   | Some content_type ->
     match String.split_on_char ';' content_type with
     | "application/x-www-form-urlencoded"::_ ->
-      let body = Message.body request in
+      let body = Eio.Promise.await_exn @@ Message.body request in
       let form = Formats.from_form_urlencoded body in
       if csrf then
         sort_and_check_form ~now (fun string -> string) form request

@@ -36,7 +36,7 @@ type 'a message = {
   mutable headers : (string * string) list;
   mutable client_stream : Stream.stream;
   mutable server_stream : Stream.stream;
-  mutable body : string option;
+  mutable body : string Eio.Promise.or_exn option;
   mutable fields : Fields.t;
 }
 
@@ -198,7 +198,7 @@ let body message =
     body_promise
 
 let set_body message body =
-  message.body <- Some body;
+  message.body <- Some (Eio.Promise.create_resolved (Ok body));
   match message.kind with
   | Request -> message.server_stream <- Stream.string body
   | Response -> message.client_stream <- Stream.string body
@@ -213,9 +213,14 @@ let set_content_length_headers message =
       match message.body with
       | None ->
         add_header message "Transfer-Encoding" "chunked"
-      | Some body ->
-        let length = string_of_int (String.length body) in
-        add_header message "Content-Length" length
+      | Some body_promise ->
+        match Eio.Promise.peek body_promise with
+        | None ->
+          add_header message "Transfer-Encoding" "chunked"
+        | Some (Error exn) -> raise exn
+        | Some (Ok body) ->
+          let length = string_of_int (String.length body) in
+          add_header message "Content-Length" length
 
 let drop_content_length_headers message =
   drop_header message "Content-Length";

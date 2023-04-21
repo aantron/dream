@@ -61,7 +61,7 @@ val lowercase_headers : 'a message -> unit
 
 
 
-val body : 'a message -> string
+val body : 'a message -> string Eio.Promise.or_exn
 val set_body : 'a message -> string -> unit
 val set_content_length_headers : 'a message -> unit
 val drop_content_length_headers : 'a message -> unit

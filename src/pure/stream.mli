@@ -81,7 +81,7 @@ val read_convenience : stream -> string option
     into [Some s], and [~close] into [None], and uses them to resolve a promise.
     [~flush] is ignored. *)
 
-val read_until_close : stream -> string
+val read_until_close : stream -> string Eio.Promise.or_exn
 (** Reads a stream completely until [~close], and accumulates the data into a
     string. *)
 
