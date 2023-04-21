@@ -8,6 +8,6 @@ let () =
       let body = Dream.body request in
       Dream.respond
         ~headers:["Content-Type", "application/octet-stream"]
-        body);
+        (Eio.Promise.await_exn body));
 
   ]

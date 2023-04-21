@@ -727,7 +727,7 @@ module Make
 
   (** {1 Bodies} *)
 
-  val body : 'a message -> string
+  val body : 'a message -> string Eio.Promise.or_exn
   (** Retrieves the entire body. See example
       {{:https://github.com/aantron/dream/tree/master/example/6-echo#files}
       [6-echo]}. *)
