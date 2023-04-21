@@ -5,6 +5,7 @@
   bigarray-compat
   bigstringaf
   digestif
+  rresult
   dream.cipher
   dream.server
   dream.certificate

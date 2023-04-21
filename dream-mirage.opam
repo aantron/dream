@@ -63,6 +63,7 @@ depends: [
   "mirage-time"
   "tcpip"
   "tls-mirage"
+  "rresult"
 ]
 
 build: [
