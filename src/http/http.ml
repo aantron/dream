@@ -380,14 +380,11 @@ let ocaml_tls = {
       ~error_handler:(Error_handler.httpaf error_handler)
 }
 
-
-
 let built_in_middleware error_handler =
   Message.pipeline [
     Catch.catch (Error_handler.app error_handler);
+    Header_middleware.drop_empty_headers;
   ]
-
-
 
 let serve_with_details
     caller_function_for_error_messages

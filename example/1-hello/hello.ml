@@ -1,3 +1,3 @@
 let () =
-  Dream.run (fun _ ->
-    Dream.html "Good morning, world!")
+  Dream.run ~builtins:true (fun _ ->
+    Dream.html ~headers:["hey", "hi"; "",""] "Good morning, world!")
