@@ -99,6 +99,7 @@ let set_target request target =
 (* Responses *)
 
 let response ?status ?code ?(headers = []) client_stream server_stream =
+  let drop_empty_headers = List.filter (fun (key, _) -> key <> "") in
   let status =
     match status, code with
     | None, None -> `OK
@@ -111,7 +112,7 @@ let response ?status ?code ?(headers = []) client_stream server_stream =
       status;
       websocket = None;
     };
-    headers;
+    headers = drop_empty_headers headers;
     client_stream;
     server_stream;
     body = None;

@@ -44,8 +44,8 @@ let tls request =
 let set_tls request tls =
   Message.set_field request tls_field tls
 
-
-
+let drop_empty_headers request = Message.drop_header request ""
+  
 let request ~client ~method_ ~target ~tls ~headers server_stream =
   let request =
     Message.request ~method_ ~target ~headers Stream.null server_stream in
@@ -56,11 +56,10 @@ let request ~client ~method_ ~target ~tls ~headers server_stream =
 let request_with_body ?method_ ?target ?headers body =
   Message.request ?method_ ?target ?headers Stream.null (Stream.string body)
 
-
-
 let response_with_body ?status ?code ?headers body =
   let response =
     Message.response ?status ?code ?headers Stream.null Stream.null in
+  Message.drop_header response "";
   Message.set_body response body;
   response
 
@@ -70,6 +69,7 @@ let respond ?status ?code ?headers body =
 let html ?status ?code ?headers body =
   let response = response_with_body ?status ?code ?headers body in
   Message.set_header response "Content-Type" Formats.text_html;
+  Message.drop_header response "";
   Lwt.return response
 
 let json ?status ?code ?headers body =

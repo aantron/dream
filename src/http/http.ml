@@ -383,7 +383,6 @@ let ocaml_tls = {
 let built_in_middleware error_handler =
   Message.pipeline [
     Catch.catch (Error_handler.app error_handler);
-    Header_middleware.drop_empty_headers;
   ]
 
 let serve_with_details
