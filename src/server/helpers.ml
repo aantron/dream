@@ -57,7 +57,6 @@ let request_with_body ?method_ ?target ?headers body =
 let response_with_body ?status ?code ?headers body =
   let response =
     Message.response ?status ?code ?headers Stream.null Stream.null in
-  Message.drop_header response "";
   Message.set_body response body;
   response
 
