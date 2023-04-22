@@ -1471,7 +1471,7 @@ val router : route list -> handler
     structure metadata.
     
     Note, Dream's router differentiates between routes that end with a [/] and routes
-    that don't. For example [/foo/] and [/foo] are treated as different
+    that don't. For example, [/foo/] and [/foo] are treated as different
     routes. This is to enforce the idea that routes without a final [/] 
     should serve a file-like response, while routes that do end with [/] offer a
     directory-like response. *)
