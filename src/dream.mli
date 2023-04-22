@@ -1468,7 +1468,13 @@ val router : route list -> handler
     include its own router, into a subsite. However, it is better to compose
     sites with routes and {!Dream.scope} rather than opaque handlers and [**],
     because, in the future, it may be possible to query routes for site
-    structure metadata. *)
+    structure metadata.
+    
+    Note, Dream's router differentiates between routes that end with a [/] and routes
+    that don't. For example [/foo/] and [/foo] are treated as different
+    routes. This is to enforce the idea that routes without a final [/] 
+    should serve a file-like response, while routes that do end with [/] offer a
+    directory-like response. *)
 
 val get     : string -> handler -> route
 (** Forwards [`GET] requests for the given path to the handler.
