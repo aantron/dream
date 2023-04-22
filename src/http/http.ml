@@ -380,9 +380,18 @@ let ocaml_tls = {
       ~error_handler:(Error_handler.httpaf error_handler)
 }
 
+let check_headers_middleware next_handler request =
+  let%lwt response = next_handler request in
+  let invalid_headers_exist = Message.all_headers response |> List.exists (fun (key, _) -> String.trim key = "") in
+  if invalid_headers_exist then
+    log.warning (fun log ->
+      log "A response header is empty or contains only whitespace. This is not allowed by RFC 7230.");
+  Lwt.return response
+
 let built_in_middleware error_handler =
   Message.pipeline [
     Catch.catch (Error_handler.app error_handler);
+    check_headers_middleware;
   ]
 
 let serve_with_details
