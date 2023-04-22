@@ -7,9 +7,8 @@
   dream.server
   graphql_parser
   graphql-lwt
-  lwt
+  lwt_eio
   str
   yojson
  )
- (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

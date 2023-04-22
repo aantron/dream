@@ -4,10 +4,10 @@
  (libraries
   caqti
   caqti-lwt
+  lwt_eio
   dream.cipher
   dream-pure
   dream.server
   uri
   yojson)
- (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

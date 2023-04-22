@@ -1,5 +1,7 @@
 (* TODO Definitely needs flow control. *)
 
+open Eio.Std
+
 let home =
   <html>
     <body>
@@ -41,27 +43,27 @@ let stress websocket =
   let limit = 1024 * 1024 * 1024 in
   let start = Unix.gettimeofday () in
   let rec loop sent =
-    if sent >= limit then
-      let%lwt () = Dream.close_websocket websocket in
-      Lwt.return (Unix.gettimeofday () -. start)
-    else
-      let%lwt () = Dream.send websocket frame_a ~text_or_binary:`Binary in
-      let%lwt () = Dream.send websocket frame_b ~text_or_binary:`Binary in
-      let%lwt () = Lwt.pause () in
+    if sent >= limit then (
+     Dream.close_websocket websocket;
+      Unix.gettimeofday () -. start
+    ) else (
+      Dream.send websocket frame_a ~text_or_binary:`Binary;
+      Dream.send websocket frame_b ~text_or_binary:`Binary;
+      Fiber.yield ();
       loop (sent + frame + frame)
+    )
   in
-  let%lwt elapsed = loop 0 in
+  let elapsed = loop 0 in
 
   Dream.log "%.0f MB/s over %.1f s"
     ((float_of_int limit) /. elapsed /. 1024. /. 1024.) elapsed;
-  show_heap_size ();
-
-  Lwt.return_unit
+  show_heap_size ()
 
 let () =
   show_heap_size ();
 
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.router [
 

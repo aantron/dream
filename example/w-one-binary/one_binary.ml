@@ -4,8 +4,9 @@ let loader _root path _request =
   | Some asset -> Dream.respond asset
 
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.router [
-    Dream.get "/assets/**" (Dream.static ~loader "")
+    Dream.get "/assets/**" (Dream.static ~loader (Eio.Stdenv.cwd env))
   ]

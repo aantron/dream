@@ -5,6 +5,6 @@
   bigstringaf
   dream-pure
   dream-httpaf.dream-websocketaf
+  lwt_eio
  )
- (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

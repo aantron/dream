@@ -21,7 +21,7 @@ module Message = Dream_pure.Message
 val default : Catch.error_handler
 val debug_error_handler : Catch.error_handler
 val customize :
-  (Catch.error -> string -> Message.response -> Message.response Lwt.t) ->
+  (Catch.error -> string -> Message.response -> Message.response) ->
     Catch.error_handler
 
 
@@ -39,19 +39,19 @@ val customize :
 
 val app :
   Catch.error_handler ->
-    (Catch.error -> Message.response Lwt.t)
+    (Catch.error -> Message.response)
 
 val httpaf :
   Catch.error_handler ->
-    (Unix.sockaddr -> Httpaf.Server_connection.error_handler)
+    (Eio.Net.Sockaddr.stream -> Httpaf.Server_connection.error_handler)
 
 val h2 :
   Catch.error_handler ->
-    (Unix.sockaddr -> H2.Server_connection.error_handler)
+    (Eio.Net.Sockaddr.stream -> H2.Server_connection.error_handler)
 
 val tls :
   Catch.error_handler ->
-    (Unix.sockaddr -> exn -> unit)
+    (Eio.Net.Sockaddr.stream -> exn -> unit)
 
 val websocket :
   Catch.error_handler ->
@@ -61,7 +61,7 @@ val websocket :
 
 val websocket_handshake :
   Catch.error_handler ->
-    (Message.request -> Message.response -> string -> Message.response Lwt.t)
+    (Message.request -> Message.response -> string -> Message.response)
 
 
 

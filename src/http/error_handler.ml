@@ -161,7 +161,7 @@ let customize template (error : Catch.error) =
      Then, call the template, and return the response. *)
 
   if not error.will_send_response then
-    Lwt.return_none
+    None
 
   else
     let debug_dump = dump error in
@@ -181,13 +181,13 @@ let customize template (error : Catch.error) =
     (* No need to catch errors when calling the template, because every call
        site of the error handler already has error handlers for catching double
        faults. *)
-    let%lwt response = template error debug_dump response in
-    Lwt.return (Some response)
+    let response = template error debug_dump response in
+    Some response
 
 
 
 let default_template _error _debug_dump response =
-  Lwt.return response
+  response
 
 let debug_template _error debug_dump response =
   let status = Message.status response in
@@ -195,7 +195,7 @@ let debug_template _error debug_dump response =
   and reason = Status.status_to_string status in
   Message.set_header response "Content-Type" Dream_pure.Formats.text_html;
   Message.set_body response (Error_template.render ~debug_dump ~code ~reason);
-  Lwt.return response
+  response
 
 let default =
   customize default_template
@@ -210,7 +210,7 @@ let debug_error_handler =
 
 
 let double_faults f default =
-  Lwt.catch f begin fun exn ->
+  try f () with exn ->
     let backtrace = Printexc.get_backtrace () in
 
     log.error (fun log ->
@@ -221,7 +221,6 @@ let double_faults f default =
       log.error (fun log -> log "%s" line));
 
     default ()
-  end
 
 (* If the user's handler fails to provide a response, return an empty 500
    response. Don't return the original response we passed to the error handler,
@@ -232,15 +231,14 @@ let double_faults f default =
 let respond_with_option f =
   double_faults
     (fun () ->
-      f ()
-      |> Lwt.map (function
-        | Some response -> response
-        | None ->
-          Message.response
-            ~status:`Internal_Server_Error Stream.empty Stream.null))
+      match f () with
+      | Some response -> response
+      | None ->
+        Message.response
+          ~status:`Internal_Server_Error Stream.empty Stream.null)
     (fun () ->
       Message.response ~status:`Internal_Server_Error Stream.empty Stream.null
-      |> Lwt.return)
+    )
 
 
 
@@ -304,9 +302,8 @@ let httpaf
     will_send_response = true;
   } in
 
-  Lwt.async begin fun () ->
     double_faults begin fun () ->
-      let%lwt response = user's_error_handler error in
+      let response = user's_error_handler error in
 
       let response =
         match response with
@@ -317,12 +314,9 @@ let httpaf
       let headers = Httpaf.Headers.of_list (Message.all_headers response) in
       let body = start_response headers in
 
-      Adapt.forward_body response body;
-
-      Lwt.return_unit
+      Adapt.forward_body response body
     end
-      Lwt.return
-  end
+      (fun () -> ())
 
 
 
@@ -362,9 +356,8 @@ let h2
     will_send_response = true;
   } in
 
-  Lwt.async begin fun () ->
     double_faults begin fun () ->
-      let%lwt response = user's_error_handler error in
+      let response = user's_error_handler error in
 
       let response =
         match response with
@@ -375,12 +368,9 @@ let h2
       let headers = H2.Headers.of_list (Message.all_headers response) in
       let body = start_response headers in
 
-      Adapt.forward_body_h2 response body;
-
-      Lwt.return_unit
+      Adapt.forward_body_h2 response body
     end
-      Lwt.return
-  end
+      (fun () -> ())
 
 
 
@@ -403,10 +393,9 @@ let tls
     will_send_response = false;
   } in
 
-  Lwt.async (fun () ->
     double_faults
-      (fun () -> Lwt.map ignore (user's_error_handler error))
-      Lwt.return)
+      (fun () -> user's_error_handler error |> ignore)
+      (fun () -> ())
 
 
 
@@ -434,10 +423,9 @@ let websocket
     will_send_response = false;
   } in
 
-  Lwt.async (fun () ->
     double_faults
-      (fun () -> Lwt.map ignore (user's_error_handler error))
-      Lwt.return)
+      (fun () -> user's_error_handler error |> ignore)
+      (fun () -> ())
 
 
 

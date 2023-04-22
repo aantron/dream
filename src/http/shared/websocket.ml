@@ -100,7 +100,7 @@ let websocket_handler stream socket =
     else
       match !current_payload with
       | None ->
-        Lwt.on_success (Lwt_stream.get frames) begin function
+        begin match Lwt_eio.run_lwt @@ fun () -> Lwt_stream.get frames with
         | None ->
           if not !closed then begin
             closed := true;

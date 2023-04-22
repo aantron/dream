@@ -68,11 +68,6 @@ let logs_lib_tag : string Logs.Tag.def =
     request_id_label
     Format.pp_print_string
 
-(* Lwt sequence-associated storage key used to pass request ids for use when
-   ~request is not provided. *)
-let id_lwt_key : string Lwt.key =
-  Lwt.new_key ()
-
 (* The actual request id "field" associated with each request by the logger. If
    this field is missing, the logger assigns the request a fresh id. *)
 let id_field =
@@ -81,21 +76,23 @@ let id_field =
     ~show_value:(fun id -> id)
     ()
 
-(* Makes a best-effort attempt to retrieve the request id. *)
-let get_request_id ?request () =
-  let request_id =
-    match request with
-    | None -> None
-    | Some request -> Message.field request id_field
-  in
-  match request_id with
-  | Some _ -> request_id
-  | None -> Lwt.get id_lwt_key
-
 (* The current state of the request id sequence. *)
 let last_id =
   ref 0
 
+(* Makes a best-effort attempt to retrieve the request id. *)
+let get_request_id ?request () =
+  match request with
+  | None -> ""
+  | Some request ->
+    match Message.field request id_field with
+    | Some id -> id
+    | None ->
+      (* Get the requwst's id or assign a new one. *)
+      last_id := !last_id + 1;
+      let id = string_of_int !last_id in
+      Message.set_field request id_field id;
+      id
 
 
 (* TODO Nice logging for multiline strings? *)
@@ -211,14 +208,14 @@ let reporter ~now () =
 
       let request_id =
         match request_id_from_tags with
-        | Some _ -> request_id_from_tags
+        | Some id -> id
         | None -> get_request_id ()
       in
 
       let request_id, request_style =
         match request_id with
-        | Some "" | None -> "", `White
-        | Some request_id ->
+        | "" -> "", `White
+        | request_id ->
           (* The last byte of the request id is basically always going to be a
              digit, growing incrementally, so we can use the parity of its
              ASCII code to stripe the requests in the log. *)
@@ -259,9 +256,6 @@ let sources : (string * Logs.src) list ref =
   ref []
 
 let set_printexc =
-  ref true
-
-let set_async_exception_hook =
   ref true
 
 let _initialized = ref None
@@ -321,10 +315,7 @@ let sub_log ?level:level_ name =
           match request with
           | None -> Logs.Tag.empty
           | Some request ->
-            match get_request_id ~request () with
-            | None -> Logs.Tag.empty
-            | Some request_id ->
-              Logs.Tag.add logs_lib_tag request_id Logs.Tag.empty
+            Logs.Tag.add logs_lib_tag (get_request_id ~request ()) Logs.Tag.empty
         in
         log ~tags format_and_arguments))
   in
@@ -382,19 +373,8 @@ let log =
 
 
 
-let set_up_exception_hook () =
-  if !set_async_exception_hook then begin
-    set_async_exception_hook := false;
-    Lwt.async_exception_hook := fun exn ->
-      let backtrace = Printexc.get_backtrace () in
-      log.error (fun log -> log "Async exception: %s" (Printexc.to_string exn));
-      backtrace
-      |> iter_backtrace (fun line -> log.error (fun log -> log "%s" line))
-  end
-
 let initialize_log
     ?(backtraces = true)
-    ?(async_exception_hook = true)
     ?level:level_
     ?enable:(enable_ = true)
     () =
@@ -402,10 +382,6 @@ let initialize_log
   if backtraces then
     Printexc.record_backtrace true;
   set_printexc := false;
-
-  if async_exception_hook then
-    set_up_exception_hook ();
-  set_async_exception_hook := false;
 
   let level_ =
     Option.map to_logs_level level_
@@ -468,17 +444,6 @@ struct
       set_printexc := false
     end;
 
-    (* Get the requwst's id or assign a new one. *)
-    let id =
-      match Message.field request id_field with
-      | Some id -> id
-      | None ->
-        last_id := !last_id + 1;
-        let id = string_of_int !last_id in
-        Message.set_field request id_field id;
-        id
-    in
-
     (* Identify the request in the log. *)
     let user_agent =
       Message.headers request "User-Agent"
@@ -493,11 +458,8 @@ struct
         user_agent);
 
     (* Call the rest of the app. *)
-    Lwt.try_bind
-      (fun () ->
-        Lwt.with_value id_lwt_key (Some id) (fun () ->
-          next_handler request))
-      (fun response ->
+    match next_handler request with
+    | response ->
         (* Log the elapsed time. If the response is a redirection, log the
            target. *)
         let location =
@@ -531,21 +493,20 @@ struct
               log.info report
         end;
 
-        Lwt.return response)
-
-      (fun exn ->
-        let backtrace = Printexc.get_backtrace () in
-        (* In case of exception, log the exception. We alsp log the backtrace
-           here, even though it is likely to be redundant, because some OCaml
-           libraries install exception printers that will clobber the backtrace
-           right during Printexc.to_string! *)
-        log.warning (fun log ->
+        response
+    | exception exn ->
+      let backtrace = Printexc.get_backtrace () in
+      (* In case of exception, log the exception. We alsp log the backtrace
+         here, even though it is likely to be redundant, because some OCaml
+         libraries install exception printers that will clobber the backtrace
+         right during Printexc.to_string! *)
+      log.warning (fun log ->
           log ~request "Aborted by: %s" (Printexc.to_string exn));
 
-        backtrace
-        |> iter_backtrace (fun line -> log.warning (fun log -> log "%s" line));
+      backtrace
+      |> iter_backtrace (fun line -> log.warning (fun log -> log "%s" line));
 
-        Lwt.fail exn)
+      raise exn
 end
 
 

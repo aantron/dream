@@ -53,10 +53,6 @@ let () =
 let now () =
   Ptime.to_float_s (Ptime.v (Ptime_clock.now_d_ps ()))
 
-let () =
-  Random.initialize (fun () ->
-    Mirage_crypto_rng_lwt.initialize (module Mirage_crypto_rng.Fortuna))
-
 module Session =
 struct
   include Dream__server.Session
@@ -76,7 +72,6 @@ type route = Router.route
 type 'a message = 'a Message.message
 type client = Message.client
 type server = Message.server
-type 'a promise = 'a Message.promise
 
 
 
@@ -144,7 +139,7 @@ let all_cookies = Cookie.all_cookies
 
 (* Bodies *)
 
-let body = Message.body
+let body x = Message.body x
 let set_body = Message.set_body
 
 
@@ -195,12 +190,12 @@ let origin_referrer_check = Origin_referrer_check.origin_referrer_check
 (* Forms *)
 
 type 'a form_result = 'a Form.form_result
-let form = Form.form ~now
+let form ?csrf x = Form.form ~now ?csrf x
 type multipart_form = Upload.multipart_form
-let multipart = Upload.multipart ~now
+let multipart ?csrf x = Upload.multipart ~now ?csrf x
 type part = Upload.part
-let upload = Upload.upload
-let upload_part = Upload.upload_part
+let upload request = Upload.upload request
+let upload_part request = Upload.upload_part request
 type csrf_result = Csrf.csrf_result
 let csrf_token = Csrf.csrf_token ~now
 let verify_csrf_token = Csrf.verify_csrf_token ~now
@@ -289,7 +284,7 @@ let graphiql = Graphql.graphiql
 (* SQL *)
 
 let sql_pool = Sql.sql_pool
-let sql = Sql.sql
+let sql req fn = Sql.sql req fn
 
 
 
@@ -390,8 +385,7 @@ let test ?(prefix = "") handler request =
     Site_prefix.with_site_prefix prefix
     @@ handler
   in
-
-  Lwt_main.run (app request)
+  Eio_main.run (fun _env -> app request)
 
 let sort_headers = Message.sort_headers
 let echo = Echo.echo

@@ -64,7 +64,7 @@ let wrap_handler_httpaf _user's_error_handler user's_dream_handler =
     Lwt.async begin fun () ->
       Lwt.catch begin fun () ->
         (* Do the big call. *)
-        let%lwt response = user's_dream_handler request in
+        let response = user's_dream_handler request in
 
         (* Extract the Dream response's headers. *)
 
@@ -202,7 +202,6 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
   type 'a message = 'a Message.message
   type client = Message.client
   type server = Message.server
-  type 'a promise = 'a Message.promise
 
 
   (* Requests *)
@@ -503,16 +502,14 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
 
     if not @@ Method.methods_equal (Message.method_ request) `GET then
       Message.response ~status:`Not_Found Stream.empty Stream.null
-      |> Lwt.return
 
     else
       match validate_path request with
       | None ->
         Message.response ~status:`Not_Found Stream.empty Stream.null
-        |> Lwt.return
 
       | Some path ->
-        let%lwt response = loader local_root path request in
+        let response = loader local_root path request in
         if not (Message.has_header response "Content-Type") then begin
           match Message.status response with
           | `OK
@@ -524,7 +521,7 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
           | _ ->
             ()
         end;
-        Lwt.return response
+        response
 
 end
 

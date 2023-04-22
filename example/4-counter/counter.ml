@@ -5,7 +5,8 @@ let count_requests inner_handler request =
   inner_handler request
 
 let () =
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ count_requests
   @@ Dream.router [

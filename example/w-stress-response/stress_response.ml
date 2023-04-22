@@ -1,3 +1,5 @@
+open Eio.Std
+
 let show_heap_size () =
   Gc.((quick_stat ()).heap_words) * 8
   |> float_of_int
@@ -14,23 +16,22 @@ let stress ?(megabytes = 1024) ?(chunk = 64) stream =
   let start = Unix.gettimeofday () in
 
   let rec loop sent =
-    if sent >= limit then
-      let%lwt () = Dream.flush stream in
-      let%lwt () = Dream.close stream in
-      Lwt.return (Unix.gettimeofday () -. start)
-    else
-      let%lwt () = Dream.write stream chunk_a in
-      let%lwt () = Dream.write stream chunk_b in
-      let%lwt () = Lwt.pause () in
+    if sent >= limit then (
+      Dream.flush stream;
+      Dream.close stream;
+      Unix.gettimeofday () -. start
+    ) else (
+      Dream.write stream chunk_a;
+      Dream.write stream chunk_b;
+      Fiber.yield ();
       loop (sent + chunk + chunk)
+    )
   in
-  let%lwt elapsed = loop 0 in
+  let elapsed = loop 0 in
 
   Dream.log "%.0f MB/s over %.1f s"
     ((float_of_int megabytes) /. elapsed) elapsed;
-  show_heap_size ();
-
-  Lwt.return_unit
+  show_heap_size ()
 
 let query_int request name =
   Dream.query request name |> Option.map int_of_string
@@ -38,7 +39,8 @@ let query_int request name =
 let () =
   show_heap_size ();
 
-  Dream.run
+  Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.router [
 

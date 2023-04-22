@@ -4,7 +4,6 @@
    Copyright 2021 Anton Bachin *)
 
 
-
 (** {1 Types}
 
     Dream is built on just five types. The first two are the data types of
@@ -19,7 +18,7 @@ and response = server message
 
 (** The remaining three types are for building up Web apps. *)
 
-and handler = request -> response promise
+and handler = request -> response
 (** Handlers are asynchronous functions from requests to responses. Example
     {{:https://github.com/aantron/dream/tree/master/example/1-hello#files}
     [1-hello]} \[{{:http://dream.as/1-hello} playground}\] shows the simplest
@@ -119,7 +118,6 @@ and server = Dream_pure.Message.server
 (* TODO These docs need to be clarified. *)
 (* TODO Hide all the Dream_pure type equalities. *)
 
-and 'a promise = 'a Lwt.t
 (** Dream uses {{:https://github.com/ocsigen/lwt} Lwt} for promises and
     asynchronous I/O. See example
     {{:https://github.com/aantron/dream/tree/master/example/5-promise#files}
@@ -451,7 +449,7 @@ val respond :
   ?status:[< status ] ->
   ?code:int ->
   ?headers:(string * string) list ->
-    string -> response promise
+    string -> response
 (** Same as {!Dream.val-response}, but the new {!type-response} is wrapped in a
     {!type-promise}. *)
 
@@ -459,7 +457,7 @@ val html :
   ?status:[< status ] ->
   ?code:int ->
   ?headers:(string * string) list ->
-    string -> response promise
+    string -> response
 (** Same as {!Dream.respond}, but adds [Content-Type: text/html; charset=utf-8].
     See {!Dream.text_html}.
 
@@ -473,7 +471,7 @@ val json :
   ?status:[< status ] ->
   ?code:int ->
   ?headers:(string * string) list ->
-    string -> response promise
+    string -> response
 (** Same as {!Dream.respond}, but adds [Content-Type: application/json]. See
     {!Dream.application_json}. *)
 
@@ -481,7 +479,7 @@ val redirect :
   ?status:[< redirection ] ->
   ?code:int ->
   ?headers:(string * string) list ->
-    request -> string -> response promise
+    request -> string -> response
 (** Creates a new {!type-response}. Adds a [Location:] header with the given
     string. The default status code is [303 See Other], for a temporary
     redirection. Use [~status:`Moved_Permanently] or [~code:301] for a permanent
@@ -495,8 +493,9 @@ val redirect :
 
 val empty :
   ?headers:(string * string) list ->
-    status -> response promise
+    status -> response
 (** Same as {!Dream.val-response} with the empty string for a body. *)
+
 
 val status : response -> status
 (** Response {!type-status}. For example, [`OK]. *)
@@ -696,7 +695,7 @@ val all_cookies : request -> (string * string) list
 
 (** {1 Bodies} *)
 
-val body : 'a message -> string promise
+val body : 'a message -> string Eio.Promise.or_exn
 (** Retrieves the entire body. See example
     {{:https://github.com/aantron/dream/tree/master/example/6-echo#files}
     [6-echo]}. *)
@@ -727,7 +726,7 @@ val stream :
   ?code:int ->
   ?headers:(string * string) list ->
   ?close:bool ->
-    (stream -> unit promise) -> response promise
+    (stream -> unit) -> response
 (** Creates a response with a {!type-stream} open for writing, and passes the
     stream to the callback when it is ready. See example
     {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
@@ -742,7 +741,7 @@ val stream :
     [Dream.stream] automatically closes the stream when the callback returns or
     raises an exception. Pass [~close:false] to suppress this behavior. *)
 
-val read : stream -> string option promise
+val read : stream -> string option
 (** Retrieves a body chunk. See example
     {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
     [j-stream]}. *)
@@ -757,15 +756,15 @@ https://aantron.github.io/dream/#val-set_stream
 "]
 (**/**)
 
-val write : stream -> string -> unit promise
+val write : stream -> string -> unit
 (** Streams out the string. The promise is fulfilled when the response can
     accept more writes. *)
 (* TODO Document clearly which of the writing functions can raise exceptions. *)
 
-val flush : stream -> unit promise
+val flush : stream -> unit
 (** Flushes the stream's write buffer. Data is sent to the client. *)
 
-val close : stream -> unit promise
+val close : stream -> unit
 (** Closes the stream. *)
 
 (** {2 Low-level streaming}
@@ -870,7 +869,7 @@ val abort_stream : stream -> exn -> unit
 
 (**/**)
 val write_buffer :
-  ?offset:int -> ?length:int -> response -> buffer -> unit promise
+  ?offset:int -> ?length:int -> response -> buffer -> unit
 [@@ocaml.deprecated
 "Use Dream.write_stream. See
 https://aantron.github.io/dream/#val-write_stream
@@ -891,7 +890,7 @@ type websocket
 val websocket :
   ?headers:(string * string) list ->
   ?close:bool ->
-    (websocket -> unit promise) -> response promise
+    (websocket -> unit) -> response
 (** Creates a fresh [101 Switching Protocols] response. Once this response is
     returned to Dream's HTTP layer, the callback is passed a new
     {!type-websocket}, and the application can begin using it. See example
@@ -917,7 +916,7 @@ type end_of_message = [ `End_of_message | `Continues ]
 val send :
   ?text_or_binary:[< text_or_binary ] ->
   ?end_of_message:[< end_of_message ] ->
-    websocket -> string -> unit promise
+    websocket -> string -> unit
 (** Sends a single WebSocket message. The WebSocket is ready another message
     when the promise resolves.
 
@@ -933,15 +932,15 @@ val send :
     [~end_of_message] is ignored for now, as the WebSocket library underlying
     Dream does not support sending message fragments yet. *)
 
-val receive : websocket -> string option promise
+val receive : websocket -> string option
 (** Receives a message. If the WebSocket is closed before a complete message
     arrives, the result is [None]. *)
 
 val receive_fragment :
-  websocket -> (string * text_or_binary * end_of_message) option promise
+  websocket -> (string * text_or_binary * end_of_message) option
 (** Receives a single fragment of a message, streaming it. *)
 
-val close_websocket : ?code:int -> websocket -> unit promise
+val close_websocket : ?code:int -> websocket -> unit
 (** Closes the WebSocket. [~code] is usually not necessary, but is needed for
     some protocols based on WebSockets. See
     {{:https://tools.ietf.org/html/rfc6455#section-7.4} RFC 6455 §7.4}. *)
@@ -1033,7 +1032,7 @@ type 'a form_result = [
     activity, or tokens so old that decryption keys have since been rotated on
     the server. *)
 
-val form : ?csrf:bool -> request -> (string * string) list form_result promise
+val form : ?csrf:bool -> request -> (string * string) list form_result
 (** Parses the request body as a form. Performs CSRF checks. Use
     {!Dream.csrf_tag} in a form template to transparently generate forms that
     will pass these checks. See {!section-templates} and example
@@ -1126,7 +1125,7 @@ type multipart_form =
     OWASP {i File Upload Cheat Sheet}} for security precautions for upload
     forms. *)
 
-val multipart : ?csrf:bool -> request -> multipart_form form_result promise
+val multipart : ?csrf:bool -> request -> multipart_form form_result
 (** Like {!Dream.form}, but also reads files, and [Content-Type:] must be
     [multipart/form-data]. The CSRF token can be generated in a template with
 
@@ -1158,7 +1157,7 @@ type part = string option * string option * ((string * string) list)
     Note that, in the general case, [filename] and [headers] are not reliable.
     [name] is the form field name. *)
 
-val upload : request -> part option promise
+val upload : request -> part option
 (** Retrieves the next upload part.
 
     Upon getting [Some (name, filename, headers)] from this function, the user
@@ -1177,7 +1176,7 @@ val upload : request -> part option promise
       [FormData]} in the client to submit [multipart/form-data] by AJAX, and
       include a custom header. *)
 
-val upload_part : request -> string option promise
+val upload_part : request -> string option
 (** Retrieves a part chunk. *)
 
 (** {2 CSRF tokens}
@@ -1219,7 +1218,7 @@ val csrf_token : ?valid_for:float -> request -> string
     in seconds. The default value is one hour ([3600.]). Dream uses signed
     tokens that are not stored server-side. *)
 
-val verify_csrf_token : request -> string -> csrf_result promise
+val verify_csrf_token : request -> string -> csrf_result
 (** Checks that the CSRF token is valid for the {!type-request}'s session. *)
 
 
@@ -1545,8 +1544,7 @@ val no_route : route
 (** {1 Static files} *)
 
 val static :
-  ?loader:(string -> string -> handler) ->
-    string -> handler
+    'a Eio.Path.t -> handler
 (** Serves static files from a local directory. See example
     {{:https://github.com/aantron/dream/tree/master/example/f-static#files}
     [f-static]}.
@@ -1576,7 +1574,7 @@ val static :
     {{:https://github.com/aantron/dream/tree/master/example/w-one-binary#files}
     [w-one-binary]} for a loader that serves files from memory instead. *)
 
-val from_filesystem : string -> string -> handler
+val from_filesystem : _ Eio.Path.t -> string -> handler
 (** [Dream.from_filesystem local_directory path request] responds with a file
     from the file system found at [local_directory ^ "/" ^ path].
     If such a file does not exist, it responds with [404 Not Found].
@@ -1644,12 +1642,12 @@ https://aantron.github.io/dream/#val-session_field
 "]
 (**/**)
 
-val set_session_field : request -> string -> string -> unit promise
+val set_session_field : request -> string -> string -> unit
 (** Mutates a value in the request's session. The back end may commit the value
     to storage immediately, so this function returns a promise. *)
 
 (**/**)
-val put_session : string -> string -> request -> unit promise
+val put_session : string -> string -> request -> unit
 [@ocaml.deprecated
 "Renamed to Dream.set_session_field. See
 https://aantron.github.io/dream/#val-set_session_field
@@ -1667,7 +1665,7 @@ https://aantron.github.io/dream/#val-all_session_fields
 "]
 (**/**)
 
-val invalidate_session : request -> unit promise
+val invalidate_session : request -> unit
 (** Invalidates the request's session, replacing it with a fresh, empty
     pre-session. *)
 
@@ -1758,7 +1756,7 @@ https://aantron.github.io/dream/#val-add_flash_message
     OWASP {i GraphQL Cheat Sheet}} for an overview of security topics related to
     GraphQL. *)
 
-val graphql : (request -> 'a promise) -> 'a Graphql_lwt.Schema.schema -> handler
+val graphql : (request -> 'a) -> 'a Graphql_lwt.Schema.schema -> handler
 (** [Dream.graphql make_context schema] serves the GraphQL [schema].
 
     {[
@@ -1846,7 +1844,7 @@ val graphiql : ?default_query:string -> string -> handler
 val sql_pool : ?size:int -> string -> middleware
 (** Makes an SQL connection pool available to its inner handler. *)
 
-val sql : request -> (Caqti_lwt.connection -> 'a promise) -> 'a promise
+val sql : request -> (Caqti_lwt.connection -> 'a) -> 'a
 (** Runs the callback with a connection from the SQL pool. See example
     {{:https://github.com/aantron/dream/tree/master/example/h-sql#files}
     [h-sql]}.
@@ -1966,7 +1964,6 @@ val sub_log : ?level:[< log_level] -> string -> sub_log
 
 val initialize_log :
   ?backtraces:bool ->
-  ?async_exception_hook:bool ->
   ?level:[< log_level ] ->
   ?enable:bool ->
     unit -> unit
@@ -2121,7 +2118,7 @@ type error = {
     [true].
     }} *)
 
-type error_handler = error -> response option promise
+type error_handler = error -> response option
 (** Error handlers log errors and convert them into responses. Ignore if using
     {!Dream.error_template}.
 
@@ -2137,7 +2134,7 @@ type error_handler = error -> response option promise
 (* TODO Get rid of the option? *)
 
 val error_template :
-  (error -> string -> response -> response promise) -> error_handler
+  (error -> string -> response -> response) -> error_handler
 (** Builds an {!error_handler} from a template. See example
     {{:https://github.com/aantron/dream/tree/master/example/9-error#files}
     [9-error]} \[{{:http://dream.as/9-error} playground}\].
@@ -2182,7 +2179,7 @@ val debug_error_handler : error_handler
 (** An {!error_handler} for showing extra information about requests and
     exceptions, for use during development. *)
 
-val catch : (error -> response promise) -> middleware
+val catch : (error -> response) -> middleware
 (** Forwards exceptions, rejections, and [4xx], [5xx] responses from the
     application to the error handler. See {!section-errors}. *)
 (* TODO Error handler should not return an option, and then the type can be
@@ -2195,14 +2192,16 @@ val catch : (error -> response promise) -> middleware
 val run :
   ?interface:string ->
   ?port:int ->
-  ?stop:unit promise ->
+  ?stop:unit Eio.Promise.t ->
   ?error_handler:error_handler ->
+  ?backlog:int ->
   ?tls:bool ->
   ?certificate_file:string ->
   ?key_file:string ->
   ?builtins:bool ->
   ?greeting:bool ->
   ?adjust_terminal:bool ->
+  < clock:Eio.Time.clock; net:#Eio.Net.t; secure_random:Eio.Flow.source; ..> ->
     handler -> unit
 (** Runs the Web application represented by the {!handler}, by default at
     {{:http://localhost:8080} http://localhost:8080}.
@@ -2214,10 +2213,6 @@ val run :
     - [~interface] is the network interface to listen on. Defaults to
       ["localhost"]. Use ["0.0.0.0"] to listen on all interfaces.
     - [~port] is the port to listen on. Defaults to [8080].
-    - [~stop] is a promise that causes the server to stop accepting new
-      requests, and {!Dream.run} to return. Requests that have already entered
-      the Web application continue to be processed. The default value is a
-      promise that never resolves. However, see also [~stop_on_input].
     - [~debug:true] enables debug information in error templates. See
       {!Dream.error_template}. The default is [false], to prevent accidental
       deployment with debug output turned on. See example
@@ -2254,13 +2249,15 @@ val run :
 val serve :
   ?interface:string ->
   ?port:int ->
-  ?stop:unit promise ->
+  ?stop:unit Eio.Promise.t ->
   ?error_handler:error_handler ->
+  ?backlog:int ->
   ?tls:bool ->
   ?certificate_file:string ->
   ?key_file:string ->
   ?builtins:bool ->
-    handler -> unit promise
+  net:#Eio.Net.t ->
+    handler -> unit
 (** Like {!Dream.run}, but returns a promise that does not resolve until the
     server stops listening, instead of calling
     {{:https://ocsigen.org/lwt/latest/api/Lwt_main#VALrun} [Lwt_main.run]}.
@@ -2555,7 +2552,7 @@ val request :
   ?method_:[< method_ ] ->
   ?target:string ->
   ?headers:(string * string) list ->
-    string -> request
+  string -> request
 (** [Dream.request body] creates a fresh request with the given body for
     testing. The optional arguments set the corresponding {{!requests} request
     fields}. *)

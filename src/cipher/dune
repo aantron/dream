@@ -6,6 +6,6 @@
   dream-pure
   mirage-crypto
   mirage-crypto-rng
+  mirage-crypto-rng-eio
  )
- (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

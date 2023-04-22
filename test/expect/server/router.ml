@@ -96,11 +96,11 @@ let show ?(prefix = "/") ?(method_ = `GET) target router =
     |> Dream.test ~prefix router
     |> fun response ->
       let body =
+        Eio_main.run @@ fun env ->
         Dream.client_stream response
         |> Obj.magic (* TODO Needs to be replaced by exposing read_until_close
                              as a function on abstract streams. *)
         |> Dream_pure.Stream.read_until_close
-        |> Lwt_main.run
       in
       let status = Dream.status response in
       Printf.printf "Response: %i %s\n"

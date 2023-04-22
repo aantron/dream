@@ -9,7 +9,8 @@ let home =
   </html>
 
 let () =
-  Dream.run ~interface:"0.0.0.0" ~port:8081
+  Eio_main.run @@ fun env ->
+  Dream.run ~interface:"0.0.0.0" ~port:8081 env
   @@ Dream.logger
   @@ Dream.router [
     Dream.get "/" (fun _request -> Dream.html home)

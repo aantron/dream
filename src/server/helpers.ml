@@ -4,6 +4,7 @@
    Copyright 2021 Anton Bachin *)
 
 
+open Eio.Std
 
 module Formats = Dream_pure.Formats
 module Message = Dream_pure.Message
@@ -46,6 +47,12 @@ let set_tls request tls =
 
 
 
+let switch_field =
+  Message.new_field
+    ~name:"dream.switch"
+    ~show_value:(Fmt.to_to_string Switch.dump)
+    ()
+
 let request ~client ~method_ ~target ~tls ~headers server_stream =
   let request =
     Message.request ~method_ ~target ~headers Stream.null server_stream in
@@ -65,17 +72,17 @@ let response_with_body ?status ?code ?headers body =
   response
 
 let respond ?status ?code ?headers body =
-  Lwt.return (response_with_body ?status ?code ?headers body)
+  response_with_body ?status ?code ?headers body
 
 let html ?status ?code ?headers body =
   let response = response_with_body ?status ?code ?headers body in
   Message.set_header response "Content-Type" Formats.text_html;
-  Lwt.return response
+  response
 
 let json ?status ?code ?headers body =
   let response = response_with_body ?status ?code ?headers body in
   Message.set_header response "Content-Type" Formats.application_json;
-  Lwt.return response
+  response
 
 (* TODO Actually use the request and extract the site prefix. *)
 let redirect ?status ?code ?headers _request location =
@@ -87,7 +94,12 @@ let redirect ?status ?code ?headers _request location =
   in
   let response = response_with_body ?status ?code ?headers "" in
   Message.set_header response "Location" location;
-  Lwt.return response
+  response
+
+let get_switch request =
+  match Message.field request switch_field with
+  | Some sw -> sw
+  | None -> failwith "Missing switch field on request!"
 
 let stream ?status ?code ?headers ?(close = true) callback =
   let reader, writer = Stream.pipe () in
@@ -95,20 +107,32 @@ let stream ?status ?code ?headers ?(close = true) callback =
   and server_stream = Stream.stream Stream.no_reader writer in
   let response =
     Message.response ?status ?code ?headers client_stream server_stream in
+  (* FIXME untested *)
+  let sw = get_switch response in
+  let callback stream = Fiber.fork ~sw (fun () -> callback stream) in
 
   (* TODO Make sure the request id is propagated to the callback. *)
-  Lwt.async (fun () ->
-    if close then
-      match%lwt callback server_stream with
-      | () ->
-        Message.close server_stream
-      | exception exn ->
-        let%lwt () = Message.close server_stream in
-        raise exn
-    else
-      callback server_stream);
+  (if close then
+    match callback server_stream with
+    | () ->
+      Message.close server_stream
+    | exception exn ->
+      Message.close server_stream;
+      raise exn
+  else
+    callback server_stream);
+  response
 
-  Lwt.return response
+let websocket_field =
+  Message.new_field
+    ~name:"dream.websocket"
+    ~show_value:(Printf.sprintf "%b")
+    ()
+
+let is_websocket response =
+  match Message.field response websocket_field with
+  | Some true -> true
+  | _ -> false
 
 let empty ?headers status =
   respond ?headers ~status ""
@@ -125,18 +149,19 @@ let websocket ?headers ?(close = true) callback =
   let websocket = Message.create_websocket response in
 
   (* TODO Make sure the request id is propagated to the callback. *)
-  Lwt.async (fun () ->
+  begin
     if close then
-      match%lwt callback websocket with
+      match callback websocket with
       | () ->
         Message.close_websocket websocket
       | exception exn ->
-        let%lwt () = Message.close_websocket websocket ~code:1005 in
+        Message.close_websocket websocket ~code:1005;
         raise exn
     else
-      callback websocket);
+      callback websocket
+  end;
 
-  Lwt.return response
+  response
 
 let receive (_, server_stream) =
   Message.receive server_stream

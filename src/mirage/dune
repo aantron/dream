@@ -17,5 +17,4 @@
   dream-mirage.dream-paf.alpn
   dream-mirage.dream-paf.mirage
  )
- (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

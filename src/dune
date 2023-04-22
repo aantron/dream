@@ -14,8 +14,5 @@
   fmt.tty
   graphql-lwt
   logs
-  lwt
-  lwt.unix
-  mirage-crypto-rng-lwt
   ptime.clock.os
  ))

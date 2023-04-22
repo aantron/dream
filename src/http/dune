@@ -9,16 +9,13 @@
   dream.server
   dream-httpaf
   dream-httpaf.dream-gluten
-  dream-httpaf.dream-gluten-lwt-unix
+  dream-httpaf.dream-gluten-eio
   dream-httpaf.dream-h2
-  dream-httpaf.dream-h2-lwt-unix
+  dream-httpaf.dream-h2-eio
   dream-httpaf.dream-httpaf_
-  dream-httpaf.dream-httpaf_-lwt-unix
-  lwt
-  lwt.unix
-  lwt_ssl
+  dream-httpaf.dream-httpaf_-eio
   ssl
   dream-httpaf.dream-websocketaf
+  eio_main
  )
- (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

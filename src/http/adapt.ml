@@ -13,9 +13,13 @@ module Message = Dream_pure.Message
 
 
 
-let address_to_string : Unix.sockaddr -> string = function
-  | ADDR_UNIX path -> path
-  | ADDR_INET (address, port) ->
+let address_to_string : Eio.Net.Sockaddr.stream -> string = function
+  | `Unix path -> path
+  | `Tcp (address, port) ->
+    let address =
+      address
+      |> Eio_unix.Ipaddr.to_unix
+    in
     Printf.sprintf "%s:%i" (Unix.string_of_inet_addr address) port
 
 

@@ -141,7 +141,7 @@ let select_log = function
        Then, call the template, and return the response. *)
 
     if not error.will_send_response then
-      Lwt.return_none
+      None
 
     else
       let debug_dump = dump error in
@@ -161,8 +161,8 @@ let select_log = function
       (* No need to catch errors when calling the template, because every call
          site of the error handler already has error handlers for catching double
          faults. *)
-      let%lwt response = template error debug_dump response in
-      Lwt.return (Some response)
+      let response = template error debug_dump response in
+      Some response
 
   let default_response = function
     | `Server ->
@@ -171,13 +171,13 @@ let select_log = function
       Message.response ~status:`Bad_Request Stream.empty Stream.null
 
 let default_template _error _debug_dump response =
-  Lwt.return response
+  response
 
 let default =
   customize default_template
 
 let double_faults f default =
-  Lwt.catch f begin fun exn ->
+  try f () with exn ->
     let backtrace = Printexc.get_backtrace () in
 
     log.error (fun log ->
@@ -188,7 +188,6 @@ let double_faults f default =
       log.error (fun log -> log "%s" line));
 
     default ()
-  end
 
 let httpaf user's_error_handler = fun client_address ?request:_ error start_response ->
   let condition, severity, caused_by = match error with
@@ -216,33 +215,30 @@ let httpaf user's_error_handler = fun client_address ?request:_ error start_resp
     will_send_response = true;
   } in
 
-  Lwt.async begin fun () ->
+  begin
     double_faults begin fun () ->
-      let%lwt response = user's_error_handler error in
+      let response = user's_error_handler error in
       let response = match response with
         | Some response -> response
         | None -> default_response caused_by in
       let headers = Httpaf.Headers.of_list (Message.all_headers response) in
       let body = start_response headers in
-      Adapt.forward_body response body;
-      Lwt.return_unit
-    end
-      Lwt.return
+      Adapt.forward_body response body
+    end (fun () -> ())
   end
 
 let respond_with_option f =
-  double_faults
-    (fun () ->
-      f ()
-      |> Lwt.map (function
-        | Some response -> response
-        | None ->
-          Message.response
-            ~status:`Internal_Server_Error Stream.empty Stream.null))
-    (fun () ->
-      Message.response ~status:`Internal_Server_Error Stream.empty Stream.null
-      |> Lwt.return)
-
+  begin
+    double_faults
+      (fun () ->
+         match f () with
+         | Some response -> response
+         | None ->
+           Message.response
+             ~status:`Internal_Server_Error Stream.empty Stream.null)
+      (fun () ->
+         Message.response ~status:`Internal_Server_Error Stream.empty Stream.null)
+  end
 
 let app user's_error_handler = fun error ->
   respond_with_option (fun () -> user's_error_handler error)

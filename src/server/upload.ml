@@ -19,14 +19,14 @@ type multipart_state = {
   mutable state_init : bool;
   mutable name : string option;
   mutable filename : string option;
-  mutable stream : (< > * Multipart_form.Header.t * string Lwt_stream.t) Lwt_stream.t;
+  mutable stream : (< > * Multipart_form.Header.t * string Eio.Stream.t) Eio.Stream.t;
 }
 
 let initial_multipart_state () = {
   state_init = true;
   name = None;
   filename = None;
-  stream = Lwt_stream.of_list [];
+  stream = Eio.Stream.create max_int;
 }
 
 (* TODO Dump the value of the multipart state somehow? *)
@@ -62,16 +62,17 @@ let log = Log.sub_log "dream.upload"
 
 let upload_part (request : Message.request) =
   let state = multipart_state request in
-  match%lwt Lwt_stream.peek state.stream with
-  | None -> Lwt.return_none
+  match Eio.Stream.take_nonblocking state.stream with
+  | None -> None
   | Some (_uid, _header, stream) ->
-    match%lwt Lwt_stream.get stream with
-    | Some _ as v -> Lwt.return v
+    match Eio.Stream.take_nonblocking stream with
+    | Some _ as v -> v
     | None ->
       log.debug (fun m -> m "End of the part.") ;
-      let%lwt () = Lwt_stream.junk state.stream in
+      (* TODO this doesn't look right? *)
+      Eio.Stream.take state.stream |> ignore;
+      None
       (* XXX(dinosaure): delete the current part from the [stream]. *)
-      Lwt.return_none
 
 let identify _ = object end
 
@@ -80,8 +81,11 @@ type part = string option * string option * ((string * string) list)
 let rec state (request : Message.request) =
   let state' = multipart_state request in
   let stream = state'.stream in
-  match%lwt Lwt_stream.peek stream with
-  | None -> let%lwt () = Lwt_stream.junk stream in Lwt.return_none
+  match Eio.Stream.take_nonblocking stream with
+  | None ->
+    (* TODO this doesn't look right? *)
+    Eio.Stream.take stream |> ignore;
+    None
   | Some (_, headers, _stream) ->
     let headers =
       headers
@@ -90,7 +94,7 @@ let rec state (request : Message.request) =
     in
     let part =
       state'.name, state'.filename, headers in
-    Lwt.return (Some part)
+    Some part
 
 and upload (request : Message.request) =
   let state' = multipart_state request in
@@ -115,12 +119,12 @@ and upload (request : Message.request) =
       failwith message
 
     | Some content_type ->
-      let body =
-        Lwt_stream.from (fun () ->
-          Message.read (Message.server_stream request)) in
-      let `Parse th, stream =
-        Multipart_form_lwt.stream ~identify body content_type in
-      Lwt.async (fun () -> let%lwt _ = th in Lwt.return_unit);
+      let body = Eio.Stream.create 1 in
+      Eio.Stream.add body (Message.read (Message.server_stream request) |> Option.get);
+      Eio.Switch.run @@ fun sw ->
+      let th, stream =
+        Multipart_form_eio.stream ~sw ~identify body content_type in
+      let _ = Eio.Promise.await th in
       state'.stream <- stream;
       state'.state_init <- false;
       state request
@@ -135,14 +139,13 @@ let multipart ?(csrf=true) ~now request =
       Result.to_option (Multipart_form.Content_type.of_string (content_type ^ "\r\n"))
     | None -> None in
   match content_type with
-  | None -> Lwt.return `Wrong_content_type
+  | None -> `Wrong_content_type
   | Some content_type ->
-    let body =
-      Lwt_stream.from (fun () ->
-        Message.read (Message.server_stream request)) in
-    match%lwt Multipart_form_lwt.of_stream_to_list body content_type with
+    let body = Eio.Stream.create 1 in
+    Eio.Stream.add body (Message.read (Message.server_stream request) |> Option.get);
+    match Multipart_form_eio.of_stream_to_list body content_type with
     | Error (`Msg _err) ->
-      Lwt.return `Wrong_content_type (* XXX(dinosaure): better error? *)
+      `Wrong_content_type (* XXX(dinosaure): better error? *)
     | Ok (tree, assoc) ->
       let open Multipart_form in
       let tree = flatten tree in
@@ -176,4 +179,4 @@ let multipart ?(csrf=true) ~now request =
         parts request
       else
       let form = Form.sort parts in
-      Lwt.return (`Ok form)
+      `Ok form
