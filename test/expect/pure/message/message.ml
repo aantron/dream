@@ -5,7 +5,7 @@
 
 
 
-let%expect_test _ =
+let%expect_test "middleware runs sequentially onion-style" =
   let handler _ =
     print_endline "handler";
     Dream.empty `OK
