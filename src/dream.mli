@@ -2218,15 +2218,14 @@ val run :
       requests, and {!Dream.run} to return. Requests that have already entered
       the Web application continue to be processed. The default value is a
       promise that never resolves. However, see also [~stop_on_input].
-    - [~debug:true] enables debug information in error templates. See
-      {!Dream.error_template}. The default is [false], to prevent accidental
-      deployment with debug output turned on. See example
-      {{:https://github.com/aantron/dream/tree/master/example/8-debug#files}
-      [8-debug]} \[{{:http://dream.as/8-debug} playground}\].
     - [~error_handler] handles all errors, both from the application, and
       low-level errors. See {!section-errors} and example
       {{:https://github.com/aantron/dream/tree/master/example/9-error#files}
       [9-error]} \[{{:http://dream.as/9-error} playground}\].
+      {!Dream.debug_error_handler} is a default error handler that can be passed
+      here to help debug Web apps. See example
+      {{:https://github.com/aantron/dream/tree/master/example/8-debug#files}
+      [8-debug]} \[{{:http://dream.as/8-debug} playground}\].
     - [~tls:true] enables TLS. You should also specify [~certificate_file] and
       [~key_file]. However, for development, Dream includes an insecure
       compiled-in
