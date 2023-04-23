@@ -1,4 +1,4 @@
-# `w-watch-mode`
+# `w-watch`
 
 <br>
 
