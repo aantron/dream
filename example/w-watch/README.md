@@ -7,6 +7,8 @@ This example introduces dune's watch mode `exec -w` to recompile and run your se
 <pre><code><b>$ cd example/w-watch-mode</b>
 <b>$ dune exec -w ./hello.exe</b></code></pre>
 
+Note that this requires Dune 3.7.0 or higher.
+
 <br>
 
 **See also:**
