@@ -1470,7 +1470,7 @@ val router : route list -> handler
     because, in the future, it may be possible to query routes for site
     structure metadata.
     
-    Dream's router is {{:https://www.rfc-editor.org/rfc/rfc1738#section-3.3} RFC 1738} compliant.
+    Dream's router is {{:https://www.rfc-editor.org/rfc/rfc1738#section-3.3} RFC 1738 Section 3.3} compliant.
     This means routes that end with [/], and routes that don't end with [/] will be treated
     as separate entities. *)
 
