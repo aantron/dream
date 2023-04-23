@@ -120,11 +120,12 @@ if something is missing!
   [esy](https://esy.sh/), an npm-like package manager.
 - [**`w-one-binary`**](w-one-binary#files) &nbsp;&mdash;&nbsp; bakes static
   assets into a self-contained server binary.
-- [**`w-fswatch`**](w-fswatch#files) &nbsp;&mdash;&nbsp; sets up a development
-  watcher using fswatch.
+- [**`w-watch`**](w-watch#files) &nbsp;&mdash;&nbsp; sets up a development
+  watcher.
 - [**`w-live-reload`**](w-live-reload#files) &nbsp;&mdash;&nbsp; a simple
   live-reloading setup.
-- [**`w-nginx`**](w-nginx#files) &nbsp;&mdash;&nbsp; uses nginx as a reverse proxy.
+- [**`w-nginx`**](w-nginx#files) &nbsp;&mdash;&nbsp; uses nginx as a
+  reverse proxy.
 - [**`w-tyxml`**](w-tyxml#files) &nbsp;&mdash;&nbsp; uses TyXML for type-checked
   HTML templating.
 - [**`w-long-polling`**](w-long-polling#files) &nbsp;&mdash;&nbsp; old form of

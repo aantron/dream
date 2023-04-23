@@ -165,7 +165,7 @@ dune exec ./middleware.exe
   small-to-medium deployments.
 - [**Examples**][examples] &mdash; These cover various HTTP scenarios.
 - [**API reference**][api-main]
-- [Watching][fswatch] and [live reloading][reload].
+- [Watching][watch] and [live reloading][reload].
 
 [tutorial]: https://github.com/aantron/dream/tree/master/example#readme
 [examples]: https://github.com/aantron/dream/tree/master/example#examples
@@ -175,7 +175,7 @@ dune exec ./middleware.exe
 [deploying]: https://github.com/aantron/dream/tree/master/example#deploying
 [api-main]: https://aantron.github.io/dream/#types
 [fullstack]: https://github.com/aantron/dream/tree/master/example#full-stack
-[fswatch]: https://github.com/aantron/dream/tree/master/example/w-fswatch#files
+[watch]: https://github.com/aantron/dream/tree/master/example/w-watch#files
 [reload]: https://github.com/aantron/dream/tree/master/example/w-live-reload#files
 
 <br>

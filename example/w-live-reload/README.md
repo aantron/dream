@@ -118,11 +118,11 @@ Good morning, world! Random tag: jRak
 
 <br>
 
-This example plays very well with [**`w-fswatch`**](../w-fswatch#files), which
-shows how to rebuild and restart a development server every time sources are
-modified in the file system. Combining the two examples, it is possible to
-propagate reloading all the way to the client, whenever any of the server's
-source code changes.
+This example plays very well with [**`w-watch`**](../w-watch#files), which shows
+how to rebuild and restart a development server every time sources are modified
+in the file system. Combining the two examples, it is possible to propagate
+reloading all the way to the client, whenever any of the server's source code
+changes.
 
 <br>
 

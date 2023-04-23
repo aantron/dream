@@ -107,7 +107,7 @@ To add more files, just add them to the `assets/` directory and re-run
 **See also:**
 
 - [**`w-esy`**](../w-esy#files) for details on packaging with esy.
-- [**`w-fswatch`**](../w-fswatch#files) for a primitive watcher, which can be
+- [**`w-watch`**](../w-watch#files) for a primitive watcher, which can be
   extended to watch `assets/`.
 - [**`f-static`**](../f-static#files) shows the basics of
   [`Dream.static`](https://aantron.github.io/dream/#val-static).
