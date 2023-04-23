@@ -386,7 +386,7 @@ let check_headers_middleware next_handler request =
   let%lwt response = next_handler request in
   let invalid_headers_exist =
     Message.all_headers response
-    |> List.exists (fun (key, _) -> String.trim key = "")
+    |> List.exists (fun (name, _) -> String.trim name = "")
   in
   if invalid_headers_exist then
     log.warning (fun log ->
