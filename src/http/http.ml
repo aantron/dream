@@ -380,6 +380,8 @@ let ocaml_tls = {
       ~error_handler:(Error_handler.httpaf error_handler)
 }
 
+
+
 let check_headers_middleware next_handler request =
   let%lwt response = next_handler request in
   let invalid_headers_exist = Message.all_headers response |> List.exists (fun (key, _) -> String.trim key = "") in
@@ -393,6 +395,8 @@ let built_in_middleware error_handler =
     Catch.catch (Error_handler.app error_handler);
     check_headers_middleware;
   ]
+
+
 
 let serve_with_details
     caller_function_for_error_messages
