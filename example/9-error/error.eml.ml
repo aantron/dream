@@ -17,4 +17,4 @@ let my_error_template _error debug_info suggested_response =
 let () =
   Dream.run ~error_handler:(Dream.error_template my_error_template)
   @@ Dream.logger
-  @@ Dream.not_found
+  @@ fun _ -> Dream.empty `Not_Found
