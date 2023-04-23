@@ -390,7 +390,7 @@ let check_headers_middleware next_handler request =
   in
   if invalid_headers_exist then
     log.warning (fun log ->
-      log "A response header is empty or contains only whitespace");
+      log ~request "A response header is empty or contains only whitespace");
   Lwt.return response
 
 let built_in_middleware error_handler =
