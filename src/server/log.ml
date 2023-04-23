@@ -378,7 +378,7 @@ let iter_backtrace f backtrace =
 (* Use the above function to create a log source for Log's own middleware, the
    same way any other middleware would. *)
 let log =
-  sub_log "dream.log"
+  sub_log "dream.logger"
 
 
 
