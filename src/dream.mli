@@ -1470,11 +1470,9 @@ val router : route list -> handler
     because, in the future, it may be possible to query routes for site
     structure metadata.
     
-    Note, Dream's router differentiates between routes that end with a [/] and routes
-    that don't. For example, [/foo/] and [/foo] are treated as different
-    routes. This is to enforce the idea that routes without a final [/] 
-    should serve a file-like response, while routes that do end with [/] offer a
-    directory-like response. *)
+    Dream's router is {{:https://www.rfc-editor.org/rfc/rfc1738#section-3.3} RFC 1738} compliant,
+    meaning routes that end with [/], and routes that don't end with [/] will be treated
+    as separate entities. *)
 
 val get     : string -> handler -> route
 (** Forwards [`GET] requests for the given path to the handler.
