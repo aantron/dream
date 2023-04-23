@@ -1467,9 +1467,6 @@ let run_replacement = {|
   ?port:int ->
   ?stop:unit <a href="#type-promise">promise</a> ->
   ?error_handler:<a href="#type-error_handler">error_handler</a> ->
-  ?secret:string ->
-  ?old_secrets:string list ->
-  ?prefix:string ->
   ?tls:bool ->
   ?certificate_file:string ->
   ?key_file:string ->
@@ -1492,9 +1489,6 @@ let serve_replacement = {|
   ?port:int ->
   ?stop:unit <a href="#type-promise">promise</a> ->
   ?error_handler:<a href="#type-error_handler">error_handler</a> ->
-  ?secret:string ->
-  ?old_secrets:string list ->
-  ?prefix:string ->
   ?tls:bool ->
   ?certificate_file:string ->
   ?key_string:string ->
