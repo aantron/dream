@@ -395,8 +395,8 @@ let check_headers_middleware next_handler request =
 
 let built_in_middleware error_handler =
   Message.pipeline [
-    Catch.catch (Error_handler.app error_handler);
     check_headers_middleware;
+    Catch.catch (Error_handler.app error_handler);
   ]
 
 
