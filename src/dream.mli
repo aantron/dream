@@ -1435,7 +1435,7 @@ val set_server_stream : request -> stream -> unit
 
 val router : route list -> handler
 (** Creates a router. If none of the routes match the request, the router
-    returns {!Dream.not_found}. Route components starting with [:] are
+    responds with [404 Not Found]. Route components starting with [:] are
     parameters, which can be retrieved with {!Dream.param}. See example
     {{:https://github.com/aantron/dream/tree/master/example/3-router#files}
     [3-router]} \[{{:http://dream.as/3-router} playground}\].
@@ -1490,8 +1490,14 @@ val patch   : string -> handler -> route
 val any     : string -> handler -> route
 (** Like {!Dream.get}, but does not check the method. *)
 
+(**/**)
 val not_found : handler
+[@@ocaml.deprecated
+"Use
+fun _ -> Dream.empty `Not_Found
+"]
 (** Always responds with [404 Not Found]. *)
+(**/**)
 
 (* :((( *)
 val param : request -> string -> string
