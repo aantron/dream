@@ -1469,9 +1469,10 @@ val router : route list -> handler
     sites with routes and {!Dream.scope} rather than opaque handlers and [**],
     because, in the future, it may be possible to query routes for site
     structure metadata.
-    
-    Note, routes that end with [/], and routes that don't end with [/] will be treated
-    as separate entities. *)
+
+    Note: routes that end with [/] and routes that don't end with [/] are
+    {{:https://github.com/aantron/dream/issues/244#issuecomment-1511624682}
+    different}. *)
 
 val get     : string -> handler -> route
 (** Forwards [`GET] requests for the given path to the handler.
