@@ -660,9 +660,9 @@ h2:first-of-type {
 
   .odoc-toc.fixed .current-section {
     /* background-color: #1c2a3b; */
-    /* color: var(--h1-text-shadow);
+    /* color: black;
     font-weight: bold; */
-    /* background-color: var(--h1-text-shadow);
+    /* background-color: black;
     font-weight: bold; */
   }
 
