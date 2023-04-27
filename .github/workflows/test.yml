@@ -20,6 +20,8 @@ jobs:
         include:
         - os: macos-latest
           ocaml: 4.12.x
+        - os: windows-latest
+          ocaml: 4.14.x
         # Windows is blocked until we no longer require libev; Dream still works
         # on Windows, but testing it is awkward at the moment.
 
@@ -30,8 +32,17 @@ jobs:
         submodules: recursive
 
     - uses: avsm/setup-ocaml@v2
+      if: runner.os != 'Windows'
       with:
         ocaml-compiler: ${{matrix.ocaml}}
+
+    - uses: avsm/setup-ocaml@v2
+      if: runner.os == 'Windows'
+      with:
+        ocaml-compiler: ${{matrix.ocaml}}
+        opam-repositories: |
+          opam-repository-mingw: https://github.com/ocaml-opam/opam-repository-mingw.git#sunset
+          default: https://github.com/ocaml/opam-repository.git
 
     - run: opam depext --yes conf-postgresql
     - run: opam depext --yes conf-libev
