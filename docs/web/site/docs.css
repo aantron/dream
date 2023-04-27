@@ -69,9 +69,9 @@
   --pre-bg-color: #1a1f26;
   --code-bg-color: #2c333b;
   --border-color: #282828;
-  --h1-text-shadow: black;
   --link-color: #8dc5ff;
   --external-link-color: #5d7fcd;
+  --anchor-color: #bfcdea;
 
   --of-color: #bec5cd;
   --target-backing-color: #390022;
@@ -91,9 +91,9 @@
     --code-bg-color: #e5e7eb;
     --header-bg-color: #f5f7fa;
     --border-color: #e0e0e0;
-    --h1-text-shadow: rgba(0, 0, 0, 0.3);
     --link-color: #1c7ed6;
     --external-link-color: #1d4ed8;
+    --anchor-color: #888;
 
     --of-color: #6b7280;
     --target-backing-color: #f7f6f3;
@@ -202,10 +202,6 @@ header {
 header .topmost {
   /* background-color: #0f131a; */
   border-bottom: 1px solid var(--border-color);
-}
-
-h1 {
-  text-shadow: -2px 2px var(--h1-text-shadow);
 }
 
 header pre {
@@ -627,7 +623,7 @@ h2:first-of-type {
     overflow-y: scroll;
     scrollbar-width: none;
     line-height: 30px;
-    border-right: 1px solid #262626;
+    border-right: 1px solid var(--border-color);
     background-color: var(--bg-color);
     /* color: #ddd; */
   }
@@ -719,7 +715,7 @@ h2 > .anchor, h3 > .anchor {
   font-family: FontAwesome;
   font-size: 10px;
   font-style: oblique;
-  color: #bfcdea;
+  color: var(--anchor-color);
   position: relative;
   top: -1.75px;
   left: -4px;
