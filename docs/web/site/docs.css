@@ -66,7 +66,6 @@
 :root {
   --bg-color: #131618;
   --text-color: #c9d1d9;
-  --pre-bg-color: #1a1f26;
   --code-bg-color: #2c333b;
   --border-color: #282828;
   --link-color: #8dc5ff;
@@ -87,8 +86,7 @@
   :root {
     --bg-color: #f5f7fa;
     --text-color: #1f2937;
-    --pre-bg-color: #ffffff;
-    --code-bg-color: #e5e7eb;
+    --code-bg-color: #eef1f6;
     --header-bg-color: #f5f7fa;
     --border-color: #e0e0e0;
     --link-color: #1c7ed6;
@@ -151,10 +149,10 @@ body {
 }
 
 .odoc-content pre {
-  background-color: var(--pre-bg-color);
+  background-color: var(--code-bg-color);
   margin-left: 1em;
   margin-right: 1em;
-  border: 1px solid #111;
+  border: 1px solid var(--border-color);
 }
 .odoc-content .spec > pre {
   background: none;
