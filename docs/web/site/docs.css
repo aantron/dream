@@ -63,7 +63,7 @@
 /* Theme */
 
 /* Dark theme (default) */
-:root {
+:root, body:not([data-theme="light"]) {
   --bg-color: #131618;
   --text-color: #c9d1d9;
   --code-bg-color: #2c333b;
@@ -81,26 +81,24 @@
   --hljs-string-color: #e3db7a;
 }
 
-@media (prefers-color-scheme: light) {
-  /* Light theme */
-  :root {
-    --bg-color: #f5f7fa;
-    --text-color: #1f2937;
-    --code-bg-color: #eef1f6;
-    --header-bg-color: #f5f7fa;
-    --border-color: #e0e0e0;
-    --link-color: #1c7ed6;
-    --external-link-color: #1d4ed8;
-    --anchor-color: #888;
+/* Light theme */
+:root, body[data-theme="light"] {
+  --bg-color: #f5f7fa;
+  --text-color: #1f2937;
+  --code-bg-color: #eef1f6;
+  --header-bg-color: #f5f7fa;
+  --border-color: #e0e0e0;
+  --link-color: #1c7ed6;
+  --external-link-color: #1d4ed8;
+  --anchor-color: #888;
 
-    --of-color: #6b7280;
-    --target-backing-color: #f7f6f3;
+  --of-color: #6b7280;
+  --target-backing-color: #f7f6f3;
 
-    --hljs-keyword-color: #d94879;
-    --hljs-identifier-color: #22863a;
-    --hljs-tag-color: #6f42c1;
-    --hljs-string-color: #b94e48;
-  }
+  --hljs-keyword-color: #d94879;
+  --hljs-identifier-color: #22863a;
+  --hljs-tag-color: #6f42c1;
+  --hljs-string-color: #b94e48;
 }
 
 body {
@@ -528,6 +526,33 @@ ul ul li {
     float: left;
     max-width: 46em;
     padding-left: 0;
+  }
+
+  .topmost .toolbar {
+    float: right;
+  }
+
+  .topmost .toggle-theme-btn {
+    all: unset;
+    position: relative;
+  }
+
+  .topmost .toggle-theme-btn::before {
+    content: "\F186"; /* moon */
+    position: absolute;
+    left: calc(0% - 16px + -8px);
+    top: calc(0% + 4px);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: FontAwesome, FontAwesomeBrands;
+    font-size: 15px;
+  }
+
+  body:not([data-theme="light"]) .topmost .toggle-theme-btn::before {
+    content: "\F185"; /* sun */
   }
 
   header pre {
