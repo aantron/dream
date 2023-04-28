@@ -200,6 +200,33 @@ header .topmost {
   border-bottom: 1px solid var(--border-color);
 }
 
+.topmost .toolbar {
+  float: right;
+}
+
+.topmost .toggle-theme-btn {
+  all: unset;
+  position: relative;
+}
+
+.topmost .toggle-theme-btn::before {
+  content: "\F186"; /* moon */
+  position: absolute;
+  left: calc(0% - 16px + -8px);
+  top: calc(0% + 4px);
+  width: 16px;
+  height: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: FontAwesome, FontAwesomeBrands;
+  font-size: 15px;
+}
+
+body:not([data-theme="light"]) .topmost .toggle-theme-btn::before {
+  content: "\F185"; /* sun */
+}
+
 header pre {
   padding: 27px 18px;
   /* background-color: #202020; */
@@ -526,33 +553,6 @@ ul ul li {
     float: left;
     max-width: 46em;
     padding-left: 0;
-  }
-
-  .topmost .toolbar {
-    float: right;
-  }
-
-  .topmost .toggle-theme-btn {
-    all: unset;
-    position: relative;
-  }
-
-  .topmost .toggle-theme-btn::before {
-    content: "\F186"; /* moon */
-    position: absolute;
-    left: calc(0% - 16px + -8px);
-    top: calc(0% + 4px);
-    width: 16px;
-    height: 16px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: FontAwesome, FontAwesomeBrands;
-    font-size: 15px;
-  }
-
-  body:not([data-theme="light"]) .topmost .toggle-theme-btn::before {
-    content: "\F185"; /* sun */
   }
 
   header pre {
