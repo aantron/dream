@@ -26,3 +26,4 @@ scratch/
 
 # Editors
 .vscode/
+*.swp
