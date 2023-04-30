@@ -5,7 +5,7 @@
     "graphiql": "^2.4.1",
     "graphql": "^16.6.0",
     "inliner": "aantron/inliner#fork",
-    "react": "^18.0.2",
-    "react-dom": "^18.0.2"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }
