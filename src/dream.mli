@@ -386,24 +386,8 @@ https://github.com/aantron/dream/issues
 val set_client : request -> string -> unit
 (** Replaces the client. See {!Dream.val-client}. *)
 
-(**/**)
-val with_client : string -> request -> request
-[@@ocaml.deprecated
-"Use Dream.set_client. See
-https://aantron.github.io/dream/#val-set_client
-"]
-(**/**)
-
 val set_method_ : request -> [< method_ ] -> unit
 (** Replaces the method. See {!Dream.type-method_}. *)
-
-(**/**)
-val with_method_ : [< method_ ] -> request -> request
-[@@ocaml.deprecated
-"Use Dream.set_method_. See
-https://aantron.github.io/dream/#val-set_method_
-"]
-(**/**)
 
 (**/**)
 val with_path : string list -> request -> request
@@ -532,14 +516,6 @@ val drop_header : 'a message -> string -> unit
 
 val set_header : 'a message -> string -> string -> unit
 (** Equivalent to {!Dream.drop_header} followed by {!Dream.add_header}. *)
-
-(**/**)
-val with_header : string -> string -> 'a message -> 'a message
-[@@ocaml.deprecated
-"Use Dream.set_header. See
-https://aantron.github.io/dream/#val-with_header
-"]
-(**/**)
 
 
 
@@ -704,14 +680,6 @@ val body : 'a message -> string promise
 val set_body : 'a message -> string -> unit
 (** Replaces the body. *)
 
-(**/**)
-val with_body : string -> response -> response
-[@@ocaml.deprecated
-"Use Dream.set_body. See
-https://aantron.github.io/dream/#val-set_body
-"]
-(**/**)
-
 
 
 (** {1 Streams} *)
@@ -748,14 +716,6 @@ val read : stream -> string option promise
     [j-stream]}. *)
 (* TODO Document difference between receiving a request and receiving on a
    WebSocket. *)
-
-(**/**)
-val with_stream : response -> response
-[@@ocaml.deprecated
-"Use Dream.stream instead. See
-https://aantron.github.io/dream/#val-set_stream
-"]
-(**/**)
 
 val write : stream -> string -> unit promise
 (** Streams out the string. The promise is fulfilled when the response can
@@ -867,15 +827,6 @@ val close_stream : stream -> int -> unit
 val abort_stream : stream -> exn -> unit
 (** Aborts the stream, causing all readers and writers to receive the given
     exception. *)
-
-(**/**)
-val write_buffer :
-  ?offset:int -> ?length:int -> response -> buffer -> unit promise
-[@@ocaml.deprecated
-"Use Dream.write_stream. See
-https://aantron.github.io/dream/#val-write_stream
-"]
-(**/**)
 
 (* TODO Ergonomics of this stream surface API. *)
 
@@ -1334,46 +1285,6 @@ val csrf_tag : request -> string
     recommended} to put the CSRF tag immediately after the starting [<form>]
     tag, to prevent certain kinds of DOM manipulation-based attacks. *)
 
-(**/**)
-val form_tag :
-  ?method_:[< method_ ] ->
-  ?target:string ->
-  ?enctype:[< `Multipart_form_data ] ->
-  ?csrf_token:bool ->
-    action:string -> request -> string
-[@ocaml.deprecated
-"Use Dream.csrf_tag. See
-https://aantron.github.io/dream/#val-csrf_tag
-"]
-(** Generates a [<form>] tag and an [<input>] tag with a CSRF token, suitable
-    for use with {!Dream.val-form} and {!Dream.val-multipart}. For example, in
-    a template,
-
-    {[
-      <%s! Dream.form_tag ~action:"/" request %>
-        <input name="my.field">
-      </form>
-    ]}
-
-    expands to
-
-    {[
-      <form method="POST" action="/">
-        <input name="dream.csrf" type="hidden" value="a-token">
-        <input name="my.field">
-      </form>
-    ]}
-
-    [~method] sets the method used to submit the form. The default is [`POST].
-
-    [~target] adds a [target] attribute. For example, [~target:"_blank"] causes
-    the browser to submit the form in a new tab or window.
-
-    Pass [~enctype:`Multipart_form_data] for a file upload form.
-
-    [~csrf_token:false] suppresses generation of the [dream.csrf] field. *)
-(**/**)
-
 
 
 (** {1 Middleware}
@@ -1646,36 +1557,12 @@ val mime_lookup : string -> (string * string) list
 val session_field : request -> string -> string option
 (** Value from the request's session. *)
 
-(**/**)
-val session : string -> request -> string option
-[@ocaml.deprecated
-"Renamed to Dream.session_field. See
-https://aantron.github.io/dream/#val-session_field
-"]
-(**/**)
-
 val set_session_field : request -> string -> string -> unit promise
 (** Mutates a value in the request's session. The back end may commit the value
     to storage immediately, so this function returns a promise. *)
 
-(**/**)
-val put_session : string -> string -> request -> unit promise
-[@ocaml.deprecated
-"Renamed to Dream.set_session_field. See
-https://aantron.github.io/dream/#val-set_session_field
-"]
-(**/**)
-
 val all_session_fields : request -> (string * string) list
 (** Full session dictionary. *)
-
-(**/**)
-val all_session_values : request -> (string * string) list
-[@ocaml.deprecated
-"Renamed to Dream.all_session_fields. See
-https://aantron.github.io/dream/#val-all_session_fields
-"]
-(**/**)
 
 val invalidate_session : request -> unit promise
 (** Invalidates the request's session, replacing it with a fresh, empty
@@ -1733,14 +1620,6 @@ val flash_messages : request -> (string * string) list
 
 val add_flash_message : request -> string -> string -> unit
 (** Adds a flash message to the request. *)
-
-(**/**)
-val put_flash : request -> string -> string -> unit
-[@@ocaml.deprecated
-"Renamed to Dream.add_flash_message. See
-https://aantron.github.io/dream/#val-add_flash_message
-"]
-(**/**)
 
 
 
@@ -2513,48 +2392,16 @@ val decrypt :
 type 'a field
 (** Per-message variable. *)
 
-(**/**)
-type 'a local = 'a field
-[@@ocaml.deprecated
-"Renamed to type Dream.field. See
-https://aantron.github.io/dream/#type-field
-"]
-(**/**)
-
 val new_field : ?name:string -> ?show_value:('a -> string) -> unit -> 'a field
 (** Declares a variable of type ['a] in all messages. The variable is initially
     unset in each message. The optional [~name] and [~show_value] are used by
     {!Dream.run} [~debug] to show the variable in debug dumps. *)
 
-(**/**)
-val new_local : ?name:string -> ?show_value:('a -> string) -> unit -> 'a field
-[@@ocaml.deprecated
-"Renamed to Dream.new_field. See
-https://aantron.github.io/dream/#val-new_field
-"]
-(**/**)
-
 val field : 'b message -> 'a field -> 'a option
 (** Retrieves the value of the per-message variable. *)
 
-(**/**)
-val local : 'b message -> 'a field -> 'a option
-[@@ocaml.deprecated
-"Renamed to Dream.field. See
-https://aantron.github.io/dream/#val-field
-"]
-(**/**)
-
 val set_field : 'b message -> 'a field -> 'a -> unit
 (** Sets the per-message variable to the value. *)
-
-(**/**)
-val with_local : 'a field -> 'a -> 'b message -> 'b message
-[@@ocaml.deprecated
-"Use Dream.set_field instead. See
-https://aantron.github.io/dream/#val-set_field
-"]
-(**/**)
 
 
 
@@ -2577,22 +2424,6 @@ val test : ?prefix:string -> handler -> (request -> response)
     internally to await the response, which is why the response returned from
     the test is not wrapped in a promise. If you don't need these facilities,
     you can test [handler] by calling it directly with a request. *)
-
-(**/**)
-val first : 'a message -> 'a message
-[@@ocaml.deprecated "Simply returns its own argument."]
-(** [Dream.first message] evaluates to the original request or response that
-    [message] is immutably derived from. This is useful for getting the original
-    state of requests especially, when they were first created inside the HTTP
-    server ({!Dream.run}). *)
-
-val last : 'a message -> 'a message
-[@@ocaml.deprecated "Simply returns its own argument."]
-(** [Dream.last message] evaluates to the latest request or response that was
-    derived from [message]. This is most useful for obtaining the state of
-    requests at the time an exception was raised, without having to instrument
-    the latest version of the request before the exception. *)
-(**/**)
 
 val sort_headers : (string * string) list -> (string * string) list
 (** Sorts headers by name. Headers with the same name are not sorted by value or

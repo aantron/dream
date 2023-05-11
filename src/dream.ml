@@ -209,9 +209,6 @@ let verify_csrf_token = Csrf.verify_csrf_token ~now
 
 (* Templates *)
 
-let form_tag ?method_ ?target ?enctype ?csrf_token ~action request =
-  Tag.form_tag ~now ?method_ ?target ?enctype ?csrf_token ~action request
-
 let csrf_tag = Tag.csrf_tag ~now
 
 
@@ -274,7 +271,6 @@ let session_expires_at = Session.session_expires_at
 
 let flash = Flash.flash_messages
 let flash_messages = Flash.flash
-let put_flash = Flash.put_flash
 let add_flash_message = Flash.put_flash
 
 
@@ -400,48 +396,6 @@ let echo = Echo.echo
 
 (* Deprecated helpers. *)
 
-let with_client client message =
-  Helpers.set_client message client;
-  message
-
-let with_method_ method_ message =
-  Message.set_method_ message method_;
-  message
-
 let with_path path message =
   Router.set_path message path;
-  message
-
-let with_header name value message =
-  Message.set_header message name value;
-  message
-
-let with_body body message =
-  Message.set_body message body;
-  message
-
-let with_stream message =
-  message
-
-let write_buffer ?(offset = 0) ?length message chunk =
-  let length =
-    match length with
-    | Some length -> length
-    | None -> Bigstringaf.length chunk - offset
-  in
-  let string = Bigstringaf.substring chunk ~off:offset ~len:length in
-  write (Message.server_stream message) string
-
-type 'a local = 'a Message.field
-let new_local = Message.new_field
-let local = Message.field
-
-let with_local key value message =
-  Message.set_field message key value;
-  message
-
-let first message =
-  message
-
-let last message =
   message
