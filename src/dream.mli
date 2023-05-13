@@ -1304,6 +1304,17 @@ val no_middleware : middleware
         Dream.no_middleware
     ]} *)
 
+val livereload : ?script:string -> ?path:string -> middleware
+(** Adds live reloading to your Dream application.
+
+    It works by injecting a script in the HTML pages sent to clients that will
+    initiate a WebSocket.
+
+    When the server restarts, the WebSocket connection is lost, at which point,
+    the client will try to reconnect every 500ms for 5s. If within these 5s the
+    client is able to reconnect to the server, it will trigger a reload of the
+    page. *)
+
 val pipeline : middleware list -> middleware
 (** Combines a sequence of middlewares into one, such that these two lines are
     equivalent:
