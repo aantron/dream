@@ -17,6 +17,7 @@ module Formats = Dream_pure.Formats
 module Graphql = Dream__graphql.Graphql
 module Helpers = Dream__server.Helpers
 module Http = Dream__http.Http
+module Livereload = Dream__server.Livereload
 module Message = Dream_pure.Message
 module Method = Dream_pure.Method
 module Origin_referrer_check = Dream__server.Origin_referrer_check
@@ -216,6 +217,7 @@ let csrf_tag = Tag.csrf_tag ~now
 
 let no_middleware = Message.no_middleware
 let pipeline = Message.pipeline
+let livereload = Livereload.livereload
 
 
 
