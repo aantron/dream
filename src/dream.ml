@@ -10,6 +10,7 @@ module Cipher = Dream__cipher.Cipher
 module Cookie = Dream__server.Cookie
 module Csrf = Dream__server.Csrf
 module Echo = Dream__server.Echo
+module Encoding = Dream__unix.Encoding
 module Error_handler = Dream__http.Error_handler
 module Flash = Dream__server.Flash
 module Form = Dream__server.Form
@@ -185,6 +186,14 @@ let receive_fragment = Helpers.receive_fragment
 let close_websocket = Message.close_websocket
 
 
+(* Encoding *)
+
+let with_encoded_body = Encoding.with_encoded_body
+let accepted_encodings = Encoding.accepted_encodings
+let accepted_encodings_with_weights = Encoding.accepted_encodings_with_weights
+let content_encodings = Encoding.content_encodings
+let preferred_content_encoding = Encoding.preferred_content_encoding
+
 
 (* JSON *)
 
@@ -216,6 +225,8 @@ let csrf_tag = Tag.csrf_tag ~now
 
 let no_middleware = Message.no_middleware
 let pipeline = Message.pipeline
+let compress = Encoding.compress
+let decompress = Encoding.decompress
 
 
 

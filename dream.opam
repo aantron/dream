@@ -54,6 +54,7 @@ depends: [
   "caqti-lwt"
   "conf-libev" {os != "win32"}
   "cstruct" {>= "6.0.0"}
+  "decompress" {>= "1.4.1"}
   "dream-httpaf" {>= "1.0.0~alpha2"}
   "dream-pure" {>= "1.0.0~alpha2"}
   "dune" {>= "2.7.0"}  # --instrument-with.

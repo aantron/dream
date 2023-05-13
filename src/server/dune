@@ -2,6 +2,8 @@
  (public_name dream.server)
  (name dream__server)
  (libraries
+  decompress.de
+  decompress.gz
   digestif
   dream.cipher
   dream-pure
