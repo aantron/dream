@@ -52,7 +52,7 @@ depends: [
   "camlp-streams"
   "caqti" {>= "1.8.0"}  # Infix operators.
   "caqti-lwt"
-  "conf-libev" {os != "win32"}
+  ("conf-libev" {os != "win32"} | "ocaml" {os = "win32"})
   "cstruct" {>= "6.0.0"}
   "dream-httpaf" {>= "1.0.0~alpha2"}
   "dream-pure" {>= "1.0.0~alpha2"}
