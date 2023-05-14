@@ -5,6 +5,16 @@
 
 
 
+let%expect_test "default status is OK" =
+  Dream.status (Dream.response "") |> Dream.status_to_string |> print_endline;
+  [%expect {| OK |}]
+
+let%expect_test "set_status" =
+  let response = Dream.response "" in
+  Dream.set_status response `Not_Found;
+  Dream.status response |> Dream.status_to_string |> print_endline;
+  [%expect {| Not Found |}]
+
 let%expect_test "middleware runs sequentially onion-style" =
   let handler _ =
     print_endline "handler";

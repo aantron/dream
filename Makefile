@@ -30,7 +30,7 @@ test-watch :
 
 .PHONY : coverage-serve
 coverage-serve :
-	cd _coverage && dune exec -- serve -p 8082
+	cd _coverage && dune exec -- dream-serve -p 8082
 
 .PHONY : promote
 promote :
