@@ -22,8 +22,6 @@ jobs:
           ocaml: 4.12.x
         - os: windows-latest
           ocaml: 4.14.x
-        # Windows is blocked until we no longer require libev; Dream still works
-        # on Windows, but testing it is awkward at the moment.
 
     runs-on: ${{matrix.os}}
     steps:
@@ -44,13 +42,16 @@ jobs:
           opam-repository-mingw: https://github.com/ocaml-opam/opam-repository-mingw.git#sunset
           default: https://github.com/ocaml/opam-repository.git
 
+    - run: opam depext --yes conf-sqlite3
     - run: opam depext --yes conf-postgresql
     - run: opam depext --yes conf-libev
+      if: runner.os != 'Windows'
 
     # The tests require ppx_expect. The latest versions of it introduced changes
     # in the formatting of the output, and also require OCaml >= 4.10, which
     # makes testing on < 4.10 awkward. So, we skip tests on < 4.10.
-    - run: |
+    - shell: bash
+      run: |
         set -e
         set -x
 
@@ -60,11 +61,17 @@ jobs:
           4.08.x) WITH_TEST=;;
         esac
 
-        opam install --yes --deps-only $WITH_TEST ./dream-pure.opam ./dream-httpaf.opam ./dream.opam
+        OPAM=$(which opam || true)
+        if [ -z "$OPAM" ]
+        then
+          OPAM=D:\\cygwin\\wrapperbin\\opam.cmd
+        fi
+
+        $OPAM install --yes --deps-only $WITH_TEST ./dream-pure.opam ./dream-httpaf.opam ./dream.opam
 
         if [ ! -z "$WITH_TEST" ]
         then
-          opam exec -- dune runtest
+          $OPAM exec -- dune runtest
 
           EXAMPLES=$(find example -maxdepth 1 -type d -not -name "w-mirage*" -not -name "r-tyxml" | grep -v "^example/0" | grep -v "^example$" | sort)
           shopt -s nullglob
@@ -74,7 +81,7 @@ jobs:
             FILE=$(ls $EXAMPLE/*.ml $EXAMPLE/*.re $EXAMPLE/server/*.ml $EXAMPLE/server/*.re)
             EXE=$(echo $FILE | sed 's/\..*$/.exe/g')
             echo dune build $EXE
-            opam exec -- dune build $EXE
+            $OPAM exec -- dune build $EXE
           done
         fi
 
