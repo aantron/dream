@@ -41,7 +41,7 @@ let sandbox_dune_no_eml = {|(executable
  (preprocess (pps lwt_ppx ppx_yojson_conv tyxml-jsx tyxml-ppx)))
 |}
 
-let base_dockerfile = {|FROM ubuntu:focal-20210416
+let base_dockerfile = {|FROM ubuntu:jammy-20230425
 RUN apt update && apt install -y openssl libev4 libsqlite3-0
 WORKDIR /www
 COPY db.sqlite db.sqlite

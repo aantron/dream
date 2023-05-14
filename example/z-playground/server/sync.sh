@@ -100,6 +100,7 @@ set +x
 echo
 echo "If this is the first sync, run as playground@$HOST in ~/playground:"
 echo "  opam install --deps-only ./dream-pure.opam ./dream-httpaf.opam ./dream.opam"
+echo "  cd example/z-playground/"
 echo "  opam switch export opam-switch"
 echo "  npm install"
 echo "Then, as root@$HOST:"
