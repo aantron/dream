@@ -869,7 +869,7 @@ val send :
   ?text_or_binary:[< text_or_binary ] ->
   ?end_of_message:[< end_of_message ] ->
     websocket -> string -> unit promise
-(** Sends a single WebSocket message. The WebSocket is ready another message
+(** Sends a single WebSocket message. The WebSocket is ready for another message
     when the promise resolves.
 
     With [~text_or_binary:`Text], the default, the message is interpreted as a
