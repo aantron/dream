@@ -61,6 +61,12 @@ jobs:
           4.08.x) WITH_TEST=;;
         esac
 
+        # Tests on Windows are disabled because of a difference in ppx_expect
+        # output. See https://github.com/aantron/dream/pull/282.
+        case ${{runner.os}} in
+          Windows) WITH_TEST=;;
+        esac
+
         OPAM=$(which opam || true)
         if [ -z "$OPAM" ]
         then
