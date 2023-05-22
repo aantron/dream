@@ -4,8 +4,7 @@
 // Copyright 2021 Anton Bachin *)
 
 
-
-console.log("foo");
+/* Scrolling */
 
 function current_section() {
   var threshold = window.innerHeight / 2;
@@ -49,3 +48,36 @@ function scroll() {
 };
 
 window.onscroll = scroll;
+
+
+/* Theme mode */
+
+var THEME_MODE_KEY = "dream-theme" 
+
+function apply_theme(theme) {
+  if (theme === "light") {
+    document.body.setAttribute("data-theme", "light");
+  } else {
+    document.body.removeAttribute("data-theme");
+  }
+}
+
+function toggle_theme() {
+  var current_theme = localStorage.getItem(THEME_MODE_KEY);
+  var new_theme = current_theme === "dark" ? "light" : "dark";
+  localStorage.setItem(THEME_MODE_KEY, new_theme);
+  apply_theme(new_theme);
+}
+
+function init_theme() {
+  var default_theme = "dark";
+  var stored_theme = localStorage.getItem(THEME_MODE_KEY) || default_theme;
+  apply_theme(stored_theme);
+
+  var theme_toggle_button = document.querySelector(".toggle-theme-btn");
+  if (theme_toggle_button) {
+    theme_toggle_button.addEventListener("click", toggle_theme);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", init_theme);
