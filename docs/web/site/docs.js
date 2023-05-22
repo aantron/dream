@@ -52,7 +52,7 @@ window.onscroll = scroll;
 
 /* Theme mode */
 
-var THEME_MODE_KEY = "dream-theme" 
+var THEME_MODE_KEY = "dream-theme"
 
 function apply_theme(theme) {
   if (theme === "light") {
@@ -73,11 +73,13 @@ function init_theme() {
   var default_theme = "dark";
   var stored_theme = localStorage.getItem(THEME_MODE_KEY) || default_theme;
   apply_theme(stored_theme);
+}
 
+function prepare_button() {
   var theme_toggle_button = document.querySelector(".toggle-theme-btn");
   if (theme_toggle_button) {
     theme_toggle_button.addEventListener("click", toggle_theme);
   }
 }
 
-document.addEventListener("DOMContentLoaded", init_theme);
+document.addEventListener("DOMContentLoaded", prepare_button);
