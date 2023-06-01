@@ -9,10 +9,18 @@ module Message = Dream_pure.Message
 
 
 
-let default_script
-    ?(retry_interval_ms = 500) ?(max_retry_ms = 5000) ?(route = "/_livereload")
-    () =
-  Printf.sprintf
+let route =
+  "/_livereload"
+
+let retry_interval_ms =
+  500
+
+let max_retry_ms =
+  5000
+
+
+
+let script = Printf.sprintf
     {js|
 var socketUrl = "ws://" + location.host + "%s";
 var s = new WebSocket(socketUrl);
@@ -58,12 +66,10 @@ s.onerror = function(event) {
 
 
 
-let livereload
-    ?(script = default_script ()) ?(path = "/_livereload") next_handler
-    request =
+let livereload next_handler request =
 
   match Message.target request with
-  | target when target = path ->
+  | target when target = route ->
     Helpers.websocket @@ fun socket ->
     let%lwt _ = Helpers.receive socket in
     Message.close_websocket socket
