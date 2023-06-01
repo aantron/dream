@@ -1304,7 +1304,7 @@ val no_middleware : middleware
         Dream.no_middleware
     ]} *)
 
-val livereload : ?script:string -> ?path:string -> middleware
+val livereload : middleware
 (** Adds live reloading to your Dream application.
 
     It works by injecting a script in the HTML pages sent to clients that will
