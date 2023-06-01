@@ -15,9 +15,6 @@ let route =
 let retry_interval_ms =
   500
 
-let max_retry_ms =
-  5000
-
 
 
 let script = Printf.sprintf
@@ -32,22 +29,13 @@ s.onopen = function(even) {
 s.onclose = function(even) {
   console.debug("Live reload: WebSocket connection closed");
 
-  var innerMs = %i;
-  var maxMs = %i;
-  var maxAttempts = Math.round(maxMs / innerMs);
-  var attempts = 0;
+  var retryIntervalMs = %i;
 
   function reload() {
-    attempts++;
-    if(attempts > maxAttempts) {
-      console.debug("Live reload: Could not reconnect to dev server");
-      return;
-    }
-
     s2 = new WebSocket(socketUrl);
 
     s2.onerror = function(event) {
-      setTimeout(reload, innerMs);
+      setTimeout(reload, retryIntervalMs);
     };
 
     s2.onopen = function(event) {
@@ -62,7 +50,7 @@ s.onerror = function(event) {
   console.debug("Live reload: WebSocket error:", event);
 };
 |js}
-    route retry_interval_ms max_retry_ms
+    route retry_interval_ms
 
 
 
