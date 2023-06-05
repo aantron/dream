@@ -782,7 +782,7 @@ end
 
 
 
-let process_file (input_file, location, syntax) =
+let process_file (input_file, location, syntax, std_out) =
   let reason, extension = match syntax with
   | `OCaml -> (false, ".ml")
   | `Reason -> (true, ".re")
@@ -800,7 +800,7 @@ let process_file (input_file, location, syntax) =
   (* We don't bother closing these - the OCaml runtime and/or kernel will close
      it automatically on process exit, anyway. *)
   let input_channel = open_in input_file in
-  let output_channel = open_out output_file in
+  let output_channel = if std_out then stdout else open_out output_file in
 
   let input_stream = Location.stream (fun () ->
     try Some (input_char input_channel)
