@@ -57,6 +57,7 @@ type session = {
 
 type operations = {
   put : string -> string -> unit Lwt.t;
+  drop : string -> unit Lwt.t;
   invalidate : unit -> unit Lwt.t;
   mutable dirty : bool;
 }
@@ -127,6 +128,12 @@ struct
     |> fun dictionary -> session.payload <- dictionary;
     Lwt.return_unit
 
+  let drop session name =
+    session.payload
+    |> List.remove_assoc name
+    |> fun dictionary -> session.payload <- dictionary;
+    Lwt.return_unit
+
   let invalidate hash_table ~now lifetime operations session =
     Hashtbl.remove hash_table !session.id;
     session := create hash_table (now () +. lifetime);
@@ -137,6 +144,8 @@ struct
     let rec operations = {
       put =
         (fun name value -> put !session name value);
+      drop =
+        (fun name -> drop !session name);
       invalidate =
         (fun () -> invalidate ~now hash_table lifetime operations session);
       dirty;
@@ -216,6 +225,13 @@ struct
     operations.dirty <- true;
     Lwt.return_unit
 
+  let drop operations session name =
+    session.payload
+    |> List.remove_assoc name
+    |> fun dictionary -> session.payload <- dictionary;
+    operations.dirty <- true;
+    Lwt.return_unit
+
   let invalidate ~now lifetime operations session =
     session := create (now () +. lifetime);
     operations.dirty <- true;
@@ -224,6 +240,7 @@ struct
   let operations ~now lifetime session dirty =
     let rec operations = {
       put = (fun name value -> put operations !session name value);
+      drop = (fun name -> drop operations !session name);
       invalidate = (fun () -> invalidate ~now lifetime operations session);
       dirty;
     } in
@@ -336,6 +353,9 @@ let session name request =
 
 let put_session name value request =
   (fst (getter request)).put name value
+
+let drop_session_field request name =
+  (fst (getter request)).drop name
 
 let all_session_values request =
   !(snd (getter request)).payload

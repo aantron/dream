@@ -1572,6 +1572,9 @@ val set_session_field : request -> string -> string -> unit promise
 (** Mutates a value in the request's session. The back end may commit the value
     to storage immediately, so this function returns a promise. *)
 
+val drop_session_field : request -> string -> unit promise
+(** Drops a field from the request's session. *)
+
 val all_session_fields : request -> (string * string) list
 (** Full session dictionary. *)
 

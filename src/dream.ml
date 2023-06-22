@@ -256,6 +256,7 @@ let session = Session.session
 let session_field request name = session name request
 let put_session = Session.put_session
 let set_session_field request name value = put_session name value request
+let drop_session_field = Session.drop_session_field
 let all_session_values = Session.all_session_values
 let all_session_fields = all_session_values
 let invalidate_session = Session.invalidate_session
