@@ -1,3 +1,6 @@
+(* Bring the Yojson-converters for primitive types into scope *)
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
+
 type message_object = {
   message : string;
 } [@@deriving yojson]
