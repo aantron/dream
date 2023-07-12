@@ -46,7 +46,7 @@ Later, you'll need to fork the repository on GitHub, and add your fork as a
 remote:
 
 ```
-git remote add fork git@github.com/my-github-name/dream.git
+git remote add fork git@github.com:my-github-name/dream.git
 ```
 
 Install Dream's dependencies:
