@@ -10,7 +10,6 @@ converter between JSON and an OCaml data type. We then create a little server
 that listens for JSON of the right shape, and echoes back its `message` field:
 
 ```ocaml
-(* Bring the Yojson-converters for primitive types into scope *)
 open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 type message_object = {
