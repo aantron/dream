@@ -14,7 +14,7 @@ let log =
   Log.sub_log "dream.sql"
 
 (* TODO Debug metadata for the pools. *)
-let pool_field : (_, Caqti_error.t) Caqti_lwt.Pool.t Message.field =
+let pool_field : (_, Caqti_error.t) Caqti_lwt_unix.Pool.t Message.field =
   Message.new_field ()
 
 (* TODO This may not be necessary since Caqti 1.8.0. May require some messing
@@ -48,7 +48,8 @@ let sql_pool ?size uri =
         "Dream.sql_pool: \
         'sqlite' is not a valid scheme; did you mean 'sqlite3'?");
     let pool =
-      Caqti_lwt.connect_pool ?max_size:size ~post_connect parsed_uri in
+      let pool_config = Caqti_pool_config.create ?max_size:size () in
+      Caqti_lwt_unix.connect_pool ~pool_config ~post_connect parsed_uri in
     match pool with
     | Ok pool ->
       pool_cell := Some pool;
@@ -72,7 +73,7 @@ let sql request callback =
     failwith message
   | Some pool ->
     let%lwt result =
-      pool |> Caqti_lwt.Pool.use (fun db ->
+      pool |> Caqti_lwt_unix.Pool.use (fun db ->
         (* The special exception handling is a workaround for
            https://github.com/paurkedal/ocaml-caqti/issues/68. *)
         match%lwt callback db with

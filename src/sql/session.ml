@@ -28,7 +28,7 @@ let serialize_payload payload =
 let insert =
   let query =
     let open Caqti_request.Infix in
-    (T.(tup4 string string float string) ->. T.unit) {|
+    (T.(t4 string string float string) ->. T.unit) {|
       INSERT INTO dream_session (id, label, expires_at, payload)
       VALUES ($1, $2, $3, $4)
     |} in
@@ -42,7 +42,7 @@ let insert =
 let find_opt =
   let query =
     let open Caqti_request.Infix in
-    (T.string ->? T.(tup3 string float string))
+    (T.string ->? T.(t3 string float string))
       "SELECT label, expires_at, payload FROM dream_session WHERE id = $1" in
 
   fun (module Db : DB) id ->
@@ -70,7 +70,7 @@ let find_opt =
 let refresh =
   let query =
     let open Caqti_request.Infix in
-    (T.(tup2 float string) ->. T.unit)
+    (T.(t2 float string) ->. T.unit)
       "UPDATE dream_session SET expires_at = $1 WHERE id = $2" in
 
   fun (module Db : DB) (session : Session.session) ->
@@ -80,7 +80,7 @@ let refresh =
 let update =
   let query =
     let open Caqti_request.Infix in
-    (T.(tup2 string string) ->. T.unit)
+    (T.(t2 string string) ->. T.unit)
       "UPDATE dream_session SET payload = $1 WHERE id = $2" in
 
   fun (module Db : DB) (session : Session.session) ->

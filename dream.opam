@@ -50,8 +50,8 @@ depends: [
   "base-unix"
   "bigarray-compat"
   "camlp-streams"
-  "caqti" {>= "1.8.0"}  # Infix operators.
-  "caqti-lwt"
+  "caqti" {>= "2.0.1"}
+  "caqti-lwt" {>= "2.0.1"}
   ("conf-libev" {os != "win32"} | "ocaml" {os = "win32"})
   "cstruct" {>= "6.0.0"}
   "dream-httpaf" {>= "1.0.0~alpha2"}
