@@ -61,7 +61,7 @@ depends: [
   "graphql_parser"
   "graphql-lwt"
   "lwt"
-  "lwt_ppx" {>= "2.1.0"}
+  "lwt_ppx" {>= "1.2.2"}
   "lwt_ssl"
   "logs" {>= "0.5.0"}
   "magic-mime"
