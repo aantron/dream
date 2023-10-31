@@ -2301,7 +2301,7 @@ val from_path : string -> string list
     - [Dream.from_path "a%2Fb"] becomes [["a/b"]].
     - [Dream.from_path "a//b"] becomes [["a"; "b"]].
 
-    This function is not for use on full targets, because they may incldue query
+    This function is not for use on full targets, because they may include query
     strings ([?]), and {!Dream.from_path} does not treat them specially. Split
     query strings off with {!Dream.split_target} first. *)
 
