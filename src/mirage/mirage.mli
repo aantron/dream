@@ -908,14 +908,15 @@ module Make
 
   (** {1 Forms}
 
-      {!Dream.form_tag} and {!Dream.val-form} round-trip secure forms.
-      {!Dream.form_tag} is used inside a template to generate a form header with a
-      CSRF token:
+      {!Dream.csrf_tag} and {!Dream.val-form} round-trip secure forms.
+      {!Dream.csrf_tag} is used inside a form template to generate a hidden field
+      with a CSRF token:
 
       {[
-        <%s! Dream.form_tag ~action:"/" request %>
-          <input name="my.field">
-        </form>
+      <form method="POST" action="/">
+      <%s! Dream.csrf_tag request %>
+      <input name="my.field">
+      </form>
       ]}
 
       {!Dream.val-form} recieves the form and checks the CSRF token:
@@ -953,13 +954,13 @@ module Make
 
   val form : ?csrf:bool -> request -> (string * string) list form_result promise
   (** Parses the request body as a form. Performs CSRF checks. Use
-      {!Dream.form_tag} in a template to transparently generate forms that will
+      {!Dream.csrf_tag} in a template to transparently generate forms that will
       pass these checks. See {!section-templates} and example
       {{:https://github.com/aantron/dream/tree/master/example/d-form#readme}
       [d-form]}.
 
       - [Content-Type:] must be [application/x-www-form-urlencoded].
-      - The form must have a field named [dream.csrf]. {!Dream.form_tag} adds such
+      - The form must have a field named [dream.csrf]. {!Dream.csrf_tag} adds such
         a field.
       - {!Dream.form} calls {!Dream.verify_csrf_token} to check the token in
         [dream.csrf].
@@ -1100,8 +1101,9 @@ module Make
 
       It's usually not necessary to handle CSRF tokens directly.
 
-      - Form tag generator {!Dream.form_tag} generates and inserts a CSRF token
-        that {!Dream.val-form} and {!Dream.val-multipart} transparently verify.
+      - CSRF token field generator {!Dream.csrf_tag} generates and inserts a CSRF
+        token that {!Dream.val-form} and {!Dream.val-multipart} transparently
+        verify.
       - AJAX can be protected from CSRF by {!Dream.origin_referrer_check}.
 
       CSRF functions are exposed for creating custom schemes, and for
@@ -1135,8 +1137,6 @@ module Make
 
   val verify_csrf_token : request -> string -> csrf_result promise
   (** Checks that the CSRF token is valid for the {!type-request}'s session. *)
-
-  val csrf_tag : request -> string
 
   (** {1 Templates}
 
@@ -1223,20 +1223,13 @@ module Make
       unquoted attribute values, CSS in [<style>] tags, or literal JavaScript in
       [<script>] tags. *)
 
-  val form_tag :
-    ?method_:[< method_] ->
-    ?target:string ->
-    ?enctype:[< `Multipart_form_data] ->
-    ?csrf_token:bool ->
-    action:string ->
-    request ->
-    string
-  (** Generates a [<form>] tag and an [<input>] tag with a CSRF token, suitable
-      for use with {!Dream.val-form} and {!Dream.val-multipart}. For example, in
-      a template,
+  val csrf_tag : request -> string
+  (** Generates an [<input>] tag with a CSRF token, suitable for use with
+      {!Dream.val-form} and {!Dream.val-multipart}. For example, in a template,
 
       {[
-        <%s! Dream.form_tag ~action:"/" request %>
+        <form method="POST" action="/">
+          <%s! Dream.csrf_tag request %>
           <input name="my.field">
         </form>
       ]}
@@ -1245,19 +1238,15 @@ module Make
 
       {[
         <form method="POST" action="/">
-          <input name="dream.csrf" type="hidden" value="a-token">
+          <input name="dream.csrf" type="hidden" value="j8vjZ6...">
           <input name="my.field">
         </form>
       ]}
 
-      [~method] sets the method used to submit the form. The default is [`POST].
-
-      [~target] adds a [target] attribute. For example, [~target:"_blank"] causes
-      the browser to submit the form in a new tab or window.
-
-      Pass [~enctype:`Multipart_form_data] for a file upload form.
-
-      [~csrf_token:false] suppresses generation of the [dream.csrf] field. *)
+      It is
+      {{:https://portswigger.net/web-security/csrf/tokens#how-should-csrf-tokens-be-transmitted}
+      recommended} to put the CSRF tag immediately after the starting [<form>]
+      tag, to prevent certain kinds of DOM manipulation-based attacks. *)
 
   (** {1 Middleware}
 
