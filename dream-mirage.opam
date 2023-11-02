@@ -59,7 +59,7 @@ depends: [
   "letsencrypt" {>= "0.3.0"}
   "lwt"
   "lwt_ppx" {>= "1.2.2"}
-  "mimic" {>= "0.0.6"}
+  "mimic" {>= "0.0.4"}
   "mirage-time"
   "rresult"
   "tcpip"
