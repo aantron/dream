@@ -435,6 +435,9 @@ struct
     if !enable then begin
       setup_outputs () ;
       Logs.set_level ~all:true (Some !level);
+      !custom_log_levels |> List.iter (fun (name, level) ->
+        List.assoc_opt name !sources
+        |> Option.iter (fun source -> Logs.Src.set_level source (Some level)));
       Logs.set_reporter (reporter ~now ())
     end ;
     `Initialized
