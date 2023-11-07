@@ -9,7 +9,6 @@
   (libraries
    bigstringaf
    faraday
-   ke
   )))
 
 (subdir gluten/lwt

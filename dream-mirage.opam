@@ -56,6 +56,7 @@ depends: [
   "dune" {>= "2.7.0"}
   "duration"
   "emile" {>= "1.1"}
+  "ke" {>= "0.4"}  # paf.
   "letsencrypt" {>= "0.3.0"}
   "lwt"
   "lwt_ppx" {>= "1.2.2"}
