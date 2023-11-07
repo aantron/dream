@@ -152,7 +152,6 @@
    dream-httpaf.dream-hpack
    dream-httpaf.dream-httpaf_
    psq
-   result
   )))
 
 (subdir h2/lwt
