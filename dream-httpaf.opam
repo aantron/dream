@@ -40,7 +40,6 @@ depends: [
   "faraday-lwt-unix"
   "lwt_ssl" {>= "1.2.0"}  # Gluten.
   "psq"  # h2.
-  "result"  # websocket/af.
 ]
 
 build: [

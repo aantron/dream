@@ -89,7 +89,6 @@
    faraday
    dream-httpaf.dream-gluten
    dream-httpaf.dream-httpaf_
-   result
   )))
 
 (subdir websocketaf/lwt
