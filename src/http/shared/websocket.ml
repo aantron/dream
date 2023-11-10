@@ -204,32 +204,34 @@ let websocket_handler stream socket =
             outgoing_loop ()
         end)
       ~flush:(fun () -> flush ~close outgoing_loop)
-      ~ping:(fun _buffer _offset length ->
+      ~ping:(fun buffer offset length ->
         if length > 125 then
           raise (Failure "Ping payload cannot exceed 125 bytes");
-        (* See https://github.com/anmonteiro/websocketaf/issues/36. *)
-        (* if length > 0 then
-          websocket_log.warning (fun log ->
-            log "Ping with non-empty payload not yet supported"); *)
         if !closed then
           close !close_code
         else begin
-          Websocketaf.Wsd.send_ping socket;
+          if length = 0 then
+            Websocketaf.Wsd.send_ping socket
+          else
+            Websocketaf.Wsd.send_ping
+              ~application_data:{Faraday.buffer; off = offset; len = length}
+              socket;
           outgoing_loop ()
         end)
-      ~pong:(fun _buffer _offset length ->
+      ~pong:(fun buffer offset length ->
         (* TODO Is there any way for the peer to send a ping payload with more
            than 125 bytes, forcing a too-large pong and an exception? *)
         if length > 125 then
           raise (Failure "Pong payload cannot exceed 125 bytes");
-        (* See https://github.com/anmonteiro/websocketaf/issues/36. *)
-        (* if length > 0 then
-          websocket_log.warning (fun log ->
-            log "Pong with non-empty payload not yet supported"); *)
         if !closed then
           close !close_code
         else begin
-          Websocketaf.Wsd.send_pong socket;
+          if length = 0 then
+            Websocketaf.Wsd.send_pong socket
+          else
+            Websocketaf.Wsd.send_pong
+              ~application_data:{Faraday.buffer; off = offset; len = length}
+              socket;
           outgoing_loop ()
         end)
       ~close
