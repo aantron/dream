@@ -237,10 +237,3 @@ let websocket_handler stream socket =
   outgoing_loop ();
 
   Websocketaf.Websocket_connection.{frame; eof}
-
-  (* TODO The equality between server and client input handlers is not
-     exposed in the websocketaf API.
-     https://github.com/anmonteiro/websocketaf/issues/39. *)
-let client_websocket_handler :
-    Stream.stream -> Websocketaf.Wsd.t ->
-      Websocketaf.Websocket_connection.input_handlers = websocket_handler
