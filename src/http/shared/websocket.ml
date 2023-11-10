@@ -187,16 +187,13 @@ let websocket_handler stream socket =
   let rec outgoing_loop () =
     Stream.read
       stream
-      ~data:(fun buffer offset length binary _fin ->
-        (* Until https://github.com/anmonteiro/websocketaf/issues/33. *)
-        (* if not fin then
-          websocket_log.error (fun log ->
-            log "Non-FIN frames not yet supported"); *)
+      ~data:(fun buffer offset length binary fin ->
         let kind = if binary then `Binary else `Text in
         if !closed then
           close !close_code
         else begin
-          Websocketaf.Wsd.schedule socket ~kind buffer ~off:offset ~len:length;
+          Websocketaf.Wsd.schedule
+            socket ~is_fin:fin ~kind buffer ~off:offset ~len:length;
           bytes_since_flush := !bytes_since_flush + length;
           if !bytes_since_flush >= 4096 then
             flush ~close outgoing_loop
