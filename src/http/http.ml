@@ -399,13 +399,11 @@ let built_in_middleware error_handler =
     Catch.catch (Error_handler.app error_handler);
   ]
 
-
-
 let serve_with_details
     caller_function_for_error_messages
     tls_library
     ~interface
-    ~port
+    ~network
     ~stop
     ~error_handler
     ~certificate_file
@@ -461,14 +459,19 @@ let serve_with_details
 
   (* Look up the low-level address corresponding to the interface. Hopefully,
      this is a local interface. *)
+  let%lwt listen_address =
+    match network with
+    | `Unix path ->
+      Lwt.return (Lwt_unix.ADDR_UNIX path)
+    | `Inet port ->
   let%lwt addresses = Lwt_unix.getaddrinfo interface (string_of_int port) [] in
   match addresses with
   | [] ->
     Printf.ksprintf failwith "Dream.%s: no interface with address %s"
       caller_function_for_error_messages interface
   | address::_ ->
-  let listen_address = Lwt_unix.(address.ai_addr) in
-
+  Lwt.return Lwt_unix.(address.ai_addr)
+  in
 
   (* Bring up the HTTP server. Wait for the server to actually get started.
      Then, wait for the ~stop promise. If the ~stop promise ever resolves, stop
@@ -489,7 +492,7 @@ let is_localhost interface =
 let serve_with_maybe_https
     caller_function_for_error_messages
     ~interface
-    ~port
+    ~network
     ~stop
     ~error_handler
     ~tls
@@ -515,7 +518,7 @@ let serve_with_maybe_https
         caller_function_for_error_messages
         no_tls
         ~interface
-        ~port
+        ~network
         ~stop
         ~error_handler
         ~certificate_file:""
@@ -580,7 +583,7 @@ let serve_with_maybe_https
           caller_function_for_error_messages
           tls_library
           ~interface
-          ~port
+          ~network
           ~stop
           ~error_handler
           ~certificate_file
@@ -608,7 +611,7 @@ let serve_with_maybe_https
           caller_function_for_error_messages
           tls_library
           ~interface
-          ~port
+          ~network
           ~stop
           ~error_handler
           ~certificate_file
@@ -634,11 +637,15 @@ let default_interface = "localhost"
 let default_port = 8080
 let never = fst (Lwt.wait ())
 
-
+let network ~port ~socket_path =
+  match socket_path with
+  | None -> `Inet port
+  | Some path -> `Unix path
 
 let serve
     ?(interface = default_interface)
     ?(port = default_port)
+    ?socket_path
     ?(stop = never)
     ?(error_handler = Error_handler.default)
     ?(tls = false)
@@ -650,7 +657,7 @@ let serve
   serve_with_maybe_https
     "serve"
     ~interface
-    ~port
+    ~network:(network ~port ~socket_path)
     ~stop
     ~error_handler
     ~tls:(if tls then `OpenSSL else `No)
@@ -666,6 +673,7 @@ let serve
 let run
     ?(interface = default_interface)
     ?(port = default_port)
+    ?socket_path
     ?(stop = never)
     ?(error_handler = Error_handler.default)
     ?(tls = false)
@@ -728,8 +736,10 @@ let run
         "http"
     in
 
-    begin match interface with
-    | "localhost" | "127.0.0.1" ->
+    begin match interface, socket_path with
+    | _, Some path ->
+      log "Running on %s" path
+    | ("localhost" | "127.0.0.1"), None ->
       log "Running at %s://localhost:%i" scheme port
     | _ ->
       log "Running on %s:%i (%s://localhost:%i)" interface port scheme port
@@ -742,7 +752,7 @@ let run
       serve_with_maybe_https
         "run"
         ~interface
-        ~port
+        ~network:(network ~port ~socket_path)
         ~stop
         ~error_handler
         ~tls:(if tls then `OpenSSL else `No)

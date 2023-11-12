@@ -2100,6 +2100,7 @@ val catch : (error -> response promise) -> middleware
 val run :
   ?interface:string ->
   ?port:int ->
+  ?socket_path:string ->
   ?stop:unit promise ->
   ?error_handler:error_handler ->
   ?tls:bool ->
@@ -2158,6 +2159,7 @@ val run :
 val serve :
   ?interface:string ->
   ?port:int ->
+  ?socket_path:string ->
   ?stop:unit promise ->
   ?error_handler:error_handler ->
   ?tls:bool ->
