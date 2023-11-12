@@ -7,23 +7,20 @@ a response body. It sends one paragraph per second to the client:
 
 ```ocaml
 let render response =
-  let%lwt () =
-    %% response
-    <html>
-    <body>
+  %% response
+  <html>
+  <body>
 
-%     let rec paragraphs index =
-        <p><%i index %></p>
-%       let%lwt () = Dream.flush response in
-%       let%lwt () = Lwt_unix.sleep 1. in
-%       paragraphs (index + 1)
-%     in
-%     let%lwt () = paragraphs 0 in
+%   let rec paragraphs index =
+      <p><%i index %></p>
+%     let%lwt () = Dream.flush response in
+%     let%lwt () = Lwt_unix.sleep 1. in
+%     paragraphs (index + 1)
+%   in
+%   let%lwt () = paragraphs 0 in
 
-    </body>
-    </html>
-  in
-  Dream.close_stream response
+  </body>
+  </html>
 
 let () =
   Dream.run

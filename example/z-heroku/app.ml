@@ -4,4 +4,3 @@ let () =
   @@ Dream.router [
     Dream.get "/" (fun _ -> Dream.html "Dream running in Heroku!");
   ]
-  @@ Dream.not_found

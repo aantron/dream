@@ -11,7 +11,8 @@ sizes:
 let home request =
   <html>
   <body>
-    <%s! Dream.form_tag ~action:"/" ~enctype:`Multipart_form_data request %>
+    <form method="POST" action="/" enctype="multipart/form-data">
+      <%s! Dream.csrf_tag request %>
       <input name="files" type="file" multiple>
       <button>Submit!</button>
     </form>
@@ -47,7 +48,6 @@ let () =
       | _ -> Dream.empty `Bad_Request);
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/g-upload</b>
@@ -85,10 +85,11 @@ streaming file uploads.
 [`Dream.multipart`](https://aantron.github.io/dream/#val-multipart) behaves just
 like [`Dream.form`](https://aantron.github.io/dream/#val-form) when it comes to
 [CSRF protection](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html).
-See example [**`d-form`**](../d-form#files). We still use
-[`Dream.form_tag`](https://aantron.github.io/dream/#val-form_tag) to generate
-the form in the template. The only difference is that we now pass it
-``~enctype:`Multipart_form_data`` to make its output look like this:
+See example [**`d-form`**](../d-form#files). We use
+[`Dream.csrf_tag`](https://aantron.github.io/dream/#val-csrf_tag) to generate
+the CSRF token in the template, and pass the `enctype="multipart/form-data"`
+attribute as needed for forms to upload files. The template output looks like
+this:
 
 ```html
 <form method="POST" action="/" enctype="multipart/form-data">

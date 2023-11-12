@@ -1,13 +1,14 @@
 {
   "name": "fullstack-rescript",
   "dependencies": {
-    "bs-platform": "*",
-    "bs-webapi": "*",
     "esbuild": "*",
-    "esy": "*"
+    "esy": "*",
+    "rescript": "*",
+    "rescript-webapi": "^0.5.0"
   },
   "scripts": {
-    "build": "bsb -make-world",
+    "postinstall": "npx esy install",
+    "build": "rescript",
     "pack": "esbuild lib/js/client/client.js --bundle --outfile=static/client.js",
     "start": "npm run build && npm run pack && npx esy start"
   }

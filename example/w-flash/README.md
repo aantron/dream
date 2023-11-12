@@ -13,7 +13,8 @@ absolutely primitive form with just one field:
 let form request =
   <html>
   <body>
-    <%s! Dream.form_tag ~action:"/" request %>
+    <form method="POST" action="/">
+      <%s! Dream.csrf_tag request %>
       <input name="text" autofocus>
     </form>
   </body>
@@ -28,7 +29,7 @@ let result request =
   <html>
   <body>
 
-%   Dream.flash request |> List.iter (fun (category, text) ->
+%   Dream.flash_messages request |> List.iter (fun (category, text) ->
       <p><%s category %>: <%s text %></p><% ); %>
 
   </body>
@@ -37,21 +38,23 @@ let result request =
 
 The app just displays the form. The text that is entered into the form by the
 user is placed into a flash message using
-[`Dream.put_flash`](https://aantron.github.io/dream/#val-put_flash). The app
+[`Dream.add_flash_message`](https://aantron.github.io/dream/#val-add_flash_message).
+The app
 then tells the client to redirect to `/result`. The handler for `/result` calls
 the `result` template, which retrieves the flash message using
-[`Dream.flash`](https://aantron.github.io/dream/#val-put_flash) and displays it.
-We need to include
-[`Dream.flash_messages`](https://aantron.github.io/dream/#val-flash_messages) in
-our middleware stack, because that is the piece that actually puts the messages
-into cookies and reads them back out:
+[`Dream.flash_messages`](https://aantron.github.io/dream/#val-flash_messages)
+and displays it. We need to include
+[`Dream.flash`](https://aantron.github.io/dream/#val-flash) in our middleware
+stack, because that is the piece that actually puts the messages into cookies
+and reads them back out:
 
 ```ocaml
 let () =
+  Dream.set_log_level "dream.flash" `Debug;
   Dream.run
   @@ Dream.logger
   @@ Dream.memory_sessions
-  @@ Dream.flash_messages
+  @@ Dream.flash
   @@ Dream.router [
 
     Dream.get  "/"
@@ -62,7 +65,7 @@ let () =
       (fun request ->
         match%lwt Dream.form request with
         | `Ok ["text", text] ->
-          let () = Dream.put_flash "Info" text request in
+          let () = Dream.add_flash_message request "Info" text in
           Dream.redirect request "/result"
         | _ ->
           Dream.redirect request "/");
@@ -72,7 +75,16 @@ let () =
         Dream.html (result request));
 
   ]
-  @@ Dream.not_found
+```
+
+The example configures a custom log level for flash messages using
+`Dream.set_log_level`. Setting this to `` `Debug`` means the server logs
+will display a log point summarizing the flash messages on every
+request, like this:
+
+```
+10.11.21 01:48:21.629       dream.log  INFO REQ 3 GET /result ::1:39808 Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0
+10.11.21 01:48:21.629     dream.flash DEBUG REQ 3 Flash messages: Info: Some Message
 ```
 
 <pre><code><b>$ cd example/w-flash</b>

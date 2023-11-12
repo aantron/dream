@@ -1,11 +1,9 @@
 (library
- (public_name dream.pure)
- (name dream__pure)
+ (public_name dream-pure)
+ (name dream_pure)
  (libraries
   base64
   bigstringaf
-  dream.cipher
-  multipart_form
   hmap
   lwt
   uri

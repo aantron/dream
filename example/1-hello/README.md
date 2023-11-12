@@ -12,9 +12,9 @@ let () =
 
 <br>
 
-It's the absolute minimum Dream server. It responds to all requests with the
-same text. At startup, Dream prints a message to the log, telling you where to
-point your browser. Your terminal probably makes the link clickable.
+It's the minimal Dream server. It responds to all requests with the same text.
+At startup, Dream prints a message to the log, telling you where to point your
+browser. Your terminal probably makes the link clickable.
 
 <pre><code><b>$ cd example/1-hello</b>
 <b>$ npm install esy && npx esy</b>
@@ -53,7 +53,7 @@ name of the `.ml` file, but with `.ml` changed to `.exe`.
 - [**`r-hello`**](../r-hello#files) is a Reason syntax version of this example.
 - [**`w-esy`**](../w-esy#files) gives more detail on the [esy](https://esy.sh/)
   packaging.
-- [**`w-fswatch`**](../w-fswatch#files) sets up a primitive development watcher.
+- [**`w-watch`**](../w-watch#files) sets up a development watcher.
 
 
 <br>

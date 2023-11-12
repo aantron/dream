@@ -45,7 +45,9 @@ events {
 
 The reference for
 [`nginx.conf`](https://github.com/aantron/dream/blob/master/example/w-nginx/nginx.conf)
-can be found [here](https://nginx.org/en/docs/).
+can be found [here](https://nginx.org/en/docs/). In particular, see
+[this page](http://nginx.org/en/docs/http/websocket.html) for information on
+WebSocket proxying.
 
 Our
 [`docker-compose.yml`](https://github.com/aantron/dream/blob/master/example/w-nginx/docker-compose.yml)
@@ -93,7 +95,6 @@ let () =
   @@ Dream.router [
     Dream.get "/" (fun _request -> Dream.html home)
   ]
-  @@ Dream.not_found
 ```
 
 To build, run:

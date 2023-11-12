@@ -8,7 +8,8 @@ let show_form ?message request =
       <p>You entered: <b><%s message %>!</b></p>
 %   end;
 
-    <%s! Dream.form_tag ~action:"/" request %>
+    <form method="POST" action="/">
+      <%s! Dream.csrf_tag request %>
       <input name="message" autofocus>
     </form>
 
@@ -34,4 +35,3 @@ let () =
           Dream.empty `Bad_Request);
 
   ]
-  @@ Dream.not_found

@@ -38,7 +38,7 @@ let rec message_loop () =
 
   message_loop ()
 
-let rec forward_messages response =
+let rec forward_messages stream =
   let%lwt messages =
     match !server_state with
     | [] ->
@@ -58,9 +58,9 @@ let rec forward_messages response =
   |> List.map (Printf.sprintf "data: %s\n\n")
   |> String.concat ""
   |> fun text ->
-    let%lwt () = Dream.write response text in
-    let%lwt () = Dream.flush response in
-    forward_messages response
+    let%lwt () = Dream.write stream text in
+    let%lwt () = Dream.flush stream in
+    forward_messages stream
 
 let () =
   Lwt.async message_loop;
@@ -77,4 +77,3 @@ let () =
         forward_messages);
 
   ]
-  @@ Dream.not_found

@@ -28,8 +28,7 @@ let () =
     Dream.get("/",
       (_ => Dream.html(html_to_string(greet("world"))))),
 
-  ])
-  @@ Dream.not_found
+  ]);
 ```
 
 <pre><code><b>$ cd example/r-tyxml</b>
@@ -43,8 +42,9 @@ To get this, we depend on package `tyxml-jsx` in
 
 <pre><code>{
   "dependencies": {
-    "@opam/dream": "aantron/dream:dream.opam",
+    "@opam/dream": "1.0.0~alpha4",
     "@opam/dune": "^2.0",
+    "@opam/reason": "^3.8.0",
     "@opam/tyxml": "*",
     <b>"@opam/tyxml-jsx": "*",</b>
     "ocaml": "4.12.x"

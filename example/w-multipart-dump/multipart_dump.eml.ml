@@ -1,7 +1,8 @@
 let home request =
   <html>
   <body>
-    <%s! Dream.form_tag ~action:"/" ~enctype:`Multipart_form_data request %>
+    <form method="POST" action="/" enctype="multipart/form-data">
+      <%s! Dream.csrf_tag request %>
       <input name="text"><br>
       <input name="files" type="file" multiple><br>
       <button>Submit!</button>
@@ -25,4 +26,3 @@ let () =
         body);
 
   ]
-  @@ Dream.not_found

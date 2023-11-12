@@ -2,20 +2,12 @@
 
 <br>
 
-While templates can be written with other code in `.ml` files, they can also
-live in their own source files.  This can be useful as templates become larger,
-or when you have many templates.
-
-If your template file is mostly HTML, you can give it a name like
-`template.eml.html`, to trigger HTML syntax highlighting by your editor.
-Additionally, if you are using `ocamlformat`, the `.html` extension will
-prevent errors that come from `ocamlformat` attempting to format the syntax of
-the template.
-
-This example does just that. It splits the code of the basic template example,
-[**7-template**](../7-template#files), into two files. The first is the
+This example splits the code of the basic template example,
+[**`7-template`**](../7-template#files), into two files. The first is the
 template, in
-[`template.eml.html`](https://github.com/aantron/dream/blob/master/example/w-template-files/template.eml.html):
+[`template.eml.html`](https://github.com/aantron/dream/blob/master/example/w-template-files/template.eml.html).
+We use the `.html` extension because it is mostly HTML, and to prevent
+`ocamlformat` from trying to format the file:
 
 ```html
 let render param =
@@ -28,7 +20,7 @@ let render param =
 
 After preprocessing by the templater, this file becomes `template.ml`, so it
 defines a module `Template`, containing a function `Template.render`. We call
-this function from the main server in
+this function from the main server module in
 [`server.ml`](https://github.com/aantron/dream/blob/master/example/w-template-files/server.ml):
 
 ```ocaml
@@ -44,7 +36,6 @@ let () =
         |> Dream.html);
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/w-template-files</b>
@@ -55,11 +46,12 @@ let () =
 
 **See also:**
 
-- [**7-template**](../7-template#files) for comments on the
-[`dune` file](https://github.com/aantron/dream/blob/master/example/w-template-files/dune)
-and [security
-information](https://github.com/aantron/dream/tree/master/example/7-template#security).
-- [**r-template-files**](../r-template-files) for the Reason syntax version of this example.
+- [**`7-template`**](../7-template#files) for comments on the [`dune`
+  file](https://github.com/aantron/dream/blob/master/example/w-template-files/dune)
+  and [security
+  information](https://github.com/aantron/dream/tree/master/example/7-template#security).
+- [**`r-template-files`**](../r-template-files) for the Reason syntax version of
+  this example.
 
 <br>
 

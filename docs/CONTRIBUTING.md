@@ -46,7 +46,7 @@ Later, you'll need to fork the repository on GitHub, and add your fork as a
 remote:
 
 ```
-git remote add fork git@github.com/my-github-name/dream.git
+git remote add fork git@github.com:my-github-name/dream.git
 ```
 
 Install Dream's dependencies:
@@ -58,17 +58,23 @@ opam install --deps-only ./dream.opam --with-test
 If you don't have an opam switch ready, first create one with
 
 ```
-opam switch create . 4.12.0 --no-install
+opam switch create . 4.14.1 --no-install
 ```
 
 You can now add some code that will exercise your change, so you can test it as
 you work. There are two main places for this:
 
 1. The tests in `test/`. They can be run with `make test`. View the generated
-   coverage report in `_coverage/index.html` to see how much the tests exercies
+   coverage report in `_coverage/index.html` to see how much the tests exercise
    your changes.
 
-2. The examples in `example/`. I often test changes by modifying an example that
+   To run tests from a single directory, for example `test/expect/pure`, run
+   `make test TEST=test/expect/pure`.
+
+2. The tests can also be run in watch mode using `make test-watch`. This is not
+   compatible with coverage reports at the moment.
+
+3. The examples in `example/`. I often test changes by modifying an example that
    is almost on topic for the code I'm changing, and then not committing the
    example. In some cases, though, it's easiest to fork or write a new example
    for some new code, and commit it. New examples greatly appreciated! To build
@@ -100,6 +106,12 @@ If you want to work again later, be sure to use `--recurse-submodules` during
 ```
 git pull --recurse-submodules
 ```
+
+**Note:** Please don't force-push into a PR &mdash; it makes incremental review
+very difficult, and we will squash-merge most PRs anyway!
+
+**Note:** Please don't resolve conversations in PRs. Reviewers use resolving
+conversations to keep track of what has been addressed.
 
 <br>
 
@@ -137,8 +149,8 @@ To build the docs, go to
 make deps
 ```
 
-This will install npm packages and opam packages (some of which are pinned to
-git commits).
+This will install npm and opam packages. In particular, the site currently
+requires odoc 2.0.2, Soupault, and a specific version of Highlight.js.
 
 After that, back in the project root,
 
@@ -153,3 +165,11 @@ make docs
 ```
 
 to build the docs locally. They are output to `docs/web/build/index.html`.
+
+You can also use
+
+```
+make docs-watch
+```
+
+to rebuild the docs automatically as you write them.

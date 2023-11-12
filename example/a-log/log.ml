@@ -14,4 +14,3 @@ let () =
         raise (Failure "The Web app failed!"));
 
   ]
-  @@ Dream.not_found

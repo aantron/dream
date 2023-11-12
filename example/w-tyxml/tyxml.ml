@@ -20,4 +20,3 @@ let () =
       (fun _ -> Dream.html (html_to_string (greet "world")));
 
   ]
-  @@ Dream.not_found

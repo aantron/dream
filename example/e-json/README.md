@@ -10,6 +10,8 @@ converter between JSON and an OCaml data type. We then create a little server
 that listens for JSON of the right shape, and echoes back its `message` field:
 
 ```ocaml
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
+
 type message_object = {
   message : string;
 } [@@deriving yojson]
@@ -35,7 +37,6 @@ let () =
         |> Dream.json);
 
   ]
-  @@ Dream.not_found
 ```
 
 To get this working, we have to add `ppx_yojson_conv` to our

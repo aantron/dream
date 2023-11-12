@@ -5,8 +5,9 @@
 
 
 
-module Dream = Dream__pure.Inmost
-module Session = Dream__middleware.Session
+module Dream = Dream_pure
+module Cookie = Dream__server.Cookie
+module Session = Dream__server.Session
 
 
 
@@ -26,7 +27,8 @@ let serialize_payload payload =
 
 let insert =
   let query =
-    R.exec T.(tup4 string string float string) {|
+    let open Caqti_request.Infix in
+    (T.(t4 string string float string) ->. T.unit) {|
       INSERT INTO dream_session (id, label, expires_at, payload)
       VALUES ($1, $2, $3, $4)
     |} in
@@ -39,7 +41,8 @@ let insert =
 
 let find_opt =
   let query =
-    R.find_opt T.string T.(tup3 string float string)
+    let open Caqti_request.Infix in
+    (T.string ->? T.(t3 string float string))
       "SELECT label, expires_at, payload FROM dream_session WHERE id = $1" in
 
   fun (module Db : DB) id ->
@@ -66,7 +69,8 @@ let find_opt =
 
 let refresh =
   let query =
-    R.exec T.(tup2 float string)
+    let open Caqti_request.Infix in
+    (T.(t2 float string) ->. T.unit)
       "UPDATE dream_session SET expires_at = $1 WHERE id = $2" in
 
   fun (module Db : DB) (session : Session.session) ->
@@ -75,7 +79,8 @@ let refresh =
 
 let update =
   let query =
-    R.exec T.(tup2 string string)
+    let open Caqti_request.Infix in
+    (T.(t2 string string) ->. T.unit)
       "UPDATE dream_session SET payload = $1 WHERE id = $2" in
 
   fun (module Db : DB) (session : Session.session) ->
@@ -84,7 +89,9 @@ let update =
     Caqti_lwt.or_fail result
 
 let remove =
-  let query = R.exec T.string "DELETE FROM dream_session WHERE id = $1" in
+  let query =
+    let open Caqti_request.Infix in
+    (T.string ->. T.unit) "DELETE FROM dream_session WHERE id = $1"  in
 
   fun (module Db : DB) id ->
     let%lwt result = Db.exec query id in
@@ -120,6 +127,12 @@ let put request (session : Session.session) name value =
   |> fun dictionary -> session.payload <- dictionary;
   Sql.sql request (fun db -> update db session)
 
+let drop request (session : Session.session) name =
+  session.payload
+  |> List.remove_assoc name
+  |> fun dictionary -> session.payload <- dictionary;
+  Sql.sql request (fun db -> update db session)
+
 let invalidate request lifetime operations (session : Session.session ref) =
   Sql.sql request begin fun db ->
     let%lwt () = remove db !session.id in
@@ -132,6 +145,7 @@ let invalidate request lifetime operations (session : Session.session ref) =
 let operations request lifetime (session : Session.session ref) dirty =
   let rec operations = {
     Session.put = (fun name value -> put request !session name value);
+    drop = (fun name -> drop request !session name);
     invalidate = (fun () -> invalidate request lifetime operations session);
     dirty;
   } in
@@ -142,7 +156,7 @@ let load lifetime request =
     let now = Unix.gettimeofday () in
 
     let%lwt valid_session =
-      match Dream.cookie ~decrypt:false Session.session_cookie request with
+      match Cookie.cookie request ~decrypt:false Session.session_cookie with
       | None -> Lwt.return_none
       | Some id ->
         match Session.read_session_id id with
@@ -179,24 +193,23 @@ let load lifetime request =
   end
 
 let send (operations, session) request response =
-  if not operations.Session.dirty then
-    Lwt.return response
-  else
+  if operations.Session.dirty then begin
     let id = Session.version_session_id !session.Session.id in
     let max_age = !session.Session.expires_at -. Unix.gettimeofday () in
-    Lwt.return
-      (Dream.set_cookie
-        Session.session_cookie
-        id
-        request
-        response
-        ~encrypt:false
-        ~max_age)
+    Cookie.set_cookie
+      response
+      request
+      Session.session_cookie
+      id
+      ~encrypt:false
+      ~max_age
+  end;
+  Lwt.return response
 
 let back_end lifetime = {
   Session.load = load lifetime;
   send;
 }
 
-let middleware ?(lifetime = Session.two_weeks) =
+let sql_sessions ?(lifetime = Session.two_weeks) =
   Session.middleware (back_end lifetime)

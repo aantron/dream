@@ -592,7 +592,7 @@ let val_redirect_replacement = {|
 
 let stream_expected = {|<div class="spec value" id="val-stream">
  <a href="#val-stream" class="anchor"></a><code><span><span class="keyword">val</span> stream : <span>?status:<span>[&lt; <a href="#type-status">status</a> ]</span> <span class="arrow">-&gt;</span></span> <span>?code:int <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span>
-<span><span>(<span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
+<span>?close:bool <span class="arrow">-&gt;</span></span> <span><span>(<span><a href="#type-stream">stream</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
@@ -601,7 +601,8 @@ let stream_replacement = {|
   ?status:[&lt; <a href="#type-status">status</a> ] ->
   ?code:int ->
   ?headers:(string * string) list ->
-    (<a href="#type-response">response</a> -> unit <a href="#type-promise">promise</a>) -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+  ?close:bool ->
+    (<a href="#type-stream">stream</a> -> unit <a href="#type-promise">promise</a>) -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -618,30 +619,30 @@ let empty_replacement = {|
 |}
 
 let add_header_expected = {|<div class="spec value" id="val-add_header">
- <a href="#val-add_header" class="anchor"></a><code><span><span class="keyword">val</span> add_header : <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><span><span class="type-var">'a</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> <a href="#type-message">message</a></span></span></code>
+ <a href="#val-add_header" class="anchor"></a><code><span><span class="keyword">val</span> add_header : <span><span><span class="type-var">'a</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
 |}
 
 let add_header_replacement = {|
 <pre><span class="keyword">val</span> add_header :
-  string -> string -> 'a <a href="#type-message">message</a> -> 'a <a href="#type-message">message</a>
+  'a <a href="#type-message">message</a> -> string -> string -> unit
 |}
 
-let with_header_expected = {|<div class="spec value" id="val-with_header">
- <a href="#val-with_header" class="anchor"></a><code><span><span class="keyword">val</span> with_header : <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><span><span class="type-var">'a</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> <a href="#type-message">message</a></span></span></code>
+let set_header_expected = {|<div class="spec value" id="val-set_header">
+ <a href="#val-set_header" class="anchor"></a><code><span><span class="keyword">val</span> set_header : <span><span><span class="type-var">'a</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
 |}
 
-let with_header_replacement = {|
-<pre><span class="keyword">val</span> with_header :
-  string -> string -> 'a <a href="#type-message">message</a> -> 'a <a href="#type-message">message</a>
+let set_header_replacement = {|
+<pre><span class="keyword">val</span> set_header :
+  'a <a href="#type-message">message</a> -> string -> string -> unit
 |}
 
 let add_set_cookie_expected = {|<div class="spec value" id="val-set_cookie">
  <a href="#val-set_cookie" class="anchor"></a><code><span><span class="keyword">val</span> set_cookie : <span>?prefix:<span><span>[&lt; `Host <span>| `Secure</span> ]</span> option</span> <span class="arrow">-&gt;</span></span> <span>?encrypt:bool <span class="arrow">-&gt;</span></span>
 <span>?expires:float <span class="arrow">-&gt;</span></span> <span>?max_age:float <span class="arrow">-&gt;</span></span> <span>?domain:string <span class="arrow">-&gt;</span></span> <span>?path:<span>string option</span> <span class="arrow">-&gt;</span></span>
 <span>?secure:bool <span class="arrow">-&gt;</span></span> <span>?http_only:bool <span class="arrow">-&gt;</span></span> <span>?same_site:<span><span>[&lt; `Strict <span>| `Lax</span> <span>| `None</span> ]</span> option</span> <span class="arrow">-&gt;</span></span>
-<span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <a href="#type-response">response</a></span></code>
+<span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
 |}
 
@@ -656,12 +657,30 @@ let add_set_cookie_replacement = {|
   ?secure:bool ->
   ?http_only:bool ->
   ?same_site:[&lt; `Strict | `Lax | `None ] option -></span>
-    string -> string -> <a href="#type-request">request</a> -> <a href="#type-response">response</a> -> <a href="#type-response">response</a>
+    <a href="#type-response">response</a> -> <a href="#type-request">request</a> -> string -> string -> unit
+</pre>|}
+
+let drop_cookie_expected = {|<div class="spec value" id="val-drop_cookie">
+ <a href="#val-drop_cookie" class="anchor"></a><code><span><span class="keyword">val</span> drop_cookie : <span>?prefix:<span><span>[&lt; `Host <span>| `Secure</span> ]</span> option</span> <span class="arrow">-&gt;</span></span> <span>?domain:string <span class="arrow">-&gt;</span></span>
+<span>?path:<span>string option</span> <span class="arrow">-&gt;</span></span> <span>?secure:bool <span class="arrow">-&gt;</span></span> <span>?http_only:bool <span class="arrow">-&gt;</span></span>
+<span>?same_site:<span><span>[&lt; `Strict <span>| `Lax</span> <span>| `None</span> ]</span> option</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
+|}
+
+let drop_cookie_replacement = {|
+<pre><span class="keyword">val</span> drop_cookie :
+  <span class="optional">?prefix:[&lt; `Host | `Secure ] option ->
+  ?domain:string ->
+  ?path:string option ->
+  ?secure:bool ->
+  ?http_only:bool ->
+  ?same_site:[&lt; `Strict | `Lax | `None ] option -></span>
+    <a href="#type-response">response</a> -> <a href="#type-request">request</a> -> string -> unit
 </pre>|}
 
 let cookie_expected = {|<div class="spec value" id="val-cookie">
  <a href="#val-cookie" class="anchor"></a><code><span><span class="keyword">val</span> cookie : <span>?prefix:<span><span>[&lt; `Host <span>| `Secure</span> ]</span> option</span> <span class="arrow">-&gt;</span></span> <span>?decrypt:bool <span class="arrow">-&gt;</span></span>
-<span>?domain:string <span class="arrow">-&gt;</span></span> <span>?path:<span>string option</span> <span class="arrow">-&gt;</span></span> <span>?secure:bool <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string option</span></span></code>
+<span>?domain:string <span class="arrow">-&gt;</span></span> <span>?path:<span>string option</span> <span class="arrow">-&gt;</span></span> <span>?secure:bool <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string option</span></span></code>
 </div>
 |}
 
@@ -672,7 +691,7 @@ let cookie_replacement = {|
   ?domain:string ->
   ?path:string option ->
   ?secure:bool ->
-    string -> <a href="#type-request">request</a> -> string option
+    <a href="#type-request">request</a> -> string -> string option
 </pre>
 |}
 
@@ -688,34 +707,90 @@ let bigstring_replacement = {|
 </pre>
 |}
 
-let next_expected = {|<div class="spec value" id="val-next">
- <a href="#val-next" class="anchor"></a><code><span><span class="keyword">val</span> next : <span>buffer:<span>(<span><a href="#type-buffer">buffer</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>close:<span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>exn:<span>(<span>exn <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span>
-<span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> unit</span></code>
+let read_stream_expected = {|<div class="spec value" id="val-read_stream">
+ <a href="#val-read_stream" class="anchor"></a><code><span><span class="keyword">val</span> read_stream : <span><a href="#type-stream">stream</a> <span class="arrow">-&gt;</span></span> <span>data:<span>(<span><a href="#type-buffer">buffer</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>bool <span class="arrow">-&gt;</span></span> <span>bool <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>flush:<span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span>
+<span>ping:<span>(<span><a href="#type-buffer">buffer</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>pong:<span>(<span><a href="#type-buffer">buffer</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>close:<span>(<span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span>
+<span>exn:<span>(<span>exn <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
 |}
 
-let next_replacement = {|
-<pre><span class="keyword">val</span> next :
-  buffer:(<a href="#type-buffer">buffer</a> -> int -> int -> unit) ->
-  close:(unit -> unit) ->
+let read_stream_replacement = {|
+<pre><span class="keyword">val</span> read_stream :
+  <a href="#type-stream">stream</a> ->
+  data:(<a href="#type-buffer">buffer</a> -> int -> int -> bool -> bool -> unit) ->
+  flush:(unit -> unit) ->
+  ping:(<a href="#type-buffer">buffer</a> -> int -> int -> unit) ->
+  pong:(<a href="#type-buffer">buffer</a> -> int -> int -> unit) ->
+  close:(int -> unit) ->
   exn:(exn -> unit) ->
-  <a href="#type-request">request</a> ->
     unit
 </pre>
 |}
 
-let write_bigstring_expected = {|<div class="spec value" id="val-write_buffer">
- <a href="#val-write_buffer" class="anchor"></a><code><span><span class="keyword">val</span> write_buffer : <span>?offset:int <span class="arrow">-&gt;</span></span> <span>?length:int <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-buffer">buffer</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+let write_stream_expected = {|<div class="spec value" id="val-write_stream">
+ <a href="#val-write_stream" class="anchor"></a><code><span><span class="keyword">val</span> write_stream : <span><a href="#type-stream">stream</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-buffer">buffer</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>bool <span class="arrow">-&gt;</span></span> <span>bool <span class="arrow">-&gt;</span></span> <span>close:<span>(<span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span>
+<span>exn:<span>(<span>exn <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span><span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
 |}
 
-let write_bigstring_replacement = {|
-<pre><span class="keyword">val</span> write_buffer :
-  ?offset:int ->
-  ?length:int ->
-    <a href="#type-response">response</a> -> <a href="#type-buffer">buffer</a> -> unit <a href="#type-promise">promise</a>
-</pre>
+let write_stream_replacement = {|
+<pre><span class="keyword">val</span> write_stream :
+  <a href="#type-stream">stream</a> ->
+  <a href="#type-buffer">buffer</a> -> int -> int ->
+  bool -> bool ->
+  close:(int -> unit) ->
+  exn:(exn -> unit) ->
+  (unit -> unit) ->
+    unit
+</pre>|}
+
+let flush_stream_expected = {|<div class="spec value" id="val-flush_stream">
+ <a href="#val-flush_stream" class="anchor"></a><code><span><span class="keyword">val</span> flush_stream : <span><a href="#type-stream">stream</a> <span class="arrow">-&gt;</span></span> <span>close:<span>(<span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>exn:<span>(<span>exn <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span><span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
 |}
+
+let flush_stream_replacement = {|
+<pre><span class="keyword">val</span> flush_stream :
+  <a href="#type-stream">stream</a> ->
+  close:(int -> unit) ->
+  exn:(exn -> unit) ->
+  (unit -> unit) ->
+    unit
+</pre>|}
+
+let ping_stream_expected = {|<div class="spec value" id="val-ping_stream">
+ <a href="#val-ping_stream" class="anchor"></a><code><span><span class="keyword">val</span> ping_stream : <span><a href="#type-stream">stream</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-buffer">buffer</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>close:<span>(<span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>exn:<span>(<span>exn <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span>
+<span><span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
+|}
+
+let ping_stream_replacement = {|
+<pre>
+<span class="keyword">val</span> ping_stream :
+  <a href="#type-stream">stream</a> ->
+  <a href="#type-buffer">buffer</a> -> int -> int ->
+  close:(int -> unit) ->
+  exn:(exn -> unit) ->
+  (unit -> unit) ->
+    unit
+</pre>|}
+
+let pong_stream_expected = {|<div class="spec value" id="val-pong_stream">
+ <a href="#val-pong_stream" class="anchor"></a><code><span><span class="keyword">val</span> pong_stream : <span><a href="#type-stream">stream</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-buffer">buffer</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> <span>close:<span>(<span>int <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> <span>exn:<span>(<span>exn <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span>
+<span><span>(<span>unit <span class="arrow">-&gt;</span></span> unit)</span> <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
+|}
+
+let pong_stream_replacement = {|
+<pre>
+<span class="keyword">val</span> pong_stream :
+  <a href="#type-stream">stream</a> ->
+  <a href="#type-buffer">buffer</a> -> int -> int ->
+  close:(int -> unit) ->
+  exn:(exn -> unit) ->
+  (unit -> unit) ->
+    unit
+</pre>|}
 
 let form_expected = {|<div class="spec type" id="type-form_result">
  <a href="#type-form_result" class="anchor"></a><code><span><span class="keyword">type</span> <span>'a form_result</span></span><span> = </span><span>[ </span></code>
@@ -775,13 +850,14 @@ let form_replacement = {|
 |}
 
 let form'_expected = {|<div class="spec value" id="val-form">
- <a href="#val-form" class="anchor"></a><code><span><span class="keyword">val</span> form : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span><span><span>(string * string)</span> list</span> <a href="#type-form_result">form_result</a></span> <a href="#type-promise">promise</a></span></span></code>
+ <a href="#val-form" class="anchor"></a><code><span><span class="keyword">val</span> form : <span>?csrf:bool <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span><span><span>(string * string)</span> list</span> <a href="#type-form_result">form_result</a></span> <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let form'_replacement = {|
 <pre><span class="keyword">val</span> form :
-  <a href="#type-request">request</a> -> (string * string) list <a href="#type-form_result">form_result</a> <a href="#type-promise">promise</a>
+  ?csrf:bool ->
+    <a href="#type-request">request</a> -> (string * string) list <a href="#type-form_result">form_result</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -797,13 +873,14 @@ let multipart_form_replacement = {|
 |}
 
 let multipart_expected = {|<div class="spec value" id="val-multipart">
- <a href="#val-multipart" class="anchor"></a><code><span><span class="keyword">val</span> multipart : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span><a href="#type-multipart_form">multipart_form</a> <a href="#type-form_result">form_result</a></span> <a href="#type-promise">promise</a></span></span></code>
+ <a href="#val-multipart" class="anchor"></a><code><span><span class="keyword">val</span> multipart : <span>?csrf:bool <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span><a href="#type-multipart_form">multipart_form</a> <a href="#type-form_result">form_result</a></span> <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let multipart_replacement = {|
 <pre><span class="keyword">val</span> multipart :
-  <a href="#type-request">request</a> -> <a href="#type-multipart">multipart_form</a> <a href="#type-form_result">form_result</a> <a href="#type-promise">promise</a>
+  ?csrf:bool ->
+    <a href="#type-request">request</a> -> <a href="#type-multipart">multipart_form</a> <a href="#type-form_result">form_result</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -908,22 +985,6 @@ let verify_csrf_token_replacement = {|
 </pre>
 |}
 
-let form_tag_expected = {|<div class="spec value" id="val-form_tag">
- <a href="#val-form_tag" class="anchor"></a><code><span><span class="keyword">val</span> form_tag : <span>?method_:<span>[&lt; <a href="#type-method_">method_</a> ]</span> <span class="arrow">-&gt;</span></span> <span>?target:string <span class="arrow">-&gt;</span></span>
-<span>?enctype:<span>[&lt; `Multipart_form_data ]</span> <span class="arrow">-&gt;</span></span> <span>?csrf_token:bool <span class="arrow">-&gt;</span></span> <span>action:string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> string</span></code>
-</div>
-|}
-
-let form_tag_replacement = {|
-<pre><span class="keyword">val</span> form_tag :
-  ?method_:[&lt; <a href="#type-method_">method_</a> ] ->
-  ?target:string ->
-  ?enctype:[&lt; `Multipart_form_data ] ->
-  ?csrf_token:bool ->
-    action:string -> <a href="#type-request">request</a> -> string
-</pre>
-|}
-
 let scope_expected = {|<div class="spec value" id="val-scope">
  <a href="#val-scope" class="anchor"></a><code><span><span class="keyword">val</span> scope : <span>string <span class="arrow">-&gt;</span></span> <span><span><a href="#type-middleware">middleware</a> list</span> <span class="arrow">-&gt;</span></span> <span><span><a href="#type-route">route</a> list</span> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
 </div>
@@ -1019,39 +1080,100 @@ let static_replacement = {|
 </pre>
 |}
 
-let set_session_expected = {|<div class="spec value" id="val-put_session">
- <a href="#val-put_session" class="anchor"></a><code><span><span class="keyword">val</span> put_session : <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+let set_session_expected = {|<div class="spec value" id="val-set_session_field">
+ <a href="#val-set_session_field" class="anchor"></a><code><span><span class="keyword">val</span> set_session_field : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let set_session_replacement = {|
-<pre><span class="keyword">val</span> put_session :
-  string -> string -> <a href="#type-request">request</a> -> unit <a href="#type-promise">promise</a>
+<pre><span class="keyword">val</span> set_session_field :
+  <a href="#type-request">request</a> -> string -> string -> unit <a href="#type-promise">promise</a>
 </pre>
 |}
 
 let websocket_expected = {|<div class="spec value" id="val-websocket">
- <a href="#val-websocket" class="anchor"></a><code><span><span class="keyword">val</span> websocket : <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span> <span><span>(<span><a href="#type-websocket">websocket</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
+ <a href="#val-websocket" class="anchor"></a><code><span><span class="keyword">val</span> websocket : <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span> <span>?close:bool <span class="arrow">-&gt;</span></span> <span><span>(<span><a href="#type-websocket">websocket</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let websocket_replacement = {|
 <pre><span class="keyword">val</span> websocket :
   ?headers:(string * string) list ->
-  (<a href="#type-websocket">websocket</a> -> unit <a href="#type-promise">promise</a>) ->
-    <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+  ?close:bool ->
+    (<a href="#type-websocket">websocket</a> -> unit <a href="#type-promise">promise</a>) -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
+let text_or_binary_expected = {|<div class="spec type" id="type-text_or_binary">
+ <a href="#type-text_or_binary" class="anchor"></a><code><span><span class="keyword">type</span> text_or_binary</span><span> = </span><span>[ </span></code>
+ <table>
+  <tbody>
+   <tr id="type-text_or_binary.Text" class="anchored">
+    <td class="def constructor">
+     <a href="#type-text_or_binary.Text" class="anchor"></a><code><span>| </span></code><code><span>`Text</span></code>
+    </td>
+   </tr>
+   <tr id="type-text_or_binary.Binary" class="anchored">
+    <td class="def constructor">
+     <a href="#type-text_or_binary.Binary" class="anchor"></a><code><span>| </span></code><code><span>`Binary</span></code>
+    </td>
+   </tr>
+  </tbody>
+ </table>
+ <code><span> ]</span></code>
+</div>
+|}
+
+let text_or_binary_replacement = {|
+<pre class="compact"><span class="keyword">type</span> text_or_binary = [ `Text | `Binary ]</pre>
+|}
+
+let end_of_message_expected = {|<div class="spec type" id="type-end_of_message">
+ <a href="#type-end_of_message" class="anchor"></a><code><span><span class="keyword">type</span> end_of_message</span><span> = </span><span>[ </span></code>
+ <table>
+  <tbody>
+   <tr id="type-end_of_message.End_of_message" class="anchored">
+    <td class="def constructor">
+     <a href="#type-end_of_message.End_of_message" class="anchor"></a><code><span>| </span></code><code><span>`End_of_message</span></code>
+    </td>
+   </tr>
+   <tr id="type-end_of_message.Continues" class="anchored">
+    <td class="def constructor">
+     <a href="#type-end_of_message.Continues" class="anchor"></a><code><span>| </span></code><code><span>`Continues</span></code>
+    </td>
+   </tr>
+  </tbody>
+ </table>
+ <code><span> ]</span></code>
+</div>
+|}
+
+let end_of_message_replacement = {|
+<pre class="compact"><span class="keyword">type</span> end_of_message = [ `End_of_message | `Continues ]</pre>
+|}
+
 let send_expected = {|<div class="spec value" id="val-send">
- <a href="#val-send" class="anchor"></a><code><span><span class="keyword">val</span> send : <span>?kind:<span>[&lt; `Text <span>| `Binary</span> ]</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-websocket">websocket</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+ <a href="#val-send" class="anchor"></a><code><span><span class="keyword">val</span> send : <span>?text_or_binary:<span>[&lt; <a href="#type-text_or_binary">text_or_binary</a> ]</span> <span class="arrow">-&gt;</span></span> <span>?end_of_message:<span>[&lt; <a href="#type-end_of_message">end_of_message</a> ]</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-websocket">websocket</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
 
 let send_replacement = {|
 <pre><span class="keyword">val</span> send :
-  ?kind:[&lt; `Text | `Binary ] ->
+  ?text_or_binary:[&lt; <a href="#type-text_or_binary">text_or_binary</a> ] ->
+  ?end_of_message:[&lt; <a href="#type-end_of_message">end_of_message</a> ] ->
     <a href="#type-websocket">websocket</a> -> string -> unit <a href="#type-promise">promise</a>
+</pre>
+|}
+
+let receive_fragment_expected = {|<div class="spec value" id="val-receive_fragment">
+ <a href="#val-receive_fragment" class="anchor"></a><code><span><span class="keyword">val</span> receive_fragment : <span><a href="#type-websocket">websocket</a> <span class="arrow">-&gt;</span></span> <span><span><span>(string * <a href="#type-text_or_binary">text_or_binary</a> * <a href="#type-end_of_message">end_of_message</a>)</span> option</span> <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let receive_fragment_replacement = {|
+<pre><span class="keyword">val</span> receive_fragment :
+  <a href="#type-websocket">websocket</a> ->
+    (string * <a href="#type-text_or_binary">text_or_binary</a> * <a href="#type-end_of_message">end_of_message</a>) option <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -1229,13 +1351,13 @@ let initialize_log_replacement = {|
 </pre>|}
 
 let error_template_expected = {|<div class="spec value" id="val-error_template">
- <a href="#val-error_template" class="anchor"></a><code><span><span class="keyword">val</span> error_template : <span><span>(<span><a href="#type-error">error</a> <span class="arrow">-&gt;</span></span> <span><span>string option</span> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <a href="#type-error_handler">error_handler</a></span></code>
+ <a href="#val-error_template" class="anchor"></a><code><span><span class="keyword">val</span> error_template : <span><span>(<span><a href="#type-error">error</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-response">response</a> <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <a href="#type-error_handler">error_handler</a></span></code>
 </div>
 |}
 
 let error_template_replacement = {|
 <pre><span class="keyword">val</span> error_template :
-  (<a href="#type-error">error</a> -> string option -> <a href="#val-response">response</a> -> <a href="#val-response">response</a> <a href="#type-promise">promise</a>) ->
+  (<a href="#type-error">error</a> -> string -> <a href="#val-response">response</a> -> <a href="#val-response">response</a> <a href="#type-promise">promise</a>) ->
     <a href="#type-error_handler">error_handler</a>
 </pre>
 |}
@@ -1279,11 +1401,6 @@ let error_expected = {|<div class="spec type" id="type-error">
      <a href="#type-error.severity" class="anchor"></a><code><span>severity : <a href="#type-log_level">log_level</a>;</span></code>
     </td>
    </tr>
-   <tr id="type-error.debug" class="anchored">
-    <td class="def record field">
-     <a href="#type-error.debug" class="anchor"></a><code><span>debug : bool;</span></code>
-    </td>
-   </tr>
    <tr id="type-error.will_send_response" class="anchored">
     <td class="def record field">
      <a href="#type-error.will_send_response" class="anchor"></a><code><span>will_send_response : bool;</span></code>
@@ -1308,21 +1425,20 @@ let error_replacement = {|
   response  <span class="of">:</span> <a href="#type-response">response</a> option;
   client    <span class="of">:</span> string   option;
   severity  <span class="of">:</span> <a href="#type-log_level">log_level</a>;
-  debug     <span class="of">:</span> bool;
   will_send_response <span class="of">:</span> bool;
 }
 </pre>|}
 
-let new_local_expected = {|<div class="spec value" id="val-new_local">
- <a href="#val-new_local" class="anchor"></a><code><span><span class="keyword">val</span> new_local : <span>?name:string <span class="arrow">-&gt;</span></span> <span>?show_value:<span>(<span><span class="type-var">'a</span> <span class="arrow">-&gt;</span></span> string)</span> <span class="arrow">-&gt;</span></span> <span>unit <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> <a href="#type-local">local</a></span></span></code>
+let new_field_expected = {|<div class="spec value" id="val-new_field">
+ <a href="#val-new_field" class="anchor"></a><code><span><span class="keyword">val</span> new_field : <span>?name:string <span class="arrow">-&gt;</span></span> <span>?show_value:<span>(<span><span class="type-var">'a</span> <span class="arrow">-&gt;</span></span> string)</span> <span class="arrow">-&gt;</span></span> <span>unit <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> <a href="#type-field">field</a></span></span></code>
 </div>
 |}
 
-let new_local_replacement = {|
-<pre><span class="keyword">val</span> new_local :
+let new_field_replacement = {|
+<pre><span class="keyword">val</span> new_field :
   ?name:string ->
   ?show_value:('a -> string) ->
-    unit -> 'a <a href="#type-local">local</a>
+    unit -> 'a <a href="#type-field">field</a>
 </pre>
 |}
 
@@ -1339,9 +1455,8 @@ let new_global_replacement = {|
 |}
 
 let run_expected = {|<div class="spec value" id="val-run">
- <a href="#val-run" class="anchor"></a><code><span><span class="keyword">val</span> run : <span>?interface:string <span class="arrow">-&gt;</span></span> <span>?port:int <span class="arrow">-&gt;</span></span> <span>?stop:<span>unit <a href="#type-promise">promise</a></span> <span class="arrow">-&gt;</span></span> <span>?debug:bool <span class="arrow">-&gt;</span></span>
-<span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span> <span>?secret:string <span class="arrow">-&gt;</span></span> <span>?old_secrets:<span>string list</span> <span class="arrow">-&gt;</span></span> <span>?prefix:string <span class="arrow">-&gt;</span></span>
-<span>?https:bool <span class="arrow">-&gt;</span></span> <span>?certificate_file:string <span class="arrow">-&gt;</span></span> <span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?builtins:bool <span class="arrow">-&gt;</span></span>
+ <a href="#val-run" class="anchor"></a><code><span><span class="keyword">val</span> run : <span>?interface:string <span class="arrow">-&gt;</span></span> <span>?port:int <span class="arrow">-&gt;</span></span> <span>?stop:<span>unit <a href="#type-promise">promise</a></span> <span class="arrow">-&gt;</span></span> <span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span>
+<span>?tls:bool <span class="arrow">-&gt;</span></span> <span>?certificate_file:string <span class="arrow">-&gt;</span></span> <span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?builtins:bool <span class="arrow">-&gt;</span></span>
 <span>?greeting:bool <span class="arrow">-&gt;</span></span> <span>?adjust_terminal:bool <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> unit</span></code>
 </div>
 |}
@@ -1351,12 +1466,8 @@ let run_replacement = {|
   <span class="optional">?interface:string ->
   ?port:int ->
   ?stop:unit <a href="#type-promise">promise</a> ->
-  ?debug:bool ->
   ?error_handler:<a href="#type-error_handler">error_handler</a> ->
-  ?secret:string ->
-  ?old_secrets:string list ->
-  ?prefix:string ->
-  ?https:true ->
+  ?tls:bool ->
   ?certificate_file:string ->
   ?key_file:string ->
   ?builtins:bool ->
@@ -1366,9 +1477,8 @@ let run_replacement = {|
 </pre>|}
 
 let serve_expected = {|<div class="spec value" id="val-serve">
- <a href="#val-serve" class="anchor"></a><code><span><span class="keyword">val</span> serve : <span>?interface:string <span class="arrow">-&gt;</span></span> <span>?port:int <span class="arrow">-&gt;</span></span> <span>?stop:<span>unit <a href="#type-promise">promise</a></span> <span class="arrow">-&gt;</span></span> <span>?debug:bool <span class="arrow">-&gt;</span></span>
-<span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span> <span>?secret:string <span class="arrow">-&gt;</span></span> <span>?old_secrets:<span>string list</span> <span class="arrow">-&gt;</span></span> <span>?prefix:string <span class="arrow">-&gt;</span></span>
-<span>?https:bool <span class="arrow">-&gt;</span></span> <span>?certificate_file:string <span class="arrow">-&gt;</span></span> <span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?builtins:bool <span class="arrow">-&gt;</span></span>
+ <a href="#val-serve" class="anchor"></a><code><span><span class="keyword">val</span> serve : <span>?interface:string <span class="arrow">-&gt;</span></span> <span>?port:int <span class="arrow">-&gt;</span></span> <span>?stop:<span>unit <a href="#type-promise">promise</a></span> <span class="arrow">-&gt;</span></span> <span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span>
+<span>?tls:bool <span class="arrow">-&gt;</span></span> <span>?certificate_file:string <span class="arrow">-&gt;</span></span> <span>?key_file:string <span class="arrow">-&gt;</span></span> <span>?builtins:bool <span class="arrow">-&gt;</span></span>
 <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
 </div>
 |}
@@ -1378,12 +1488,8 @@ let serve_replacement = {|
   <span class="optional">?interface:string ->
   ?port:int ->
   ?stop:unit <a href="#type-promise">promise</a> ->
-  ?debug:bool ->
   ?error_handler:<a href="#type-error_handler">error_handler</a> ->
-  ?secret:string ->
-  ?old_secrets:string list ->
-  ?prefix:string ->
-  ?https:bool ->
+  ?tls:bool ->
   ?certificate_file:string ->
   ?key_string:string ->
   ?builtins:bool -></span>
@@ -1459,17 +1565,15 @@ let decrypt_replacement = {|
 |}
 
 let request_expected = {|<div class="spec value" id="val-request">
- <a href="#val-request" class="anchor"></a><code><span><span class="keyword">val</span> request : <span>?client:string <span class="arrow">-&gt;</span></span> <span>?method_:<span>[&lt; <a href="#type-method_">method_</a> ]</span> <span class="arrow">-&gt;</span></span> <span>?target:string <span class="arrow">-&gt;</span></span>
-<span>?version:<span>(int * int)</span> <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-request">request</a></span></code>
+ <a href="#val-request" class="anchor"></a><code><span><span class="keyword">val</span> request : <span>?method_:<span>[&lt; <a href="#type-method_">method_</a> ]</span> <span class="arrow">-&gt;</span></span> <span>?target:string <span class="arrow">-&gt;</span></span> <span>?headers:<span><span>(string * string)</span> list</span>
+<span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-request">request</a></span></code>
 </div>
 |}
 
 let request_replacement = {|
 <pre><span class="keyword">val</span> request :
-  <span class="optional">?client:string ->
-  ?method_:[&lt; <a href="#type-method_">method_</a> ] ->
+  <span class="optional">?method_:[&lt; <a href="#type-method_">method_</a> ] ->
   ?target:string ->
-  ?version:int * int ->
   ?headers:(string * string) list -></span>
     string -> <a href="#type-request">request</a>
 </pre>|}
@@ -1484,6 +1588,43 @@ let sort_headers_replacement = {|
   (string * string) list -> (string * string) list
 </pre>|}
 
+let message_expected = {|<div class="spec type" id="type-message">
+ <a href="#type-message" class="anchor"></a><code><span><span class="keyword">and</span> <span>'a message</span></span><span> = <span><span class="type-var">'a</span> <a href="../../dream-pure/Dream_pure/Message/index.html#type-message">Dream_pure.Message.message</a></span></span></code>
+</div>
+|}
+
+let message_replacement = {|
+<code><span><span class="keyword">and</span> 'a message</span></code>
+|}
+
+let client_expected' = {|<div class="spec type" id="type-client">
+ <a href="#type-client" class="anchor"></a><code><span><span class="keyword">and</span> client</span><span> = <a href="../../dream-pure/Dream_pure/Message/index.html#type-client">Dream_pure.Message.client</a></span></code>
+</div>
+|}
+
+let client_replacement' = {|
+<code><span><span class="keyword">and</span> client</span></code>
+|}
+
+let server_expected' = {|<div class="spec type" id="type-server">
+ <a href="#type-server" class="anchor"></a><code><span><span class="keyword">and</span> server</span><span> = <a href="../../dream-pure/Dream_pure/Message/index.html#type-server">Dream_pure.Message.server</a></span></code>
+</div>
+|}
+
+let server_replacement' = {|
+<code><span><span class="keyword">and</span> server</span></code>
+|}
+
+let set_secret_expected = {|<div class="spec value" id="val-set_secret">
+ <a href="#val-set_secret" class="anchor"></a><code><span><span class="keyword">val</span> set_secret : <span>?old_secrets:<span>string list</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-middleware">middleware</a></span></code>
+</div>
+|}
+
+let set_secret_replacement = {|
+<pre><span class="keyword">val</span> set_secret :
+  ?old_secrets:string list -> string -> <a href="#type-middleware">middleware</a>
+</pre>|}
+
 let pretty_print_signatures soup =
   let method_ = soup $ "#type-method_" in
   if_expected
@@ -1494,7 +1635,7 @@ let pretty_print_signatures soup =
       Soup.replace (method_ $ "> table") (Soup.parse method_replacement);
       Soup.add_class "multiline" method_);
 
-  let rewrite_status_group id expected replacement =
+  let rewrite_status_group ?(multiline = true) id expected replacement =
     let group = soup $ id in
     if_expected
       expected
@@ -1502,7 +1643,8 @@ let pretty_print_signatures soup =
       (fun () ->
         group $$ "> code" |> Soup.iter Soup.delete;
         Soup.replace (group $ "> table") (Soup.parse replacement);
-        Soup.add_class "multiline" group)
+        if multiline then
+          Soup.add_class "multiline" group)
   in
 
   rewrite_status_group
@@ -1600,7 +1742,7 @@ let pretty_print_signatures soup =
   in
 
   replace "#val-add_header" add_header_expected add_header_replacement;
-  multiline "#val-with_header" with_header_expected with_header_replacement;
+  multiline "#val-set_header" set_header_expected set_header_replacement;
 
   let add_set_cookie = soup $ "#val-set_cookie" in
   if_expected
@@ -1612,6 +1754,16 @@ let pretty_print_signatures soup =
         (Soup.parse add_set_cookie_replacement);
       Soup.add_class "multiline" add_set_cookie);
 
+  let drop_cookie = soup $ "#val-drop_cookie" in
+  if_expected
+    drop_cookie_expected
+    (fun () -> pretty_print drop_cookie)
+    (fun () ->
+      Soup.replace
+        (drop_cookie $ "> code")
+        (Soup.parse drop_cookie_replacement);
+      Soup.add_class "multiline" drop_cookie);
+
   multiline "#val-cookie" cookie_expected cookie_replacement;
 
   let bigstring = soup $ "#type-buffer" in
@@ -1621,23 +1773,6 @@ let pretty_print_signatures soup =
     (fun () ->
       Soup.replace (bigstring $ "> code") (Soup.parse bigstring_replacement);
       Soup.add_class "multiline" bigstring);
-
-  let next = soup $ "#val-next" in
-  if_expected
-    next_expected
-    (fun () -> pretty_print next)
-    (fun () ->
-      Soup.replace (next $ "> code") (Soup.parse next_replacement);
-      Soup.add_class "multiline" next);
-
-  let write_bigstring = soup $ "#val-write_buffer" in
-  if_expected
-    write_bigstring_expected
-    (fun () -> pretty_print write_bigstring)
-    (fun () ->
-      Soup.replace
-        (write_bigstring $ "> code") (Soup.parse write_bigstring_replacement);
-      Soup.add_class "multiline" write_bigstring);
 
   let form = soup $ "#type-form_result" in
   if_expected
@@ -1681,7 +1816,6 @@ let pretty_print_signatures soup =
     verify_csrf_token_expected
     verify_csrf_token_replacement;
 
-  multiline "#val-form_tag" form_tag_expected form_tag_replacement;
   multiline "#val-scope" scope_expected scope_replacement;
   replace "#val-get" get_expected get_replacement;
   replace "#val-post" post_expected post_replacement;
@@ -1692,7 +1826,8 @@ let pretty_print_signatures soup =
   replace "#val-patch" patch_expected patch_replacement;
   replace "#val-any" any_expected any_replacement;
   multiline "#val-static" static_expected static_replacement;
-  multiline "#val-put_session" set_session_expected set_session_replacement;
+  multiline "#val-set_session_field"
+    set_session_expected set_session_replacement;
   multiline "#val-websocket" websocket_expected websocket_replacement;
   multiline "#val-send" send_expected send_replacement;
   multiline "#val-close_websocket"
@@ -1756,8 +1891,7 @@ let pretty_print_signatures soup =
       Soup.replace (error $ "> table") (Soup.parse error_replacement);
       Soup.add_class "multiline" error);
 
-  multiline "#val-new_local" new_local_expected new_local_replacement;
-  multiline "#val-new_global" new_global_expected new_global_replacement;
+  multiline "#val-new_field" new_field_expected new_field_replacement;
 
   let run = soup $ "#val-run" in
   if_expected
@@ -1795,7 +1929,28 @@ let pretty_print_signatures soup =
       Soup.replace (request $ "> code") (Soup.parse request_replacement);
       Soup.add_class "multiline" request);
 
-  multiline "#val-sort_headers" sort_headers_expected sort_headers_replacement
+  multiline "#val-sort_headers" sort_headers_expected sort_headers_replacement;
+
+  replace "#type-message" message_expected message_replacement;
+  replace "#type-client" client_expected' client_replacement';
+  replace "#type-server" server_expected' server_replacement';
+
+  multiline "#val-read_stream" read_stream_expected read_stream_replacement;
+  multiline "#val-write_stream" write_stream_expected write_stream_replacement;
+  multiline "#val-flush_stream" flush_stream_expected flush_stream_replacement;
+  multiline "#val-ping_stream" ping_stream_expected ping_stream_replacement;
+  multiline "#val-pong_stream" pong_stream_expected pong_stream_replacement;
+
+  rewrite_status_group ~multiline:false
+    "#type-text_or_binary" text_or_binary_expected text_or_binary_replacement;
+  rewrite_status_group ~multiline:false
+    "#type-end_of_message" end_of_message_expected end_of_message_replacement;
+
+  multiline
+    "#val-receive_fragment"
+    receive_fragment_expected receive_fragment_replacement;
+
+  multiline "#val-set_secret" set_secret_expected set_secret_replacement
 
 let remove_stdlib soup =
   soup $$ ".xref-unresolved:contains(\"Stdlib\")" |> Soup.iter (fun element ->

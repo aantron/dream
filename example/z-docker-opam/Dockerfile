@@ -15,7 +15,7 @@ RUN opam exec -- dune build
 
 
 
-FROM alpine:3.12 as run
+FROM alpine:3.18.4 as run
 
 RUN apk add --update libev
 

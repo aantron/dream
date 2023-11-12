@@ -4,9 +4,10 @@
  (libraries
   caqti
   caqti-lwt
+  caqti-lwt.unix
   dream.cipher
-  dream.middleware
-  dream.pure
+  dream-pure
+  dream.server
   uri
   yojson)
  (preprocess (pps lwt_ppx))

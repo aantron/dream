@@ -13,8 +13,35 @@ let if_expected expected test f =
     f ()
   else begin
     Soup.write_file "actual" actual;
-    Printf.ksprintf failwith "Mismatch; wrote %s"
-      (Filename.concat (Sys.getcwd ()) "actual")
+    prerr_newline ();
+    prerr_newline ();
+    prerr_endline "Mismatch with expected initial HTML content.";
+    prerr_newline ();
+    prerr_endline
+      "The Dream docs build rewrites HTML emitted by odoc to make it neater.";
+    prerr_endline
+      "Each rewritten tag has an expected initial content for sanity checking.";
+
+    prerr_endline "The actual found content has been written to";
+    prerr_newline ();
+    prerr_endline ("  " ^ (Filename.concat (Sys.getcwd ()) "actual"));
+    prerr_newline ();
+
+    begin match String.split_on_char '\n' actual with
+    | [] -> ()
+    | first_line::_ ->
+      prerr_endline "Hint:";
+      prerr_newline ();
+      prerr_endline ("  " ^ first_line);
+      prerr_newline ()
+    end;
+
+    prerr_endline "Hint: make sure odoc 2.0.2 is installed.";
+    prerr_endline
+      "Other versions of odoc generate markup that doesn't match the expected.";
+    prerr_newline ();
+
+    Printf.ksprintf failwith "Mismatch"
   end
 
 let add_backing_lines soup =

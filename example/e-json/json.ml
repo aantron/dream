@@ -1,3 +1,5 @@
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
+
 type message_object = {
   message : string;
 } [@@deriving yojson]
@@ -23,4 +25,3 @@ let () =
         |> Dream.json);
 
   ]
-  @@ Dream.not_found

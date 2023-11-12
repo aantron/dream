@@ -1,5 +1,5 @@
 let () =
-  Dream.run ~debug:true
+  Dream.run ~error_handler:Dream.debug_error_handler
   @@ Dream.logger
   @@ Dream.router [
 
@@ -12,4 +12,3 @@ let () =
         raise (Failure "The Web app failed!"));
 
   ]
-  @@ Dream.not_found

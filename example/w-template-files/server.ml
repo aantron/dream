@@ -5,9 +5,8 @@ let () =
 
     Dream.get "/:word"
       (fun request ->
-        Dream.param "word" request
+        Dream.param request "word"
         |> Template.render
         |> Dream.html);
 
   ]
-  @@ Dream.not_found

@@ -60,6 +60,47 @@
   src: url('tenor-sans-v12-latin-regular.woff2') format('woff2');
 }
 
+/* Theme */
+
+/* Dark theme (default) */
+:root, body:not([data-theme="light"]) {
+  --bg-color: #131618;
+  --text-color: #c9d1d9;
+  --code-bg-color: #2c333b;
+  --border-color: #282828;
+  --link-color: #8dc5ff;
+  --external-link-color: #5d7fcd;
+  --anchor-color: #bfcdea;
+
+  --of-color: #bec5cd;
+  --target-backing-color: #390022;
+
+  --hljs-keyword-color: #ff6c9b;
+  --hljs-identifier-color: #70df5c;
+  --hljs-tag-color: #c28eff;
+  --hljs-string-color: #e3db7a;
+}
+
+/* Light theme */
+:root, body[data-theme="light"] {
+  --bg-color: #f5f7fa;
+  --text-color: #1f2937;
+  --code-bg-color: #eef1f6;
+  --header-bg-color: #f5f7fa;
+  --border-color: #e0e0e0;
+  --link-color: #1c7ed6;
+  --external-link-color: #1d4ed8;
+  --anchor-color: #888;
+
+  --of-color: #6b7280;
+  --target-backing-color: #f7f6f3;
+
+  --hljs-keyword-color: #d94879;
+  --hljs-identifier-color: #22863a;
+  --hljs-tag-color: #6f42c1;
+  --hljs-string-color: #b94e48;
+}
+
 body {
   font-family: Lato, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
   font-size: 16px;
@@ -101,15 +142,15 @@ h6 {
 /* Colors and presentation styles. */
 
 body {
-  background-color: #131618;
-  color: #c9d1d9;
+  background-color: var(--bg-color);
+  color: var(--text-color);
 }
 
 .odoc-content pre {
-  background-color: #1a1f26;
+  background-color: var(--code-bg-color);
   margin-left: 1em;
   margin-right: 1em;
-  border: 1px solid #111;
+  border: 1px solid var(--border-color);
 }
 .odoc-content .spec > pre {
   background: none;
@@ -119,7 +160,7 @@ body {
 
 .odoc-content code {
   /* color: #ddd; */
-  background-color: #2c333b;
+  background-color: var(--code-bg-color);
   padding: 0 5px;
   margin: 0 1px;
   white-space: nowrap;
@@ -150,17 +191,40 @@ body {
 } */
 
 header {
-  background-color: #131618;
-  border-bottom: 1px solid #282828;
+  background-color: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 header .topmost {
   /* background-color: #0f131a; */
-  border-bottom: 1px solid #282828;
+  border-bottom: 1px solid var(--border-color);
 }
 
-h1 {
-  text-shadow: -2px 2px black;
+.topmost .toolbar {
+  float: right;
+}
+
+.topmost .toggle-theme-btn {
+  all: unset;
+  position: relative;
+}
+
+.topmost .toggle-theme-btn::before {
+  content: "\F186"; /* moon */
+  position: absolute;
+  left: calc(0% - 16px + -8px);
+  top: calc(0% + 4px);
+  width: 16px;
+  height: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: FontAwesome, FontAwesomeBrands;
+  font-size: 15px;
+}
+
+body:not([data-theme="light"]) .topmost .toggle-theme-btn::before {
+  content: "\F185"; /* sun */
 }
 
 header pre {
@@ -191,7 +255,7 @@ footer {
 }
 
 :target .backing {
-  background-color: #390022;
+  background-color: var(--target-backing-color);
 }
 
 nav ~ * a[href="#builtin"],
@@ -214,7 +278,7 @@ a[href^=http]::after {
   font-family: FontAwesome;
   font-size: 10px;
   line-height: 18px;
-  color: #5d7fcd;
+  color: var(--external-link-color);
   position: relative;
   top: -1px;
   margin-left: 2px;
@@ -225,7 +289,7 @@ a[href^=http]::after {
 }
 
 a, a:visited, a:active {
-  color: #8dc5ff;
+  color: var(--link-color);
   text-decoration: none;
 }
 
@@ -234,27 +298,27 @@ a:hover {
 }
 
 .odoc-content a > code {
-  color: #8dc5ff;
+  color: var(--link-color);
 }
 
 .hljs-module-access, .hljs-keyword, .keyword {
-  color: #ff6c9b;
+  color: var(--hljs-keyword-color);
 }
 
 .hljs-identifier, .hljs-literal, .hljs-type {
-  color: #70df5c;
+  color: var(--hljs-identifier-color);
 }
 
 .hljs-tag {
-  color: #c28eff;
+  color: var(--hljs-tag-color);
 }
 
 .hljs-string {
-  color: #e3db7a;
+  color: var(--hljs-string-color);
 }
 
 .of {
-  color: #bec5cd;
+  color: var(--of-color);
 }
 
 .topmost ul {
@@ -407,7 +471,7 @@ ul ul li {
     height: 100%;
     width: 43rem;
     /* background-color: #262626; */
-    border-right: 1px solid #282828;
+    border-right: 1px solid var(--border-color);
   }
 
   h2, h2 ~ :not(.odoc-spec):not(nav), footer {
@@ -462,8 +526,8 @@ ul ul li {
     margin-bottom: 24px;
   }
 
-  #type-outgoing + .spec-doc {
-    margin-top: -1.5rem;
+  #type-server + .spec-doc {
+    margin-top: -26px;
     margin-bottom: 48px;
   }
   #val-patch + .spec-doc {
@@ -582,8 +646,8 @@ h2:first-of-type {
     overflow-y: scroll;
     scrollbar-width: none;
     line-height: 30px;
-    border-right: 1px solid #262626;
-    background-color: #131618;
+    border-right: 1px solid var(--border-color);
+    background-color: var(--bg-color);
     /* color: #ddd; */
   }
   .odoc-toc::-webkit-scrollbar {
@@ -674,7 +738,7 @@ h2 > .anchor, h3 > .anchor {
   font-family: FontAwesome;
   font-size: 10px;
   font-style: oblique;
-  color: #bfcdea;
+  color: var(--anchor-color);
   position: relative;
   top: -1.75px;
   left: -4px;

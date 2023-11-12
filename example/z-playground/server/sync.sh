@@ -8,7 +8,7 @@ DIR=playground/example/z-playground
 
 rsync -v $HOST:$DIR/package-lock.json $HOST:$DIR/opam-switch . || true
 rsync -rlv --exclude node_modules \
-  ../../dream.opam ../../dune-project ../../src $HOST:playground
+  ../../dream*.opam ../../dune-project ../../src $HOST:playground
 ssh $HOST "mkdir -p $DIR"
 rsync -rlv . $HOST:$DIR
 
@@ -49,17 +49,18 @@ example h-sql
 example i-graphql
 example j-stream
 example k-websocket
-example w-graphql-subscription
-example w-flash
-example w-content-security-policy
-example w-long-polling
-example w-multipart-dump
 example w-query
-example w-server-sent-events
-example w-template-stream
+example w-flash
 example w-tyxml
-example w-upload-stream
 example w-chat
+example w-graphql-subscription
+example w-long-polling
+example w-server-sent-events
+example w-template-logic
+example w-template-stream
+example w-upload-stream
+example w-content-security-policy
+example w-multipart-dump
 touch ./sync-temp/sandbox/w-tyxml/no-eml
 mv ./sync-temp/sandbox/w-tyxml/server.eml.ml \
   ./sync-temp/sandbox/w-tyxml/server.ml
@@ -76,6 +77,7 @@ function example_re {
 }
 example_re r-hello
 example_re r-template
+example_re r-template-logic
 example_re r-template-stream
 example_re r-graphql
 example_re r-tyxml
@@ -97,7 +99,8 @@ set +x
 
 echo
 echo "If this is the first sync, run as playground@$HOST in ~/playground:"
-echo "  opam install --deps-only ."
+echo "  opam install --deps-only ./dream-pure.opam ./dream-httpaf.opam ./dream.opam"
+echo "  cd example/z-playground/"
 echo "  opam switch export opam-switch"
 echo "  npm install"
 echo "Then, as root@$HOST:"

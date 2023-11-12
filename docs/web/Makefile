@@ -4,7 +4,7 @@ ODOC := odoc/default/_doc/_html
 .PHONY : build
 build :
 	dune build @doc --root $(ROOT) --no-print-directory --build-dir `pwd`/odoc \
-	  --only-packages dream
+	  --only-packages dream-pure,dream-httpaf,dream
 	rm -f site/index.html
 	dune exec -- postprocess/index.exe \
 	  $(ODOC)/dream/Dream/index.html site/index.html

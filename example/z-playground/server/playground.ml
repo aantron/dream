@@ -41,7 +41,7 @@ let sandbox_dune_no_eml = {|(executable
  (preprocess (pps lwt_ppx ppx_yojson_conv tyxml-jsx tyxml-ppx)))
 |}
 
-let base_dockerfile = {|FROM ubuntu:focal-20210416
+let base_dockerfile = {|FROM ubuntu:jammy-20230425
 RUN apt update && apt install -y openssl libev4 libsqlite3-0
 WORKDIR /www
 COPY db.sqlite db.sqlite
@@ -500,7 +500,7 @@ let () =
 
   (* Start the Web server. *)
   let playground_handler request =
-    let sandbox = Dream.param "id" request in
+    let sandbox = Dream.param request "id" in
     match validate_id sandbox with
     | false -> Dream.empty `Not_Found
     | true ->
@@ -533,7 +533,7 @@ let () =
        nice error handling here, because a valid client won't trigger them. If
        they occur, they are harmless to the server. *)
     Dream.get "/socket" (fun request ->
-      match Dream.query "sandbox" request with
+      match Dream.query request "sandbox" with
       | None -> Dream.empty `Bad_Request
       | Some sandbox ->
       match validate_id sandbox with
@@ -555,8 +555,7 @@ let () =
     Dream.get "/:id" playground_handler;
     Dream.get "/:id/**" playground_handler;
 
-  ]
-  @@ Dream.not_found;
+  ];
 
   Dream.log "Killing all containers";
   Sys.command "docker kill $(docker ps -q)" |> ignore;

@@ -36,7 +36,6 @@ let () =
         Dream.empty `Bad_Request);
 
   ]
-  @@ Dream.not_found
 ```
 
 In addition, we now link with `caqti-driver-postgres` instead of

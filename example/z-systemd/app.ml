@@ -4,4 +4,3 @@ let () =
   @@ Dream.router [
     Dream.get "/" (fun _ -> Dream.html "Dream started by systemd!");
   ]
-  @@ Dream.not_found

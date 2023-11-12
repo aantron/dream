@@ -1,0 +1,34 @@
+(library
+ (public_name dream.server)
+ (name dream__server)
+ (libraries
+  digestif
+  dream.cipher
+  dream-pure
+  fmt
+  lambdasoup
+  logs
+  lwt
+  magic-mime
+  markup
+  mirage-clock
+  multipart_form
+  multipart_form-lwt
+  ptime
+  unstrctrd
+  uri
+  yojson
+ )
+ (preprocess (pps lwt_ppx))
+ (instrumentation (backend bisect_ppx)))
+
+(rule
+ (targets error_template.ml)
+ (deps error_template.eml.ml)
+ (action
+  (run %{bin:dream_eml} %{deps} --workspace %{workspace_root})))
+
+(rule
+ (targets tag.ml)
+ (deps tag.eml.ml)
+ (action (run dream_eml %{deps} --workspace %{workspace_root})))

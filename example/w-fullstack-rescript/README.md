@@ -39,7 +39,6 @@ let () =
       (Dream.static "./static");
 
   ]
-  @@ Dream.not_found
 ```
 
 ...and the rest of the message in the client,
@@ -59,7 +58,7 @@ let () = {
 
     let p = document |> Document.createElement("p")
     p->Element.setInnerText(text)
-    body |> Element.appendChild(p)
+    body |> Element.appendChild(~child=p)
   }
 }
 ```

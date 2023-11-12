@@ -5,4 +5,3 @@ let () =
     Dream.get "/" (fun _ ->
       Dream.html "Dream started by Docker Compose, built with esy!");
   ]
-  @@ Dream.not_found

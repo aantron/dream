@@ -4,4 +4,3 @@ let () =
   @@ Dream.router([
     Dream.get("/", _ => Dream.html(Playground.welcome)),
   ])
-  @@ Dream.not_found

@@ -1,21 +1,16 @@
-version = 0.19.0
+version = 0.25.1
 profile = conventional
 
 leading-nested-match-parens = false
-align-constructors-decl = true
-align-variants-decl = true
 space-around-variants = false
 space-around-arrays = false
 space-around-lists = false
 space-around-records = false
-break-before-in = auto
 break-infix = fit-or-vertical
 break-separators = after
-space-around-records = true
-break-cases = all
+break-cases = fit-or-vertical
 cases-exp-indent = 2
 exp-grouping = preserve
-nested-match = align
 if-then-else = fit-or-vertical
 let-and = sparse
 type-decl = sparse

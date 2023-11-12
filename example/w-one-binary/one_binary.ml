@@ -9,4 +9,3 @@ let () =
   @@ Dream.router [
     Dream.get "/assets/**" (Dream.static ~loader "")
   ]
-  @@ Dream.not_found

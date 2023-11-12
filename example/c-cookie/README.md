@@ -6,20 +6,21 @@ Let's [set our own cookie](https://aantron.github.io/dream/#cookies):
 
 ```ocaml
 let () =
-  Dream.run ~secret:"foo"
+  Dream.run
+  @@ Dream.set_secret "foo"
   @@ Dream.logger
   @@ fun request ->
 
-    match Dream.cookie "ui.language" request with
+    match Dream.cookie request "ui.language" with
     | Some value ->
       Printf.ksprintf
         Dream.html "Your preferred language is %s!" (Dream.html_escape value)
 
     | None ->
-      Dream.response "Set language preference; come again!"
-      |> Dream.add_header "Content-Type" Dream.text_html
-      |> Dream.set_cookie "ui.language" "ut-OP" request
-      |> Lwt.return
+      let response = Dream.response "Set language preference; come again!" in
+      Dream.add_header response "Content-Type" Dream.text_html;
+      Dream.set_cookie response request "ui.language" "ut-OP";
+      Lwt.return response
 ```
 
 <pre><code><b>$ cd example/c-cookie</b>
@@ -42,7 +43,9 @@ That's because it access certain fields of the request to set some fairly
 aggressive security defaults:
 
 - Cookie encryption, for which it accesses the encryption key. This is why we
-  passed `~secret` to [`Dream.run`](https://aantron.github.io/dream/#val-run).
+  used the
+  [`Dream.set_secret`](https://aantron.github.io/dream/#val-set_secret)
+  middleware.
 - Whether the request likely came through an HTTPS connection, to set the
   [`Secure`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#restrict_access_to_cookies)
   attribute.

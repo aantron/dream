@@ -10,19 +10,16 @@ by default. To use,
 <b>$ npx esy start</b>
 <b>$ curl http://localhost:8080 > /dev/null &</b></code></pre>
 
-The `curl` command can be repeated for multiple concurrent clients.
+The `curl` command can be repeated for multiple concurrent clients, to check
+fairness or other effects.
+
+The URL supports query parameters: `?mb=16384` sets the total number of
+megabytes to respond with (16 GB in this case), and `?chunk=128` changes the
+chunk size used during writing (128 KB in this case).
 
 <br>
 
-Writing currently slows down for very large streams. This is likely due to the
-lack of server-side flow control for writers, which probably causes allocation
-of huge internal buffers, which first triggers needless GC, and eventually page
-thrashing at the virtual memory level.
-[#34](https://github.com/aantron/dream/issues/34) should address this in one of
-the early releases of Dream.
-
-Nonetheless, for smaller streams, unoptimized Dream is able to peak out at
-about 8 Gbits/s, which is more than one curl client can handle (2 Gbits/s).
+Dream is currently able to peak out on my machine at about 10 Gbit/s.
 
 <br>
 

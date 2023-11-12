@@ -31,7 +31,6 @@ let () =
       (fun _ -> Dream.html (html_to_string (greet "world")));
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/w-tyxml</b>
@@ -110,4 +109,4 @@ this, please [open an issue](https://github.com/aantron/dream/issues).
 
 <br>
 
-[Up to the tutorial index](../#examples)
+[Up to the example index](../#examples)

@@ -24,6 +24,10 @@
 </head>
 <body class="index">
 
+<script>
+init_theme();
+</script>
+
 <header>
   <div class="topmost">
     <div class="titles">
@@ -32,11 +36,15 @@
     </div>
 
     <ul>
-      <li><code>1.0.0~alpha3~master</code></li>
+      <li><code>1.0.0~alpha5</code></li>
       <li><code>opam install dream</code></li>
       <li><a target="_blank" rel="noreferrer noopener" href="https://github.com/aantron/dream">GitHub</a></li>
       <li><a target="_blank" rel="noreferrer noopener" href="https://github.com/aantron/dream/blob/master/src/dream.mli">Edit these docs</a></li>
     </ul>
+
+    <div class="toolbar">
+      <button class="toggle-theme-btn">&nbsp;</button>
+    </div>
   </div>
 
   <pre><span class="keyword">let</span> hello who =
@@ -52,8 +60,7 @@
   @@ <span class="hljs-type">Dream</span>.router <span class="hljs-string">[</span>
     <span class="hljs-type">Dream</span>.get <span class="hljs-string">"/"</span> (<span class="keyword">fun</span> _ ->
       <span class="hljs-type">Dream</span>.html (hello <span class="hljs-string">"world"</span>));
-  <span class="hljs-string">]</span>
-  @@ <span class="hljs-type">Dream</span>.not_found</pre>
+  <span class="hljs-string">]</span></pre>
 
   <!-- Send TLS link to HTTPS example. -->
 

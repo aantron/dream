@@ -1,5 +1,7 @@
 opam-version: "2.0"
 
+synopsis: "Dream playground runtime"
+maintainer: "Anton Bachin <antonbachin@yahoo.com>"
 depends: [
   "dream"
   "dune" {>= "2.0.0"}

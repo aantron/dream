@@ -38,7 +38,6 @@ let () =
         !successful !failed));
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/5-promise</b>

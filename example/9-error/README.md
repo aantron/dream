@@ -10,28 +10,21 @@ an `error_handler` is to call
 [`Dream.error_template`](https://aantron.github.io/dream/#val-error_template):
 
 ```ocaml
-let my_error_template debug_info suggested_response =
+let my_error_template _error debug_info suggested_response =
   let status = Dream.status suggested_response in
   let code = Dream.status_to_int status
   and reason = Dream.status_to_string status in
 
-  suggested_response
-  |> Dream.with_header "Content-Type" Dream.text_html
-  |> Dream.with_body begin
+  Dream.set_header suggested_response "Content-Type" Dream.text_html;
+  Dream.set_body suggested_response begin
     <html>
     <body>
       <h1><%i code %> <%s reason %></h1>
-
-%     begin match debug_info with
-%     | None -> ()
-%     | Some debug_info ->
-        <pre><%s debug_info %></pre>
-%     end;
-
+      <pre><%s debug_info %></pre>
     </body>
     </html>
-  end
-  |> Lwt.return
+  end;
+  Lwt.return suggested_response
 
 let () =
   Dream.run ~error_handler:(Dream.error_template my_error_template)
@@ -49,12 +42,6 @@ Try it in the [playground](http://dream.as/9-error).
 
 We kept the error template simple for the sake of the example, but this is
 where you'd put in neat graphics to make a beautiful error page!
-
-This app doesn't show debug information by default. However, try adding
-`~debug:true` to [`Dream.run`](https://aantron.github.io/dream/#val-run),
-rebuilding the app, and accessing it again. You will see the same kind of output
-as in example [**`8-debug`**](../8-debug#files), but now you control its
-placement and styling.
 
 <br>
 
@@ -77,10 +64,8 @@ including return a completely new response.
 
 <br>
 
-`debug_info` is `None` by default. If you passed `~debug:true` to
-[`Dream.run`](https://aantron.github.io/dream/#val-run), it is `Some` of a
-string that contains the debug info that we saw in the previous example,
-[**`8-debug`**](../8-debug#files).
+`debug_info` is a multiline string containing the same information as in the
+previous example, [**`8-debug`**](../8-debug#files).
 
 <!-- TODO Images of the generated pages. -->
 
@@ -88,8 +73,9 @@ string that contains the debug info that we saw in the previous example,
 
 If you don't customize the error handler, Dream defaults to sending only empty
 responses, so that your application can be fully localization-friendly &mdash;
-even at the lowest levels. This is also in accordance with the [OWASP Error
-Handling Cheat
+even at the lowest levels. Rather than leaking hardcoded English strings, Dream
+relies on the user's browser to display its own built-in, localized error pages.
+This choice is also in accordance with the [OWASP Error Handling Cheat
 Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html).
 
 <br>

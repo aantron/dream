@@ -6,15 +6,16 @@
   bigstringaf
   digestif
   dream.cipher
-  dream.localhost
-  dream.middleware
-  dream.pure
-  dream.h2
-  dream.httpaf
+  dream.server
+  dream.certificate
+  dream-pure
+  dream-httpaf.dream-h2
   lwt
-  dream-mirage.paf
-  dream-mirage.paf.alpn
-  dream-mirage.paf.mirage
+  rresult
+  tcpip
+  dream-mirage.dream-paf
+  dream-mirage.dream-paf.alpn
+  dream-mirage.dream-paf.mirage
  )
  (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

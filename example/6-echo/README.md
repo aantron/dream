@@ -18,7 +18,6 @@ let () =
         body);
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/6-echo</b>

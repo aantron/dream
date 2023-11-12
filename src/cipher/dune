@@ -3,6 +3,7 @@
  (name dream__cipher)
  (libraries
   cstruct
+  dream-pure
   mirage-crypto
   mirage-crypto-rng
  )

@@ -15,10 +15,15 @@ _esy/
 esy.lock
 
 # Release script
-dream-*
+dream-*.gz
+dream-*/
 
 # Bisect_ppx
 _coverage/
 
 # Humans
 scratch/
+
+# Editors
+.vscode/
+*.swp

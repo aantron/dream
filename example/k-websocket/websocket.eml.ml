@@ -31,10 +31,8 @@ let () =
         Dream.websocket (fun websocket ->
           match%lwt Dream.receive websocket with
           | Some "Hello?" ->
-            let%lwt () = Dream.send websocket "Good-bye!" in
-            Dream.close_websocket websocket
+            Dream.send websocket "Good-bye!"
           | _ ->
             Dream.close_websocket websocket));
 
   ]
-  @@ Dream.not_found

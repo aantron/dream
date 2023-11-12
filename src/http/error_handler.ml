@@ -5,7 +5,18 @@
 
 
 
-module Dream = Dream__pure.Inmost
+module Httpaf = Dream_httpaf_.Httpaf
+module H2 = Dream_h2.H2
+module Websocketaf = Dream_websocketaf.Websocketaf
+
+module Catch = Dream__server.Catch
+module Error_template = Dream__server.Error_template
+module Method = Dream_pure.Method
+module Helpers = Dream__server.Helpers
+module Log = Dream__server.Log
+module Message = Dream_pure.Message
+module Status = Dream_pure.Status
+module Stream = Dream_pure.Stream
 
 
 
@@ -15,7 +26,7 @@ module Dream = Dream__pure.Inmost
    an app. *)
 
 let log =
-  Dream__middleware.Log.sub_log "dream.http"
+  Log.sub_log "dream.http"
 
 let select_log = function
   | `Error -> log.error
@@ -25,14 +36,14 @@ let select_log = function
 
 
 
-let dump (error : Dream.error) =
+let dump (error : Catch.error) =
   let buffer = Buffer.create 4096 in
   let p format = Printf.bprintf buffer format in
 
   begin match error.condition with
   | `Response response ->
-    let status = Dream.status response in
-    p "%i %s\n" (Dream.status_to_int status) (Dream.status_to_string status)
+    let status = Message.status response in
+    p "%i %s\n" (Status.status_to_int status) (Status.status_to_string status)
 
   | `String "" ->
     p "(Library error without description payload)\n"
@@ -43,7 +54,7 @@ let dump (error : Dream.error) =
   | `Exn exn ->
     let backtrace = Printexc.get_backtrace () in
     p "%s\n" (Printexc.to_string exn);
-    backtrace |> Dream__middleware.Log.iter_backtrace (p "%s\n")
+    backtrace |> Log.iter_backtrace (p "%s\n")
   end;
 
   p "\n";
@@ -83,29 +94,21 @@ let dump (error : Dream.error) =
   begin match error.request with
   | None -> ()
   | Some request ->
-    let last = Dream.last request in
+    p "\n\n%s %s"
+      (Method.method_to_string (Message.method_ request))
+      (Message.target request);
 
-    let major, minor = Dream.version last in
-    p "\n\n%s %s HTTP/%i.%i"
-      (Dream.method_to_string (Dream.method_ last))
-      (Dream.target last)
-      major minor;
-
-    Dream.all_headers last
+    Message.all_headers request
     |> List.iter (fun (name, value) -> p "\n%s: %s" name value);
 
-    let show_variables kind =
-      kind (fun name value first ->
-        if first then
-          p "\n";
-        p "\n%s: %s" name value;
-        false)
-        true
-        request
-      |> ignore
-    in
-    show_variables Dream.fold_locals;
-    show_variables Dream.fold_globals
+    Message.fold_fields (fun name value first ->
+      if first then
+        p "\n";
+      p "\n%s: %s" name value;
+      false)
+      true
+      request
+    |> ignore
   end;
 
   Buffer.contents buffer
@@ -113,11 +116,11 @@ let dump (error : Dream.error) =
 (* TODO LATER Some library is registering S-exp-based printers for expressions,
    which are calling functions that use exceptions during parsing, which are
    clobbering the backtrace. *)
-let customize template (error : Dream.error) =
+let customize template (error : Catch.error) =
 
   (* First, log the error. *)
 
-  let log_handler condition (error : Dream.error)  =
+  let log_handler condition (error : Catch.error) =
      let client =
        match error.client with
        | None -> ""
@@ -145,18 +148,20 @@ let customize template (error : Dream.error) =
 
      select_log error.severity (fun log ->
        log ?request:error.request "%s" message);
-     backtrace |> Dream__middleware.Log.iter_backtrace (fun line ->
+     backtrace |> Log.iter_backtrace (fun line ->
        select_log error.severity (fun log ->
          log ?request:error.request "%s" line))
   in
+
   begin match error.condition with
   | `Response _ -> ()
-  (* TODO is this the right place to handle lower level connection resets? *)
+  (* TODO Is this the right place to handle lower level connection resets? *)
   | `Exn (Unix.Unix_error (Unix.ECONNRESET, _, _)) ->
-     let condition = `String "Connection Reset at Client" in
-     let severity = `Info in
-     log_handler condition {error with condition; severity}
-  | `String _ | `Exn _ as condition -> log_handler condition error
+    let condition = `String "Connection Reset at Client" in
+    let severity = `Info in
+    log_handler condition {error with condition; severity}
+  | `String _ | `Exn _ as condition ->
+    log_handler condition error
   end;
 
   (* If Dream will not send a response for this error, we are done after
@@ -167,11 +172,7 @@ let customize template (error : Dream.error) =
     Lwt.return_none
 
   else
-    let debug_dump =
-      match error.debug with
-      | false -> None
-      | true -> Some (dump error)
-    in
+    let debug_dump = dump error in
 
     let response =
       match error.condition with
@@ -182,35 +183,33 @@ let customize template (error : Dream.error) =
           | `Server -> `Internal_Server_Error
           | `Client -> `Bad_Request
         in
-        Dream.response ~status ""
+        Message.response ~status Stream.empty Stream.null
     in
 
     (* No need to catch errors when calling the template, because every call
        site of the error handler already has error handlers for catching double
        faults. *)
-    response
-    |> template error debug_dump
-    |> Lwt.map (fun response -> Some response)
+    let%lwt response = template error debug_dump response in
+    Lwt.return (Some response)
 
 
 
-let default_template _error debug_dump response =
-  match debug_dump with
-  | None -> Lwt.return response
-  | Some debug_dump ->
-    let status = Dream.status response in
-    let code = Dream.status_to_int status
-    and reason = Dream.status_to_string status in
-    response
-    |> Dream.with_header "Content-Type" Dream__pure.Formats.text_html
-    |> Dream.with_body
-      (Dream__middleware.Error_template.render ~debug_dump ~code ~reason)
-    |> Lwt.return
+let default_template _error _debug_dump response =
+  Lwt.return response
 
-
+let debug_template _error debug_dump response =
+  let status = Message.status response in
+  let code = Status.status_to_int status
+  and reason = Status.status_to_string status in
+  Message.set_header response "Content-Type" Dream_pure.Formats.text_html;
+  Message.set_body response (Error_template.render ~debug_dump ~code ~reason);
+  Lwt.return response
 
 let default =
   customize default_template
+
+let debug_error_handler =
+  customize debug_template
 
 
 
@@ -226,7 +225,7 @@ let double_faults f default =
       log "Error handler raised: %s" (Printexc.to_string exn));
 
     backtrace
-    |> Dream__middleware.Log.iter_backtrace (fun line ->
+    |> Log.iter_backtrace (fun line ->
       log.error (fun log -> log "%s" line));
 
     default ()
@@ -244,9 +243,12 @@ let respond_with_option f =
       f ()
       |> Lwt.map (function
         | Some response -> response
-        | None -> Dream.response ~status:`Internal_Server_Error ""))
+        | None ->
+          Message.response
+            ~status:`Internal_Server_Error Stream.empty Stream.null))
     (fun () ->
-      Dream.empty `Internal_Server_Error)
+      Message.response ~status:`Internal_Server_Error Stream.empty Stream.null
+      |> Lwt.return)
 
 
 
@@ -264,70 +266,16 @@ let app
 
   respond_with_option (fun () -> user's_error_handler error)
 
-(* let app
-    app user's_error_handler =
-    fun next_handler request ->
-
-  Lwt.try_bind
-
-    (fun () ->
-      next_handler request)
-
-    (fun response ->
-      let status = Dream.status response in
-
-      if Dream.is_client_error status || Dream.is_server_error status then begin
-        let caused_by, severity =
-          if Dream.is_client_error status then
-            `Client, `Warning
-          else
-            `Server, `Error
-        in
-
-        let error = Error.{
-          condition = `Response response;
-          layer = `App;
-          caused_by;
-          request = Some request;
-          response = Some response;
-          client = Some (Dream.client request);
-          severity = severity;
-          debug = Dream.debug app;
-          will_send_response = true;
-        } in
-
-        respond_with_option (fun () -> user's_error_handler error)
-      end
-      else
-        Lwt.return response)
-
-    (* This exception handler is partially redundant, in that the HTTP-level
-       handlers will also catch exceptions. However, this handler is able to
-       capture more relevant context. We leave the HTTP-level handlers for truly
-       severe protocol-level errors and integration mistakes. *)
-    (fun exn ->
-      let error = Error.{
-        condition = `Exn exn;
-        layer = `App;
-        caused_by = `Server;
-        request = Some request;
-        response = None;
-        client = Some (Dream.client request);
-        severity = `Error;
-        debug = Dream.debug app;
-        will_send_response = true;
-      } in
-
-      respond_with_option (fun () -> user's_error_handler error)) *)
-
 
 
 let default_response = function
-  | `Server -> Dream.response ~status:`Internal_Server_Error ""
-  | `Client -> Dream.response ~status:`Bad_Request ""
+  | `Server ->
+    Message.response ~status:`Internal_Server_Error Stream.empty Stream.null
+  | `Client ->
+    Message.response ~status:`Bad_Request Stream.empty Stream.null
 
 let httpaf
-    app user's_error_handler =
+    user's_error_handler =
     fun client_address ?request error start_response ->
 
   ignore (request : Httpaf.Request.t option);
@@ -354,14 +302,13 @@ let httpaf
   in
 
   let error = {
-    Dream.condition;
+    Catch.condition;
     layer = `HTTP;
     caused_by;
     request = None;
     response = None;
     client = Some (Adapt.address_to_string client_address);
     severity;
-    debug = Dream.debug app;
     will_send_response = true;
   } in
 
@@ -375,7 +322,7 @@ let httpaf
         | None -> default_response caused_by
       in
 
-      let headers = Httpaf.Headers.of_list (Dream.all_headers response) in
+      let headers = Httpaf.Headers.of_list (Message.all_headers response) in
       let body = start_response headers in
 
       Adapt.forward_body response body;
@@ -388,7 +335,7 @@ let httpaf
 
 
 let h2
-    app user's_error_handler =
+    user's_error_handler =
     fun client_address ?request error start_response ->
 
   ignore request; (* TODO Recover something from the request. *)
@@ -413,14 +360,13 @@ let h2
   in
 
   let error = {
-    Dream.condition;
+    Catch.condition;
     layer = `HTTP2;
     caused_by;
     request = None;
     response = None;
     client = Some (Adapt.address_to_string client_address);
     severity;
-    debug = Dream.debug app;
     will_send_response = true;
   } in
 
@@ -434,7 +380,7 @@ let h2
         | None -> default_response caused_by
       in
 
-      let headers = H2.Headers.of_list (Dream.all_headers response) in
+      let headers = H2.Headers.of_list (Message.all_headers response) in
       let body = start_response headers in
 
       Adapt.forward_body_h2 response body;
@@ -452,17 +398,16 @@ let h2
    However, SSL protocol errors are not wrapped in any of these, so we add an
    edditional top-level handler to catch them. *)
 let tls
-    app user's_error_handler client_address error =
+    user's_error_handler client_address error =
 
   let error = {
-    Dream.condition = `Exn error;
+    Catch.condition = `Exn error;
     layer = `TLS;
     caused_by = `Client;
     request = None;
     response = None;
     client = Some (Adapt.address_to_string client_address);
     severity = `Warning;
-    debug = Dream.debug app;
     will_send_response = false;
   } in
 
@@ -487,14 +432,13 @@ let websocket
   let `Exn exn = error in
 
   let error = {
-    Dream.condition = `Exn exn;
+    Catch.condition = `Exn exn;
     layer = `WebSocket;
     caused_by = `Server;
     request = Some request;
     response = Some response;
-    client = Some (Dream.client request);
+    client = Some (Helpers.client request);
     severity = `Warning;   (* Not sure what these errors are, yet. *)
-    debug = Dream.debug (Dream.app request);
     will_send_response = false;
   } in
 
@@ -510,14 +454,13 @@ let websocket_handshake
     fun request response error_string ->
 
   let error = {
-    Dream.condition = `String error_string;
+    Catch.condition = `String error_string;
     layer = `WebSocket;
     caused_by = `Client;
     request = Some request;
     response = Some response;
-    client = Some (Dream.client request);
+    client = Some (Helpers.client request);
     severity = `Warning;
-    debug = Dream.debug (Dream.app request);
     will_send_response = true;
   } in
 

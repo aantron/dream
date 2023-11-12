@@ -41,13 +41,11 @@ let () =
         Dream.websocket (fun websocket ->
           match%lwt Dream.receive websocket with
           | Some "Hello?" ->
-            let%lwt () = Dream.send websocket "Good-bye!" in
-            Dream.close_websocket websocket
+            Dream.send websocket "Good-bye!"
           | _ ->
             Dream.close_websocket websocket));
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/k-websocket</b>
@@ -63,16 +61,35 @@ Visit [http://localhost:8080](http://localhost:8080)
 
 <br>
 
-See [*WebSockets*](https://aantron.github.io/dream/#websockets) in the API docs.
-
 If you are running under HTTPS, be sure to use `wss://` for the protocol scheme,
 rather than `ws://`, on the client.
+
+You don't have to call
+[`Dream.close_websocket`](https://aantron.github.io/dream/#val-close_websocket)
+when you are done with the WebSocket.
+[`Dream.websocket`](https://aantron.github.io/dream/#val-websocket) calls it
+automatically when your callback's promise resolves or is rejected with an
+exception. This example calls `Dream.close_websocket` in one branch just
+because there is nothing else to do.
+
+See [*WebSockets*](https://aantron.github.io/dream/#websockets) in the API docs.
 
 <br>
 
 **Last step:**
 
 - [**`l-https`**](../l-https#files) enables HTTPS.
+
+<br>
+
+**See also:**
+
+- [**`w-chat`**](../w-chat#files) is a simple WebSocket-based chat application.
+- [**`w-live-reload`**](../w-live-reload#files) uses WebSockets to implement
+  live reloading.
+- [**`w-graphql-subscription`**](../w-graphql-subscription) does not show a
+  WebSocket directly, but shows GraphQL subscriptions, which are implemented
+  over WebSockets.
 
 <br>
 

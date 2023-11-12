@@ -1,0 +1,5 @@
+(library
+ (name test_expect_server_cipher)
+ (libraries test_expect_server)
+ (inline_tests)
+ (preprocess (pps lwt_ppx ppx_expect)))

@@ -1,9 +1,9 @@
 (library
- (public_name dream.localhost)
- (name dream__localhost))
+ (public_name dream.certificate)
+ (name dream__certificate))
 
 (rule
- (target dream__localhost.ml)
+ (target dream__certificate.ml)
  (deps
   (:certificate localhost.crt)
   (:key localhost.key))
@@ -11,10 +11,10 @@
   (with-stdout-to
    %{target}
    (progn
-    (echo "let certificate = {ssl|")
+    (echo "let localhost_certificate = {ssl|")
     (cat %{certificate})
     (echo "|ssl}\n\n")
-    (echo "let key = {key|")
+    (echo "let localhost_certificate_key = {key|")
     (cat %{key})
     (echo "|key}\n")
    ))))

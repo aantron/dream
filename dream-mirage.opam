@@ -47,16 +47,24 @@ author: "Anton Bachin <antonbachin@yahoo.com>"
 maintainer: "Anton Bachin <antonbachin@yahoo.com>"
 
 depends: [
-  "dream"
-  "dune" {>= "2.7.0"}
-  "dream"
   "bigarray-compat"
   "bigstringaf"
   "digestif" {>= "1.0.0"}
-  "lwt"
-  "tls-mirage"
-  "lwt_ppx" {>= "1.2.2"}
+  "dream"
+  "dream-httpaf"
+  "dream-pure"
+  "dune" {>= "2.7.0"}
+  "duration"
+  "emile" {>= "1.1"}
+  "ke" {>= "0.4"}  # paf.
   "letsencrypt" {>= "0.3.0"}
+  "lwt"
+  "lwt_ppx" {>= "1.2.2"}
+  "mimic" {>= "0.0.5"}
+  "mirage-time"
+  "rresult"
+  "tcpip"
+  "tls-mirage"
 ]
 
 build: [

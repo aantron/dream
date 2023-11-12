@@ -1,0 +1,23 @@
+{
+  "scripts": {
+    "start": "./_esy/default/build/default/app.exe",
+    "build": "dune build"
+  },
+  "dependencies": {
+    "@opam/conf-libssl": "3",
+    "@opam/dream": "1.0.0~alpha5",
+    "@opam/dune": "^3.0",
+    "ocaml": "^4.14.0"
+  },
+  "devDependencies": {
+    "@opam/ocaml-lsp-server": "*"
+  },
+  "resolutions": {
+    "@opam/conf-libev": "esy-packages/libev:package.json#0b5eb6685b688649045aceac55dc559f6f21b829"
+  },
+  "esy": {
+    "build": [
+      "dune build --root . ./app.exe"
+    ]
+  }
+}

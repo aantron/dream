@@ -1,10 +1,10 @@
-(* TODO Once concurrent writing is supported, send N concurrent streams and test
-   for fairness. *)
-(* TODO There seems to be some GC thrashing and even page thrashing or similar
-   with very large streams, probably due to buffer growth from a lack of
-   server-side flow control. *)
+let show_heap_size () =
+  Gc.((quick_stat ()).heap_words) * 8
+  |> float_of_int
+  |> fun bytes -> bytes /. 1024. /. 1024.
+  |> Dream.log "Heap size: %.0f MB"
 
-let stress ?(megabytes = 1024) ?(chunk = 64) response =
+let stress ?(megabytes = 1024) ?(chunk = 64) stream =
   let limit = megabytes * 1024 * 1024 in
   let chunk = chunk * 1024 in
 
@@ -15,12 +15,12 @@ let stress ?(megabytes = 1024) ?(chunk = 64) response =
 
   let rec loop sent =
     if sent >= limit then
-      let%lwt () = Dream.flush response in
-      let%lwt () = Dream.close_stream response in
+      let%lwt () = Dream.flush stream in
+      let%lwt () = Dream.close stream in
       Lwt.return (Unix.gettimeofday () -. start)
     else
-      let%lwt () = Dream.write response chunk_a in
-      let%lwt () = Dream.write response chunk_b in
+      let%lwt () = Dream.write stream chunk_a in
+      let%lwt () = Dream.write stream chunk_b in
       let%lwt () = Lwt.pause () in
       loop (sent + chunk + chunk)
   in
@@ -28,13 +28,16 @@ let stress ?(megabytes = 1024) ?(chunk = 64) response =
 
   Dream.log "%.0f MB/s over %.1f s"
     ((float_of_int megabytes) /. elapsed) elapsed;
+  show_heap_size ();
 
   Lwt.return_unit
 
-let query_int name request =
-  Dream.query name request |> Option.map int_of_string
+let query_int request name =
+  Dream.query request name |> Option.map int_of_string
 
 let () =
+  show_heap_size ();
+
   Dream.run
   @@ Dream.logger
   @@ Dream.router [
@@ -43,8 +46,7 @@ let () =
       Dream.stream
         ~headers:["Content-Type", "application/octet-stream"]
         (stress
-          ?megabytes:(query_int "mb" request)
-          ?chunk:(query_int "chunk" request)));
+          ?megabytes:(query_int request "mb")
+          ?chunk:(query_int request "chunk")));
 
   ]
-  @@ Dream.not_found

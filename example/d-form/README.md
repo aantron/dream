@@ -16,7 +16,8 @@ let show_form ?message request =
       <p>You entered: <b><%s message %>!</b></p>
 %   end;
 
-    <%s! Dream.form_tag ~action:"/" request %>
+    <form method="POST" action="/">
+      <%s! Dream.csrf_tag request %>
       <input name="message" autofocus>
     </form>
 
@@ -42,7 +43,6 @@ let () =
           Dream.empty `Bad_Request);
 
   ]
-  @@ Dream.not_found
 ```
 
 <pre><code><b>$ cd example/d-form</b>
@@ -53,38 +53,39 @@ Try it in the [playground](http://dream.as/d-form).
 
 <br>
 
-We didn't write a literal `<form>` tag in the template. Instead, we used
-[`Dream.form_tag`](https://aantron.github.io/dream/#val-form_tag) to generate
-the tag. [`Dream.form_tag`](https://aantron.github.io/dream/#val-form_tag) also
-snuck in a hidden `<input>` field containing a CSRF token:
+The template adds a CSRF token to the form using
+[`Dream.csrf_tag`](https://aantron.github.io/dream/#val-csrf_tag). Its output
+looks something like this:
 
 ```html
 <form method="POST" action="/">
   <input name="dream.csrf" type="hidden" value="j8vjZ6...">
-
-  <!-- The rest we actually wrote ourselves in the template! -->
   <input name="message" autofocus>
 </form>
 ```
 
-This hidden `dream.csrf` field helps to
-[prevent CSRF attacks](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html)
-attacks against the form.
+That generated, hidden `dream.csrf` field helps to [prevent CSRF
+attacks](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html).
+It should be the [first
+field](https://portswigger.net/web-security/csrf/tokens#how-should-csrf-tokens-be-transmitted)
+in your form.
 
-[`Dream.form`](https://aantron.github.io/dream/#val-form) expects `dream.csrf`
-and checks it. If there is anything wrong with the token,
-[`Dream.form`](https://aantron.github.io/dream/#val-form) will return a [value
-other than `` `Ok _``](https://aantron.github.io/dream/#type-form_result).
+When the form is submitted and parsed using
+[`Dream.form`](https://aantron.github.io/dream/#val-form), `Dream.form` expects
+to find the `dream.csrf` field, and checks it. If there is anything wrong with
+the CSRF token, [`Dream.form`](https://aantron.github.io/dream/#val-form) will
+return a [value other than
+`` `Ok _``](https://aantron.github.io/dream/#type-form_result).
 
 <br>
 
 The form fields carried inside `` `Ok _`` are returned in sorted order, so you
 can reliably pattern-match on them.
 
-The bad token results, like `` `Expired _``, also carry the form fields. You can
-add handling for them to recover. For example, if you receive an expired form,
-you may want to resend it with some of the fields pre-filled to received
-values, so that the user can try again quickly.
+The bad token results, like `` `Expired (_, _)``, also carry the form fields.
+You can add handling for them to recover. For example, if you receive a form
+with an expired token, you may want to resend it with some of the fields pre-
+filled to received values, so that the user can try again quickly.
 
 However, do not send back any sensitive data, because *any* result other than
 `` `Ok _`` *might* indicate an attack in progress. That said, `` `Expired _``

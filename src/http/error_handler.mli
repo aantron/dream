@@ -5,17 +5,24 @@
 
 
 
-module Dream = Dream__pure.Inmost
+module Httpaf = Dream_httpaf_.Httpaf
+module H2 = Dream_h2.H2
+module Websocketaf = Dream_websocketaf.Websocketaf
+
+module Catch = Dream__server.Catch
+module Log = Dream__server.Log
+module Message = Dream_pure.Message
 
 
 
 (* User's error handlers and defaults. These actually generate error response
    templates and/or do logging. *)
 
-val default : Dream.error_handler
+val default : Catch.error_handler
+val debug_error_handler : Catch.error_handler
 val customize :
-  (Dream.error -> string option -> Dream.response -> Dream.response Lwt.t) ->
-    Dream.error_handler
+  (Catch.error -> string -> Message.response -> Message.response Lwt.t) ->
+    Catch.error_handler
 
 
 
@@ -31,36 +38,33 @@ val customize :
     Dream.middleware *)
 
 val app :
-  Dream.error_handler ->
-    (Dream.error -> Dream.response Lwt.t)
+  Catch.error_handler ->
+    (Catch.error -> Message.response Lwt.t)
 
 val httpaf :
-  Dream.app ->
-  Dream.error_handler ->
+  Catch.error_handler ->
     (Unix.sockaddr -> Httpaf.Server_connection.error_handler)
 
 val h2 :
-  Dream.app ->
-  Dream.error_handler ->
+  Catch.error_handler ->
     (Unix.sockaddr -> H2.Server_connection.error_handler)
 
 val tls :
-  Dream.app ->
-  Dream.error_handler ->
+  Catch.error_handler ->
     (Unix.sockaddr -> exn -> unit)
 
 val websocket :
-  Dream.error_handler ->
-  Dream.request ->
-  Dream.response ->
+  Catch.error_handler ->
+  Message.request ->
+  Message.response ->
     (Websocketaf.Wsd.t -> [ `Exn of exn ] -> unit)
 
 val websocket_handshake :
-  Dream.error_handler ->
-    (Dream.request -> Dream.response -> string -> Dream.response Lwt.t)
+  Catch.error_handler ->
+    (Message.request -> Message.response -> string -> Message.response Lwt.t)
 
 
 
 
 (* Logger also used by elsewhere in the HTTP integration. *)
-val log : Dream__middleware.Log.sub_log
+val log : Log.sub_log

@@ -5,7 +5,11 @@
 
 
 
-module Dream = Dream__pure.Inmost
+module Formats = Dream_pure.Formats
+module Message = Dream_pure.Message
+module Method = Dream_pure.Method
+module Router = Dream__server.Router
+module Stream = Dream_pure.Stream
 
 
 
@@ -17,7 +21,7 @@ module Dream = Dream__pure.Inmost
 let mime_lookup filename =
   let content_type =
     match Magic_mime.lookup filename with
-    | "text/html" -> Dream__pure.Formats.text_html
+    | "text/html" -> Formats.text_html
     | content_type -> content_type
   in
   ["Content-Type", content_type]
@@ -28,8 +32,12 @@ let from_filesystem local_root path _ =
     (fun () ->
       Lwt_io.(with_file ~mode:Input file) (fun channel ->
         let%lwt content = Lwt_io.read channel in
-        Dream.respond ~headers:(mime_lookup path) content))
-    (fun _exn -> Dream.empty `Not_Found)
+        Message.response
+          ~headers:(mime_lookup path) (Stream.string content) Stream.null
+        |> Lwt.return))
+    (fun _exn ->
+      Message.response ~status:`Not_Found Stream.empty Stream.null
+      |> Lwt.return)
 
 (* TODO Add ETag handling. *)
 (* TODO Add Content-Length handling? *)
@@ -38,7 +46,7 @@ let from_filesystem local_root path _ =
 (* TODO On Windows, should we also check for \ and drive letters? *)
 (* TODO Not an efficient implementation at the moment. *)
 let validate_path request =
-  let path = Dream.path request in
+  let path = Router.path request in
 
   let has_slash component = String.contains component '/' in
   let has_backslash component = String.contains component '\\' in
@@ -66,29 +74,27 @@ let validate_path request =
 
 let static ?(loader = from_filesystem) local_root = fun request ->
 
-  if not @@ Dream.methods_equal (Dream.method_ request) `GET then
-    Dream.empty `Not_Found
+  if not @@ Method.methods_equal (Message.method_ request) `GET then
+    Message.response ~status:`Not_Found Stream.empty Stream.null
+    |> Lwt.return
 
   else
     match validate_path request with
-    | None -> Dream.empty `Not_Found
+    | None ->
+      Message.response ~status:`Not_Found Stream.empty Stream.null
+      |> Lwt.return
+
     | Some path ->
-
       let%lwt response = loader local_root path request in
-
-      let response =
-        if Dream.has_header "Content-Type" response then
-          response
-        else
-          match Dream.status response with
-          | `OK
-          | `Non_Authoritative_Information
-          | `No_Content
-          | `Reset_Content
-          | `Partial_Content ->
-            Dream.add_header "Content-Type" (Magic_mime.lookup path) response
-          | _ ->
-            response
-      in
-
+      if not (Message.has_header response "Content-Type") then begin
+        match Message.status response with
+        | `OK
+        | `Non_Authoritative_Information
+        | `No_Content
+        | `Reset_Content
+        | `Partial_Content ->
+          Message.add_header response "Content-Type" (Magic_mime.lookup path)
+        | _ ->
+          ()
+      end;
       Lwt.return response

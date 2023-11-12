@@ -22,7 +22,7 @@ let hardcoded_users = [
 
 let user =
   Graphql_lwt.Schema.(
-    obj("user", ~fields=_info =>
+    obj("user", ~fields=
       [
         field("id", ~typ=non_null(int), ~args=Arg.[], ~resolve=(_info, user) =>
           user.id
@@ -65,8 +65,7 @@ let () =
   @@ Dream.router([
     Dream.any("/graphql", Dream.graphql(Lwt.return, schema)),
     Dream.get("/", Dream.graphiql(~default_query, "/graphql")),
-  ])
-  @@ Dream.not_found;
+  ]);
 ```
 
 <pre><code><b>$ cd example/r-graphql</b>

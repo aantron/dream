@@ -10,4 +10,3 @@ let () =
         body);
 
   ]
-  @@ Dream.not_found

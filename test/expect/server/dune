@@ -1,0 +1,15 @@
+(library
+ (name test_expect_server)
+ (libraries
+  base
+  dream
+  dream-pure
+  dream.server
+  lwt
+  lwt.unix
+  ppx_expect.common
+  ppx_inline_test.config
+  ppx_expect.config_types
+ )
+ (inline_tests)
+ (preprocess (pps lwt_ppx ppx_expect)))

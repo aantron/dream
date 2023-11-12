@@ -1,7 +1,7 @@
 {
   "name": "fullstack-rescript",
   "bs-dependencies": [
-    "bs-webapi"
+    "rescript-webapi"
   ],
   "sources": [
     "common",

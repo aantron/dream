@@ -1,58 +1,32 @@
 (data_only_dirs *)
 
-(subdir paf/lib
- (library
-  (name paf)
-  (public_name dream-mirage.paf)
-  (modules paf)
-  (libraries faraday bigstringaf ke mimic)))
 
-(subdir paf/lib
- (library
-  (name alpn)
-  (public_name dream-mirage.paf.alpn)
-  (modules alpn)
-  (libraries dream-mirage.paf dream.httpaf dream.h2)))
-
-(subdir paf/lib
- (library
-  (name paf_mirage)
-  (public_name dream-mirage.paf.mirage)
-  (modules paf_mirage)
-  (libraries dream-mirage.paf tls-mirage mirage-time mirage-stack dream-mirage.paf.alpn)))
-
-(subdir paf/lib
- (library
-  (name le)
-  (wrapped false)
-  (public_name dream-mirage.paf.le)
-  (modules lE)
-  (libraries dream.httpaf dream-mirage.paf mirage-time mirage-stack duration tls-mirage emile
-    letsencrypt)))
 
 (subdir gluten/lib
  (library
-  (name gluten)
-  (public_name dream.gluten)
+  (name dream_gluten)
+  (public_name dream-httpaf.dream-gluten)
   (libraries
    bigstringaf
-   faraday)))
+   faraday
+  )))
 
 (subdir gluten/lwt
  (library
-  (name gluten_lwt)
-  (public_name dream.gluten-lwt)
+  (name dream_gluten_lwt)
+  (public_name dream-httpaf.dream-gluten-lwt)
   (libraries
-   dream.gluten
-   lwt)))
+   dream-httpaf.dream-gluten
+   lwt
+  )))
 
 (subdir gluten/lwt-unix
  (library
-  (name gluten_lwt_unix)
-  (public_name dream.gluten-lwt-unix)
+  (name dream_gluten_lwt_unix)
+  (public_name dream-httpaf.dream-gluten-lwt-unix)
   (libraries
    faraday-lwt-unix
-   dream.gluten-lwt
+   dream-httpaf.dream-gluten-lwt
    lwt.unix
    (select
     ssl_io.ml
@@ -63,56 +37,82 @@
     tls_io.ml
     from
     (tls.lwt -> tls_io.real.ml)
-    (-> tls_io.dummy.ml)))
+    (-> tls_io.dummy.ml))
+  )
   (modules gluten_lwt_unix tls_io ssl_io)))
-
-
-
-(subdir websocketaf/lib
- (library
-  (name websocketaf)
-  (public_name dream.websocketaf)
-  (libraries
-   angstrom
-   base64
-   bigstringaf
-   faraday
-   dream.gluten
-   httpaf
-   result)))
 
 
 
 (subdir httpaf/lib
  (library
-  (name httpaf)
-  (public_name dream.httpaf)
+  (name dream_httpaf_)
+  (public_name dream-httpaf.dream-httpaf_)
   (libraries
    angstrom
    bigstringaf
    faraday
-   result)))
+  )))
 
 (subdir httpaf/lwt
  (library
-  (name httpaf_lwt)
-  (public_name dream.httpaf-lwt)
+  (name dream_httpaf__lwt)
+  (public_name dream-httpaf.dream-httpaf_-lwt)
   (libraries
-   dream.gluten
-   dream.gluten-lwt
-   dream.httpaf
-   lwt)))
+   dream-httpaf.dream-gluten
+   dream-httpaf.dream-gluten-lwt
+   dream-httpaf.dream-httpaf_
+   lwt
+  )))
 
 (subdir httpaf/lwt-unix
  (library
-  (name httpaf_lwt_unix)
-  (public_name dream.httpaf-lwt-unix)
+  (name dream_httpaf__lwt_unix)
+  (public_name dream-httpaf.dream-httpaf_-lwt-unix)
   (libraries
    faraday-lwt-unix
-   dream.gluten-lwt-unix
-   dream.httpaf
-   dream.httpaf-lwt
-   lwt.unix)))
+   dream-httpaf.dream-gluten-lwt-unix
+   dream-httpaf.dream-httpaf_
+   dream-httpaf.dream-httpaf_-lwt
+   lwt.unix
+  )))
+
+
+
+(subdir websocketaf/lib
+ (library
+  (name dream_websocketaf)
+  (public_name dream-httpaf.dream-websocketaf)
+  (libraries
+   angstrom
+   base64
+   bigstringaf
+   faraday
+   dream-httpaf.dream-gluten
+   dream-httpaf.dream-httpaf_
+  )))
+
+(subdir websocketaf/lwt
+ (library
+  (name dream_websocketaf_lwt)
+  (public_name dream-httpaf.dream-websocketaf-lwt)
+  (libraries
+   base64
+   digestif.ocaml
+   dream-httpaf.dream-gluten-lwt
+   lwt
+   dream-httpaf.dream-websocketaf
+  )))
+
+(subdir websocketaf/lwt-unix
+ (library
+  (name dream_websocketaf_lwt_unix)
+  (public_name dream-httpaf.dream-websocketaf-lwt-unix)
+  (libraries
+   faraday-lwt-unix
+   dream-httpaf.dream-gluten-lwt-unix
+   lwt.unix
+   dream-httpaf.dream-websocketaf-lwt
+  )))
 
 
 
@@ -120,15 +120,17 @@
  (executables
   (names gen_huffman gen_static)
   (libraries
-   compiler-libs.common)))
+   compiler-libs.common
+  )))
 
 (subdir h2/hpack/src
  (library
-  (name hpack)
-  (public_name dream.hpack)
+  (name dream_hpack)
+  (public_name dream-httpaf.dream-hpack)
   (libraries
    angstrom
-   faraday))
+   faraday
+  ))
  (rule
   (targets huffman_table.ml)
   (deps ../util/huffman_table.txt)
@@ -139,35 +141,75 @@
 
 (subdir h2/lib
  (library
-  (name h2)
-  (public_name dream.h2)
+  (name dream_h2)
+  (public_name dream-httpaf.dream-h2)
   (libraries
    angstrom
    base64
    bigstringaf
    faraday
-   dream.hpack
-   dream.httpaf
+   dream-httpaf.dream-hpack
+   dream-httpaf.dream-httpaf_
    psq
-   result)))
+  )))
 
 (subdir h2/lwt
  (library
-  (name h2_lwt)
-  (public_name dream.h2-lwt)
+  (name dream_h2_lwt)
+  (public_name dream-httpaf.dream-h2-lwt)
   (libraries
-   dream.gluten
-   dream.gluten-lwt
+   dream-httpaf.dream-gluten
+   dream-httpaf.dream-gluten-lwt
    lwt
-   dream.h2)))
+   dream-httpaf.dream-h2
+  )))
 
 (subdir h2/lwt-unix
  (library
-  (name h2_lwt_unix)
-  (public_name dream.h2-lwt-unix)
+  (name dream_h2_lwt_unix)
+  (public_name dream-httpaf.dream-h2-lwt-unix)
   (libraries
    faraday-lwt-unix
-   dream.gluten-lwt-unix
-   dream.h2
-   dream.h2-lwt
-   lwt.unix)))
+   dream-httpaf.dream-gluten-lwt-unix
+   dream-httpaf.dream-h2
+   dream-httpaf.dream-h2-lwt
+   lwt.unix
+  )))
+
+
+
+(subdir paf/lib
+ (library
+  (name dream_paf)
+  (public_name dream-mirage.dream-paf)
+  (modules paf)
+  (libraries
+   faraday
+   bigstringaf
+   ke
+   mimic
+  )))
+
+(subdir paf/lib
+ (library
+  (name dream_alpn)
+  (public_name dream-mirage.dream-paf.alpn)
+  (modules alpn)
+  (libraries
+   dream-mirage.dream-paf
+   dream-httpaf.dream-httpaf_
+   dream-httpaf.dream-h2
+  )))
+
+(subdir paf/lib
+ (library
+  (name dream_paf_mirage)
+  (public_name dream-mirage.dream-paf.mirage)
+  (modules paf_mirage)
+  (libraries
+   tcpip
+   dream-mirage.dream-paf
+   tls-mirage
+   mirage-time
+   dream-mirage.dream-paf.alpn
+  )))

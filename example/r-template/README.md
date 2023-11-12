@@ -23,8 +23,7 @@ let () =
     Dream.get("/",
       (_ => Dream.html(greet("world")))),
 
-  ])
-  @@ Dream.not_found;
+  ]);
 ```
 
 <pre><code><b>$ cd example/r-template</b>
@@ -62,6 +61,8 @@ same.
 
 **See also:**
 
+- [**`r-template-files`**](../r-template-files#files) puts the template into a
+  separate `.eml.html` file, which can help with editor problems.
 - [**`r-template-stream`**](../r-template-stream#files) streams a template to a
   response.
 - [**`9-error`**](../9-error#files) sets up a central error template. The

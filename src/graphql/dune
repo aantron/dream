@@ -3,8 +3,8 @@
  (name dream__graphql)
  (libraries
   dream.graphiql
-  dream.middleware
-  dream.pure
+  dream-pure
+  dream.server
   graphql_parser
   graphql-lwt
   lwt
