@@ -464,13 +464,14 @@ let serve_with_details
     | `Unix path ->
       Lwt.return (Lwt_unix.ADDR_UNIX path)
     | `Inet port ->
-  let%lwt addresses = Lwt_unix.getaddrinfo interface (string_of_int port) [] in
-  match addresses with
-  | [] ->
-    Printf.ksprintf failwith "Dream.%s: no interface with address %s"
-      caller_function_for_error_messages interface
-  | address::_ ->
-  Lwt.return Lwt_unix.(address.ai_addr)
+      let%lwt addresses =
+        Lwt_unix.getaddrinfo interface (string_of_int port) [] in
+      match addresses with
+      | [] ->
+        Printf.ksprintf failwith "Dream.%s: no interface with address %s"
+          caller_function_for_error_messages interface
+      | address::_ ->
+        Lwt.return Lwt_unix.(address.ai_addr)
   in
 
   (* Bring up the HTTP server. Wait for the server to actually get started.
