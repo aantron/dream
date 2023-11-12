@@ -379,10 +379,6 @@ let built_in_middleware error_handler =
     Catch.catch (Error_handler.app error_handler);
   ]
 
-type network =
-  [ `Inet of int
-  | `Unix of string ]
-
 let serve_with_details
     caller_function_for_error_messages
     tls_library
@@ -448,15 +444,13 @@ let serve_with_details
     | `Unix path ->
       Lwt.return (Lwt_unix.ADDR_UNIX path)
     | `Inet port ->
-      let%lwt addresses =
-        Lwt_unix.getaddrinfo interface (string_of_int port) []
-      in
-      match addresses with
-      | [] ->
-        Printf.ksprintf failwith "Dream.%s: no interface with address %s"
-          caller_function_for_error_messages interface
-      | address::_ ->
-         Lwt.return Lwt_unix.(address.ai_addr)
+  let%lwt addresses = Lwt_unix.getaddrinfo interface (string_of_int port) [] in
+  match addresses with
+  | [] ->
+    Printf.ksprintf failwith "Dream.%s: no interface with address %s"
+      caller_function_for_error_messages interface
+  | address::_ ->
+  Lwt.return Lwt_unix.(address.ai_addr)
   in
 
   (* Bring up the HTTP server. Wait for the server to actually get started.
@@ -623,10 +617,10 @@ let default_interface = "localhost"
 let default_port = 8080
 let never = fst (Lwt.wait ())
 
-let network port socket_path =
-  match port, socket_path with
-  | _, None -> `Inet port
-  | _, Some p -> `Unix p
+let network ~port ~socket_path =
+  match socket_path with
+  | None -> `Inet port
+  | Some path -> `Unix path
 
 let serve
     ?(interface = default_interface)
@@ -643,7 +637,7 @@ let serve
   serve_with_maybe_https
     "serve"
     ~interface
-    ~network:(network port socket_path)
+    ~network:(network ~port ~socket_path)
     ~stop
     ~error_handler
     ~tls:(if tls then `OpenSSL else `No)
@@ -738,7 +732,7 @@ let run
       serve_with_maybe_https
         "run"
         ~interface
-        ~network:(network port socket_path)
+        ~network:(network ~port ~socket_path)
         ~stop
         ~error_handler
         ~tls:(if tls then `OpenSSL else `No)
