@@ -60,6 +60,8 @@
   src: url('tenor-sans-v12-latin-regular.woff2') format('woff2');
 }
 
+
+
 /* Theme */
 
 /* Dark theme (default) */
@@ -210,7 +212,7 @@ header .topmost {
 }
 
 .topmost .toggle-theme-btn::before {
-  content: "\F186"; /* moon */
+  content: "\F185"; /* sun */
   position: absolute;
   left: calc(0% - 16px + -8px);
   top: calc(0% + 4px);
@@ -224,7 +226,7 @@ header .topmost {
 }
 
 body:not([data-theme="light"]) .topmost .toggle-theme-btn::before {
-  content: "\F185"; /* sun */
+  content: "\F186"; /* moon */
 }
 
 header pre {
