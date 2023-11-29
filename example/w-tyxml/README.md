@@ -34,8 +34,8 @@ let () =
 ```
 
 <pre><code><b>$ cd example/w-tyxml</b>
-<b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b></code></pre>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . ./tyxml.exe</b></code></pre>
 
 Try it in the [playground](http://dream.as/w-tyxml).
 

@@ -8,5 +8,3 @@
  (deps (source_tree assets))
  (action (with-stdout-to %{null}
   (run ocaml-crunch -m plain assets -o %{target}))))
-
-(data_only_dirs _esy esy.lock lib node_modules)

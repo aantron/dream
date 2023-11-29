@@ -68,8 +68,8 @@ let () =
 ```
 
 <pre><code><b>$ cd example/w-template-logic</b>
-<b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b></code></pre>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . ./template.exe</b></code></pre>
 
 Try it in the [playground](http://dream.as/w-template-logic).
 

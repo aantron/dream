@@ -7,5 +7,3 @@
  (targets upload_stream.ml)
  (deps upload_stream.eml.ml)
  (action (run dream_eml %{deps} --workspace %{workspace_root})))
-
-(data_only_dirs _esy esy.lock lib node_modules)

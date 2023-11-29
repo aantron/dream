@@ -2,10 +2,12 @@
 
 <br>
 
-This example introduces dune's watch mode `exec -w` to recompile and run your server when you make changes.
+This example introduces dune's watch mode `exec --watch` to recompile
+and run your server when you make changes.
 
 <pre><code><b>$ cd example/w-watch</b>
-<b>$ dune exec -w ./hello.exe</b></code></pre>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . --watch ./hello.exe</b></code></pre>
 
 Note that this requires Dune 3.7.0 or higher.
 

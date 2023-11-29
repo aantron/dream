@@ -28,8 +28,8 @@ let () =
 ```
 
 <pre><code><b>$ cd example/w-live-reload</b>
-<b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . ./live_reload.exe</b>
 </code></pre>
 
 <br>

@@ -19,11 +19,16 @@ directory into a file `assets.ml`:
 </b></code></pre>
 
 crunch comes from the opam repository, so we also add it in
-[`esy.json`](https://github.com/aantron/dream/blob/master/example/w-one-binary/esy.json):
+[`one_binary.opam`](https://github.com/aantron/dream/blob/master/example/w-one-binary/esy.json):
 
-<pre><code>"dependencies": {
-  <b>"@opam/crunch": "*"</b>
-}
+<pre><code>opam-version: "2.0"
+
+depends: [
+  <b>"crunch"</b>
+  "ocaml" {>= "4.08.0"}
+  "dream"
+  "dune" {>= "2.0.0"}
+]
 </code></pre>
 
 <br>
@@ -70,8 +75,8 @@ it by setting `Content-Type` yourself when calling
 To build the whole setup, just do
 
 <pre><code><b>$ cd example/w-one-binary</b>
-<b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b></code></pre>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . ./one_binary.exe</b></code></pre>
 
 You can now visit
 [http://localhost:8080/assets/camel.jpeg](http://localhost:8080/assets/camel.jpeg)

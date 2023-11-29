@@ -1,0 +1,9 @@
+opam-version: "2.0"
+
+depends: [
+  "ocaml" {>= "4.08.0"}
+  "dream"
+  "dune" {>= "2.0.0"}
+  "js_of_ocaml"
+  "js_of_ocaml-ppx"
+]

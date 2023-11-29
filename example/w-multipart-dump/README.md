@@ -38,8 +38,8 @@ Content-Type: application/octet-stream
 ```
 
 <pre><code><b>$ cd example/w-multipart-dump</b>
-<b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b></code></pre>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . ./multipart_dump.exe</b></code></pre>
 
 <br>
 

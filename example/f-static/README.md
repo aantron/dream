@@ -5,8 +5,8 @@
 Run this example:
 
 <pre><code><b>$ cd example/f-static</b>
-<b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b></code></pre>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . ./static.exe</b></code></pre>
 
 ...and visit
 [http://localhost:8080/static/static.ml](http://localhost:8080/static/static.ml).

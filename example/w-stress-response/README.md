@@ -6,8 +6,8 @@ This example responds with very large data streams &mdash; 1 GB in 64 KB chunks
 by default. To use,
 
 <pre><code><b>$ cd example/w-stress-response</b>
-<b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . ./stress_response.exe</b>
 <b>$ curl http://localhost:8080 > /dev/null &</b></code></pre>
 
 The `curl` command can be repeated for multiple concurrent clients, to check

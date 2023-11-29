@@ -54,18 +54,13 @@ let () =
 
 To run the example, do
 
-<pre><code><b>cd example/w-fullstack-jsoo</b>
-<b>dune build --root . client/client.bc.js
-mkdir -p static
-cp _build/default/client/client.bc.js static/client.js
-dune exec --root . server/server.exe
-</b></code></pre>
-
-You can also trigger it all with esy with
-
 <pre><code><b>$ cd example/w-fullstack-jsoo</b>
-<b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b></code></pre>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune build --root . client/client.bc.js
+$ mkdir -p static
+$ cp _build/default/client/client.bc.js static/client.js
+$ dune exec --root . server/server.exe
+</b></code></pre>
 
 Then visit [http://localhost:8080](http://localhost:8080), and you will see...
 

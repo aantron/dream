@@ -67,8 +67,8 @@ let () =
 ```
 
 <pre><code><b>$ cd example/h-sql</b>
-<b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b></code></pre>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . ./sql.exe</b></code></pre>
 
 <br>
 
@@ -118,11 +118,14 @@ We also had to make an addition to our
 </pre>
 
 ...and to
-[`esy.json`](https://github.com/aantron/dream/blob/master/example/h-sql/esy.json):
+[`sql.opam`](https://github.com/aantron/dream/blob/master/example/h-sql/esy.json):
 
-<pre>"dependencies": {
-  <b>"@opam/caqti-driver-sqlite3": "^1.7.0"</b>
-}
+<pre>depends: [
+  <b>"caqti-driver-sqlite3" {>= "1.7.0"}</b>
+  "ocaml" {>= "4.08.0"}
+  "dream"
+  "dune" {>= "2.0.0"}
+]
 </pre>
 
 <br>

@@ -46,8 +46,8 @@ let () =
 ```
 
 <pre><code><b>$ cd example/d-form</b>
-<b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b></code></pre>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . ./form.exe</b></code></pre>
 
 Try it in the [playground](http://dream.as/d-form).
 

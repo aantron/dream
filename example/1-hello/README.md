@@ -17,8 +17,8 @@ At startup, Dream prints a message to the log, telling you where to point your
 browser. Your terminal probably makes the link clickable.
 
 <pre><code><b>$ cd example/1-hello</b>
-<b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . ./hello.exe</b>
 08.03.21 21:17:21.471                       Running at http://localhost:8080
 08.03.21 21:17:21.471                       Type Ctrl+C to stop
 </code></pre>
@@ -31,7 +31,7 @@ Playground](http://dream.as/1-hello).
 
 If you'd like to copy out the server binary, you can do it like this:
 
-<pre><code><b>$ npx esy cp '#{self.target_dir}/default/hello.exe' .
+<pre><code><b>$ cp _build/default/hello.exe .
 </b></code></pre>
 
 The name will change as you go through the tutorial examples. It's always the

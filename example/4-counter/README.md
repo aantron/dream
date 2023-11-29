@@ -24,8 +24,8 @@ let () =
   ]
 ```
 <pre><code><b>$ cd example/4-counter</b>
-<b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b></code></pre>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . ./counter.exe</b></code></pre>
 
 <br>
 

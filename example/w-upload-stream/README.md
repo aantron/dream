@@ -59,8 +59,9 @@ let () =
   ]
 ```
 
-<pre><code><b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b></code></pre>
+<pre><code><b>cd example/w-upload-stream</b>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . ./upload_stream.exe</b></code></pre>
 
 Try it in the [playground](http://dream.as/w-upload-stream).
 

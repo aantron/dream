@@ -16,8 +16,8 @@ let () =
 ```
 
 <pre><code><b>$ cd example/w-query</b>
-<b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b></code></pre>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . ./query.exe</b></code></pre>
 
 <br>
 

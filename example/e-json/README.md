@@ -49,22 +49,21 @@ To get this working, we have to add `ppx_yojson_conv` to our
 </code></pre>
 
 and to
-[`esy.json`](https://github.com/aantron/dream/blob/master/example/e-json/esy.json):
+[`json.opam`](https://github.com/aantron/dream/blob/master/example/e-json/json.opam):
 
-<pre><code>{
-"dependencies": {
-  "@opam/dream": "aantron/dream:dream.opam",
-  "@opam/dune": "^2.0",
-  <b>"@opam/ppx_yojson_conv": "*",</b>
-  "ocaml": "4.12.x"
-}
+<pre><code>depends: [
+  "ocaml" {>= "4.08.0"}
+  "dream"
+  "dune" {>= "2.0.0"}
+  <b>"ppx_yojson_conv"</b>
+]
 </code></pre>
 
 The build commands, as always, are:
 
 <pre><code><b>$ cd example/e-json</b>
-<b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b></code></pre>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . ./json.exe</b></code></pre>
 
 You can try this example in the [playground](http://dream.as/e-json).
 

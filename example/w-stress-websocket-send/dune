@@ -7,5 +7,3 @@
  (targets stress_websocket_send.ml)
  (deps stress_websocket_send.eml.ml)
  (action (run dream_eml %{deps} --workspace %{workspace_root})))
-
-(data_only_dirs _esy esy.lock lib node_modules)

@@ -28,8 +28,8 @@ let handle_client client =
 The rest of the code hooks up the client's message form to the WebSocket.
 
 <pre><code><b>$ cd example/w-chat</b>
-<b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b></code></pre>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . ./chat.exe</b></code></pre>
 
 <br>
 

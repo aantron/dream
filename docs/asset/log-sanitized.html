@@ -39,8 +39,8 @@ b {
 <body>
 
 <pre><code><b>$ cd example/2-middleware</b>
-<b>$ npm install esy && npx esy</b>
-<b>$ npx esy start</b>
+<b>$ opam install --deps-only --yes .</b>
+<b>$ dune exec --root . ./middleware.exe</b>
 <span class="dim">08.03.21 22:19:21.126</span>                       Running at http://localhost:8080
 <span class="dim">08.03.21 22:19:21.126</span>                       Type Ctrl+C to stop
 <span class="dim">08.03.21 22:19:24.927</span>       dream.log  <span class="info">INFO</span> <span class="odd">REQ 1</span> GET / 127.0.0.1:58549 Mozilla/5.0 ...
