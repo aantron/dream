@@ -51,8 +51,6 @@ name of the `.ml` file, but with `.ml` changed to `.exe`.
 **See also:**
 
 - [**`r-hello`**](../r-hello#files) is a Reason syntax version of this example.
-- [**`w-esy`**](../w-esy#files) gives more detail on the [esy](https://esy.sh/)
-  packaging.
 - [**`w-watch`**](../w-watch#files) sets up a development watcher.
 
 
