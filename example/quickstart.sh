@@ -3,6 +3,7 @@
 set -e
 
 EXAMPLE=2-middleware
+DIRECTORY=dream-project
 REPO=https://github.com/aantron/dream
 if [ "$1" == "" ]
 then
@@ -12,17 +13,34 @@ else
   echo Using ref $REF
 fi
 
-echo
-echo -e "\e[0m✅ Creating example directory ./$EXAMPLE\e[0m"
-echo
-echo 💲 mkdir $EXAMPLE
-mkdir $EXAMPLE
-cd $EXAMPLE
+if ! (which git >> /dev/null)
+then
+  echo
+  echo -e "\e[0m🛑 'git' command missing \e[0m"
+  echo -e "\e[0m   Please install git from your system package manager\e[0m"
+  exit 1
+fi
+
+if ! (which opam >> /dev/null)
+then
+  echo
+  echo -e "\e[0m🛑 'opam' command missing \e[0m"
+  echo -e "\e[0m   Please install opam by visiting\e[0m"
+  echo -e "\e[0m   https://opam.ocaml.org/doc/Install.html\e[0m"
+  echo -e "\e[0m   ...and run 'opam init'"
+  exit 1
+fi
 
 echo
+echo -e "\e[0m✅ Creating directory './$DIRECTORY'\e[0m"
 echo
+echo 💲 mkdir $DIRECTORY
+mkdir $DIRECTORY
+echo 💲 cd $DIRECTORY
+cd $DIRECTORY
+
 echo
-echo -e "\e[0m✅ Fetching example files with git\e[0m"
+echo -e "\e[0m✅ Fetching example files using git\e[0m"
 echo -e "\e[0m   Source: $REPO/tree/$REF/example/$EXAMPLE#files\e[0m"
 mkdir clone
 cd clone
@@ -36,50 +54,38 @@ mv clone/example/$EXAMPLE/* .
 rm -rf clone
 
 echo
+echo -e "\e[0m✅ Building and installing dependencies\e[0m"
+echo -e "\e[0m   This can take a few minutes\e[0m"
 echo
-echo
-echo -e "\e[0m✅ Installing esy in ./$EXAMPLE\e[0m"
-echo -e "\e[0m   esy (https://esy.sh/) is an npm-like package manager for native code\e[0m"
-echo
-echo 💲 npm install esy
-npm --silent install esy
+echo 💲 opam switch create . 5.1.0 --no-install --yes
+opam switch create . 5.1.0 --no-install --yes
+echo 💲 'eval `opam env`'
+eval `opam env`
+echo 💲 opam install . --deps-only --yes
+opam install . --deps-only --yes
 
-echo
-echo
-echo -e "\e[0m✅ Building and installing native dependencies in ./$EXAMPLE\e[0m"
-echo -e "\e[0m   This can take a few minutes the first time\e[0m"
-echo
-echo 💲 npx esy
-npx esy
+OPAM=$(ls *.opam)
+EXE="${OPAM%.*}.exe"
 
-echo
-echo
 echo
 echo -e "\e[0m✅ Building and running example\e[0m"
+echo -e "\e[0m✅ When building yourself, be sure to run\e[0m"
 echo
-echo 💲 npx esy start
+echo '     eval `opam env`'
 echo
-npx esy start
-
+echo -e "\e[0m✅ The built server binary can be copied out with\e[0m"
 echo
+echo "     cp _build/default/$EXE ."
 echo
+echo -e "\e[0m✅ To rebuild automatically when source files change, run\e[0m"
 echo
-echo ❗ To completely delete everything touched by this Quick Start script, run
+echo "     dune exec ./$EXE --watch"
 echo
-echo "     rm" -rf ./$EXAMPLE "~/.esy"
-echo
-echo "   To" re-run the server instead, \`cd ./$EXAMPLE\`, and just repeat
-echo
-echo "     npx esy start"
-echo
-echo "   If" you change the code, \`npx esy start\` will rebuild the server automatically.
-echo "   The" built server binary can be copied out with:
-echo
-echo "     cd ./$EXAMPLE"
-echo "     npx esy cp '#{self.target_dir}/default/middleware.exe' ."
-echo
-echo "   See:"
+echo -e "\e[0m✅ See\e[0m"
 echo
 echo "   - This example:" $REPO/tree/$REF/example/$EXAMPLE#files
 echo "   - Tutorial:    " $REPO/tree/$REF/example#tutorial
 echo
+echo 💲 dune exec --root . ./$EXE
+echo
+dune exec --root . ./$EXE
