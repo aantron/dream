@@ -1,29 +1,22 @@
-FROM debian:stable-slim as build
-
-RUN apt-get update
-RUN apt-get install -y curl git libpq-dev m4 npm unzip
-
+FROM ocaml/opam:debian-12-ocaml-5.1 as build
 WORKDIR /build
 
-RUN npm install esy
-
 # Install dependencies.
-ADD esy.* .
-RUN [ -f esy.lock ] || node_modules/.bin/esy solve
-RUN node_modules/.bin/esy fetch
-RUN node_modules/.bin/esy build-dependencies
+RUN sudo apt-get update
+RUN sudo apt-get install -y libev-dev libpq-dev pkg-config
+ADD . .
+RUN opam install --deps-only .
 
 # Build project.
-ADD . .
-RUN node_modules/.bin/esy build
+RUN opam exec -- dune build
 
 
 
-FROM debian:stable-slim as run
+FROM debian:stable-20231120-slim as run
 
 RUN apt-get update
-RUN apt-get install -y libev4 libpq5 libssl1.1
+RUN apt-get install -y libev4 libpq5 libssl3
 
-COPY --from=build /build/_esy/default/build/default/postgres.exe /bin/postgres
+COPY --from=build /build/_build/default/postgres.exe /bin/postgres
 
 ENTRYPOINT /bin/postgres
