@@ -83,7 +83,7 @@ $ ssh root@my-droplet
 Install system packages for building the app:
 
 ```
-$ apt install m4 npm unzip -y
+$ apt install curl m4 opam unzip -y
 ```
 
 Install system packages for running the app:
@@ -117,7 +117,7 @@ To deploy our app, we send the sources, and then run `build.sh` and `deploy.sh`
 on the droplet:
 
 ```
-$ rsync -rlv . build@my-droplet:app --exclude _esy --exclude node_modules
+$ rsync -rlv . build@my-droplet:app --exclude _build
 $ ssh build@my-droplet "cd app && bash build.sh"
 $ ssh root@my-droplet "bash /home/build/app/deploy.sh"
 ```
