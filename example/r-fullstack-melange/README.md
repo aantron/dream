@@ -65,8 +65,13 @@ let () = {
 
 To run, do
 
-<pre><code><b>npm install
-npm start
+<pre><code><b>$ cd example/w-fullstack-melange
+$ opam install --deps-only --yes .
+$ npm install esbuild --no-save
+$ dune build --root . @melange
+$ mkdir -p static
+$ npx esbuild _build/default/client/client/client/client.js --bundle --outfile=static/client.js
+$ dune exec server/server.exe
 </b></code></pre>
 
 Then visit [http://localhost:8080](http://localhost:8080), and you will see...
@@ -82,13 +87,13 @@ example in OCaml syntax.
 
 **See also:**
 
-- [**`w-esy`**](../w-esy#files) details the server's [esy](https://esy.sh/)
-  packaging.
 - [**`w-watch`**](../w-fswatch#files) sets up a development watcher.
 - [**`w-one-binary`**](../w-one-binary#files) bundles assets into a
   self-contained binary.
 - [**`7-template`**](../7-template#files) discusses the templater, including
   security. The example is in OCaml syntax.
+- [**`r-template`**](../r-template#files) the code of the template example in
+  Reason syntax.
 
 <br>
 

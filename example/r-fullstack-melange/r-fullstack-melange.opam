@@ -1,0 +1,10 @@
+opam-version: "2.0"
+
+depends: [
+  "ocaml"
+  "dream"
+  "dune" {>= "3.8.0"}
+  "melange" {>= "2.0.0"}
+  "melange-webapi"
+  "reason" {>= "3.10.0"}
+]

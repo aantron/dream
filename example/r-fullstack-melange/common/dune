@@ -1,2 +1,3 @@
 (library
- (name common))
+ (name common)
+ (modes best melange))
