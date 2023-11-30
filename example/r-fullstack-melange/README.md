@@ -57,7 +57,7 @@ let () = {
     let text = Common.greet(`Client);
 
     let p = document |> Document.createElement("p");
-    p->Element.setInnerText(text);
+    Element.setInnerText(p, text);
     body |> Element.appendChild(p);
   }
 };
