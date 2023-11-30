@@ -120,14 +120,6 @@ You can get and build it locally with:
 Most of the other [examples][tutorial] are also loaded in the playground. See
 the links on its [home page][playground].
 
-## esy
-
-Visit any of the [examples][tutorial], such as
-[**`2-middleware`**][2-middleware], and re-create the files locally. The file
-[`esy.json`](https://github.com/aantron/dream/blob/master/example/2-middleware/esy.json)
-shows how to depend on Dream. All of the examples are installed by running `npx
-esy`, and started with `npx esy start`.
-
 ### opam
 
 ```
@@ -147,6 +139,14 @@ dune exec ./middleware.exe
 [2-middleware]: https://github.com/aantron/dream/tree/master/example/2-middleware#files
 [playground]: http://dream.as
 [2-middleware-playground]: http://dream.as/2-middleware
+
+## esy
+
+Visit any of the [examples][tutorial], such as
+[**`2-middleware`**][2-middleware], and re-create the files locally. The file
+[`esy.json`](https://github.com/aantron/dream/blob/master/example/2-middleware/esy.json)
+shows how to depend on Dream. All of the examples are installed by running `npx
+esy`, and started with `npx esy start`.
 
 <br>
 
