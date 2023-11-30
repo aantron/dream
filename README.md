@@ -122,6 +122,17 @@ the links on its [home page][playground].
 
 ### opam
 
+Create a project directory with an optional local switch:
+
+```
+mkdir project
+cd project
+opam switch create . 5.1.0
+eval $(opam env)
+```
+
+Install Dream:
+
 ```
 opam install dream
 ```
