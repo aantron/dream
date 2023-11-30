@@ -13,6 +13,26 @@ The playground is packaged a systemd daemon.
 
 <br>
 
+To monitor logs on dream.as, run
+
+```
+journalctl -f -u playground
+```
+
+To view the service status,
+
+```
+service playground status
+```
+
+To view active sandboxes,
+
+```
+docker ps
+```
+
+<br>
+
 **See also:**
 
 - [**`k-websocket`**](../k-websocket#files) introduces WebSockets.
