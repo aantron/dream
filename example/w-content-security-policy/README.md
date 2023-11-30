@@ -45,7 +45,7 @@ let () =
 
 <pre><code><b>$ cd example/w-content-security-policy</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./content_security_policy.exe</b></code></pre>
+<b>$ dune exec ./content_security_policy.exe</b></code></pre>
 
 <br>
 

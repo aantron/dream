@@ -14,7 +14,7 @@ let () =
 
 <pre><code><b>$ cd example/l-https</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./https.exe</b></code></pre>
+<b>$ dune exec ./https.exe</b></code></pre>
 
 <br>
 
@@ -28,7 +28,8 @@ but it is self-signed, and the browser rightly recognizes it as dubious.
 For production, be sure to obtain a real certificate, for example, from
 [Let's Encrypt](https://letsencrypt.org/). Pass the certificate to
 [`Dream.run`](https://aantron.github.io/dream/#val-run) with `~certificate_file`
-and `~key_file`.
+and `~key_file`. Dream will remind you to do this in the logs if you try to use
+the built-in self-signed certificate when not running on localhost.
 
 <br>
 

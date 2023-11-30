@@ -25,7 +25,7 @@ let () =
 
 <pre><code><b>$ cd example/c-cookie</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./cookie.exe</b></code></pre>
+<b>$ dune exec ./cookie.exe</b></code></pre>
 
 <br>
 

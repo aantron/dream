@@ -3,6 +3,7 @@
 set -e
 
 EXAMPLE=2-middleware
+EXE=middleware.exe
 DIRECTORY=dream-project
 REPO=https://github.com/aantron/dream
 if [ "$1" == "" ]
@@ -64,9 +65,6 @@ eval `opam env`
 echo 💲 opam install . --deps-only --yes
 opam install . --deps-only --yes
 
-OPAM=$(ls *.opam)
-EXE="${OPAM%.*}.exe"
-
 echo
 echo -e "\e[0m✅ Building and running example\e[0m"
 echo -e "\e[0m✅ When building yourself, be sure to run\e[0m"
@@ -86,6 +84,6 @@ echo
 echo "   - This example:" $REPO/tree/$REF/example/$EXAMPLE#files
 echo "   - Tutorial:    " $REPO/tree/$REF/example#tutorial
 echo
-echo 💲 dune exec --root . ./$EXE
+echo 💲 dune exec ./$EXE
 echo
-dune exec --root . ./$EXE
+dune exec ./$EXE

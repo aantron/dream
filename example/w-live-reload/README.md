@@ -29,7 +29,7 @@ let () =
 
 <pre><code><b>$ cd example/w-live-reload</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./live_reload.exe</b>
+<b>$ dune exec ./live_reload.exe</b>
 </code></pre>
 
 <br>

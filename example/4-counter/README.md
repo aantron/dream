@@ -25,7 +25,7 @@ let () =
 ```
 <pre><code><b>$ cd example/4-counter</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./counter.exe</b></code></pre>
+<b>$ dune exec ./counter.exe</b></code></pre>
 
 <br>
 

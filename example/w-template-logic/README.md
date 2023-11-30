@@ -69,7 +69,7 @@ let () =
 
 <pre><code><b>$ cd example/w-template-logic</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./template.exe</b></code></pre>
+<b>$ dune exec ./template.exe</b></code></pre>
 
 Try it in the [playground](http://dream.as/w-template-logic).
 

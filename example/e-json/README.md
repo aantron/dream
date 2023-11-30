@@ -63,7 +63,7 @@ The build commands, as always, are:
 
 <pre><code><b>$ cd example/e-json</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./json.exe</b></code></pre>
+<b>$ dune exec ./json.exe</b></code></pre>
 
 You can try this example in the [playground](http://dream.as/e-json).
 

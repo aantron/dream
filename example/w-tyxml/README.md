@@ -35,7 +35,7 @@ let () =
 
 <pre><code><b>$ cd example/w-tyxml</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./tyxml.exe</b></code></pre>
+<b>$ dune exec ./tyxml.exe</b></code></pre>
 
 Try it in the [playground](http://dream.as/w-tyxml).
 

@@ -7,7 +7,7 @@ by default. To use,
 
 <pre><code><b>$ cd example/w-stress-response</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./stress_response.exe</b>
+<b>$ dune exec ./stress_response.exe</b>
 <b>$ curl http://localhost:8080 > /dev/null &</b></code></pre>
 
 The `curl` command can be repeated for multiple concurrent clients, to check

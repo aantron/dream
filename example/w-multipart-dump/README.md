@@ -39,7 +39,7 @@ Content-Type: application/octet-stream
 
 <pre><code><b>$ cd example/w-multipart-dump</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./multipart_dump.exe</b></code></pre>
+<b>$ dune exec ./multipart_dump.exe</b></code></pre>
 
 <br>
 

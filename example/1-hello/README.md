@@ -18,7 +18,7 @@ browser. Your terminal probably makes the link clickable.
 
 <pre><code><b>$ cd example/1-hello</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./hello.exe</b>
+<b>$ dune exec ./hello.exe</b>
 08.03.21 21:17:21.471                       Running at http://localhost:8080
 08.03.21 21:17:21.471                       Type Ctrl+C to stop
 </code></pre>

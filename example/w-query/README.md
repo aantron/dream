@@ -17,7 +17,7 @@ let () =
 
 <pre><code><b>$ cd example/w-query</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./query.exe</b></code></pre>
+<b>$ dune exec ./query.exe</b></code></pre>
 
 <br>
 

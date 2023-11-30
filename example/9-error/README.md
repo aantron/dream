@@ -34,7 +34,7 @@ let () =
 
 <pre><code><b>$ cd example/9-error</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./error.exe</b></code></pre>
+<b>$ dune exec ./error.exe</b></code></pre>
 
 Try it in the [playground](http://dream.as/9-error).
 

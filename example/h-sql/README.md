@@ -68,7 +68,7 @@ let () =
 
 <pre><code><b>$ cd example/h-sql</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./sql.exe</b></code></pre>
+<b>$ dune exec ./sql.exe</b></code></pre>
 
 <br>
 

@@ -22,7 +22,7 @@ let () =
 
 <pre><code><b>$ cd example/6-echo</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./echo.exe</b></code></pre>
+<b>$ dune exec ./echo.exe</b></code></pre>
 
 ...or run it in the [playground](http://dream.as/6-echo).
 

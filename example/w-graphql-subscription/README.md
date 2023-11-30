@@ -52,7 +52,7 @@ let () =
 
 <pre><code><b>$ cd example/w-graphql-subscription</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./graphql_subscription.exe</b></code></pre>
+<b>$ dune exec ./graphql_subscription.exe</b></code></pre>
 
 <br>
 

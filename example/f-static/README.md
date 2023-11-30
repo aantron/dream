@@ -6,7 +6,7 @@ Run this example:
 
 <pre><code><b>$ cd example/f-static</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --root . ./static.exe</b></code></pre>
+<b>$ dune exec ./static.exe</b></code></pre>
 
 ...and visit
 [http://localhost:8080/static/static.ml](http://localhost:8080/static/static.ml).
