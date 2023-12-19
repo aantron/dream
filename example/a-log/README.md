@@ -41,7 +41,7 @@ messages in the log, between the others:
 ```
 
 Note that this is on `stderr`. As you can see, the functions take
-[`Printf`-style format strings](https://caml.inria.fr/pub/docs/manual-ocaml/libref/Printf.html),
+[`Printf`-style format strings](https://v2.ocaml.org/api/Printf.html),
 so you can quickly print values of various types to the log.
 
 <br>

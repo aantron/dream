@@ -19,7 +19,7 @@ let () =
 However, as you can see, the more middlewares we stack on top of each other
 like this, the more parentheses and indentation we will end up with! To keep
 the code tidy, we use `@@`, the
-[standard OCaml operator](https://caml.inria.fr/pub/docs/manual-ocaml/libref/Stdlib.html#VAL(@@)) for calling functions without parentheses. So, the [actual
+[standard OCaml operator](https://v2.ocaml.org/api/Stdlib.html#VAL(@@)) for calling functions without parentheses. So, the [actual
 code](https://github.com/aantron/dream/blob/master/example/2-middleware/middleware.ml)
 in this example looks like this:
 
