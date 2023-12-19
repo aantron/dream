@@ -26,6 +26,6 @@ lockfile.
 
 Useful links:
 
-- OCaml [*Syntax of documentation comments*](http://caml.inria.fr/pub/docs/manual-ocaml/ocamldoc.html#ss:ocamldoc-syntax)
+- OCaml [*Syntax of documentation comments*](https://v2.ocaml.org/manual/ocamldoc.html#ss:ocamldoc-syntax)
 - Lambda Soup [*Module Soup*](https://aantron.github.io/lambdasoup/)
 - Soupault [*Tips and tricks*](https://soupault.app/tips-and-tricks/)

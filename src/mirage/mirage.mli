@@ -640,7 +640,7 @@ module Make
         easiest way to do so is to pass the value through an encoder like
         {!Dream.to_base64url}. See {!Dream.run} argument [~secret].
       - [~expires] sets the [Expires=] attribute. The value is compatible with
-        {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Unix.html#VALgettimeofday}
+        {{:https://v2.ocaml.org/api/Unix.html#VALgettimeofday}
         [Unix.gettimeofday]}. See
         {{:https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-07#section-4.1.2.1}
         RFC 6265bis §4.1.2.1} and
@@ -741,7 +741,7 @@ module Make
   type buffer =
     (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
   (** Byte arrays in the C heap. See
-      {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Bigarray.Array1.html}
+      {{:https://v2.ocaml.org/api/Bigarray.Array1.html}
       [Bigarray.Array1]}. This type is also found in several libraries installed
       by Dream, so their functions can be used with {!Dream.buffer}:
 
@@ -1212,7 +1212,7 @@ module Make
         within template lines.
 
       The [s] in [<%s code %>] is actually a
-      {{:https://caml.inria.fr/pub/docs/manual-ocaml/libref/Printf.html}
+      {{:https://v2.ocaml.org/api/Printf.html}
       Printf}-style format specification. So, for example, one can print two hex
       digits using [<%02X code %>].
 
@@ -1533,9 +1533,9 @@ module Make
   val log : ('a, Format.formatter, unit, unit) format4 -> 'a
   (** Formats a message and logs it. Disregard the obfuscated type: the first
       argument is a format string as described in the standard library modules
-      {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Printf.html#VALfprintf}
+      {{:https://v2.ocaml.org/api/Printf.html#VALfprintf}
       [Printf]} and
-      {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html#VALfprintf}
+      {{:https://v2.ocaml.org/api/Format.html#VALfprintf}
       [Format]}. The rest of the arguments are determined by the format string.
       See example
       {{:https://github.com/aantron/dream/tree/master/example/a-log#files}
@@ -1629,7 +1629,7 @@ module Make
       {!Dream.initialize_log} early in program execution.
 
       - [~backtraces:true], the default, causes Dream to call
-        {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Printexc.html#VALrecord_backtrace}
+        {{:https://v2.ocaml.org/api/Printexc.html#VALrecord_backtrace}
         [Printexc.record_backtrace]}, which makes exception backtraces available.
 
       - [~async_exception_hook:true], the default, causes Dream to set

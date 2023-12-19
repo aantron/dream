@@ -54,7 +54,7 @@ file to run the template preprocessor:
 <br>
 
 The substitution, `<%s param %>`, uses
-[`Printf` conversion specifications](https://caml.inria.fr/pub/docs/manual-ocaml/libref/Printf.html)
+[`Printf` conversion specifications](https://v2.ocaml.org/api/Printf.html)
 from the standard library. So, you can do things like this:
 
 - `<%i my_int %>` to print an OCaml `int`.
