@@ -30,7 +30,7 @@ let () =
   @@ Dream.router([
 
     Dream.get("/:word", request =>
-      Dream.param("word", request)
+      Dream.param(request, "word")
       |> Template.render
       |> Dream.html),
 
