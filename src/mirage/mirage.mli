@@ -741,9 +741,9 @@ module Make
   type buffer =
     (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
   (** Byte arrays in the C heap. See
-      {{:https://v2.ocaml.org/api/Bigarray.Array1.html}
-      [Bigarray.Array1]}. This type is also found in several libraries installed
-      by Dream, so their functions can be used with {!Dream.buffer}:
+      {{:https://v2.ocaml.org/api/Bigarray.Array1.html} [Bigarray.Array1]}. This
+      type is also found in several libraries installed by Dream, so their
+      functions can be used with {!Dream.buffer}:
 
       - {{:https://github.com/inhabitedtype/bigstringaf/blob/353cb283aef4c261597f68154eb27a138e7ef112/lib/bigstringaf.mli}
         [Bigstringaf.t]} in bigstringaf.
@@ -1212,9 +1212,9 @@ module Make
         within template lines.
 
       The [s] in [<%s code %>] is actually a
-      {{:https://v2.ocaml.org/api/Printf.html}
-      Printf}-style format specification. So, for example, one can print two hex
-      digits using [<%02X code %>].
+      {{:https://v2.ocaml.org/api/Printf.html} Printf}-style format
+      specification. So, for example, one can print two hex digits using
+      [<%02X code %>].
 
       [<%s code %>] automatically escapes the result of [code] using
       {!Dream.html_escape}. This can be suppressed with [!]. [<%s! code %>] prints
@@ -1533,11 +1533,9 @@ module Make
   val log : ('a, Format.formatter, unit, unit) format4 -> 'a
   (** Formats a message and logs it. Disregard the obfuscated type: the first
       argument is a format string as described in the standard library modules
-      {{:https://v2.ocaml.org/api/Printf.html#VALfprintf}
-      [Printf]} and
-      {{:https://v2.ocaml.org/api/Format.html#VALfprintf}
-      [Format]}. The rest of the arguments are determined by the format string.
-      See example
+      {{:https://v2.ocaml.org/api/Printf.html#VALfprintf} [Printf]} and
+      {{:https://v2.ocaml.org/api/Format.html#VALfprintf} [Format]}. The rest of
+      the arguments are determined by the format string. See example
       {{:https://github.com/aantron/dream/tree/master/example/a-log#files}
       [a-log]} \[{{:http://dream.as/a-log} playground}\].
 
