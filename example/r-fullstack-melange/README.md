@@ -71,7 +71,7 @@ $ npm install esbuild --no-save
 $ dune build --root . @melange
 $ mkdir -p static
 $ npx esbuild _build/default/client/client/client/client.js --bundle --outfile=static/client.js
-$ dune exec server/server.exe
+$ dune exec --root . server/server.exe
 </b></code></pre>
 
 Then visit [http://localhost:8080](http://localhost:8080), and you will see...

@@ -29,7 +29,7 @@ The rest of the code hooks up the client's message form to the WebSocket.
 
 <pre><code><b>$ cd example/w-chat</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec ./chat.exe</b></code></pre>
+<b>$ dune exec --root . ./chat.exe</b></code></pre>
 
 <br>
 

@@ -47,7 +47,7 @@ let () =
 
 <pre><code><b>$ cd example/d-form</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec ./form.exe</b></code></pre>
+<b>$ dune exec --root . ./form.exe</b></code></pre>
 
 Try it in the [playground](http://dream.as/d-form).
 

@@ -52,7 +52,7 @@ Mirage. To build and run, do
 <b>$ opam install mirage</b>
 <b>$ mirage configure -t unix</b>
 <b>$ make depends</b>
-<b>$ dune build</b>
+<b>$ dune build --root .</b>
 <b>$ _build/default/main.exe</b>
 </code></pre>
 

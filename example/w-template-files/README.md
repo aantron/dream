@@ -40,7 +40,7 @@ let () =
 
 <pre><code><b>$ cd example/w-template-files</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec ./server.exe</b></code></pre>
+<b>$ dune exec --root . ./server.exe</b></code></pre>
 
 <br>
 

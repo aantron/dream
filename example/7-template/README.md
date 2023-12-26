@@ -32,7 +32,7 @@ let () =
 
 <pre><code><b>$ cd example/7-template</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec ./template.exe</b></code></pre>
+<b>$ dune exec --root . ./template.exe</b></code></pre>
 
 <br>
 

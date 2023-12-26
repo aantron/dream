@@ -27,7 +27,7 @@ let () =
 
 <pre><code><b>$ cd example/3-router</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec ./router.exe</b></code></pre>
+<b>$ dune exec --root . ./router.exe</b></code></pre>
 
 <br>
 

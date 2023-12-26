@@ -26,7 +26,7 @@ let () =
 
 <pre><code><b>$ cd example/a-log</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec ./log.exe</b></code></pre>
+<b>$ dune exec --root . ./log.exe</b></code></pre>
 
 <br>
 

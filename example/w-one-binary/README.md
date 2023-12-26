@@ -76,7 +76,7 @@ To build the whole setup, just do
 
 <pre><code><b>$ cd example/w-one-binary</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec ./one_binary.exe</b></code></pre>
+<b>$ dune exec --root . ./one_binary.exe</b></code></pre>
 
 You can now visit
 [http://localhost:8080/assets/camel.jpeg](http://localhost:8080/assets/camel.jpeg)

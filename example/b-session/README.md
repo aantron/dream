@@ -24,7 +24,7 @@ let () =
 
 <pre><code><b>$ cd example/b-session</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec ./session.exe</b></code></pre>
+<b>$ dune exec --root . ./session.exe</b></code></pre>
 
 <br>
 

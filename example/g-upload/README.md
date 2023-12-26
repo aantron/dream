@@ -52,7 +52,7 @@ let () =
 
 <pre><code><b>$ cd example/g-upload</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec ./upload.exe</b></code></pre>
+<b>$ dune exec --root . ./upload.exe</b></code></pre>
 
 <br>
 

@@ -89,7 +89,7 @@ request, like this:
 
 <pre><code><b>$ cd example/w-flash</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec ./flash.exe</b></code></pre>
+<b>$ dune exec --root . ./flash.exe</b></code></pre>
 
 <br>
 

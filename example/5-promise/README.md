@@ -42,7 +42,7 @@ let () =
 
 <pre><code><b>$ cd example/5-promise</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec ./promise.exe</b></code></pre>
+<b>$ dune exec --root . ./promise.exe</b></code></pre>
 
 Try it in the [playground](http://dream.as/5-promise).
 

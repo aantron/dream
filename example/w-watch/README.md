@@ -7,7 +7,7 @@ and run your server when you make changes.
 
 <pre><code><b>$ cd example/w-watch</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec --watch ./hello.exe</b></code></pre>
+<b>$ dune exec --root . --watch ./hello.exe</b></code></pre>
 
 Note that this requires Dune 3.7.0 or higher.
 

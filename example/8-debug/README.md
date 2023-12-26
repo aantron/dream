@@ -24,7 +24,7 @@ let () =
 
 <pre><code><b>$ cd example/8-debug</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec ./debug.exe</b></code></pre>
+<b>$ dune exec --root . ./debug.exe</b></code></pre>
 
 <br>
 

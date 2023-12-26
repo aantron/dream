@@ -14,7 +14,7 @@ let () =
 
 <pre><code><b>$ cd example/l-https</b>
 <b>$ opam install --deps-only --yes .</b>
-<b>$ dune exec ./https.exe</b></code></pre>
+<b>$ dune exec --root . ./https.exe</b></code></pre>
 
 <br>
 
