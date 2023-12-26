@@ -19,13 +19,13 @@ Contributions are very welcome. This includes not only code PRs, but also:
 To get the version of Dream installed in a project that uses it, run
 
 ```
-npx esy ls-builds
+opam list dream
 ```
 
 or
 
 ```
-opam list dream
+npx esy ls-builds
 ```
 
 <br>
@@ -40,7 +40,8 @@ cd dream
 ```
 
 Note: the clone *must* be `--recursive`, because Dream several dependencies
-vendored as [submodules](https://github.com/aantron/dream/tree/master/src/vendor)!
+vendored as
+[submodules](https://github.com/aantron/dream/tree/master/src/vendor).
 
 Later, you'll need to fork the repository on GitHub, and add your fork as a
 remote:
@@ -52,7 +53,7 @@ git remote add fork git@github.com:my-github-name/dream.git
 Install Dream's dependencies:
 
 ```
-opam install --deps-only ./dream.opam --with-test
+make deps
 ```
 
 If you don't have an opam switch ready, first create one with
