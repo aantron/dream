@@ -1368,7 +1368,7 @@ val router : route list -> handler
         Dream.run
         @@ Dream.router [
           Dream.get "/echo/:word" @@ fun request ->
-            Dream.html (Dream.param "word" request);
+            Dream.html (Dream.param request "word");
         ]
     ]}
 
