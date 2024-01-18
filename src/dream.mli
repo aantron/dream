@@ -1507,7 +1507,11 @@ val static :
 
     The default loader is {!Dream.from_filesystem}. See example
     {{:https://github.com/aantron/dream/tree/master/example/w-one-binary#files}
-    [w-one-binary]} for a loader that serves files from memory instead. *)
+    [w-one-binary]} for a loader that serves files from memory instead.
+
+    Note that no caching-related headers are sent in the response. If you want
+    caching, one option is to pass [~static:custom_loader] where the custom
+    loader calls {!Dream.from_filesystem} and then adds appropriate headers. *)
 
 val from_filesystem : string -> string -> handler
 (** [Dream.from_filesystem local_directory path request] responds with a file
