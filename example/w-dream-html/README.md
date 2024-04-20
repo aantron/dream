@@ -37,7 +37,7 @@ let () =
 <b>$ opam install --deps-only --yes .</b>
 <b>$ dune exec --root . ./main.exe</b></code></pre>
 
-Try it in the [playground](http://dream.as/w-dream-html).
+Try it in the [playground](https://dream.as/w-dream-html).
 
 Some notes:
 
