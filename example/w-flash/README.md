@@ -94,7 +94,7 @@ request, like this:
 <br>
 
 After starting the server, visit [http://localhost:8080](http://localhost:8080)
-[[playground](http://dream.as/w-flash)] to start this little interaction!
+to start this little interaction!
 
 <br>
 

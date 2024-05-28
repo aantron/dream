@@ -27,9 +27,8 @@ let rec message_loop () =
 <br>
 
 When a client connects to the example's server-sent events endpoint at
-[http://localhost:8080/push](http://localhost:8080/push)
-[[playground](http://dream.as/w-server-sent-events)], the server first sends any
-messages that have already accumulated, and then gradually
+[http://localhost:8080/push](http://localhost:8080/push), the server first
+sends any messages that have already accumulated, and then gradually
 [streams](https://aantron.github.io/dream/#streaming) more messages as they are
 created.
 

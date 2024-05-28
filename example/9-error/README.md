@@ -36,8 +36,6 @@ let () =
 <b>$ opam install --deps-only --yes .</b>
 <b>$ dune exec --root . ./error.exe</b></code></pre>
 
-Try it in the [playground](http://dream.as/9-error).
-
 <br>
 
 We kept the error template simple for the sake of the example, but this is

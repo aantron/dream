@@ -42,8 +42,6 @@ the client immediately. If a client sends the next request before any more
 messages are generated, the server waits to respond &mdash; hence, “long
 polling.”
 
-Try it in the [playground](http://dream.as/w-long-polling).
-
 <br>
 
 **See also:**

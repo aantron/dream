@@ -30,8 +30,6 @@ let () =
 <b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
 
-Try it in the [playground](http://dream.as/r-template).
-
 <br>
 
 To use the templater, we need to add a stanza to our

@@ -72,8 +72,8 @@ let () =
 
 <br>
 
-Try visiting [http://localhost:8080](http://localhost:8080)
-[[playground](http://dream.as/h-sql)] and leaving some comments!
+Try visiting [http://localhost:8080](http://localhost:8080) and leaving some
+comments!
 
 ![Comments](https://raw.githubusercontent.com/aantron/dream/master/docs/asset/sql.png)
 

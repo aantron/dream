@@ -35,8 +35,7 @@ let () =
 
 <br>
 
-Visit [http://localhost:8080](http://localhost:8080)
-[[playground](http://dream.as/r-template-stream)] to see it in action.
+Visit [http://localhost:8080](http://localhost:8080) to see it in action.
 
 The important differences with regular usage of templates are:
 

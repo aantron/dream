@@ -32,8 +32,6 @@ let () =
 <b>$ opam install --deps-only --yes .</b>
 <b>$ dune exec --root . ./template_stream.exe</b></code></pre>
 
-Try it in the [playground](http://dream.as/w-template-stream).
-
 <br>
 
 Most uses of streaming don't need

@@ -1,9 +1,9 @@
 name: systemd
-on:
-  push:
-    paths:
-    - 'example/z-systemd/**'
-    - .github/workflows/systemd.yml
+# on:
+#   push:
+#     paths:
+#     - 'example/z-systemd/**'
+#     - .github/workflows/systemd.yml
 
 jobs:
   deploy:

@@ -1,9 +1,9 @@
 name: docker-esy
-on:
-  push:
-    paths:
-    - 'example/z-docker-esy/**'
-    - .github/workflows/docker-esy.yml
+# on:
+#   push:
+#     paths:
+#     - 'example/z-docker-esy/**'
+#     - .github/workflows/docker-esy.yml
 
 jobs:
   deploy:

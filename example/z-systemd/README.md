@@ -36,10 +36,6 @@ let () =
   ]
 ```
 
-It is live at [http://systemd.dream.as](http://systemd.dream.as). As a second
-example, the [playground](http://dream.as) is deployed as a [systemd
-service](https://github.com/aantron/dream/blob/master/example/z-playground/server/playground.service).
-
 The service can be hosted on any server provider. We will use [Digital
 Ocean](https://www.digitalocean.com) in this example. We will run the build
 remotely, taking advantage of the remote filesystem as a build cache. If you
@@ -48,8 +44,7 @@ binaries to the server. This will simplify the server setup slightly, as it
 won't need an OCaml/Reason build system.
 
 To complete the setup, we [add a CD script](#automation) at the end. It deploys
-the example to [systemd.dream.as](http://systemd.dream.as) each time the code is
-pushed!
+the example each time the code is pushed!
 
 <br>
 
@@ -161,13 +156,9 @@ $ ssh build@my-droplet "journalctl -f"
 
 ## Automation
 
-The Dream repo deploys this example to
-[systemd.dream.as](http://systemd.dream.as) from a [GitHub
-action](https://github.com/aantron/dream/blob/master/.github/workflows/systemd.yml),
-which mainly just runs the [deploy steps](#deploy) above.
-
-The action needs SSH access to the droplet. Generate an SSH key pair without a
-passphrase, and upload the public key:
+The app can be deployed by a GitHub Action. The action needs SSH access to the
+droplet. Generate an SSH key pair without a passphrase, and upload the public
+key:
 
 ```
 $ ssh-keygen -t rsa -b 4096 -f github-actions

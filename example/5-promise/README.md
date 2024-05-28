@@ -44,8 +44,6 @@ let () =
 <b>$ opam install --deps-only --yes .</b>
 <b>$ dune exec --root . ./promise.exe</b></code></pre>
 
-Try it in the [playground](http://dream.as/5-promise).
-
 <br>
 
 As you can see, the

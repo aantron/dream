@@ -32,9 +32,6 @@ services:
       driver: ${LOGGING_DRIVER:-json-file}
 ```
 
-The example app is running live at
-[http://docker-esy.dream.as](http://docker-esy.dream.as).
-
 The setup can be run locally or on any server provider. We will use a [Digital
 Ocean](https://digitalocean.com) "droplet" (virtual machine). The server binary is built by Docker.
 
@@ -151,10 +148,8 @@ $ ssh build@my-droplet "journalctl -f"
 
 ## Automation
 
-The Dream repo has a
-[GitHub action](https://github.com/aantron/dream/blob/master/.github/workflows/docker-esy.yml)
-that deploys this example to [docker-esy.dream.as](http://docker-esy.dream.as)
-on every push. It runs the [two commands](#deploy) above.
+The app can be deployed on every push by running the [two commands](#deploy)
+above in GitHub Actions.
 
 The action needs SSH access to the droplet. See
 [*Automation*](../z-systemd#automation) in

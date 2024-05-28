@@ -49,8 +49,6 @@ let () =
 <b>$ opam install --deps-only --yes .</b>
 <b>$ dune exec --root . ./form.exe</b></code></pre>
 
-Try it in the [playground](http://dream.as/d-form).
-
 <br>
 
 The template adds a CSRF token to the form using

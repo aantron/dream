@@ -49,10 +49,9 @@ let () =
 
 <br>
 
-Visit [http://localhost:8080](http://localhost:8080)
-[[playground](http://dream.as/w-content-security-policy)], and your browser
-should refuse to show `/nested` inside the frame on the home page. In addition,
-the server log will show something like
+Visit [http://localhost:8080](http://localhost:8080), and your browser should
+refuse to show `/nested` inside the frame on the home page. In addition, the
+server log will show something like
 
 ```
 09.06.21 09:54:35.971                 ERROR REQ 3 {

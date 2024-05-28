@@ -13,11 +13,6 @@ which, in this example, derives an image from one of the [opam base
 images](https://hub.docker.com/r/ocaml/opam), and installs dependencies using
 opam. The initial build requires at least 2 GB of memory.
 
-The example is live at
-[http://docker-opam.dream.as](http://docker-opam.dream.as), and is deployed
-there automatically, on push, by a
-[GitHub action](https://github.com/aantron/dream/blob/master/.github/workflows/docker-opam.yml).
-
 <br>
 
 [Up to the example index](../#deploying)

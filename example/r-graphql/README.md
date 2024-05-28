@@ -74,8 +74,8 @@ let () =
 
 <br>
 
-Visit [http://localhost:8080](http://localhost:8080)
-[[playground](http://dream.as/r-graphql)], and you can interact with the schema:
+Visit [http://localhost:8080](http://localhost:8080), and you can interact with
+the schema:
 
 ![GraphiQL](https://raw.githubusercontent.com/aantron/dream/master/docs/asset/graphiql.png)
 

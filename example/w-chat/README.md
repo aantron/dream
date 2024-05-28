@@ -34,10 +34,7 @@ The rest of the code hooks up the client's message form to the WebSocket.
 <br>
 
 Open [http://localhost:8080](http://localhost:8080) in two tabs to get the
-whole exchange started! You can also try it in the
-[playground](http://dream.as/w-chat). To connect a second tab, copy out the
-address from the playground's location bar, and paste it into a new tab in your
-browser.
+whole exchange started!
 
 <br>
 

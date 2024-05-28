@@ -54,8 +54,8 @@ let () =
 
 <br>
 
-Visit [http://localhost:8080](http://localhost:8080)
-[[playground](http://dream.as/k-websocket)] to get the whole exchange started!
+Visit [http://localhost:8080](http://localhost:8080) to get the whole exchange
+started!
 
 ![WebSocket alert](https://raw.githubusercontent.com/aantron/dream/master/docs/asset/websocket.png)
 

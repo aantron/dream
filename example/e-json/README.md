@@ -65,8 +65,6 @@ The build commands, as always, are:
 <b>$ opam install --deps-only --yes .</b>
 <b>$ dune exec --root . ./json.exe</b></code></pre>
 
-You can try this example in the [playground](http://dream.as/e-json).
-
 <br>
 
 This example expects JSON of the form `{"message": "some-message"}`. Let's test

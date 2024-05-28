@@ -24,8 +24,6 @@ let () =
 <b>$ opam install --deps-only --yes .</b>
 <b>$ dune exec --root . ./echo.exe</b></code></pre>
 
-...or run it in the [playground](http://dream.as/6-echo).
-
 <br>
 
 You can test it with curl:

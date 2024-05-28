@@ -37,8 +37,6 @@ let () =
 <b>$ opam install --deps-only --yes .</b>
 <b>$ dune exec --root . ./tyxml.exe</b></code></pre>
 
-Try it in the [playground](http://dream.as/w-tyxml).
-
 <br>
 
 ## JSX

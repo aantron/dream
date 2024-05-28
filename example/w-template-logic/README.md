@@ -71,8 +71,6 @@ let () =
 <b>$ opam install --deps-only --yes .</b>
 <b>$ dune exec --root . ./template.exe</b></code></pre>
 
-Try it in the [playground](http://dream.as/w-template-logic).
-
 <br>
 
 **See also:**

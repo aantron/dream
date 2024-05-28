@@ -19,9 +19,8 @@ let () =
 
 <br>
 
-After starting it, visit [http://localhost:8080](http://localhost:8080), or use
-the [playground](http://dream.as/r-hello), and it will respond with its friendly
-greeting!
+After starting it, visit [http://localhost:8080](http://localhost:8080), and it
+will respond with its friendly greeting!
 
 <br>
 

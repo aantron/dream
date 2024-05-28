@@ -28,8 +28,8 @@ let () =
 
 <br>
 
-The first time you access the app [[playground](http://dream.as/b-session)], it
-“logs you in” by saving you user name in a session. The session manager,
+The first time you access the app, it “logs you in” by saving you user name in
+a session. The session manager,
 [`Dream.memory_sessions`](https://aantron.github.io/dream/#val-memory_sessions),
 a middleware, adds a `dream.session` cookie to the response, containing the
 session key. The next time you access the app, the session is looked up again

@@ -56,8 +56,7 @@ let () =
 
 <br>
 
-The page shown after uploading looks like this
-[[playground](http://dream.as/g-upload)]:
+The page shown after uploading looks like this:
 
 ```
 foo.png, 663959 bytes

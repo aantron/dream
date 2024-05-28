@@ -36,8 +36,6 @@ let () =
 <b>$ opam install --deps-only --yes .</b>
 <b>$ dune exec --root . ./stream.exe</b></code></pre>
 
-Try running it in the [playground](http://dream.as/j-stream).
-
 <br>
 
 You can test it by running

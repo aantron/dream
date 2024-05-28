@@ -12,7 +12,6 @@ Easy-to-use, feature-complete Web framework without boilerplate.
 
 <p align="center">
   <a href="#quick-start">Quick Start</a> |
-  <a href="http://dream.as">Playground</a> |
   <a href="https://github.com/aantron/dream/tree/master/example#readme">
     Tutorial</a> |
   <a href="https://aantron.github.io/dream/">Reference</a>
@@ -110,15 +109,11 @@ into.
 
 ## Quick start
 
-Visit one of the first tutorials in the [online
-playground][2-middleware-playground], and read its
-[docs](https://github.com/aantron/dream/tree/master/example/2-middleware#files).
-You can get and build it locally with:
+You can get
+[one](https://github.com/aantron/dream/tree/master/example/2-middleware#files)
+of the first [tutorials][tutorial] and build it locally with:
 
 <pre><b>bash -c "$(curl -fsSL https://raw.githubusercontent.com/aantron/dream/master/example/quickstart.sh)"</b></pre>
-
-Most of the other [examples][tutorial] are also loaded in the playground. See
-the links on its [home page][playground].
 
 ### opam
 
@@ -148,8 +143,6 @@ dune exec ./middleware.exe
 [quickstart.sh]: https://github.com/aantron/dream/blob/master/example/quickstart.sh
 [esy]: https://esy.sh/
 [2-middleware]: https://github.com/aantron/dream/tree/master/example/2-middleware#files
-[playground]: http://dream.as
-[2-middleware-playground]: http://dream.as/2-middleware
 
 ## esy
 

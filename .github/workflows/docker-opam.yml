@@ -1,9 +1,9 @@
 name: docker-opam
-on:
-  push:
-    paths:
-    - 'example/z-docker-opam/**'
-    - .github/workflows/docker-opam.yml
+# on:
+#   push:
+#     paths:
+#     - 'example/z-docker-opam/**'
+#     - .github/workflows/docker-opam.yml
 
 jobs:
   deploy:

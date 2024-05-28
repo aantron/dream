@@ -70,8 +70,6 @@ let () =
 <b>$ npm install esy && npx esy</b>
 <b>$ npx esy start</b></code></pre>
 
-Try it in the [playground](http://dream.as/r-template-logic).
-
 <br>
 
 **See also:**
