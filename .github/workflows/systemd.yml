@@ -1,5 +1,5 @@
 name: systemd
-# on:
+on: workflow_call
 #   push:
 #     paths:
 #     - 'example/z-systemd/**'

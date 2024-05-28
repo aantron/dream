@@ -1,5 +1,5 @@
 name: docker-esy
-# on:
+on: workflow_call
 #   push:
 #     paths:
 #     - 'example/z-docker-esy/**'
