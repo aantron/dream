@@ -151,9 +151,9 @@ release : clean
 	(cd _release && tar xf $(RELEASE).tar.gz)
 	opam remove -y dream-pure dream-httpaf dream gluten httpaf h2 websocketaf paf
 	opam pin remove -y dream-pure dream-httpaf dream
-	opam pin add -y --no-action dream-pure _release/$(RELEASE) --kind=path
-	opam pin add -y --no-action dream-httpaf _release/$(RELEASE) --kind=path
-	opam pin add -y --no-action dream _release/$(RELEASE) --kind=path
+	opam pin add -y --no-action dream-pure.dev _release/$(RELEASE) --kind=path
+	opam pin add -y --no-action dream-httpaf.dev _release/$(RELEASE) --kind=path
+	opam pin add -y --no-action dream.dev _release/$(RELEASE) --kind=path
 	opam reinstall -y --verbose dream
 	@echo Run make release-finish to complete after killing the server
 	cd example/1-hello && dune exec --root . ./hello.exe || true
