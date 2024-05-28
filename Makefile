@@ -162,5 +162,5 @@ release : clean
 release-finish :
 	opam remove -y dream-pure dream-httpaf dream
 	opam pin remove -y dream-pure dream-httpaf dream
-	md5sum $(RELEASE).tar.gz
+	sha256sum $(RELEASE).tar.gz
 	ls -l $(RELEASE).tar.gz
