@@ -120,6 +120,16 @@ You can get and build it locally with:
 Most of the other [examples][tutorial] are also loaded in the playground. See
 the links on its [home page][playground].
 
+### Project template
+
+To quickly start a new project with [Spin](https://github.com/tmattio/spin), you can use:
+
+```bash
+opam spin new https://github.com/ocaml-templates/spin-dream.git
+```
+
+The project contains a typical project structure for a real-world application, as well as optional configurations for TailwindCSS and Turbolink. You can read more about it [here](https://github.com/tmattio/spin-dream/#readme)
+
 ### opam
 
 Create a project directory with an optional local switch:
