@@ -271,11 +271,11 @@ nav ~ * a[href="#templates"] {
   font-style: italic;
 }
 
-a[href*=example] {
+header a[href*=example], .spec-doc a[href*=example] {
   font-weight: bold;
 }
 
-a[href^=http]::after {
+header a[href^=http]::after, .spec-doc a[href^=http]::after {
   content: "\f35d";
   font-family: FontAwesome;
   font-size: 10px;

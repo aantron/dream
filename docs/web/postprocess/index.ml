@@ -9,6 +9,15 @@ let if_expected = Common.if_expected
 
 open Soup
 
+let promise_expected = {|<div class="spec type" id="type-promise">
+ <a href="#type-promise" class="anchor"></a><code><span><span class="keyword">and</span> <span>'a promise</span></span><span> = <span><span class="type-var">'a</span> <span class="xref-unresolved">Lwt</span>.t</span></span></code>
+</div>
+|}
+
+let promise_replacement = {|
+<code><span class="keyword">and</span> 'a promise = 'a <a href="https://ocsigen.org/lwt/latest/api/Lwt#2_Fundamentals">Lwt.t</a></code>
+|}
+
 let method_expected = {|<div class="spec type" id="type-method_">
  <a href="#type-method_" class="anchor"></a><code><span><span class="keyword">type</span> method_</span><span> = </span><span>[ </span></code>
  <table>
@@ -80,9 +89,36 @@ let method_replacement = {|
   | `OPTIONS
   | `TRACE
   | `PATCH
-  | `Method <span class="of">of</span> string
+  | `Method <span class="of">of</span> <a href="https://ocaml.org/manual/latest/api/String.html">string</a>
 ]
 </pre>
+|}
+
+let method_to_string_expected = {|<div class="spec value" id="val-method_to_string">
+ <a href="#val-method_to_string" class="anchor"></a><code><span><span class="keyword">val</span> method_to_string : <span><span>[&lt; <a href="#type-method_">method_</a> ]</span> <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let method_to_string_replacement = {|
+<code><span class="keyword">val</span> method_to_string : [&lt; <a href="#type-method_">method_</a> ] <span class="arrow">-&gt;</span> <a href="https://ocaml.org/manual/latest/api/String.html">string</a></code>
+|}
+
+let string_to_method_expected = {|<div class="spec value" id="val-string_to_method">
+ <a href="#val-string_to_method" class="anchor"></a><code><span><span class="keyword">val</span> string_to_method : <span>string <span class="arrow">-&gt;</span></span> <a href="#type-method_">method_</a></span></code>
+</div>
+|}
+
+let string_to_method_replacement = {|
+<code><span class="keyword">val</span> string_to_method : <a href="https://ocaml.org/manual/latest/api/String.html">string</a> <span class="arrow">-&gt;</span> <a href="#type-method_">method_</a></code>
+|}
+
+let methods_equal_expected = {|<div class="spec value" id="val-methods_equal">
+ <a href="#val-methods_equal" class="anchor"></a><code><span><span class="keyword">val</span> methods_equal : <span><span>[&lt; <a href="#type-method_">method_</a> ]</span> <span class="arrow">-&gt;</span></span> <span><span>[&lt; <a href="#type-method_">method_</a> ]</span> <span class="arrow">-&gt;</span></span> bool</span></code>
+</div>
+|}
+
+let methods_equal_replacement = {|
+<code><span class="keyword">val</span> methods_equal : [&lt; <a href="#type-method_">method_</a> ] <span class="arrow">-&gt;</span> [&lt; <a href="#type-method_">method_</a> ] <span class="arrow">-&gt;</span> <a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a></code>
 |}
 
 let informational_expected = {|<div class="spec type" id="type-informational">
@@ -227,7 +263,7 @@ let redirect_replacement = {|
 ]</pre>
 |}
 
-let client_expected = {|<div class="spec type" id="type-client_error">
+let client_error_expected = {|<div class="spec type" id="type-client_error">
  <a href="#type-client_error" class="anchor"></a><code><span><span class="keyword">type</span> client_error</span><span> = </span><span>[ </span></code>
  <table>
   <tbody>
@@ -362,7 +398,7 @@ let client_expected = {|<div class="spec type" id="type-client_error">
 </div>
 |}
 
-let client_replacement = {|
+let client_error_replacement = {|
 <pre class="compact"><span class="keyword">type</span> client_error = [
   | `Bad_Request
   | `Unauthorized
@@ -511,8 +547,138 @@ let status_expected = {|<div class="spec type" id="type-status">
 let status_replacement = {|
 <pre class="compact"><span class="keyword">type</span> status = [
   | <a href="#type-standard_status">standard_status</a>
-  | `Status <span class="of">of</span> int
+  | `Status <span class="of">of</span> <a href="https://ocaml.org/manual/latest/api/Int.html">int</a>
 ]</pre>
+|}
+
+let status_to_string_expected = {|<div class="spec value" id="val-status_to_string">
+ <a href="#val-status_to_string" class="anchor"></a><code><span><span class="keyword">val</span> status_to_string : <span><span>[&lt; <a href="#type-status">status</a> ]</span> <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let status_to_string_replacement = {|
+<code><span class="keyword">val</span> status_to_string : [&lt; <a href="#type-status">status</a> ] <span class="arrow">-&gt;</span> <a href="https://ocaml.org/manual/latest/api/String.html">string</a></code>
+|}
+
+let status_to_reason_expected = {|<div class="spec value" id="val-status_to_reason">
+ <a href="#val-status_to_reason" class="anchor"></a><code><span><span class="keyword">val</span> status_to_reason : <span><span>[&lt; <a href="#type-status">status</a> ]</span> <span class="arrow">-&gt;</span></span> <span>string option</span></span></code>
+</div>
+|}
+
+let status_to_reason_replacement = {|
+<code><span class="keyword">val</span> status_to_reason : [&lt; <a href="#type-status">status</a> ] <span class="arrow">-&gt;</span> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> <a href="https://ocaml.org/manual/latest/api/Option.html">option</a></code>
+|}
+
+let status_to_int_expected = {|<div class="spec value" id="val-status_to_int">
+ <a href="#val-status_to_int" class="anchor"></a><code><span><span class="keyword">val</span> status_to_int : <span><span>[&lt; <a href="#type-status">status</a> ]</span> <span class="arrow">-&gt;</span></span> int</span></code>
+</div>
+|}
+
+let status_to_int_replacement = {|
+<code><span class="keyword">val</span> status_to_int : [&lt; <a href="#type-status">status</a> ] <span class="arrow">-&gt;</span> <a href="https://ocaml.org/manual/latest/api/Int.html">int</a></code>
+|}
+
+let int_to_status_expected = {|<div class="spec value" id="val-int_to_status">
+ <a href="#val-int_to_status" class="anchor"></a><code><span><span class="keyword">val</span> int_to_status : <span>int <span class="arrow">-&gt;</span></span> <a href="#type-status">status</a></span></code>
+</div>
+|}
+
+let int_to_status_replacement = {|
+<code><span class="keyword">val</span> int_to_status : <a href="https://ocaml.org/manual/latest/api/Int.html">int</a> <span class="arrow">-&gt;</span> <a href="#type-status">status</a></code>
+|}
+
+let is_informational_expected = {|<div class="spec value" id="val-is_informational">
+ <a href="#val-is_informational" class="anchor"></a><code><span><span class="keyword">val</span> is_informational : <span><span>[&lt; <a href="#type-status">status</a> ]</span> <span class="arrow">-&gt;</span></span> bool</span></code>
+</div>
+|}
+
+let is_informational_replacement = {|
+<code><span class="keyword">val</span> is_informational : [&lt; <a href="#type-status">status</a> ] <span class="arrow">-&gt;</span> <a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a></code>
+|}
+
+let is_successful_expected = {|<div class="spec value" id="val-is_successful">
+ <a href="#val-is_successful" class="anchor"></a><code><span><span class="keyword">val</span> is_successful : <span><span>[&lt; <a href="#type-status">status</a> ]</span> <span class="arrow">-&gt;</span></span> bool</span></code>
+</div>
+|}
+
+let is_successful_replacement = {|
+<code><span class="keyword">val</span> is_successful : [&lt; <a href="#type-status">status</a> ] <span class="arrow">-&gt;</span> <a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a></code>
+|}
+
+let is_redirection_expected = {|<div class="spec value" id="val-is_redirection">
+ <a href="#val-is_redirection" class="anchor"></a><code><span><span class="keyword">val</span> is_redirection : <span><span>[&lt; <a href="#type-status">status</a> ]</span> <span class="arrow">-&gt;</span></span> bool</span></code>
+</div>
+|}
+
+let is_redirection_replacement = {|
+<code><span class="keyword">val</span> is_redirection : [&lt; <a href="#type-status">status</a> ] <span class="arrow">-&gt;</span> <a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a></code>
+|}
+
+let is_client_error_expected = {|<div class="spec value" id="val-is_client_error">
+ <a href="#val-is_client_error" class="anchor"></a><code><span><span class="keyword">val</span> is_client_error : <span><span>[&lt; <a href="#type-status">status</a> ]</span> <span class="arrow">-&gt;</span></span> bool</span></code>
+</div>
+|}
+
+let is_client_error_replacement = {|
+<code><span class="keyword">val</span> is_client_error : [&lt; <a href="#type-status">status</a> ] <span class="arrow">-&gt;</span> <a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a></code>
+|}
+
+let is_server_error_expected = {|<div class="spec value" id="val-is_server_error">
+ <a href="#val-is_server_error" class="anchor"></a><code><span><span class="keyword">val</span> is_server_error : <span><span>[&lt; <a href="#type-status">status</a> ]</span> <span class="arrow">-&gt;</span></span> bool</span></code>
+</div>
+|}
+
+let is_server_error_replacement = {|
+<code><span class="keyword">val</span> is_server_error : [&lt; <a href="#type-status">status</a> ] <span class="arrow">-&gt;</span> <a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a></code>
+|}
+
+let status_codes_equal_expected = {|<div class="spec value" id="val-status_codes_equal">
+ <a href="#val-status_codes_equal" class="anchor"></a><code><span><span class="keyword">val</span> status_codes_equal : <span><span>[&lt; <a href="#type-status">status</a> ]</span> <span class="arrow">-&gt;</span></span> <span><span>[&lt; <a href="#type-status">status</a> ]</span> <span class="arrow">-&gt;</span></span> bool</span></code>
+</div>
+|}
+
+let status_codes_equal_replacement = {|
+<code><span class="keyword">val</span> status_codes_equal : [&lt; <a href="#type-status">status</a> ] <span class="arrow">-&gt;</span> [&lt; <a href="#type-status">status</a> ] <span class="arrow">-&gt;</span> <a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a></code>
+|}
+
+let client_expected = {|<div class="spec value" id="val-client">
+ <a href="#val-client" class="anchor"></a><code><span><span class="keyword">val</span> client : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let tls_expected = {|<div class="spec value" id="val-tls">
+ <a href="#val-tls" class="anchor"></a><code><span><span class="keyword">val</span> tls : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> bool</span></code>
+</div>
+|}
+
+let target_expected = {|<div class="spec value" id="val-target">
+ <a href="#val-target" class="anchor"></a><code><span><span class="keyword">val</span> target : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let set_client_expected = {|<div class="spec value" id="val-set_client">
+ <a href="#val-set_client" class="anchor"></a><code><span><span class="keyword">val</span> set_client : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
+|}
+
+let set_method_expected = {|<div class="spec value" id="val-set_method_">
+ <a href="#val-set_method_" class="anchor"></a><code><span><span class="keyword">val</span> set_method_ : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span>[&lt; <a href="#type-method_">method_</a> ]</span> <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
+|}
+
+let query_expected = {|<div class="spec value" id="val-query">
+ <a href="#val-query" class="anchor"></a><code><span><span class="keyword">val</span> query : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string option</span></span></code>
+</div>
+|}
+
+let queries_expected = {|<div class="spec value" id="val-queries">
+ <a href="#val-queries" class="anchor"></a><code><span><span class="keyword">val</span> queries : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string list</span></span></code>
+</div>
+|}
+
+let all_queries_expected = {|<div class="spec value" id="val-all_queries">
+ <a href="#val-all_queries" class="anchor"></a><code><span><span class="keyword">val</span> all_queries : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span>(string * string)</span> list</span></span></code>
+</div>
 |}
 
 let response_expected = {|<div class="spec value" id="val-response">
@@ -524,9 +690,9 @@ let response_expected = {|<div class="spec value" id="val-response">
 let response_replacement = {|
 <pre><span class="keyword">val</span> response :
   <span class="optional">?status:[&lt; <a href="#type-status">status</a> ] -&gt;
-  ?code:int ->
-  ?headers:(string * string) list -&gt;</span>
-    string -&gt; <a href="#type-response">response</a>
+  ?code:<a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -&gt;
+  ?headers:(<a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) <a href="https://ocaml.org/manual/latest/api/List.html">list</a> -&gt;</span>
+    <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -&gt; <a href="#type-response">response</a>
 </pre>
 |}
 
@@ -538,10 +704,10 @@ let respond_expected = {|<div class="spec value" id="val-respond">
 
 let respond_replacement = {|
 <pre><span class="keyword">val</span> respond :
-  <span class="optional">?status:[&lt; <a href="#type-status">status</a> ] ->
-  ?code:int ->
-  ?headers:(string * string) list -></span>
-    string -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+  <span class="optional">?status:[&lt; <a href="#type-status">status</a> ] -&gt;
+  ?code:<a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -&gt;
+  ?headers:(<a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) <a href="https://ocaml.org/manual/latest/api/List.html">list</a> -&gt;</span>
+    <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -&gt; <a href="#type-response">response</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -554,9 +720,9 @@ let html_expected = {|<div class="spec value" id="val-html">
 let html_replacement = {|
 <pre><span class="keyword">val</span> html :
   <span class="optional">?status:[&lt; <a href="#type-status">status</a> ] ->
-  ?code:int ->
-  ?headers:(string * string) list -></span>
-    string -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+  ?code:<a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -&gt;
+  ?headers:(<a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) <a href="https://ocaml.org/manual/latest/api/List.html">list</a> -&gt;</span>
+    <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -569,9 +735,9 @@ let json_expected = {|<div class="spec value" id="val-json">
 let json_replacement = {|
 <pre><span class="keyword">val</span> json :
   <span class="optional">?status:[&lt; <a href="#type-status">status</a> ] ->
-  ?code:int ->
-  ?headers:(string * string) list -></span>
-    string -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+  ?code:<a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -&gt;
+  ?headers:(<a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) <a href="https://ocaml.org/manual/latest/api/List.html">list</a> -&gt;</span>
+    <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -584,9 +750,9 @@ let val_redirect_expected = {|<div class="spec value" id="val-redirect">
 let val_redirect_replacement = {|
 <pre><span class="keyword">val</span> redirect :
   <span class="optional">?status:[&lt; <a href="#type-redirection">redirection</a> ] ->
-  ?code:int ->
-  ?headers:(string * string) list -></span>
-    <a href="#type-request">request</a> -> string -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+  ?code:<a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -&gt;
+  ?headers:(<a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) <a href="https://ocaml.org/manual/latest/api/List.html">list</a> -&gt;</span>
+    <a href="#type-request">request</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -599,10 +765,10 @@ let stream_expected = {|<div class="spec value" id="val-stream">
 let stream_replacement = {|
 <pre><span class="keyword">val</span> stream :
   ?status:[&lt; <a href="#type-status">status</a> ] ->
-  ?code:int ->
-  ?headers:(string * string) list ->
-  ?close:bool ->
-    (<a href="#type-stream">stream</a> -> unit <a href="#type-promise">promise</a>) -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+  ?code:<a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -&gt;
+  ?headers:(<a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) <a href="https://ocaml.org/manual/latest/api/List.html">list</a> -&gt;</span>
+  ?close:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+    (<a href="#type-stream">stream</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> <a href="#type-promise">promise</a>) -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -613,9 +779,39 @@ let empty_expected = {|<div class="spec value" id="val-empty">
 
 let empty_replacement = {|
 <pre><span class="keyword">val</span> empty :
-  ?headers:(string * string) list ->
+  ?headers:(<a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) <a href="https://ocaml.org/manual/latest/api/List.html">list</a> -&gt;</span>
     <a href="#type-status">status</a> -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
 </pre>
+|}
+
+let set_status_expected = {|<div class="spec value" id="val-set_status">
+ <a href="#val-set_status" class="anchor"></a><code><span><span class="keyword">val</span> set_status : <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-status">status</a> <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
+|}
+
+let header_expected = {|<div class="spec value" id="val-header">
+ <a href="#val-header" class="anchor"></a><code><span><span class="keyword">val</span> header : <span><span><span class="type-var">'a</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string option</span></span></code>
+</div>
+|}
+
+let headers_expected = {|<div class="spec value" id="val-headers">
+ <a href="#val-headers" class="anchor"></a><code><span><span class="keyword">val</span> headers : <span><span><span class="type-var">'a</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string list</span></span></code>
+</div>
+|}
+
+let all_headers_expected = {|<div class="spec value" id="val-all_headers">
+ <a href="#val-all_headers" class="anchor"></a><code><span><span class="keyword">val</span> all_headers : <span><span><span class="type-var">'a</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> <span><span>(string * string)</span> list</span></span></code>
+</div>
+|}
+
+let has_header_expected = {|<div class="spec value" id="val-has_header">
+ <a href="#val-has_header" class="anchor"></a><code><span><span class="keyword">val</span> has_header : <span><span><span class="type-var">'a</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> bool</span></code>
+</div>
+|}
+
+let drop_header_expected = {|<div class="spec value" id="val-drop_header">
+ <a href="#val-drop_header" class="anchor"></a><code><span><span class="keyword">val</span> drop_header : <span><span><span class="type-var">'a</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
 |}
 
 let add_header_expected = {|<div class="spec value" id="val-add_header">
@@ -625,7 +821,7 @@ let add_header_expected = {|<div class="spec value" id="val-add_header">
 
 let add_header_replacement = {|
 <pre><span class="keyword">val</span> add_header :
-  'a <a href="#type-message">message</a> -> string -> string -> unit
+  'a <a href="#type-message">message</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>
 |}
 
 let set_header_expected = {|<div class="spec value" id="val-set_header">
@@ -635,7 +831,7 @@ let set_header_expected = {|<div class="spec value" id="val-set_header">
 
 let set_header_replacement = {|
 <pre><span class="keyword">val</span> set_header :
-  'a <a href="#type-message">message</a> -> string -> string -> unit
+  'a <a href="#type-message">message</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>
 |}
 
 let add_set_cookie_expected = {|<div class="spec value" id="val-set_cookie">
@@ -648,16 +844,16 @@ let add_set_cookie_expected = {|<div class="spec value" id="val-set_cookie">
 
 let add_set_cookie_replacement = {|
 <pre><span class="keyword">val</span> set_cookie :
-  <span class="optional">?prefix:[&lt; `Host | `Secure ] option ->
-  ?encrypt:bool ->
-  ?expires:float ->
-  ?max_age:float ->
-  ?domain:string ->
-  ?path:string option ->
-  ?secure:bool ->
-  ?http_only:bool ->
-  ?same_site:[&lt; `Strict | `Lax | `None ] option -></span>
-    <a href="#type-response">response</a> -> <a href="#type-request">request</a> -> string -> string -> unit
+  <span class="optional">?prefix:[&lt; `Host | `Secure ] <a href="https://ocaml.org/manual/latest/api/Option.html">option</a> ->
+  ?encrypt:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+  ?expires:<a href="https://ocaml.org/manual/latest/api/Float.html">float</a> ->
+  ?max_age:<a href="https://ocaml.org/manual/latest/api/Float.html">float</a> ->
+  ?domain:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+  ?path:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> <a href="https://ocaml.org/manual/latest/api/Option.html">option</a> ->
+  ?secure:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+  ?http_only:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+  ?same_site:[&lt; `Strict | `Lax | `None ] <a href="https://ocaml.org/manual/latest/api/Option.html">option</a> -></span>
+    <a href="#type-response">response</a> -> <a href="#type-request">request</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>
 </pre>|}
 
 let drop_cookie_expected = {|<div class="spec value" id="val-drop_cookie">
@@ -669,13 +865,13 @@ let drop_cookie_expected = {|<div class="spec value" id="val-drop_cookie">
 
 let drop_cookie_replacement = {|
 <pre><span class="keyword">val</span> drop_cookie :
-  <span class="optional">?prefix:[&lt; `Host | `Secure ] option ->
-  ?domain:string ->
-  ?path:string option ->
-  ?secure:bool ->
-  ?http_only:bool ->
-  ?same_site:[&lt; `Strict | `Lax | `None ] option -></span>
-    <a href="#type-response">response</a> -> <a href="#type-request">request</a> -> string -> unit
+  <span class="optional">?prefix:[&lt; `Host | `Secure ] <a href="https://ocaml.org/manual/latest/api/Option.html">option</a> ->
+  ?domain:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+  ?path:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> <a href="https://ocaml.org/manual/latest/api/Option.html">option</a> ->
+  ?secure:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+  ?http_only:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+  ?same_site:[&lt; `Strict | `Lax | `None ] <a href="https://ocaml.org/manual/latest/api/Option.html">option</a> -></span>
+    <a href="#type-response">response</a> -> <a href="#type-request">request</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>
 </pre>|}
 
 let cookie_expected = {|<div class="spec value" id="val-cookie">
@@ -686,13 +882,48 @@ let cookie_expected = {|<div class="spec value" id="val-cookie">
 
 let cookie_replacement = {|
 <pre><span class="keyword">val</span> cookie :
-  ?prefix:[&lt; `Host | `Secure ] option ->
-  ?decrypt:bool ->
-  ?domain:string ->
-  ?path:string option ->
-  ?secure:bool ->
-    <a href="#type-request">request</a> -> string -> string option
+  ?prefix:[&lt; `Host | `Secure ] <a href="https://ocaml.org/manual/latest/api/Option.html">option</a> ->
+  ?decrypt:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+  ?domain:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+  ?path:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> <a href="https://ocaml.org/manual/latest/api/Option.html">option</a> ->
+  ?secure:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+    <a href="#type-request">request</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> <a href="https://ocaml.org/manual/latest/api/Option.html">option</a>
 </pre>
+|}
+
+let all_cookies_expected = {|<div class="spec value" id="val-all_cookies">
+ <a href="#val-all_cookies" class="anchor"></a><code><span><span class="keyword">val</span> all_cookies : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span>(string * string)</span> list</span></span></code>
+</div>
+|}
+
+let body_expected = {|<div class="spec value" id="val-body">
+ <a href="#val-body" class="anchor"></a><code><span><span class="keyword">val</span> body : <span><span><span class="type-var">'a</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> <span>string <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let set_body_expected = {|<div class="spec value" id="val-set_body">
+ <a href="#val-set_body" class="anchor"></a><code><span><span class="keyword">val</span> set_body : <span><span><span class="type-var">'a</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
+|}
+
+let read_expected = {|<div class="spec value" id="val-read">
+ <a href="#val-read" class="anchor"></a><code><span><span class="keyword">val</span> read : <span><a href="#type-stream">stream</a> <span class="arrow">-&gt;</span></span> <span><span>string option</span> <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let write_expected = {|<div class="spec value" id="val-write">
+ <a href="#val-write" class="anchor"></a><code><span><span class="keyword">val</span> write : <span><a href="#type-stream">stream</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let flush_expected = {|<div class="spec value" id="val-flush">
+ <a href="#val-flush" class="anchor"></a><code><span><span class="keyword">val</span> flush : <span><a href="#type-stream">stream</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let close_expected = {|<div class="spec value" id="val-close">
+ <a href="#val-close" class="anchor"></a><code><span><span class="keyword">val</span> close : <span><a href="#type-stream">stream</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+</div>
 |}
 
 let bigstring_expected = {|<div class="spec type" id="type-buffer">
@@ -702,8 +933,8 @@ let bigstring_expected = {|<div class="spec type" id="type-buffer">
 
 let bigstring_replacement = {|
 <pre><span class="keyword">type</span> buffer =
-  (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout)
-    Bigarray.Array1.t
+  (<a href="https://ocaml.org/manual/latest/api/Char.html">char</a>, <a href="https://ocaml.org/manual/latest/api/Bigarray.html#1_Elementkinds">Bigarray.int8_unsigned_elt</a>, <a href="https://ocaml.org/manual/latest/api/Bigarray.html#1_Arraylayouts">Bigarray.c_layout</a>)
+    <a href="https://ocaml.org/manual/latest/api/Bigarray.Array1.html">Bigarray.Array1.t</a>
 </pre>
 |}
 
@@ -717,13 +948,13 @@ let read_stream_expected = {|<div class="spec value" id="val-read_stream">
 let read_stream_replacement = {|
 <pre><span class="keyword">val</span> read_stream :
   <a href="#type-stream">stream</a> ->
-  data:(<a href="#type-buffer">buffer</a> -> int -> int -> bool -> bool -> unit) ->
-  flush:(unit -> unit) ->
-  ping:(<a href="#type-buffer">buffer</a> -> int -> int -> unit) ->
-  pong:(<a href="#type-buffer">buffer</a> -> int -> int -> unit) ->
-  close:(int -> unit) ->
-  exn:(exn -> unit) ->
-    unit
+  data:(<a href="#type-buffer">buffer</a> -> <a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -> <a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -> <a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> -> <a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+  flush:(<a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+  ping:(<a href="#type-buffer">buffer</a> -> <a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -> <a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+  pong:(<a href="#type-buffer">buffer</a> -> <a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -> <a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+  close:(<a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+  exn:(<a href="https://ocaml.org/manual/latest/coreexamples.html#s%3Aexceptions">exn</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+    <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>
 </pre>
 |}
 
@@ -736,12 +967,12 @@ let write_stream_expected = {|<div class="spec value" id="val-write_stream">
 let write_stream_replacement = {|
 <pre><span class="keyword">val</span> write_stream :
   <a href="#type-stream">stream</a> ->
-  <a href="#type-buffer">buffer</a> -> int -> int ->
-  bool -> bool ->
-  close:(int -> unit) ->
-  exn:(exn -> unit) ->
-  (unit -> unit) ->
-    unit
+  <a href="#type-buffer">buffer</a> -> <a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -> <a href="https://ocaml.org/manual/latest/api/Int.html">int</a> ->
+  <a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> -> <a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+  close:(<a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+  exn:(<a href="https://ocaml.org/manual/latest/coreexamples.html#s%3Aexceptions">exn</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+  (<a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+    <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>
 </pre>|}
 
 let flush_stream_expected = {|<div class="spec value" id="val-flush_stream">
@@ -752,10 +983,10 @@ let flush_stream_expected = {|<div class="spec value" id="val-flush_stream">
 let flush_stream_replacement = {|
 <pre><span class="keyword">val</span> flush_stream :
   <a href="#type-stream">stream</a> ->
-  close:(int -> unit) ->
-  exn:(exn -> unit) ->
-  (unit -> unit) ->
-    unit
+  close:(<a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+  exn:(<a href="https://ocaml.org/manual/latest/coreexamples.html#s%3Aexceptions">exn</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+  (<a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+    <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>
 </pre>|}
 
 let ping_stream_expected = {|<div class="spec value" id="val-ping_stream">
@@ -768,11 +999,11 @@ let ping_stream_replacement = {|
 <pre>
 <span class="keyword">val</span> ping_stream :
   <a href="#type-stream">stream</a> ->
-  <a href="#type-buffer">buffer</a> -> int -> int ->
-  close:(int -> unit) ->
-  exn:(exn -> unit) ->
-  (unit -> unit) ->
-    unit
+  <a href="#type-buffer">buffer</a> -> <a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -> <a href="https://ocaml.org/manual/latest/api/Int.html">int</a> ->
+  close:(<a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+  exn:(<a href="https://ocaml.org/manual/latest/coreexamples.html#s%3Aexceptions">exn</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+  (<a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+    <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>
 </pre>|}
 
 let pong_stream_expected = {|<div class="spec value" id="val-pong_stream">
@@ -785,12 +1016,26 @@ let pong_stream_replacement = {|
 <pre>
 <span class="keyword">val</span> pong_stream :
   <a href="#type-stream">stream</a> ->
-  <a href="#type-buffer">buffer</a> -> int -> int ->
-  close:(int -> unit) ->
-  exn:(exn -> unit) ->
-  (unit -> unit) ->
-    unit
+  <a href="#type-buffer">buffer</a> -> <a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -> <a href="https://ocaml.org/manual/latest/api/Int.html">int</a> ->
+  close:(<a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+  exn:(<a href="https://ocaml.org/manual/latest/coreexamples.html#s%3Aexceptions">exn</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+  (<a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) ->
+    <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>
 </pre>|}
+
+let close_stream_expected = {|<div class="spec value" id="val-close_stream">
+ <a href="#val-close_stream" class="anchor"></a><code><span><span class="keyword">val</span> close_stream : <span><a href="#type-stream">stream</a> <span class="arrow">-&gt;</span></span> <span>int <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
+|}
+
+let abort_stream_expected = {|<div class="spec value" id="val-abort_stream">
+ <a href="#val-abort_stream" class="anchor"></a><code><span><span class="keyword">val</span> abort_stream : <span><a href="#type-stream">stream</a> <span class="arrow">-&gt;</span></span> <span>exn <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
+|}
+
+let abort_stream_replacement = {|
+<code><span class="keyword">val</span> abort_stream : <a href="#type-stream">stream</a> <span class="arrow">-&gt;</span> <a href="https://ocaml.org/manual/latest/coreexamples.html#s%3Aexceptions">exn</a> <span class="arrow">-&gt;</span> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a></code>
+|}
 
 let form_expected = {|<div class="spec type" id="type-form_result">
  <a href="#type-form_result" class="anchor"></a><code><span><span class="keyword">type</span> <span>'a form_result</span></span><span> = </span><span>[ </span></code>
@@ -840,7 +1085,7 @@ let form_expected = {|<div class="spec type" id="type-form_result">
 let form_replacement = {|
 <pre class="compact"><span class="keyword">type</span> 'a form_result = [
   | `Ok            <span class="of">of</span> 'a
-  | `Expired       <span class="of">of</span> 'a * float
+  | `Expired       <span class="of">of</span> 'a * <a href="https://ocaml.org/manual/latest/api/Float.html">float</a>
   | `Wrong_session <span class="of">of</span> 'a
   | `Invalid_token <span class="of">of</span> 'a
   | `Missing_token <span class="of">of</span> 'a
@@ -856,8 +1101,8 @@ let form'_expected = {|<div class="spec value" id="val-form">
 
 let form'_replacement = {|
 <pre><span class="keyword">val</span> form :
-  ?csrf:bool ->
-    <a href="#type-request">request</a> -> (string * string) list <a href="#type-form_result">form_result</a> <a href="#type-promise">promise</a>
+  ?csrf:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+    <a href="#type-request">request</a> -> (<a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) <a href="https://ocaml.org/manual/latest/api/List.html">list</a> <a href="#type-form_result">form_result</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -868,7 +1113,7 @@ let multipart_form_expected = {|<div class="spec type" id="type-multipart_form">
 
 let multipart_form_replacement = {|
 <pre><span class="keyword">type</span> multipart_form =
-  (string * ((string option * string) list)) list
+  (<a href="https://ocaml.org/manual/latest/api/String.html">string</a> * ((<a href="https://ocaml.org/manual/latest/api/String.html">string</a> <a href="https://ocaml.org/manual/latest/api/Option.html">option</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) <a href="https://ocaml.org/manual/latest/api/List.html">list</a>)) <a href="https://ocaml.org/manual/latest/api/List.html">list</a>
 </pre>
 |}
 
@@ -879,7 +1124,7 @@ let multipart_expected = {|<div class="spec value" id="val-multipart">
 
 let multipart_replacement = {|
 <pre><span class="keyword">val</span> multipart :
-  ?csrf:bool ->
+  ?csrf:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
     <a href="#type-request">request</a> -> <a href="#type-multipart">multipart_form</a> <a href="#type-form_result">form_result</a> <a href="#type-promise">promise</a>
 </pre>
 |}
@@ -891,7 +1136,7 @@ let part_expected = {|<div class="spec type" id="type-part">
 
 let part_replacement = {|
 <pre><span class="keyword">type</span> part =
-  string option * string option * ((string * string) list)
+  <a href="https://ocaml.org/manual/latest/api/String.html">string</a> <a href="https://ocaml.org/manual/latest/api/Option.html">option</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a> <a href="https://ocaml.org/manual/latest/api/Option.html">option</a> * ((<a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) <a href="https://ocaml.org/manual/latest/api/List.html">list</a>)
 </pre>
 |}
 
@@ -927,8 +1172,8 @@ let upload_event_expected = {|<div class="spec type" id="type-upload_event">
 
 let upload_event_replacement = {|
 <pre><span class="keyword">type</span> upload_event = [
-  | `File <span class="of">of</span> string * string
-  | `Field <span class="of">of</span> string * string
+  | `File <span class="of">of</span> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>
+  | `Field <span class="of">of</span> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>
   | `Done
   | `Wrong_content_type
 ]
@@ -968,7 +1213,7 @@ let csrf_result_expected = {|<div class="spec type" id="type-csrf_result">
 let csrf_result_replacement = {|
 <pre class="compact"><span class="keyword">type</span> csrf_result = [
   | `Ok
-  | `Expired <span class="of">of</span> float
+  | `Expired <span class="of">of</span> <a href="https://ocaml.org/manual/latest/api/Float.html">float</a>
   | `Wrong_session
   | `Invalid
 ]
@@ -981,7 +1226,7 @@ let verify_csrf_token_expected = {|<div class="spec value" id="val-verify_csrf_t
 
 let verify_csrf_token_replacement = {|
 <pre><span class="keyword">val</span> verify_csrf_token :
-  <a href="#type-request">request</a> -> string -> <a href="#type-csrf_result">csrf_result</a> <a href="#type-promise">promise</a>
+  <a href="#type-request">request</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="#type-csrf_result">csrf_result</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -992,7 +1237,7 @@ let scope_expected = {|<div class="spec value" id="val-scope">
 
 let scope_replacement = {|
 <pre><span class="keyword">val</span> scope :
-  string -> <a href="#type-middleware">middleware</a> list -> <a href="#type-route">route</a> list -> <a href="#type-route">route</a>
+  <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="#type-middleware">middleware</a> <a href="https://ocaml.org/manual/latest/api/List.html">list</a> -> <a href="#type-route">route</a> <a href="https://ocaml.org/manual/latest/api/List.html">list</a> -> <a href="#type-route">route</a>
 </pre>
 |}
 
@@ -1002,7 +1247,7 @@ let get_expected = {|<div class="spec value" id="val-get">
 |}
 
 let get_replacement = {|
-<code><span><span class="keyword">val</span> get &nbsp;&nbsp;&nbsp;&nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+<code><span><span class="keyword">val</span> get &nbsp;&nbsp;&nbsp;&nbsp;: <span><a href="https://ocaml.org/manual/latest/api/String.html">string</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
 |}
 
 let post_expected = {|<div class="spec value" id="val-post">
@@ -1011,7 +1256,7 @@ let post_expected = {|<div class="spec value" id="val-post">
 |}
 
 let post_replacement = {|
-<code><span><span class="keyword">val</span> post &nbsp;&nbsp;&nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+<code><span><span class="keyword">val</span> post &nbsp;&nbsp;&nbsp;: <span><a href="https://ocaml.org/manual/latest/api/String.html">string</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
 |}
 
 let put_expected = {|<div class="spec value" id="val-put">
@@ -1020,7 +1265,7 @@ let put_expected = {|<div class="spec value" id="val-put">
 |}
 
 let put_replacement = {|
-<code><span><span class="keyword">val</span> put &nbsp;&nbsp;&nbsp;&nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+<code><span><span class="keyword">val</span> put &nbsp;&nbsp;&nbsp;&nbsp;: <span><a href="https://ocaml.org/manual/latest/api/String.html">string</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
 |}
 
 let delete_expected = {|<div class="spec value" id="val-delete">
@@ -1029,7 +1274,7 @@ let delete_expected = {|<div class="spec value" id="val-delete">
 |}
 
 let delete_replacement = {|
-<code><span><span class="keyword">val</span> delete &nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+<code><span><span class="keyword">val</span> delete &nbsp;: <span><a href="https://ocaml.org/manual/latest/api/String.html">string</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
 |}
 
 let head_expected = {|<div class="spec value" id="val-head">
@@ -1038,7 +1283,7 @@ let head_expected = {|<div class="spec value" id="val-head">
 |}
 
 let head_replacement = {|
-<code><span><span class="keyword">val</span> head &nbsp;&nbsp;&nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+<code><span><span class="keyword">val</span> head &nbsp;&nbsp;&nbsp;: <span><a href="https://ocaml.org/manual/latest/api/String.html">string</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
 |}
 
 let trace_expected = {|<div class="spec value" id="val-trace">
@@ -1047,7 +1292,7 @@ let trace_expected = {|<div class="spec value" id="val-trace">
 |}
 
 let trace_replacement = {|
-<code><span><span class="keyword">val</span> trace &nbsp;&nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+<code><span><span class="keyword">val</span> trace &nbsp;&nbsp;: <span><a href="https://ocaml.org/manual/latest/api/String.html">string</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
 |}
 
 let patch_expected = {|<div class="spec value" id="val-patch">
@@ -1056,7 +1301,7 @@ let patch_expected = {|<div class="spec value" id="val-patch">
 |}
 
 let patch_replacement = {|
-<code><span><span class="keyword">val</span> patch &nbsp;&nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+<code><span><span class="keyword">val</span> patch &nbsp;&nbsp;: <span><a href="https://ocaml.org/manual/latest/api/String.html">string</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
 |}
 
 let any_expected = {|<div class="spec value" id="val-any">
@@ -1065,7 +1310,7 @@ let any_expected = {|<div class="spec value" id="val-any">
 |}
 
 let any_replacement = {|
-<code><span><span class="keyword">val</span> any &nbsp;&nbsp;&nbsp;&nbsp;: <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+<code><span><span class="keyword">val</span> any &nbsp;&nbsp;&nbsp;&nbsp;: <span><a href="https://ocaml.org/manual/latest/api/String.html">string</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
 |}
 
 let static_expected = {|<div class="spec value" id="val-static">
@@ -1075,8 +1320,8 @@ let static_expected = {|<div class="spec value" id="val-static">
 
 let static_replacement = {|
 <pre><span class="keyword">val</span> static :
-  ?loader:(string -> string -> <a href="#type-handler">handler</a>) ->
-    string -> <a href="#type-handler">handler</a>
+  ?loader:(<a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="#type-handler">handler</a>) ->
+    <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="#type-handler">handler</a>
 </pre>
 |}
 
@@ -1087,7 +1332,7 @@ let set_session_expected = {|<div class="spec value" id="val-set_session_field">
 
 let set_session_replacement = {|
 <pre><span class="keyword">val</span> set_session_field :
-  <a href="#type-request">request</a> -> string -> string -> unit <a href="#type-promise">promise</a>
+  <a href="#type-request">request</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -1098,9 +1343,9 @@ let websocket_expected = {|<div class="spec value" id="val-websocket">
 
 let websocket_replacement = {|
 <pre><span class="keyword">val</span> websocket :
-  ?headers:(string * string) list ->
-  ?close:bool ->
-    (<a href="#type-websocket">websocket</a> -> unit <a href="#type-promise">promise</a>) -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
+  ?headers:(<a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) <a href="https://ocaml.org/manual/latest/api/List.html">list</a> ->
+  ?close:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+    (<a href="#type-websocket">websocket</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> <a href="#type-promise">promise</a>) -> <a href="#type-response">response</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -1161,8 +1406,13 @@ let send_replacement = {|
 <pre><span class="keyword">val</span> send :
   ?text_or_binary:[&lt; <a href="#type-text_or_binary">text_or_binary</a> ] ->
   ?end_of_message:[&lt; <a href="#type-end_of_message">end_of_message</a> ] ->
-    <a href="#type-websocket">websocket</a> -> string -> unit <a href="#type-promise">promise</a>
+    <a href="#type-websocket">websocket</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> <a href="#type-promise">promise</a>
 </pre>
+|}
+
+let receive_expected = {|<div class="spec value" id="val-receive">
+ <a href="#val-receive" class="anchor"></a><code><span><span class="keyword">val</span> receive : <span><a href="#type-websocket">websocket</a> <span class="arrow">-&gt;</span></span> <span><span>string option</span> <a href="#type-promise">promise</a></span></span></code>
+</div>
 |}
 
 let receive_fragment_expected = {|<div class="spec value" id="val-receive_fragment">
@@ -1173,7 +1423,7 @@ let receive_fragment_expected = {|<div class="spec value" id="val-receive_fragme
 let receive_fragment_replacement = {|
 <pre><span class="keyword">val</span> receive_fragment :
   <a href="#type-websocket">websocket</a> ->
-    (string * <a href="#type-text_or_binary">text_or_binary</a> * <a href="#type-end_of_message">end_of_message</a>) option <a href="#type-promise">promise</a>
+    (<a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="#type-text_or_binary">text_or_binary</a> * <a href="#type-end_of_message">end_of_message</a>) <a href="https://ocaml.org/manual/latest/api/Option.html">option</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -1184,7 +1434,7 @@ let close_websocket_expected = {|<div class="spec value" id="val-close_websocket
 
 let close_websocket_replacement = {|
 <pre><span class="keyword">val</span> close_websocket :
-  ?code:int -> <a href="#type-websocket">websocket</a> -> unit <a href="#type-promise">promise</a>
+  ?code:<a href="https://ocaml.org/manual/latest/api/Int.html">int</a> -> <a href="#type-websocket">websocket</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> <a href="#type-promise">promise</a>
 </pre>
 |}
 
@@ -1196,7 +1446,7 @@ let graphql_expected = {|<div class="spec value" id="val-graphql">
 let graphql_replacement = {|
 <pre><span class="keyword">val</span> graphql :
   (<a href="#type-request">request</a> -> 'a <a href="#type-promise">promise</a>) ->
-  'a Graphql_lwt.Schema.schema ->
+  'a <a href="https://github.com/andreas/ocaml-graphql-server?tab=readme-ov-file#defining-a-schema">Graphql_lwt.Schema.schema</a> ->
     <a href="#type-handler">handler</a>
 </pre>
 |}
@@ -1208,7 +1458,7 @@ let sql_expected = {|<div class="spec value" id="val-sql">
 
 let sql_replacement = {|
 <pre><span class="keyword">val</span> sql :
-  <a href="#type-request">request</a> -> (Caqti_lwt.connection -> 'a <a href="#type-promise">promise</a>) ->
+  <a href="#type-request">request</a> -> (<a href="https://github.com/paurkedal/caqti-study/#readme">Caqti_lwt.connection</a> -> 'a <a href="#type-promise">promise</a>) ->
     'a <a href="#type-promise">promise</a>
 </pre>
 |}
@@ -1221,8 +1471,8 @@ let conditional_log_expected = {|<div class="spec type" id="type-conditional_log
 let conditional_log_replacement = {|
 <pre class="compact"><span class="keyword">type</span> ('a, 'b) conditional_log =
   ((?request:<a href="#type-request">request</a> ->
-   ('a, Format.formatter, unit, 'b) format4 -> 'a) -> 'b) ->
-    unit
+   <a href="https://ocaml.org/manual/latest/api/Format.html">('a, Format.formatter, unit, 'b) format4</a> -> 'a) -> 'b) ->
+    <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>
 </pre>
 |}
 
@@ -1258,12 +1508,17 @@ let sub_log_expected = {|<div class="spec type" id="type-sub_log">
 
 let sub_log_replacement = {|
 <pre class="compact"><span class="keyword">type</span> sub_log = {
-  error   <span class="of">:</span> 'a. ('a, unit) <a href="#type-conditional_log">conditional_log</a>;
-  warning <span class="of">:</span> 'a. ('a, unit) <a href="#type-conditional_log">conditional_log</a>;
-  info    <span class="of">:</span> 'a. ('a, unit) <a href="#type-conditional_log">conditional_log</a>;
-  debug   <span class="of">:</span> 'a. ('a, unit) <a href="#type-conditional_log">conditional_log</a>;
+  error   <span class="of">:</span> 'a. ('a, <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) <a href="#type-conditional_log">conditional_log</a>;
+  warning <span class="of">:</span> 'a. ('a, <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) <a href="#type-conditional_log">conditional_log</a>;
+  info    <span class="of">:</span> 'a. ('a, <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) <a href="#type-conditional_log">conditional_log</a>;
+  debug   <span class="of">:</span> 'a. ('a, <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>) <a href="#type-conditional_log">conditional_log</a>;
 }
 </pre>|}
+
+let sub_log_expected' = {|<div class="spec value" id="val-sub_log">
+ <a href="#val-sub_log" class="anchor"></a><code><span><span class="keyword">val</span> sub_log : <span>?level:<span>[&lt; <a href="#type-log_level">log_level</a> ]</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-sub_log">sub_log</a></span></code>
+</div>
+|}
 
 let log_level_expected = {|<div class="spec type" id="type-log_level">
  <a href="#type-log_level" class="anchor"></a><code><span><span class="keyword">type</span> log_level</span><span> = </span><span>[ </span></code>
@@ -1305,7 +1560,7 @@ let val_error_expected = {|<div class="spec value" id="val-error">
 |}
 
 let val_error_replacement = {|
-<code><span><span class="keyword">val</span> error &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span><span>(<span class="type-var">'a</span>,&nbsp;unit)</span> <a href="#type-conditional_log">conditional_log</a></span></span></code>
+<code><span><span class="keyword">val</span> error &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span><span>(<span class="type-var">'a</span>,&nbsp;<a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>)</span> <a href="#type-conditional_log">conditional_log</a></span></span></code>
 |}
 
 let warning_expected = {|<div class="spec value" id="val-warning">
@@ -1314,7 +1569,7 @@ let warning_expected = {|<div class="spec value" id="val-warning">
 |}
 
 let warning_replacement = {|
-<code><span><span class="keyword">val</span> warning &nbsp;&nbsp;&nbsp;: <span><span>(<span class="type-var">'a</span>,&nbsp;unit)</span> <a href="#type-conditional_log">conditional_log</a></span></span></code>
+<code><span><span class="keyword">val</span> warning &nbsp;&nbsp;&nbsp;: <span><span>(<span class="type-var">'a</span>,&nbsp;<a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>)</span> <a href="#type-conditional_log">conditional_log</a></span></span></code>
 |}
 
 let info_expected = {|<div class="spec value" id="val-info">
@@ -1323,7 +1578,7 @@ let info_expected = {|<div class="spec value" id="val-info">
 |}
 
 let info_replacement = {|
-<code><span><span class="keyword">val</span> info &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span><span>(<span class="type-var">'a</span>,&nbsp;unit)</span> <a href="#type-conditional_log">conditional_log</a></span></span></code>
+<code><span><span class="keyword">val</span> info &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span><span>(<span class="type-var">'a</span>,&nbsp;<a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>)</span> <a href="#type-conditional_log">conditional_log</a></span></span></code>
 |}
 
 let debug_expected = {|<div class="spec value" id="val-debug">
@@ -1332,7 +1587,7 @@ let debug_expected = {|<div class="spec value" id="val-debug">
 |}
 
 let debug_replacement = {|
-<code><span><span class="keyword">val</span> debug &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span><span>(<span class="type-var">'a</span>,&nbsp;unit)</span> <a href="#type-conditional_log">conditional_log</a></span></span></code>
+<code><span><span class="keyword">val</span> debug &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span><span>(<span class="type-var">'a</span>,&nbsp;<a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>)</span> <a href="#type-conditional_log">conditional_log</a></span></span></code>
 |}
 
 let initialize_log_expected = {|<div class="spec value" id="val-initialize_log">
@@ -1343,11 +1598,11 @@ let initialize_log_expected = {|<div class="spec value" id="val-initialize_log">
 
 let initialize_log_replacement = {|
 <pre><span class="keyword">val</span> initialize_log :
-  <span class="optional">?backtraces:bool ->
-  ?async_exception_hook:bool ->
+  <span class="optional">?backtraces:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+  ?async_exception_hook:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
   ?level:[&lt; <a href="#type-log_level">log_level</a> ] ->
-  ?enable:bool -></span>
-    unit -> unit
+  ?enable:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> -></span>
+    <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>
 </pre>|}
 
 let error_template_expected = {|<div class="spec value" id="val-error_template">
@@ -1357,7 +1612,7 @@ let error_template_expected = {|<div class="spec value" id="val-error_template">
 
 let error_template_replacement = {|
 <pre><span class="keyword">val</span> error_template :
-  (<a href="#type-error">error</a> -> string -> <a href="#val-response">response</a> -> <a href="#val-response">response</a> <a href="#type-promise">promise</a>) ->
+  (<a href="#type-error">error</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="#val-response">response</a> -> <a href="#val-response">response</a> <a href="#type-promise">promise</a>) ->
     <a href="#type-error_handler">error_handler</a>
 </pre>
 |}
@@ -1416,16 +1671,16 @@ let error_replacement = {|
 <pre class="compact"><span class="keyword">type</span> error = {
   condition <span class="of">:</span> [
     | `Response of <a href="#type-response">response</a>
-    | `String of string
-    | `Exn of exn
+    | `String of <a href="https://ocaml.org/manual/latest/api/String.html">string</a>
+    | `Exn of <a href="https://ocaml.org/manual/latest/coreexamples.html#s%3Aexceptions">exn</a>
   ];
   layer     <span class="of">:</span> [ `App | `HTTP | `HTTP2 | `TLS | `WebSocket ];
   caused_by <span class="of">:</span> [ `Server | `Client ];
-  request   <span class="of">:</span> <a href="#type-request">request</a>  option;
-  response  <span class="of">:</span> <a href="#type-response">response</a> option;
-  client    <span class="of">:</span> string   option;
+  request   <span class="of">:</span> <a href="#type-request">request</a>  <a href="https://ocaml.org/manual/latest/api/Option.html">option</a>;
+  response  <span class="of">:</span> <a href="#type-response">response</a> <a href="https://ocaml.org/manual/latest/api/Option.html">option</a>;
+  client    <span class="of">:</span> <a href="https://ocaml.org/manual/latest/api/String.html">string</a>   <a href="https://ocaml.org/manual/latest/api/Option.html">option</a>;
   severity  <span class="of">:</span> <a href="#type-log_level">log_level</a>;
-  will_send_response <span class="of">:</span> bool;
+  will_send_response <span class="of">:</span> <a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a>;
 }
 </pre>|}
 
@@ -1436,9 +1691,9 @@ let new_field_expected = {|<div class="spec value" id="val-new_field">
 
 let new_field_replacement = {|
 <pre><span class="keyword">val</span> new_field :
-  ?name:string ->
-  ?show_value:('a -> string) ->
-    unit -> 'a <a href="#type-field">field</a>
+  ?name:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+  ?show_value:('a -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) ->
+    <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> -> 'a <a href="#type-field">field</a>
 </pre>
 |}
 
@@ -1449,9 +1704,9 @@ let new_global_expected = {|<div class="spec value" id="val-new_global">
 
 let new_global_replacement = {|
 <pre><span class="keyword">val</span> new_global :
-  ?name:string ->
-  ?show_value:('a -> string) ->
-    (unit -> 'a) -> 'a <a href="#type-global">global</a>
+  ?name:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+  ?show_value:('a -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) ->
+    (<a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> -> 'a) -> 'a <a href="#type-global">global</a>
 |}
 
 let run_expected = {|<div class="spec value" id="val-run">
@@ -1463,18 +1718,18 @@ let run_expected = {|<div class="spec value" id="val-run">
 
 let run_replacement = {|
 <pre><span class="keyword">val</span> run :
-  <span class="optional">?interface:string ->
-  ?port:int ->
-  ?stop:unit <a href="#type-promise">promise</a> ->
-  ?socket_path:string ->
+  <span class="optional">?interface:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+  ?port:<a href="https://ocaml.org/manual/latest/api/Int.html">int</a> ->
+  ?stop:<a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> <a href="#type-promise">promise</a> ->
+  ?socket_path:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
   ?error_handler:<a href="#type-error_handler">error_handler</a> ->
-  ?tls:bool ->
-  ?certificate_file:string ->
-  ?key_file:string ->
-  ?builtins:bool ->
-  ?greeting:bool ->
-  ?adjust_terminal:bool -></span>
-    <a href="#type-handler">handler</a> -> unit
+  ?tls:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+  ?certificate_file:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+  ?key_file:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+  ?builtins:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+  ?greeting:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+  ?adjust_terminal:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> -></span>
+    <a href="#type-handler">handler</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a>
 </pre>|}
 
 let serve_expected = {|<div class="spec value" id="val-serve">
@@ -1486,16 +1741,16 @@ let serve_expected = {|<div class="spec value" id="val-serve">
 
 let serve_replacement = {|
 <pre><span class="keyword">val</span> serve :
-  <span class="optional">?interface:string ->
-  ?port:int ->
-  ?socket_path:string ->
-  ?stop:unit <a href="#type-promise">promise</a> ->
+  <span class="optional">?interface:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+  ?port:<a href="https://ocaml.org/manual/latest/api/Int.html">int</a> ->
+  ?socket_path:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+  ?stop:<a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> <a href="#type-promise">promise</a> ->
   ?error_handler:<a href="#type-error_handler">error_handler</a> ->
-  ?tls:bool ->
-  ?certificate_file:string ->
-  ?key_string:string ->
-  ?builtins:bool -></span>
-    <a href="#type-handler">handler</a> -> unit <a href="#type-promise">promise</a>
+  ?tls:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+  ?certificate_file:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+  ?key_string:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+  ?builtins:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> -></span>
+    <a href="#type-handler">handler</a> -> <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> <a href="#type-promise">promise</a>
 </pre>|}
 
 let to_percent_encoded_expected = {|<div class="spec value" id="val-to_percent_encoded">
@@ -1505,7 +1760,7 @@ let to_percent_encoded_expected = {|<div class="spec value" id="val-to_percent_e
 
 let to_percent_encoded_replacement = {|
 <pre><span class="keyword">val</span> to_percent_encoded :
-  ?international:bool -> string -> string
+  ?international:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a>
 </pre>
 |}
 
@@ -1518,14 +1773,14 @@ let to_set_cookie_expected = {|<div class="spec value" id="val-to_set_cookie">
 
 let to_set_cookie_replacement = {|
 <pre><span class="keyword">val</span> to_set_cookie :
-  ?expires:float ->
-  ?max_age:float ->
-  ?domain:string ->
-  ?path:string ->
-  ?secure:bool ->
-  ?http_only:bool ->
+  ?expires:<a href="https://ocaml.org/manual/latest/api/Float.html">float</a> ->
+  ?max_age:<a href="https://ocaml.org/manual/latest/api/Float.html">float</a> ->
+  ?domain:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+  ?path:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+  ?secure:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+  ?http_only:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
   ?same_site:[ `Strict | `Lax | `None ] ->
-    string -> string -> string
+    <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a>
 </pre>
 |}
 
@@ -1536,9 +1791,9 @@ let to_path_expected = {|<div class="spec value" id="val-to_path">
 
 let to_path_replacement = {|
 <pre><span class="keyword">val</span> to_path :
-  ?relative:bool ->
-  ?international:bool ->
-    string list -> string
+  ?relative:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+  ?international:<a href="https://ocaml.org/manual/latest/api/Bool.html">bool</a> ->
+    <a href="https://ocaml.org/manual/latest/api/String.html">string</a> <a href="https://ocaml.org/manual/latest/api/List.html">list</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a>
 </pre>
 |}
 
@@ -1549,8 +1804,8 @@ let encrypt_expected = {|<div class="spec value" id="val-encrypt">
 
 let encrypt_replacement = {|
 <pre><span class="keyword">val</span> encrypt :
-  ?associated_data:string ->
-    <a href="#type-request">request</a> -> string -> string
+  ?associated_data:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+    <a href="#type-request">request</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a>
 </pre>
 |}
 
@@ -1561,8 +1816,8 @@ let decrypt_expected = {|<div class="spec value" id="val-decrypt">
 
 let decrypt_replacement = {|
 <pre><span class="keyword">val</span> decrypt :
-  ?associated_data:string ->
-    <a href="#type-request">request</a> -> string -> string option
+  ?associated_data:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+    <a href="#type-request">request</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> <a href="https://ocaml.org/manual/latest/api/Option.html">option</a>
 </pre>
 |}
 
@@ -1575,9 +1830,9 @@ let request_expected = {|<div class="spec value" id="val-request">
 let request_replacement = {|
 <pre><span class="keyword">val</span> request :
   <span class="optional">?method_:[&lt; <a href="#type-method_">method_</a> ] ->
-  ?target:string ->
-  ?headers:(string * string) list -></span>
-    string -> <a href="#type-request">request</a>
+  ?target:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
+  ?headers:(<a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) <a href="https://ocaml.org/manual/latest/api/List.html">list</a> -></span>
+    <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="#type-request">request</a>
 </pre>|}
 
 let sort_headers_expected = {|<div class="spec value" id="val-sort_headers">
@@ -1587,7 +1842,7 @@ let sort_headers_expected = {|<div class="spec value" id="val-sort_headers">
 
 let sort_headers_replacement = {|
 <pre><span class="keyword">val</span> sort_headers :
-  (string * string) list -> (string * string) list
+  (<a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) <a href="https://ocaml.org/manual/latest/api/List.html">list</a> -> (<a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) <a href="https://ocaml.org/manual/latest/api/List.html">list</a>
 </pre>|}
 
 let message_expected = {|<div class="spec type" id="type-message">
@@ -1624,8 +1879,247 @@ let set_secret_expected = {|<div class="spec value" id="val-set_secret">
 
 let set_secret_replacement = {|
 <pre><span class="keyword">val</span> set_secret :
-  ?old_secrets:string list -> string -> <a href="#type-middleware">middleware</a>
+  ?old_secrets:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> <a href="https://ocaml.org/manual/latest/api/List.html">list</a> -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> -> <a href="#type-middleware">middleware</a>
 </pre>|}
+
+let upload_expected = {|<div class="spec value" id="val-upload">
+ <a href="#val-upload" class="anchor"></a><code><span><span class="keyword">val</span> upload : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span><a href="#type-part">part</a> option</span> <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let upload_part_expected = {|<div class="spec value" id="val-upload_part">
+ <a href="#val-upload_part" class="anchor"></a><code><span><span class="keyword">val</span> upload_part : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span>string option</span> <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let csrf_token_expected = {|<div class="spec value" id="val-csrf_token">
+ <a href="#val-csrf_token" class="anchor"></a><code><span><span class="keyword">val</span> csrf_token : <span>?valid_for:float <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let csrf_tag_expected = {|<div class="spec value" id="val-csrf_tag">
+ <a href="#val-csrf_tag" class="anchor"></a><code><span><span class="keyword">val</span> csrf_tag : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let pipeline_expected = {|<div class="spec value" id="val-pipeline">
+ <a href="#val-pipeline" class="anchor"></a><code><span><span class="keyword">val</span> pipeline : <span><span><a href="#type-middleware">middleware</a> list</span> <span class="arrow">-&gt;</span></span> <a href="#type-middleware">middleware</a></span></code>
+</div>
+|}
+
+let set_client_stream_expected = {|<div class="spec value" id="val-set_client_stream">
+ <a href="#val-set_client_stream" class="anchor"></a><code><span><span class="keyword">val</span> set_client_stream : <span><a href="#type-response">response</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-stream">stream</a> <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
+|}
+
+let set_server_stream_expected = {|<div class="spec value" id="val-set_server_stream">
+ <a href="#val-set_server_stream" class="anchor"></a><code><span><span class="keyword">val</span> set_server_stream : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-stream">stream</a> <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
+|}
+
+let router_expected = {|<div class="spec value" id="val-router">
+ <a href="#val-router" class="anchor"></a><code><span><span class="keyword">val</span> router : <span><span><a href="#type-route">route</a> list</span> <span class="arrow">-&gt;</span></span> <a href="#type-handler">handler</a></span></code>
+</div>
+|}
+
+let param_expected = {|<div class="spec value" id="val-param">
+ <a href="#val-param" class="anchor"></a><code><span><span class="keyword">val</span> param : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let from_filesystem_expected = {|<div class="spec value" id="val-from_filesystem">
+ <a href="#val-from_filesystem" class="anchor"></a><code><span><span class="keyword">val</span> from_filesystem : <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-handler">handler</a></span></code>
+</div>
+|}
+
+let mime_lookup_expected = {|<div class="spec value" id="val-mime_lookup">
+ <a href="#val-mime_lookup" class="anchor"></a><code><span><span class="keyword">val</span> mime_lookup : <span>string <span class="arrow">-&gt;</span></span> <span><span>(string * string)</span> list</span></span></code>
+</div>
+|}
+
+let session_field_expected = {|<div class="spec value" id="val-session_field">
+ <a href="#val-session_field" class="anchor"></a><code><span><span class="keyword">val</span> session_field : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string option</span></span></code>
+</div>
+|}
+
+let drop_session_field_expected = {|<div class="spec value" id="val-drop_session_field">
+ <a href="#val-drop_session_field" class="anchor"></a><code><span><span class="keyword">val</span> drop_session_field : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let all_session_fields_expected = {|<div class="spec value" id="val-all_session_fields">
+ <a href="#val-all_session_fields" class="anchor"></a><code><span><span class="keyword">val</span> all_session_fields : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span>(string * string)</span> list</span></span></code>
+</div>
+|}
+
+let invalidate_session_expected = {|<div class="spec value" id="val-invalidate_session">
+ <a href="#val-invalidate_session" class="anchor"></a><code><span><span class="keyword">val</span> invalidate_session : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>unit <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let memory_sessions_expected = {|<div class="spec value" id="val-memory_sessions">
+ <a href="#val-memory_sessions" class="anchor"></a><code><span><span class="keyword">val</span> memory_sessions : <span>?lifetime:float <span class="arrow">-&gt;</span></span> <a href="#type-middleware">middleware</a></span></code>
+</div>
+|}
+
+let cookie_sessions_expected = {|<div class="spec value" id="val-cookie_sessions">
+ <a href="#val-cookie_sessions" class="anchor"></a><code><span><span class="keyword">val</span> cookie_sessions : <span>?lifetime:float <span class="arrow">-&gt;</span></span> <a href="#type-middleware">middleware</a></span></code>
+</div>
+|}
+
+let sql_sessions_expected = {|<div class="spec value" id="val-sql_sessions">
+ <a href="#val-sql_sessions" class="anchor"></a><code><span><span class="keyword">val</span> sql_sessions : <span>?lifetime:float <span class="arrow">-&gt;</span></span> <a href="#type-middleware">middleware</a></span></code>
+</div>
+|}
+
+let session_id_expected = {|<div class="spec value" id="val-session_id">
+ <a href="#val-session_id" class="anchor"></a><code><span><span class="keyword">val</span> session_id : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let session_label_expected = {|<div class="spec value" id="val-session_label">
+ <a href="#val-session_label" class="anchor"></a><code><span><span class="keyword">val</span> session_label : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let session_expires_at_expected = {|<div class="spec value" id="val-session_expires_at">
+ <a href="#val-session_expires_at" class="anchor"></a><code><span><span class="keyword">val</span> session_expires_at : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> float</span></code>
+</div>
+|}
+
+let flash_messages_expected = {|<div class="spec value" id="val-flash_messages">
+ <a href="#val-flash_messages" class="anchor"></a><code><span><span class="keyword">val</span> flash_messages : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span><span>(string * string)</span> list</span></span></code>
+</div>
+|}
+
+let add_flash_message_expected = {|<div class="spec value" id="val-add_flash_message">
+ <a href="#val-add_flash_message" class="anchor"></a><code><span><span class="keyword">val</span> add_flash_message : <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
+|}
+
+let graphiql_expected = {|<div class="spec value" id="val-graphiql">
+ <a href="#val-graphiql" class="anchor"></a><code><span><span class="keyword">val</span> graphiql : <span>?default_query:string <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-handler">handler</a></span></code>
+</div>
+|}
+
+let sql_pool_expected = {|<div class="spec value" id="val-sql_pool">
+ <a href="#val-sql_pool" class="anchor"></a><code><span><span class="keyword">val</span> sql_pool : <span>?size:int <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-middleware">middleware</a></span></code>
+</div>
+|}
+
+let connect_expected = {|<div class="spec value" id="val-connect">
+ <a href="#val-connect" class="anchor"></a><code><span><span class="keyword">val</span> connect : <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+</div>
+|}
+
+let options_expected = {|<div class="spec value" id="val-options">
+ <a href="#val-options" class="anchor"></a><code><span><span class="keyword">val</span> options : <span>string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <a href="#type-route">route</a></span></code>
+</div>
+|}
+
+let log_expected = {|<div class="spec value" id="val-log">
+ <a href="#val-log" class="anchor"></a><code><span><span class="keyword">val</span> log : <span><span><span>(<span class="type-var">'a</span>,&nbsp;<span class="xref-unresolved">Stdlib</span>.Format.formatter,&nbsp;unit,&nbsp;unit)</span> <span class="xref-unresolved">Stdlib</span>.format4</span> <span class="arrow">-&gt;</span></span> <span class="type-var">'a</span></span></code>
+</div>
+|}
+
+let log_replacement = {|
+<code><span class="keyword">val</span> log : <a href="https://ocaml.org/manual/latest/api/Format.html">(<span class="type-var">'a</span>,&nbsp;Format.formatter,&nbsp;unit,&nbsp;unit) format4</a> <span class="arrow">-&gt;</span> <span class="type-var">'a</span></code>
+|}
+
+let set_log_level_expected = {|<div class="spec value" id="val-set_log_level">
+ <a href="#val-set_log_level" class="anchor"></a><code><span><span class="keyword">val</span> set_log_level : <span>string <span class="arrow">-&gt;</span></span> <span><span>[&lt; <a href="#type-log_level">log_level</a> ]</span> <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
+|}
+
+let error_handler_expected = {|<div class="spec type" id="type-error_handler">
+ <a href="#type-error_handler" class="anchor"></a><code><span><span class="keyword">type</span> error_handler</span><span> = <span><a href="#type-error">error</a> <span class="arrow">-&gt;</span></span> <span><span><a href="#type-response">response</a> option</span> <a href="#type-promise">promise</a></span></span></code>
+</div>
+|}
+
+let with_site_prefix_expected = {|<div class="spec value" id="val-with_site_prefix">
+ <a href="#val-with_site_prefix" class="anchor"></a><code><span><span class="keyword">val</span> with_site_prefix : <span>string <span class="arrow">-&gt;</span></span> <a href="#type-middleware">middleware</a></span></code>
+</div>
+|}
+
+let html_escape_expected = {|<div class="spec value" id="val-html_escape">
+ <a href="#val-html_escape" class="anchor"></a><code><span><span class="keyword">val</span> html_escape : <span>string <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let to_base64url_expected = {|<div class="spec value" id="val-to_base64url">
+ <a href="#val-to_base64url" class="anchor"></a><code><span><span class="keyword">val</span> to_base64url : <span>string <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let from_base64url_expected = {|<div class="spec value" id="val-from_base64url">
+ <a href="#val-from_base64url" class="anchor"></a><code><span><span class="keyword">val</span> from_base64url : <span>string <span class="arrow">-&gt;</span></span> <span>string option</span></span></code>
+</div>
+|}
+
+let from_percent_encoded_expected = {|<div class="spec value" id="val-from_percent_encoded">
+ <a href="#val-from_percent_encoded" class="anchor"></a><code><span><span class="keyword">val</span> from_percent_encoded : <span>string <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let to_form_urlencoded_expected = {|<div class="spec value" id="val-to_form_urlencoded">
+ <a href="#val-to_form_urlencoded" class="anchor"></a><code><span><span class="keyword">val</span> to_form_urlencoded : <span><span><span>(string * string)</span> list</span> <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let from_form_urlencoded_expected = {|<div class="spec value" id="val-from_form_urlencoded">
+ <a href="#val-from_form_urlencoded" class="anchor"></a><code><span><span class="keyword">val</span> from_form_urlencoded : <span>string <span class="arrow">-&gt;</span></span> <span><span>(string * string)</span> list</span></span></code>
+</div>
+|}
+
+let from_cookie_expected = {|<div class="spec value" id="val-from_cookie">
+ <a href="#val-from_cookie" class="anchor"></a><code><span><span class="keyword">val</span> from_cookie : <span>string <span class="arrow">-&gt;</span></span> <span><span>(string * string)</span> list</span></span></code>
+</div>
+|}
+
+let split_target_expected = {|<div class="spec value" id="val-split_target">
+ <a href="#val-split_target" class="anchor"></a><code><span><span class="keyword">val</span> split_target : <span>string <span class="arrow">-&gt;</span></span> string * string</span></code>
+</div>
+|}
+
+let from_path_expected = {|<div class="spec value" id="val-from_path">
+ <a href="#val-from_path" class="anchor"></a><code><span><span class="keyword">val</span> from_path : <span>string <span class="arrow">-&gt;</span></span> <span>string list</span></span></code>
+</div>
+|}
+
+let drop_trailing_slash_expected = {|<div class="spec value" id="val-drop_trailing_slash">
+ <a href="#val-drop_trailing_slash" class="anchor"></a><code><span><span class="keyword">val</span> drop_trailing_slash : <span><span>string list</span> <span class="arrow">-&gt;</span></span> <span>string list</span></span></code>
+</div>
+|}
+
+let text_html_expected = {|<div class="spec value" id="val-text_html">
+ <a href="#val-text_html" class="anchor"></a><code><span><span class="keyword">val</span> text_html : string</span></code>
+</div>
+|}
+
+let application_json_expected = {|<div class="spec value" id="val-application_json">
+ <a href="#val-application_json" class="anchor"></a><code><span><span class="keyword">val</span> application_json : string</span></code>
+</div>
+|}
+
+let random_expected = {|<div class="spec value" id="val-random">
+ <a href="#val-random" class="anchor"></a><code><span><span class="keyword">val</span> random : <span>int <span class="arrow">-&gt;</span></span> string</span></code>
+</div>
+|}
+
+let field_expected = {|<div class="spec value" id="val-field">
+ <a href="#val-field" class="anchor"></a><code><span><span class="keyword">val</span> field : <span><span><span class="type-var">'b</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> <span><span><span class="type-var">'a</span> <a href="#type-field">field</a></span> <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> option</span></span></code>
+</div>
+|}
+
+let set_field_expected = {|<div class="spec value" id="val-set_field">
+ <a href="#val-set_field" class="anchor"></a><code><span><span class="keyword">val</span> set_field : <span><span><span class="type-var">'b</span> <a href="#type-message">message</a></span> <span class="arrow">-&gt;</span></span> <span><span><span class="type-var">'a</span> <a href="#type-field">field</a></span> <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> <span class="arrow">-&gt;</span></span> unit</span></code>
+</div>
+|}
+
+let test_expected = {|<div class="spec value" id="val-test">
+ <a href="#val-test" class="anchor"></a><code><span><span class="keyword">val</span> test : <span>?prefix:string <span class="arrow">-&gt;</span></span> <span><a href="#type-handler">handler</a> <span class="arrow">-&gt;</span></span> <span><a href="#type-request">request</a> <span class="arrow">-&gt;</span></span> <a href="#type-response">response</a></span></code>
+</div>
+|}
 
 let pretty_print_signatures soup =
   let method_ = soup $ "#type-method_" in
@@ -1666,8 +2160,8 @@ let pretty_print_signatures soup =
 
   rewrite_status_group
     "#type-client_error"
-    client_expected
-    client_replacement;
+    client_error_expected
+    client_error_replacement;
 
   rewrite_status_group
     "#type-server_error"
@@ -1743,6 +2237,81 @@ let pretty_print_signatures soup =
         Soup.replace (element $ "> code") (Soup.parse replacement))
   in
 
+  replace "#type-promise" promise_expected promise_replacement;
+
+  replace
+    "#val-method_to_string"
+    method_to_string_expected
+    method_to_string_replacement;
+  replace
+    "#val-string_to_method"
+    string_to_method_expected
+    string_to_method_replacement;
+  replace
+    "#val-methods_equal"
+    methods_equal_expected
+    methods_equal_replacement;
+
+  replace
+    "#val-status_to_string"
+    status_to_string_expected
+    status_to_string_replacement;
+  replace
+    "#val-status_to_reason"
+    status_to_reason_expected
+    status_to_reason_replacement;
+  replace "#val-status_to_int" status_to_int_expected status_to_int_replacement;
+  replace "#val-int_to_status" int_to_status_expected int_to_status_replacement;
+  replace
+    "#val-is_informational"
+    is_informational_expected
+    is_informational_replacement;
+  replace "#val-is_successful" is_successful_expected is_successful_replacement;
+  replace
+    "#val-is_redirection" is_redirection_expected is_redirection_replacement;
+  replace
+    "#val-is_client_error" is_client_error_expected is_client_error_replacement;
+  replace
+    "#val-is_server_error" is_server_error_expected is_server_error_replacement;
+  replace
+    "#val-status_codes_equal"
+    status_codes_equal_expected
+    status_codes_equal_replacement;
+
+  let link_stdlib_type selector expected types =
+    let replacement =
+      types
+      |> List.fold_left begin fun replacement type_ ->
+        let link =
+          {|<a href="https://ocaml.org/manual/latest/api/|} ^
+          (String.capitalize_ascii type_) ^
+          {|.html">|} ^
+          type_ ^
+          {|</a>|}
+        in
+        Str.global_replace (Str.regexp (Str.quote type_)) link replacement
+      end
+        (Soup.parse expected $ "code" |> Soup.to_string)
+    in
+    replace selector expected replacement
+  in
+
+  link_stdlib_type "#val-client" client_expected ["string"];
+  link_stdlib_type "#val-tls" tls_expected ["bool"];
+  link_stdlib_type "#val-target" target_expected ["string"];
+  link_stdlib_type "#val-set_client" set_client_expected ["string"; "unit"];
+  link_stdlib_type "#val-set_method_" set_method_expected ["unit"];
+  link_stdlib_type "#val-query" query_expected ["string"; "option"];
+  link_stdlib_type "#val-queries" queries_expected ["string"; "list"];
+  link_stdlib_type "#val-all_queries" all_queries_expected ["string"; "list"];
+
+  link_stdlib_type "#val-set_status" set_status_expected ["unit"];
+
+  link_stdlib_type "#val-header" header_expected ["string"; "option"];
+  link_stdlib_type "#val-headers" headers_expected ["string"; "list"];
+  link_stdlib_type "#val-all_headers" all_headers_expected ["string"; "list"];
+  link_stdlib_type "#val-has_header" has_header_expected ["string"; "bool"];
+  link_stdlib_type "#val-drop_header" drop_header_expected ["string"; "unit"];
   replace "#val-add_header" add_header_expected add_header_replacement;
   multiline "#val-set_header" set_header_expected set_header_replacement;
 
@@ -1767,6 +2336,15 @@ let pretty_print_signatures soup =
       Soup.add_class "multiline" drop_cookie);
 
   multiline "#val-cookie" cookie_expected cookie_replacement;
+  link_stdlib_type "#val-all_cookies" all_cookies_expected ["string"; "list"];
+
+  link_stdlib_type "#val-body" body_expected ["string"];
+  link_stdlib_type "#val-set_body" set_body_expected ["string"; "unit"];
+
+  link_stdlib_type "#val-read" read_expected ["string"; "option"];
+  link_stdlib_type "#val-write" write_expected ["string"; "unit"];
+  link_stdlib_type "#val-flush" flush_expected ["unit"];
+  link_stdlib_type "#val-close" close_expected ["unit"];
 
   let bigstring = soup $ "#type-buffer" in
   if_expected
@@ -1775,6 +2353,9 @@ let pretty_print_signatures soup =
     (fun () ->
       Soup.replace (bigstring $ "> code") (Soup.parse bigstring_replacement);
       Soup.add_class "multiline" bigstring);
+
+  link_stdlib_type "#val-close_stream" close_stream_expected ["int"; "unit"];
+  replace "#val-abort_stream" abort_stream_expected abort_stream_replacement;
 
   let form = soup $ "#type-form_result" in
   if_expected
@@ -1802,6 +2383,10 @@ let pretty_print_signatures soup =
     "#type-multipart_form" multipart_form_expected multipart_form_replacement;
   multiline "#val-multipart" multipart_expected multipart_replacement;
   multiline "#type-part" part_expected part_replacement;
+  link_stdlib_type "#val-upload" upload_expected ["option"];
+  link_stdlib_type "#val-upload_part" upload_part_expected ["string"; "option"];
+  link_stdlib_type "#val-csrf_token" csrf_token_expected ["float"; "string"];
+  link_stdlib_type "#val-csrf_tag" csrf_tag_expected ["string"];
 
   let csrf_result = soup $ "#type-csrf_result" in
   if_expected
@@ -1818,24 +2403,63 @@ let pretty_print_signatures soup =
     verify_csrf_token_expected
     verify_csrf_token_replacement;
 
+  link_stdlib_type "#val-pipeline" pipeline_expected ["list"];
+  link_stdlib_type "#val-set_client_stream" set_client_stream_expected ["unit"];
+  link_stdlib_type "#val-set_server_stream" set_server_stream_expected ["unit"];
+
+  link_stdlib_type "#val-router" router_expected ["list"];
   multiline "#val-scope" scope_expected scope_replacement;
   replace "#val-get" get_expected get_replacement;
   replace "#val-post" post_expected post_replacement;
   replace "#val-put" put_expected put_replacement;
   replace "#val-delete" delete_expected delete_replacement;
   replace "#val-head" head_expected head_replacement;
+  link_stdlib_type "#val-connect" connect_expected ["string"];
+  link_stdlib_type "#val-options" options_expected ["string"];
   replace "#val-trace" trace_expected trace_replacement;
   replace "#val-patch" patch_expected patch_replacement;
   replace "#val-any" any_expected any_replacement;
+  link_stdlib_type "#val-param" param_expected ["string"];
   multiline "#val-static" static_expected static_replacement;
+  link_stdlib_type "#val-from_filesystem" from_filesystem_expected ["string"];
+  link_stdlib_type "#val-mime_lookup" mime_lookup_expected ["string"; "list"];
+
+  link_stdlib_type
+    "#val-session_field" session_field_expected ["string"; "option"];
   multiline "#val-set_session_field"
     set_session_expected set_session_replacement;
+  link_stdlib_type
+    "#val-drop_session_field" drop_session_field_expected ["string"; "unit"];
+  link_stdlib_type
+    "#val-all_session_fields" all_session_fields_expected ["string"; "list"];
+  link_stdlib_type
+    "#val-invalidate_session" invalidate_session_expected ["unit"];
+  link_stdlib_type "#val-memory_sessions" memory_sessions_expected ["float"];
+  link_stdlib_type "#val-cookie_sessions" cookie_sessions_expected ["float"];
+  link_stdlib_type "#val-sql_sessions" sql_sessions_expected ["float"];
+  link_stdlib_type "#val-session_id" session_id_expected ["string"];
+  link_stdlib_type "#val-session_label" session_label_expected ["string"];
+  link_stdlib_type
+    "#val-session_expires_at" session_expires_at_expected ["float"];
+
+  link_stdlib_type
+    "#val-flash_messages" flash_messages_expected ["string"; "list"];
+  link_stdlib_type
+    "#val-add_flash_message" add_flash_message_expected ["string"; "unit"];
+
   multiline "#val-websocket" websocket_expected websocket_replacement;
   multiline "#val-send" send_expected send_replacement;
+  link_stdlib_type "#val-receive" receive_expected ["string"; "option"];
   multiline "#val-close_websocket"
     close_websocket_expected close_websocket_replacement;
+
   multiline "#val-graphql" graphql_expected graphql_replacement;
+  link_stdlib_type "#val-graphiql" graphiql_expected ["string"];
+
+  link_stdlib_type "#val-sql_pool" sql_pool_expected ["int"; "string"];
   multiline "#val-sql" sql_expected sql_replacement;
+
+  replace "#val-log" log_expected log_replacement;
 
   let conditional_log = soup $ "#type-conditional_log" in
   if_expected
@@ -1871,6 +2495,10 @@ let pretty_print_signatures soup =
   replace "#val-info" info_expected info_replacement;
   replace "#val-debug" debug_expected debug_replacement;
 
+  link_stdlib_type "#val-sub_log" sub_log_expected' ["string"];
+  link_stdlib_type
+    "#val-set_log_level" set_log_level_expected ["string"; "unit"];
+
   let initialize_log = soup $ "#val-initialize_log" in
   if_expected
     initialize_log_expected
@@ -1892,6 +2520,8 @@ let pretty_print_signatures soup =
       error $$ "> code" |> Soup.iter Soup.delete;
       Soup.replace (error $ "> table") (Soup.parse error_replacement);
       Soup.add_class "multiline" error);
+
+  link_stdlib_type "#type-error_handler" error_handler_expected ["option"];
 
   multiline "#val-new_field" new_field_expected new_field_replacement;
 
@@ -1915,13 +2545,40 @@ let pretty_print_signatures soup =
         (Soup.parse serve_replacement);
       Soup.add_class "multiline" serve);
 
+  link_stdlib_type "#val-with_site_prefix" with_site_prefix_expected ["string"];
+
+  link_stdlib_type "#val-html_escape" html_escape_expected ["string"];
+  link_stdlib_type "#val-to_base64url" to_base64url_expected ["string"];
+  link_stdlib_type
+    "#val-from_base64url" from_base64url_expected ["string"; "option"];
   multiline "#val-to_percent_encoded"
     to_percent_encoded_expected to_percent_encoded_replacement;
+  link_stdlib_type
+    "#val-from_percent_encoded" from_percent_encoded_expected ["string"];
+  link_stdlib_type
+    "#val-to_form_urlencoded" to_form_urlencoded_expected ["string"; "list"];
+  link_stdlib_type
+    "#val-from_form_urlencoded"
+    from_form_urlencoded_expected
+    ["string"; "list"];
+  link_stdlib_type "#val-from_cookie" from_cookie_expected ["string"; "list"];
   multiline
     "#val-to_set_cookie" to_set_cookie_expected to_set_cookie_replacement;
+  link_stdlib_type "#val-split_target" split_target_expected ["string"];
+  link_stdlib_type "#val-from_path" from_path_expected ["string"; "list"];
   multiline "#val-to_path" to_path_expected to_path_replacement;
+  link_stdlib_type
+    "#val-drop_trailing_slash" drop_trailing_slash_expected ["string"; "list"];
+
+  link_stdlib_type "#val-text_html" text_html_expected ["string"];
+  link_stdlib_type "#val-application_json" application_json_expected ["string"];
+
+  link_stdlib_type "#val-random" random_expected ["int"; "string"];
   multiline "#val-encrypt" encrypt_expected encrypt_replacement;
   multiline "#val-decrypt" decrypt_expected decrypt_replacement;
+
+  link_stdlib_type "#val-field" field_expected ["option"];
+  link_stdlib_type "#val-set_field" set_field_expected ["unit"];
 
   let request = soup $ "#val-request" in
   if_expected
@@ -1952,7 +2609,9 @@ let pretty_print_signatures soup =
     "#val-receive_fragment"
     receive_fragment_expected receive_fragment_replacement;
 
-  multiline "#val-set_secret" set_secret_expected set_secret_replacement
+  multiline "#val-set_secret" set_secret_expected set_secret_replacement;
+
+  link_stdlib_type "#val-test" test_expected ["string"]
 
 let remove_stdlib soup =
   soup $$ ".xref-unresolved:contains(\"Stdlib\")" |> Soup.iter (fun element ->
