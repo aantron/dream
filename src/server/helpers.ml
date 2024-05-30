@@ -65,17 +65,17 @@ let response_with_body ?status ?code ?headers body =
   response
 
 let respond ?status ?code ?headers body =
-  Lwt.return (response_with_body ?status ?code ?headers body)
+  response_with_body ?status ?code ?headers body
 
 let html ?status ?code ?headers body =
   let response = response_with_body ?status ?code ?headers body in
   Message.set_header response "Content-Type" Formats.text_html;
-  Lwt.return response
+  response
 
 let json ?status ?code ?headers body =
   let response = response_with_body ?status ?code ?headers body in
   Message.set_header response "Content-Type" Formats.application_json;
-  Lwt.return response
+  response
 
 (* TODO Actually use the request and extract the site prefix. *)
 let redirect ?status ?code ?headers _request location =
@@ -87,7 +87,7 @@ let redirect ?status ?code ?headers _request location =
   in
   let response = response_with_body ?status ?code ?headers "" in
   Message.set_header response "Location" location;
-  Lwt.return response
+  response
 
 let stream ?status ?code ?headers ?(close = true) callback =
   let reader, writer = Stream.pipe () in
@@ -97,6 +97,9 @@ let stream ?status ?code ?headers ?(close = true) callback =
     Message.response ?status ?code ?headers client_stream server_stream in
 
   (* TODO Make sure the request id is propagated to the callback. *)
+  (* TODO This needs to become a fiber, or to be called afterwards in the
+     current fiber, after having Cohttp start the response -- depends on the
+     semantics of Cohttp.
   Lwt.async (fun () ->
     if close then
       match%lwt callback server_stream with
@@ -107,8 +110,11 @@ let stream ?status ?code ?headers ?(close = true) callback =
         raise exn
     else
       callback server_stream);
+  *)
+  ignore close;
+  ignore callback;
 
-  Lwt.return response
+  response
 
 let empty ?headers status =
   respond ?headers ~status ""
@@ -125,6 +131,7 @@ let websocket ?headers ?(close = true) callback =
   let websocket = Message.create_websocket response in
 
   (* TODO Make sure the request id is propagated to the callback. *)
+  (* TODO Get this working, depending on the semantics of Cohttp.
   Lwt.async (fun () ->
     if close then
       match%lwt callback websocket with
@@ -135,8 +142,12 @@ let websocket ?headers ?(close = true) callback =
         raise exn
     else
       callback websocket);
+  *)
+  ignore websocket;
+  ignore callback;
+  ignore close;
 
-  Lwt.return response
+  response
 
 let receive (_, server_stream) =
   Message.receive server_stream

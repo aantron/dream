@@ -5,10 +5,6 @@
 
 
 
-module Httpaf = Dream_httpaf_.Httpaf
-module H2 = Dream_h2.H2
-module Websocketaf = Dream_websocketaf.Websocketaf
-
 module Catch = Dream__server.Catch
 module Log = Dream__server.Log
 module Message = Dream_pure.Message
@@ -21,7 +17,7 @@ module Message = Dream_pure.Message
 val default : Catch.error_handler
 val debug_error_handler : Catch.error_handler
 val customize :
-  (Catch.error -> string -> Message.response -> Message.response Lwt.t) ->
+  (Catch.error -> string -> Message.response -> Message.response) ->
     Catch.error_handler
 
 
@@ -39,8 +35,9 @@ val customize :
 
 val app :
   Catch.error_handler ->
-    (Catch.error -> Message.response Lwt.t)
+    (Catch.error -> Message.response)
 
+(* TODO Restore or adapt.
 val httpaf :
   Catch.error_handler ->
     (Unix.sockaddr -> Httpaf.Server_connection.error_handler)
@@ -62,6 +59,7 @@ val websocket :
 val websocket_handshake :
   Catch.error_handler ->
     (Message.request -> Message.response -> string -> Message.response Lwt.t)
+ *)
 
 
 

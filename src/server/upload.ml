@@ -19,14 +19,18 @@ type multipart_state = {
   mutable state_init : bool;
   mutable name : string option;
   mutable filename : string option;
+  (* TODO Restore
   mutable stream : (< > * Multipart_form.Header.t * string Lwt_stream.t) Lwt_stream.t;
+  *)
 }
 
 let initial_multipart_state () = {
   state_init = true;
   name = None;
   filename = None;
+  (* TODO Restore
   stream = Lwt_stream.of_list [];
+  *)
 }
 
 (* TODO Dump the value of the multipart state somehow? *)
@@ -61,6 +65,7 @@ let field_to_string (request : Message.request) field =
 let log = Log.sub_log "dream.upload"
 
 let upload_part (request : Message.request) =
+  (* TODO Restore
   let state = multipart_state request in
   match%lwt Lwt_stream.peek state.stream with
   | None -> Lwt.return_none
@@ -72,12 +77,16 @@ let upload_part (request : Message.request) =
       let%lwt () = Lwt_stream.junk state.stream in
       (* XXX(dinosaure): delete the current part from the [stream]. *)
       Lwt.return_none
+  *)
+  ignore request;
+  assert false
 
 let identify _ = object end
 
 type part = string option * string option * ((string * string) list)
 
 let rec state (request : Message.request) =
+  (* TODO Restore
   let state' = multipart_state request in
   let stream = state'.stream in
   match%lwt Lwt_stream.peek stream with
@@ -91,8 +100,13 @@ let rec state (request : Message.request) =
     let part =
       state'.name, state'.filename, headers in
     Lwt.return (Some part)
+  *)
+  ignore state;
+  ignore request;
+  assert false
 
 and upload (request : Message.request) =
+  (* TODO Restore
   let state' = multipart_state request in
   match state'.state_init with
   | false ->
@@ -124,12 +138,16 @@ and upload (request : Message.request) =
       state'.stream <- stream;
       state'.state_init <- false;
       state request
+  *)
+  ignore request;
+  assert false
 
 type multipart_form =
   (string * ((string option * string) list)) list
 module Map = Map.Make (String)
 
 let multipart ?(csrf=true) ~now request =
+  (* TODO Restore
   let content_type = match Message.header request "Content-Type" with
     | Some content_type ->
       Result.to_option (Multipart_form.Content_type.of_string (content_type ^ "\r\n"))
@@ -177,3 +195,8 @@ let multipart ?(csrf=true) ~now request =
       else
       let form = Form.sort parts in
       Lwt.return (`Ok form)
+  *)
+  ignore csrf;
+  ignore now;
+  ignore request;
+  assert false

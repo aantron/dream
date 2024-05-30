@@ -8,9 +8,6 @@
 type buffer =
   (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
 
-type 'a promise =
-  'a Lwt.t
-
 type read =
   data:(buffer -> int -> int -> bool -> bool -> unit) ->
   flush:(unit -> unit) ->
@@ -396,6 +393,7 @@ let forward (reader : reader) stream =
   loop ()
 
 let read_convenience stream =
+  (* TODO Restore
   let promise, resolver = Lwt.wait () in
   let close _code = Lwt.wakeup_later resolver None in
   let abort exn = Lwt.wakeup_later_exn resolver exn in
@@ -423,19 +421,22 @@ let read_convenience stream =
   loop ();
 
   promise
+  *)
+  ignore stream;
+  assert false
 
 (* TODO It's probably best to protect "wakeups" of the promise to prevent
    Invalid_argument from Lwt. *)
 let read_until_close stream =
-  let promise, resolver = Lwt.wait () in
+  let promise, resolver = Eio.Promise.create () in
   let length = ref 0 in
   let buffer = ref (Bigstringaf.create 4096) in
   let close _code =
     Bigstringaf.sub !buffer ~off:0 ~len:!length
     |> Bigstringaf.to_string
-    |> Lwt.wakeup_later resolver
+    |> Eio.Promise.resolve_ok resolver
   in
-  let abort exn = Lwt.wakeup_later_exn resolver exn in
+  let abort exn = Eio.Promise.resolve_error resolver exn in
 
   let rec loop () =
     stream.reader.read

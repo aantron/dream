@@ -33,32 +33,32 @@ let sort_and_check_form ~now to_value form request =
 
   match csrf_token with
   | [_, value] ->
-    begin match%lwt Csrf.verify_csrf_token ~now request (to_value value) with
+    begin match Csrf.verify_csrf_token ~now request (to_value value) with
     | `Ok ->
-      Lwt.return (`Ok form)
+      `Ok form
 
     | `Expired time ->
-      Lwt.return (`Expired (form, time))
+      `Expired (form, time)
 
     | `Wrong_session ->
-      Lwt.return (`Wrong_session form)
+      `Wrong_session form
 
     | `Invalid ->
-      Lwt.return (`Invalid_token form)
+      `Invalid_token form
     end
 
   | [] ->
     log.warning (fun log -> log ~request "CSRF token missing");
-    Lwt.return (`Missing_token form)
+    `Missing_token form
 
   | _::_::_ ->
     log.warning (fun log -> log ~request "CSRF token duplicated");
-    Lwt.return (`Many_tokens form)
+    `Many_tokens form
 
 let wrong_content_type request =
   log.warning (fun log -> log ~request
     "Content-Type not 'application/x-www-form-urlencoded'");
-  Lwt.return `Wrong_content_type
+  `Wrong_content_type
 
 let form ?(csrf = true) ~now request =
   match Message.header request "Content-Type" with
@@ -67,11 +67,11 @@ let form ?(csrf = true) ~now request =
   | Some content_type ->
     match String.split_on_char ';' content_type with
     | "application/x-www-form-urlencoded"::_ ->
-      let%lwt body = Message.body request in
+      let body = Message.body request in
       let form = Formats.from_form_urlencoded body in
       if csrf then
         sort_and_check_form ~now (fun string -> string) form request
       else
-        Lwt.return (`Ok (sort form))
+        `Ok (sort form)
     | _ ->
       wrong_content_type request

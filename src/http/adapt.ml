@@ -5,18 +5,18 @@
 
 
 
-module Httpaf = Dream_httpaf_.Httpaf
-module H2 = Dream_h2.H2
-
 module Stream = Dream_pure.Stream
 module Message = Dream_pure.Message
 
 
 
-let address_to_string : Unix.sockaddr -> string = function
-  | ADDR_UNIX path -> path
-  | ADDR_INET (address, port) ->
-    Printf.sprintf "%s:%i" (Unix.string_of_inet_addr address) port
+let address_to_string : Eio.Net.Sockaddr.stream -> string = function
+  | `Unix path -> path
+  | `Tcp (address, port) ->
+    let address =
+      Eio.Net.Ipaddr.pp (Format.get_str_formatter ()) address;
+      Format.flush_str_formatter () in
+    Printf.sprintf "%s:%i" address port
 
 
 
@@ -69,6 +69,7 @@ let forward_body_general
 
   send ()
 
+(* TODO Restore these or analogues.
 let forward_body
     (response : Message.response)
     (body : Httpaf.Body.Writer.t) =
@@ -90,3 +91,4 @@ let forward_body_h2
     (H2.Body.Writer.write_bigstring body)
     (H2.Body.Writer.flush body)
     (fun _code -> H2.Body.Writer.close body)
+*)

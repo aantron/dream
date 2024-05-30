@@ -1,4 +1,3 @@
 (executable
  (name echo)
- (libraries dream)
- (preprocess (pps lwt_ppx)))
+ (libraries dream eio_main))

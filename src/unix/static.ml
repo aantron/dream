@@ -27,6 +27,7 @@ let mime_lookup filename =
   ["Content-Type", content_type]
 
 let from_filesystem local_root path _ =
+  (* TODO Restore.
   let file = Filename.concat local_root path in
   Lwt.catch
     (fun () ->
@@ -38,6 +39,10 @@ let from_filesystem local_root path _ =
     (fun _exn ->
       Message.response ~status:`Not_Found Stream.empty Stream.null
       |> Lwt.return)
+  *)
+  ignore local_root;
+  ignore path;
+  assert false
 
 (* TODO Add ETag handling. *)
 (* TODO Add Content-Length handling? *)
@@ -73,6 +78,7 @@ let validate_path request =
       None
 
 let static ?(loader = from_filesystem) local_root = fun request ->
+  (* TODO Restore.
 
   if not @@ Method.methods_equal (Message.method_ request) `GET then
     Message.response ~status:`Not_Found Stream.empty Stream.null
@@ -98,3 +104,8 @@ let static ?(loader = from_filesystem) local_root = fun request ->
           ()
       end;
       Lwt.return response
+  *)
+  ignore loader;
+  ignore local_root;
+  ignore request;
+  assert false

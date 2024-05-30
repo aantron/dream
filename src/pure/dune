@@ -4,10 +4,9 @@
  (libraries
   base64
   bigstringaf
+  eio
   hmap
-  lwt
   uri
   ptime
  )
- (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

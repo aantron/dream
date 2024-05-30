@@ -24,6 +24,8 @@ module Stream = Dream_pure.Stream
 
        https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md *)
 
+(* TODO Restore.
+
 let log =
   Log.sub_log "dream.graphql"
 
@@ -345,3 +347,4 @@ let graphiql ?(default_query = "") graphql_endpoint =
 
   fun _request ->
     Helpers.html (Lazy.force html)
+*)

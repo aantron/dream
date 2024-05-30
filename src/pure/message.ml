@@ -7,8 +7,6 @@
 
 (* Type abbreviations and modules used in defining the primary types *)
 
-type 'a promise = 'a Lwt.t
-
 type 'a field_metadata = {
   name : string option;
   show_value : ('a -> string) option;
@@ -39,7 +37,7 @@ type 'a message = {
   mutable headers : (string * string) list;
   mutable client_stream : Stream.stream;
   mutable server_stream : Stream.stream;
-  mutable body : string promise option;
+  mutable body : string Eio.Promise.or_exn option;
   mutable fields : Fields.t;
 }
 
@@ -50,7 +48,7 @@ type response = server message
 
 (* Functions of messages *)
 
-type handler = request -> response Lwt.t
+type handler = request -> response
 type middleware = handler -> handler
 
 
@@ -189,7 +187,8 @@ let lowercase_headers message =
 
 let body message =
   match message.body with
-  | Some body_promise -> body_promise
+  | Some body_promise ->
+    Eio.Promise.await_exn body_promise
   | None ->
     let stream =
       match message.kind with
@@ -198,15 +197,16 @@ let body message =
     in
     let body_promise = Stream.read_until_close stream in
     message.body <- Some body_promise;
-    body_promise
+    Eio.Promise.await_exn body_promise
 
 let set_body message body =
-  message.body <- Some (Lwt.return body);
+  message.body <- Some (Eio.Promise.create_resolved (Ok body));
   match message.kind with
   | Request -> message.server_stream <- Stream.string body
   | Response -> message.client_stream <- Stream.string body
 
 let set_content_length_headers message =
+  (* TODO Restore.
   if has_header message "Content-Length" then
     ()
   else
@@ -223,6 +223,9 @@ let set_content_length_headers message =
         | Some body ->
           let length = string_of_int (String.length body) in
           add_header message "Content-Length" length
+  *)
+  ignore message;
+  assert false
 
 let drop_content_length_headers message =
   drop_header message "Content-Length";
@@ -236,6 +239,7 @@ let read stream =
   Stream.read_convenience stream
 
 let write stream chunk =
+  (* TODO Restore.
   let promise, resolver = Lwt.wait () in
   let length = String.length chunk in
   let buffer = Bigstringaf.of_string ~off:0 ~len:length chunk in
@@ -246,8 +250,13 @@ let write stream chunk =
     ~exn:(fun exn -> Lwt.wakeup_later_exn resolver exn)
     (fun () -> Lwt.wakeup_later resolver ());
   promise
+  *)
+  ignore stream;
+  ignore chunk;
+  assert false
 
 let flush stream =
+  (* TODO Restore.
   let promise, resolver = Lwt.wait () in
   Stream.flush
     stream
@@ -255,10 +264,12 @@ let flush stream =
     ~exn:(fun exn -> Lwt.wakeup_later_exn resolver exn)
     (Lwt.wakeup_later resolver);
   promise
+  *)
+  ignore stream;
+  assert false
 
 let close stream =
-  Stream.close stream 1000;
-  Lwt.return_unit
+  Stream.close stream 1000
 
 let client_stream message =
   message.client_stream
@@ -288,8 +299,7 @@ let get_websocket response =
 
 let close_websocket ?(code = 1000) (client_stream, server_stream) =
   Stream.close client_stream code;
-  Stream.close server_stream code;
-  Lwt.return_unit
+  Stream.close server_stream code
 
 type text_or_binary = [
   | `Text
@@ -302,6 +312,7 @@ type end_of_message = [
 ]
 
 let receive_fragment stream =
+  (* TODO Restore.
   let promise, resolver = Lwt.wait () in
   let close _code = Lwt.wakeup_later resolver None in
   let abort exn = Lwt.wakeup_later_exn resolver exn in
@@ -333,12 +344,16 @@ let receive_fragment stream =
   loop ();
 
   promise
+  *)
+  ignore stream;
+  assert false
 
 (* TODO This can be optimized by using a buffer, and also by immediately
    returning the first chunk without accumulation if FIN is set on it. *)
 (* TODO Test what happens on end of stream without FIN set. The next read should
    still gracefully return None. *)
 let receive_full stream =
+  (* TODO Restore.
   let rec receive_continuations text_or_binary acc =
     match%lwt receive_fragment stream with
     | None ->
@@ -355,13 +370,22 @@ let receive_full stream =
     Lwt.return (Some (fragment, text_or_binary))
   | Some (fragment, text_or_binary, `Continues) ->
     receive_continuations text_or_binary fragment
+  *)
+  ignore stream;
+  assert false
 
 let receive stream =
+  (* TODO Restore.
   match%lwt receive_full stream with
   | None -> Lwt.return_none
   | Some (message, _) -> Lwt.return (Some message)
+  *)
+  ignore receive_full;
+  ignore stream;
+  assert false
 
 let send ?text_or_binary ?end_of_message stream data =
+  (* TODO Restore.
   let promise, resolver = Lwt.wait () in
   let binary =
     match text_or_binary with
@@ -383,6 +407,12 @@ let send ?text_or_binary ?end_of_message stream data =
     ~exn:(fun exn -> Lwt.wakeup_later_exn resolver exn)
     (fun () -> Lwt.wakeup_later resolver ());
   promise
+  *)
+  ignore text_or_binary;
+  ignore end_of_message;
+  ignore stream;
+  ignore data;
+  assert false
 
 
 

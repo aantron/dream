@@ -5,10 +5,6 @@
 
 
 
-module Httpaf = Dream_httpaf_.Httpaf
-module H2 = Dream_h2.H2
-module Websocketaf = Dream_websocketaf.Websocketaf
-
 module Catch = Dream__server.Catch
 module Error_template = Dream__server.Error_template
 module Method = Dream_pure.Method
@@ -161,7 +157,7 @@ let customize template (error : Catch.error) =
      Then, call the template, and return the response. *)
 
   if not error.will_send_response then
-    Lwt.return_none
+    None
 
   else
     let debug_dump = dump error in
@@ -181,13 +177,12 @@ let customize template (error : Catch.error) =
     (* No need to catch errors when calling the template, because every call
        site of the error handler already has error handlers for catching double
        faults. *)
-    let%lwt response = template error debug_dump response in
-    Lwt.return (Some response)
+    Some (template error debug_dump response)
 
 
 
 let default_template _error _debug_dump response =
-  Lwt.return response
+  response
 
 let debug_template _error debug_dump response =
   let status = Message.status response in
@@ -195,7 +190,7 @@ let debug_template _error debug_dump response =
   and reason = Status.status_to_string status in
   Message.set_header response "Content-Type" Dream_pure.Formats.text_html;
   Message.set_body response (Error_template.render ~debug_dump ~code ~reason);
-  Lwt.return response
+  response
 
 let default =
   customize default_template
@@ -210,7 +205,8 @@ let debug_error_handler =
 
 
 let double_faults f default =
-  Lwt.catch f begin fun exn ->
+  try f ()
+  with exn ->
     let backtrace = Printexc.get_backtrace () in
 
     log.error (fun log ->
@@ -221,7 +217,6 @@ let double_faults f default =
       log.error (fun log -> log "%s" line));
 
     default ()
-  end
 
 (* If the user's handler fails to provide a response, return an empty 500
    response. Don't return the original response we passed to the error handler,
@@ -232,15 +227,14 @@ let double_faults f default =
 let respond_with_option f =
   double_faults
     (fun () ->
-      f ()
-      |> Lwt.map (function
+      (* TODO Fix indentation. *)
+      match f () with
         | Some response -> response
         | None ->
           Message.response
-            ~status:`Internal_Server_Error Stream.empty Stream.null))
+            ~status:`Internal_Server_Error Stream.empty Stream.null)
     (fun () ->
-      Message.response ~status:`Internal_Server_Error Stream.empty Stream.null
-      |> Lwt.return)
+      Message.response ~status:`Internal_Server_Error Stream.empty Stream.null)
 
 
 
@@ -260,6 +254,7 @@ let app
 
 
 
+(* TODO Response or adapt.
 let default_response = function
   | `Server ->
     Message.response ~status:`Internal_Server_Error Stream.empty Stream.null
@@ -457,3 +452,4 @@ let websocket_handshake
   } in
 
   respond_with_option (fun () -> user's_error_handler error)
+*)

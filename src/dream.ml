@@ -9,14 +9,14 @@ module Catch = Dream__server.Catch
 module Cipher = Dream__cipher.Cipher
 module Cookie = Dream__server.Cookie
 module Csrf = Dream__server.Csrf
+module Driver = Dream__http.Driver
 module Echo = Dream__server.Echo
 module Error_handler = Dream__http.Error_handler
 module Flash = Dream__server.Flash
 module Form = Dream__server.Form
 module Formats = Dream_pure.Formats
-module Graphql = Dream__graphql.Graphql
+(* module Graphql = Dream__graphql.Graphql *)
 module Helpers = Dream__server.Helpers
-module Http = Dream__http.Driver
 module Livereload = Dream__server.Livereload
 module Message = Dream_pure.Message
 module Method = Dream_pure.Method
@@ -54,9 +54,11 @@ let () =
 let now () =
   Ptime.to_float_s (Ptime.v (Ptime_clock.now_d_ps ()))
 
+(* TODO Fix this. *)
 let () =
   Random.initialize (fun () ->
-    Mirage_crypto_rng_lwt.initialize (module Mirage_crypto_rng.Fortuna))
+    ())
+    (* Mirage_crypto_rng_lwt.initialize (module Mirage_crypto_rng.Fortuna)) *)
 
 module Session =
 struct
@@ -77,7 +79,6 @@ type route = Router.route
 type 'a message = 'a Message.message
 type client = Message.client
 type server = Message.server
-type 'a promise = 'a Message.promise
 
 
 
@@ -262,7 +263,8 @@ let all_session_fields = all_session_values
 let invalidate_session = Session.invalidate_session
 let memory_sessions = Session.memory_sessions
 let cookie_sessions = Session.cookie_sessions
-let sql_sessions = Sql_session.sql_sessions
+(* let sql_sessions = Sql_session.sql_sessions TODO *)
+let sql_sessions ?lifetime _ = ignore lifetime; assert false
 let session_id = Session.session_id
 let session_label = Session.session_label
 let session_expires_at = Session.session_expires_at
@@ -280,15 +282,19 @@ let add_flash_message = Flash.put_flash
 
 (* GraphQL *)
 
-let graphql = Graphql.graphql
-let graphiql = Graphql.graphiql
+(* let graphql = Graphql.graphql TODO *)
+let graphql _ = assert false
+(* let graphiql = Graphql.graphiql TODO *)
+let graphiql ?default_query:_ _ = assert false
 
 
 
 (* SQL *)
 
-let sql_pool = Sql.sql_pool
-let sql = Sql.sql
+(* let sql_pool = Sql.sql_pool TODO *)
+let sql_pool ?size:_ _ = assert false
+(* let sql = Sql.sql TODO *)
+let sql _ = assert false
 
 
 
@@ -348,8 +354,8 @@ let catch = Catch.catch
 
 (* Servers *)
 
-let run = Http.run
-let serve = Http.serve
+let run = Driver.run
+let serve = Driver.serve
 let with_site_prefix = Site_prefix.with_site_prefix
 
 
@@ -390,7 +396,10 @@ let test ?(prefix = "") handler request =
     @@ handler
   in
 
-  Lwt_main.run (app request)
+  (* Lwt_main.run (app request) TODO *)
+  ignore request;
+  ignore app;
+  assert false
 
 let sort_headers = Message.sort_headers
 let echo = Echo.echo

@@ -15,8 +15,6 @@ type stream
 
 type buffer =
   (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
-type 'a promise =
-  'a Lwt.t
 
 type read =
   data:(buffer -> int -> int -> bool -> bool -> unit) ->
@@ -78,12 +76,14 @@ val abort : stream -> exn -> unit
 val read : stream -> read
 (** Awaits the next stream event. See {!Stream.type-read}. *)
 
-val read_convenience : stream -> string option promise
+val read_convenience : stream -> string option
 (** A wrapper around {!Stream.val-read} that converts [~data] with content [s]
     into [Some s], and [~close] into [None], and uses them to resolve a promise.
     [~flush] is ignored. *)
 
-val read_until_close : stream -> string promise
+(* TODO This should probably do the full read loop, instead of exposing a
+   promise. *)
+val read_until_close : stream -> string Eio.Promise.or_exn
 (** Reads a stream completely until [~close], and accumulates the data into a
     string. *)
 

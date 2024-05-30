@@ -13,6 +13,8 @@ module Message = Dream_pure.Message
 let log =
   Log.sub_log "dream.sql"
 
+(* TODO Restore everything here. *)
+(**
 (* TODO Debug metadata for the pools. *)
 let pool_field : (_, Caqti_error.t) Caqti_lwt_unix.Pool.t Message.field =
   Message.new_field ()
@@ -81,3 +83,4 @@ let sql request callback =
         | exception exn -> raise exn)
     in
     Caqti_lwt.or_fail result
+*)

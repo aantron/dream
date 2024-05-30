@@ -15,11 +15,11 @@ maintainer: "Anton Bachin <antonbachin@yahoo.com>"
 depends: [
   "dream-pure"
   "dune" {>= "2.7.0"}  # --instrument-with.
-  "lwt"
-  "lwt_ppx" {>= "1.2.2"}
-  "lwt_ssl"
+  # "lwt"
+  # "lwt_ppx" {>= "1.2.2"}
+  # "lwt_ssl"
   "ocaml" {>= "4.08.0"}
-  "ssl" {>= "0.5.8"}  # Ssl.get_negotiated_alpn_protocol.
+  # "ssl" {>= "0.5.8"}  # Ssl.get_negotiated_alpn_protocol.
 
   # Currently vendored.
   # "gluten"
@@ -32,14 +32,14 @@ depends: [
   # "websocketaf"
 
   # Dependencies of vendored packages.
-  "angstrom" {>= "0.14.0"}
-  "base64" {>= "3.0.0"}
-  "bigstringaf" {>= "0.5.0"}  # h2.
-  "digestif" {>= "0.7.2"}  # websocket/af, sha1, default implementation.
-  "faraday" {>= "0.6.1"}
-  "faraday-lwt-unix"
-  "lwt_ssl" {>= "1.2.0"}  # Gluten.
-  "psq"  # h2.
+  # "angstrom" {>= "0.14.0"}
+  # "base64" {>= "3.0.0"}
+  # "bigstringaf" {>= "0.5.0"}  # h2.
+  # "digestif" {>= "0.7.2"}  # websocket/af, sha1, default implementation.
+  # "faraday" {>= "0.6.1"}
+  # "faraday-lwt-unix"
+  # "lwt_ssl" {>= "1.2.0"}  # Gluten.
+  # "psq"  # h2.
 ]
 
 build: [

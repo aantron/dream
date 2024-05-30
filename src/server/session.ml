@@ -15,14 +15,14 @@ let log =
   Log.sub_log "dream.session"
 
 type 'a back_end = {
-  load : Message.request -> 'a Lwt.t;
-  send : 'a -> Message.request -> Message.response -> Message.response Lwt.t;
+  load : Message.request -> 'a;
+  send : 'a -> Message.request -> Message.response -> Message.response;
 }
 
 let middleware field back_end = fun inner_handler request ->
-  let%lwt session = back_end.load request in
+  let session = back_end.load request in
   Message.set_field request field session;
-  let%lwt response = inner_handler request in
+  let response = inner_handler request in
   back_end.send session request response
 
 let getter field request =
@@ -56,9 +56,9 @@ type session = {
 }
 
 type operations = {
-  put : string -> string -> unit Lwt.t;
-  drop : string -> unit Lwt.t;
-  invalidate : unit -> unit Lwt.t;
+  put : string -> string -> unit;
+  drop : string -> unit;
+  invalidate : unit -> unit;
   mutable dirty : bool;
 }
 
@@ -125,20 +125,17 @@ struct
     session.payload
     |> List.remove_assoc name
     |> fun dictionary -> (name, value)::dictionary
-    |> fun dictionary -> session.payload <- dictionary;
-    Lwt.return_unit
+    |> fun dictionary -> session.payload <- dictionary
 
   let drop session name =
     session.payload
     |> List.remove_assoc name
-    |> fun dictionary -> session.payload <- dictionary;
-    Lwt.return_unit
+    |> fun dictionary -> session.payload <- dictionary
 
   let invalidate hash_table ~now lifetime operations session =
     Hashtbl.remove hash_table !session.id;
     session := create hash_table (now () +. lifetime);
-    operations.dirty <- true;
-    Lwt.return_unit
+    operations.dirty <- true
 
   let operations ~now hash_table lifetime session dirty =
     let rec operations = {
@@ -182,7 +179,7 @@ struct
     in
 
     let session = ref session in
-    Lwt.return (operations ~now:gettimeofday hash_table lifetime session dirty, session)
+    operations ~now:gettimeofday hash_table lifetime session dirty, session
 
   let send ~now (operations, session) request response =
     if operations.dirty then begin
@@ -191,7 +188,7 @@ struct
       Cookie.set_cookie
         response request session_cookie id ~encrypt:false ~max_age
     end;
-    Lwt.return response
+    response
 
   let back_end ~now lifetime =
     let hash_table = Hashtbl.create 256 in
@@ -222,20 +219,17 @@ struct
     |> List.remove_assoc name
     |> fun dictionary -> (name, value)::dictionary
     |> fun dictionary -> session.payload <- dictionary;
-    operations.dirty <- true;
-    Lwt.return_unit
+    operations.dirty <- true
 
   let drop operations session name =
     session.payload
     |> List.remove_assoc name
     |> fun dictionary -> session.payload <- dictionary;
-    operations.dirty <- true;
-    Lwt.return_unit
+    operations.dirty <- true
 
   let invalidate ~now lifetime operations session =
     session := create (now () +. lifetime);
-    operations.dirty <- true;
-    Lwt.return_unit
+    operations.dirty <- true
 
   let operations ~now lifetime session dirty =
     let rec operations = {
@@ -301,7 +295,7 @@ struct
     in
 
     let session = ref session in
-    Lwt.return (operations ~now:gettimeofday lifetime session dirty, session)
+    operations ~now:gettimeofday lifetime session dirty, session
 
   let send ~now (operations, session) request response =
     if operations.dirty then begin
@@ -319,7 +313,7 @@ struct
       in
       Cookie.set_cookie response request session_cookie value ~max_age
     end;
-    Lwt.return response
+    response
 
   let back_end ~now lifetime = {
     load = load ~now lifetime;
