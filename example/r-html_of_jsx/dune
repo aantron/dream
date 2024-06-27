@@ -1,0 +1,6 @@
+(executable
+ (name html_of_jsx)
+ (libraries dream html_of_jsx)
+ (preprocess (pps lwt_ppx html_of_jsx.ppx)))
+
+(data_only_dirs _esy esy.lock lib node_modules)
