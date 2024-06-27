@@ -4,7 +4,7 @@
     "@opam/dream": "1.0.0~alpha5",
     "@opam/dune": "^3.0",
     "@opam/reason": "^3.8.0",
-    "@opam/html_of_jsx": "*",
+    "@opam/html_of_jsx": "0.0.4",
     "ocaml": "^4.14.0"
   },
   "devDependencies": {
