@@ -5,8 +5,8 @@ let render param =
   </body>
   </html>
 
-let () =
-  Dream.run
+let () = Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.router [
 

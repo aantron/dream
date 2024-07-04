@@ -68,6 +68,7 @@ depends: [
   "mirage-clock" {>= "3.0.0"}  # now_d_ps : unit -> int * int64.
   "mirage-crypto" {>= "0.8.1"}  # AES-256-GCM.
   "mirage-crypto-rng"
+  "mirage-crypto-rng-eio"
   "multipart_form" {>= "0.4.0"}
   "ocaml" {>= "4.08.0"}
   "ptime" {>= "0.8.1"}  # Ptime.v.

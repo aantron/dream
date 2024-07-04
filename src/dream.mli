@@ -2094,7 +2094,10 @@ val run :
   ?builtins:bool ->
   ?greeting:bool ->
   ?adjust_terminal:bool ->
-  <clock:_ Eio.Time.clock; net:[> [> `Generic ] Eio.Net.ty ] Eio.Resource.t; secure_random:_ Eio.Flow.source; ..> ->
+  <clock:_ Eio.Time.clock;
+   mono_clock:_ Eio.Time.Mono.t;
+   net:[> [> `Generic ] Eio.Net.ty ] Eio.Resource.t;
+   secure_random:_ Eio.Flow.source; ..> ->
     handler -> unit
 (** Runs the Web application represented by the {!handler}, by default at
     {{:http://localhost:8080} http://localhost:8080}.
@@ -2154,7 +2157,10 @@ val serve :
   ?certificate_file:string ->
   ?key_file:string ->
   ?builtins:bool ->
-  <clock:_ Eio.Time.clock; net:[> [> `Generic ] Eio.Net.ty ] Eio.Resource.t; secure_random:_ Eio.Flow.source; ..> ->
+  <clock:_ Eio.Time.clock;
+   mono_clock:_ Eio.Time.Mono.t;
+   net:[> [> `Generic ] Eio.Net.ty ] Eio.Resource.t;
+   secure_random:_ Eio.Flow.source; ..> ->
     handler -> unit
 (** Like {!Dream.run}, but returns a promise that does not resolve until the
     server stops listening, instead of calling

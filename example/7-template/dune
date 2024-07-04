@@ -1,6 +1,6 @@
 (executable
  (name template)
- (libraries dream))
+ (libraries dream eio_main))
 
 (rule
  (targets template.ml)

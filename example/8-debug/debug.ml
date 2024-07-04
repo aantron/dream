@@ -1,5 +1,5 @@
-let () =
-  Dream.run ~error_handler:Dream.debug_error_handler
+let () = Eio_main.run @@ fun env ->
+  Dream.run ~error_handler:Dream.debug_error_handler env
   @@ Dream.logger
   @@ Dream.router [
 

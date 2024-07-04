@@ -499,7 +499,7 @@ let built_in_middleware error_handler =
 let serve_with_details
     caller_function_for_error_messages
     tls_library
-    ~capability
+    env
     ~interface
     ~network
     ~stop
@@ -569,7 +569,7 @@ let serve_with_details
     | `Inet port ->
       let addresses =
         Eio.Net.getaddrinfo_stream
-          capability interface ~service:(string_of_int port) in
+          env#net interface ~service:(string_of_int port) in
       match addresses with
       | [] ->
         Printf.ksprintf failwith "Dream.%s: no interface with address %s"
@@ -582,7 +582,10 @@ let serve_with_details
   Eio.Switch.run begin fun sw ->
     let socket =
       Eio.Net.listen
-        ~sw capability listen_address ~reuse_addr:true ~backlog:1000 in
+        ~sw env#net listen_address ~reuse_addr:true ~backlog:1000 in
+
+    Mirage_crypto_rng_eio.run (module Mirage_crypto_rng.Fortuna) env
+    @@ fun () ->
 
     (* TODO The error handler. *)
     Cohttp_eio.Server.run ~on_error:raise socket cohttp_server
@@ -609,7 +612,7 @@ let is_localhost interface =
 
 let serve_with_maybe_https
     caller_function_for_error_messages
-    ~capability
+    env
     ~interface
     ~network
     ~stop
@@ -641,7 +644,7 @@ let serve_with_maybe_https
       serve_with_details
         caller_function_for_error_messages
         (* TODO no_tls *) ()
-        ~capability
+        env
         ~interface
         ~network
         ~stop
@@ -778,13 +781,13 @@ let serve
     ?certificate_file
     ?key_file
     ?(builtins = true)
-    capability
+    env
     user's_dream_handler =
 
   ignore tls;
   serve_with_maybe_https
     "serve"
-    ~capability:capability#net
+    env
     ~interface
     ~network:(network ~port ~socket_path)
     ~stop
@@ -811,7 +814,7 @@ let run
     ?(builtins = true)
     ?(greeting = true)
     ?(adjust_terminal = true)
-    capability
+    env
     user's_dream_handler =
 
   let () = if Sys.unix then
@@ -881,7 +884,7 @@ let run
     (* Lwt_main.run begin TODO *)
       serve_with_maybe_https
         "run"
-        ~capability:capability#net
+        env
         ~interface
         ~network:(network ~port ~socket_path)
         ~stop

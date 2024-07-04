@@ -1,6 +1,6 @@
 (executable
  (name error)
- (libraries dream))
+ (libraries dream eio_main))
 
 (rule
  (targets error.ml)

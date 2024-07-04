@@ -54,12 +54,6 @@ let () =
 let now () =
   Ptime.to_float_s (Ptime.v (Ptime_clock.now_d_ps ()))
 
-(* TODO Fix this. *)
-let () =
-  Random.initialize (fun () ->
-    ())
-    (* Mirage_crypto_rng_lwt.initialize (module Mirage_crypto_rng.Fortuna)) *)
-
 module Session =
 struct
   include Dream__server.Session
