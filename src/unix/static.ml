@@ -27,22 +27,15 @@ let mime_lookup filename =
   ["Content-Type", content_type]
 
 let from_filesystem local_root path _ =
-  (* TODO Restore.
-  let file = Filename.concat local_root path in
-  Lwt.catch
-    (fun () ->
-      Lwt_io.(with_file ~mode:Input file) (fun channel ->
-        let%lwt content = Lwt_io.read channel in
+  let (/) = Eio.Path.(/) in
+  let file = local_root / path in
+  (* TODO Indentation below. *)
+  try
+    let content = Eio.Path.load file in
         Message.response
           ~headers:(mime_lookup path) (Stream.string content) Stream.null
-        |> Lwt.return))
-    (fun _exn ->
+    with _exn ->
       Message.response ~status:`Not_Found Stream.empty Stream.null
-      |> Lwt.return)
-  *)
-  ignore local_root;
-  ignore path;
-  assert false
 
 (* TODO Add ETag handling. *)
 (* TODO Add Content-Length handling? *)
@@ -77,21 +70,20 @@ let validate_path request =
     else
       None
 
-let static ?(loader = from_filesystem) local_root = fun request ->
-  (* TODO Restore.
-
+let static local_root = fun request ->
   if not @@ Method.methods_equal (Message.method_ request) `GET then
     Message.response ~status:`Not_Found Stream.empty Stream.null
-    |> Lwt.return
 
   else
     match validate_path request with
     | None ->
       Message.response ~status:`Not_Found Stream.empty Stream.null
-      |> Lwt.return
 
     | Some path ->
-      let%lwt response = loader local_root path request in
+      (* TODO Using from_filesystem because of row type unification problems in
+         the phantom type parameters of Eio path capabilities -- a completely
+         artificial regression. *)
+      let response = from_filesystem local_root path request in
       if not (Message.has_header response "Content-Type") then begin
         match Message.status response with
         | `OK
@@ -103,9 +95,4 @@ let static ?(loader = from_filesystem) local_root = fun request ->
         | _ ->
           ()
       end;
-      Lwt.return response
-  *)
-  ignore loader;
-  ignore local_root;
-  ignore request;
-  assert false
+      response

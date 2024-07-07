@@ -103,13 +103,8 @@ let to_dream_method : Cohttp_http.Method.t -> Method.method_ = function
   | `CONNECT -> `CONNECT
   | `Other method_ -> `Method method_
 
-(* TODO Adapt
-let to_httpaf_status status =
-  Status.status_to_int status |> Httpaf.Status.of_code
-
-let to_h2_status status =
-  Status.status_to_int status |> H2.Status.of_code
-*)
+let to_cohttp_status status =
+  Status.status_to_int status |> Cohttp_http.Status.of_int
 
 let sha1 s =
   s
@@ -190,7 +185,10 @@ let wrap_handler
         (Stream_adapter.create response,
         Eio.Flow.Pi.source (module Stream_adapter)) in
 
-    Cohttp_eio.Server.respond ~status:`OK ~body:response_body ()
+    Cohttp_eio.Server.respond
+      ~status:(to_cohttp_status (Message.status response))
+      ~headers:(Cohttp.Header.of_list (Message.all_headers response))
+      ~body:response_body ()
   in
 
     (* Call the user's handler. If it raises an exception or returns a promise

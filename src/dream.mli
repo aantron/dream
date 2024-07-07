@@ -1463,9 +1463,7 @@ val no_route : route
 
 (** {1 Static files} *)
 
-val static :
-  ?loader:(string -> string -> handler) ->
-    string -> handler
+val static : _ Eio.Path.t -> handler
 (** Serves static files from a local directory. See example
     {{:https://github.com/aantron/dream/tree/master/example/f-static#files}
     [f-static]}.
@@ -1495,7 +1493,7 @@ val static :
     {{:https://github.com/aantron/dream/tree/master/example/w-one-binary#files}
     [w-one-binary]} for a loader that serves files from memory instead. *)
 
-val from_filesystem : string -> string -> handler
+val from_filesystem : _ Eio.Path.t -> string -> handler
 (** [Dream.from_filesystem local_directory path request] responds with a file
     from the file system found at [local_directory ^ "/" ^ path].
     If such a file does not exist, it responds with [404 Not Found].
