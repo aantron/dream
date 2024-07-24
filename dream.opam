@@ -85,6 +85,7 @@ depends: [
   "caqti-driver-postgresql" {with-test}
   "caqti-driver-sqlite3" {with-test}
   "crunch" {with-test}
+  "html_of_jsx" {with-test}
   "js_of_ocaml" {with-test}
   "js_of_ocaml-ppx" {with-test}
   "ppx_expect" {with-test & >= "v0.15.0"}  # Formatting changes.
