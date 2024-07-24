@@ -1,7 +1,6 @@
 (executable
  (name form)
- (libraries dream)
- (preprocess (pps lwt_ppx)))
+ (libraries dream eio_main))
 
 (rule
  (targets form.ml)

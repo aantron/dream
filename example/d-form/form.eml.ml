@@ -16,8 +16,8 @@ let show_form ?message request =
   </body>
   </html>
 
-let () =
-  Dream.run
+let () = Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.memory_sessions
   @@ Dream.router [
@@ -28,7 +28,7 @@ let () =
 
     Dream.post "/"
       (fun request ->
-        match%lwt Dream.form request with
+        match Dream.form request with
         | `Ok ["message", message] ->
           Dream.html (show_form ~message request)
         | _ ->

@@ -4,18 +4,16 @@ type message_object = {
   message : string;
 } [@@deriving yojson]
 
-let () =
-  Dream.run
+let () = Eio_main.run @@ fun env ->
+  Dream.run env
   @@ Dream.logger
   @@ Dream.origin_referrer_check
   @@ Dream.router [
 
     Dream.post "/"
       (fun request ->
-        let%lwt body = Dream.body request in
-
         let message_object =
-          body
+          Dream.body request
           |> Yojson.Safe.from_string
           |> message_object_of_yojson
         in

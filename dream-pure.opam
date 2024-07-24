@@ -16,9 +16,8 @@ depends: [
   "base64" {>= "3.1.0"}  # Base64.encode_string.
   "bigstringaf" {>= "0.5.0"}  # Bigstringaf.to_string.
   "dune" {>= "2.7.0"}  # --instrument-with.
+  "eio"
   "hmap"
-  "lwt"
-  "lwt_ppx" {>= "1.2.2"}
   "ocaml" {>= "4.08.0"}
   "ptime" {>= "0.8.1"}  # Ptime.weekday.
   "uri" {>= "4.2.0"}

@@ -15,8 +15,7 @@ type 'a message
 type request = client message
 type response = server message
 
-type 'a promise = 'a Lwt.t
-type handler = request -> response promise
+type handler = request -> response
 type middleware = handler -> handler
 
 
@@ -62,17 +61,17 @@ val lowercase_headers : 'a message -> unit
 
 
 
-val body : 'a message -> string promise
+val body : 'a message -> string
 val set_body : 'a message -> string -> unit
 val set_content_length_headers : 'a message -> unit
 val drop_content_length_headers : 'a message -> unit
 
 
 
-val read : Stream.stream -> string option promise
-val write : Stream.stream -> string -> unit promise
-val flush : Stream.stream -> unit promise
-val close : Stream.stream -> unit promise
+val read : Stream.stream -> string option
+val write : Stream.stream -> string -> unit
+val flush : Stream.stream -> unit
+val close : Stream.stream -> unit
 val client_stream : 'a message -> Stream.stream
 val server_stream : 'a message -> Stream.stream
 val set_client_stream : 'a message -> Stream.stream -> unit
@@ -82,7 +81,7 @@ val set_server_stream : 'a message -> Stream.stream -> unit
 
 val create_websocket : response -> (Stream.stream * Stream.stream)
 val get_websocket : response -> (Stream.stream * Stream.stream) option
-val close_websocket : ?code:int -> Stream.stream * Stream.stream -> unit promise
+val close_websocket : ?code:int -> Stream.stream * Stream.stream -> unit
 
 type text_or_binary = [
   | `Text
@@ -95,16 +94,15 @@ type end_of_message = [
 ]
 
 (* TODO This also needs message length limits. *)
-val receive :
-  Stream.stream -> string option promise
+val receive : Stream.stream -> string option
 val receive_fragment :
-  Stream.stream -> (string * text_or_binary * end_of_message) option promise
+  Stream.stream -> (string * text_or_binary * end_of_message) option
 val send :
   ?text_or_binary:[< text_or_binary ] ->
   ?end_of_message:[< end_of_message ] ->
   Stream.stream ->
   string ->
-    unit promise
+    unit
 
 
 

@@ -14,6 +14,9 @@ module Session = Dream__server.Session
 let (|>?) =
   Option.bind
 
+(* TODO Restore everything here. *)
+(*
+
 module type DB = Caqti_lwt.CONNECTION
 
 module R = Caqti_request
@@ -213,3 +216,4 @@ let back_end lifetime = {
 
 let sql_sessions ?(lifetime = Session.two_weeks) =
   Session.middleware (back_end lifetime)
+*)

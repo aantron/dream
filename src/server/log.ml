@@ -70,8 +70,10 @@ let logs_lib_tag : string Logs.Tag.def =
 
 (* Lwt sequence-associated storage key used to pass request ids for use when
    ~request is not provided. *)
+(* TODO Is there an equivalent mechanism with Eio?
 let id_lwt_key : string Lwt.key =
   Lwt.new_key ()
+*)
 
 (* The actual request id "field" associated with each request by the logger. If
    this field is missing, the logger assigns the request a fresh id. *)
@@ -88,9 +90,12 @@ let get_request_id ?request () =
     | None -> None
     | Some request -> Message.field request id_field
   in
+  (* TODO Re-enable if there is an equivalent mechanism with Eio.
   match request_id with
   | Some _ -> request_id
   | None -> Lwt.get id_lwt_key
+  *)
+  request_id
 
 (* The current state of the request id sequence. *)
 let last_id =
@@ -383,6 +388,7 @@ let log =
 
 
 let set_up_exception_hook () =
+  (* TODO Is there an Eio equivalent?
   if !set_async_exception_hook then begin
     set_async_exception_hook := false;
     Lwt.async_exception_hook := fun exn ->
@@ -391,6 +397,8 @@ let set_up_exception_hook () =
       backtrace
       |> iter_backtrace (fun line -> log.error (fun log -> log "%s" line))
   end
+  *)
+  ()
 
 let initialize_log
     ?(backtraces = true)
@@ -481,6 +489,7 @@ struct
         Message.set_field request id_field id;
         id
     in
+    ignore id; (* TODO Actually use the id. *)
 
     (* Identify the request in the log. *)
     let user_agent =
@@ -496,10 +505,9 @@ struct
         user_agent);
 
     (* Call the rest of the app. *)
-    Lwt.try_bind
-      (fun () ->
-        Lwt.with_value id_lwt_key (Some id) (fun () ->
-          next_handler request))
+    (* TODO Simplify the passing of values to the old functions away. *)
+    match next_handler request with
+    | response -> response |>
       (fun response ->
         (* Log the elapsed time. If the response is a redirection, log the
            target. *)
@@ -534,8 +542,9 @@ struct
               log.info report
         end;
 
-        Lwt.return response)
+        response)
 
+    | exception exn -> exn |>
       (fun exn ->
         let backtrace = Printexc.get_backtrace () in
         (* In case of exception, log the exception. We alsp log the backtrace
@@ -548,7 +557,7 @@ struct
         backtrace
         |> iter_backtrace (fun line -> log.warning (fun log -> log "%s" line));
 
-        Lwt.fail exn)
+        raise exn)
 end
 
 

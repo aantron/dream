@@ -1,4 +1,6 @@
 let () =
-  Dream.run
-  @@ Dream.logger
-  @@ fun _ -> Dream.html "Good morning, world!"
+  Eio_main.run begin fun env ->
+    Dream.run env
+    @@ Dream.logger
+    @@ fun _ -> Dream.html "Good morning, world!"
+  end

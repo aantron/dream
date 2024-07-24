@@ -59,14 +59,14 @@ let livereload next_handler request =
   match Message.target request with
   | target when target = route ->
     Helpers.websocket @@ fun socket ->
-    let%lwt _ = Helpers.receive socket in
+    ignore (Helpers.receive socket);
     Message.close_websocket socket
 
   | _ ->
-    let%lwt response = next_handler request in
+    let response = next_handler request in
     match Message.header response "Content-Type" with
     | Some ("text/html" | "text/html; charset=utf-8") ->
-      let%lwt body = Message.body response in
+      let body = Message.body response in
       let soup =
         Markup.string body
         |> Markup.parse_html ~context:`Document
@@ -75,14 +75,14 @@ let livereload next_handler request =
       in
       begin match Soup.Infix.(soup $? "head") with
       | None ->
-        Lwt.return response
+        response
       | Some head ->
         Soup.create_element "script" ~inner_text:script
         |> Soup.append_child head;
         soup
         |> Soup.to_string
         |> Message.set_body response;
-        Lwt.return response
+        response
       end
 
-    | _ -> Lwt.return response
+    | _ -> response

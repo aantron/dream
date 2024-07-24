@@ -6,10 +6,7 @@
   dream-pure
   dream.server
   graphql_parser
-  graphql-lwt
-  lwt
   str
   yojson
  )
- (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

@@ -8,18 +8,15 @@
   fmt
   lambdasoup
   logs
-  lwt
   magic-mime
   markup
   mirage-clock
   multipart_form
-  multipart_form-lwt
   ptime
   unstrctrd
   uri
   yojson
  )
- (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))
 
 (rule

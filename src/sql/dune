@@ -3,12 +3,9 @@
  (name dream__sql)
  (libraries
   caqti
-  caqti-lwt
-  caqti-lwt.unix
   dream.cipher
   dream-pure
   dream.server
   uri
   yojson)
- (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))
