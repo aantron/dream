@@ -2,7 +2,7 @@ let greet = (~who, ()) =>
   <html>
     <head><title>"Home"</title></head>
     <body>
-      <h1>{Jsx.txt("Good morning, " ++ who ++ "!")}</h1>
+      <h1>{JSX.string("Good morning, " ++ who ++ "!")}</h1>
     </body>
   </html>;
 
@@ -12,6 +12,6 @@ let () =
   @@ Dream.router([
 
     Dream.get("/",
-      (_ => Dream.html(Jsx.render(<greet ~who="world" />))))),
+      (_ => Dream.html(JSX.render(<greet who="world" />)))),
 
   ]);
