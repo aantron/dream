@@ -19,7 +19,7 @@ let () =
   @@ Dream.router([
 
     Dream.get("/",
-      (_ => Dream.html(Jsx.render(<greet ~who="world" />))))),
+      (_ => Dream.html(Jsx.render(<greet who="world" />))))),
 
   ]);
 ```
