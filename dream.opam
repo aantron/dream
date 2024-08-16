@@ -68,7 +68,7 @@ depends: [
   "magic-mime"
   "markup" {>= "1.0.2"}
   "mirage-clock" {>= "3.0.0"}  # now_d_ps : unit -> int * int64.
-  "mirage-crypto" {>= "0.8.1"}  # AES-256-GCM.
+  "mirage-crypto" {>= "0.8.1" & < "1.0.0"}  # AES-256-GCM.
   "mirage-crypto-rng"
   "mirage-crypto-rng-lwt"
   "multipart_form" {>= "0.4.0"}
