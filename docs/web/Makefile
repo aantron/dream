@@ -1,4 +1,4 @@
-	ROOT := ../..
+ROOT := ../..
 ODOC := odoc/default/_doc/_html
 
 .PHONY : build

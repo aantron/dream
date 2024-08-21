@@ -10,7 +10,8 @@ watch :
 
 .PHONY : deps
 deps :
-	opam install --deps-only --with-test ./dream-pure.opam ./dream-httpaf.opam ./dream.opam
+	opam install --deps-only --with-test --with-doc \
+	  ./dream-pure.opam ./dream-httpaf.opam ./dream.opam
 
 TEST ?= test
 ROOT := $(shell [ -f ../dune-workspace ] && echo .. || echo .)
