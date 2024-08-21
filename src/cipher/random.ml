@@ -22,4 +22,4 @@ let random_buffer n =
   Mirage_crypto_rng.generate n
 
 let random n =
-  Cstruct.to_string (random_buffer n)
+  random_buffer n
