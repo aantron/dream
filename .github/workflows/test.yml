@@ -24,14 +24,16 @@ jobs:
       with:
         submodules: recursive
 
-    - uses: avsm/setup-ocaml@v2
+    - uses: avsm/setup-ocaml@v3
       if: runner.os != 'Windows'
       with:
+        opam-local-packages: dream-pure.opam dream-httpaf.opam dream.opam
         ocaml-compiler: ${{matrix.ocaml}}
 
-    - uses: avsm/setup-ocaml@v2
+    - uses: avsm/setup-ocaml@v3
       if: runner.os == 'Windows'
       with:
+        opam-local-packages: dream-pure.opam dream-httpaf.opam dream.opam
         ocaml-compiler: ${{matrix.ocaml}}
         opam-repositories: |
           opam-repository-mingw: https://github.com/ocaml-opam/opam-repository-mingw.git#sunset
