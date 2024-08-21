@@ -20,7 +20,7 @@ jobs:
           - 4.10.x
           - 4.09.x
           - 4.08.x
-        include:
+        # include:
         # - os: windows-latest
         #   ocaml: 4.14.x
         # - os: macos-latest
