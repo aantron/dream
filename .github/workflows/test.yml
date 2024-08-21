@@ -11,6 +11,8 @@ jobs:
         # - macos-latest
         ocaml-compiler:
           - 5.2.x
+          - 5.1.x
+          - 5.0.x
           - 4.14.x
         # include:
         # - os: windows-latest
@@ -42,13 +44,16 @@ jobs:
     # - run: opam depext --yes conf-libev
     #   if: runner.os != 'Windows'
 
-    - name: Install dune
-      run: opam install dune 
     - name: Install deps
       run: make deps
 
     - name: Test
       run: eval $(opam env) && make test
+      # run: |
+      #   opam exec -- dune build --no-print-directory --instrument-with bisect_ppx --force @test/runtest
+      #   opam exec -- bisect-ppx-report html
+      #   opam exec -- bisect-ppx-report summary
+      #   echo See _coverage/index.html
 
     # # The tests require ppx_expect. The latest versions of it introduced changes
     # # in the formatting of the output, and also require OCaml >= 4.10, which
