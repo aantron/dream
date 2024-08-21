@@ -29,12 +29,12 @@ jobs:
       with:
         submodules: recursive
 
-    - uses: avsm/setup-ocaml@v2
+    - uses: ocaml/setup-ocaml@v3
       if: runner.os != 'Windows'
       with:
         ocaml-compiler: ${{matrix.ocaml}}
 
-    - uses: avsm/setup-ocaml@v2
+    - uses: ocaml/setup-ocaml@v3
       if: runner.os == 'Windows'
       with:
         ocaml-compiler: ${{matrix.ocaml}}
@@ -126,7 +126,7 @@ jobs:
         submodules: recursive
     - run: mkdir ../repo-copy
     - run: cp -r * ../repo-copy/
-    - uses: avsm/setup-ocaml@v2
+    - uses: ocaml/setup-ocaml@v3
       with:
         ocaml-compiler: 4.14.x
     - run: opam install --yes --deps-only ./dream-pure.opam ./dream-httpaf.opam ./dream.opam ./dream-mirage.opam
