@@ -51,7 +51,7 @@ jobs:
     #   if: runner.os != 'Windows'
 
     - name: Install dune
-      run: opam install dune
+      run: opam install dune && eval $(opam env)
     - name: Install deps
       run: make deps
 
