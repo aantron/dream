@@ -1745,7 +1745,10 @@ val graphiql : ?default_query:string -> string -> handler
     OWASP {i Database Security Cheat Sheet}}. *)
 
 val sql_pool : ?size:int -> string -> middleware
-(** Makes an SQL connection pool available to its inner handler. *)
+(** Makes an SQL connection pool available to its inner handler. [?size] is the
+    maximum number of concurrent connections that the pool will support. The
+    default value is picked by the driver. Note that for SQLite, [?size] is
+    capped to [1]. *)
 
 val sql : request -> (Caqti_lwt.connection -> 'a promise) -> 'a promise
 (** Runs the callback with a connection from the SQL pool. See example
