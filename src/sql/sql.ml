@@ -65,6 +65,15 @@ let sql_pool ?size uri =
       failwith message
   end
 
+(* In case a user calls Dream.sql within the callback of an outer call to
+   Dream.sql, if the database driver does not support concurrent database
+   connections, as with caqti-driver-sqlite3, the inner call to Dream.sql cannot
+   make progress and request handling deadlocks. This can occur when using SQL
+   sessions, a typical scenario. See
+   https://github.com/aantron/dream/issues/332. *)
+let acquired_sql_connection : bool Lwt.key =
+  Lwt.new_key ()
+
 let sql request callback =
   match Message.field request pool_field with
   | None ->
@@ -72,8 +81,18 @@ let sql request callback =
     log.error (fun log -> log ~request "%s" message);
     failwith message
   | Some pool ->
+    begin match Lwt.get acquired_sql_connection with
+    | None | Some false -> ()
+    | Some true ->
+      let message =
+        "Re-entrant call to Dream.sql, perhaps through " ^
+        "Dream.set_session_field; could cause deadlock"
+      in
+      log.warning (fun log -> log ~request "%s" message)
+    end;
     let%lwt result =
       pool |> Caqti_lwt_unix.Pool.use (fun db ->
+        Lwt.with_value acquired_sql_connection (Some true) @@ fun () ->
         (* The special exception handling is a workaround for
            https://github.com/paurkedal/ocaml-caqti/issues/68. *)
         match%lwt callback db with
