@@ -720,8 +720,12 @@ let run
         | Sys.Signal_handle f -> f signal
         | Sys.Signal_ignore -> ignore ()
         | Sys.Signal_default ->
-          Sys.set_signal signal Sys.Signal_default;
-          Unix.kill (Unix.getpid ()) signal)
+          let pid = Unix.getpid () in
+          if pid = 1 then (* we are running in a Docker container *)
+            Unix._exit 0
+          else
+            Sys.set_signal signal Sys.Signal_default;
+            Unix.kill pid signal)
   in
 
   create_handler Sys.sigint;
