@@ -45,11 +45,13 @@ jobs:
     #       opam-repository-mingw: https://github.com/ocaml-opam/opam-repository-mingw.git#sunset
     #       default: https://github.com/ocaml/opam-repository.git
 
-    - run: opam depext --yes conf-sqlite3
-    - run: opam depext --yes conf-postgresql
-    - run: opam depext --yes conf-libev
-      if: runner.os != 'Windows'
+    # - run: opam depext --yes conf-sqlite3
+    # - run: opam depext --yes conf-postgresql
+    # - run: opam depext --yes conf-libev
+    #   if: runner.os != 'Windows'
 
+    - name: Install dune
+      run: opam install dune
     - name: Install deps
       run: make deps
 
