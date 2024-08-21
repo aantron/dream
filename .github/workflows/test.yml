@@ -43,12 +43,12 @@ jobs:
     #   if: runner.os != 'Windows'
 
     - name: Install dune
-      run: opam install dune && eval $(opam env) && dune --version
+      run: opam install dune 
     - name: Install deps
       run: make deps
 
     - name: Test
-      run: make test
+      run: eval $(opam env) && make test
 
     # # The tests require ppx_expect. The latest versions of it introduced changes
     # # in the formatting of the output, and also require OCaml >= 4.10, which
