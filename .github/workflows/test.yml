@@ -12,14 +12,9 @@ jobs:
         - 5.0.x
         - 4.14.x
         - 4.13.x
-        - 4.12.x
-        - 4.11.x
-        - 4.10.x
-        - 4.09.x
-        - 4.08.x
         include:
         - os: macos-latest
-          ocaml: 4.12.x
+          ocaml: 4.14.x
         - os: windows-latest
           ocaml: 4.14.x
 
