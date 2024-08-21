@@ -113,6 +113,7 @@ jobs:
     runs-on: ${{matrix.os}}
     steps:
     - uses: ocaml/setup-ocaml@v3
+      name: Use OCaml
       if: runner.os != 'Windows'
       with:
         ocaml-compiler: ${{matrix.ocaml}}
