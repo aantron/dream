@@ -38,6 +38,10 @@ jobs:
     # - run: opam depext --yes conf-libev
     #   if: runner.os != 'Windows'
 
+    - name: Prepare MacOS
+      run: brew install postgresql@15 && brew link --overwrite postgresql@15
+      if: runner.os == "MacOS"
+
     - name: Install deps
       run: make deps
 
