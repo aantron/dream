@@ -682,16 +682,18 @@ let run
     ?key_file
     ?(builtins = true)
     ?(greeting = true)
-    ?(adjust_terminal = true)
+    ?(adjust_terminal = false)
     user's_dream_handler =
 
   let () = if Sys.unix then
     Sys.(set_signal sigpipe Signal_ignore)
   in
 
-  let _ = adjust_terminal in
-
   let log = Log.convenience_log in
+
+  if adjust_terminal then begin
+      log "The '~adjust_terminal' option is deprecated and will be removed in a future release. Dream no longer truncates long log lines.";
+  end;
 
   if greeting then begin
     let scheme =
