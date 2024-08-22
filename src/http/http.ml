@@ -689,47 +689,7 @@ let run
     Sys.(set_signal sigpipe Signal_ignore)
   in
 
-  let adjust_terminal =
-    adjust_terminal && Sys.os_type <> "Win32" && Unix.(isatty stderr) in
-
-  let restore_terminal =
-    if adjust_terminal then begin
-      (* The mystery terminal escape sequence is $(tput rmam). Prefer this,
-         hopefully it is portable enough. Calling tput seems like a security
-         risk, and I am not aware of an API for doing this programmatically. *)
-      prerr_string "\x1b[?7l";
-      flush stderr;
-      let attributes = Unix.(tcgetattr stderr) in
-      attributes.c_echo <- false;
-      Unix.(tcsetattr stderr TCSANOW) attributes;
-      fun () ->
-        (* The escape sequence is $(tput smam). *)
-        prerr_string "\x1b[?7h";
-        flush stderr
-    end
-    else
-      ignore
-  in
-
-  let create_handler signal =
-    let previous_signal_behavior = ref Sys.Signal_default in
-    previous_signal_behavior :=
-      Sys.signal signal @@ Sys.Signal_handle (fun signal ->
-        restore_terminal ();
-        match !previous_signal_behavior with
-        | Sys.Signal_handle f -> f signal
-        | Sys.Signal_ignore -> ignore ()
-        | Sys.Signal_default ->
-          let pid = Unix.getpid () in
-          if pid = 1 then (* we are running in a Docker container *)
-            Unix._exit 0
-          else
-            Sys.set_signal signal Sys.Signal_default;
-            Unix.kill pid signal)
-  in
-
-  create_handler Sys.sigint;
-  create_handler Sys.sigterm;
+  let _ = adjust_terminal in
 
   let log = Log.convenience_log in
 
@@ -752,22 +712,16 @@ let run
     log "Type Ctrl+C to stop"
   end;
 
-  try
-    Lwt_main.run begin
-      serve_with_maybe_https
-        "run"
-        ~interface
-        ~network:(network ~port ~socket_path)
-        ~stop
-        ~error_handler
-        ~tls:(if tls then `OpenSSL else `No)
-        ?certificate_file ?key_file
-        ?certificate_string:None ?key_string:None
-        ~builtins
-        user's_dream_handler
-    end;
-    restore_terminal ()
-
-  with exn ->
-    restore_terminal ();
-    raise exn
+  Lwt_main.run begin
+    serve_with_maybe_https
+      "run"
+      ~interface
+      ~network:(network ~port ~socket_path)
+      ~stop
+      ~error_handler
+      ~tls:(if tls then `OpenSSL else `No)
+      ?certificate_file ?key_file
+      ?certificate_string:None ?key_string:None
+      ~builtins
+      user's_dream_handler
+  end;
