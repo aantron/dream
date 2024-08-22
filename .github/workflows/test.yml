@@ -40,7 +40,7 @@ jobs:
 
     - name: Prepare MacOS
       run: brew install postgresql@15 && brew link --overwrite postgresql@15
-      if: runner.os == 'macos'
+      if: runner.os == 'macOS'
 
     - name: Install deps
       run: make deps
