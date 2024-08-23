@@ -682,7 +682,7 @@ let run
     ?key_file
     ?(builtins = true)
     ?(greeting = true)
-    ?(adjust_terminal = false)
+    ?adjust_terminal
     user's_dream_handler =
 
   let () = if Sys.unix then
@@ -691,10 +691,11 @@ let run
 
   let log = Log.convenience_log in
 
-  if adjust_terminal then begin
-    log "%s %s"
-      "The '~adjust_terminal' option is deprecated and will be removed in a"
-      "future release. Dream no longer truncates long log lines."
+  (* This should be removed, together with ~adjust_terminal, after a few
+     releases. The warning is present since 1.0.0~alpha7. *)
+  if adjust_terminal <> None then begin
+    Error_handler.log.warning (fun log ->
+      log "Dream.run: ~adjust_terminal is deprecated")
   end;
 
   if greeting then begin
