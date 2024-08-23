@@ -102,7 +102,7 @@ jobs:
     - uses: ocaml/setup-ocaml@v3
       name: Use OCaml ${{matrix.ocaml-compiler}}
       with:
-        ocaml-compiler: ${{matrix.ocaml}}
+        ocaml-compiler: ${{matrix.ocaml-compiler}}
     - name: Quick start
       run: |
         set -x
