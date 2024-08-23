@@ -714,16 +714,16 @@ let run
     log "Type Ctrl+C to stop"
   end;
 
-  Lwt_main.run begin
-    serve_with_maybe_https
-      "run"
-      ~interface
-      ~network:(network ~port ~socket_path)
-      ~stop
-      ~error_handler
-      ~tls:(if tls then `OpenSSL else `No)
-      ?certificate_file ?key_file
-      ?certificate_string:None ?key_string:None
-      ~builtins
-      user's_dream_handler
-  end;
+    Lwt_main.run begin
+      serve_with_maybe_https
+        "run"
+        ~interface
+        ~network:(network ~port ~socket_path)
+        ~stop
+        ~error_handler
+        ~tls:(if tls then `OpenSSL else `No)
+        ?certificate_file ?key_file
+        ?certificate_string:None ?key_string:None
+        ~builtins
+        user's_dream_handler
+    end;
