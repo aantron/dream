@@ -682,52 +682,18 @@ let run
     ?key_file
     ?(builtins = true)
     ?(greeting = true)
-    ?(adjust_terminal = true)
+    ?(adjust_terminal = false)
     user's_dream_handler =
 
   let () = if Sys.unix then
     Sys.(set_signal sigpipe Signal_ignore)
   in
 
-  let adjust_terminal =
-    adjust_terminal && Sys.os_type <> "Win32" && Unix.(isatty stderr) in
-
-  let restore_terminal =
-    if adjust_terminal then begin
-      (* The mystery terminal escape sequence is $(tput rmam). Prefer this,
-         hopefully it is portable enough. Calling tput seems like a security
-         risk, and I am not aware of an API for doing this programmatically. *)
-      prerr_string "\x1b[?7l";
-      flush stderr;
-      let attributes = Unix.(tcgetattr stderr) in
-      attributes.c_echo <- false;
-      Unix.(tcsetattr stderr TCSANOW) attributes;
-      fun () ->
-        (* The escape sequence is $(tput smam). *)
-        prerr_string "\x1b[?7h";
-        flush stderr
-    end
-    else
-      ignore
-  in
-
-  let create_handler signal =
-    let previous_signal_behavior = ref Sys.Signal_default in
-    previous_signal_behavior :=
-      Sys.signal signal @@ Sys.Signal_handle (fun signal ->
-        restore_terminal ();
-        match !previous_signal_behavior with
-        | Sys.Signal_handle f -> f signal
-        | Sys.Signal_ignore -> ignore ()
-        | Sys.Signal_default ->
-          Sys.set_signal signal Sys.Signal_default;
-          Unix.kill (Unix.getpid ()) signal)
-  in
-
-  create_handler Sys.sigint;
-  create_handler Sys.sigterm;
-
   let log = Log.convenience_log in
+
+  if adjust_terminal then begin
+      log "The '~adjust_terminal' option is deprecated and will be removed in a future release. Dream no longer truncates long log lines.";
+  end;
 
   if greeting then begin
     let scheme =
@@ -748,7 +714,6 @@ let run
     log "Type Ctrl+C to stop"
   end;
 
-  try
     Lwt_main.run begin
       serve_with_maybe_https
         "run"
@@ -762,8 +727,3 @@ let run
         ~builtins
         user's_dream_handler
     end;
-    restore_terminal ()
-
-  with exn ->
-    restore_terminal ();
-    raise exn
