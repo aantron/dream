@@ -37,7 +37,7 @@ jobs:
 
     # We don't need Postgres for our tests so we opam to assume it's installed.
     - name: Install dependencies
-      run: opam install --deps-only --with-test --with-doc --assume-depexts .
+      run: opam install --deps-only --with-test --with-doc --assume-depexts ./dream-pure.opam ./dream-httpaf.opam ./dream.opam
 
     - name: Test
       run: eval $(opam env) && make test
@@ -100,7 +100,7 @@ jobs:
     runs-on: ${{matrix.os}}
     steps:
     - uses: ocaml/setup-ocaml@v3
-      name: Use OCaml
+      name: Use OCaml ${{matrix.ocaml-compiler}}
       with:
         ocaml-compiler: ${{matrix.ocaml}}
     - name: Quick start
