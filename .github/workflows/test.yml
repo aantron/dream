@@ -28,16 +28,12 @@ jobs:
 
     # For caqti Postgres tests. Opam does actually install Postgres for us, however brew
     # doesn't link it by default, so we have to install and link it manually.
-    # - name: Prepare MacOS
-    #   run: brew install postgresql@15 && brew link --overwrite postgresql@15
-    #   if: runner.os == 'macOS'
     - name: Prepare MacOS
-      run: brew install libev
+      run: brew install postgresql@15 && brew link --overwrite postgresql@15
       if: runner.os == 'macOS'
 
-    # We don't need Postgres for our tests so we opam to assume it's installed.
     - name: Install dependencies
-      run: opam install --deps-only --with-test --with-doc --assume-depexts ./dream-pure.opam ./dream-httpaf.opam ./dream.opam
+      run: make deps
 
     - name: Test
       run: eval $(opam env) && make test
