@@ -25,33 +25,22 @@ jobs:
       with:
         ocaml-compiler: ${{matrix.ocaml-compiler}}
 
-    # - uses: ocaml/setup-ocaml@v3
-    #   if: runner.os == 'Windows'
-    #   with:
-    #     ocaml-compiler: ${{matrix.ocaml}}
-    #     opam-repositories: |
-    #       opam-repository-mingw: https://github.com/ocaml-opam/opam-repository-mingw.git#sunset
-    #       default: https://github.com/ocaml/opam-repository.git
 
-    # - run: opam depext --yes conf-sqlite3
-    # - run: opam depext --yes conf-postgresql
-    # - run: opam depext --yes conf-libev
-    #   if: runner.os != 'Windows'
-
+    # For caqti Postgres tests. Opam does actually install Postgres for us, however brew
+    # doesn't link it by default, so we have to install and link it manually.
+    # - name: Prepare MacOS
+    #   run: brew install postgresql@15 && brew link --overwrite postgresql@15
+    #   if: runner.os == 'macOS'
     - name: Prepare MacOS
-      run: brew install postgresql@15 && brew link --overwrite postgresql@15
+      run: brew install libev
       if: runner.os == 'macOS'
 
-    - name: Install deps
-      run: make deps
+    # We don't need Postgres for our tests so we opam to assume it's installed.
+    - name: Install dependencies
+      run: opam install --deps-only --with-test --with-doc --assume-depexts .
 
     - name: Test
       run: eval $(opam env) && make test
-      # run: |
-      #   opam exec -- dune build --no-print-directory --instrument-with bisect_ppx --force @test/runtest
-      #   opam exec -- bisect-ppx-report html
-      #   opam exec -- bisect-ppx-report summary
-      #   echo See _coverage/index.html
 
     # # The tests require ppx_expect. The latest versions of it introduced changes
     # # in the formatting of the output, and also require OCaml >= 4.10, which
@@ -97,36 +86,37 @@ jobs:
     #       done
     #     fi
 
-  # quickstart:
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os:
-  #       - ubuntu-latest
-  #       - macos-latest
-  #
-  #   runs-on: ${{matrix.os}}
-  #   steps:
-  #   - uses: ocaml/setup-ocaml@v3
-  #     name: Use OCaml
-  #     if: runner.os != 'Windows'
-  #     with:
-  #       ocaml-compiler: ${{matrix.ocaml}}
-  #   - name: Quick start
-  #     run: |
-  #       set -x
-  #       touch output
-  #       tail -f output | grep --line-buffered 'Ctrl' | xargs -L1 -I FOO bash -c "echo Success && touch success && killall middleware.exe" &
-  #       tail -f output &
-  #       ((curl -fsSL https://raw.githubusercontent.com/aantron/dream/$GITHUB_SHA/example/quickstart.sh | bash -s $GITHUB_SHA) || true) > output 2>&1
-  #       sleep 1
-  #       if [ -f success ]
-  #       then
-  #         exit 0
-  #       else
-  #         exit 1
-  #       fi
-  #
+  quickstart:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+        - ubuntu-latest
+        - macos-latest
+        ocaml-compiler:
+          - 5.0.x
+          - 4.14.x
+
+    runs-on: ${{matrix.os}}
+    steps:
+    - uses: ocaml/setup-ocaml@v3
+      name: Use OCaml
+      with:
+        ocaml-compiler: ${{matrix.ocaml}}
+    - name: Quick start
+      run: |
+        set -x
+        touch output
+        tail -f output | grep --line-buffered 'Ctrl' | xargs -L1 -I FOO bash -c "echo Success && touch success && killall middleware.exe" &
+        tail -f output &
+        ((curl -fsSL https://raw.githubusercontent.com/aantron/dream/$GITHUB_SHA/example/quickstart.sh | bash -s $GITHUB_SHA) || true) > output 2>&1
+        sleep 1
+        if [ -f success ]
+        then
+          exit 0
+        else
+          exit 1
+        fi
   # mirage:
   #   runs-on: ubuntu-latest
   #   steps:
