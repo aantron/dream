@@ -57,7 +57,7 @@ depends: [
   "duration"
   "emile" {>= "1.1"}
   "ke" {>= "0.4"}  # paf.
-  "letsencrypt" {>= "0.5.0"}
+  "letsencrypt" {>= "0.3.0"}
   "lwt"
   "lwt_ppx" {>= "1.2.2"}
   "mimic" {>= "0.0.5"}
