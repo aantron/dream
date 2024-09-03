@@ -1140,46 +1140,6 @@ let part_replacement = {|
 </pre>
 |}
 
-let upload_event_expected = {|<div class="spec type" id="type-upload_event">
- <a href="#type-upload_event" class="anchor"></a><code><span><span class="keyword">type</span> upload_event</span><span> = </span><span>[ </span></code>
- <table>
-  <tbody>
-   <tr id="type-upload_event.File" class="anchored">
-    <td class="def constructor">
-     <a href="#type-upload_event.File" class="anchor"></a><code><span>| </span></code><code><span>`File <span class="keyword">of</span> string * string</span></code>
-    </td>
-   </tr>
-   <tr id="type-upload_event.Field" class="anchored">
-    <td class="def constructor">
-     <a href="#type-upload_event.Field" class="anchor"></a><code><span>| </span></code><code><span>`Field <span class="keyword">of</span> string * string</span></code>
-    </td>
-   </tr>
-   <tr id="type-upload_event.Done" class="anchored">
-    <td class="def constructor">
-     <a href="#type-upload_event.Done" class="anchor"></a><code><span>| </span></code><code><span>`Done</span></code>
-    </td>
-   </tr>
-   <tr id="type-upload_event.Wrong_content_type" class="anchored">
-    <td class="def constructor">
-     <a href="#type-upload_event.Wrong_content_type" class="anchor"></a><code><span>| </span></code><code><span>`Wrong_content_type</span></code>
-    </td>
-   </tr>
-  </tbody>
- </table>
- <code><span> ]</span></code>
-</div>
-|}
-
-let upload_event_replacement = {|
-<pre><span class="keyword">type</span> upload_event = [
-  | `File <span class="of">of</span> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>
-  | `Field <span class="of">of</span> <a href="https://ocaml.org/manual/latest/api/String.html">string</a> * <a href="https://ocaml.org/manual/latest/api/String.html">string</a>
-  | `Done
-  | `Wrong_content_type
-]
-</pre>
-|}
-
 let csrf_result_expected = {|<div class="spec type" id="type-csrf_result">
  <a href="#type-csrf_result" class="anchor"></a><code><span><span class="keyword">type</span> csrf_result</span><span> = </span><span>[ </span></code>
  <table>
@@ -1695,18 +1655,6 @@ let new_field_replacement = {|
   ?show_value:('a -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) ->
     <a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> -> 'a <a href="#type-field">field</a>
 </pre>
-|}
-
-let new_global_expected = {|<div class="spec value" id="val-new_global">
- <a href="#val-new_global" class="anchor"></a><code><span><span class="keyword">val</span> new_global : <span>?name:string <span class="arrow">-&gt;</span></span> <span>?show_value:<span>(<span><span class="type-var">'a</span> <span class="arrow">-&gt;</span></span> string)</span> <span class="arrow">-&gt;</span></span> <span><span>(<span>unit <span class="arrow">-&gt;</span></span> <span class="type-var">'a</span>)</span> <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> <a href="#type-global">global</a></span></span></code>
-</div>
-|}
-
-let new_global_replacement = {|
-<pre><span class="keyword">val</span> new_global :
-  ?name:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
-  ?show_value:('a -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) ->
-    (<a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> -> 'a) -> 'a <a href="#type-global">global</a>
 |}
 
 let run_expected = {|<div class="spec value" id="val-run">
