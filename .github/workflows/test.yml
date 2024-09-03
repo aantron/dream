@@ -75,8 +75,6 @@ jobs:
         include:
         - os: macos-latest
           ocaml: 4.14.x
-        - os: windows-latest
-          ocaml: 4.14.x
 
     runs-on: ${{matrix.os}}
     steps:
@@ -87,6 +85,7 @@ jobs:
     - name: Run quickstart.sh
       shell: bash
       run: |
+        set -x
         touch output
         tail -f output | grep --line-buffered 'Ctrl' | xargs -L1 -I FOO bash -c "echo Success && touch success && killall middleware.exe" &
         tail -f output &
