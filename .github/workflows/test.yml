@@ -24,6 +24,7 @@ jobs:
         submodules: recursive
 
     - uses: ocaml/setup-ocaml@v3
+      if: runner.os != 'Windows'
       with:
         ocaml-compiler: ${{matrix.ocaml-compiler}}
 
