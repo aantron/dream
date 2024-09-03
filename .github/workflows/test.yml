@@ -33,6 +33,11 @@ jobs:
       run: brew install postgresql@15 && brew link --overwrite postgresql@15
       if: runner.os == 'macOS'
 
+    # Workaround https://github.com/savonet/ocaml-ssl/issues/155 and/or
+    # https://github.com/ocaml/setup-ocaml/issues/856.
+    - run: opam pin add ssl 0.6.0 --no-action
+      if: runner.os == 'Windows'
+
     - name: Install dependencies
       run: make deps
 
