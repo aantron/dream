@@ -87,7 +87,6 @@ jobs:
     - name: Run quickstart.sh
       shell: bash
       run: |
-        set -x
         touch output
         tail -f output | grep --line-buffered 'Ctrl' | xargs -L1 -I FOO bash -c "echo Success && touch success && killall middleware.exe" &
         tail -f output &
@@ -111,6 +110,8 @@ jobs:
     - uses: ocaml/setup-ocaml@v3
       with:
         ocaml-compiler: 4.14.x
+    # Needed until https://github.com/robur-coop/ocaml-letsencrypt/pull/34.
+    - run: opam pin add letsencrypt git+https://github.com/hannesm/ocaml-letsencrypt.git#no-cstruct --no-action
     - run: opam install --yes --deps-only ./dream-pure.opam ./dream-httpaf.opam ./dream.opam ./dream-mirage.opam
     - run: opam install --yes mirage mirage-clock-unix
     - run: cd example/w-mirage && mv config.ml config.ml.backup
