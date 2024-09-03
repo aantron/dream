@@ -29,7 +29,7 @@ Within this model, Dream adds:
 - Helpers for Web formats, such as Base64url, and a modern cipher.
 
 Because of the simple programming model, everything is optional and
-composable. It is trivailly possible to strip Dream down to just a
+composable. It is trivially possible to strip Dream down to just a
 bare driver of the various HTTP protocols.
 
 Dream is presented as a single module, whose API is documented on one
