@@ -27,8 +27,9 @@ jobs:
       with:
         ocaml-compiler: ${{matrix.ocaml}}
 
-    # For caqti Postgres tests. Opam does actually install Postgres for us, however brew
-    # doesn't link it by default, so we have to install and link it manually.
+    # For Caqti PostgreSQL examples. opam does actually install PostgreSQL for
+    # us. However, Homebrew doesn't link it by default, so we have to install
+    # and link it manually.
     - run: brew install postgresql@15 && brew link --overwrite postgresql@15
       if: runner.os == 'macOS'
 
