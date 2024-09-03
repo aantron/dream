@@ -6,10 +6,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ubuntu-latest
+        os:
+        - ubuntu-latest
         ocaml-compiler:
-          - 5.2.x
-          - 4.14.x
+        - 5.2.x
+        - 4.14.x
         include:
         - os: macos-latest
           ocaml-compiler: 4.14.x
