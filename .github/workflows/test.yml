@@ -6,13 +6,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-        - ubuntu-latest
-        - macos-latest
-        # - windows-latest
+        os: ubuntu-latest
         ocaml-compiler:
-          - 5.0.x
+          - 5.2.x
           - 4.14.x
+        include:
+        - os: macos-latest
+          ocaml-compiler: 4.14.x
+        - os: windows-latest
+          ocaml-compiler: 4.14.x
 
     runs-on: ${{matrix.os}}
     steps:
@@ -21,10 +23,8 @@ jobs:
         submodules: recursive
 
     - uses: ocaml/setup-ocaml@v3
-      name: Use OCaml ${{matrix.ocaml-compiler}}
       with:
         ocaml-compiler: ${{matrix.ocaml-compiler}}
-
 
     # For caqti Postgres tests. Opam does actually install Postgres for us, however brew
     # doesn't link it by default, so we have to install and link it manually.
