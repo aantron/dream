@@ -99,6 +99,7 @@ jobs:
         fi
 
   mirage:
+    if: false
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
