@@ -68,18 +68,22 @@ jobs:
       matrix:
         os:
         - ubuntu-latest
-        - macos-latest
         ocaml-compiler:
-          - 5.0.x
-          - 4.14.x
+        - 5.2.x
+        - 4.14.x
+        include:
+        - os: macos-latest
+          ocaml-compiler: 4.14.x
+        - os: windows-latest
+          ocaml-compiler: 4.14.x
 
     runs-on: ${{matrix.os}}
     steps:
     - uses: ocaml/setup-ocaml@v3
-      name: Use OCaml ${{matrix.ocaml-compiler}}
       with:
         ocaml-compiler: ${{matrix.ocaml-compiler}}
-    - name: Quick start
+
+    - name: Run quickstart.sh
       run: |
         set -x
         touch output
@@ -93,6 +97,7 @@ jobs:
         else
           exit 1
         fi
+
   # mirage:
   #   runs-on: ubuntu-latest
   #   steps:
