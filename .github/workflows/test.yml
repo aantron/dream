@@ -8,14 +8,14 @@ jobs:
       matrix:
         os:
         - ubuntu-latest
-        ocaml-compiler:
+        ocaml:
         - 5.2.x
         - 4.14.x
         include:
         - os: macos-latest
-          ocaml-compiler: 4.14.x
+          ocaml: 4.14.x
         - os: windows-latest
-          ocaml-compiler: 4.14.x
+          ocaml: 4.14.x
 
     runs-on: ${{matrix.os}}
     steps:
@@ -25,7 +25,7 @@ jobs:
 
     - uses: ocaml/setup-ocaml@v3
       with:
-        ocaml-compiler: ${{matrix.ocaml-compiler}}
+        ocaml-compiler: ${{matrix.ocaml}}
 
     # For caqti Postgres tests. Opam does actually install Postgres for us, however brew
     # doesn't link it by default, so we have to install and link it manually.
@@ -68,20 +68,20 @@ jobs:
       matrix:
         os:
         - ubuntu-latest
-        ocaml-compiler:
+        ocaml:
         - 5.2.x
         - 4.14.x
         include:
         - os: macos-latest
-          ocaml-compiler: 4.14.x
+          ocaml: 4.14.x
         - os: windows-latest
-          ocaml-compiler: 4.14.x
+          ocaml: 4.14.x
 
     runs-on: ${{matrix.os}}
     steps:
     - uses: ocaml/setup-ocaml@v3
       with:
-        ocaml-compiler: ${{matrix.ocaml-compiler}}
+        ocaml-compiler: ${{matrix.ocaml}}
 
     - name: Run quickstart.sh
       run: |
