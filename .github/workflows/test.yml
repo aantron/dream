@@ -37,10 +37,15 @@ jobs:
     - run: opam pin add ssl 0.6.0 --no-action
       if: runner.os == 'Windows'
 
-    - run: make deps
+    - run: opam exec -- make deps
 
-    - name: Test
-      run: opam exec -- make test
+    - run: opam exec -- make
+
+    # Tests on Windows are disabled because of a difference in ppx_expect
+    # output. See https://github.com/aantron/dream/pull/282. This difference
+    # remains as of ppx_expect 0.16.
+    - run: opam exec -- make test
+      if: runner.os != 'Windows'
 
     # # The tests require ppx_expect. The latest versions of it introduced changes
     # # in the formatting of the output, and also require OCaml >= 4.10, which
