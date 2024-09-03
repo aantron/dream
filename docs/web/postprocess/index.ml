@@ -1657,18 +1657,6 @@ let new_field_replacement = {|
 </pre>
 |}
 
-let new_global_expected = {|<div class="spec value" id="val-new_global">
- <a href="#val-new_global" class="anchor"></a><code><span><span class="keyword">val</span> new_global : <span>?name:string <span class="arrow">-&gt;</span></span> <span>?show_value:<span>(<span><span class="type-var">'a</span> <span class="arrow">-&gt;</span></span> string)</span> <span class="arrow">-&gt;</span></span> <span><span>(<span>unit <span class="arrow">-&gt;</span></span> <span class="type-var">'a</span>)</span> <span class="arrow">-&gt;</span></span> <span><span class="type-var">'a</span> <a href="#type-global">global</a></span></span></code>
-</div>
-|}
-
-let new_global_replacement = {|
-<pre><span class="keyword">val</span> new_global :
-  ?name:<a href="https://ocaml.org/manual/latest/api/String.html">string</a> ->
-  ?show_value:('a -> <a href="https://ocaml.org/manual/latest/api/String.html">string</a>) ->
-    (<a href="https://ocaml.org/manual/latest/api/Unit.html">unit</a> -> 'a) -> 'a <a href="#type-global">global</a>
-|}
-
 let run_expected = {|<div class="spec value" id="val-run">
  <a href="#val-run" class="anchor"></a><code><span><span class="keyword">val</span> run : <span>?interface:string <span class="arrow">-&gt;</span></span> <span>?port:int <span class="arrow">-&gt;</span></span> <span>?socket_path:string <span class="arrow">-&gt;</span></span> <span>?stop:<span>unit <a href="#type-promise">promise</a></span> <span class="arrow">-&gt;</span></span>
 <span>?error_handler:<a href="#type-error_handler">error_handler</a> <span class="arrow">-&gt;</span></span> <span>?tls:bool <span class="arrow">-&gt;</span></span> <span>?certificate_file:string <span class="arrow">-&gt;</span></span> <span>?key_file:string <span class="arrow">-&gt;</span></span>
