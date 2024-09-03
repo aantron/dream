@@ -85,6 +85,7 @@ jobs:
         ocaml-compiler: ${{matrix.ocaml}}
 
     - name: Run quickstart.sh
+      shell: bash
       run: |
         set -x
         touch output
