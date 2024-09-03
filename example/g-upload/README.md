@@ -74,7 +74,7 @@ However, this is only good for rare, small uploads, such as user avatars, or for
 prototyping.
 
 For more heavy usage, see
-[`Dream.upload`](https://aantron.github.io/dream/#type-upload_event) for
+[`Dream.upload`](https://aantron.github.io/dream/#val-upload) for
 streaming file uploads.
 
 <br>
