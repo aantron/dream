@@ -29,8 +29,7 @@ jobs:
 
     # For caqti Postgres tests. Opam does actually install Postgres for us, however brew
     # doesn't link it by default, so we have to install and link it manually.
-    - name: Prepare MacOS
-      run: brew install postgresql@15 && brew link --overwrite postgresql@15
+    - run: brew install postgresql@15 && brew link --overwrite postgresql@15
       if: runner.os == 'macOS'
 
     # Workaround https://github.com/savonet/ocaml-ssl/issues/155 and/or
@@ -38,11 +37,10 @@ jobs:
     - run: opam pin add ssl 0.6.0 --no-action
       if: runner.os == 'Windows'
 
-    - name: Install dependencies
-      run: make deps
+    - run: make deps
 
     - name: Test
-      run: eval $(opam env) && make test
+      run: opam exec -- make test
 
     # # The tests require ppx_expect. The latest versions of it introduced changes
     # # in the formatting of the output, and also require OCaml >= 4.10, which
