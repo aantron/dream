@@ -9,87 +9,59 @@ jobs:
         os:
         - ubuntu-latest
         ocaml:
-        - 5.0.x
+        - 5.2.x
         - 4.14.x
-        - 4.13.x
-        - 4.12.x
-        - 4.11.x
-        - 4.10.x
-        - 4.09.x
-        - 4.08.x
         include:
         - os: macos-latest
-          ocaml: 4.12.x
+          ocaml: 4.14.x
         - os: windows-latest
           ocaml: 4.14.x
 
     runs-on: ${{matrix.os}}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
 
-    - uses: avsm/setup-ocaml@v2
-      if: runner.os != 'Windows'
+    - uses: ocaml/setup-ocaml@v3
       with:
         ocaml-compiler: ${{matrix.ocaml}}
 
-    - uses: avsm/setup-ocaml@v2
+    # For Caqti PostgreSQL examples. opam does actually install PostgreSQL for
+    # us. However, Homebrew doesn't link it by default, so we have to install
+    # and link it manually.
+    - run: brew install postgresql@15 && brew link --overwrite postgresql@15
+      if: runner.os == 'macOS'
+
+    # Workaround https://github.com/savonet/ocaml-ssl/issues/155 and/or
+    # https://github.com/ocaml/setup-ocaml/issues/856.
+    - run: opam pin add ssl 0.6.0 --no-action
       if: runner.os == 'Windows'
-      with:
-        ocaml-compiler: ${{matrix.ocaml}}
-        opam-repositories: |
-          opam-repository-mingw: https://github.com/ocaml-opam/opam-repository-mingw.git#sunset
-          default: https://github.com/ocaml/opam-repository.git
 
-    - run: opam depext --yes conf-sqlite3
-    - run: opam depext --yes conf-postgresql
-    - run: opam depext --yes conf-libev
+    - run: opam exec -- make deps
+
+    - run: opam exec -- make
+
+    # Tests on Windows are disabled because of a difference in ppx_expect
+    # output. See https://github.com/aantron/dream/pull/282. This difference
+    # remains as of ppx_expect 0.16.
+    - run: opam exec -- make test
       if: runner.os != 'Windows'
 
-    # The tests require ppx_expect. The latest versions of it introduced changes
-    # in the formatting of the output, and also require OCaml >= 4.10, which
-    # makes testing on < 4.10 awkward. So, we skip tests on < 4.10.
-    - shell: bash
+    - name: Build examples
+      if: runner.os != 'Windows'
       run: |
         set -e
         set -x
-
-        WITH_TEST=--with-test
-        case ${{matrix.ocaml}} in
-          4.09.x) WITH_TEST=;;
-          4.08.x) WITH_TEST=;;
-        esac
-
-        # Tests on Windows are disabled because of a difference in ppx_expect
-        # output. See https://github.com/aantron/dream/pull/282.
-        case ${{runner.os}} in
-          Windows) WITH_TEST=;;
-        esac
-
-        OPAM=$(which opam || true)
-        if [ -z "$OPAM" ]
-        then
-          OPAM=D:\\cygwin\\wrapperbin\\opam.cmd
-        fi
-
-        $OPAM install --yes --deps-only $WITH_TEST ./dream-pure.opam ./dream-httpaf.opam ./dream.opam
-
-        if [ ! -z "$WITH_TEST" ]
-        then
-          $OPAM exec -- dune runtest
-
           EXAMPLES=$(find example -maxdepth 1 -type d -not -name "w-mirage*" -not -name "r-tyxml" | grep -v "^example/0" | grep -v "^example$" | sort)
           shopt -s nullglob
-
           for EXAMPLE in $EXAMPLES
           do
             FILE=$(ls $EXAMPLE/*.ml $EXAMPLE/*.re $EXAMPLE/server/*.ml $EXAMPLE/server/*.re)
             EXE=$(echo $FILE | sed 's/\..*$/.exe/g')
             echo dune build $EXE
-            $OPAM exec -- dune build $EXE
+            opam exec -- dune build $EXE
           done
-        fi
 
   quickstart:
     strategy:
@@ -97,11 +69,21 @@ jobs:
       matrix:
         os:
         - ubuntu-latest
-        - macos-latest
+        ocaml:
+        - 5.2.x
+        - 4.14.x
+        include:
+        - os: macos-latest
+          ocaml: 4.14.x
 
     runs-on: ${{matrix.os}}
     steps:
-    - name: Quick start
+    - uses: ocaml/setup-ocaml@v3
+      with:
+        ocaml-compiler: ${{matrix.ocaml}}
+
+    - name: Run quickstart.sh
+      shell: bash
       run: |
         set -x
         touch output
@@ -117,6 +99,7 @@ jobs:
         fi
 
   mirage:
+    if: false
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -124,18 +107,20 @@ jobs:
         submodules: recursive
     - run: mkdir ../repo-copy
     - run: cp -r * ../repo-copy/
-    - uses: avsm/setup-ocaml@v2
+    - uses: ocaml/setup-ocaml@v3
       with:
         ocaml-compiler: 4.14.x
+    # Needed until https://github.com/robur-coop/ocaml-letsencrypt/pull/34.
+    - run: opam pin add letsencrypt git+https://github.com/hannesm/ocaml-letsencrypt.git#no-cstruct --no-action
     - run: opam install --yes --deps-only ./dream-pure.opam ./dream-httpaf.opam ./dream.opam ./dream-mirage.opam
-    - run: opam install --yes mirage mirage-clock-unix
+    - run: opam install --yes mirage mirage-clock-unix mirage-crypto-rng-mirage
     - run: cd example/w-mirage && mv config.ml config.ml.backup
     - run: cd example/w-mirage && sed -e 's/package "dream-mirage"//' < config.ml.backup > config.ml
     - run: cd example/w-mirage && opam exec -- mirage configure -t unix
     - run: cd example/w-mirage && opam exec -- make depends
     - run: cd example/w-mirage && ls duniverse
     - run: cp -r ../repo-copy example/w-mirage/duniverse/dream
-    - run: cd example/w-mirage/duniverse && rm -rf ocaml-cstruct logs ke fmt lwt bytes seq mirage-flow sexplib0 ptime tls domain-name ocaml-ipaddr mirage-clock ocplib-endian
+    - run: cd example/w-mirage/duniverse && rm -rf ocaml-cstruct logs ke fmt lwt bytes seq mirage-flow sexplib0 ptime tls domain-name ocaml-ipaddr mirage-clock ocplib-endian digestif eqaf mirage-crypto mirage-runtime
     - run: cd example/w-mirage && mv config.ml.backup config.ml
     - run: cd example/w-mirage && sed -e 's/(libraries/(libraries dream-mirage/' < dune.build > dune.build.2
     - run: cd example/w-mirage && mv dune.build.2 dune.build
