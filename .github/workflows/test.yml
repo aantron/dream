@@ -53,15 +53,15 @@ jobs:
       run: |
         set -e
         set -x
-          EXAMPLES=$(find example -maxdepth 1 -type d -not -name "w-mirage*" -not -name "r-tyxml" | grep -v "^example/0" | grep -v "^example$" | sort)
-          shopt -s nullglob
-          for EXAMPLE in $EXAMPLES
-          do
-            FILE=$(ls $EXAMPLE/*.ml $EXAMPLE/*.re $EXAMPLE/server/*.ml $EXAMPLE/server/*.re)
-            EXE=$(echo $FILE | sed 's/\..*$/.exe/g')
-            echo dune build $EXE
-            opam exec -- dune build $EXE
-          done
+        EXAMPLES=$(find example -maxdepth 1 -type d -not -name "w-mirage*" -not -name "r-tyxml" | grep -v "^example/0" | grep -v "^example$" | sort)
+        shopt -s nullglob
+        for EXAMPLE in $EXAMPLES
+        do
+          FILE=$(ls $EXAMPLE/*.ml $EXAMPLE/*.re $EXAMPLE/server/*.ml $EXAMPLE/server/*.re)
+          EXE=$(echo $FILE | sed 's/\..*$/.exe/g')
+          echo dune build $EXE
+          opam exec -- dune build $EXE
+        done
 
   quickstart:
     strategy:
@@ -102,7 +102,7 @@ jobs:
     if: false
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
     - run: mkdir ../repo-copy
