@@ -24,17 +24,8 @@ jobs:
         submodules: recursive
 
     - uses: ocaml/setup-ocaml@v3
-      if: runner.os != 'Windows'
       with:
         ocaml-compiler: ${{matrix.ocaml-compiler}}
-
-    - uses: ocaml/setup-ocaml@v3
-      if: runner.os == 'Windows'
-      with:
-        ocaml-compiler: ${{matrix.ocaml-compiler}}
-        opam-repositories: |
-          opam-repository-mingw: https://github.com/ocaml-opam/opam-repository-mingw.git#sunset
-          default: https://github.com/ocaml/opam-repository.git
 
     # For caqti Postgres tests. Opam does actually install Postgres for us, however brew
     # doesn't link it by default, so we have to install and link it manually.
