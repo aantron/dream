@@ -165,3 +165,7 @@ release-finish :
 	opam pin remove -y dream-pure dream-httpaf dream
 	sha256sum $(RELEASE).tar.gz
 	ls -l $(RELEASE).tar.gz
+
+.PHONY : release-clean
+release-clean :
+	rm -rf $(RELEASE) $(RELEASE).tar.gz _release
