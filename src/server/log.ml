@@ -426,6 +426,9 @@ let set_log_level name level =
   let src = List.assoc_opt name !sources in
   Option.iter (fun s -> Logs.Src.set_level s (Some level)) src
 
+let fd_field : int Message.field =
+  Message.new_field ~name:"dream.fd" ~show_value:string_of_int ()
+
 module Make (Pclock : Mirage_clock.PCLOCK) =
 struct
   let now () =
@@ -482,6 +485,12 @@ struct
         id
     in
 
+    let fd_string =
+      match Message.field request fd_field with
+      | None -> ""
+      | Some fd -> " fd " ^ (string_of_int fd)
+    in
+
     (* Identify the request in the log. *)
     let user_agent =
       Message.headers request "User-Agent"
@@ -489,10 +498,11 @@ struct
     in
 
     log.info (fun log ->
-      log ~request "%s %s %s %s"
+      log ~request "%s %s %s%s %s"
         (Method.method_to_string (Message.method_ request))
         (Message.target request)
         (Helpers.client request)
+        fd_string
         user_agent);
 
     (* Call the rest of the app. *)
