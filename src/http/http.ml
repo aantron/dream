@@ -44,6 +44,18 @@ let sha1 s =
 let websocket_log =
   Log.sub_log "dream.websocket"
 
+let set_fd =
+  match Sys.os_type with
+  | "Unix" | "Cygwin" ->
+    fun request unix_socket ->
+      unix_socket
+      |> Lwt_unix.unix_file_descr
+      |> Obj.magic
+      |> Message.set_field request Log.fd_field
+  | _ ->
+    fun _request _unix_socket ->
+      ()
+
 
 
 (* Wraps the user's Dream handler in the kind of handler expected by http/af.
@@ -62,7 +74,9 @@ let wrap_handler
     (user's_error_handler : Catch.error_handler)
     (user's_dream_handler : Message.handler) =
 
-  let httpaf_request_handler = fun fd client_address (conn : _ Gluten.Reqd.t) ->
+  let httpaf_request_handler =
+      fun unix_socket client_address (conn : _ Gluten.Reqd.t) ->
+
     Log.set_up_exception_hook ();
 
     let conn, upgrade = conn.reqd, conn.upgrade in
@@ -101,6 +115,8 @@ let wrap_handler
 
     let request : Message.request =
       Helpers.request ~client ~method_ ~target ~tls ~headers body in
+
+    set_fd request unix_socket;
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -191,7 +207,9 @@ let wrap_handler_h2
     (_user's_error_handler : Catch.error_handler)
     (user's_dream_handler : Message.handler) =
 
-  let httpaf_request_handler = fun fd client_address (conn : H2.Reqd.t) ->
+  let httpaf_request_handler =
+      fun unix_socket client_address (conn : H2.Reqd.t) ->
+
     Log.set_up_exception_hook ();
 
     (* Covert the h2 request to a Dream request. *)
@@ -224,6 +242,8 @@ let wrap_handler_h2
 
     let request : Message.request =
       Helpers.request ~client ~method_ ~target ~tls ~headers body in
+
+    set_fd request unix_socket;
 
     (* Call the user's handler. If it raises an exception or returns a promise
        that rejects with an exception, pass the exception up to Httpaf. This
@@ -302,10 +322,15 @@ let no_tls = {
       ~certificate_file:_ ~key_file:_
       ~handler
       ~error_handler ->
-    Httpaf_lwt_unix.Server.create_connection_handler
-      ?config:None
-      ~request_handler:(wrap_handler false error_handler handler)
-      ~error_handler:(Error_handler.httpaf error_handler)
+    let request_handler = wrap_handler false error_handler handler in
+    let error_handler = Error_handler.httpaf error_handler in
+    fun client_address unix_socket ->
+      Httpaf_lwt_unix.Server.create_connection_handler
+        ?config:None
+        ~request_handler:(request_handler unix_socket)
+        ~error_handler
+        client_address
+        unix_socket
   end;
 }
 
@@ -316,17 +341,27 @@ let openssl = {
       ~error_handler ->
 
     let httpaf_handler =
-      Httpaf_lwt_unix.Server.SSL.create_connection_handler
-        ?config:None
-        ~request_handler:(wrap_handler true error_handler handler)
-        ~error_handler:(Error_handler.httpaf error_handler)
+      let request_handler = wrap_handler true error_handler handler in
+      let error_handler = Error_handler.httpaf error_handler in
+      fun client_address unix_socket tls_endpoint ->
+        Httpaf_lwt_unix.Server.SSL.create_connection_handler
+          ?config:None
+          ~request_handler:(request_handler unix_socket)
+          ~error_handler
+          client_address
+          tls_endpoint
     in
 
     let h2_handler =
-      H2_lwt_unix.Server.SSL.create_connection_handler
-        ?config:None
-        ~request_handler:(wrap_handler_h2 true error_handler handler)
-        ~error_handler:(Error_handler.h2 error_handler)
+      let request_handler = wrap_handler_h2 true error_handler handler in
+      let error_handler = Error_handler.h2 error_handler in
+      fun client_address unix_socket tls_endpoint ->
+        H2_lwt_unix.Server.SSL.create_connection_handler
+          ?config:None
+          ~request_handler:(request_handler unix_socket)
+          ~error_handler
+          client_address
+          tls_endpoint
     in
 
     let perform_tls_handshake =
@@ -357,11 +392,11 @@ let openssl = {
              application will need to respond to the CONNECT method. *)
           (* TODO DOC User guidance on responding to both GET and CONNECT in
              WebSocket handlers. *)
-          httpaf_handler client_address tls_endpoint
+          httpaf_handler client_address unix_socket tls_endpoint
         | Some "http/1.1" ->
-          httpaf_handler client_address tls_endpoint
+          httpaf_handler client_address unix_socket tls_endpoint
         | Some "h2" ->
-          h2_handler client_address tls_endpoint
+          h2_handler client_address unix_socket tls_endpoint
         | Some _ ->
           assert false
   end;
@@ -373,11 +408,16 @@ let ocaml_tls = {
       ~certificate_file ~key_file
       ~handler
       ~error_handler ->
-    Httpaf_lwt_unix.Server.TLS.create_connection_handler_with_default
-      ~certfile:certificate_file ~keyfile:key_file
-      ?config:None
-      ~request_handler:(wrap_handler true error_handler handler)
-      ~error_handler:(Error_handler.httpaf error_handler)
+    let request_handler = wrap_handler true error_handler handler in
+    let error_handler = Error_handler.httpaf error_handler in
+    fun client_address unix_socket ->
+      Httpaf_lwt_unix.Server.TLS.create_connection_handler_with_default
+        ~certfile:certificate_file ~keyfile:key_file
+        ?config:None
+        ~request_handler:(request_handler unix_socket)
+        ~error_handler
+        client_address
+        unix_socket
 }
 
 
