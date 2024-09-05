@@ -471,7 +471,7 @@ struct
       set_printexc := false
     end;
 
-    (* Get the requwst's id or assign a new one. *)
+    (* Get the request's id or assign a new one. *)
     let id =
       match Message.field request id_field with
       | Some id -> id
