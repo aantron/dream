@@ -62,7 +62,7 @@ let wrap_handler
     (user's_error_handler : Catch.error_handler)
     (user's_dream_handler : Message.handler) =
 
-  let httpaf_request_handler = fun client_address (conn : _ Gluten.Reqd.t) ->
+  let httpaf_request_handler = fun fd client_address (conn : _ Gluten.Reqd.t) ->
     Log.set_up_exception_hook ();
 
     let conn, upgrade = conn.reqd, conn.upgrade in
@@ -191,7 +191,7 @@ let wrap_handler_h2
     (_user's_error_handler : Catch.error_handler)
     (user's_dream_handler : Message.handler) =
 
-  let httpaf_request_handler = fun client_address (conn : H2.Reqd.t) ->
+  let httpaf_request_handler = fun fd client_address (conn : H2.Reqd.t) ->
     Log.set_up_exception_hook ();
 
     (* Covert the h2 request to a Dream request. *)
@@ -318,15 +318,15 @@ let openssl = {
     let httpaf_handler =
       Httpaf_lwt_unix.Server.SSL.create_connection_handler
         ?config:None
-      ~request_handler:(wrap_handler true error_handler handler)
-      ~error_handler:(Error_handler.httpaf error_handler)
+        ~request_handler:(wrap_handler true error_handler handler)
+        ~error_handler:(Error_handler.httpaf error_handler)
     in
 
     let h2_handler =
       H2_lwt_unix.Server.SSL.create_connection_handler
         ?config:None
-      ~request_handler:(wrap_handler_h2 true error_handler handler)
-      ~error_handler:(Error_handler.h2 error_handler)
+        ~request_handler:(wrap_handler_h2 true error_handler handler)
+        ~error_handler:(Error_handler.h2 error_handler)
     in
 
     let perform_tls_handshake =
