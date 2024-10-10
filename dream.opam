@@ -52,7 +52,7 @@ depends: [
   "camlp-streams"
   "caqti" {>= "2.0.0"}
   "caqti-lwt" {>= "2.0.0"}
-  ("conf-libev" {os != "win32"} | "ocaml" {os = "win32"})
+  # ("conf-libev" {os != "win32"} | "ocaml" {os = "win32"})
   "cstruct" {>= "6.0.0"}
   "digestif" {>= "0.7"}  # to_raw_string.
   "dream-httpaf" {>= "1.0.0~alpha3"}
