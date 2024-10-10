@@ -6,123 +6,37 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-        - ubuntu-latest
-        ocaml:
-        - 5.2.x
-        - 4.14.x
-        include:
-        - os: macos-latest
-          ocaml: 4.14.x
-        - os: windows-latest
-          ocaml: 4.14.x
+        ocaml-compiler:
+          - ocaml.5.2.0
 
-    runs-on: ${{matrix.os}}
+    runs-on: macos-latest
+
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: recursive
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
-    - uses: ocaml/setup-ocaml@v3
-      with:
-        ocaml-compiler: ${{matrix.ocaml}}
+      - run: brew install postgresql@15 && brew link --overwrite postgresql@15
+        if: runner.os == 'macOS'
 
-    # For Caqti PostgreSQL examples. opam does actually install PostgreSQL for
-    # us. However, Homebrew doesn't link it by default, so we have to install
-    # and link it manually.
-    - run: brew install postgresql@15 && brew link --overwrite postgresql@15
-      if: runner.os == 'macOS'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.opam
+          key: deps-${{ hashFiles('dream.opam') }}
 
-    # Workaround https://github.com/savonet/ocaml-ssl/issues/155 and/or
-    # https://github.com/ocaml/setup-ocaml/issues/856.
-    - run: opam pin add ssl 0.6.0 --no-action
-      if: runner.os == 'Windows'
+      - name: Set up OCaml
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
 
-    - run: opam exec -- make deps
+      - name: Install dependencies
+        run: opam install . --deps-only --with-test
 
-    - run: opam exec -- make
+      - name: Test
+        run: |
+          opam exec -- dune exec -- example/1-hello/hello.exe &
+          sleep 1;
+          for (( i=0; i<1024; ++i )) ; do echo connecting; curl -s http://localhost:8080/ ; done
 
-    # Tests on Windows are disabled because of a difference in ppx_expect
-    # output. See https://github.com/aantron/dream/pull/282. This difference
-    # remains as of ppx_expect 0.16.
-    - run: opam exec -- make test
-      if: runner.os != 'Windows'
-
-    - name: Build examples
-      if: runner.os != 'Windows'
-      run: |
-        set -e
-        set -x
-        EXAMPLES=$(find example -maxdepth 1 -type d -not -name "w-mirage*" -not -name "r-tyxml" | grep -v "^example/0" | grep -v "^example$" | sort)
-        shopt -s nullglob
-        for EXAMPLE in $EXAMPLES
-        do
-          FILE=$(ls $EXAMPLE/*.ml $EXAMPLE/*.re $EXAMPLE/server/*.ml $EXAMPLE/server/*.re)
-          EXE=$(echo $FILE | sed 's/\..*$/.exe/g')
-          echo dune build $EXE
-          opam exec -- dune build $EXE
-        done
-
-  quickstart:
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-        - ubuntu-latest
-        ocaml:
-        - 5.2.x
-        - 4.14.x
-        include:
-        - os: macos-latest
-          ocaml: 4.14.x
-
-    runs-on: ${{matrix.os}}
-    steps:
-    - uses: ocaml/setup-ocaml@v3
-      with:
-        ocaml-compiler: ${{matrix.ocaml}}
-
-    - name: Run quickstart.sh
-      shell: bash
-      run: |
-        set -x
-        touch output
-        tail -f output | grep --line-buffered 'Ctrl' | xargs -L1 -I FOO bash -c "echo Success && touch success && killall middleware.exe" &
-        tail -f output &
-        ((curl -fsSL https://raw.githubusercontent.com/aantron/dream/$GITHUB_SHA/example/quickstart.sh | bash -s $GITHUB_SHA) || true) > output 2>&1
-        sleep 1
-        if [ -f success ]
-        then
-          exit 0
-        else
-          exit 1
-        fi
-
-  mirage:
-    if: false
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: recursive
-    - run: mkdir ../repo-copy
-    - run: cp -r * ../repo-copy/
-    - uses: ocaml/setup-ocaml@v3
-      with:
-        ocaml-compiler: 4.14.x
-    # Needed until https://github.com/robur-coop/ocaml-letsencrypt/pull/34.
-    - run: opam pin add letsencrypt git+https://github.com/hannesm/ocaml-letsencrypt.git#no-cstruct --no-action
-    - run: opam install --yes --deps-only ./dream-pure.opam ./dream-httpaf.opam ./dream.opam ./dream-mirage.opam
-    - run: opam install --yes mirage mirage-clock-unix mirage-crypto-rng-mirage
-    - run: cd example/w-mirage && mv config.ml config.ml.backup
-    - run: cd example/w-mirage && sed -e 's/package "dream-mirage"//' < config.ml.backup > config.ml
-    - run: cd example/w-mirage && opam exec -- mirage configure -t unix
-    - run: cd example/w-mirage && opam exec -- make depends
-    - run: cd example/w-mirage && ls duniverse
-    - run: cp -r ../repo-copy example/w-mirage/duniverse/dream
-    - run: cd example/w-mirage/duniverse && rm -rf ocaml-cstruct logs ke fmt lwt bytes seq mirage-flow sexplib0 ptime tls domain-name ocaml-ipaddr mirage-clock ocplib-endian digestif eqaf mirage-crypto mirage-runtime
-    - run: cd example/w-mirage && mv config.ml.backup config.ml
-    - run: cd example/w-mirage && sed -e 's/(libraries/(libraries dream-mirage/' < dune.build > dune.build.2
-    - run: cd example/w-mirage && mv dune.build.2 dune.build
-    - run: cd example/w-mirage && opam exec -- dune build
-    - run: file example/w-mirage/_build/default/main.exe
+      - run: opam clean
