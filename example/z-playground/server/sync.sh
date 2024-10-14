@@ -52,6 +52,7 @@ example k-websocket
 example w-query
 example w-flash
 example w-tyxml
+example w-dream-html
 example w-chat
 example w-graphql-subscription
 example w-long-polling
