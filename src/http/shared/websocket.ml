@@ -5,8 +5,6 @@
 
 
 
-module Websocketaf = Dream_websocketaf.Websocketaf
-
 module Stream = Dream_pure.Stream
 
 
@@ -42,7 +40,7 @@ let websocket_handler stream socket =
       push_frame (Some (`Data (!message_is_binary, is_fin), payload))
   in
 
-  let eof () =
+  let eof ?error:_ () =
     push_frame None in
 
   (* The reader retrieves the next frame. If it is a data frame, it keeps a
@@ -66,7 +64,7 @@ let websocket_handler stream socket =
   let first_chunk_offset = ref 0 in
   let first_chunk_length = ref 0 in
   let rec drain_payload payload continuation =
-    Websocketaf.Payload.schedule_read
+    Httpun_ws.Payload.schedule_read
       payload
       ~on_read:(fun buffer ~off ~len ->
         if not !first_chunk_received then begin
@@ -106,7 +104,7 @@ let websocket_handler stream socket =
             closed := true;
             close_code := 1005
           end;
-          Websocketaf.Wsd.close socket;
+          Httpun_ws.Wsd.close socket;
           close !close_code
         | Some (`Close, payload) ->
           drain_payload payload @@ fun buffer offset length ->
@@ -138,7 +136,7 @@ let websocket_handler stream socket =
           read ~data ~flush ~ping ~pong ~close ~exn
         end
       | Some ((binary, fin), payload) ->
-        Websocketaf.Payload.schedule_read
+        Httpun_ws.Payload.schedule_read
           payload
           ~on_read:(fun buffer ~off ~len ->
             match !last_chunk with
@@ -167,7 +165,7 @@ let websocket_handler stream socket =
     if !closed then
       close !close_code
     else
-      Websocketaf.Wsd.flushed socket ok
+      Httpun_ws.Wsd.flushed socket ok
   in
 
   let close code =
@@ -175,7 +173,7 @@ let websocket_handler stream socket =
       (* TODO Really need to work out the "close handshake" and how it is
          exposed in the Stream API. *)
       (* closed := true; *)
-      Websocketaf.Wsd.close ~code:(`Other code) socket
+      Httpun_ws.Wsd.close ~code:(`Other code) socket
     end
   in
 
@@ -192,7 +190,7 @@ let websocket_handler stream socket =
         if !closed then
           close !close_code
         else begin
-          Websocketaf.Wsd.schedule
+          Httpun_ws.Wsd.schedule
             socket ~is_fin:fin ~kind buffer ~off:offset ~len:length;
           bytes_since_flush := !bytes_since_flush + length;
           if !bytes_since_flush >= 4096 then
@@ -208,9 +206,9 @@ let websocket_handler stream socket =
           close !close_code
         else begin
           if length = 0 then
-            Websocketaf.Wsd.send_ping socket
+            Httpun_ws.Wsd.send_ping socket
           else
-            Websocketaf.Wsd.send_ping
+            Httpun_ws.Wsd.send_ping
               ~application_data:{Faraday.buffer; off = offset; len = length}
               socket;
           outgoing_loop ()
@@ -224,9 +222,9 @@ let websocket_handler stream socket =
           close !close_code
         else begin
           if length = 0 then
-            Websocketaf.Wsd.send_pong socket
+            Httpun_ws.Wsd.send_pong socket
           else
-            Websocketaf.Wsd.send_pong
+            Httpun_ws.Wsd.send_pong
               ~application_data:{Faraday.buffer; off = offset; len = length}
               socket;
           outgoing_loop ()
@@ -236,4 +234,4 @@ let websocket_handler stream socket =
   in
   outgoing_loop ();
 
-  Websocketaf.Websocket_connection.{frame; eof}
+  Httpun_ws.Websocket_connection.{frame; eof}

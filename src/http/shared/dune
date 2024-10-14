@@ -4,7 +4,7 @@
  (libraries
   bigstringaf
   dream-pure
-  dream-httpaf.dream-websocketaf
+  httpun-ws
  )
  (preprocess (pps lwt_ppx))
  (instrumentation (backend bisect_ppx)))

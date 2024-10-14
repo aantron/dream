@@ -5,14 +5,6 @@
 
 
 
-module Gluten = Dream_gluten.Gluten
-module Gluten_lwt_unix = Dream_gluten_lwt_unix.Gluten_lwt_unix
-module Httpaf = Dream_httpaf_.Httpaf
-module Httpaf_lwt_unix = Dream_httpaf__lwt_unix.Httpaf_lwt_unix
-module H2 = Dream_h2.H2
-module H2_lwt_unix = Dream_h2_lwt_unix.H2_lwt_unix
-module Websocketaf = Dream_websocketaf.Websocketaf
-
 module Catch = Dream__server.Catch
 module Helpers = Dream__server.Helpers
 module Log = Dream__server.Log
@@ -28,10 +20,10 @@ module Stream = Dream_pure.Stream
 
 
 let to_dream_method method_ =
-  Httpaf.Method.to_string method_ |> Method.string_to_method
+  Httpun.Method.to_string method_ |> Method.string_to_method
 
-let to_httpaf_status status =
-  Status.status_to_int status |> Httpaf.Status.of_code
+let to_httpun_status status =
+  Status.status_to_int status |> Httpun.Status.of_code
 
 let to_h2_status status =
   Status.status_to_int status |> H2.Status.of_code
@@ -82,8 +74,8 @@ let wrap_handler
     let conn, upgrade = conn.reqd, conn.upgrade in
 
     (* Covert the http/af request to a Dream request. *)
-    let httpaf_request : Httpaf.Request.t =
-      Httpaf.Reqd.request conn in
+    let httpaf_request : Httpun.Request.t =
+      Httpun.Reqd.request conn in
 
     let client =
       Adapt.address_to_string client_address in
@@ -92,22 +84,22 @@ let wrap_handler
     let target =
       httpaf_request.target in
     let headers =
-      Httpaf.Headers.to_list httpaf_request.headers in
+      Httpun.Headers.to_list httpaf_request.headers in
 
     let body =
-      Httpaf.Reqd.request_body conn in
+      Httpun.Reqd.request_body conn in
     (* TODO Review per-chunk allocations. *)
     (* TODO Should the stream be auto-closed? It doesn't even have a closed
        state. The whole thing is just a wrapper for whatever the http/af
        behavior is. *)
     let read ~data ~flush:_ ~ping:_ ~pong:_ ~close ~exn:_ =
-      Httpaf.Body.Reader.schedule_read
+      Httpun.Body.Reader.schedule_read
         body
         ~on_eof:(fun () -> close 1000)
         ~on_read:(fun buffer ~off ~len -> data buffer off len true false)
     in
     let close _code =
-      Httpaf.Body.Reader.close body in
+      Httpun.Body.Reader.close body in
     let body =
       Stream.reader ~read ~close ~abort:close in
     let body =
@@ -119,7 +111,7 @@ let wrap_handler
     set_fd request unix_socket;
 
     (* Call the user's handler. If it raises an exception or returns a promise
-       that rejects with an exception, pass the exception up to Httpaf. This
+       that rejects with an exception, pass the exception up to Httpun. This
        will cause it to call its (low-level) error handler with variand `Exn _.
        A well-behaved Dream app should catch all of its own exceptions and
        rejections in one of its top-level middlewares.
@@ -146,15 +138,15 @@ let wrap_handler
           Message.set_content_length_headers response;
 
           let headers =
-            Httpaf.Headers.of_list (Message.all_headers response) in
+            Httpun.Headers.of_list (Message.all_headers response) in
 
           let status =
-            to_httpaf_status (Message.status response) in
+            to_httpun_status (Message.status response) in
 
-          let httpaf_response =
-            Httpaf.Response.create ~headers status in
+          let httpun_response =
+            Httpun.Response.create ~headers status in
           let body =
-            Httpaf.Reqd.respond_with_streaming conn httpaf_response in
+            Httpun.Reqd.respond_with_streaming conn httpun_response in
 
           Adapt.forward_body response body;
 
@@ -167,19 +159,19 @@ let wrap_handler
         | Some (client_stream, _server_stream) ->
           let error_handler =
             Error_handler.websocket user's_error_handler request response in
+          ignore error_handler; (* TODO *)
 
           let proceed () =
-            Websocketaf.Server_connection.create_websocket
-              ~error_handler
+            Httpun_ws.Server_connection.create_websocket
               (Dream_httpaf.Websocket.websocket_handler client_stream)
-            |> Gluten.make (module Websocketaf.Server_connection)
+            |> Gluten.make (module Httpun_ws.Server_connection)
             |> upgrade
           in
 
           let headers =
-            Httpaf.Headers.of_list (Message.all_headers response) in
+            Httpun.Headers.of_list (Message.all_headers response) in
 
-          Websocketaf.Handshake.respond_with_upgrade ~headers ~sha1 conn proceed
+          Httpun_ws.Handshake.respond_with_upgrade ~headers ~sha1 conn proceed
           |> function
           | Ok () -> Lwt.return_unit
           | Error error_string ->
@@ -192,7 +184,7 @@ let wrap_handler
       @@ fun exn ->
         (* TODO There was something in the fork changelogs about not requiring
            report exn. Is it relevant to this? *)
-        Httpaf.Reqd.report_exn conn exn;
+        Httpun.Reqd.report_exn conn exn;
         Lwt.return_unit
     end
   in
@@ -325,7 +317,7 @@ let no_tls = {
     let request_handler = wrap_handler false error_handler handler in
     let error_handler = Error_handler.httpaf error_handler in
     fun client_address unix_socket ->
-      Httpaf_lwt_unix.Server.create_connection_handler
+      Httpun_lwt_unix.Server.create_connection_handler
         ?config:None
         ~request_handler:(request_handler unix_socket)
         ~error_handler
@@ -344,7 +336,7 @@ let openssl = {
       let request_handler = wrap_handler true error_handler handler in
       let error_handler = Error_handler.httpaf error_handler in
       fun client_address unix_socket tls_endpoint ->
-        Httpaf_lwt_unix.Server.SSL.create_connection_handler
+        Httpun_lwt_unix.Server.SSL.create_connection_handler
           ?config:None
           ~request_handler:(request_handler unix_socket)
           ~error_handler
@@ -411,7 +403,7 @@ let ocaml_tls = {
     let request_handler = wrap_handler true error_handler handler in
     let error_handler = Error_handler.httpaf error_handler in
     fun client_address unix_socket ->
-      Httpaf_lwt_unix.Server.TLS.create_connection_handler_with_default
+      Httpun_lwt_unix.Server.TLS.create_connection_handler_with_default
         ~certfile:certificate_file ~keyfile:key_file
         ?config:None
         ~request_handler:(request_handler unix_socket)
@@ -551,7 +543,7 @@ let serve_with_maybe_https
         log.warning (fun log ->
           log "Consider using Dream.to_base64url (Dream.random 32)");
     end; *)
-    (* TODO Make sure there is a similar check in cipher.ml now.Hpack *)
+    (* TODO Make sure there is a similar check in cipher.ml now. *)
 
     match tls with
     | `No ->

@@ -5,10 +5,6 @@
 
 
 
-module Httpaf = Dream_httpaf_.Httpaf
-module H2 = Dream_h2.H2
-module Websocketaf = Dream_websocketaf.Websocketaf
-
 module Catch = Dream__server.Catch
 module Error_template = Dream__server.Error_template
 module Method = Dream_pure.Method
@@ -270,7 +266,7 @@ let httpaf
     user's_error_handler =
     fun client_address ?request error start_response ->
 
-  ignore (request : Httpaf.Request.t option);
+  ignore (request : Httpun.Request.t option);
   (* TODO LATER Should factor out the request translation function and use it to
      partially recover the request info. *)
 
@@ -314,7 +310,7 @@ let httpaf
         | None -> default_response caused_by
       in
 
-      let headers = Httpaf.Headers.of_list (Message.all_headers response) in
+      let headers = Httpun.Headers.of_list (Message.all_headers response) in
       let body = start_response headers in
 
       Adapt.forward_body response body;
@@ -417,7 +413,7 @@ let websocket
   (* Note: in this function, request and response are from the original request
      that negotiated the websocket. *)
 
-  Websocketaf.Wsd.close socket;
+  Httpun_ws.Wsd.close socket;
 
   (* The only constructor of error is `Exn, so presumably these are server-side
      errors. Not sure if any I/O errors are possible here. *)
