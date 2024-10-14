@@ -5,10 +5,6 @@
 
 
 
-module Httpaf = Dream_httpaf_.Httpaf
-module H2 = Dream_h2.H2
-module Websocketaf = Dream_websocketaf.Websocketaf
-
 module Catch = Dream__server.Catch
 module Log = Dream__server.Log
 module Message = Dream_pure.Message
@@ -43,7 +39,7 @@ val app :
 
 val httpaf :
   Catch.error_handler ->
-    (Unix.sockaddr -> Httpaf.Server_connection.error_handler)
+    (Unix.sockaddr -> Httpun.Server_connection.error_handler)
 
 val h2 :
   Catch.error_handler ->
@@ -57,7 +53,7 @@ val websocket :
   Catch.error_handler ->
   Message.request ->
   Message.response ->
-    (Websocketaf.Wsd.t -> [ `Exn of exn ] -> unit)
+    (Httpun_ws.Wsd.t -> [ `Exn of exn ] -> unit)
 
 val websocket_handshake :
   Catch.error_handler ->

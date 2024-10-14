@@ -5,9 +5,6 @@
 
 
 
-module Httpaf = Dream_httpaf_.Httpaf
-module H2 = Dream_h2.H2
-
 module Stream = Dream_pure.Stream
 module Message = Dream_pure.Message
 
@@ -71,14 +68,14 @@ let forward_body_general
 
 let forward_body
     (response : Message.response)
-    (body : Httpaf.Body.Writer.t) =
+    (body : Httpun.Body.Writer.t) =
 
   forward_body_general
     response
-    (Httpaf.Body.Writer.write_string body)
-    (Httpaf.Body.Writer.write_bigstring body)
-    (Httpaf.Body.Writer.flush body)
-    (fun _code -> Httpaf.Body.Writer.close body)
+    (Httpun.Body.Writer.write_string body)
+    (Httpun.Body.Writer.write_bigstring body)
+    (Httpun.Body.Writer.flush body)
+    (fun _code -> Httpun.Body.Writer.close body)
 
 let forward_body_h2
     (response : Message.response)
