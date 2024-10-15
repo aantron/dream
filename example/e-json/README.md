@@ -49,7 +49,7 @@ To get this working, we have to add `ppx_yojson_conv` to our
 </code></pre>
 
 and to
-[`json.opam`](https://github.com/aantron/dream/blob/master/example/e-json/json.opam):
+[`json.opam`](https://github.com/aantron/dream/blob/master/example/e-json/e-json.opam):
 
 <pre><code>depends: [
   "ocaml" {>= "4.08.0"}
