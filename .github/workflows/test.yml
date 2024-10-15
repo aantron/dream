@@ -59,6 +59,7 @@ jobs:
         shopt -s nullglob
         for EXAMPLE in $EXAMPLES
         do
+          echo /$EXAMPLE/
           FILE=$(ls $EXAMPLE/*.ml $EXAMPLE/*.re $EXAMPLE/server/*.ml $EXAMPLE/server/*.re)
           EXE=$(echo $FILE | sed 's/\..*$/.exe/g')
           echo dune build $EXE
