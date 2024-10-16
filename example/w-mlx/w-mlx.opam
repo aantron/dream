@@ -7,3 +7,10 @@ depends: [
   "mlx"
   "html_of_jsx"
 ]
+
+synopsis: "One of the Dream examples"
+homepage: "https://github.com/aantron/dream"
+bug-reports: "https://github.com/aantron/dream/issues"
+author: "Anton Bachin <antonbachin@yahoo.com>"
+license: "MIT"
+maintainer: "Anton Bachin <antonbachin@yahoo.com>"
