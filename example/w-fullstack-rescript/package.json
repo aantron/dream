@@ -3,8 +3,8 @@
   "dependencies": {
     "esbuild": "*",
     "esy": "*",
-    "rescript": "*",
-    "rescript-webapi": "^0.5.0"
+    "rescript": "^11",
+    "rescript-webapi": "^0.9.1"
   },
   "scripts": {
     "postinstall": "npx esy install",
