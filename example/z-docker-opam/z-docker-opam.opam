@@ -1,9 +1,14 @@
 opam-version: "2.0"
 
-synopsis: "Dream Docker Hello World example"
-maintainer: "Anton Bachin <antonbachin@yahoo.com>"
 depends: [
   "ocaml" {>= "4.08.0"}
   "dune" {>= "2.0.0"}
   "dream"
 ]
+
+synopsis: "Dream Docker Hello World example"
+homepage: "https://github.com/aantron/dream"
+bug-reports: "https://github.com/aantron/dream/issues"
+author: "Anton Bachin <antonbachin@yahoo.com>"
+license: "MIT"
+maintainer: "Anton Bachin <antonbachin@yahoo.com>"

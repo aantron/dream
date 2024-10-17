@@ -8,3 +8,10 @@ depends: [
   "melange-webapi"
   "reason" {>= "3.10.0"}
 ]
+
+synopsis: "One of the Dream examples"
+homepage: "https://github.com/aantron/dream"
+bug-reports: "https://github.com/aantron/dream/issues"
+author: "Anton Bachin <antonbachin@yahoo.com>"
+license: "MIT"
+maintainer: "Anton Bachin <antonbachin@yahoo.com>"

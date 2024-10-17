@@ -50,6 +50,8 @@ jobs:
     - run: opam exec -- make test
       if: runner.os != 'Windows'
 
+    - run: opam lint example/**/*.opam
+
     - name: Build examples
       if: runner.os != 'Windows'
       run: |
