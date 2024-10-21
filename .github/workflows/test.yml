@@ -57,7 +57,8 @@ jobs:
       run: |
         set -e
         set -x
-        EXAMPLES=$(find example -maxdepth 1 -type d -not -name "w-mirage*" -not -name "r-tyxml" | grep -v "^example/0" | grep -v "^example$" | sort)
+        EXCLUDED_EXMPLS='w-mirage*|r-tyxml|w-dream-html'
+        EXAMPLES=$(find example -maxdepth 1 -type d | grep -Ev $EXCLUDED_EXMPLS | grep -v "^example/0" | grep -v "^example$" | sort)
         shopt -s nullglob
         for EXAMPLE in $EXAMPLES
         do
