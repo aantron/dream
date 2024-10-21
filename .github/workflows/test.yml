@@ -62,7 +62,15 @@ jobs:
         shopt -s nullglob
         for EXAMPLE in $EXAMPLES
         do
-          FILE=$(ls $EXAMPLE/*.ml $EXAMPLE/*.re $EXAMPLE/server/*.ml $EXAMPLE/server/*.re)
+          FILE=$(find $EXAMPLE -maxdepth 1 -type f -and -path "${EXAMPLE}/*.ml")
+          FILE+=$(find $EXAMPLE -maxdepth 1 -type f -and -path "${EXAMPLE}/*.re")
+          FILE+=$(find $EXAMPLE -maxdepth 2 -type f -and -path "${EXAMPLE}/server/*.ml")
+          FILE+=$(find $EXAMPLE -maxdepth 2 -type f -and -path "${EXAMPLE}/server/*.re")
+
+          if [[ "$FILE" == "" ]]; then
+              continue
+          fi
+
           EXE=$(echo $FILE | sed 's/\..*$/.exe/g')
           echo dune build $EXE
           opam exec -- dune build $EXE
