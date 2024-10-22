@@ -50,18 +50,27 @@ jobs:
     - run: opam exec -- make test
       if: runner.os != 'Windows'
 
-    - run: opam lint example/**/*.opam
+    - run: opam lint --recursive example
 
     - name: Build examples
       if: runner.os != 'Windows'
       run: |
         set -e
         set -x
-        EXAMPLES=$(find example -maxdepth 1 -type d -not -name "w-mirage*" -not -name "r-tyxml" | grep -v "^example/0" | grep -v "^example$" | sort)
+        EXCLUDED_EXAMPLES='w-mirage*|r-tyxml|w-dream-html'
+        EXAMPLES=$(find example -maxdepth 1 -type d | grep -Ev $EXCLUDED_EXAMPLES | grep -v "^example/0" | grep -v "^example$" | sort)
         shopt -s nullglob
         for EXAMPLE in $EXAMPLES
         do
-          FILE=$(ls $EXAMPLE/*.ml $EXAMPLE/*.re $EXAMPLE/server/*.ml $EXAMPLE/server/*.re)
+          FILE=$(find $EXAMPLE -maxdepth 1 -type f -and -path "${EXAMPLE}/*.ml")
+          FILE+=$(find $EXAMPLE -maxdepth 1 -type f -and -path "${EXAMPLE}/*.re")
+          FILE+=$(find $EXAMPLE -maxdepth 2 -type f -and -path "${EXAMPLE}/server/*.ml")
+          FILE+=$(find $EXAMPLE -maxdepth 2 -type f -and -path "${EXAMPLE}/server/*.re")
+
+          if [[ "$FILE" == "" ]]; then
+              continue
+          fi
+
           EXE=$(echo $FILE | sed 's/\..*$/.exe/g')
           echo dune build $EXE
           opam exec -- dune build $EXE
