@@ -459,7 +459,11 @@ val json :
   ?headers:(string * string) list ->
     string -> response promise
 (** Same as {!Dream.respond}, but adds [Content-Type: application/json]. See
-    {!Dream.application_json}. *)
+    {!Dream.application_json}.
+
+    See example
+    {{:https://github.com/aantron/dream/tree/master/example/e-json#e-json}
+    [e-json]}. *)
 
 val redirect :
   ?status:[< redirection ] ->
