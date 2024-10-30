@@ -462,7 +462,7 @@ val json :
     {!Dream.application_json}.
 
     See example
-    {{:https://github.com/aantron/dream/tree/master/example/e-json#e-json}
+    {{:https://github.com/aantron/dream/tree/master/example/e-json#files}
     [e-json]}. *)
 
 val redirect :
