@@ -920,7 +920,7 @@ val origin_referrer_check : middleware
     - their value must match [Host:]
 
     Responds with [400 Bad Request] if the check fails. See example
-    {{:https://github.com/aantron/dream/tree/master/example/e-json#files}
+    {{:https://github.com/aantron/dream/tree/master/example/e-json#security}
     [e-json]}.
 
     Implements the
