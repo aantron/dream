@@ -459,9 +459,7 @@ val json :
   ?headers:(string * string) list ->
     string -> response promise
 (** Same as {!Dream.respond}, but adds [Content-Type: application/json]. See
-    {!Dream.application_json}.
-
-    See example
+    {!Dream.application_json} and example
     {{:https://github.com/aantron/dream/tree/master/example/e-json#files}
     [e-json]}. *)
 
@@ -922,7 +920,7 @@ val origin_referrer_check : middleware
     - their value must match [Host:]
 
     Responds with [400 Bad Request] if the check fails. See example
-    {{:https://github.com/aantron/dream/tree/master/example/e-json#security}
+    {{:https://github.com/aantron/dream/tree/master/example/e-json#files}
     [e-json]}.
 
     Implements the
