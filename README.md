@@ -77,24 +77,24 @@ Dream binary][one-binary], or use Dream in a subcommand. Dream tries to be as
 functional as possible, touching global runtime state only lazily, when called
 into.
 
-[https]: https://github.com/aantron/dream/tree/master/example/l-https#files
-[websocket]: https://github.com/aantron/dream/tree/master/example/k-websocket#files
-[graphql]: https://github.com/aantron/dream/tree/master/example/w-graphql-subscription#files
-[templates]: https://github.com/aantron/dream/tree/master/example/7-template#files
-[reason-templates]: https://github.com/aantron/dream/tree/master/example/r-template#files
-[middleware]: https://github.com/aantron/dream/tree/master/example/2-middleware#files
+[https]: https://github.com/aantron/dream/tree/master/example/l-https#folders-and-files
+[websocket]: https://github.com/aantron/dream/tree/master/example/k-websocket#folders-and-files
+[graphql]: https://github.com/aantron/dream/tree/master/example/w-graphql-subscription#folders-and-files
+[templates]: https://github.com/aantron/dream/tree/master/example/7-template#folders-and-files
+[reason-templates]: https://github.com/aantron/dream/tree/master/example/r-template#folders-and-files
+[middleware]: https://github.com/aantron/dream/tree/master/example/2-middleware#folders-and-files
 [handler]: https://aantron.github.io/dream/#type-handler
-[routing]: https://github.com/aantron/dream/tree/master/example/3-router#files
+[routing]: https://github.com/aantron/dream/tree/master/example/3-router#folders-and-files
 [cookies]: https://aantron.github.io/dream/#cookies
 [forms]: https://aantron.github.io/dream/#forms
-[sessions]: https://github.com/aantron/dream/tree/master/example/b-session#files
+[sessions]: https://github.com/aantron/dream/tree/master/example/b-session#folders-and-files
 [back-ends]: https://aantron.github.io/dream/#back-ends
-[errors]: https://github.com/aantron/dream/tree/master/example/9-error#files
+[errors]: https://github.com/aantron/dream/tree/master/example/9-error#folders-and-files
 [crypto]: https://aantron.github.io/dream/#cryptography
-[logging]: https://github.com/aantron/dream/tree/master/example/2-middleware#files
-[melange]: https://github.com/aantron/dream/tree/master/example/r-fullstack-melange#files
-[rescript]: https://github.com/aantron/dream/tree/master/example/w-fullstack-rescript#files
-[jsoo]: https://github.com/aantron/dream/tree/master/example/w-fullstack-jsoo#files
+[logging]: https://github.com/aantron/dream/tree/master/example/2-middleware#folders-and-files
+[melange]: https://github.com/aantron/dream/tree/master/example/r-fullstack-melange#folders-and-files
+[rescript]: https://github.com/aantron/dream/tree/master/example/w-fullstack-rescript#folders-and-files
+[jsoo]: https://github.com/aantron/dream/tree/master/example/w-fullstack-jsoo#folders-and-files
 [types]: https://aantron.github.io/dream/#types
 [basic-read]: https://aantron.github.io/dream/#val-body
 [streaming]: https://aantron.github.io/dream/#streaming
@@ -102,15 +102,15 @@ into.
 [alpn]: https://en.wikipedia.org/wiki/Application-Layer_Protocol_Negotiation
 [libs]: https://github.com/aantron/dream/tree/master/src
 [deploy]: https://github.com/aantron/dream/tree/master/example#deploying
-[jsx]: https://github.com/aantron/dream/tree/master/example/r-tyxml#files
-[one-binary]: https://github.com/aantron/dream/tree/master/example/w-one-binary#files
+[jsx]: https://github.com/aantron/dream/tree/master/example/r-tyxml#folders-and-files
+[one-binary]: https://github.com/aantron/dream/tree/master/example/w-one-binary#folders-and-files
 
 <br>
 
 ## Quick start
 
 You can get
-[one](https://github.com/aantron/dream/tree/master/example/2-middleware#files)
+[one](https://github.com/aantron/dream/tree/master/example/2-middleware#folders-and-files)
 of the first [tutorials][tutorial] and build it locally with:
 
 <pre><b>bash -c "$(curl -fsSL https://raw.githubusercontent.com/aantron/dream/master/example/quickstart.sh)"</b></pre>
@@ -139,10 +139,10 @@ After that, go to any of the [examples][tutorial], such as
 dune exec ./middleware.exe
 ```
 
-[esy-example]: https://github.com/aantron/dream/tree/master/example/w-esy#files
+[esy-example]: https://github.com/aantron/dream/tree/master/example/w-esy#folders-and-files
 [quickstart.sh]: https://github.com/aantron/dream/blob/master/example/quickstart.sh
 [esy]: https://esy.sh/
-[2-middleware]: https://github.com/aantron/dream/tree/master/example/2-middleware#files
+[2-middleware]: https://github.com/aantron/dream/tree/master/example/2-middleware#folders-and-files
 
 ## esy
 
@@ -173,14 +173,14 @@ esy`, and started with `npx esy start`.
 
 [tutorial]: https://github.com/aantron/dream/tree/master/example#readme
 [examples]: https://github.com/aantron/dream/tree/master/example#examples
-[1-hello]: https://github.com/aantron/dream/tree/master/example/1-hello#files
-[r-hello]: https://github.com/aantron/dream/tree/master/example/r-hello#files
+[1-hello]: https://github.com/aantron/dream/tree/master/example/1-hello#folders-and-files
+[r-hello]: https://github.com/aantron/dream/tree/master/example/r-hello#folders-and-files
 [reason-examples]: https://github.com/aantron/dream/tree/master/example#reason
 [deploying]: https://github.com/aantron/dream/tree/master/example#deploying
 [api-main]: https://aantron.github.io/dream/#types
 [fullstack]: https://github.com/aantron/dream/tree/master/example#full-stack
-[watch]: https://github.com/aantron/dream/tree/master/example/w-watch#files
-[reload]: https://github.com/aantron/dream/tree/master/example/w-live-reload#files
+[watch]: https://github.com/aantron/dream/tree/master/example/w-watch#folders-and-files
+[reload]: https://github.com/aantron/dream/tree/master/example/w-live-reload#folders-and-files
 
 <br>
 

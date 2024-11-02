@@ -59,7 +59,7 @@ Some notes:
 - [**`7-template`**](../7-template#security) section *Security* on output
   security. Dream-html escapes strings by default, just as the built-in templater
   does.
-- [**`w-tyxml`**](../w-tyxml#files) is a similar library that also generates
+- [**`w-tyxml`**](../w-tyxml#folders-and-files) is a similar library that also generates
   HTML, with different design tradeoffs.
 
 <br>

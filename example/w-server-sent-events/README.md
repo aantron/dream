@@ -42,9 +42,9 @@ interface to server-sent events.
 
 **See also:**
 
-- [**`k-websocket`**](../k-websocket#files) for WebSockets, which largely
+- [**`k-websocket`**](../k-websocket#folders-and-files) for WebSockets, which largely
   supersede server-sent events.
-- [**`w-template-stream`**](../w-template-stream#files) for another example of
+- [**`w-template-stream`**](../w-template-stream#folders-and-files) for another example of
   “real-time” streaming with
   [`Dream.flush`](https://aantron.github.io/dream/#val-flush).
 

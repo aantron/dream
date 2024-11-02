@@ -84,7 +84,7 @@ streaming file uploads.
 [`Dream.multipart`](https://aantron.github.io/dream/#val-multipart) behaves just
 like [`Dream.form`](https://aantron.github.io/dream/#val-form) when it comes to
 [CSRF protection](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html).
-See example [**`d-form`**](../d-form#files). We use
+See example [**`d-form`**](../d-form#folders-and-files). We use
 [`Dream.csrf_tag`](https://aantron.github.io/dream/#val-csrf_tag) to generate
 the CSRF token in the template, and pass the `enctype="multipart/form-data"`
 attribute as needed for forms to upload files. The template output looks like
@@ -109,17 +109,17 @@ for a checklist of additional security precautions.
 
 **Next steps:**
 
-- [**`h-sql`**](../h-sql#files) runs SQL queries against a database.
-- [**`i-graphql`**](../i-graphql#files) handles GraphQL queries and serves
+- [**`h-sql`**](../h-sql#folders-and-files) runs SQL queries against a database.
+- [**`i-graphql`**](../i-graphql#folders-and-files) handles GraphQL queries and serves
   GraphiQL.
 
 <br>
 
 **See also:**
 
-- [**`w-upload-stream`**](../w-upload-stream#files) shows the streaming
+- [**`w-upload-stream`**](../w-upload-stream#folders-and-files) shows the streaming
   interface for receiving file uploads.
-- [**`w-multipart-dump`**](../w-multipart-dump#files) shows the request body
+- [**`w-multipart-dump`**](../w-multipart-dump#folders-and-files) shows the request body
   that is interpreted by
   [`Dream.multipart`](https://aantron.github.io/dream/#val-multipart).
 

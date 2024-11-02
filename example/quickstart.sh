@@ -42,7 +42,7 @@ cd $DIRECTORY
 
 echo
 echo -e "\e[0m✅ Fetching example files using git\e[0m"
-echo -e "\e[0m   Source: $REPO/tree/$REF/example/$EXAMPLE#files\e[0m"
+echo -e "\e[0m   Source: $REPO/tree/$REF/example/$EXAMPLE#folders-and-files\e[0m"
 mkdir clone
 cd clone
 git init --quiet
@@ -81,7 +81,7 @@ echo "     dune exec ./$EXE --watch"
 echo
 echo -e "\e[0m✅ See\e[0m"
 echo
-echo "   - This example:" $REPO/tree/$REF/example/$EXAMPLE#files
+echo "   - This example:" $REPO/tree/$REF/example/$EXAMPLE#folders-and-files
 echo "   - Tutorial:    " $REPO/tree/$REF/example#tutorial
 echo
 echo 💲 dune exec ./$EXE

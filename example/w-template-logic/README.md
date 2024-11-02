@@ -75,8 +75,8 @@ let () =
 
 **See also:**
 
-- [**`7-template`**](../7-template#files) for more information about templates.
-- [**`r-template-logic`**](../r-template-logic#files) for the Reason syntax
+- [**`7-template`**](../7-template#folders-and-files) for more information about templates.
+- [**`r-template-logic`**](../r-template-logic#folders-and-files) for the Reason syntax
   version of this example.
 
 <br>

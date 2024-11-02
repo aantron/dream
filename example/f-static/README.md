@@ -56,7 +56,7 @@ You can replace the file loading behavior of
 [crunch](https://github.com/mirage/ocaml-crunch) to compile a directory right
 into your Web app binary, and then serve that directory from memory with
 [`Dream.static`](https://aantron.github.io/dream/#val-static)! See example
-[**`w-one-binary`**](../w-one-binary#files).
+[**`w-one-binary`**](../w-one-binary#folders-and-files).
 
 You can also use `~loader` to set arbitrary headers on the response.
 
@@ -64,9 +64,9 @@ You can also use `~loader` to set arbitrary headers on the response.
 
 **Next steps:**
 
-- [**`g-upload`**](../g-upload#files) receives files instead of serving them.
-- [**`h-sql`**](../h-sql#files) runs SQL queries against a database.
-- [**`w-one-binary`**](../w-one-binary#files) bundles assets into a
+- [**`g-upload`**](../g-upload#folders-and-files) receives files instead of serving them.
+- [**`h-sql`**](../h-sql#folders-and-files) runs SQL queries against a database.
+- [**`w-one-binary`**](../w-one-binary#folders-and-files) bundles assets into a
   self-contained binary.
 
 <br>

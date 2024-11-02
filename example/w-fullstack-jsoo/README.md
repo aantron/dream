@@ -70,7 +70,7 @@ Then visit [http://localhost:8080](http://localhost:8080), and you will see...
 
 **See also:**
 
-- [**`w-one-binary`**](../w-one-binary#files) for bundling assets into a
+- [**`w-one-binary`**](../w-one-binary#folders-and-files) for bundling assets into a
   self-contained binary.
 
 <br>

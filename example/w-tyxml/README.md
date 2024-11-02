@@ -43,7 +43,7 @@ let () =
 
 When using Reason, TyXML supports JSX, through package
 [`tyxml-jsx`](https://ocsigen.org/tyxml/latest/manual/jsx). See
-[**`r-tyxml`**](../r-tyxml#files) for a complete example, including Dune
+[**`r-tyxml`**](../r-tyxml#folders-and-files) for a complete example, including Dune
 metadata.
 
 ```reason
@@ -102,7 +102,7 @@ this, please [open an issue](https://github.com/aantron/dream/issues).
 - [**`7-template`**](../7-template#security) section *Security* on output
   security. TyXML escapes strings by default, just as the built-in templater
   does.
-- [**`r-tyxml`**](../r-tyxml#files) is the Reason and JSX version of this
+- [**`r-tyxml`**](../r-tyxml#folders-and-files) is the Reason and JSX version of this
   example.
 
 <br>

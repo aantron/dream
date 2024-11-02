@@ -82,7 +82,7 @@ comments!
 We take the opportunity to try out
 [`Dream.sql_sessions`](https://aantron.github.io/dream/#val-sql_sessions), which
 stores session data persistently in `db.sqlite`. See example
-[**`b-session`**](../b-session#files) for an introduction to session management.
+[**`b-session`**](../b-session#folders-and-files) for an introduction to session management.
 Both the comments and the sessions survive server restarts.
 
 <br>
@@ -132,7 +132,7 @@ We also had to make an addition to our
 
 SQLite is good for small-to-medium sites and examples. For a larger site,
 microservices, or other needs, you can switch, for example, to PostgreSQL. See
-[**`w-postgres`**](../w-postgres#files).
+[**`w-postgres`**](../w-postgres#folders-and-files).
 
 A good program for examining databases locally is
 [Beekeeper Studio](https://www.beekeeperstudio.io/). Dream might also integrate
@@ -156,9 +156,9 @@ See
 
 **Next steps:**
 
-- [**`i-graphql`**](../i-graphql#files) handles GraphQL queries and serves
+- [**`i-graphql`**](../i-graphql#folders-and-files) handles GraphQL queries and serves
   GraphiQL.
-- [**`j-stream`**](../j-stream#files) streams response bodies to clients.
+- [**`j-stream`**](../j-stream#folders-and-files) streams response bodies to clients.
 
 <br>
 

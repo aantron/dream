@@ -40,17 +40,17 @@ name of the `.ml` file, but with `.ml` changed to `.exe`.
 
 **Next steps:**
 
-- The next example, [**`2-middleware`**](../2-middleware#files), adds a logger
+- The next example, [**`2-middleware`**](../2-middleware#folders-and-files), adds a logger
   to the app.
-- [**`3-router`**](../3-router#files) sends requests to different handlers,
+- [**`3-router`**](../3-router#folders-and-files) sends requests to different handlers,
   depending on their path.
 
 <br>
 
 **See also:**
 
-- [**`r-hello`**](../r-hello#files) is a Reason syntax version of this example.
-- [**`w-watch`**](../w-watch#files) sets up a development watcher.
+- [**`r-hello`**](../r-hello#folders-and-files) is a Reason syntax version of this example.
+- [**`w-watch`**](../w-watch#folders-and-files) sets up a development watcher.
 
 
 <br>

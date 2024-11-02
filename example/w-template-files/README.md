@@ -3,7 +3,7 @@
 <br>
 
 This example splits the code of the basic template example,
-[**`7-template`**](../7-template#files), into two files. The first is the
+[**`7-template`**](../7-template#folders-and-files), into two files. The first is the
 template, in
 [`template.eml.html`](https://github.com/aantron/dream/blob/master/example/w-template-files/template.eml.html).
 We use the `.html` extension because it is mostly HTML, and to prevent
@@ -46,7 +46,7 @@ let () =
 
 **See also:**
 
-- [**`7-template`**](../7-template#files) for comments on the [`dune`
+- [**`7-template`**](../7-template#folders-and-files) for comments on the [`dune`
   file](https://github.com/aantron/dream/blob/master/example/w-template-files/dune)
   and [security
   information](https://github.com/aantron/dream/tree/master/example/7-template#security).

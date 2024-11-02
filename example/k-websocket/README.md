@@ -78,14 +78,14 @@ See [*WebSockets*](https://aantron.github.io/dream/#websockets) in the API docs.
 
 **Last step:**
 
-- [**`l-https`**](../l-https#files) enables HTTPS.
+- [**`l-https`**](../l-https#folders-and-files) enables HTTPS.
 
 <br>
 
 **See also:**
 
-- [**`w-chat`**](../w-chat#files) is a simple WebSocket-based chat application.
-- [**`w-live-reload`**](../w-live-reload#files) uses WebSockets to implement
+- [**`w-chat`**](../w-chat#folders-and-files) is a simple WebSocket-based chat application.
+- [**`w-live-reload`**](../w-live-reload#folders-and-files) uses WebSockets to implement
   live reloading.
 - [**`w-graphql-subscription`**](../w-graphql-subscription) does not show a
   WebSocket directly, but shows GraphQL subscriptions, which are implemented

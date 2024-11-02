@@ -83,9 +83,9 @@ the schema:
 
 **See also:**
 
-- [**`i-graphql`**](../i-graphql#files), the OCaml version of this example, for
+- [**`i-graphql`**](../i-graphql#folders-and-files), the OCaml version of this example, for
   some more discussion.
-- [**`w-graphql-subscription`**](../w-graphql-subscription#files) for GraphQL
+- [**`w-graphql-subscription`**](../w-graphql-subscription#folders-and-files) for GraphQL
   subscriptions.
 
 <br>

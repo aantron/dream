@@ -45,7 +45,7 @@ end
 
 <br>
 
-It's the basic example [**`2-middleware`**](../2-middleware#files) adapted to
+It's the basic example [**`2-middleware`**](../2-middleware#folders-and-files) adapted to
 Mirage. To build and run, do
 
 <pre><code><b>$ cd example/w-mirage</b>

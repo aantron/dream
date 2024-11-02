@@ -3,7 +3,7 @@
 <br>
 
 *Long polling* is a technique, largely made obsolete by
-[WebSockets](../k-websocket#files), where a client sends a request, but the
+[WebSockets](../k-websocket#folders-and-files), where a client sends a request, but the
 server does not respond until some data is available. This delayed response
 works as a sort of “push” from the client's point of view, because it comes at
 a time of the server's choosing.
@@ -46,7 +46,7 @@ polling.”
 
 **See also:**
 
-- [**`k-websocket`**](../k-websocket#files) for a more modern way of achieving
+- [**`k-websocket`**](../k-websocket#folders-and-files) for a more modern way of achieving
   asynchronous client-server communication.
 
 <br>

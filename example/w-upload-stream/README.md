@@ -2,7 +2,7 @@
 
 <br>
 
-This example is a variant of [**`g-upload`**](../g-upload#files) that
+This example is a variant of [**`g-upload`**](../g-upload#folders-and-files) that
 [streams](https://aantron.github.io/dream/#streaming-uploads) uploaded files
 one chunk at a time, instead of loading them completely into memory. It counts
 the total size of each uploaded file:
@@ -84,9 +84,9 @@ for a checklist of additional security precautions.
 
 **See also:**
 
-- [**`g-upload`**](../g-upload#files) shows the simplified interface for
+- [**`g-upload`**](../g-upload#folders-and-files) shows the simplified interface for
   receiving file uploads.
-- [**`w-multipart-dump`**](../w-multipart-dump#files) shows the request body
+- [**`w-multipart-dump`**](../w-multipart-dump#folders-and-files) shows the request body
   that is parsed by
   [`Dream.upload`](https://aantron.github.io/dream/#val-upload).
 

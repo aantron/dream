@@ -2,7 +2,7 @@
 
 <br>
 
-[**`4-counter`**](../4-counter#files) was limited to counting requests *before*
+[**`4-counter`**](../4-counter#folders-and-files) was limited to counting requests *before*
 passing them on to the rest of the app. With the promise library
 [Lwt](https://github.com/ocsigen/lwt), we can await responses, and do something
 *after*. In this example, we separately count requests that were handled
@@ -91,8 +91,8 @@ We will stick to `let%lwt` in the examples and keep things tidy.
 
 **Next steps:**
 
-- [**`6-echo`**](../6-echo#files) uses Dream and Lwt to read a request body.
-- [**`7-template`**](../7-template#files) shows how to interleave HTML and
+- [**`6-echo`**](../6-echo#folders-and-files) uses Dream and Lwt to read a request body.
+- [**`7-template`**](../7-template#folders-and-files) shows how to interleave HTML and
   OCaml.
 
 <br>

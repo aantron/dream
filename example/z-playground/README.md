@@ -35,8 +35,8 @@ docker ps
 
 **See also:**
 
-- [**`k-websocket`**](../k-websocket#files) introduces WebSockets.
-- [**`z-systemd`**](../z-systemd#files) packages a tiny app for management by
+- [**`k-websocket`**](../k-websocket#folders-and-files) introduces WebSockets.
+- [**`z-systemd`**](../z-systemd#folders-and-files) packages a tiny app for management by
   systemd.
 
 <br>

@@ -44,7 +44,7 @@ here to prevent buffering of each paragraph.
 
 - [**`7-template`**](../7-template#security) section *Security* on security
   considerations with templates, and in general.
-- [**`r-template-stream`**](../r-template-stream#files) is a Reason syntax
+- [**`r-template-stream`**](../r-template-stream#folders-and-files) is a Reason syntax
   version of this example.
 
 <br>

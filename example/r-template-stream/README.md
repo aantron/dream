@@ -49,7 +49,7 @@ The important differences with regular usage of templates are:
   name `response`.
 - We use the promise library [Lwt](https://github.com/ocsigen/lwt) inside the
   template for asynchronous control flow. See example
-  [**`5-promise`**](../5-promise#files) for an introduction to Lwt.
+  [**`5-promise`**](../5-promise#folders-and-files) for an introduction to Lwt.
 
 The call to [`Dream.flush`](https://aantron.github.io/dream/#val-flush) isn't
 necessary in most real-world cases &mdash; Dream's HTTP layer automatically
@@ -60,11 +60,11 @@ interactive, so we force writing of all output after generating each `<p>` tag.
 
 **See also:**
 
-- [**`r-template`**](../r-template#files) for the simpler way to do templates,
+- [**`r-template`**](../r-template#folders-and-files) for the simpler way to do templates,
   building up entire bodies as strings.
 - [**`7-template`**](../7-template#security) section *Security* for XSS
   prevention considerations.
-- [**`w-template-stream`**](../w-template-stream#files) is the OCaml version of
+- [**`w-template-stream`**](../w-template-stream#folders-and-files) is the OCaml version of
   this example.
 
 <br>

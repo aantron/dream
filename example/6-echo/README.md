@@ -46,11 +46,11 @@ foo
 We usually want to do something more interesting with the request body than just
 echo it, and there are several examples for that!
 
-- [**`d-form`**](../d-form#files) parses request bodies as forms.
-- [**`e-json`**](../e-json#files) parses bodies as JSON.
-- [**`g-upload`**](../g-upload#files) receives file upload forms.
-- [**`i-graphql`**](../i-graphql#files) receives GraphQL queries.
-- [**`j-stream`**](../j-stream#files) streams huge bodies.
+- [**`d-form`**](../d-form#folders-and-files) parses request bodies as forms.
+- [**`e-json`**](../e-json#folders-and-files) parses bodies as JSON.
+- [**`g-upload`**](../g-upload#folders-and-files) receives file upload forms.
+- [**`i-graphql`**](../i-graphql#folders-and-files) receives GraphQL queries.
+- [**`j-stream`**](../j-stream#folders-and-files) streams huge bodies.
 
 We delay these examples a bit, so we can squeeze in a couple security topics
 first. These examples do take client input, after all! So, it's better to
@@ -62,9 +62,9 @@ present them the right way.
 
 **Next steps:**
 
-- [**`7-template`**](../7-template#files) builds responses from templates and
+- [**`7-template`**](../7-template#folders-and-files) builds responses from templates and
   guards against injection attacks (XSS).
-- [**`8-debug`**](../8-debug#files) renders error information in responses.
+- [**`8-debug`**](../8-debug#folders-and-files) renders error information in responses.
 
 <br>
 

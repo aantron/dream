@@ -37,7 +37,7 @@ Note that we had to make an addition to
 
 **See also:**
 
-- [**`r-template`**](../r-template#files) shows templates with Reason syntax.
+- [**`r-template`**](../r-template#folders-and-files) shows templates with Reason syntax.
 - [**`2-middleware`**](../2-middleware) introduces the *logger*, the most
   commonly used Dream middleware. The example is in OCaml syntax.
 

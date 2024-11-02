@@ -68,7 +68,7 @@ There are two other session back ends, which are persistent:
   using a different random encryption key each time it starts.
 - [`Dream.sql_sessions`](https://aantron.github.io/dream/#val-sql_sessions)
   stores sessions in a database. It is shown in example
-  [**`h-sql`**](../h-sql#files).
+  [**`h-sql`**](../h-sql#folders-and-files).
 
 <br>
 
@@ -90,7 +90,7 @@ new session will, again, be an empty pre-session.
 It is best to use HTTPS when using sessions, to prevent session cookies from
 being easily observed by third parties. See
 [`Dream.run`](https://aantron.github.io/dream/#val-run) argument `~https`, and
-example [**`l-https`**](../l-https#files). If you redirect from HTTP to HTTPS,
+example [**`l-https`**](../l-https#folders-and-files). If you redirect from HTTP to HTTPS,
 do not issue sessions for HTTP requests. If you do, don't accept them later
 from HTTPS requests.
 
@@ -100,8 +100,8 @@ from HTTPS requests.
 **Next steps:**
 
 - Sessions already use cookies internally, but in
-  [**`c-cookie`**](../c-cookie#files) we set cookies for our own purposes!
-- [**`d-form`**](../d-form#files) builds secure forms on top of sessions.
+  [**`c-cookie`**](../c-cookie#folders-and-files) we set cookies for our own purposes!
+- [**`d-form`**](../d-form#folders-and-files) builds secure forms on top of sessions.
 
 <br>
 

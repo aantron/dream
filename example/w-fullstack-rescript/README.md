@@ -85,12 +85,12 @@ client in `./static/client.js`. The example serves the bundled client using
 
 **See also:**
 
-- [**`w-esy`**](../w-esy#files) details the server's [esy](https://esy.sh/)
+- [**`w-esy`**](../w-esy#folders-and-files) details the server's [esy](https://esy.sh/)
   packaging.
-- [**`w-fswatch`**](../w-fswatch#files) sets up a primitive development watcher.
-- [**`w-one-binary`**](../w-one-binary#files) bundles assets into a
+- [**`w-fswatch`**](../w-fswatch#folders-and-files) sets up a primitive development watcher.
+- [**`w-one-binary`**](../w-one-binary#folders-and-files) bundles assets into a
   self-contained binary.
-- [**`f-static`**](../r-hello#files) presents
+- [**`f-static`**](../r-hello#folders-and-files) presents
   [`Dream.static`](https://aantron.github.io/dream/#val-static).
 
 <br>

@@ -3,7 +3,7 @@
 <br>
 
 This example splits the code of the basic template example,
-[**`r-template`**](../r-template#files), into two files. The first is the
+[**`r-template`**](../r-template#folders-and-files), into two files. The first is the
 template, in
 [`template.eml.html`](https://github.com/aantron/dream/blob/master/example/r-template-files/template.eml.html). We use the `.html` extension because it is
 mostly HTML, and to prevent `refmt` from trying to format the file:
@@ -57,8 +57,8 @@ file:
 
 **See also:**
 
-- [**`r-template`**](../r-template#files) for the one-file version.
-- [**`7-template`**](../7-template#files) for comments on [security
+- [**`r-template`**](../r-template#folders-and-files) for the one-file version.
+- [**`7-template`**](../7-template#folders-and-files) for comments on [security
   information](../7-template#security).
 - [**`w-template-files`**](../w-template-files) for the OCaml version of this
   example.

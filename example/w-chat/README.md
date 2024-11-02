@@ -45,7 +45,7 @@ scheme, rather than `ws://`, on the client.
 
 **See also:**
 
-- [**k-websocket**](../k-websocket#files) for an introduction to WebSockets.
+- [**k-websocket**](../k-websocket#folders-and-files) for an introduction to WebSockets.
 
 <br>
 

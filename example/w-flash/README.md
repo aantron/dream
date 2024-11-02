@@ -107,7 +107,7 @@ blows up their original size by 4/3.
 
 **See also:**
 
-- [**`c-cookie`**](../c-cookie#files) shows cookie handling, the mechanism that
+- [**`c-cookie`**](../c-cookie#folders-and-files) shows cookie handling, the mechanism that
   flash messages are implemented over.
 
 <br>

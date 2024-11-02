@@ -74,8 +74,8 @@ let () =
 
 **See also:**
 
-- [**`7-template`**](../7-template#files) for basic information about templates.
-- [**`w-template-logic`**](../w-template-logic#files) for the OCaml version
+- [**`7-template`**](../7-template#folders-and-files) for basic information about templates.
+- [**`w-template-logic`**](../w-template-logic#folders-and-files) for the OCaml version
   of this example.
 
 <br>

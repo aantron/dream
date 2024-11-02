@@ -11,7 +11,7 @@ is that it imposes some constraints on your app, such as no persistent local
 state. Many apps satisfy these constraints, however.
 
 The code is essentially example
-[**`2-middleware`**](../2-middleware#files), but Heroku will pass the desired
+[**`2-middleware`**](../2-middleware#folders-and-files), but Heroku will pass the desired
 port number in environment variable `PORT`, so we read it:
 
 ```ocaml
@@ -180,9 +180,9 @@ by Aleksandra Sikora.
 
 **See also:**
 
-- [**`z-docker-esy`**](../z-docker-esy#files) deploys to a dedicated server,
+- [**`z-docker-esy`**](../z-docker-esy#folders-and-files) deploys to a dedicated server,
   with the Web application managed by Docker Compose.
-- [**`z-systemd`**](../z-systemd#files) deploys to a dedicated server, running
+- [**`z-systemd`**](../z-systemd#folders-and-files) deploys to a dedicated server, running
   the Web application as a systemd daemon.
 
 <br>

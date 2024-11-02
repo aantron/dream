@@ -42,20 +42,20 @@ The syntax `:word` in a route creates a path parameter, which can be read with
 When none of the routes match, the router returns a `404 Not Found` response.
 Except for the status code, the `404 Not Found` response is *completely* empty,
 so it might not display well in your browser. In example
-[**`9-error`**](../9-error#files), we will decorate all error responses with
+[**`9-error`**](../9-error#folders-and-files), we will decorate all error responses with
 an error template in one central location.
 
 <br>
 
 The router can do more than match simple routes:
 
-- [**`f-static`**](../f-static#files) forwards all requests with a certain
+- [**`f-static`**](../f-static#folders-and-files) forwards all requests with a certain
   prefix to a static file handler.
 
 
-<!-- - [**`w-scope`**](../w-scope/#files) applies middlewares to groups of routes
+<!-- - [**`w-scope`**](../w-scope#folders-and-files) applies middlewares to groups of routes
   &mdash; but only when they match.
-- [**`w-subsite`**](../w-subsite/#files) attaches a handler as a complete,
+- [**`w-subsite`**](../w-subsite#folders-and-files) attaches a handler as a complete,
   nested sub-site, which might have its own router. -->
 <!-- TODO -->
 
@@ -63,9 +63,9 @@ The router can do more than match simple routes:
 
 **Next steps:**
 
-- [**`4-counter`**](../4-counter#files) counts requests, and exposes a route for
+- [**`4-counter`**](../4-counter#folders-and-files) counts requests, and exposes a route for
   getting the count.
-- [**`5-promise`**](../5-promise#files) introduces
+- [**`5-promise`**](../5-promise#folders-and-files) introduces
   [Lwt](https://github.com/ocsigen/lwt), the promise library used by Dream.
 
 <br>

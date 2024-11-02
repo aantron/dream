@@ -2,7 +2,7 @@
 
 <br>
 
-In example [**`6-echo`**](../6-echo#files), we echoed `POST` requests by reading
+In example [**`6-echo`**](../6-echo#folders-and-files), we echoed `POST` requests by reading
 their whole bodies into memory, and then writing them. Here, we echo request
 bodies chunk by chunk:
 
@@ -60,9 +60,9 @@ See [*Streams*](https://aantron.github.io/dream/#streams) in the API docs.
 
 **Next steps:**
 
-- [**`k-websocket`**](../k-websocket#files) sends and receives messages over a
+- [**`k-websocket`**](../k-websocket#folders-and-files) sends and receives messages over a
   WebSocket.
-- [**`l-https`**](../l-https#files) enables HTTPS, which is very easy with
+- [**`l-https`**](../l-https#folders-and-files) enables HTTPS, which is very easy with
   Dream.
 
 <br>
