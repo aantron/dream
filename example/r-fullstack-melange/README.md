@@ -87,12 +87,12 @@ example in OCaml syntax.
 
 **See also:**
 
-- [**`w-watch`**](../w-fswatch#files) sets up a development watcher.
-- [**`w-one-binary`**](../w-one-binary#files) bundles assets into a
+- [**`w-watch`**](../w-fswatch#folders-and-files) sets up a development watcher.
+- [**`w-one-binary`**](../w-one-binary#folders-and-files) bundles assets into a
   self-contained binary.
-- [**`7-template`**](../7-template#files) discusses the templater, including
+- [**`7-template`**](../7-template#folders-and-files) discusses the templater, including
   security. The example is in OCaml syntax.
-- [**`r-template`**](../r-template#files) the code of the template example in
+- [**`r-template`**](../r-template#folders-and-files) the code of the template example in
   Reason syntax.
 
 <br>

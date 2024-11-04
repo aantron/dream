@@ -2,7 +2,7 @@
 
 <br>
 
-With the session middleware from example [**`b-session`**](../b-session#files),
+With the session middleware from example [**`b-session`**](../b-session#folders-and-files),
 we can build a [secure form](https://aantron.github.io/dream/#forms):
 
 ```ocaml
@@ -100,14 +100,14 @@ important on login forms and other sensitive pages.
 
 However, this server is so simple that it doesn't store the data anywhere, and
 the data is not sensitive, so we took a shortcut. See
-[**`h-sql`**](../h-sql#files) for an example with a proper redirection.
+[**`h-sql`**](../h-sql#folders-and-files) for an example with a proper redirection.
 
 <br>
 
 **Next steps:**
 
-- [**`e-json`**](../e-json#files) receives and sends JSON.
-- [**`f-static`**](../f-static#files) serves static files from a local
+- [**`e-json`**](../e-json#folders-and-files) receives and sends JSON.
+- [**`f-static`**](../f-static#folders-and-files) serves static files from a local
   directory.
 
 <br>

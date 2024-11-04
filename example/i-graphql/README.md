@@ -89,17 +89,17 @@ GraphiQL conditionally, only during development.
 
 **Next steps:**
 
-- [**`j-stream`**](../j-stream#files) streams response bodies to clients.
-- [**`k-websocket`**](../k-websocket#files) sends and receives messages over a
+- [**`j-stream`**](../j-stream#folders-and-files) streams response bodies to clients.
+- [**`k-websocket`**](../k-websocket#folders-and-files) sends and receives messages over a
   WebSocket.
 
 <br>
 
 **See also:**
 
-- [**`r-graphql`**](../r-graphql#files) is a version of this example in Reason
+- [**`r-graphql`**](../r-graphql#folders-and-files) is a version of this example in Reason
   syntax.
-- [**`w-graphql-subscription`**](../w-graphql-subscription#files) for GraphQL
+- [**`w-graphql-subscription`**](../w-graphql-subscription#folders-and-files) for GraphQL
   subscriptions.
 
 <br>

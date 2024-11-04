@@ -55,8 +55,8 @@ curl -F 'a=b' http://localhost:8080/
 
 **See also:**
 
-- [**`g-upload`**](../g-upload#files) is the proper file upload example.
-- [**`6-echo`**](../6-echo#files) is a proper echo example :)
+- [**`g-upload`**](../g-upload#folders-and-files) is the proper file upload example.
+- [**`6-echo`**](../6-echo#folders-and-files) is a proper echo example :)
 
 <br>
 

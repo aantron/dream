@@ -9,7 +9,7 @@ Web server with a PostgreSQL database.
 
 The
 [code](https://github.com/aantron/dream/blob/master/example/w-postgres/postgres.eml.ml)
-is almost identical to [**`h-sql`**](../h-sql#files). The only differences are:
+is almost identical to [**`h-sql`**](../h-sql#folders-and-files). The only differences are:
 
 - we now listen on `"0.0.0.0"`, since our client will definitely be outside the
   Docker container, so not on `localhost`, and
@@ -108,11 +108,11 @@ Tips:
 
 **See also:**
 
-- [**`h-sql`**](../h-sql#files) is the SQLite, non-Docker version of this
+- [**`h-sql`**](../h-sql#folders-and-files) is the SQLite, non-Docker version of this
   example.
-- [**`z-docker-esy`**](../z-docker-esy#files) deploys to Digital Ocean with
+- [**`z-docker-esy`**](../z-docker-esy#folders-and-files) deploys to Digital Ocean with
   Docker Compose and esy, including Docker installation instructions.
-- [**`z-docker-opam`**](../z-docker-opam#files) deploys with Docker Compose and
+- [**`z-docker-opam`**](../z-docker-opam#folders-and-files) deploys with Docker Compose and
   opam.
 
 <br>

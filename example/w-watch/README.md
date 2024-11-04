@@ -15,9 +15,9 @@ Note that this requires Dune 3.7.0 or higher.
 
 **See also:**
 
-- [**`w-live-reload`**](../w-live-reload#files) adds live reloading, so that
+- [**`w-live-reload`**](../w-live-reload#folders-and-files) adds live reloading, so that
   browsers reload when the server is restarted.
-- [**`w-esy`**](../w-esy#files) discusses [esy](https://esy.sh/) packaging.
+- [**`w-esy`**](../w-esy#folders-and-files) discusses [esy](https://esy.sh/) packaging.
 
 <br>
 

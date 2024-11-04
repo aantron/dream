@@ -2,46 +2,46 @@
 
 Dream's first several examples make up a **tutorial**. Each example is a
 complete project with a helpful README, and plenty of links to next steps and
-documentation. You can begin at [**`1-hello`**](1-hello#files), or look in the
+documentation. You can begin at [**`1-hello`**](1-hello#folders-and-files), or look in the
 list below and jump to whatever interests you!
 
-- [**`1-hello`**](1-hello/#files) &nbsp;&mdash;&nbsp; the simplest Dream server
+- [**`1-hello`**](1-hello#folders-and-files) &nbsp;&mdash;&nbsp; the simplest Dream server
   responds to every request with the same friendly message.
-- [**`2-middleware`**](2-middleware/#files) &nbsp;&mdash;&nbsp; adds the first
+- [**`2-middleware`**](2-middleware#folders-and-files) &nbsp;&mdash;&nbsp; adds the first
   Dream middleware: the *logger*.
-- [**`3-router`**](3-router/#files) &nbsp;&mdash;&nbsp; different handlers for
+- [**`3-router`**](3-router#folders-and-files) &nbsp;&mdash;&nbsp; different handlers for
   different paths.
-- [**`4-counter`**](4-counter/#files) &nbsp;&mdash;&nbsp; the first *custom*
+- [**`4-counter`**](4-counter#folders-and-files) &nbsp;&mdash;&nbsp; the first *custom*
   middleware!
-- [**`5-promise`**](5-promise/#files) &nbsp;&mdash;&nbsp; introduces Lwt, the
+- [**`5-promise`**](5-promise#folders-and-files) &nbsp;&mdash;&nbsp; introduces Lwt, the
   promise library used by Dream.
-- [**`6-echo`**](6-echo/#files) &nbsp;&mdash;&nbsp; reads request bodies.
-- [**`7-template`**](7-template/#files) &nbsp;&mdash;&nbsp; renders responses
+- [**`6-echo`**](6-echo#folders-and-files) &nbsp;&mdash;&nbsp; reads request bodies.
+- [**`7-template`**](7-template#folders-and-files) &nbsp;&mdash;&nbsp; renders responses
   from inline HTML templates and guards against XSS.
-- [**`8-debug`**](8-debug/#files) &nbsp;&mdash;&nbsp; includes detailed
+- [**`8-debug`**](8-debug#folders-and-files) &nbsp;&mdash;&nbsp; includes detailed
   information about errors in responses.
-- [**`9-error`**](9-error/#files) &nbsp;&mdash;&nbsp; customize all error
+- [**`9-error`**](9-error#folders-and-files) &nbsp;&mdash;&nbsp; customize all error
   responses in one place.
-- [**`a-log`**](a-log/#files) &nbsp;&mdash;&nbsp; writing messages to Dream's
+- [**`a-log`**](a-log#folders-and-files) &nbsp;&mdash;&nbsp; writing messages to Dream's
   log.
-- [**`b-session`**](b-session/#files) &nbsp;&mdash;&nbsp; associates state with
+- [**`b-session`**](b-session#folders-and-files) &nbsp;&mdash;&nbsp; associates state with
   client sessions.
-- [**`c-cookie`**](c-cookie/#files) &nbsp;&mdash;&nbsp; sets custom cookies.
-- [**`d-form`**](d-form#files) &nbsp;&mdash;&nbsp; reads forms with CSRF
+- [**`c-cookie`**](c-cookie#folders-and-files) &nbsp;&mdash;&nbsp; sets custom cookies.
+- [**`d-form`**](d-form#folders-and-files) &nbsp;&mdash;&nbsp; reads forms with CSRF
   prevention.
-- [**`e-json`**](e-json#files) &nbsp;&mdash;&nbsp; sends and receives JSON
+- [**`e-json`**](e-json#folders-and-files) &nbsp;&mdash;&nbsp; sends and receives JSON
   securely.
-- [**`f-static`**](f-static#files) &nbsp;&mdash;&nbsp; serves static files from
+- [**`f-static`**](f-static#folders-and-files) &nbsp;&mdash;&nbsp; serves static files from
   a local directory.
-- [**`g-upload`**](g-upload#files) &nbsp;&mdash;&nbsp; receives file uploads.
-- [**`h-sql`**](h-sql#files) &nbsp;&mdash;&nbsp; queries an SQL database.
-- [**`i-graphql`**](i-graphql#files) &nbsp;&mdash;&nbsp; serves a GraphQL
+- [**`g-upload`**](g-upload#folders-and-files) &nbsp;&mdash;&nbsp; receives file uploads.
+- [**`h-sql`**](h-sql#folders-and-files) &nbsp;&mdash;&nbsp; queries an SQL database.
+- [**`i-graphql`**](i-graphql#folders-and-files) &nbsp;&mdash;&nbsp; serves a GraphQL
   schema and GraphiQL.
-- [**`j-stream`**](j-stream#files) &nbsp;&mdash;&nbsp; streams request and
+- [**`j-stream`**](j-stream#folders-and-files) &nbsp;&mdash;&nbsp; streams request and
   response bodies.
-- [**`k-websocket`**](k-websocket#files) &nbsp;&mdash;&nbsp; opens a WebSocket
+- [**`k-websocket`**](k-websocket#folders-and-files) &nbsp;&mdash;&nbsp; opens a WebSocket
   between client and server.
-- [**`l-https`**](l-https#files) &nbsp;&mdash;&nbsp; enables HTTPS and HTTP/2
+- [**`l-https`**](l-https#folders-and-files) &nbsp;&mdash;&nbsp; enables HTTPS and HTTP/2
   upgrades.
 
 That's it for the tutorial!
@@ -52,43 +52,43 @@ That's it for the tutorial!
 
 There are several examples showing Dream with Reason syntax.
 
-- [**`r-hello`**](r-hello#files) &nbsp;&mdash;&nbsp; the simplest Dream server.
-- [**`r-template`**](r-template#files) &nbsp;&mdash;&nbsp; renders HTML
+- [**`r-hello`**](r-hello#folders-and-files) &nbsp;&mdash;&nbsp; the simplest Dream server.
+- [**`r-template`**](r-template#folders-and-files) &nbsp;&mdash;&nbsp; renders HTML
   templates and protects against XSS.
-- [**`r-template-files`**](r-template-files#files) &nbsp;&mdash;&nbsp; templates
+- [**`r-template-files`**](r-template-files#folders-and-files) &nbsp;&mdash;&nbsp; templates
   in separate `.html` files for better editor support.
-- [**`r-template-logic`**](r-template-logic#files) &nbsp;&mdash;&nbsp; control
+- [**`r-template-logic`**](r-template-logic#folders-and-files) &nbsp;&mdash;&nbsp; control
   flow inside templates.
-- [**`r-template-stream`**](r-template-stream#files) &nbsp;&mdash;&nbsp; streams
+- [**`r-template-stream`**](r-template-stream#folders-and-files) &nbsp;&mdash;&nbsp; streams
   templates as response bodies.
-- [**`r-tyxml`**](r-tyxml#files) &nbsp;&mdash;&nbsp; type-checked server-side
+- [**`r-tyxml`**](r-tyxml#folders-and-files) &nbsp;&mdash;&nbsp; type-checked server-side
   JSX templates.
-- [**`r-graphql`**](r-graphql#files) &nbsp;&mdash;&nbsp; serves a GraphQL
+- [**`r-graphql`**](r-graphql#folders-and-files) &nbsp;&mdash;&nbsp; serves a GraphQL
   schema.
 
 <br>
 
 # Full-stack
 
-- [**`r-fullstack-melange`**](r-fullstack-melange#files) &nbsp;&mdash;&nbsp;
+- [**`r-fullstack-melange`**](r-fullstack-melange#folders-and-files) &nbsp;&mdash;&nbsp;
   server *and* client written in Reason!
-- [**`w-fullstack-rescript`**](w-fullstack-rescript#files) &nbsp;&mdash;&nbsp;
+- [**`w-fullstack-rescript`**](w-fullstack-rescript#folders-and-files) &nbsp;&mdash;&nbsp;
   shares OCaml code between server and client using ReScript.
-- [**`w-fullstack-jsoo`**](w-fullstack-jsoo#files) &nbsp;&mdash;&nbsp; shares
+- [**`w-fullstack-jsoo`**](w-fullstack-jsoo#folders-and-files) &nbsp;&mdash;&nbsp; shares
   OCaml code between server and client using js_of_ocaml.
 
 <br>
 
 # Deploying
 
-- [**`z-heroku`**](z-heroku#files) &nbsp;&mdash;&nbsp; to
+- [**`z-heroku`**](z-heroku#folders-and-files) &nbsp;&mdash;&nbsp; to
   [Heroku](https://www.heroku.com).
-- [**`z-fly`**](z-fly#files) &nbsp;&mdash;&nbsp; to [Fly.io](https://fly.io/).
-- [**`z-docker-esy`**](z-docker-esy#files) &nbsp;&mdash;&nbsp; on a server,
+- [**`z-fly`**](z-fly#folders-and-files) &nbsp;&mdash;&nbsp; to [Fly.io](https://fly.io/).
+- [**`z-docker-esy`**](z-docker-esy#folders-and-files) &nbsp;&mdash;&nbsp; on a server,
   using Docker, with package manager esy.
-- [**`z-docker-opam`**](z-docker-opam#files) &nbsp;&mdash;&nbsp; on a server,
+- [**`z-docker-opam`**](z-docker-opam#folders-and-files) &nbsp;&mdash;&nbsp; on a server,
   using Docker, with package manager opam.
-- [**`z-systemd`**](z-systemd#files) &nbsp;&mdash;&nbsp; on a server, as a
+- [**`z-systemd`**](z-systemd#folders-and-files) &nbsp;&mdash;&nbsp; on a server, as a
   systemd daemon.
 
 <br>
@@ -102,51 +102,51 @@ if something is missing!
 
 <br>
 
-- [**`w-template-files`**](w-template-files#files) &nbsp;&mdash;&nbsp; templates
+- [**`w-template-files`**](w-template-files#folders-and-files) &nbsp;&mdash;&nbsp; templates
   in separate `.html` files for better editor support.
-- [**`w-template-logic`**](w-template-logic#files) &nbsp;&mdash;&nbsp; control
+- [**`w-template-logic`**](w-template-logic#folders-and-files) &nbsp;&mdash;&nbsp; control
   flow inside templates.
-- [**`w-graphql-subscription`**](w-graphql-subscription#files)
+- [**`w-graphql-subscription`**](w-graphql-subscription#folders-and-files)
   &nbsp;&mdash;&nbsp; GraphQL subscriptions.
-- [**`w-postgres`**](w-postgres#files) &nbsp;&mdash;&nbsp; connects to a
+- [**`w-postgres`**](w-postgres#folders-and-files) &nbsp;&mdash;&nbsp; connects to a
   PostgreSQL database.
-- [**`w-flash`**](w-flash#files) &nbsp;&mdash;&nbsp; using flash messages, which
+- [**`w-flash`**](w-flash#folders-and-files) &nbsp;&mdash;&nbsp; using flash messages, which
   are displayed on the next request.
-- [**`w-chat`**](w-chat#files) &nbsp;&mdash;&nbsp; a chat room based on
+- [**`w-chat`**](w-chat#folders-and-files) &nbsp;&mdash;&nbsp; a chat room based on
   WebSockets.
-- [**`w-content-security-policy`**](w-content-security-policy#files)
+- [**`w-content-security-policy`**](w-content-security-policy#folders-and-files)
   &nbsp;&mdash;&nbsp; sandboxes Web pages using `Content-Security-Policy`.
-- [**`w-esy`**](w-esy#files) &nbsp;&mdash;&nbsp; gives detail on packaging with
+- [**`w-esy`**](w-esy#folders-and-files) &nbsp;&mdash;&nbsp; gives detail on packaging with
   [esy](https://esy.sh/), an npm-like package manager.
-- [**`w-one-binary`**](w-one-binary#files) &nbsp;&mdash;&nbsp; bakes static
+- [**`w-one-binary`**](w-one-binary#folders-and-files) &nbsp;&mdash;&nbsp; bakes static
   assets into a self-contained server binary.
-- [**`w-watch`**](w-watch#files) &nbsp;&mdash;&nbsp; sets up a development
+- [**`w-watch`**](w-watch#folders-and-files) &nbsp;&mdash;&nbsp; sets up a development
   watcher.
-- [**`w-live-reload`**](w-live-reload#files) &nbsp;&mdash;&nbsp; a simple
+- [**`w-live-reload`**](w-live-reload#folders-and-files) &nbsp;&mdash;&nbsp; a simple
   live-reloading setup.
-- [**`w-nginx`**](w-nginx#files) &nbsp;&mdash;&nbsp; uses nginx as a
+- [**`w-nginx`**](w-nginx#folders-and-files) &nbsp;&mdash;&nbsp; uses nginx as a
   reverse proxy.
-- [**`w-tyxml`**](w-tyxml#files) &nbsp;&mdash;&nbsp; uses TyXML for type-checked
+- [**`w-tyxml`**](w-tyxml#folders-and-files) &nbsp;&mdash;&nbsp; uses TyXML for type-checked
   HTML templating.
-- [**`w-dream-html`**](../w-dream-html#files) &nbsp;&mdash;&nbsp; uses
+- [**`w-dream-html`**](../w-dream-html#folders-and-files) &nbsp;&mdash;&nbsp; uses
   dream-html for convenient HTML generation from OCaml.
-- [**`w-long-polling`**](w-long-polling#files) &nbsp;&mdash;&nbsp; old form of
+- [**`w-long-polling`**](w-long-polling#folders-and-files) &nbsp;&mdash;&nbsp; old form of
   asynchronous communication without WebSockets.
-- [**`w-query`**](w-query#files) &nbsp;&mdash;&nbsp; reads URL query parameters.
-- [**`w-server-sent-events`**](w-server-sent-events#files) &nbsp;&mdash;&nbsp;
+- [**`w-query`**](w-query#folders-and-files) &nbsp;&mdash;&nbsp; reads URL query parameters.
+- [**`w-server-sent-events`**](w-server-sent-events#folders-and-files) &nbsp;&mdash;&nbsp;
   [`EventSource`](https://developer.mozilla.org/en-US/docs/Web/API/EventSource),
   an older alternative to WebSockets.
-- [**`w-template-stream`**](w-template-stream#files) &nbsp;&mdash;&nbsp; sends
+- [**`w-template-stream`**](w-template-stream#folders-and-files) &nbsp;&mdash;&nbsp; sends
   templates asynchronously, one chunk at a time.
-- [**`w-upload-stream`**](w-upload-stream#files) &nbsp;&mdash;&nbsp; streams
+- [**`w-upload-stream`**](w-upload-stream#folders-and-files) &nbsp;&mdash;&nbsp; streams
   uploaded files.
-- [**`w-stress-response`**](w-stress-response#files) &nbsp;&mdash;&nbsp;
+- [**`w-stress-response`**](w-stress-response#folders-and-files) &nbsp;&mdash;&nbsp;
   benchmarks streaming very large responses.
-- [**`w-stress-websocket-send`**](w-stress-websocket-send#files)
+- [**`w-stress-websocket-send`**](w-stress-websocket-send#folders-and-files)
   &nbsp;&mdash;&nbsp; benchmarks sending WebSocket messages quickly.
-- [**`w-multipart-dump`**](w-multipart-dump#files) &nbsp;&mdash;&nbsp; echoes
+- [**`w-multipart-dump`**](w-multipart-dump#folders-and-files) &nbsp;&mdash;&nbsp; echoes
   `multipart/form-data` bodies for debugging.
-- [**`z-playground`**](z-playground#files) &nbsp;&mdash;&nbsp; source code of
+- [**`z-playground`**](z-playground#folders-and-files) &nbsp;&mdash;&nbsp; source code of
   the Dream playground.
 
 <br>
@@ -169,7 +169,7 @@ Ideas:
 Basics:
 
 - `w-content-negotiation`
-- [**`w-query`**](w-query#files) &nbsp;&mdash;&nbsp; done.
+- [**`w-query`**](w-query#folders-and-files) &nbsp;&mdash;&nbsp; done.
 - `w-scope` &nbsp;&mdash;&nbsp; for
   [`Dream.scope`](https://aantron.github.io/dream/#val-scope).
 - `w-subsite` &nbsp;&mdash;&nbsp; for

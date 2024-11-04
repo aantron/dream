@@ -59,11 +59,11 @@ same.
 
 **See also:**
 
-- [**`r-template-files`**](../r-template-files#files) puts the template into a
+- [**`r-template-files`**](../r-template-files#folders-and-files) puts the template into a
   separate `.eml.html` file, which can help with editor problems.
-- [**`r-template-stream`**](../r-template-stream#files) streams a template to a
+- [**`r-template-stream`**](../r-template-stream#folders-and-files) streams a template to a
   response.
-- [**`9-error`**](../9-error#files) sets up a central error template. The
+- [**`9-error`**](../9-error#folders-and-files) sets up a central error template. The
   example is in OCaml syntax.
 
 <br>

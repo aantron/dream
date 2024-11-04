@@ -183,10 +183,10 @@ very convenient way of passing it to the action.
 
 **See also:**
 
-- [**`z-docker-esy`**](../z-docker-esy#files) packages the app using [Docker
+- [**`z-docker-esy`**](../z-docker-esy#folders-and-files) packages the app using [Docker
   Compose](https://docs.docker.com/compose/), instead of running it directly
   with systemd.
-- [**`z-heroku`**](../z-heroku#files) deploys the app to
+- [**`z-heroku`**](../z-heroku#folders-and-files) deploys the app to
   [Heroku](https://heroku.com).
 
 <br>

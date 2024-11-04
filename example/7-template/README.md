@@ -125,31 +125,31 @@ and not supported by Dream.
 
 **Next steps:**
 
-- [**`8-debug`**](../8-debug#files) shows how to turn on debug responses, and
+- [**`8-debug`**](../8-debug#folders-and-files) shows how to turn on debug responses, and
   get more info about errors.
-- [**`9-error`**](../9-error#files) sets up a central error template for all
+- [**`9-error`**](../9-error#folders-and-files) sets up a central error template for all
   errors.
-- [**`r-template`**](../r-template#files) is a Reason syntax version of this
+- [**`r-template`**](../r-template#folders-and-files) is a Reason syntax version of this
   example.
 
 <br>
 
 **See also:**
 
-- [**`w-template-files`**](../w-template-files#files) moves the template into a
+- [**`w-template-files`**](../w-template-files#folders-and-files) moves the template into a
   separate `.eml.html` to avoid problems with editor support.
-- [**`w-template-logic`**](../w-template-logic#files) shows how to put control
+- [**`w-template-logic`**](../w-template-logic#folders-and-files) shows how to put control
   flow into templates.
-- [**`w-tyxml`**](../w-tyxml#files) shows how to use
+- [**`w-tyxml`**](../w-tyxml#folders-and-files) shows how to use
   [TyXML](https://github.com/ocsigen/tyxml), a different templater that uses
   OCaml's type system to prevent emitting many kinds of invalid HTML.
-- [**`r-tyxml`**](../r-tyxml#files) if you are using Reason. You can use TyXML
+- [**`r-tyxml`**](../r-tyxml#folders-and-files) if you are using Reason. You can use TyXML
   with JSX syntax server-side!
-- [**`w-dream-html`**](../w-dream-html#files) shows how to use
+- [**`w-dream-html`**](../w-dream-html#folders-and-files) shows how to use
   [dream-html](https://github.com/yawaramin/dream-html), another alternative
   library for generating HTML from OCaml, which is more closely integrated with
   Dream.
-- [**`w-template-stream`**](../w-template-stream#files) streams templates to
+- [**`w-template-stream`**](../w-template-stream#folders-and-files) streams templates to
   responses, instead of building up complete response strings.
 
 <br>

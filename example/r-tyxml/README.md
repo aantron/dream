@@ -76,7 +76,7 @@ Error: Unbound value html
 
 **See also:**
 
-- [**`w-tyxml`**](../w-tyxml#files) for an introduction to TyXML.
+- [**`w-tyxml`**](../w-tyxml#folders-and-files) for an introduction to TyXML.
 - [**`7-template`**](../7-template#security) section *Security* on output
   security. TyXML escapes strings by default, just as the built-in templater
   does.

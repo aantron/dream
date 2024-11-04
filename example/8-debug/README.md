@@ -94,7 +94,7 @@ work with in development.
 
 You can have Dream show a custom error page with any information or graphics
 that you like &mdash; we will do this in the [very next
-example](../9-error#files)!
+example](../9-error#folders-and-files)!
 
 <!-- TODO Fix after stack trace is fixed. -->
 <!-- TODO Show the log -->
@@ -104,9 +104,9 @@ example](../9-error#files)!
 
 **Next steps:**
 
-- [**`9-error`**](../9-error#files) handles all errors in one place, including
+- [**`9-error`**](../9-error#folders-and-files) handles all errors in one place, including
   displaying the debugger output.
-- [**`a-log`**](../a-log#files) shows [log
+- [**`a-log`**](../a-log#folders-and-files) shows [log
   levels](https://aantron.github.io/dream/#type-log_level) and
   [sub-logs](https://aantron.github.io/dream/#type-sub_log).
 

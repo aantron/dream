@@ -112,9 +112,9 @@ requests!
 
 **Next steps:**
 
-- [**`f-static`**](../f-static#files) serves static files from the local
+- [**`f-static`**](../f-static#folders-and-files) serves static files from the local
   file system.
-- [**`g-upload`**](../g-upload#files) receives files from an upload form.
+- [**`g-upload`**](../g-upload#folders-and-files) receives files from an upload form.
 
 <br>
 

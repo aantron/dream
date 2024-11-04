@@ -76,9 +76,9 @@ let () =
 
 **Next steps:**
 
-- [**`b-session`**](../b-session#files) returns Web development proper with
+- [**`b-session`**](../b-session#folders-and-files) returns Web development proper with
   session management.
-- [**`c-cookie`**](../c-cookie#files) shows cookie handling in Dream.
+- [**`c-cookie`**](../c-cookie#folders-and-files) shows cookie handling in Dream.
 
 <br>
 

@@ -55,7 +55,7 @@ You can then use the `esy` command without the `npx` prefix.
 
 If you need to run multiple build steps before `dune exec`, use
 [`esy.build`](https://esy.sh/docs/en/configuration.html#esybuild). Here is an
-example from [**`w-fullstack-jsoo`**](../w-fullstack-jsoo#files):
+example from [**`w-fullstack-jsoo`**](../w-fullstack-jsoo#folders-and-files):
 
 ```json
 "esy": {
@@ -124,12 +124,12 @@ See the examples linked below.
 
 **See also:**
 
-- [**`w-fullstack-rescript`**](../w-fullstack-rescript#files) for full-stack
+- [**`w-fullstack-rescript`**](../w-fullstack-rescript#folders-and-files) for full-stack
   development with ReScript.
-- [**`r-fullstack-melange`**](../r-fullstack-melange#files) for full-stack
+- [**`r-fullstack-melange`**](../r-fullstack-melange#folders-and-files) for full-stack
   development with Melange and Reason syntax.
-- [**`w-fswatch`**](../w-fswatch#files) for a development watcher.
-- [**`w-one-binary`**](../w-one-binary#files) for bundling assets into a
+- [**`w-fswatch`**](../w-fswatch#folders-and-files) for a development watcher.
+- [**`w-one-binary`**](../w-one-binary#folders-and-files) for bundling assets into a
   self-contained binary.
 
 <br>

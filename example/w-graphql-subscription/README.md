@@ -79,8 +79,8 @@ similar.
 
 **See also:**
 
-- [**`i-graphql`**](../i-graphql#files) for a basic GraphQL example.
-- [**`k-websocket`**](../k-websocket#files) for direct WebSocket usage.
+- [**`i-graphql`**](../i-graphql#folders-and-files) for a basic GraphQL example.
+- [**`k-websocket`**](../k-websocket#folders-and-files) for direct WebSocket usage.
 
 <br>
 

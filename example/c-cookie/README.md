@@ -96,9 +96,9 @@ The easiest way to do that for general data is to use
 
 **Next steps:**
 
-- [**`d-form`**](../d-form#files) builds secure forms on top of sessions, and
+- [**`d-form`**](../d-form#folders-and-files) builds secure forms on top of sessions, and
   introduces automatic handling of CSRF tokens.
-- [**`e-json`**](../e-json#files) sends and receives JSON instead!
+- [**`e-json`**](../e-json#folders-and-files) sends and receives JSON instead!
 
 <br>
 

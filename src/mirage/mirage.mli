@@ -30,11 +30,11 @@ module Make
 
   and handler = request -> response promise
   (** Handlers are asynchronous functions from requests to responses. Example
-      {{:https://github.com/aantron/dream/tree/master/example/1-hello#files}
+      {{:https://github.com/aantron/dream/tree/master/example/1-hello#folders-and-files}
       [1-hello]} \[{{:http://dream.as/1-hello} playground}\] shows the simplest
       handler, an anonymous function which we pass to {!Dream.run}. This creates a
       complete Web server! You can also see the Reason version in example
-      {{:https://github.com/aantron/dream/tree/master/example/r-hello#files}
+      {{:https://github.com/aantron/dream/tree/master/example/r-hello#folders-and-files}
       [r-hello]}.
 
       {[
@@ -46,7 +46,7 @@ module Make
   and middleware = handler -> handler
   (** Middlewares are functions that take a {!handler}, and run some code before
       or after — producing a “bigger” handler. Example
-      {{:https://github.com/aantron/dream/tree/master/example/2-middleware#files}
+      {{:https://github.com/aantron/dream/tree/master/example/2-middleware#folders-and-files}
       [2-middleware]} inserts the {!Dream.logger} middleware into a Web app:
 
       {[
@@ -57,9 +57,9 @@ module Make
       ]}
 
       Examples
-      {{:https://github.com/aantron/dream/tree/master/example/4-counter#files}
+      {{:https://github.com/aantron/dream/tree/master/example/4-counter#folders-and-files}
       [4-counter]} \[{{:http://dream.as/4-counter} playground}\] and
-      {{:https://github.com/aantron/dream/tree/master/example/5-promise#files}
+      {{:https://github.com/aantron/dream/tree/master/example/5-promise#folders-and-files}
       [5-promise]} show user-defined middlewares:
 
       {[
@@ -81,7 +81,7 @@ module Make
   and route
   (** Routes tell {!Dream.router} which handler to select for each request. See
       {!section-routing} and example
-      {{:https://github.com/aantron/dream/tree/master/example/3-router#files}
+      {{:https://github.com/aantron/dream/tree/master/example/3-router#folders-and-files}
       [3-router]} \[{{:http://dream.as/3-router/echo/foo} playground}\]. Routes
       are created by helpers such as {!Dream.get} and {!Dream.scope}:
 
@@ -131,7 +131,7 @@ module Make
   and 'a promise = 'a Lwt.t
   (** Dream uses {{:https://github.com/ocsigen/lwt} Lwt} for promises and
       asynchronous I/O. See example
-      {{:https://github.com/aantron/dream/tree/master/example/5-promise#files}
+      {{:https://github.com/aantron/dream/tree/master/example/5-promise#folders-and-files}
       [5-promise]} \[{{:http://dream.as/5-promise} playground}\].
 
       Use [raise] to reject promises. If you are writing a library, you may prefer
@@ -387,7 +387,7 @@ module Make
   (** First query parameter with the given name. See
       {{:https://tools.ietf.org/html/rfc3986#section-3.4} RFC 3986 §3.4} and
       example
-      {{:https://github.com/aantron/dream/tree/master/example/w-query#files}
+      {{:https://github.com/aantron/dream/tree/master/example/w-query#folders-and-files}
       [w-query]}. *)
 
   val queries : request -> string -> string list
@@ -435,7 +435,7 @@ module Make
 
       As your Web app develops, consider adding [Content-Security-Policy] headers,
       as described in example
-      {{:https://github.com/aantron/dream/tree/master/example/w-content-security-policy#files}
+      {{:https://github.com/aantron/dream/tree/master/example/w-content-security-policy#folders-and-files}
       [w-content-security-policy]}. These headers are completely optional, but
       they can provide an extra layer of defense for a mature app. *)
 
@@ -482,7 +482,7 @@ module Make
   (** Creates a fresh [101 Switching Protocols] response. Once this response is
     returned to Dream's HTTP layer, the callback is passed a new
     {!type-websocket}, and the application can begin using it. See example
-    {{:https://github.com/aantron/dream/tree/master/example/k-websocket#files}
+    {{:https://github.com/aantron/dream/tree/master/example/k-websocket#folders-and-files}
     [k-websocket]} \[{{:http://dream.as/k-websocket} playground}\].
 
     {[
@@ -573,7 +573,7 @@ module Make
       {!Dream.set_cookie} and {!Dream.cookie} are designed for round-tripping
       secure cookies. The most secure settings applicable to the current server
       are inferred automatically. See example
-      {{:https://github.com/aantron/dream/tree/master/example/c-cookie#files}
+      {{:https://github.com/aantron/dream/tree/master/example/c-cookie#folders-and-files}
       [c-cookie]} \[{{:http://dream.as/c-cookie} playground}\].
 
       {[
@@ -619,7 +619,7 @@ module Make
       decrypt cookies from prior starts.
 
       See example
-      {{:https://github.com/aantron/dream/tree/master/example/c-cookie#files}
+      {{:https://github.com/aantron/dream/tree/master/example/c-cookie#folders-and-files}
       [c-cookie]}.
 
       Most of the optional arguments are for overriding inferred defaults.
@@ -711,7 +711,7 @@ module Make
     string ->
     string option
   (** First cookie with the given name. See example
-      {{:https://github.com/aantron/dream/tree/master/example/c-cookie#files}
+      {{:https://github.com/aantron/dream/tree/master/example/c-cookie#folders-and-files}
       [c-cookie]}.
 
       {[
@@ -730,7 +730,7 @@ module Make
 
   val body : 'a message -> string promise
   (** Retrieves the entire body. See example
-      {{:https://github.com/aantron/dream/tree/master/example/6-echo#files}
+      {{:https://github.com/aantron/dream/tree/master/example/6-echo#folders-and-files}
       [6-echo]}. *)
 
   val set_body : 'a message -> string -> unit
@@ -772,7 +772,7 @@ module Make
     response promise
   (** Creates a response with a {!type-stream} open for writing, and passes the
     stream to the callback when it is ready. See example
-    {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
+    {{:https://github.com/aantron/dream/tree/master/example/j-stream#folders-and-files}
     [j-stream]}.
 
     {[
@@ -786,7 +786,7 @@ module Make
 
   val read : stream -> string option promise
   (** Retrieves a body chunk. See example
-      {{:https://github.com/aantron/dream/tree/master/example/j-stream#files}
+      {{:https://github.com/aantron/dream/tree/master/example/j-stream#folders-and-files}
       [j-stream]}. *)
   (* TODO Document difference between receiving a request and receiving on a
      WebSocket. *)
@@ -878,7 +878,7 @@ module Make
       for generating JSON parsers and serializers for OCaml data types.
 
       See example
-      {{:https://github.com/aantron/dream/tree/master/example/e-json#files}
+      {{:https://github.com/aantron/dream/tree/master/example/e-json#folders-and-files}
       [e-json]}. *)
 
   val origin_referrer_check : middleware
@@ -928,7 +928,7 @@ module Make
       ]}
 
       See example
-      {{:https://github.com/aantron/dream/tree/master/example/d-form#files}
+      {{:https://github.com/aantron/dream/tree/master/example/d-form#folders-and-files}
       [d-form]} \[{{:http://dream.as/d-form} playground}\]. *)
 
   type 'a form_result =
@@ -941,7 +941,7 @@ module Make
     | `Wrong_content_type ]
   (** Form CSRF checking results, in order from least to most severe. See
       {!Dream.val-form} and example
-      {{:https://github.com/aantron/dream/tree/master/example/d-form#files}
+      {{:https://github.com/aantron/dream/tree/master/example/d-form#folders-and-files}
       [d-form]}.
 
       The first three constructors, [`Ok], [`Expired], and [`Wrong_session] can
@@ -1021,7 +1021,7 @@ module Make
       ]}
 
       See example
-      {{:https://github.com/aantron/dream/tree/master/example/g-upload#files}
+      {{:https://github.com/aantron/dream/tree/master/example/g-upload#folders-and-files}
       [g-upload]} \[{{:http://dream.as/g-upload} playground}\] and
       {{:https://datatracker.ietf.org/doc/html/rfc7578} RFC 7578}.
 
@@ -1053,7 +1053,7 @@ module Make
       ]}
 
       See {!Dream.form_tag}, section {!section-templates}, and example
-      {{:https://github.com/aantron/dream/tree/master/example/g-upload#files}
+      {{:https://github.com/aantron/dream/tree/master/example/g-upload#folders-and-files}
       [g-upload]}.
 
       Note that, like {!Dream.form}, this function sorts form fields by field
@@ -1153,19 +1153,19 @@ module Make
       v}
 
       See examples
-      {{:https://github.com/aantron/dream/tree/master/example/7-template#files}
+      {{:https://github.com/aantron/dream/tree/master/example/7-template#folders-and-files}
       [7-template]} \[{{:http://dream.as/7-template} playground}\] and
-      {{:https://github.com/aantron/dream/tree/master/example/r-template#files}
+      {{:https://github.com/aantron/dream/tree/master/example/r-template#folders-and-files}
       [r-template]} \[{{:http://dream.as/r-template} playground}\].
 
       There is also a typed alternative, provided by an external library,
       {{:https://github.com/ocsigen/tyxml} TyXML}. It is shown in example
-      {{:https://github.com/aantron/dream/tree/master/example/w-tyxml#files}
+      {{:https://github.com/aantron/dream/tree/master/example/w-tyxml#folders-and-files}
       [w-tyxml]} \[{{:http://dream.as/w-tyxml} playground}\]. If you are using
       Reason syntax, TyXML can be used with
       {{:https://ocsigen.org/tyxml/latest/manual/jsx} server-side JSX}. See
       example
-      {{:https://github.com/aantron/dream/tree/master/example/r-tyxml#files}
+      {{:https://github.com/aantron/dream/tree/master/example/r-tyxml#folders-and-files}
       [r-tyxml]} \[{{:http://dream.as/r-tyxml} playground}\].
 
       To use the built-in templates, add this to [dune]:
@@ -1188,9 +1188,9 @@ module Make
       supported presently is [%% response] for streaming the template using
       {!Dream.write}, to a {!type-response} that is in scope. This is shown in
       examples
-      {{:https://github.com/aantron/dream/tree/master/example/w-template-stream#files}
+      {{:https://github.com/aantron/dream/tree/master/example/w-template-stream#folders-and-files}
       [w-template-stream]} and
-      {{:https://github.com/aantron/dream/tree/master/example/r-template-stream#files}
+      {{:https://github.com/aantron/dream/tree/master/example/r-template-stream#folders-and-files}
       [r-template-stream]}.
 
       A template ends...
@@ -1282,7 +1282,7 @@ module Make
   (** Creates a router. If none of the routes match the request, the router
     returns {!Dream.not_found}. Route components starting with [:] are
     parameters, which can be retrieved with {!Dream.param}. See example
-    {{:https://github.com/aantron/dream/tree/master/example/3-router#files}
+    {{:https://github.com/aantron/dream/tree/master/example/3-router#folders-and-files}
     [3-router]} \[{{:http://dream.as/3-router} playground}\].
 
     {[
@@ -1390,7 +1390,7 @@ module Make
 
   val static : loader:(string -> string -> handler) -> string -> handler
   (** Serves static files from a local directory. See example
-      {{:https://github.com/aantron/dream/tree/master/example/f-static#files}
+      {{:https://github.com/aantron/dream/tree/master/example/f-static#folders-and-files}
       [f-static]}.
 
       {[
@@ -1416,7 +1416,7 @@ module Make
       - [path] is what was substituted for [**].
 
       The default loader is {!Dream.from_filesystem}. See example
-      {{:https://github.com/aantron/dream/tree/master/example/w-one-binary#files}
+      {{:https://github.com/aantron/dream/tree/master/example/w-one-binary#folders-and-files}
       [w-one-binary]} for a loader that serves files from memory instead. *)
 
   val mime_lookup : string -> (string * string) list
@@ -1456,7 +1456,7 @@ module Make
       the next request that it is assigned to.
 
       See example
-      {{:https://github.com/aantron/dream/tree/master/example/b-session#files}
+      {{:https://github.com/aantron/dream/tree/master/example/b-session#folders-and-files}
       [b-session]} \[{{:http://dream.as/b-session} playground}\]. *)
 
   val session : string -> request -> string option
@@ -1499,7 +1499,7 @@ module Make
       Flash messages are short strings which are stored in cookies during one
       request, to be made available for the next request. The typical use case is
       to provide form feedback across a redirect. See example
-      {{:https://github.com/aantron/dream/tree/master/example/w-flash#files}
+      {{:https://github.com/aantron/dream/tree/master/example/w-flash#folders-and-files}
       [w-flash]} \[{{:http://dream.as/w-flash} playground}\]. *)
 
   val flash_messages : middleware
@@ -1527,7 +1527,7 @@ module Make
 
   val logger : middleware
   (** Logs and times requests. Time spent logging is included. See example
-      {{:https://github.com/aantron/dream/tree/master/example/2-middleware#files}
+      {{:https://github.com/aantron/dream/tree/master/example/2-middleware#folders-and-files}
       [2-middleware]} \[{{:http://dream.as/2-middleware} playground}\]. *)
 
   val log : ('a, Format.formatter, unit, unit) format4 -> 'a
@@ -1536,7 +1536,7 @@ module Make
       {{:https://v2.ocaml.org/api/Printf.html#VALfprintf} [Printf]} and
       {{:https://v2.ocaml.org/api/Format.html#VALfprintf} [Format]}. The rest of
       the arguments are determined by the format string. See example
-      {{:https://github.com/aantron/dream/tree/master/example/a-log#files}
+      {{:https://github.com/aantron/dream/tree/master/example/a-log#folders-and-files}
       [a-log]} \[{{:http://dream.as/a-log} playground}\].
 
       {[
@@ -1561,7 +1561,7 @@ module Make
   (** Formats a message and writes it to the log at level [`Error]. The inner
       formatting function is called only if the {{!initialize_log} current log
       level} is [`Error] or higher. See example
-      {{:https://github.com/aantron/dream/tree/master/example/a-log#files}
+      {{:https://github.com/aantron/dream/tree/master/example/a-log#folders-and-files}
       [a-log]}.
 
       {[
@@ -1607,7 +1607,7 @@ module Make
       unless {!Dream.set_log_level} is used.
 
       See [README] of example
-      {{:https://github.com/aantron/dream/tree/master/example/a-log#files}
+      {{:https://github.com/aantron/dream/tree/master/example/a-log#folders-and-files}
       [a-log]}. *)
 
   val initialize_log :
@@ -1771,7 +1771,7 @@ module Make
   val error_template :
     (error -> string -> response -> response promise) -> error_handler
   (** Builds an {!error_handler} from a template. See example
-      {{:https://github.com/aantron/dream/tree/master/example/9-error#files}
+      {{:https://github.com/aantron/dream/tree/master/example/9-error#folders-and-files}
       [9-error]} \[{{:http://dream.as/9-error} playground}\].
 
       {[

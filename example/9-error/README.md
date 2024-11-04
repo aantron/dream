@@ -63,7 +63,7 @@ including return a completely new response.
 <br>
 
 `debug_info` is a multiline string containing the same information as in the
-previous example, [**`8-debug`**](../8-debug#files).
+previous example, [**`8-debug`**](../8-debug#folders-and-files).
 
 <!-- TODO Images of the generated pages. -->
 
@@ -80,9 +80,9 @@ Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet
 
 **Next steps:**
 
-- [**`a-log`**](../a-log#files) shows how to write messages to Dream's
+- [**`a-log`**](../a-log#folders-and-files) shows how to write messages to Dream's
   [log](https://aantron.github.io/dream/#logging).
-- [**`b-session`**](../b-session#files) adds [session
+- [**`b-session`**](../b-session#folders-and-files) adds [session
   management](https://aantron.github.io/dream/#sessions) for associating state
   with clients.
 

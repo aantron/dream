@@ -171,11 +171,11 @@ version of the deploy script.
 
 **See also:**
 
-- [**`z-docker-opam`**](../z-docker-opam#files) is a variant of this example
+- [**`z-docker-opam`**](../z-docker-opam#folders-and-files) is a variant of this example
   that uses opam instead of esy.
-- [**`z-systemd`**](../z-systemd#files) packages the app as a systemd daemon,
+- [**`z-systemd`**](../z-systemd#folders-and-files) packages the app as a systemd daemon,
   outside of a Docker container.
-- [**`z-heroku`**](../z-heroku#files) deploys the app to
+- [**`z-heroku`**](../z-heroku#folders-and-files) deploys the app to
   [Heroku](https://heroku.com).
 
 <br>

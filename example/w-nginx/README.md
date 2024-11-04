@@ -150,11 +150,11 @@ docker-compose logs web -f
 
 **See also:**
 
-- [**`f-static`**](../f-static#files) has Dream serve static files on its own,
+- [**`f-static`**](../f-static#folders-and-files) has Dream serve static files on its own,
   without a reverse proxy.
-- [**`z-docker-esy`**](../z-docker-esy#files) deploys to Digital Ocean with
+- [**`z-docker-esy`**](../z-docker-esy#folders-and-files) deploys to Digital Ocean with
   Docker Compose and esy, including Docker installation instructions.
-- [**`z-docker-opam`**](../z-docker-opam#files) deploys with Docker Compose and
+- [**`z-docker-opam`**](../z-docker-opam#folders-and-files) deploys with Docker Compose and
   opam.
 
 <br>
