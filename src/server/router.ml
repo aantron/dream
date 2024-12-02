@@ -26,6 +26,9 @@ type token =
   | Param of string
   | Wildcard of string
 
+let log =
+  Log.sub_log "dream.router"
+
 let rec validate route = function
   | (Param "")::_ ->
     Printf.ksprintf failwith "Empty path parameter name in '%s'" route
@@ -141,19 +144,15 @@ let any pattern handler =
 let no_route =
   []
 
-let rec apply middlewares routes =
-  let rec compose handler = function
-    | [] -> handler
-    | middleware::more -> middleware @@ compose handler more
-  in
+let rec apply pipeline routes =
   routes
   |> List.flatten
   |> List.map (fun (pattern, node) ->
     let node =
       match node with
       | Handler (method_, handler) ->
-        Handler (method_, compose handler middlewares)
-      | Scope route -> Scope (apply middlewares [route])
+        Handler (method_, pipeline handler)
+      | Scope route -> Scope (apply pipeline [route])
     in
     pattern, node)
 
@@ -161,8 +160,8 @@ let under prefix routes =
   [strip_empty_trailing_token (parse prefix), Scope (List.flatten routes)]
 
 let scope prefix middlewares routes =
-  under prefix [apply middlewares routes]
-
+  let pipeline = Message.pipeline middlewares in
+  under prefix [apply pipeline routes]
 
 
 let path_field : string list Message.field =
@@ -212,10 +211,6 @@ let params_field : (string * string) list Message.field =
       |> String.concat ", ")
     ()
 
-
-
-let log =
-  Log.sub_log "dream.router"
 
 let missing_param request name =
   let message = Printf.sprintf "Dream.param: missing path parameter %S" name in
