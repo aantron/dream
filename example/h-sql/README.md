@@ -7,6 +7,11 @@ prepared statements using
 [Caqti](https://paurkedal.github.io/ocaml-caqti/caqti/Caqti_connect_sig/module-type-S/module-type-CONNECTION/index.html),
 a library for talking to SQL databases:
 
+> [!TIP]
+> `let%lwt` is syntactic sugar for `Lwt.bind`, so the two forms below are equivalent (a third option would be using `>>=`).
+>
+> For more information, see [here](https://ocsigen.org/lwt/latest/api/Lwt#3_Callbacks).
+
 ```ocaml
 module type DB = Caqti_lwt.CONNECTION
 module T = Caqti_type
@@ -17,8 +22,7 @@ let list_comments =
     (T.unit ->* T.(tup2 int string))
     "SELECT id, text FROM comment" in
   fun (module Db : DB) ->
-    let%lwt comments_or_error = Db.collect_list query () in
-    Caqti_lwt.or_fail comments_or_error
+    Lwt.bind (Db.collect_list query ()) Caqti_lwt.or_fail
 
 let add_comment =
   let query =

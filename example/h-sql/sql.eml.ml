@@ -7,8 +7,7 @@ let list_comments =
     (T.unit ->* T.(t2 int string))
     "SELECT id, text FROM comment" in
   fun (module Db : DB) ->
-    let%lwt comments_or_error = Db.collect_list query () in
-    Caqti_lwt.or_fail comments_or_error
+    Lwt.bind (Db.collect_list query ()) Caqti_lwt.or_fail
 
 let add_comment =
   let query =
