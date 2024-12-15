@@ -14,7 +14,7 @@ module T = Caqti_type
 let list_comments =
   let query =
     let open Caqti_request.Infix in
-    (T.unit ->* T.(tup2 int string))
+    (T.unit ->* T.(t2 int string))
     "SELECT id, text FROM comment" in
   fun (module Db : DB) ->
     let%lwt comments_or_error = Db.collect_list query () in
