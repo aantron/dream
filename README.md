@@ -230,13 +230,6 @@ Highlight `@antron` to poke @aantron specifically.
 All kinds of contributions are welcome, including examples, links to blogs,
 related libraries, and, of course, PRs! See [CONTRIBUTING.md][contributing.md].
 
-As an immediate note, if you'd like to clone the repo, be sure to use
-`--recursive`, because Dream uses several git [submodules][vendor]:
-
-```
-git clone https://github.com/aantron/dream.git --recursive
-```
-
 [contributing.md]: https://github.com/aantron/dream/blob/master/docs/CONTRIBUTING.md
 
 <br>
@@ -251,10 +244,10 @@ several influences that cannot be discovered directly:
   and [**Embedded OCaml Templates**][eot] from [Emile Trotignon][trotignon].
 - Dream's handler and middleware types are simplified from [**Opium**][opium] by
   [Rudi Grinberg][rgrinberg] and contributors.
-- The lower-level HTTP and WebSocket servers are [vendored][vendor] copies of
+- The lower-level HTTP and WebSocket servers use
   [Antonio Nuno Monteiro][anmonteiro]'s forks and original works, with credit
   also due to their contributors, and [Spiros Eliopoulos][seliopou] in
-  particular, as the original author of two of the projects.
+  particular, as the original author of the http/af family of projects.
 - The API docs are instantiated by [**Soupault**][soupault] from
   [Daniil Baturin][dmbaturin].
 - The name was inspired by [**Morph**][morph] from [Ulrik Strid][ulrikstrid],
