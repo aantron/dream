@@ -1951,7 +1951,8 @@ let graphiql_expected = {|<div class="spec value" id="val-graphiql">
 |}
 
 let sql_pool_expected = {|<div class="spec value" id="val-sql_pool">
- <a href="#val-sql_pool" class="anchor"></a><code><span><span class="keyword">val</span> sql_pool : <span>?size:int <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-middleware">middleware</a></span></code>
+ <a href="#val-sql_pool" class="anchor"></a><code><span><span class="keyword">val</span> sql_pool : <span>?size:int <span class="arrow">-&gt;</span></span>
+<span>?post_connect:<span>(<span><span>(<span class="keyword">module</span> <span class="xref-unresolved">Caqti_lwt</span>.CONNECTION)</span> <span class="arrow">-&gt;</span></span> <span><span><span>(unit,&nbsp;<span class="xref-unresolved">Caqti_error</span>.t)</span> <span class="xref-unresolved">Stdlib</span>.result</span> <a href="#type-promise">promise</a></span>)</span> <span class="arrow">-&gt;</span></span> <span>string <span class="arrow">-&gt;</span></span> <a href="#type-middleware">middleware</a></span></code>
 </div>
 |}
 
