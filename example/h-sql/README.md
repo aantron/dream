@@ -130,6 +130,14 @@ We also had to make an addition to our
 
 <br>
 
+If you are deploying in alpine linux, you must have sqlite shared libraries. In Dockerfile
+```
+RUN sudo apk add --no-cache --update sqlite-dev sqlite-libs
+```
+You need to install those for both the build and runtime stages.
+
+<br>
+
 Pass multiple arguments with `(?, ?, ..)`.  See [Caqti utop](https://github.com/paurkedal/ocaml-caqti?tab=readme-ov-file#running-under-utop).
 
 Tips.
