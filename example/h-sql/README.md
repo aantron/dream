@@ -145,15 +145,16 @@ Tips.
 - `->!` returns a single row and uses `Db.find`.
 - `->*` returns a list of rows and uses `Db.collect_list`.
 
-Here is another example. It's easy to guess the table's schema. We expect a single integer to be returned, which is the auto-incremented id of the created row. see [RETURNING sql tutorial](https://www.sqlitetutorial.net/sqlite-returning/).
-```
-let query =
-  let open Caqti_request.Infix in
-  ( T.(t3 string string string) ->! T.int )
-  ("INSERT INTO guest(name, university, position) VALUES (?, ?, ?) RETURNING id") in
-fun (name, university, position) (module Db : DB) ->
-  let%lwt unit_or_error = Db.find query (name, university, position) in
-  Caqti_lwt.or_fail unit_or_error
+Here is another example. We expect a single integer to be returned, which is the id of the created row. see [RETURNING sql tutorial](https://www.sqlitetutorial.net/sqlite-returning/).
+```ocaml
+let add_session =
+  let query =
+    let open Caqti_request.Infix in
+    ( T.(t4 string string float string) ->! T.int )
+    ("INSERT INTO dream_session(id, label, expires_at, payload) VALUES (?, ?, ?, ?) RETURNING id") in
+  fun (id, label, expires_at, payload) (module Db : DB) ->
+    let%lwt unit_or_error = Db.find query (id, label, expires_at, payload) in
+    Caqti_lwt.or_fail unit_or_error
 ```
 
 See
