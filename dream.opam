@@ -71,7 +71,6 @@ depends: [
   "mirage-clock" {>= "3.0.0"}  # now_d_ps : unit -> int * int64.
   "mirage-crypto" {>= "1.2.0"}
   "mirage-crypto-rng" {>= "1.2.0"}
-  "mirage-crypto-rng-unix"
   "multipart_form" {>= "0.4.0"}
   "multipart_form-lwt"
   "ocaml" {>= "4.08.0"}
