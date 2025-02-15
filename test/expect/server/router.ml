@@ -88,29 +88,79 @@ let%expect_test _ =
     Path wildcard must be just '**'
     Path wildcard must be just '**' |}]
 
+(* Transfer a Dream session cookie from a response to a request. This function
+   helps testing Dream sessions.*)
+let forward_session_cookie (response: Dream.response) (request: Dream.request) =
+  match Dream.header response "Set-Cookie" with
+  | None -> ()
+  | Some payload ->
+     ignore @@ Str.search_forward
+                 (Str.regexp {|\(dream.session=.+\)?;|}) payload 0;
+     let session_cookie = Str.matched_group 1 payload
+     in
+     Dream.set_header request "Cookie" session_cookie
 
+let%expect_test _ =
+  let print_headers message =
+    Dream.all_headers message
+    |> List.iter (fun (k, v) -> Printf.printf "%s %s\n" k v)
+  in
+  let resp = Dream.response "testing"
+  in
+  Dream.set_cookie
+    ~encrypt:false resp (Dream.request "first req") "dream.session" "abc";
+  print_headers resp;
+  let req = Dream.request "second req"
+  in
+  forward_session_cookie resp req;
+  print_headers req;
+  match Dream.cookie ~decrypt:false req "dream.session" with
+  | None -> Printf.printf "Failed\n"
+  | Some x -> Printf.printf "%s\n" x;
+  [%expect {|
+    Set-Cookie dream.session=abc; Path=/; HttpOnly; SameSite=Lax
+    Cookie dream.session=abc; Path=/; HttpOnly
+    abc |}]
 
-let show ?(prefix = "/") ?(method_ = `GET) target router =
+(* Simulate a request to a given target, execute the router, print info about
+   the response and return it. If a Dream response is also given, the simulated
+   request should contain the same Dream session cookie. *)
+let show_response
+      ?(prefix = "/") ?(method_ = `GET) ?(response = None) target router =
   try
-    Dream.request ~method_ ~target ""
+    let request = Dream.request ~method_ ~target ""
+    in
+    (match response with
+     | None -> ()
+     | Some r -> forward_session_cookie r request);
+    request
     |> Dream.test ~prefix router
     |> fun response ->
-      let body =
-        Dream.client_stream response
-        |> Obj.magic (* TODO Needs to be replaced by exposing read_until_close
-                             as a function on abstract streams. *)
-        |> Dream_pure.Stream.read_until_close
-        |> Lwt_main.run
-      in
-      let status = Dream.status response in
-      Printf.printf "Response: %i %s\n"
-        (Dream.status_to_int status) (Dream.status_to_string status);
-      if body <> "" then
-        Printf.printf "%s\n" body
-      else
-        ()
+       let body =
+         Dream.client_stream response
+         |> Obj.magic (* TODO Needs to be replaced by exposing read_until_close
+                         as a function on abstract streams. *)
+         |> Dream_pure.Stream.read_until_close
+         |> Lwt_main.run
+       in
+       let status = Dream.status response in
+       Printf.printf "Response: %i %s\n"
+         (Dream.status_to_int status) (Dream.status_to_string status);
+       (if body <> "" then
+          Printf.printf "%s\n" body
+        else
+          ());
+       response
   with Failure message ->
-    print_endline message
+    print_endline message;
+    raise (Failure message)
+
+(* Simulate a request to a given target, execute the router, print info about
+   the response and return it. This is a simpler version of "show_response". *)
+let show ?(prefix = "/") ?(method_ = `GET) target router =
+  try
+    ignore @@ show_response ~prefix:prefix ~method_:method_ target router
+  with _ -> ()
 
 (* Basic router tests. *)
 
@@ -522,6 +572,47 @@ let%expect_test _ =
   ];
   [%expect {|
     Response: 404 Not Found |}]
+
+(* We want to check if different session backends are working properly with
+   "Dream.scope". *)
+let%expect_test _ =
+  let session_field = "testfield"
+  in
+  let app session_backend session_value =
+    Dream.router [
+        Dream.scope "/" [session_backend] [
+            Dream.get "/abc"
+              (fun req ->
+                let%lwt () =
+                  Dream.set_session_field req session_field session_value
+                in
+                Dream.respond "baz");
+            Dream.get "/def"
+              (fun req ->
+                Dream.respond
+                  (match Dream.session_field req session_field with
+                   | None -> "No value in the session"
+                   | Some x -> x))
+          ]
+      ]
+  in
+  let simulate_and_check app_with_session =
+    let resp_abc = show_response "/abc" app_with_session in
+    ignore @@ show_response ~response:(Some resp_abc) "/def" app_with_session
+  in
+  simulate_and_check (app Dream.cookie_sessions "100");
+  [%expect {|
+            Response: 200 OK
+            baz
+            Response: 200 OK
+            100 |}];
+  simulate_and_check (app Dream.memory_sessions "999");
+  [%expect {|
+            Response: 200 OK
+            baz
+            Response: 200 OK
+            999 |}]
+
 
 (* Router sequence works. *)
 
