@@ -606,7 +606,7 @@ let%expect_test _ =
             baz
             Response: 200 OK
             100 |}];
-  simulate_and_check (app Dream.memory_sessions "999");
+  simulate_and_check (app (Dream.memory_sessions ()) "999");
   [%expect {|
             Response: 200 OK
             baz
