@@ -2,7 +2,7 @@
 
 <br>
 
-Let's serve a list of comments with a comment form! First, we define a couple ofhttps://paurkedal.github.io/ocaml-caqti/index.html/caqti-lwt/Caqti_lwt/module-type-CONNECTION/index.html
+Let's serve a list of comments with a comment form! First, we define a couple of
 prepared statements using
 [Caqti](https://paurkedal.github.io/ocaml-caqti/index.html/caqti-lwt/Caqti_lwt/module-type-CONNECTION/index.html),
 a library for talking to SQL databases:
