@@ -2,9 +2,9 @@
 
 <br>
 
-Let's serve a list of comments with a comment form! First, we define a couple of
+Let's serve a list of comments with a comment form! First, we define a couple ofhttps://paurkedal.github.io/ocaml-caqti/index.html/caqti-lwt/Caqti_lwt/module-type-CONNECTION/index.html
 prepared statements using
-[Caqti](https://paurkedal.github.io/ocaml-caqti/caqti/Caqti_connect_sig/module-type-S/module-type-CONNECTION/index.html),
+[Caqti](https://paurkedal.github.io/ocaml-caqti/index.html/caqti-lwt/Caqti_lwt/module-type-CONNECTION/index.html),
 a library for talking to SQL databases:
 
 ```ocaml
