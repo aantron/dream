@@ -4,7 +4,6 @@
    Copyright 2021 Anton Bachin *)
 
 
-
 (* https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html *)
 
 module Message = Dream_pure.Message
@@ -317,7 +316,7 @@ struct
         |> Yojson.Basic.to_string
         |> version_value
       in
-      Cookie.set_cookie response request session_cookie value ~max_age
+      Cookie.set_cookie response request session_cookie value ~max_age ~path:(Some "/")
     end;
     Lwt.return response
 
