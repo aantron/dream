@@ -64,6 +64,11 @@ type 'a with_location = {
   what : 'a;
 }
 
+type start_file_token = [
+  (* Token for the start of file. Will be replaced with code creating buffer pool *)
+  | `Start_file
+]
+
 type code_block_token = [
   (* A block of OCaml code. These start at the beginning of the input file, and
      continue until a line that starts with '<'. They occur again whenever the
@@ -99,6 +104,7 @@ type template_token = [
 ]
 
 type token = [
+  | start_file_token
   | code_block_token
   | options_token
   | newline_token
@@ -111,6 +117,8 @@ sig
 end =
 struct
   let show = function
+    | `Start_file ->
+      "Start of file"
     | `Code_block {line; column; what = code} ->
       Printf.sprintf "(%i, %i) Code_block\n%s" (line + 1) column code
     | `Options (options, indent) ->
@@ -423,13 +431,14 @@ struct
 
   let scan stream =
     stream
-    |> at_code_block [] ""
+    |> at_code_block [`Start_file] ""
     |> List.rev
 end
 
 
 
 type template = [
+  | start_file_token
   | code_block_token
   | `Template of (string * int) * template_token list list
 ]
@@ -471,6 +480,8 @@ struct
            at the start of every template, carrying indentation information. So,
            it should be removed at the next opportunity. *)
         template_level ("", 0) accumulator [] [] tokens
+      | (`Start_file as token)::tokens ->
+        top_level (token::accumulator) tokens
       | (`Code_block _ as token)::tokens ->
         top_level (token::accumulator) tokens
       | [] ->
@@ -485,6 +496,8 @@ struct
         top_level ((`Template (options, List.rev template))::accumulator) tokens
       | `Newline::tokens ->
         template_level options accumulator ((List.rev line)::template) [] tokens
+      | (`Start_file as token)::tokens ->
+        top_level (token::accumulator) tokens
       | (#template_token as token)::tokens ->
         template_level options accumulator template (token::line) tokens
 
@@ -498,7 +511,7 @@ struct
     templates
     |> List.map (function
       | `Template (options, template) -> `Template (options, f options template)
-      | `Code_block _ as token -> token)
+      | (`Code_block _) | `Start_file as token -> token)
 
 
 
@@ -643,14 +656,40 @@ struct
     format_end : unit -> unit;
   }
 
+  let generate_pool = 
+"type __pool_t = {
+  mutex: Mutex.t;
+  mutable body: Buffer.t List.t;
+}
+
+let __pool: __pool_t = {
+  mutex = Mutex.create ();
+  body = List.init 2 (fun _ -> Buffer.create 4096)
+}
+
+let __get_buffer pool =
+  Mutex.protect pool.mutex (fun () ->
+    match pool.body with
+    | buf :: bufs ->
+      pool.body <- bufs;
+      Buffer.clear buf;
+      buf
+    | [] -> Buffer.create 4096)
+
+
+let __return_buffer pool buf =
+  Mutex.protect pool.mutex (fun () ->
+    pool.body <- buf :: pool.body;
+    Buffer.contents buf)\n\n"
+
   let string print = {
     print;
 
     init = (fun () ->
-      print "let ___eml_buffer = Buffer.create 4096 in\n");
+      print "let ___eml_buffer = __get_buffer __pool in\n");
 
     finish = (fun () ->
-      print "(Buffer.contents ___eml_buffer)\n");
+      print "(__return_buffer __pool ___eml_buffer)\n");
 
     text =
       Printf.ksprintf print "(Buffer.add_string ___eml_buffer %S);\n";
@@ -758,6 +797,7 @@ struct
 
   let generate ~reason location print templates =
     templates |> List.iter begin function
+      | `Start_file -> print generate_pool
       | `Code_block {line; what; _} ->
         Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
         print what
