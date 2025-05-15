@@ -9,7 +9,7 @@
   dream.http
   dream.server
   dream.unix
-  dream-pure
+  (re_export dream-pure)
   dream.sql
   fmt.tty
   graphql-lwt
