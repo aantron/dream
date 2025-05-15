@@ -146,13 +146,12 @@ let handler user_err user_resp =
   }
 
 
-module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip.Stack.V4V6) = struct
+module Make (Stack : Tcpip.Stack.V4V6) = struct
   include Dream_pure
   include Method
   include Status
 
   include Log
-  include Log.Make (Pclock)
   include Dream__server.Echo
 
   let default_log =
@@ -165,7 +164,6 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
 
   module Session = struct
     include Dream__server.Session
-    include Dream__server.Session.Make (Pclock)
   end
   module Flash = Dream__server.Flash
 
@@ -331,7 +329,7 @@ module Make (Pclock : Mirage_clock.PCLOCK) (Time : Mirage_time.S) (Stack : Tcpip
     Log.convenience_log
 
 
-  let now () = Ptime.to_float_s (Ptime.v (Pclock.now_d_ps ()))
+  let now () = Ptime.to_float_s (Ptime.v (Mirage_ptime.now_d_ps ()))
 
   let form = form ~now
   let multipart = multipart ~now

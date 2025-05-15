@@ -42,7 +42,6 @@ module Upload = Dream__server.Upload
 module Log =
 struct
   include Dream__server.Log
-  include Dream__server.Log.Make (Ptime_clock)
 end
 
 let default_log =
@@ -52,7 +51,7 @@ let () =
   Log.initialize ~setup_outputs:Fmt_tty.setup_std_outputs
 
 let now () =
-  Ptime.to_float_s (Ptime.v (Ptime_clock.now_d_ps ()))
+  Ptime.to_float_s (Ptime.v (Mirage_ptime.now_d_ps ()))
 
 let () =
   Random.initialize (fun () ->
@@ -61,7 +60,6 @@ let () =
 module Session =
 struct
   include Dream__server.Session
-  include Dream__server.Session.Make (Ptime_clock)
 end
 
 

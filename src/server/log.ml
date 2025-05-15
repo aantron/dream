@@ -429,10 +429,8 @@ let set_log_level name level =
 let fd_field : int Message.field =
   Message.new_field ~name:"dream.fd" ~show_value:string_of_int ()
 
-module Make (Pclock : Mirage_clock.PCLOCK) =
-struct
   let now () =
-    Ptime.to_float_s (Ptime.v (Pclock.now_d_ps ()))
+    Ptime.to_float_s (Ptime.v (Mirage_ptime.now_d_ps ()))
 
   let initializer_ ~setup_outputs = lazy begin
     if !enable then begin
@@ -559,7 +557,6 @@ struct
         |> iter_backtrace (fun line -> log.warning (fun log -> log "%s" line));
 
         Lwt.fail exn)
-end
 
 
 
