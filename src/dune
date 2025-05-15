@@ -16,6 +16,6 @@
   logs
   lwt
   lwt.unix
-  mirage-crypto-rng-lwt
-  ptime.clock.os
- ))
+  mirage-crypto-rng
+  mirage-crypto-rng.unix
+  ptime.clock.os))

@@ -55,7 +55,7 @@ let now () =
 
 let () =
   Random.initialize (fun () ->
-    Mirage_crypto_rng_lwt.initialize (module Mirage_crypto_rng.Fortuna))
+    Mirage_crypto_rng_unix.use_default ())
 
 module Session =
 struct
