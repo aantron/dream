@@ -17,9 +17,9 @@ depends: [
   "dune" {>= "2.7.0"}  # --instrument-with.
   "gluten"
   "gluten-lwt-unix"
+  "h1"
   "h2" {< "0.13.0"}
-  "h2-lwt-unix"
-  "httpun" {< "0.2.0"}
+  "httpun"
   "httpun-lwt-unix"
   "httpun-ws"
   "lwt"
