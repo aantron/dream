@@ -399,9 +399,9 @@ module Make (Stack : Tcpip.Stack.V4V6) = struct
 
   let localhost_certificate =
     let crts = Rresult.R.failwith_error_msg
-      (X509.Certificate.decode_pem_multiple (Cstruct.of_string Dream__certificate.localhost_certificate)) in
+      (X509.Certificate.decode_pem_multiple Dream__certificate.localhost_certificate) in
     let key = Rresult.R.failwith_error_msg
-      (X509.Private_key.decode_pem (Cstruct.of_string Dream__certificate.localhost_certificate_key)) in
+      (X509.Private_key.decode_pem Dream__certificate.localhost_certificate_key) in
     `Single (crts, key)
 
   let https ?stop ~port ?(prefix= "") stack
