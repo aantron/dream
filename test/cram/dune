@@ -1,5 +1,10 @@
 (cram
- (deps %{bin:hello} %{bin:middleware} %{bin:router} %{bin:counter}))
+ (deps
+  %{bin:hello}
+  %{bin:middleware}
+  %{bin:router}
+  %{bin:counter}
+  %{bin:promise}))
 
 (env
  (_
@@ -11,4 +16,5 @@
    ../../example/1-hello/hello.exe
    ../../example/2-middleware/middleware.exe
    ../../example/3-router/router.exe
-   ../../example/4-counter/counter.exe)))
+   ../../example/4-counter/counter.exe
+   ../../example/5-promise/promise.exe)))
