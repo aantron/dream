@@ -1,5 +1,5 @@
 (cram
- (deps %{bin:hello} %{bin:middleware}))
+ (deps %{bin:hello} %{bin:middleware} %{bin:router}))
 
 (env
  (_
@@ -9,4 +9,5 @@
    (CURL "curl --silent --retry 2 --retry-connrefused"))
   (binaries
    ../../example/1-hello/hello.exe
-   ../../example/2-middleware/middleware.exe)))
+   ../../example/2-middleware/middleware.exe
+   ../../example/3-router/router.exe)))
