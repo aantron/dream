@@ -4,7 +4,8 @@
   %{bin:middleware}
   %{bin:router}
   %{bin:counter}
-  %{bin:promise}))
+  %{bin:promise}
+  %{bin:echo-server}))
 
 (env
  (_
@@ -17,4 +18,5 @@
    ../../example/2-middleware/middleware.exe
    ../../example/3-router/router.exe
    ../../example/4-counter/counter.exe
-   ../../example/5-promise/promise.exe)))
+   ../../example/5-promise/promise.exe
+   (../../example/6-echo/echo.exe as echo-server))))
