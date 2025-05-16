@@ -1,0 +1,10 @@
+(cram
+ (deps %{bin:hello}))
+
+(env
+ (_
+  (env-vars
+   ; --silent: Remove progress bar and error messages from retries
+   ; --retry 5 --retry-connrefused: retry in case curl is run before the server is available
+   (CURL "curl --silent --retry 2 --retry-connrefused"))
+  (binaries ../../example/1-hello/hello.exe)))
