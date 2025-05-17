@@ -11,7 +11,6 @@
   lwt
   magic-mime
   markup
-  mirage-clock
   mirage-ptime
   multipart_form
   multipart_form-lwt
