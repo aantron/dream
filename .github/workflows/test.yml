@@ -129,14 +129,14 @@ jobs:
     # Needed until https://github.com/robur-coop/ocaml-letsencrypt/pull/34.
     - run: opam pin add letsencrypt git+https://github.com/hannesm/ocaml-letsencrypt.git#no-cstruct --no-action
     - run: opam install --yes --deps-only ./dream-pure.opam ./dream-httpaf.opam ./dream.opam ./dream-mirage.opam
-    - run: opam install --yes mirage mirage-clock-unix mirage-crypto-rng-mirage
+    - run: opam install --yes mirage mirage-ptime mirage-crypto-rng-mirage
     - run: cd example/w-mirage && mv config.ml config.ml.backup
     - run: cd example/w-mirage && sed -e 's/package "dream-mirage"//' < config.ml.backup > config.ml
     - run: cd example/w-mirage && opam exec -- mirage configure -t unix
     - run: cd example/w-mirage && opam exec -- make depends
     - run: cd example/w-mirage && ls duniverse
     - run: cp -r ../repo-copy example/w-mirage/duniverse/dream
-    - run: cd example/w-mirage/duniverse && rm -rf ocaml-cstruct logs ke fmt lwt bytes seq mirage-flow sexplib0 ptime tls domain-name ocaml-ipaddr mirage-clock ocplib-endian digestif eqaf mirage-crypto mirage-runtime
+    - run: cd example/w-mirage/duniverse && rm -rf ocaml-cstruct logs ke fmt lwt bytes seq mirage-flow sexplib0 ptime tls domain-name ocaml-ipaddr mirage-ptime ocplib-endian digestif eqaf mirage-crypto mirage-runtime
     - run: cd example/w-mirage && mv config.ml.backup config.ml
     - run: cd example/w-mirage && sed -e 's/(libraries/(libraries dream-mirage/' < dune.build > dune.build.2
     - run: cd example/w-mirage && mv dune.build.2 dune.build
