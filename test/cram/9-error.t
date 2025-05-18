@@ -18,7 +18,8 @@
   
   dream.client: ::1:<omitted>
   dream.tls: false
-  dream.request_id: <omitted></pre>
+  dream.request_id: <omitted>
+  dream.fd: 6</pre>
   </body>
   </html>
   $ $CURL localhost:8080/fail | sed 's/::1:.*/::1:<omitted>/' | sed 's/dream.request_id: [^<]*/dream.request_id: <omitted>/'
@@ -40,7 +41,8 @@
   
   dream.client: ::1:<omitted>
   dream.tls: false
-  dream.request_id: <omitted></pre>
+  dream.request_id: <omitted>
+  dream.fd: 6</pre>
   </body>
   </html>
   $ pkill -P $$
