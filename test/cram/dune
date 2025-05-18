@@ -5,7 +5,23 @@
   %{bin:router}
   %{bin:counter}
   %{bin:promise}
-  %{bin:echo-server}))
+  %{bin:echo-server}
+  %{bin:template}
+  %{bin:debug}
+  %{bin:error}
+  %{bin:log}
+  %{bin:session}
+  %{bin:cookie}
+  %{bin:form}
+  %{bin:json}
+  %{bin:static}
+  %{bin:upload}
+  %{bin:sql}
+  ; TODO reenable
+  ; %{bin:graphql}
+  %{bin:stream}
+  %{bin:websocket}
+  %{bin:https}))
 
 (env
  (_
@@ -19,4 +35,19 @@
    ../../example/3-router/router.exe
    ../../example/4-counter/counter.exe
    ../../example/5-promise/promise.exe
-   (../../example/6-echo/echo.exe as echo-server))))
+   (../../example/6-echo/echo.exe as echo-server)
+   ../../example/7-template/template.exe
+   ../../example/8-debug/debug.exe
+   ../../example/9-error/error.exe
+   ../../example/a-log/log.exe
+   ../../example/b-session/session.exe
+   ../../example/c-cookie/cookie.exe
+   ../../example/d-form/form.exe
+   ../../example/e-json/json.exe
+   ../../example/f-static/static.exe
+   ../../example/g-upload/upload.exe
+   ../../example/h-sql/sql.exe
+   ; ../../example/i-graphql/graphql.exe
+   ../../example/j-stream/stream.exe
+   ../../example/k-websocket/websocket.exe
+   ../../example/l-https/https.exe)))
