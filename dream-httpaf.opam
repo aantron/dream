@@ -19,6 +19,7 @@ depends: [
   "gluten-lwt-unix"
   "h1"
   "h2"
+  "h2-lwt-unix"
   "httpun"
   "httpun-lwt-unix"
   "httpun-ws"
