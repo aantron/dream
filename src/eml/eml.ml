@@ -644,7 +644,7 @@ end
 module Generate :
 sig
   val generate :
-    reason:bool -> string -> (string -> unit) -> template list -> unit
+    reason:bool -> string -> (string -> unit) -> int -> int -> template list -> unit
 end =
 struct
   type output = {
@@ -656,9 +656,9 @@ struct
     format_end : unit -> unit;
   }
 
-  let buffer_pool = 
-"let ___EML_BUFFER_SIZE = 4096
-let ___EML_POOL_SIZE = 2
+  let buffer_pool buffer_size pool_size = 
+Printf.sprintf {|let ___EML_BUFFER_SIZE = %d
+let ___EML_POOL_SIZE = %d
 let ___eml_pool = ref (List.init ___EML_POOL_SIZE (fun _ -> Buffer.create ___EML_BUFFER_SIZE))
 let ___eml_get_buffer pool =
   match !pool with
@@ -669,11 +669,13 @@ let ___eml_get_buffer pool =
   | [] -> Buffer.create ___EML_BUFFER_SIZE
 let ___eml_return_buffer pool buf =
   pool := buf :: !pool;
-  Buffer.contents buf\n\n"
+  Buffer.contents buf
 
-  let buffer_pool_reason =
-"let ___EML_BUFFER_SIZE = 4096;
-let ___EML_POOL_SIZE = 2;
+|} buffer_size pool_size
+
+  let buffer_pool_reason buffer_size pool_size =
+Printf.sprintf {|let ___EML_BUFFER_SIZE = %d;
+let ___EML_POOL_SIZE = %d;
 let ___eml_pool = ref(List.init(___EML_POOL_SIZE, _ => Buffer.create(___EML_BUFFER_SIZE)));
 let ___eml_get_buffer = pool => {
   switch (pool^) {
@@ -687,7 +689,9 @@ let ___eml_get_buffer = pool => {
 let ___eml_return_buffer = (pool, buf) => {
   pool := [buf, ...pool^];
   Buffer.contents(buf);
-};\n\n"
+};
+
+|} buffer_size pool_size
 
   let string print = {
     print;
@@ -802,9 +806,9 @@ let ___eml_return_buffer = (pool, buf) => {
         output.format_end ();
     end
 
-  let generate ~reason location print templates =
+  let generate ~reason location print buffer_size pool_size templates =
     templates |> List.iter begin function
-      | `Start_file -> print (if reason then buffer_pool_reason else buffer_pool)
+      | `Start_file -> print (if reason then buffer_pool_reason buffer_size pool_size else buffer_pool buffer_size pool_size)
       | `Code_block {line; what; _} ->
         Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
         print what
@@ -829,7 +833,7 @@ end
 
 
 
-let process_file (input_file, location, syntax, std_out) =
+let process_file (input_file, location, syntax, std_out, buffer_size, pool_size) =
   let reason, extension = match syntax with
   | `OCaml -> (false, ".ml")
   | `Reason -> (true, ".re")
@@ -863,4 +867,4 @@ let process_file (input_file, location, syntax, std_out) =
   (* |> Transform.empty_lines *)
   |> Transform.coalesce
   |> Transform.trim
-  |> Generate.generate ~reason location (output_string output_channel)
+  |> Generate.generate ~reason location (output_string output_channel) buffer_size pool_size
