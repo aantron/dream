@@ -644,7 +644,7 @@ end
 module Generate :
 sig
   val generate :
-    reason:bool -> string -> (string -> unit) -> int -> int -> template list -> unit
+    reason:bool -> buffer_size:int -> pool_size:int -> string -> (string -> unit) -> template list -> unit
 end =
 struct
   type output = {
@@ -806,9 +806,9 @@ let ___eml_return_buffer = (pool, buf) => {
         output.format_end ();
     end
 
-  let generate ~reason location print buffer_size pool_size templates =
+  let generate ~reason ~buffer_size ~pool_size location print templates =
     templates |> List.iter begin function
-      | `Start_file -> print (if reason then buffer_pool_reason buffer_size pool_size else buffer_pool buffer_size pool_size)
+      | `Start_file -> print @@ (if reason then buffer_pool_reason else buffer_pool) buffer_size pool_size
       | `Code_block {line; what; _} ->
         Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
         print what
@@ -867,4 +867,4 @@ let process_file (input_file, location, syntax, std_out, buffer_size, pool_size)
   (* |> Transform.empty_lines *)
   |> Transform.coalesce
   |> Transform.trim
-  |> Generate.generate ~reason location (output_string output_channel) buffer_size pool_size
+  |> Generate.generate ~reason ~buffer_size ~pool_size location (output_string output_channel)
