@@ -656,40 +656,47 @@ struct
     format_end : unit -> unit;
   }
 
-  let generate_pool = 
-"type __pool_t = {
-  mutex: Mutex.t;
-  mutable body: Buffer.t List.t;
-}
+  let buffer_pool = 
+"let ___EML_BUFFER_SIZE = 4096
+let ___EML_POOL_SIZE = 2
+let ___eml_pool = ref (List.init ___EML_POOL_SIZE (fun _ -> Buffer.create ___EML_BUFFER_SIZE))
+let ___eml_get_buffer pool =
+  match !pool with
+  | buf :: bufs ->
+    pool := bufs;
+    Buffer.clear buf;
+    buf
+  | [] -> Buffer.create ___EML_BUFFER_SIZE
+let ___eml_return_buffer pool buf =
+  pool := buf :: !pool;
+  Buffer.contents buf\n\n"
 
-let __pool: __pool_t = {
-  mutex = Mutex.create ();
-  body = List.init 2 (fun _ -> Buffer.create 4096)
-}
-
-let __get_buffer pool =
-  Mutex.protect pool.mutex (fun () ->
-    match pool.body with
-    | buf :: bufs ->
-      pool.body <- bufs;
-      Buffer.clear buf;
-      buf
-    | [] -> Buffer.create 4096)
-
-
-let __return_buffer pool buf =
-  Mutex.protect pool.mutex (fun () ->
-    pool.body <- buf :: pool.body;
-    Buffer.contents buf)\n\n"
+  let buffer_pool_reason =
+"let ___EML_BUFFER_SIZE = 4096;
+let ___EML_POOL_SIZE = 2;
+let ___eml_pool = ref(List.init(___EML_POOL_SIZE, _ => Buffer.create(___EML_BUFFER_SIZE)));
+let ___eml_get_buffer = pool => {
+  switch (pool^) {
+  | [buf, ...bufs] =>
+    pool := bufs;
+    Buffer.clear(buf);
+    buf;
+  | [] => Buffer.create(___EML_BUFFER_SIZE)
+  };
+};
+let ___eml_return_buffer = (pool, buf) => {
+  pool := [buf, ...pool^];
+  Buffer.contents(buf);
+};\n\n"
 
   let string print = {
     print;
 
     init = (fun () ->
-      print "let ___eml_buffer = __get_buffer __pool in\n");
+      print "let ___eml_buffer = ___eml_get_buffer ___eml_pool in\n");
 
     finish = (fun () ->
-      print "(__return_buffer __pool ___eml_buffer)\n");
+      print "(___eml_return_buffer ___eml_pool ___eml_buffer)\n");
 
     text =
       Printf.ksprintf print "(Buffer.add_string ___eml_buffer %S);\n";
@@ -705,10 +712,10 @@ let __return_buffer pool buf =
     print;
 
     init = (fun () ->
-      print "let ___eml_buffer = Buffer.create(4096);\n");
+      print "let ___eml_buffer = ___eml_get_buffer(___eml_pool);\n");
 
     finish = (fun () ->
-      print "Buffer.contents(___eml_buffer)\n");
+      print "___eml_return_buffer(___eml_pool, ___eml_buffer)\n");
 
     text =
       Printf.ksprintf print "Buffer.add_string(___eml_buffer, %S);\n";
@@ -797,7 +804,7 @@ let __return_buffer pool buf =
 
   let generate ~reason location print templates =
     templates |> List.iter begin function
-      | `Start_file -> print generate_pool
+      | `Start_file -> print (if reason then buffer_pool_reason else buffer_pool)
       | `Code_block {line; what; _} ->
         Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
         print what
