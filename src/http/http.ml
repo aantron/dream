@@ -506,18 +506,22 @@ let serve_with_details
         Lwt.return Lwt_unix.(address.ai_addr)
   in
 
-  (* Bring up the HTTP server. Wait for the server to actually get started.
-     Then, wait for the ~stop promise. If the ~stop promise ever resolves, stop
-     the server. *)
-  let%lwt server =
-    Lwt_io.establish_server_with_client_socket
-      listen_address
-      httpaf_connection_handler in
+  Lwt.finalize
+    (fun () ->
+      (* Bring up the HTTP server. Wait for the server to actually get started.
+         Then, wait for the ~stop promise. If the ~stop promise ever resolves, stop
+         the server. *)
+      let%lwt server =
+        Lwt_io.establish_server_with_client_socket listen_address
+          httpaf_connection_handler
+      in
 
-  let%lwt () = stop in
-  Lwt_io.shutdown_server server
-
-
+      let%lwt () = stop in
+      Lwt_io.shutdown_server server)
+    (fun () ->
+      match network with
+      | `Unix path when Sys.file_exists path -> Lwt_unix.unlink path
+      | _ -> Lwt.return_unit)
 
 let is_localhost interface =
   interface = "localhost" || interface = "127.0.0.1"
