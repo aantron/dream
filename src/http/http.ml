@@ -506,6 +506,7 @@ let serve_with_details
         Lwt.return Lwt_unix.(address.ai_addr)
   in
 
+  Lwt.finalize begin fun () ->
   (* Bring up the HTTP server. Wait for the server to actually get started.
      Then, wait for the ~stop promise. If the ~stop promise ever resolves, stop
      the server. *)
@@ -516,6 +517,12 @@ let serve_with_details
 
   let%lwt () = stop in
   Lwt_io.shutdown_server server
+  end
+  begin fun () ->
+    match network with
+    | `Unix path when Sys.file_exists path -> Lwt_unix.unlink path
+    | _ -> Lwt.return_unit
+  end
 
 
 
