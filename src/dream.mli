@@ -1209,7 +1209,7 @@ let render message =
 
     As an alternative that provides a middle-ground between a fully type-checked HTML
     representation and the string-based Dream templating language,
-    {{:https://github.com/ocaml-mlx/mlx}[mlx]} can be used. See exanple
+    {{:https://github.com/ocaml-mlx/mlx}[mlx]} can be used. See example
     {{:https://github.com/aantron/dream/tree/master/example/w-mlx}[w-mlx]}.
 
     To use the built-in templates, add this to [dune]:
