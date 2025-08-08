@@ -64,6 +64,11 @@ type 'a with_location = {
   what : 'a;
 }
 
+type start_file_token = [
+  (* Token for the start of file. Will be replaced with code creating buffer pool *)
+  | `Start_file
+]
+
 type code_block_token = [
   (* A block of OCaml code. These start at the beginning of the input file, and
      continue until a line that starts with '<'. They occur again whenever the
@@ -99,6 +104,7 @@ type template_token = [
 ]
 
 type token = [
+  | start_file_token
   | code_block_token
   | options_token
   | newline_token
@@ -111,6 +117,8 @@ sig
 end =
 struct
   let show = function
+    | `Start_file ->
+      "Start of file"
     | `Code_block {line; column; what = code} ->
       Printf.sprintf "(%i, %i) Code_block\n%s" (line + 1) column code
     | `Options (options, indent) ->
@@ -423,13 +431,14 @@ struct
 
   let scan stream =
     stream
-    |> at_code_block [] ""
+    |> at_code_block [`Start_file] ""
     |> List.rev
 end
 
 
 
 type template = [
+  | start_file_token
   | code_block_token
   | `Template of (string * int) * template_token list list
 ]
@@ -471,6 +480,8 @@ struct
            at the start of every template, carrying indentation information. So,
            it should be removed at the next opportunity. *)
         template_level ("", 0) accumulator [] [] tokens
+      | (`Start_file as token)::tokens ->
+        top_level (token::accumulator) tokens
       | (`Code_block _ as token)::tokens ->
         top_level (token::accumulator) tokens
       | [] ->
@@ -485,6 +496,8 @@ struct
         top_level ((`Template (options, List.rev template))::accumulator) tokens
       | `Newline::tokens ->
         template_level options accumulator ((List.rev line)::template) [] tokens
+      | (`Start_file as token)::tokens ->
+        top_level (token::accumulator) tokens
       | (#template_token as token)::tokens ->
         template_level options accumulator template (token::line) tokens
 
@@ -498,7 +511,7 @@ struct
     templates
     |> List.map (function
       | `Template (options, template) -> `Template (options, f options template)
-      | `Code_block _ as token -> token)
+      | (`Code_block _) | `Start_file as token -> token)
 
 
 
@@ -631,7 +644,7 @@ end
 module Generate :
 sig
   val generate :
-    reason:bool -> string -> (string -> unit) -> template list -> unit
+    reason:bool -> buffer_size:int -> pool_size:int -> string -> (string -> unit) -> template list -> unit
 end =
 struct
   type output = {
@@ -643,14 +656,51 @@ struct
     format_end : unit -> unit;
   }
 
+  let buffer_pool buffer_size pool_size = 
+Printf.sprintf {|let ___EML_BUFFER_SIZE = %d
+let ___EML_POOL_SIZE = %d
+let ___eml_pool = ref (List.init ___EML_POOL_SIZE (fun _ -> Buffer.create ___EML_BUFFER_SIZE))
+let ___eml_get_buffer pool =
+  match !pool with
+  | buf :: bufs ->
+    pool := bufs;
+    Buffer.clear buf;
+    buf
+  | [] -> Buffer.create ___EML_BUFFER_SIZE
+let ___eml_return_buffer pool buf =
+  pool := buf :: !pool;
+  Buffer.contents buf
+
+|} buffer_size pool_size
+
+  let buffer_pool_reason buffer_size pool_size =
+Printf.sprintf {|let ___EML_BUFFER_SIZE = %d;
+let ___EML_POOL_SIZE = %d;
+let ___eml_pool = ref(List.init(___EML_POOL_SIZE, _ => Buffer.create(___EML_BUFFER_SIZE)));
+let ___eml_get_buffer = pool => {
+  switch (pool^) {
+  | [buf, ...bufs] =>
+    pool := bufs;
+    Buffer.clear(buf);
+    buf;
+  | [] => Buffer.create(___EML_BUFFER_SIZE)
+  };
+};
+let ___eml_return_buffer = (pool, buf) => {
+  pool := [buf, ...pool^];
+  Buffer.contents(buf);
+};
+
+|} buffer_size pool_size
+
   let string print = {
     print;
 
     init = (fun () ->
-      print "let ___eml_buffer = Buffer.create 4096 in\n");
+      print "let ___eml_buffer = ___eml_get_buffer ___eml_pool in\n");
 
     finish = (fun () ->
-      print "(Buffer.contents ___eml_buffer)\n");
+      print "(___eml_return_buffer ___eml_pool ___eml_buffer)\n");
 
     text =
       Printf.ksprintf print "(Buffer.add_string ___eml_buffer %S);\n";
@@ -666,10 +716,10 @@ struct
     print;
 
     init = (fun () ->
-      print "let ___eml_buffer = Buffer.create(4096);\n");
+      print "let ___eml_buffer = ___eml_get_buffer(___eml_pool);\n");
 
     finish = (fun () ->
-      print "Buffer.contents(___eml_buffer)\n");
+      print "___eml_return_buffer(___eml_pool, ___eml_buffer)\n");
 
     text =
       Printf.ksprintf print "Buffer.add_string(___eml_buffer, %S);\n";
@@ -756,8 +806,9 @@ struct
         output.format_end ();
     end
 
-  let generate ~reason location print templates =
+  let generate ~reason ~buffer_size ~pool_size location print templates =
     templates |> List.iter begin function
+      | `Start_file -> print @@ (if reason then buffer_pool_reason else buffer_pool) buffer_size pool_size
       | `Code_block {line; what; _} ->
         Printf.ksprintf print "#%i \"%s\"\n" (line + 1) location;
         print what
@@ -782,7 +833,7 @@ end
 
 
 
-let process_file (input_file, location, syntax, std_out) =
+let process_file (input_file, location, syntax, std_out, buffer_size, pool_size) =
   let reason, extension = match syntax with
   | `OCaml -> (false, ".ml")
   | `Reason -> (true, ".re")
@@ -816,4 +867,4 @@ let process_file (input_file, location, syntax, std_out) =
   (* |> Transform.empty_lines *)
   |> Transform.coalesce
   |> Transform.trim
-  |> Generate.generate ~reason location (output_string output_channel)
+  |> Generate.generate ~reason ~buffer_size ~pool_size location (output_string output_channel)
