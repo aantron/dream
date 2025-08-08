@@ -507,16 +507,16 @@ let serve_with_details
   in
 
   Lwt.finalize begin fun () ->
-  (* Bring up the HTTP server. Wait for the server to actually get started.
-     Then, wait for the ~stop promise. If the ~stop promise ever resolves, stop
-     the server. *)
+    (* Bring up the HTTP server. Wait for the server to actually get started.
+       Then, wait for the ~stop promise. If the ~stop promise ever resolves,
+       stop the server. *)
   let%lwt server =
     Lwt_io.establish_server_with_client_socket
       listen_address
       httpaf_connection_handler in
 
-  let%lwt () = stop in
-  Lwt_io.shutdown_server server
+    let%lwt () = stop in
+    Lwt_io.shutdown_server server
   end
   begin fun () ->
     match network with
