@@ -1590,15 +1590,15 @@ val invalidate_session : request -> unit promise
 
 (** {2 Back ends} *)
 
-val memory_sessions : ?lifetime:float -> middleware
+val memory_sessions : middleware
 (** Stores sessions in server memory. Passes session IDs to clients in cookies.
     Session data is lost when the server process exits. *)
 
-val cookie_sessions : ?lifetime:float -> middleware
+val cookie_sessions : middleware
 (** Stores sessions in encrypted cookies. Use {!Dream.set_secret} to be able to
     decrypt cookies from previous server runs. *)
 
-val sql_sessions : ?lifetime:float -> middleware
+val sql_sessions : middleware
 (** Stores sessions in an SQL database. Passes session IDs to clients in
     cookies. Must be used under {!Dream.sql_pool}. Expects a table
 

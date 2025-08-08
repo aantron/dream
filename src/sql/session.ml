@@ -211,5 +211,5 @@ let back_end lifetime = {
   send;
 }
 
-let sql_sessions ?(lifetime = Session.two_weeks) =
+let sql_sessions ?(lifetime = Session.two_weeks) () =
   Session.middleware (back_end lifetime)
