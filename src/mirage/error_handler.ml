@@ -1,5 +1,3 @@
-module Httpaf = Dream_httpaf_.Httpaf
-
 module Catch = Dream__server.Catch
 module Error_template = Dream__server.Error_template
 module Method = Dream_pure.Method
@@ -222,7 +220,7 @@ let httpaf user's_error_handler = fun client_address ?request:_ error start_resp
       let response = match response with
         | Some response -> response
         | None -> default_response caused_by in
-      let headers = Httpaf.Headers.of_list (Message.all_headers response) in
+      let headers = H1.Headers.of_list (Message.all_headers response) in
       let body = start_response headers in
       Adapt.forward_body response body;
       Lwt.return_unit

@@ -59,6 +59,7 @@ depends: [
   "ke" {>= "0.4"}  # paf.
   "letsencrypt" {>= "0.3.0"}
   "lwt"
+  "paf"
   "lwt_ppx" {>= "1.2.2"}
   "mimic" {>= "0.0.5"}
   "mirage-time"

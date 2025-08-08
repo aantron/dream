@@ -9,13 +9,15 @@
   dream.server
   dream.certificate
   dream-pure
-  dream-httpaf.dream-h2
   lwt
   rresult
   tcpip
-  dream-mirage.dream-paf
-  dream-mirage.dream-paf.alpn
-  dream-mirage.dream-paf.mirage
- )
- (preprocess (pps lwt_ppx))
- (instrumentation (backend bisect_ppx)))
+  h1
+  h2
+  paf
+  paf.alpn
+  paf.mirage)
+ (preprocess
+  (pps lwt_ppx))
+ (instrumentation
+  (backend bisect_ppx)))

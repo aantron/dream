@@ -7,8 +7,6 @@ type handler = request -> response Lwt.t
 type middleware = handler -> handler
 
 module Make
-    (Pclock : Mirage_clock.PCLOCK)
-    (Time : Mirage_time.S)
     (Stack : Tcpip.Stack.V4V6) : sig
   (* This file is part of Dream, released under the MIT license. See LICENSE.md
      for details, or visit https://github.com/aantron/dream.
