@@ -162,19 +162,10 @@ let reporter ~now () =
          of rounding 999.5+ to 1000 on output. *)
       let time =
         let unix_time = now () in
-        let time = Option.get (Ptime.of_float_s unix_time) in
-        let fraction =
-          fst (modf unix_time) *. 1000. in
-        let clamped_fraction =
-          if fraction > 999. then 999.
-          else fraction
+        match Ptime.of_float_s unix_time with
+        | None -> failwith "Invalid Unix time"
+        | Some time -> Ptime.to_rfc3339 ~frac_s:3 time
         in
-        let ((y, m, d), ((hh, mm, ss), _tz_offset_s)) =
-          Ptime.to_date_time time in
-        Printf.sprintf "%02i.%02i.%02i %02i:%02i:%02i.%03.0f"
-          d m (y mod 100)
-          hh mm ss clamped_fraction
-      in
 
       (* Format the source name column. It is the right-aligned log source name,
          clipped to the column width. If the source is the default application
