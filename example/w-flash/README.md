@@ -53,7 +53,7 @@ let () =
   Dream.set_log_level "dream.flash" `Debug;
   Dream.run
   @@ Dream.logger
-  @@ Dream.memory_sessions
+  @@ Dream.memory_sessions ()
   @@ Dream.flash
   @@ Dream.router [
 

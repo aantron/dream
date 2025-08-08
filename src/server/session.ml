@@ -342,7 +342,12 @@ module Make (Pclock : Mirage_clock.PCLOCK) = struct
   let now () = Ptime.to_float_s (Ptime.v (Pclock.now_d_ps ()))
 
   let memory_sessions ?(lifetime = two_weeks) =
-    middleware (Memory.back_end ~now lifetime)
+    (* "Memory.back_end" returns a record that has a state (a hash table). If we
+       don't provide a way to initialize it before returning the middleware, the
+       state won't be shared among routes in "Dream.scope". *)
+    let back_end = (Memory.back_end ~now lifetime)
+    in
+    fun () -> middleware back_end
 
   let cookie_sessions ?(lifetime = two_weeks) =
     middleware (Cookie.back_end ~now lifetime)

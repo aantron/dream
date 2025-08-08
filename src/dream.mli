@@ -78,7 +78,7 @@ and route
 
     {[
       Dream.router [
-        Dream.scope "/admin" [Dream.memory_sessions] [
+        Dream.scope "/admin" [Dream.memory_sessions ()] [
           Dream.get "/" admin_handler;
           Dream.get "/logout" admin_logout_handler;
         ];
@@ -1590,9 +1590,10 @@ val invalidate_session : request -> unit promise
 
 (** {2 Back ends} *)
 
-val memory_sessions : ?lifetime:float -> middleware
-(** Stores sessions in server memory. Passes session IDs to clients in cookies.
-    Session data is lost when the server process exits. *)
+val memory_sessions : ?lifetime:float -> unit -> middleware
+(** Stores sessions in server memory and requires initialization before
+    usage. Passes session IDs to clients in cookies. Session data is lost when
+    the server process exits. *)
 
 val cookie_sessions : ?lifetime:float -> middleware
 (** Stores sessions in encrypted cookies. Use {!Dream.set_secret} to be able to
