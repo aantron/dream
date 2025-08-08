@@ -130,6 +130,44 @@ We also had to make an addition to our
 
 <br>
 
+If you are deploying in alpine linux, you must have sqlite shared libraries. In Dockerfile
+```
+RUN sudo apk add --no-cache --update sqlite-dev sqlite-libs
+```
+You need to install those for both the build and runtime stages.
+
+<br>
+
+Pass multiple arguments with `(?, ?, ..)`.  See [Caqti utop](https://github.com/paurkedal/ocaml-caqti?tab=readme-ov-file#running-under-utop).
+
+Tips.
+- `->.` returns a unit and uses `Db.exec`.
+- `->!` returns a single row and uses `Db.find`.
+- `->*` returns a list of rows and uses `Db.collect_list`.
+
+Here is another example. We expect a single integer to be returned, which is the id of the created row. see [RETURNING sql tutorial](https://www.sqlitetutorial.net/sqlite-returning/).
+```ocaml
+let add_session =
+  let query =
+    let open Caqti_request.Infix in
+    ( T.(t4 string string float string) ->! T.int )
+    ("INSERT INTO dream_session(id, label, expires_at, payload) VALUES (?, ?, ?, ?) RETURNING id") in
+  fun (id, label, expires_at, payload) (module Db : DB) ->
+    let%lwt unit_or_error = Db.find query (id, label, expires_at, payload) in
+    Caqti_lwt.or_fail unit_or_error
+```
+
+See
+
+- [`Caqti_response`](https://ocaml.org/p/caqti/2.1.2/doc/Caqti_connection_sig/module-type-S/index.html)
+  for Caqti's statement runners. These are the fields of the module `Db` in the example.
+- [`Caqti_request`](https://ocaml.org/p/caqti/2.1.2/doc/Caqti_request/Infix/index.html#indep)
+  sets up prepared statements.
+- [`Caqti_type`](https://ocaml.org/p/caqti/2.1.2/doc/Caqti_type/index.html) is
+  used to specify the types of statement arguments and results.
+
+<br>
+
 SQLite is good for small-to-medium sites and examples. For a larger site,
 microservices, or other needs, you can switch, for example, to PostgreSQL. See
 [**`w-postgres`**](../w-postgres#folders-and-files).
@@ -139,19 +177,6 @@ A good program for examining databases locally is
 an optional hosted database UI in the future, and you could choose to serve it
 at some route.
 
-<br>
-
-See
-
-- [`Caqti_connect_sig.S.CONNECTION`](https://paurkedal.github.io/ocaml-caqti/caqti/Caqti_connect_sig/module-type-S/module-type-CONNECTION/index.html)
-  for Caqti's statement runners. These are the fields of the module `Db` in the
-  example.
-- [`Caqti_request`](https://paurkedal.github.io/ocaml-caqti/caqti/Caqti_request/)
-  sets up prepared statements.
-- [`Caqti_type`](https://paurkedal.github.io/ocaml-caqti/caqti/Caqti_type/) is
-  used to specify the types of statement arguments and results.
-
-<br>
 <br>
 
 **Next steps:**
