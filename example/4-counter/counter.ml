@@ -10,5 +10,5 @@ let () =
   @@ count_requests
   @@ Dream.router [
     Dream.get "/" (fun _ ->
-      Dream.html (Printf.sprintf "Saw %i request(s)!" !count));
+      Dream.html (Printf.sprintf "Responding to the %i. request!" !count));
   ]
