@@ -25,12 +25,12 @@ let foreign_keys_on =
   (Caqti_type.unit ->. Caqti_type.unit) "PRAGMA foreign_keys = ON"
   [@ocaml.warning "-3"]
 
-let post_connect (module Db : Caqti_lwt.CONNECTION) =
+let standard_post_connect (module Db : Caqti_lwt.CONNECTION) =
   match Caqti_driver_info.dialect_tag Db.driver_info with
   | `Sqlite -> Db.exec foreign_keys_on ()
   | _ -> Lwt.return (Ok ())
 
-let sql_pool ?size uri =
+let sql_pool ?size ?post_connect uri =
     let pool_cell = ref None in
     fun inner_handler request ->
 
@@ -49,7 +49,14 @@ let sql_pool ?size uri =
         'sqlite' is not a valid scheme; did you mean 'sqlite3'?");
     let pool =
       let pool_config = Caqti_pool_config.create ?max_size:size () in
-      Caqti_lwt_unix.connect_pool ~pool_config ~post_connect parsed_uri in
+      Caqti_lwt_unix.connect_pool ~pool_config ~post_connect:(fun db ->
+        Lwt_result.bind (standard_post_connect db) (fun () ->
+            match post_connect with
+            | Some f -> f db
+            | None -> Lwt_result.return ())
+        )
+        parsed_uri
+    in
     match pool with
     | Ok pool ->
       pool_cell := Some pool;
