@@ -7,7 +7,9 @@ Easy-to-use, feature-complete Web framework without boilerplate.
 <br>
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/aantron/dream/master/docs/asset/sample.png" alt="Source code of minimal sample app using the OCaml dream framework">
+<img
+src="https://raw.githubusercontent.com/aantron/dream/master/docs/asset/sample.png"
+alt="Source code of minimal sample app using the OCaml Dream web framework">
 </p>
 
 <p align="center">
