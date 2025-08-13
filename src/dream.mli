@@ -561,7 +561,7 @@ val set_cookie :
     secure defaults from the {!type-request}.
 
     {[
-      Dream.set_cookie request response "my.cookie" "value"
+      Dream.set_cookie response request "my.cookie" "value"
     ]}
 
     Use the {!Dream.set_secret} middleware, or the Web app will not be able to
