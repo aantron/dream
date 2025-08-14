@@ -55,7 +55,8 @@ let now () =
   Ptime.to_float_s (Ptime.v (Ptime_clock.now_d_ps ()))
 
 let () =
-  Random.initialize (fun () -> Mirage_crypto_rng_unix.use_default ())
+  Random.initialize (fun () ->
+    Mirage_crypto_rng_unix.use_default ())
 
 module Session =
 struct

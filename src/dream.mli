@@ -561,7 +561,7 @@ val set_cookie :
     secure defaults from the {!type-request}.
 
     {[
-      Dream.set_cookie request response "my.cookie" "value"
+      Dream.set_cookie response request "my.cookie" "value"
     ]}
 
     Use the {!Dream.set_secret} middleware, or the Web app will not be able to
@@ -1206,6 +1206,11 @@ let render message =
     example
     {{:https://github.com/aantron/dream/tree/master/example/r-tyxml#folders-and-files}
     [r-tyxml]}.
+
+    Another alternative, {{:https://github.com/ocaml-mlx/mlx} mlx}, provides a
+    middle ground between a fully type-checked HTML representation and the
+    string-based Dream templating language. See example
+    {{:https://github.com/aantron/dream/tree/master/example/w-mlx} [w-mlx]}.
 
     To use the built-in templates, add this to [dune]:
 
