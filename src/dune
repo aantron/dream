@@ -9,13 +9,13 @@
   dream.http
   dream.server
   dream.unix
-  dream-pure
+  (re_export dream-pure)
   dream.sql
   fmt.tty
   graphql-lwt
   logs
   lwt
   lwt.unix
-  mirage-crypto-rng-lwt
-  ptime.clock.os
- ))
+  mirage-crypto-rng
+  mirage-crypto-rng.unix
+))

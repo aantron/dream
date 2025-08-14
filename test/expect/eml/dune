@@ -3,9 +3,9 @@
  (libraries
   base
   eml
-  ppx_expect.common
+  ppx_expect
   ppx_inline_test.config
-  ppx_expect.config_types
- )
+  ppx_expect.config_types)
  (inline_tests)
- (preprocess (pps ppx_expect)))
+ (preprocess
+  (pps ppx_expect)))
