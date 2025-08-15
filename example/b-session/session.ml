@@ -1,7 +1,7 @@
 let () =
   Dream.run
   @@ Dream.logger
-  @@ Dream.memory_sessions
+  @@ Dream.memory_sessions ()
   @@ fun request ->
 
     match Dream.session_field request "user" with
