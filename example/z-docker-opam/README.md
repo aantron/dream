@@ -2,16 +2,19 @@
 
 <br>
 
-This example runs a simple Web app inside a [Docker](https://www.docker.com/)
-container. It is a variant of [**`z-docker-esy`**](../z-docker-esy#folders-and-files), but
-with [opam](https://opam.ocaml.org/) as the package manager.
+This example runs a simple Web app inside a [Docker](https://www.docker.com/) container using [opam](https://opam.ocaml.org/) as the package manager.
 
-All the instructions are the same as in
-[**`z-docker-esy`**](../z-docker-esy#folders-and-files). The difference is in the
-[`Dockerfile`](https://github.com/aantron/dream/blob/master/example/z-docker-opam/Dockerfile),
-which, in this example, derives an image from one of the [opam base
-images](https://hub.docker.com/r/ocaml/opam), and installs dependencies using
-opam. The initial build requires at least 2 GB of memory.
+Build the image from `Dockerfile`
+```
+DOCKER_BUILDKIT=1 docker build . --tag "docker-opam-im"
+```
+
+create and run the container
+```
+docker run --name docker-opam -p 8080:8080 docker-opam-im:latest
+```
+
+see also [**`z-docker-esy`**](../z-docker-esy#folders-and-files) for using `esy` package manager and `Docker compose`.
 
 <br>
 
