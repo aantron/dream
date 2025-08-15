@@ -7,7 +7,7 @@
 
 module Command_line :
 sig
-  val parse : unit -> (string * string * [ `OCaml | `Reason ] * bool) list
+  val parse : unit -> (string * string * [ `OCaml | `Reason ] * bool * int * int) list
 end =
 struct
   let usage = {|Usage:
@@ -27,6 +27,12 @@ struct
   let std_out =
     ref false
 
+  let buffer_size =
+    ref 4096
+
+  let pool_size =
+    ref 1
+
   let options = Arg.align [
     "--workspace",
     Arg.Set_string workspace_path,
@@ -37,6 +43,12 @@ struct
     "--stdout",
     Arg.Set std_out,
     " Print to STDOUT";
+    "--buffer-size",
+    Arg.Set_int buffer_size,
+    " Size of buffers for generated templates in bytes. 4096 by default";
+    "--pool-size",
+    Arg.Set_int pool_size,
+    " Amount of precreated buffers. 1 by default"
   ]
 
   let set_file file =
@@ -77,7 +89,7 @@ struct
         | ".re" -> `Reason
         | _ -> `OCaml
       in
-      file, Filename.concat prefix file, syntax, !std_out)
+      file, Filename.concat prefix file, syntax, !std_out, !buffer_size, !pool_size)
 end
 
 let () =
