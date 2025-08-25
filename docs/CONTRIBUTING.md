@@ -35,13 +35,9 @@ npx esy ls-builds
 If you'd like to contribute code, clone the repository with
 
 ```
-git clone https://github.com/aantron/dream.git --recursive
+git clone https://github.com/aantron/dream.git
 cd dream
 ```
-
-Note: the clone *must* be `--recursive`, because Dream several dependencies
-vendored as
-[submodules](https://github.com/aantron/dream/tree/master/src/vendor).
 
 Later, you'll need to fork the repository on GitHub, and add your fork as a
 remote:
@@ -100,13 +96,6 @@ git push -u fork my-branch
 ```
 
 GitHub should print a URL into your terminal for opening a pull request.
-
-If you want to work again later, be sure to use `--recurse-submodules` during
-`git pull`, similar to `git clone --recursive`:
-
-```
-git pull --recurse-submodules
-```
 
 **Note:** Please don't force-push into a PR &mdash; it makes incremental review
 very difficult, and we will squash-merge most PRs anyway!
