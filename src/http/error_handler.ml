@@ -116,40 +116,48 @@ let customize template (error : Catch.error) =
 
   (* First, log the error. *)
 
+  let log_handler condition (error : Catch.error) =
+     let client =
+       match error.client with
+       | None -> ""
+       | Some client ->  " (" ^ client ^ ")"
+     in
+
+     let layer =
+       match error.layer with
+       | `TLS -> ["TLS" ^ client]
+       | `HTTP -> ["HTTP" ^ client]
+       | `HTTP2 -> ["HTTP/2" ^ client]
+       | `WebSocket -> ["WebSocket" ^ client]
+       | `App -> []
+     in
+
+     let description, backtrace =
+       match condition with
+       | `String string -> string, ""
+       | `Exn exn ->
+         let backtrace = Printexc.get_backtrace () in
+         Printexc.to_string exn, backtrace
+     in
+
+     let message = String.concat ": " (layer @ [description]) in
+
+     select_log error.severity (fun log ->
+       log ?request:error.request "%s" message);
+     backtrace |> Log.iter_backtrace (fun line ->
+       select_log error.severity (fun log ->
+         log ?request:error.request "%s" line))
+  in
+
   begin match error.condition with
   | `Response _ -> ()
+  (* TODO Is this the right place to handle lower level connection resets? *)
+  | `Exn (Unix.Unix_error (Unix.ECONNRESET, _, _)) ->
+    let condition = `String "Connection Reset at Client" in
+    let severity = `Info in
+    log_handler condition {error with condition; severity}
   | `String _ | `Exn _ as condition ->
-
-    let client =
-      match error.client with
-      | None -> ""
-      | Some client ->  " (" ^ client ^ ")"
-    in
-
-    let layer =
-      match error.layer with
-      | `TLS -> ["TLS" ^ client]
-      | `HTTP -> ["HTTP" ^ client]
-      | `HTTP2 -> ["HTTP/2" ^ client]
-      | `WebSocket -> ["WebSocket" ^ client]
-      | `App -> []
-    in
-
-    let description, backtrace =
-      match condition with
-      | `String string -> string, ""
-      | `Exn exn ->
-        let backtrace = Printexc.get_backtrace () in
-        Printexc.to_string exn, backtrace
-    in
-
-    let message = String.concat ": " (layer @ [description]) in
-
-    select_log error.severity (fun log ->
-      log ?request:error.request "%s" message);
-    backtrace |> Log.iter_backtrace (fun line ->
-      select_log error.severity (fun log ->
-        log ?request:error.request "%s" line))
+    log_handler condition error
   end;
 
   (* If Dream will not send a response for this error, we are done after

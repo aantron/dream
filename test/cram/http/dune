@@ -1,0 +1,6 @@
+(executable
+  (name econnreset)
+  (libraries dream))
+
+(cram
+  (deps %{exe:econnreset.exe}))
